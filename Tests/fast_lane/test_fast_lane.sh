@@ -638,7 +638,7 @@ gh() {
     "pr list "*)  # every open PR in the --json shape; the lane picks the labelled ones itself
       u=()
       for n in "$sw"/[0-9]*.json; do
-        [[ -e "${n%.json}.merged" ]] || u+=("$n")
+        [[ ! -e "$n" || -e "${n%.json}.merged" ]] || u+=("$n")
       done
       if (( ${#u[@]} )); then jq -s . "${u[@]}"; else echo '[]'; fi ;;
     "pr view "*"--json title "*) echo "title $2" ;;
@@ -1755,7 +1755,7 @@ expect "dev red macOS only: green on a fix drops it and forms a fresh batch ther
 # lane-revert and p0, never fast-lane) and lands on its own Linux check, with
 # no prescreen and no batch; CI on dev runs once it lands. The culprit's
 # feature-lead issue hears why and a finding is filed for its app. One revert
-# call per dev-red issue (its marker), never a revert of a revert.
+# call per culprit (its marker on the issue), never a revert of a revert.
 rvdev() {  # rvdev <jobs> <path|subject>...: main at a base, dev one commit per spec past it, dev-red #520 naming main..<dev tip> (RED), red on Linux there
   local jobs="$1" w="$sw/work" spec; shift
   fresh
@@ -1819,7 +1819,7 @@ jq '.[0].number = 530' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
 printf '%s\n' "Auto-revert: an earlier call. <!-- lane-revert none -->" >"$sw/530.comments"
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-revert: a revert from an older dev-red issue is never checked or landed under a new one" \
-  "$(merges),$(grep -c -- '--ref lane/revert-201$' "$sw/calls")" ",0"
+  "$(merges),$(grep -c -- '--ref lane/revert-201$' "$sw/calls"),$(creates)" ",0,1"
 
 # A culprit on a protected path stays with a human (the lane's token can't push workflows either).
 rvdev linux "scripts/tool.sh|chore: tool (#201)"
@@ -1843,6 +1843,19 @@ expect "auto-revert: two PRs and no bisect verdict yet: no revert, no note" "$(c
 verdict "$(git -C "$sw/origin.git" rev-parse dev~1)" failure; LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-revert: once the bisect names #201, only #201 is reverted" \
   "$(creates),$(grep -c -- '^pr create .*--head lane/revert-201 ' "$sw/calls"),$(git -C "$sw/origin.git" diff --name-only dev refs/heads/lane/revert-201),$(grep -c 'line:suite' "$sw/calls")" "1,1,docs/a.md,1"
+
+# One call per certain culprit, not per issue (#5350): an open dev-red issue
+# whose first call was a no-culprit note still reverts the PR a later bisect
+# names, once; later sweeps on the same culprit open none.
+rvdev linux "docs/a.md|docs: a (#201)" "Sources/PhotoModel/B.swift|feat(photo): b (#202)"
+printf '%s\n' "Auto-revert: 2 PRs in main..abc1234 and no bisect verdict names one of them (red: macos), so a human picks the culprit. <!-- lane-revert none -->" >"$sw/520.comments"
+LANE_VERIFY_AFTER=1 lane_sweep
+verdict "$(git -C "$sw/origin.git" rev-parse dev~1)" failure; C201=$(git -C "$sw/origin.git" rev-parse dev~1); LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: after a no-culprit note, a certain Linux culprit still gets exactly one revert" \
+  "$(creates),$(grep -c -- '^pr create .*--head lane/revert-201 ' "$sw/calls"),$(grep -c "^issue comment 520 .*<!-- lane-revert ${C201:0:7} -->" "$sw/calls")" "1,1,1"
+LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(jq -r .headRefOid "$sw/600.json")" success; LANE_VERIFY_AFTER=1 lane_sweep; LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: later sweeps on the same culprit, its revert open or landed, open no second one" \
+  "$(creates),$(merges),$(grep -c "^issue comment 520 .*<!-- lane-revert ${C201:0:7} -->" "$sw/calls")" "1,pr merge 600,1"
 
 # macOS-only reds: no bisect runs there. One PR in range is the culprit; with
 # two, the lane names none and leaves the pick to a human.
