@@ -42,3 +42,4 @@ Next: FC-2 part 2: stub the catalog methods and FilterBar/collection APIs, and a
 - Feature issue #1563: not read or commented on; GitHub GraphQL returned 403 from the CLI.
 - FC-2 is the shared spine: it adds stored state and stubs to LibraryCatalog.swift, which every later task reads. The packet's MJ1 seam test needs `shownItems` and `recount` changed, which is FC-7 behavior, so FC-2 can't finish its own test without a decision. Asked below.
 - Questions for the supervisor: (1) open FC-1 as a fast-lane PR now, or wait for FC-2? (2) may builders and critics run as Workflow fan-outs, given the opt-in rule? (3) file the S-L9/S-L10 issues on this repo? (4) for FC-2: may the MJ1 seam test go in as a disabled `@Test(.disabled("waits on FC-7"))` until FC-7 lands, as contract rule 13 allows?
+- 2026-10-26T03:13:58Z Heartbeat: UP-photo #5088, UP-flare #5089, UP-halo #5091, UP-z #5231 all fast-lane, no needs-fix, waiting on the lane batch.
