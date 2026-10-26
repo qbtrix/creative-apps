@@ -146,3 +146,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 
 - dev at 3e26fbe4 (#5264 landed, not ours); wave 2 (#5064, #5233, #5235, #5236) still open with fast-lane, none merged. Wave 3 waits on them. No needs-fix or needs-rebase.
 - 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
+
+### 2026-10-26T08:19Z check-in
+
+- dev still at 3e26fbe4; wave 2 (#5064, #5233, #5235, #5236) still open with fast-lane, none merged. Wave 3 waits on them. No needs-fix or needs-rebase.
+- 0 open findings. Stage: 3 wave 3 (waiting for wave 2 to land).
