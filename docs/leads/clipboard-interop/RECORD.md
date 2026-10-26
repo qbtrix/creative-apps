@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-26T20:28Z · needs-rebase fixes: merged dev into CB-13 (#5149, PhotoWindow+Edit.swift), AR-11 (#5096), FH-3 (#4889), CB-14 (#5125) (photo.list-commands golden, 3-way by id); gates running
+Polled: 2026-10-26T20:42Z · CB-13 #5149 rebased, gate PASS, pushed 73184786, Head moved; AR-11/FH-3/CB-14 gates running
 
 
 
