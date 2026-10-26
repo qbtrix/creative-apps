@@ -188,3 +188,4 @@ utc	stage	event	ref	note
 2026-10-26T07:07:56Z	gate	PT-5 b1e44767, PT-3 e7544ba8, PT-7 a825b8de: CI PASS after re-merge, pushed; #5363 waits on prescreen of 5260e203
 2026-10-26T07:27:19Z	check	#5363 5260e203 clean, needs-rebase dropped, prescreen pending; dev 99ace703 (#5043) merges clean with #5363/PT-5/PT-7
 2026-10-26T07:49:10Z	check	#5363 5260e203 prescreen still pending; dev 3e26fbe4 (#5264) merges clean with all heads
+2026-10-26T08:10:44Z	check	#5363 5260e203 prescreen still pending; dev 3e26fbe4 clean with PT-3/4/5/7 heads
