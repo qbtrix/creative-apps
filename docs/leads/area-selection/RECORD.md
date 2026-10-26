@@ -1,7 +1,7 @@
 # area-selection lead record
 
 Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
-Run: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
+Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
