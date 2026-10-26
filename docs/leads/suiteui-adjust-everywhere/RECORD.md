@@ -268,3 +268,8 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 
 - The lane landed #5285 (dev 310d7d14); batch 20261026150314 (#5267) still in flight. The latest sweep logs all of ours eligible (#5064 etc. with Fast-Check and local-ci/prescreen; #5790 and #5800 no code), each waiting while a batch of one is in flight. No needs-* label.
 - 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land.
+
+### 2026-10-26T15:50Z check-in
+
+- dev unchanged at 310d7d14; lane batch 20261026154903 runs #5106 alone. Wave 2, #5790 and #5800 stay clean, eligible and queued, with no needs-* label.
+- 1 open finding (#5789, fixed by #5236). Stage: 3 wave 3, waiting for wave 2 to land.

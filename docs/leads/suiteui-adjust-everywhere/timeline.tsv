@@ -99,3 +99,4 @@ utc	stage	event	ref	note
 2026-10-26T15:10Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batch 150314 retries #5267 on dev f86f72f7; ours queued
 2026-10-26T15:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	status back on lead/suiteui-adjust-everywhere; batch 150314 (#5267) in flight; ours queued
 2026-10-26T15:30Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5285 (dev 310d7d14); ours eligible, waiting on one-at-a-time batches
+2026-10-26T15:50Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	batch 154903 runs #5106 alone; dev 310d7d14; ours eligible and queued
