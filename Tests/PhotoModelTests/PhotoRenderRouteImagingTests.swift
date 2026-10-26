@@ -32,9 +32,8 @@ import Testing
         return try dispatcher.read(result)
     }
 
-    /// `steps` run on the ramp in order on the CPU, as `runImaging` runs them:
-    /// tone steps on CoreRender's CPU backend, hue/saturation through Photo's
-    /// matrix (the route and the export move to core's together in IM-8).
+    /// `steps` run on the ramp in order on CoreRender's CPU backend, as
+    /// `runImaging` runs them, hue/saturation included (core's, IM-12).
     static func reference(_ steps: [ToneAdjustment], _ settings: AdjustmentSettings) throws -> PixelBuffer {
         var buffer = try ramp()
         for step in steps { buffer = try settings.runImaging([step], on: buffer) }

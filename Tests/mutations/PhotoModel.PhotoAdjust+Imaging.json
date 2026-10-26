@@ -14,6 +14,20 @@
     "tests": "PhotoImagingTests"
   },
   {
+    "label": "hueSaturationIsCoresColorAdjust: the CPU render skips its last step, hue/saturation",
+    "file": "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+    "find": "            for step in steps {\n                let next = try cpu.adjusted(surface, step)",
+    "replace": "            for step in steps.dropLast() {\n                let next = try cpu.adjusted(surface, step)",
+    "tests": "PhotoImagingTests"
+  },
+  {
+    "label": "hueSaturationIsCoresColorAdjust: the CPU render hands back the picture it was given",
+    "file": "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
+    "find": "            return try cpu.read(surface)\n",
+    "replace": "            _ = try cpu.read(surface)\n            return buffer\n",
+    "tests": "PhotoImagingTests"
+  },
+  {
     "label": ".toneFirst: tone's steps run after the sections instead of before them",
     "file": "Sources/PhotoModel/PhotoAdjust+Imaging.swift",
     "find": "        return ImagingProgram.adjustments(sections, tone: tone ?? toneSteps)\n",

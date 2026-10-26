@@ -8,9 +8,9 @@
 // with neutral output levels and saves again byte for byte; `tone` likewise
 // only when off neutral (tone-controls PT-1). Tone's steps (ToneRules) run
 // before every section, and its sharpen is one unsharp pass over the base
-// before them (tone-controls PT-3). Hue/saturation
-// stays Photo's own matrix (HueSaturation.swift): the GPU route and the live
-// tone route run that matrix, and they move together (IM-8). Linux-safe.
+// before them (tone-controls PT-3). Hue/saturation is core's ColorAdjust like
+// every other step, on the CPU, the dispatcher and the live tone route alike
+// (IM-12). Linux-safe.
 import CoreRaster
 import CoreRender
 import SuiteImaging
@@ -59,30 +59,23 @@ extension AdjustmentSettings {
     /// Every enabled section's step, as the render runs them.
     var imagingSteps: [ToneAdjustment] { imagingSteps() }
 
-    /// `steps` run on `buffer` by CoreRender's CPU backend, a hue/saturation
-    /// step through Photo's matrix. Throws `RasterError.invalid` when a step fails.
+    /// `steps` run on `buffer` by CoreRender's CPU backend, in order.
+    /// Throws `RasterError.invalid` when a step fails.
     func runImaging(_ steps: [ToneAdjustment], on buffer: PixelBuffer) throws -> PixelBuffer {
-        var result = buffer
-        let tone = steps.filter { if case .hueSaturation = $0 { false } else { true } }
-        if !tone.isEmpty {
-            let cpu = CPUBackend(name: "photo-imaging")
-            do {
-                var surface = try cpu.surface(buffer)
-                defer { cpu.release(surface) }
-                for step in tone {
-                    let next = try cpu.adjusted(surface, step)
-                    cpu.release(surface)
-                    surface = next
-                }
-                result = try cpu.read(surface)
-            } catch RenderError.raster(let message) {
-                throw RasterError.invalid(message)
+        guard !steps.isEmpty else { return buffer }
+        let cpu = CPUBackend(name: "photo-imaging")
+        do {
+            var surface = try cpu.surface(buffer)
+            defer { cpu.release(surface) }
+            for step in steps {
+                let next = try cpu.adjusted(surface, step)
+                cpu.release(surface)
+                surface = next
             }
+            return try cpu.read(surface)
+        } catch RenderError.raster(let message) {
+            throw RasterError.invalid(message)
         }
-        if tone.count != steps.count {
-            result = try result.hueSaturation(hue: hue, saturation: saturation, lightness: lightness)
-        }
-        return result
     }
 }
 

@@ -9,16 +9,17 @@
 // an opaque normal tile that covers the region replaces it, PhotoLayerComposite's
 // two shortcuts); the adjustments are ImagingProgram's steps, the suite's
 // shared list (`imagingSteps`), each `adjusted` in its order, blur is
-// `gaussianBlur`, and the bytes come from `display`. An adjustment layer, a
-// layer with an enabled mask and Hue/Saturation (Photo's own matrix) read the
-// picture back, run on CoreRaster (PhotoLayerComposite) and upload it again; a section at its identity has no step, as CoreRaster
+// `gaussianBlur`, and the bytes come from `display`. An adjustment layer and
+// a layer with an enabled mask read the picture back, run on CoreRaster
+// (PhotoLayerComposite) and upload it again, and a step the preferred backend
+// lacks (Hue/Saturation on Metal) runs on the CPU; a section at its identity has no step, as CoreRaster
 // returns the buffer itself there. The CPU
 // route renders each damaged tile on its own task; the GPU route renders each
 // row of damaged tiles as one region, the rows on their own tasks. With
 // resident tiles (`residentTiles`, the GPU route's ResidentSurfaces) a region
 // composites from them in one batch, so a frame uploads only the tiles that
 // changed, those across the cores, and `composites` keeps the live route's
-// base composites and this route's (PhotoLiveTone.swift): a region's layers
+// base composites (SuiteImaging's LiveLayerRoute) and this route's: a region's layers
 // that the last render already laid come back composited, so a Move step on a
 // hundred-layer picture composites the moved layer and the ones above it.
 // Export and `composite()` stay on
@@ -27,6 +28,7 @@
 import CoreColor
 import CoreRaster
 import CoreRender
+import SuiteImaging
 
 /// Where Photo's canvas composite runs: on `preferred` where it can, else on the CPU.
 public struct PhotoRenderRoute: Sendable {
@@ -35,7 +37,7 @@ public struct PhotoRenderRoute: Sendable {
     /// Layer tiles kept on `preferred` between renders; nil uploads every tile a render composites.
     public let resident: ResidentSurfaces?
     /// The live route's base composites, one per region, kept while their layers are unchanged.
-    public let composites = PhotoCompositeCache()
+    public let composites = LiveCompositeCache<PixelRect>()
 
     public init(preferred: (any RenderBackend)? = nil, resident: ResidentSurfaces? = nil) {
         self.preferred = preferred
@@ -71,7 +73,7 @@ extension PhotoWorkspace {
     /// straight alpha, row-major) and the name of the backend that encoded them.
     func displayed(
         _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil,
-        cache: PhotoCompositeCache? = nil
+        cache: LiveCompositeCache<PixelRect>? = nil
     ) throws -> (bytes: [UInt8], backend: String) {
         let picture = try renderedSurface(rect, on: dispatcher, resident: resident, cache: cache)
         defer { dispatcher.release(picture) }
@@ -85,7 +87,7 @@ extension PhotoWorkspace {
     /// `cache`, the layers the last render laid come from it composited (`composited(_:on:cache:)`).
     public func renderedSurface(
         _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil,
-        cache: PhotoCompositeCache? = nil
+        cache: LiveCompositeCache<PixelRect>? = nil
     ) throws -> RenderSurface {
         guard let canvas, let outer = rect.expanded(by: adjustments.blurMargin).intersection(canvas.rect),
             let inner = rect.intersection(canvas.rect)
@@ -156,15 +158,16 @@ extension PhotoWorkspace {
     }
 
     /// The visible layers over transparency in `rect`, bottom first. With `cache`, the layers the last render
-    /// laid under the ones that changed come from it composited (PhotoCompositeCache.composite), so a Move,
+    /// laid under the ones that changed come from it composited (LiveCompositeCache.composite), so a Move,
     /// transform, opacity or visibility step composites the changed layer and the ones above it.
-    func composited(_ rect: PixelRect, on dispatcher: RenderDispatcher, cache: PhotoCompositeCache? = nil) throws -> RenderSurface {
+    func composited(_ rect: PixelRect, on dispatcher: RenderDispatcher, cache: LiveCompositeCache<PixelRect>? = nil) throws -> RenderSurface {
         let shown = layers.reversed().filter { $0.isVisible && $0.opacity > 0 }
         guard let cache else { return try composited(rect, layers: shown, on: dispatcher) }
-        let stack = PhotoCompositeCache.key(shown, pixels: pixels, masks: masks)
-        var (picture, laid) = try cache.composite(rect, stack: stack, on: dispatcher) { laid in
+        let stack = shown.map { PhotoStackKey(layer: $0, pixels: pixels[$0.id], mask: masks[$0.id]) }
+        var (picture, laid, made) = try cache.composite(rect, stack: stack, on: dispatcher) { laid in
             try composited(rect, layers: Array(shown[..<laid]), on: dispatcher)
         }
+        PhotoRenderCount.base(made: made)
         PhotoRenderCount.region()
         do {
             for layer in shown[laid...] { try composited(layer, onto: &picture, at: rect, on: dispatcher) }
@@ -260,15 +263,7 @@ extension AdjustmentSettings {
             // ImagingProgram leaves out each step at its identity, where CoreRaster returns the buffer
             // itself, so the result is the same bits and an untouched section costs the GPU no round trip.
             for adjustment in imagingSteps {
-                if case .hueSaturation = adjustment {
-                    // Photo's own matrix, as runImaging runs it: read back, CoreRaster, upload again.
-                    try step {
-                        try dispatcher.surface(
-                            dispatcher.read(result).hueSaturation(hue: hue, saturation: saturation, lightness: lightness))
-                    }
-                } else {
-                    try step { try dispatcher.adjusted(result, adjustment) }
-                }
+                try step { try dispatcher.adjusted(result, adjustment) }
             }
             if blurMargin > 0 { try step { try dispatcher.gaussianBlur(result, sigma: blurSigma) } }
         } catch {
@@ -277,4 +272,12 @@ extension AdjustmentSettings {
         }
         return result
     }
+}
+
+/// A layer as the dispatcher route's kept bases see it: the layer, its pixels and its mask, whose comparison is
+/// quick on shared storage.
+struct PhotoStackKey: Equatable, Sendable {
+    let layer: PhotoLayer
+    let pixels: TiledPixels?
+    let mask: TiledPixels?
 }

@@ -16,7 +16,7 @@
 // each damaged region to the target (the app's Metal texture) and returns no
 // bytes; when the target also runs a tone program (`writeToned`) and the
 // backend runs one over a surface, a region takes the live route
-// (PhotoLiveTone.swift): adjustments and adjustment layers as GPU passes over
+// (SuiteImaging's LiveLayerRoute, PhotoImagingAdapter.swift): adjustments and adjustment layers as GPU passes over
 // a cached composite, so a slider step composites nothing and reads nothing
 // back. Linux-safe.
 import CoreRaster

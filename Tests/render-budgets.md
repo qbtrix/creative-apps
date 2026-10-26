@@ -217,7 +217,7 @@ renderer's route. Release, M2 Pro, p50 / p95 per step, 30 steps:
 Before, Hue/Saturation had no GPU op: each band of the picture was read back,
 run through Photo's per-pixel colour matrix on the CPU and uploaded again. Any
 visible adjustment layer sent every redraw, a Move or a brush frame included,
-down the same read-back path. The live route (PhotoLiveTone.swift) keeps each
+down the same read-back path. The live route (SuiteImaging's LiveLayerRoute.swift) keeps each
 band's composite of the pixel layers on the GPU while they are unchanged. It
 runs adjustment layers as CoreRender tone-program passes and writes the picture
 through the image's adjustments in the same pass as the display encode. A
@@ -235,7 +235,7 @@ layers, a quarter adjustment layers and a quarter masked) one render took
 seconds, so the drag's renders ran on after the release and the stress gate
 read 472% / 489% CPU 3 s after it (#3663). The dispatcher route now keeps each
 region's composite of the layers the stack still shares with the last render
-(PhotoCompositeCache.composite) and composites only the changed layer and the
+(LiveCompositeCache.composite) and composites only the changed layer and the
 ones above it, and a Move damages only where the layer was and is.
 `IdleWorkTests` (AppSnapshotTests) reports what a 30-sample drag leaves
 running; debug build, 1024 x 576 in 60 layers (the dev rows are from a
