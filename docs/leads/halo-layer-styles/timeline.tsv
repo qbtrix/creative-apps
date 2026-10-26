@@ -126,3 +126,4 @@ utc	stage	event	ref	note
 2026-10-26T16:06Z	heartbeat	waiting: dev-red #5321 (macOS) blocks code batches; #5174/#5158 eligible; no supervisor answer
 2026-10-26T16:28Z	heartbeat	lane	#5158	dev 527676af6; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
 2026-10-26T16:49Z	heartbeat	lane	#5158	dev 527676af6; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
+2026-10-26T17:11Z	heartbeat	lane	#5158	dev df48c0bac; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
