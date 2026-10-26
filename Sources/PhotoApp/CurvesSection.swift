@@ -19,7 +19,8 @@
 // for 150 ms. The count runs in the key's task, so a newer key cancels it and
 // it stops at its next row; on a many-layer image one count is seconds of
 // CPU, and superseded ones left running burned the cores after every toggle
-// or slider step. Values in, intents out.
+// or slider step. Mid-drag on a tone row the sections read the window's live
+// copy (PhotoWindow+Tone.swift). Values in, intents out.
 import CoreRaster
 import PhotoModel
 import SuiteModel
@@ -49,6 +50,8 @@ struct AdjustmentsPanel: View {
     /// Counts the histogram of a workspace; a test passes its own to see which counts finish.
     var count: @Sendable (PhotoWorkspace) async -> ToneHistogram = AdjustmentsPanel.count
     @State private var histogram = ToneHistogram.empty
+    /// The window's live copy, which a tone row's drag samples run on; the sections read it while it lasts.
+    @Environment(\.photoLiveTransform) private var live
 
     var body: some View {
         inspector
@@ -74,6 +77,7 @@ struct AdjustmentsPanel: View {
     }
 
     @ViewBuilder private var inspector: some View {
+        let model = live?.shown ?? self.model
         switch model.adjustTarget {
         case .image:
             AdjustmentsInspector(

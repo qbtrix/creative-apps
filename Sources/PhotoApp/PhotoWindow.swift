@@ -174,7 +174,7 @@ struct PhotoWindow: View {
         // Drag samples still waiting for the display frame land first, then a live stroke goes back.
         if case .drag = intent {} else {
             pacer.flush()
-            takeStroke(keepingTransform: Self.isTransformSample(intent))
+            takeStroke(keepingTransform: Self.isTransformSample(intent) || Self.isToneSample(intent))
         }
         switch intent {
         case .newImage:
@@ -264,7 +264,7 @@ struct PhotoWindow: View {
     }
 
     /// A live paint stroke's, drag line's or transform's copy back into the workspace: one SwiftUI pass
-    /// for the gesture. A transform sample keeps the live transform going.
+    /// for the gesture. A transform or tone sample keeps the live copy going.
     func takeStroke(keepingTransform: Bool = false) {
         if let painted = liveStroke.take() { model.adoptLiveStroke(painted) }
         if let lined = dragLine.take() { model.adoptLiveStroke(lined) }
