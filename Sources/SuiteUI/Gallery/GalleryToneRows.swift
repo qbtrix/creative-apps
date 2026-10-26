@@ -1,12 +1,14 @@
 // GalleryToneRows.swift: the gallery's `tone-rows` page (packet
-// docs/blueprints/suiteui/features/tone-controls.md, TC-2). It shows ToneRows
-// on a local ToneSettings value, every slider at neutral to start. Each intent
-// the rows send writes one line, `<command id> <intent>`, to `suite.gallery.log`
-// and applies to the local value (a set or a reset; Auto only logs), so the
-// rows follow with no History yet. TC-8 runs the intents through ToneCommands
-// on a local target with a History instead. The page is its own area in
+// docs/blueprints/suiteui/features/tone-controls.md, TC-2, live in TC-8). It
+// shows ToneRows on a GalleryToneBoard, the CLI's fake-tone document with its
+// History, every slider at neutral to start. Each intent the rows send runs
+// through ToneCommands in that document's catalog and writes one line,
+// `<command id> [<step>, <n> in History] <intent>` (or `[refused: <why>]`), to
+// `suite.gallery.log`, so a drag shows as one undo step. `applied` and `line`
+// stay for the render budget's local rows. The page is its own area in
 // `SuiteGallery.areas`. The rows scroll, the log stays under them.
 import SuiteImaging
+import SuiteKernel
 import SwiftUI
 
 enum GalleryToneRows {
@@ -29,13 +31,31 @@ enum GalleryToneRows {
     }
 }
 
+/// The page's live target: a fake-tone document, whose catalog is ToneCommands' specs plus undo and redo.
+struct GalleryToneBoard {
+    private(set) var document = FakeToneDocument()
+    var settings: ToneSettings { document.tone }
+
+    /// Runs `intent`'s command; the log line: the step it made, or why it was refused, then the intent.
+    mutating func send(_ intent: ToneIntent) -> String {
+        let command = intent.command
+        do {
+            let outcome = try FakeToneDocument.catalog.run(command.id, params: command.params, on: &document)
+            return "\(command.id) [\(outcome.undoStep ?? "no step"), \(document.history.steps.count) in History] \(intent)"
+        } catch { return "\(command.id) [refused: \(error)] \(intent)" }
+    }
+
+    /// Takes back the last step; false when there is none.
+    mutating func undo() -> Bool { document.step(redo: false) }
+}
+
 /// Internal, not private, so TC-4's snapshots and render budget can build it.
 struct GalleryToneRowsPage: View {
     #if DEBUG
     // view-static: main-actor
     static var bodyRuns = 0
     #endif
-    @State private var settings = ToneSettings.neutral
+    @State private var board = GalleryToneBoard()
     @State private var log: [String] = []
 
     var body: some View {
@@ -47,9 +67,8 @@ struct GalleryToneRowsPage: View {
             Text("Tone rows").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText).accessibilityAddTraits(.isHeader)
             // Scrolls: the four sections run past a 768-pt runner's window (#5324).
             ScrollView {
-                ToneRows(settings: settings, help: nil) { intent in
-                    settings = GalleryToneRows.applied(intent, to: settings)
-                    log.append(GalleryToneRows.line(intent))
+                ToneRows(settings: board.settings, help: nil) { intent in
+                    log.append(board.send(intent))
                     if log.count > 40 { log.removeFirst(log.count - 40) }
                 }
                 .frame(width: SuiteSize.editorPanelWidth, alignment: .leading)
