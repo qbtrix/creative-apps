@@ -2,24 +2,30 @@
 # scripts/ci-findings <ui-test-log>: journeys.yml's Findings step. One open
 # issue per failing journey, filed as "CI finding: <Target/Class/test>" (the
 # form UITests/quarantine.json takes), labelled `finding` and `line:<app>`,
-# with a `Test: \`<name>\`` body line. A lead may relabel one `gap` and retitle
-# it, so a test's open issue is any open `finding` or `gap` issue whose title
+# with a `Test: \`<name>\`` body line. Leads and audits relabel and retitle
+# these, so a test's open issue is ANY open issue, under any label, whose title
 # is that "CI finding:" title or whose body has that Test: line.
-#  - A failed test with a `finding` issue of that title gets the body
-#    rewritten, but the `Feature:`, `Slice:` and `Owner:` lines a triage added
-#    are read from the current body first and appended to the new one, so
-#    routing survives the next red run. If the body can't be read the issue is
-#    left alone. Any other open issue for the test (a `gap`, or one matched
-#    only by its Test: line) gets a "Still failing" comment instead: the lead
-#    owns that body. Only a test with no open issue gets a new one.
+#  - The open issues come from one `gh issue list --state open` with no label
+#    filter and a 5000 cap, not a search per test: the search index lags new
+#    issues (a finding filed minutes ago would be missed and re-filed) and is
+#    rate-limited, while a red run can fail dozens of tests. A list that comes
+#    back at the cap may be truncated, so it counts as a failed list.
+#  - A failed test with a `finding` issue (not also `gap`) of that title gets
+#    the body rewritten, but the `Feature:`, `Slice:` and `Owner:` lines a
+#    triage added are read from the current body first and appended to the new
+#    one, so routing survives the next red run. If the body can't be read the
+#    issue is left alone. Any other open issue for the test (a `gap`, one with
+#    no `finding` label, or one matched only by its Test: line) gets a "Still
+#    failing" comment instead: its owner owns that body. Only a test with no
+#    open issue gets a new one.
 #  - A test that passed in this log (a "Test Case ... passed" line, so it ran
 #    and was not skipped or left out of a scoped run) and has an open issue
-#    under either label gets "Passes on run <url>" and is closed. A test that
-#    also failed in the log (a retry) stays open. Only a run on `dev` closes:
-#    a pass on a fix branch (a proof run) says nothing about dev, so branch
-#    runs still file and update findings but never close one.
-#  - If either issue list fails, nothing is filed: an empty list would file
-#    a duplicate for every red test.
+#    gets "Passes on run <url>" and is closed. A test that also failed in the
+#    log (a retry) stays open. Only a run on `dev` closes: a pass on a fix
+#    branch (a proof run) says nothing about dev, so branch runs still file
+#    and update findings but never close one.
+#  - If the issue list fails or hits the cap, nothing is filed: a short list
+#    would file a duplicate for every red test it missed.
 # Needs gh and jq on PATH and RUN_URL, GITHUB_REF_NAME and GITHUB_SHA in the
 # env; Tests/ci_findings/test_ci_findings.sh runs it against a stub gh.
 set -uo pipefail
@@ -35,11 +41,11 @@ names() {
 }
 failed=$(names failed)
 passed=$(names passed)
-# Open issues under either label, one entry per issue (one may carry both).
-if ! f=$(gh issue list --label finding --state open --limit 500 --json number,title,body,labels) \
-    || ! g=$(gh issue list --label gap --state open --limit 500 --json number,title,body,labels) \
-    || ! open=$(jq -s 'add | unique_by(.number)' <<<"$f$g"); then
-  echo "::warning::could not list open finding and gap issues; filing nothing this run"
+# Every open issue, any label.
+cap=5000
+if ! open=$(gh issue list --state open --limit "$cap" --json number,title,body,labels) \
+    || ! count=$(jq length <<<"$open") || (( count >= cap )); then
+  echo "::warning::could not list every open issue; filing nothing this run"
   exit 0
 fi
 # jq: does this issue belong to test $name (its "CI finding:" title or its Test: line)?
@@ -61,7 +67,7 @@ while IFS=/ read -r mod cls test; do
     echo "Commit: $GITHUB_SHA"
   } >"$tmp/finding.md"
   # A finding of this title is ours to rewrite; any other issue for the test only hears about it.
-  n=$(jq -r --arg t "$title" '[.[] | select(.title == $t and ([.labels[]?.name] | index("gap") | not))][0].number // empty' <<<"$open")
+  n=$(jq -r --arg t "$title" '[.[] | select(.title == $t and ([.labels[]?.name] | index("finding") and (index("gap") | not)))][0].number // empty' <<<"$open")
   other=$(jq -r --arg name "$name" "[.[] | select($of_test)][0].number // empty" <<<"$open")
   if [[ -z "$n" && -n "$other" ]]; then
     gh issue comment "$other" --body "Still failing on run $RUN_URL (branch $GITHUB_REF_NAME, commit $GITHUB_SHA). Error: ${err:-none printed; see the run log}" >/dev/null \
@@ -83,7 +89,7 @@ while IFS=/ read -r mod cls test; do
   fi
 done <<<"$failed"
 
-# Close issues (either label) whose test ran and passed in this log, on dev only.
+# Close open issues (any label) whose test ran and passed in this log, on dev only.
 [[ "$GITHUB_REF_NAME" == dev ]] && jq -r '[.[] | .number as $n
     | ((.title | select(startswith("CI finding: ")) | .[12:]),
        ((.body // "") | split("\n")[] | rtrimstr("\r") | capture("^Test: `(?<t>[^`]+)`$").t))
