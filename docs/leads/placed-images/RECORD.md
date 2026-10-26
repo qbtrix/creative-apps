@@ -39,7 +39,7 @@ Next: once #5321 closes and the lane lands our PRs, post Belt-Slice-Done for PD-
 
 ## Open
 - 2026-10-26T13:24Z run act-1a1786023d9-dg65 resumed: main at d3323f6a; #4922, #4963, #4964, #5001 open and clean, Belt-Lead lines moved to this run; 11 placed-images findings open (all named by those PRs' Fixes lines), so PD-z stays held.
-- dev-red #5321 (linux, run 40327156097, range main..57dd31ff; not ours) holds every batch. Nothing to fix here.
+- dev-red #5321 (macos since 14:10Z, run 40328390857, range main..5f8925a3; was linux, run 40327156097; not ours) holds every batch. Nothing to fix here.
 - [ ] Wire: stroke-style:DK-m (merged #4888): recheck DesignNode.swift picture fields against VectorStroke when #4922 lands.
 - 2026-10-26T02:06:05Z: findings past the round cap that no open PR fixes were closed into their gaps (#4932→#4991, #4971→#4996, #4973→#4998, #4975→#4997, #4970 and #4972→new gap #5359 after needs-ui #4985). The 26 findings still open are each closed by an open slice PR on merge (Fixes lines), so PD-z/DK-z start once those land.
 - 2026-10-26T13:54Z: run act-1a1786023d9-dg65 had pushed its 13:25Z resume and 13:47Z heartbeat only to lead/placed-images; mirrored here now, and every later heartbeat goes to both branches.
