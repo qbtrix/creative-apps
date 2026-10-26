@@ -4,13 +4,14 @@ Issue: #3755 (record began on #4522) · Packet: docs/blueprints/suiteui/features
 Run: act-1a175f403b9-j4z9 (line lead, line:suiteui; resume) · earlier: act-1a1705bc1ae-pb09, act-1a1695ebfeb-d54n
 Stage: 3 wave check (AN-u #4893 in the lane)
 Base: d3323f6a7dc523e1986e1693b640cf377e362f08 (main at resume; dev 8987427d)
-Next: lane merges AN-u #4893, then open AN-6 (lead/anchor-parenting-AN-u-6); AN-10 starts after CB-8's PR #4902 (open); AN-halo after AN-u; Belt-Slice-Done on green runs
+Next: lane merges AN-u #4893, then open AN-6 (lead/anchor-parenting-AN-u-6); AN-10 built on lead/anchor-parenting-AN-flare-m (149649c8, CI: PASS, 289 lines/14 files, Mutate 4/4): open its PR once CB-8 #4902 and DS-flare #4891 land (merge dev, regenerate flare golden, gate); AN-halo after AN-u
 
 ## Run act-1a175f403b9-j4z9 decisions
 - Brief rule 1: main checked out at d3323f6a. The old lead branches share no history with main, so each lead branch is now origin/main plus one commit carrying docs/leads/ (the tree a rebase gives), pushed --force-with-lease.
 - PR base stays dev (CLAUDE.md, scripts/fast-lane.sh BASE_BRANCH=dev); the lane retargets main PRs to dev anyway.
 - PR bodies: the session's GitHub relay re-adds a generated-by footer on every edit; the lane strips it from the squash commit.
 - 02:20Z: dev-red #5321 (macOS, range main..cc5c6234, none ours) holds every code batch; no open finding names this feature.
+- 02:44Z: AN-10 built ahead (shared files with #4902, #4891 kept it unopened). Kernel gap: layer.set-parent schema refuses parent: null; filed #5367 (gap, line:suiteui), Flare widens its own copy meanwhile.
 - LS-3/LS-6/LS-7/LS-11 in the old Next belong to layer-styles (another run); dropped from this record's Next.
 
 
