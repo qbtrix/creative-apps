@@ -210,3 +210,4 @@ utc	stage	event	ref	note
 2026-10-26T18:59:23Z	wait	poll	#5321	dev-red closed
 2026-10-26T19:21:41Z	wait	poll	-	lane sweep running
 2026-10-26T19:43:06Z	wait	poll	-	lane queue unchanged
+2026-10-26T20:06:08Z	wait	poll	lane	eligible, 122-PR backlog
