@@ -258,3 +258,7 @@ Still unbatched: #4988 (e986396), #5364 (4073e00) and #4999 (941da48), with thei
 ## 2026-10-26T11:07:57Z poll
 
 Heads unchanged. Lane run 40308651429 (10:37-10:57) decides eligible for #4988 (279 lines, 6 files), #4999 (298, 13) and #5364 (143, 3): Fast-Check marker plus local-ci/prescreen. They wait in the ready queue (118 ready PRs; a batch in flight holds the sweep, bdde122 has only #5266). Nothing to fix on our side. #5164 waits on #4988; #5000 waits on #4999. No supervisor answer yet.
+
+## 2026-10-26T11:30:25Z poll
+
+Heads unchanged; none of #4988, #5364, #4999 on dev (dev head c6700db, #5727). New batch lane/batch-20261026111622 again holds only #5266. No supervisor answer. Still queued.
