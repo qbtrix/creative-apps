@@ -43,8 +43,8 @@ struct HaloTextInspector: View {
     static let sizeID = "halo.inspector.text.size"
     static let colorID = "halo.inspector.text.color"
 
-    /// Why the shared text style rows can't act yet: the kernel's text rules and commands land in TS-5 and TS-6.
-    nonisolated static let textStylesHelp = "Text styles arrive with TS-5."
+    /// Why the shared text style rows can't act yet: Halo's text commands take them in TS-10.
+    nonisolated static let textStylesHelp = "Text styles aren't connected in this window yet."
 
     /// The font families the shared rows' picker lists: this Mac's, read once.
     nonisolated static let fontFamilies = FontCatalog().families()
