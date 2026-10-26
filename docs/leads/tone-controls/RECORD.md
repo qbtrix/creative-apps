@@ -2,9 +2,9 @@
 
 Issue: #3476 · Packet: docs/blueprints/suiteui/features/tone-controls.md
 Run: act-1a175ea55b7-729d (line lead, line:suiteui; relaunch 2026-10-26) · earlier: act-1a1702c569a-0puo · Session: claude/suiteui-feature-lead-run-azjeoo · Started: 2026-10-24T23:00Z (earlier: act-1a1693a3ff0-mwrd · Session: cloud line lead (line:suiteui) · Started: 2026-10-23T14:52Z (earlier runs act-1a16469734c-d0s8, act-1a15821c836-93pf))
-Stage: 3 wave 5: TC-z #5239 restack on dev
+Stage: 3: TC-z #5239 open; finding #5324 fixed in #5375
 Base: origin/dev 8eff8ab85
-Next: TC-u done (run 40247461868 contains #5006): post Belt-Slice-Done and Mac-Finish-Wanted. Merge origin/dev into #5239 (TC-z, stale stack on the old TC-u branch), gate, move Head; once it merges and a green run contains it, TC-z done and the contact sheet.
+Next: Lane lands #5239 and #5375; then Belt-Slice-Done TC-z and the contact sheet.
 
 
 ## Run act-1a175ea55b7-729d decisions
@@ -12,6 +12,8 @@ Next: TC-u done (run 40247461868 contains #5006): post Belt-Slice-Done and Mac-F
 - PR base stays `dev` (CLAUDE.md; BASE_BRANCH=dev in scripts/fast-lane.sh; the lane retargets main PRs).
 - Stacked PRs whose parent squash-merged carry the parent's commits (size FAIL, dirty): merge origin/dev into each branch, gate, move Head.
 - TC-u #5006 merged 13:51Z (e8a888296); scoped suiteui run 40247461868 at 30096d710 green and contains it.
+- 2026-10-26T03:07:58Z: #5324 (Sharpen offscreen on the 768-pt runner): the gallery page's rows scroll and the journey reveals each row (#5375).
+
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
