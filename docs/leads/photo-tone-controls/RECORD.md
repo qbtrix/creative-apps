@@ -87,3 +87,10 @@ Next: PT-5 once TC-3 #5006 merges; turn on the Wire-disabled tests when TC-5 #48
 - PT-a slice-done: scoped photo run 40250716357 at cc5c6234a (green) contains #5007.
 - PT-m: PT-4 re-lands on `claude/tone-controls-lead-gms6yu` (a revert of the revert, then the law fixes, with the TC-6 tolerations dropped), and Packet-Review amendments 2, 3 and 8 go into it.
 - 02:21Z: PT-4 re-land opened as #5363 (head 500006ca, `scripts/ci --changed` PASS, mutation plan 9/9). Amendment 3: the kernel's exposure folds into Photo's Exposure and `tone.set exposure` is refused. Laws: `tone.set: stepNamedTitle` is tolerated (the step names the slider, as transform.flip does). `tone.auto` is tolerated only on the flat-fill laws fixture, where it has nothing to suggest; it keeps every law on the real job input and is tested on the sample picture. Amendment 8 sets Amount first in sharpen-web. RJ-P12..14 now wait on PT-7.
+- 02:38Z: #5363 conflicted with dev's layer-styles catalog entries. Merged origin/dev, keeping both tables' `style.*` entries beside the `tone.*` ones and regenerating `photo.list-commands.json` from the CLI. Head is now b9ddeb33; the PR body's Head: line was moved to it.
+- PT-3 follow-up (Packet-Review amendment): the live canvas route and the dispatcher route never ran the tone section's Sharpen, which only export ran, so the canvas differed from export with Sharpen on. Branch `claude/tone-controls-lead-gms6yu-pt3` (head 42fbe440, on top of #5363's b9ddeb33, 5 files, +114/−22):
+  - Live route: Sharpen runs over the cached composite plus a 3σ margin, and the result is cached per sharpen setting, so a temperature step still composites nothing.
+  - Dispatcher route: unsharp runs before the imaging steps, and the region reads `readMargin`.
+  - Tests: liveMatchesExportWithSharpenOn, liveMatchesExportWithSharpenUnderALayer, sharpenStepKeepsTheComposite and blurStillFallsBack, which puts an edge by the y 256 seam between rows of tiles.
+  - Mutations: PhotoLiveTone 9/9 and PhotoRenderRoute 4/4. `scripts/ci --changed` PASS.
+  - The PR opens once #5363 merges, so its diff holds only PT-3.
