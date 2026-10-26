@@ -5,8 +5,10 @@
 // 320 in 40 pt steps, LibraryLayout's column count equals GridSelection's
 // over the padded content width; its defaults equal SuiteSize and
 // SuiteSpacing. Writes library-layout-1280, library-layout-1440 and
-// library-layout-1920.png: the Library window on the shoot fixture at those
-// widths. macOS only.
+// library-layout-1920.png: the Library grid and status bar on the shoot
+// fixture at those widths. The offscreen host draws no toolbar, sidebar or
+// inspector (system split-view and glass chrome), so those columns come out
+// blank; the journey's `layout-<w>` shots are the whole window. macOS only.
 import AppKit
 import Foundation
 import SuiteUI
@@ -53,7 +55,8 @@ import Testing
     }
 
     /// The Library window on the shoot fixture at 1280 × 800, 1440 × 900 and
-    /// 1920 × 1080, drawn whole like the journey's `layout-<w>` shots.
+    /// 1920 × 1080. Only the grid and status bar draw here; read the window
+    /// chrome from the journey's `layout-<w>` shots (ui-screens).
     @Test func windowAtWidths() throws {
         let folder = try packageRoot().appending(path: ".build/snapshots")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)

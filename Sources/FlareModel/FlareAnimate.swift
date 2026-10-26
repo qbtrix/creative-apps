@@ -3,6 +3,7 @@
 // however many values it sends; the stopwatch and the keyframe button are one step each. Everything goes through
 // `services.properties`, which applies section 2's not-animated rule.
 import FlareCore
+import SuiteKernel
 
 extension FlareWorkspace {
     /// The layers the inspector edits: the stage selection's, or the panel's selected layer when nothing is on stage.
@@ -32,7 +33,7 @@ extension FlareWorkspace {
         let layers = propertyLayerIDs
         guard !layers.isEmpty else { return refuse(.refused("Select a layer first.")) }
         let properties = services.properties, frame = currentFrame, autoKey = autoKey
-        let key = "property-\(property)-\(layers)-\(frame)-\(start)-\(propertyScrubSerial)"
+        let key = CoalesceKey.key("property.\(property)", on: layers, drag: "\(frame)-\(start)-\(propertyScrubSerial)")
         step {
             try properties.setValue(value, of: property, owner: owner, layerIDs: layers, frame: frame,
                                     autoKey: autoKey, coalesceKey: key, in: &$0)

@@ -5,6 +5,7 @@
 // the collection shows, and the loupe only a photo it shows. The selection is
 // SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift), the export
 // sheet's run its `ExportRun<ExportOptions>` (LibraryExportAdapter.swift).
+import CoreRender
 import SuiteKernel
 
 /// A sidebar collection: a fixed source of photos.
@@ -84,6 +85,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var loupeRenderToken = 0
     /// The token the shown `loupeRender` landed under (the focus change's for the held thumbnail).
     public internal(set) var loupeShownToken = 0
+    /// The develop steps the loupe's view writes over `loupeRender` on the GPU route (suite-imaging IM-11); nil when it is plain pixels.
+    public internal(set) var loupeSteps: [ToneAdjustment]?
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
@@ -106,6 +109,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var collectionsRevision = 0  // bumps on every collections or filter change
     public internal(set) var collectionsSavedRevision = 0
     public internal(set) var collectionsNotice: String?  // the damaged-file notice
+    public internal(set) var backup = LibraryBackupState()  // catalog-backup (LibraryBackup+Kernel.swift)
     /// Paths Delete Rejects moved to the Trash, which an import skips (cull-finish DR-6).
     public internal(set) var excludedPaths: Set<String> = []
 
@@ -128,14 +132,15 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.exportState == rhs.exportState && lhs.fileRequests == rhs.fileRequests
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
             && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
-            && lhs.loupeError == rhs.loupeError
+            && lhs.loupeError == rhs.loupeError && lhs.loupeSteps == rhs.loupeSteps
             && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft && lhs.originalPhotoID == rhs.originalPhotoID
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError
             && lhs.showsTestValues == rhs.showsTestValues
             && lhs.collectionsRevision == rhs.collectionsRevision
             && lhs.collectionsSavedRevision == rhs.collectionsSavedRevision
-            && lhs.collectionsNotice == rhs.collectionsNotice && lhs.excludedPaths == rhs.excludedPaths
+            && lhs.collectionsNotice == rhs.collectionsNotice && lhs.backup == rhs.backup
+            && lhs.excludedPaths == rhs.excludedPaths
         return browse && work && loupe && file
     }
 

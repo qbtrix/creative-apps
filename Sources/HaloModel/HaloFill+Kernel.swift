@@ -41,7 +41,7 @@ extension HaloProject: GradientFillTarget {
     /// selection, changing nothing.
     public mutating func setFill(_ fill: Fill, in box: Rect, name: String, drag: String?) throws {
         if let fillHelp { throw CatalogError.failed(id: "fill", message: fillHelp) }
-        let key = drag.flatMap { drag in selectedLayerID.map { "\($0).fill.\(drag)" } }
+        let key = drag.flatMap { drag in selectedLayerID.map { CoalesceKey.key("fill", on: [$0], drag: drag) } }
         let set = edit(name, control: "halo.fill", coalesceKey: key) { doc in
             let (c, l) = try doc.selectedLayerIndices()
             doc.compositions[c].layers[l].setFill(fill, from: box)

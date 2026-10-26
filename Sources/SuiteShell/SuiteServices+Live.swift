@@ -5,7 +5,11 @@
 // (pure members hold the reference fake), and `pending` lists every such
 // member so views disable its controls with that reason. `animations` and
 // `updates` have no slot: they stay fakes until a process swaps them with
-// `with(animations:updates:)`.
+// `with(animations:updates:)`. `SuiteLocations.processSupportFolder` is the
+// support folder a real process uses: the `SuiteSupportDir` default (the
+// `-SuiteSupportDir` launch argument, or the one the snapshot tests register),
+// else AfterGlow's folder in the home.
+import Foundation
 import SuiteModel
 
 /// What every slot may need to build its member.
@@ -20,6 +24,16 @@ public struct SlotContext: Sendable {
     }
 }
 
+extension SuiteLocations {
+    /// This process's support folder, read at each use: UserDefaults holds the `-SuiteSupportDir` launch
+    /// argument and any registered default.
+    public static var processSupportFolder: String {
+        supportFolder(
+            arguments: [supportDirFlag, UserDefaults.standard.string(forKey: "SuiteSupportDir") ?? ""],
+            home: NSHomeDirectory())
+    }
+}
+
 extension SuiteServices {
     /// The live services for `app`, sharing the support folder `support`.
     public static func live(support: String, app: SuiteApp, arguments: [String]) -> SuiteServices {
@@ -31,7 +45,7 @@ extension SuiteServices {
             roundTrips: roundTripsSlot(c), pasteboard: pasteboardSlot(c), assets: assetsSlot(c), linking: linkingSlot(c),
             animations: FakeAnimationSource(), preferences: preferencesSlot(c), settings: settingsSlot(c),
             onboarding: onboardingSlot(c), updates: FakeUpdates(), thumbnails: thumbnailsSlot(c), home: homeSlot(c), media: mediaSlot(c),
-            text: textSlot(c), isPreview: false)
+            text: textSlot(c), metadata: metadataSlot(c), isPreview: false)
         s.pending = pendingReasons(liveness: slotLiveness)
         return s
     }

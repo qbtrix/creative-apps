@@ -177,6 +177,30 @@ import Testing
         #expect(await count.value == .empty)
     }
 
+    /// The panel's count keeps each row's composite: a Levels step composites no row again, hiding the top layer
+    /// remakes the rows under it once, showing it lays it on them; every count is the plain count's bits.
+    @Test func aKeptCountMatchesThePlainOneAndCompositesOnlyWhatChanged() throws {
+        var workspace = try grey()
+        addFilledLayer(&workspace, red: 200, green: 30, blue: 30)
+        let composites = PhotoCompositeCache()
+        func counts() -> Bool { workspace.curvesHistogram(composites: composites) == workspace.curvesHistogram() }
+        #expect(counts())
+        let rows = composites.made
+        #expect(rows == 8, "an 8 px image samples 8 rows, one base each")
+        workspace.adjust(.blackPoint(0.1))
+        workspace.adjust(.exposure(0.5))
+        #expect(counts())
+        #expect(composites.made == rows, "a tone edit composited the rows again")
+        let top = try #require(workspace.layers.first?.id)
+        workspace.toggleVisibility(top)
+        #expect(counts())
+        #expect(composites.made == 2 * rows, "hiding the top layer remakes the base under it once per row")
+        workspace.toggleVisibility(top)
+        #expect(counts())
+        #expect(composites.made == 2 * rows, "showing it again composited the rows under it again")
+        #expect(PhotoWorkspace().curvesHistogram(composites: composites) == .empty)
+    }
+
     @Test func histogramKeyMovesOnlyWithTheHistogramsInput() throws {
         var workspace = try grey()
         let key = workspace.curvesHistogramKey
