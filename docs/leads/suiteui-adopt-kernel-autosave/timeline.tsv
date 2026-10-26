@@ -153,3 +153,4 @@ utc	stage	event	ref	note
 2026-10-25T13:46:58Z	3	poll	-	13:46Z poll: no merges; lane batch-20261025132815 Linux check running; dev bbaedba66 green; SC-f not on dev
 2026-10-26T02:59:27Z	-	resume	-	run act-1a175ee1051-o29l resumed after Belt nudge; state synced from lead/adopt-kernel-autosave
 2026-10-26T14:40:25Z	all	resume	-	run act-1a178a4b1c2-ibn1 resumed; AK-8 blocked on SC-f
+2026-10-26T15:00:31Z	poll	blocked	SC-f	poll: dev-red #5321 open (macos); ci.yml at f86f72f79 running; no needs-fix/needs-rebase on our PRs; AK-photo/AK-z wait on SC-f

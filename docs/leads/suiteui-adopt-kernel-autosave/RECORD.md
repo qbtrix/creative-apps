@@ -152,3 +152,4 @@ Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (r
 ## Open
 - AK-8 on SC-f (SC-15, SC-16); AK-9 Photo leg and AK-11 after AK-8.
 - 2026-10-26T14:40:25Z Resume, run act-1a178a4b1c2-ibn1. AK-8 still blocked on shared-codecs SC-f (not on dev); AK-11 waits AK-8. dev-red #5321 open (not ours).
+- 2026-10-26T15:00:31Z poll: dev-red #5321 open (macos); ci.yml at f86f72f79 running; no needs-fix/needs-rebase on our PRs; AK-photo/AK-z wait on SC-f
