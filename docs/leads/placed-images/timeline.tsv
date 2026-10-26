@@ -215,3 +215,4 @@ utc	stage	event	ref	note
 2026-10-26T08:06Z	wait	heartbeat	#5321	dev-red still macos (not ours); 7 PRs clean, unchanged; no supervisor reply
 2026-10-26T08:29Z	wait	heartbeat	#5321	7 PRs open+clean, heads unchanged; dev-red #5321 open (macos, run 40277933712), not ours; 72 findings open so DK-z/PD-z held; no supervisor reply
 2026-10-26T08:50Z	wait	heartbeat	#5321	7 PRs open+clean, heads unchanged; dev-red #5321 open (macos, range main..c480d848), not ours; DK-z/PD-z held on findings cap; no supervisor reply
+2026-10-26T09:14Z	wait	heartbeat	#5321	7 PRs open+clean, heads unchanged; dev-red #5321 open (macos, run 40290214719, range main..3e26fbe4), not ours; 76 design findings open so DK-z/PD-z held; no supervisor reply
