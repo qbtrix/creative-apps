@@ -4,14 +4,14 @@ Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a178669406-n4me · Started: 2026-10-23 (this run resumed 2026-10-26T13:30Z)
 Stage: 3 polling: every slice PR is open, clean (#4916 192 lines/10 files) and labelled fast-lane; the lane forms no batch while dev-red #5321 is open (not ours)
 Base: origin/dev; main verified at d3323f6a
-Next: wait for the lane to land #4916, #5002, #5011 once dev-red #5321 closes, then a green design ci.yml run that holds each slice's last PR: Belt-Slice-Done for DK-u and DK-m; DK-z starts once open findings are 5 or fewer (7 open, all with Fixes lines in those PRs)
+Next: DK-m done (Belt-Slice-Done posted 23:08Z). Wait for the lane to land #5002, #5011 once dev-red #5818 closes, then a green design ci.yml run holding #5011: Belt-Slice-Done for DK-u (gaps #4990 #4991); DK-z starts once open findings are 5 or fewer (6 open, all with Fixes lines in #5002/#5011)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 2 | done; gaps #3865 #3871 #3873 | 39670298178 | wanted (posted) |
 | DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 2 | #4864 merged; #5002 (round 1) and #5011 (round 2, stacked) open; rounds spent; gaps #4990 #4991 | – | – |
-| DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d | no | 2 | #4888 merged (63592c7b); #4916 (DK-7 SVG) open; rounds spent | – | – |
+| DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d | no | 2 | #4888 merged (63592c7b); #4916 merged (9810d71b); rounds spent | done: https://github.com/qbtrix/creative-apps/actions/runs/40414010435 | – |
 | DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | held: open findings > 5 (rule 7) | – | – |
 
 ## Tasks
