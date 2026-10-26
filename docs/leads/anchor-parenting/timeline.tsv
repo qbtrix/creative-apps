@@ -200,3 +200,4 @@ utc	stage	event	ref	note
 2026-10-26T13:06:57Z	3	poll	-	13:06Z poll: no merges of ours; lane landed #5146 (dev 57dd31ff), so batches are moving again; ours queued; 0 findings.
 2026-10-26T13:39:43Z	3	poll	-	13:39Z poll: no merges of ours; dev 01600e46; 0 findings
 2026-10-26T14:04:02Z	3	poll	-	14:04Z poll: no merges of ours; #4893, #4902, #4891 open. No drift issue for anchor-parenting. Open findings 1 (#5367, kernel gap, filed earlier).
+2026-10-26T14:05Z	3	poll	-	#4893, #4887, #4901, #4902 not merged yet; AN-6/AN-10 wait. Open findings 1 (#5367).
