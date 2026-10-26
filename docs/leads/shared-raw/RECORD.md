@@ -1,7 +1,7 @@
 # shared-raw lead record
 
 Issue: #3737 · Packet: docs/blueprints/suiteui/features/shared-raw.md
-Run: act-1a175f402e7-kwji (relaunch 2026-10-26T02:00Z) · Started: 2026-10-26T02:00Z (earlier act-1a1702c56e8-b6cq, act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
+Run: act-1a17835827e-1edk (relaunch 2026-10-26T12:40Z) · Started: 2026-10-26T02:00Z (earlier act-1a175f402e7-kwji, act-1a1702c56e8-b6cq, act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: origin/dev 8987427d8
 Next: lane merges #4848 (code batches wait on dev-red #5321), then retarget #4859 and #4872 to dev; #4865 after #4859; #5262 rides on #4872. SR-z waits on SR-m, SR-photo, TC-a, PN-a.
@@ -39,6 +39,7 @@ Next: lane merges #4848 (code batches wait on dev-red #5321), then retarget #485
 - SR-4 asks the supervisor in its PR to add SystemRawDecoderTests.decodeTime to Tests/perf-suites.txt and run its macOS-only mutation plan.
 
 - 2026-10-26T02:20Z Relaunch act-1a175f402e7-kwji. No raw PR merged since the last record. #4848 #4859 #4865 #4872 #5262 open with fast-lane, each merges dev 8987427d8 cleanly. dev-red #5321 open (full CI 40251699354 macOS red, range main..cc5c6234a); while it names macOS no code batch forms, so code PRs wait.
+- 2026-10-26T12:55Z Relaunch act-1a17835827e-1edk. Packet-Review 1 (#3737, 3ff81cd3) answered, all seven applied: (1) `RawRefusal: LocalizedError`, `errorDescription = message` (SR-3, mutation `.refusalDescribed`); (2) SR-6 owns `PhotoHeadless.swift`: its open switch routes the registry's `.cameraRaw` names to `openImage` and `formats` lists them (SC-15 is not built, gap #5792); (3) `decodeLinear` default routes RAW through `SuiteRaw`, nil otherwise; `ImageIOCodec.decodeLinear` checks `RawFormat(fileName:)` first (SR-6); (4) new `RawQuality.fitted(longestSide:)`, scaled, never draft; Photo's capped open asks `.fitted` (SR-3, mutation `.fittedIsNotDraft`); (5) the plan is a full table in the packet, scale in Double; (6) `.previewCovers` and `.fullIsNotDraft` live in the `SuiteImaging.RawFormat` plan; (7) Photo open: `documentName` = stem, `fileKind = .readOnly`, Save goes to Save As, `documentURL` stays. Packet text rides SR-6 (#5262).
 
 ## Open
 - SR-6 waits on shared-codecs SC-photo (SC-4), which this run builds now; SR-8 on tone-controls TC-a and pen-paths PN-a (contract-first: their contract slices).
@@ -71,3 +72,4 @@ Next: lane merges #4848 (code batches wait on dev-red #5321), then retarget #485
 - 2026-10-26T11:26Z: heartbeat: dev-red #5321 open; dev 7aa95f57 (generated C4/waves) after b200af5b (#5726 lane auto-quarantine for a red dev with no culprit); Linux check on f3af1c00 green, Linux check 40313117666 and scoped photo running; no Feature: shared PR updated since 10:55Z; #5133 ST-z waits in lane; codec and raw stacks unchanged; findings 0
 - 2026-10-26T11:52Z: heartbeat: dev c6700dba (#5727 quarantine expiry); dev-red #5321 open; Linux check 40316903931 running; no Feature: shared PR moved; #5133 ST-z still queued
 - 2026-10-26T12:23Z: heartbeat: dev 746be6b1 (#5775 sharded macOS); full CI 40321924466 queued; Linux check 40316903931 on c6700dba green; dev-red #5321 open; no Feature: shared PR moved; #5133 ST-z queued
+- 2026-10-26T12:55Z: heartbeat: SR-3 #4859 gains the fitted quality and the described refusal (local head 4fb41f90, CI: PASS; mutate running); SR-6 #5262 gains PhotoHeadless RAW (3e395410, 2ba1df55, gate next); dev 746be6b1; dev-red #5321 open; findings 0
