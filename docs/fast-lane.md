@@ -88,9 +88,10 @@ that needs macOS forms when a slot frees (a batch resolved in this run),
 when LANE_BATCH_MAX PRs are ready, or once the oldest ready head is
 LANE_BATCH_WAIT_MIN minutes old, and never while the lane's own queued and
 running macOS runs (mac_slots_busy) fill LANE_MAC_SLOTS. One batch runs at a
-time: a second one off the same base would land untested with the first, so
-until speculative batches exist the slots are a guard rail on the shared
-macOS pool, not a second batch.
+time (HOLD, set by batch_held): a second one off the same base would land
+untested with the first, so until speculative batches exist the slots are a
+guard rail on the shared macOS pool, not a second batch. The one exception is
+a batch of one under LANE_VERIFY_AFTER=1 (below).
 A red batch is bisected by prefix on the same branch (batch_resume):
 `lane/batch-<id>-<i>` points at the chain after i PRs and gets the same
 Linux and macOS runs, until PR hi is the first that turns the chain red: PRs
@@ -143,11 +144,92 @@ dropped with its probes (no label, no comment: its PRs were not at fault) and
 the same sweep forms a fresh one. A batch whose base predates the red commit
 is never marked, so it can't be dropped this way.
 
+## Verify after merge (LANE_VERIFY_AFTER=1)
+
+The repo variable LANE_VERIFY_AFTER (fast-lane.yml passes it in; unset,
+empty or 0 is the lane described above) moves the checks from before the
+merge to after it: a code PR lands on its own proof, and a red BASE_BRANCH
+is answered by reverting its culprit.
+
+Own-proof landing rides the LANE_MAC_PER_PR path with a different macOS
+proof. A code PR (BUILD_RE) needs, besides the Linux proof above, the
+supervisor's pre-screen on its head: the `local-ci/prescreen` commit status
+(PRESCREEN_CONTEXT, posted by the pre-screen loop on the Mac after it merges
+the PR into dev and runs compile and Model tests). decide judges it in
+build_gate's slot (prescreen_gate): success is proof, failure is red, missing
+or pending waits. It is left out of the generic check summary in both modes,
+so at 0 it changes nothing and a head whose only status it is still gets its
+Linux check. There is no per-PR macOS build and no batch for code:
+settle_ready hands each code PR to batch_start alone, whose lone-PR rule
+(shared with LANE_MAC_PER_PR=1) lands it on that proof unless proof_stale
+says dev moved under it; then it is a batch of one, checked on Linux on
+today's dev (batch_apps is empty in this mode), and lands on that. The
+pre-screen screens a head once, so a stale proof re-waits on that Linux
+check, not on a new pre-screen. A batch of one holds only its own PR
+(BATCH_SOLO: batch_held puts it in INFLIGHT, so it is never batched or
+landed twice, and sets no HOLD): every other ready PR with fresh proof lands
+beside it in the same sweep, and several stale PRs each get their own batch
+of one and check in parallel (batch ids stay unique within a run), at most
+LANE_BATCH_MAX at once, since one ratchet commit on dev makes every proof
+stale together; the rest wait for a later sweep. The sweep does not wait
+BATCH_WAIT on such a batch; a later sweep reads its verdict. Landings beside
+it move dev under the batch, so its green result goes through batch_land's
+proof_stale on today's dev like any batch: stale, it is dropped and the PR
+forms a new batch of one there; not stale, it lands. Two kinds still hold
+the lane: a batch of two or more (PRs without code), and a batch of one
+whose PR changes a RATCHET_RE path itself, which proof_stale would call
+stale after every landing beside it, so it would never land. A red dev holds no code PR here: red_holds
+exists because every batch probe on a red base is red, and an own-proof
+landing runs no probe (the pre-screen already excuses failures dev has on
+its own). PRs without code still batch, held by red_holds as above.
+
+Auto-revert (revert_sweep, after the batches so a revert waits for one
+holding the lane): while the dev-red issue is open (red_sweep; a Linux or a macOS red),
+the lane makes one revert call on it. The culprit (revert_culprit) is
+red_bisect's verdict on the issue (a certain one: a "likely" verdict from a
+timing budget test is not enough), else the only PR commit (a subject ending
+`(#N)`; generated commits have none) in the issue's range main..<red sha>. A
+Linux red with several PRs waits for the bisect. A macOS-only red with
+several PRs names none, since red_bisect runs Linux probes only and
+reverting newest first would hit innocent PRs, each step a full macOS run on
+dev to read; a human picks. The revert (revert_open) is `git revert` of the
+culprit's squash commit on today's BASE_BRANCH in the scratch clone (merge
+drivers on), pushed as `lane/revert-<n>` (REVERT_PREFIX) and opened as a PR
+labelled `lane-revert` (REVERT_LABEL) and `p0`, never `fast-lane`. Its body
+names the failing jobs, the failing tests read from the red sha's logs
+(red_tests) and the run, and says `Refs` the dev-red issue, so landing it
+closes nothing. The culprit PR is merged, so its feature-lead issue (by the
+PR's `Feature:` line, feature_lead), or the PR itself, gets one comment with
+the failure and how to bring the change back (a new PR that reverts the
+revert, plus the fix), and a `finding` issue labelled `line:<app>` is filed
+(build_apps over the culprit's files; shared code or several apps:
+`line:suite`). The call ends with a REVERT_MARK comment on the dev-red issue,
+which also records a call that found nothing to revert: the culprit is a
+revert itself (never reverted), not a PR's commit, does not revert cleanly,
+or no culprit was named, touches a protected path (captain review only, and
+the lane's token can't push workflows), or its revert could not be pushed or
+opened. With one call per issue no sweep opens two reverts,
+and a dev still red after its revert waits for a human.
+
+The revert PR (a bot author on a REVERT_PREFIX branch with REVERT_LABEL,
+its body saying `Refs #<the open dev-red issue>.`; one from an older issue is
+never landed under a new one) never goes through decide: revert_land starts
+one Linux-only CI run on its head (its comment is the record), and on a
+green one lands it with land(), proof_stale permitting. A stale check, or a
+merge GitHub refuses because dev moved under the revert into a conflict,
+gets the revert cherry-picked onto today's BASE_BRANCH and checked again. It needs no prescreen, no macOS run
+and no batch, and lands while the dev-red issue holds batches, since it puts
+back code BASE_BRANCH already ran. Landing it dispatches CI on BASE_BRANCH
+(dispatch_reason), whose green run promotes main and closes the issue. A red
+check on the revert, a rebuild that conflicts, or a revert left open after
+its issue closed waits for a human. GitHub Actions must be allowed to create pull requests in the repo
+settings, or the call records that the revert was pushed but not opened.
+
 ## CI dispatch on dev
 
 A lead's PR (a `Feature:` body line) never closes a `feature-lead` issue
 (lead_refs). After its merges the lane dispatches CI on BASE_BRANCH at most
-once per run (dispatch_reason): a FEATURE_LABEL PR, a UI_RE change, or
+once per run (dispatch_reason): a lane revert, a FEATURE_LABEL PR, a UI_RE change, or
 DISPATCH_EVERY merged PRs since the last CI run. Promotion of main is
 ci.yml's job.
 

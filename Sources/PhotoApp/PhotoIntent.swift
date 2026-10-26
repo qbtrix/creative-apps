@@ -9,6 +9,7 @@
 // PhotoTool's palette look (title, symbol, one-key shortcut) lives here too.
 import CoreRaster
 import PhotoModel
+import SuiteImaging
 import SuiteKernel
 import SuiteUI
 import SwiftUI
@@ -46,6 +47,8 @@ enum PhotoIntent {
     case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
     case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
     case place(PhotoPlaceIntent), text(TypeIntent)
+    /// A tone row's change, run as its tone.* command (PhotoWindow+Tone).
+    case tone(ToneIntent)
     /// One Pen or point-editor gesture from PhotoPenOverlay, run through the catalog.
     case path(PathIntent)
     /// Return: commits a free transform, else applies a pending crop.

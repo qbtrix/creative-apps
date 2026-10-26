@@ -1,11 +1,14 @@
 // Live/LiveDevelop.swift: the live develop renderer (develop packet DV-6).
 // A photo's settings become the CoreRaster calls they need, in one fixed
 // order: white balance, exposure, contrast, highlights and shadows, whites
-// and blacks, the tone curve, levels. A control at its neutral value runs no
-// pass, so neutral settings return the input untouched. The histogram is
-// CoreRaster's, 256 bins over the sRGB values of the buffer it is given (the
-// rendered one). Vibrance and Saturation wait on creative-core (`waiting`):
-// a render that needs either throws `.renderFailed` with that reason. After
+// and blacks, levels, the tone curve, saturation. Exposure, levels, the curve
+// and saturation are SuiteImaging's shared list (`ImagingProgram.adjustments`,
+// the steps Photo runs, on CoreRender's CPU backend; suite-imaging IM-10b),
+// with Library's own tone passes after its exposure step. A control at its
+// neutral value runs no pass, so neutral settings return the input untouched.
+// The histogram is CoreRaster's, 256 bins over the sRGB values of the buffer
+// it is given (the rendered one). Vibrance waits on creative-core (`waiting`):
+// a render that needs it throws `.renderFailed` with that reason. After
 // the tone, a crop (crop CR-4) turns the buffer by its angle and cuts
 // `LiveCrop`'s frame for the buffer's own size out of the turned pixels.
 #if canImport(FoundationEssentials)
@@ -14,31 +17,35 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import CoreRender
+import SuiteImaging
 
 public struct LiveDevelop: DevelopRendering {
     public static let unavailable: String? = nil
     /// Sliders the live renderer can't draw yet, with the reason the row shows.
-    /// DV-12 empties it once CoreRaster's vibrance and saturation reach `dev`.
+    /// DV-12 empties it once CoreRaster's vibrance reaches `dev`.
     public static let waiting: [DevelopSlider: String] = [
         .vibrance: "Vibrance waits on creative-core (CoreRaster vibrance)",
-        .saturation: "Saturation waits on creative-core (CoreRaster saturation)",
     ]
 
     /// The CoreRaster calls `settings` needs, in render order; empty when neutral.
-    public enum Pass: Hashable, Sendable {
-        case whiteBalance(temperature: Float, tint: Float), exposure(Float), contrast(Float)
+    public enum Pass: Equatable, Sendable {
+        case whiteBalance(temperature: Float, tint: Float), contrast(Float)
         case highlightsShadows(highlights: Float, shadows: Float)
         case whitesBlacks(inBlack: Float, inWhite: Float, outBlack: Float, outWhite: Float)
         case color(vibrance: Float, saturation: Float)                  // DV-12
-        case curve([DevelopCurvePoint]), levels(DevelopLevels)
+        /// One step of `ImagingProgram.adjustments`: exposure, levels, the curve or saturation.
+        case shared(ToneAdjustment)
     }
 
     public init() {}
 
     public static func passes(for s: DevelopSettings) -> [Pass] {
+        let shared = ImagingProgram.adjustments(s.adjustSettings).map(Pass.shared)
+        let exposure = shared.prefix { if case .shared(.exposure) = $0 { true } else { false } }
         var p: [Pass] = []
         if s.temperature != 0 || s.tint != 0 { p.append(.whiteBalance(temperature: Float(s.temperature), tint: Float(s.tint))) }
-        if s.exposure != 0 { p.append(.exposure(Float(s.exposure))) }
+        p += exposure
         if s.contrast != 0 { p.append(.contrast(Float(s.contrast))) }
         if s.highlights != 0 || s.shadows != 0 {
             p.append(.highlightsShadows(highlights: Float(s.highlights), shadows: Float(s.shadows)))
@@ -52,9 +59,7 @@ public struct LiveDevelop: DevelopRendering {
             p.append(.whitesBlacks(inBlack: Float(inBlack), inWhite: Float(inWhite),
                                    outBlack: Float(outBlack), outWhite: Float(outWhite)))
         }
-        if !s.curve.isIdentity { p.append(.curve(s.curve.points)) }
-        if s.levels != .neutral { p.append(.levels(s.levels)) }
-        return p
+        return p + shared.dropFirst(exposure.count)
     }
 
     public func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer {
@@ -62,8 +67,11 @@ public struct LiveDevelop: DevelopRendering {
             if let why = Self.waiting[slider] { throw LibraryError.renderFailed(why) }
         }
         var b = buffer
+        let cpu = CPUBackend()
         for pass in Self.passes(for: settings) {
-            do { b = try Self.run(pass, on: b) } catch let error as RasterError {
+            do { b = try Self.run(pass, on: b, cpu: cpu) } catch let error as RasterError {
+                throw LibraryError.renderFailed("\(error)")
+            } catch let error as RenderError {
                 throw LibraryError.renderFailed("\(error)")
             }
         }
@@ -83,21 +91,24 @@ public struct LiveDevelop: DevelopRendering {
                              shadowClipped: h.shadowClipped, highlightClipped: h.highlightClipped)
     }
 
-    /// `pass`'s one CoreRaster call; whites and blacks, the curve and levels act on sRGB values.
-    private static func run(_ pass: Pass, on b: PixelBuffer) throws -> PixelBuffer {
+    /// `pass`'s one CoreRaster call; whites and blacks act on sRGB values. A
+    /// shared step runs on `cpu`, as the shared list's CPU route runs it.
+    private static func run(_ pass: Pass, on b: PixelBuffer, cpu: CPUBackend) throws -> PixelBuffer {
         switch pass {
         case .whiteBalance(let temperature, let tint): try b.whiteBalance(temperature: temperature, tint: tint)
-        case .exposure(let stops): try b.exposure(stops: stops)
         case .contrast(let amount): try b.contrast(amount)
         case .highlightsShadows(let highlights, let shadows): try b.highlightsShadows(highlights: highlights, shadows: shadows)
         case .whitesBlacks(let inBlack, let inWhite, let outBlack, let outWhite):
             try b.levels(inBlack: inBlack, inWhite: inWhite, gamma: 1, outBlack: outBlack, outWhite: outWhite, encoding: .sRGB)
         case .color: throw LibraryError.renderFailed(waiting[.vibrance] ?? "Vibrance isn't built yet")
-        case .curve(let points):
-            try b.curves(points: points.map { CurvePoint(x: Float($0.x), y: Float($0.y)) }, encoding: .sRGB)
-        case .levels(let l):
-            try b.levels(inBlack: Float(l.inBlack), inWhite: Float(l.inWhite), gamma: Float(l.gamma),
-                         outBlack: Float(l.outBlack), outWhite: Float(l.outWhite), encoding: .sRGB)
+        case .shared(let step):
+            try {
+                let input = try cpu.surface(b)
+                defer { cpu.release(input) }
+                let output = try cpu.adjusted(input, step)
+                defer { cpu.release(output) }
+                return try cpu.read(output)
+            }()
         }
     }
 }

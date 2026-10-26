@@ -2,8 +2,11 @@
 // row, the summary. Values in, closures out; a nil action disables its control.
 // Each control but the dismiss-only Cancel and Done, and the name alert's Save
 // (#4208), is its catalog command's MenuCommand on the window's catalog
-// (command-state CS-6), so it is off with the command's reason too.
+// (command-state CS-6), so it is off with the command's reason too. The
+// Metadata row (export-pack LX-2) picks the kernel's ExportMetadata policy,
+// read through the shared ExportPick (`pick`).
 import LibraryModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -84,6 +87,12 @@ struct LibraryExportSheet: View {
                 }
                 .help(formatHelp)
             }
+            LabeledContent("Metadata") {
+                ChoiceChips(options: Self.metadataOptions, selected: Self.pick(options).metadata) {
+                    (policy: ExportMetadata) -> Void in change { $0.metadata = policy }
+                }
+                .help("What the exported files keep of each photo's metadata.")
+            }
             TextField("Name", text: Binding(get: { options.naming.template }, set: { setTemplate($0) }))
                 .help(options.naming.help ?? "Tokens: {name}, {date}, {seq}, {rating}.")
                 .accessibilityIdentifier("library.export.name")
@@ -161,6 +170,17 @@ struct LibraryExportSheet: View {
     }
 
     nonisolated static let sizes = [1024, 2048, 4096, 0]
+
+    /// The Metadata row's chips: the kernel's policies under their own titles.
+    nonisolated static let metadataOptions: [InspectorOption<ExportMetadata>] = ExportMetadata.allCases.map {
+        InspectorOption(id: $0, title: $0.title, identifier: "library.export.metadata.\($0.rawValue)")
+    }
+
+    /// The options as the shared sheet rows read them (SuiteUI's ExportPick): format, quality 0...1 and the
+    /// metadata policy; the long edge is Library's own field, so the scale stays 1.
+    nonisolated static func pick(_ options: ExportOptions) -> ExportPick {
+        ExportPick(format: options.format.rawValue, quality: Double(options.quality) / 100, metadata: options.metadata)
+    }
 
     /// Why an editing control is off with no action: the sheet isn't editing.
     nonisolated static let notEditing = "The export sheet isn't editing."

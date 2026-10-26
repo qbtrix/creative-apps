@@ -31,7 +31,7 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
     /// `drag`. The eyedropper's text is the fallback; the workspace's
-    /// `toolHelp` asks its sampling service instead.
+    /// `toolHelp` enables it, since it reads the kernel's mean.
     public var unavailableHelp: String? {
         switch self {
         case .eyedropper: "Not built yet (PV-9)."
@@ -118,7 +118,7 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var cropAspect = CropAspect.free
     /// Free Transform in progress (PhotoTransform.swift).
     public internal(set) var transformDraft: TransformDraft?
-    /// The eyedropper's sample size (PhotoEyedropper.swift).
+    /// The eyedropper's sample size (PhotoSample+Kernel.swift).
     public internal(set) var sampleSize = SampleSize.point
     /// The Export sheet's last choices (PhotoExportOptions.swift).
     public internal(set) var exportOptions = ExportOptions()
