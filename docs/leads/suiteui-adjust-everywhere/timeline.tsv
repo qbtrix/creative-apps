@@ -190,3 +190,4 @@ utc	stage	event	ref	note
 17:38Z	3	poll	#5249	lane check running on the integrated head
 17:51Z	3	check-in	#5247 #5249 #5252	all clean, unmerged; wait for local-ci/prescreen
 18:00Z	3	blocked	all	waiting on local-ci/prescreen (supervisor)
+18:11Z	3	check-in	#5247 #5249 #5252	all clean, unmerged; wait for local-ci/prescreen

@@ -389,3 +389,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T17:38Z 17:38Z: #5249 at 89b9e92a, mergeable, the lane's fast-lane check running on it; others clean. dev 7c15c049, main fef52e66, #5818 open.
 - 17:51Z check-in: #5247, #5249 (needs-rebase dropped) and #5252 clean and unmerged, waiting for local-ci/prescreen. dev 7c15c0498, main fef52e668: no slice on main yet.
 - 2026-10-27T18:00Z 18:00Z: blocked on the supervisor: the lane's 17:48Z run reports 'waiting for local-ci/prescreen' on our heads (#5096 8f97ea1e and the rest) and on most other crew PRs; no prescreen status on any of them. Every PR is clean and fast-lane. dev 7c15c049, main fef52e66, #5818 open. Supervisor: please run the prescreen on these heads.
+- 18:11Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev 7c15c0498, main fef52e668.
