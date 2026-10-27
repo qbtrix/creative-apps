@@ -17,6 +17,8 @@
 // - Text nodes scale with the zoom, like the artwork they sit in; marks keep one
 //   line width on screen at any zoom. A document stroke is artwork: its width scales.
 // - A node draws at `DesignPainted.opacity`, its own opacity times its ancestors'.
+// - A rectangle's or frame's picture draws by cover through SuiteUI's drawPlaced, clipped to its rounded box,
+//   over its fill and under its stroke, in the same one Canvas (placed-images PD-u).
 // - A turned or mirrored node draws its upright shape through artworkPlacement, the kernel's matrix.
 // - A shape node draws its spec's path in its frame (DesignNode.path(in:), the kernel's ShapeRules), so a
 //   resize redraws it; its box only when the spec can't be drawn. A line or arrow is stroked, and an arrow's
@@ -202,6 +204,9 @@ func paintArtwork(
             faded.stroke(artworkTrace(node, item.stroke, shape: shape, scale: scale), with: .color(line.color), style: line.style)
         } else if let shape {
             faded.fill(shape, with: artworkShading(for: node, scale: scale))
+            if let asset = node.placedAsset, let image = node.placedImage {
+                faded.drawPlaced(asset, image, cornerRadius: node.drawnCornerRadius, scale: scale)
+            }
             if let stroke = item.stroke, let style = artworkStyle(stroke, scale: scale) {
                 let trace = artworkTrace(node, stroke, shape: shape, scale: scale)
                 faded.stroke(trace, with: .color(stroke.designColor.color), style: style)
