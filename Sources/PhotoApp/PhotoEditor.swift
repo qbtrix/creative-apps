@@ -183,7 +183,10 @@ struct PhotoCanvas: View {
             perform(.dismiss)
         default:
             // A disabled tool's key does nothing, as its palette button does.
-            guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp) else { return .ignored }
+            // Shift cycles the tools that share the letter (Shift-J: Spot Heal, Heal, Remove).
+            let current = press.modifiers.contains(.shift) ? model.tool : nil
+            guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp, cyclingFrom: current)
+            else { return .ignored }
             perform(.tool(tool))
         }
         return .handled
