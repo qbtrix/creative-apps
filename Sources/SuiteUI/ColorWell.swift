@@ -4,8 +4,10 @@
 // "RRGGBB" or "#RGB" in either case, written as "#RRGGBB". It is plain and
 // tested on its own; its bridge to SwiftUI's Color goes through
 // Color.Resolved in sRGB. Text that isn't a hex color keeps the old color.
-// The text rules are HexColorText, the suite's HexColorEditing (UC2):
-// Foundation only, over RGB8. InspectorColorWellRow is its HexColor wrapper.
+// The text rules are HexColorText, the suite's HexColorEditing (UC2), over
+// RGB8; it and HexColor parse, format and round through SuiteKernel's
+// HexText, the suite's one hex codec, and HexColor's bridge to the kernel's
+// FillColor is `init(_:)` / `fill`. InspectorColorWellRow is its HexColor wrapper.
 // Both rows report `onEnd` once per gesture through an EditRun (HexEnds): a
 // hex commit is a change and an end in one, even when it keeps the color; the
 // color panel's picks stream through `onChange` and end once when the panel
@@ -17,33 +19,25 @@
 // that disables the row passes its reason as `sampleHelp`, so the button lists
 // itself in `suite.controls` as disabled with that reason, not as enabled.
 import AppKit
+import SuiteKernel
 import SwiftUI
 
 /// The hex field's text rules (UC2): "#RRGGBB", "RRGGBB" or "#RGB" in either
 /// case, with surrounding spaces and one leading "#" ignored; three digits
-/// double up ("#F80" is "#FF8800"). Written as "#RRGGBB", upper case.
-/// Foundation only.
+/// double up ("#F80" is "#FF8800"). An alpha form ("#RRGGBBAA") reads only
+/// when opaque: the row has no alpha. Written as "#RRGGBB", upper case.
+/// Both are HexText's, so the field reads like every other hex in the suite.
 public struct HexColorText: HexColorEditing {
     public init() {}
 
     public func parse(_ text: String) -> RGB8? {
-        var digits = text.trimmingCharacters(in: .whitespaces)
-        if digits.hasPrefix("#") { digits.removeFirst() }
-        if digits.count == 3 { digits = String(digits.flatMap { [$0, $0] }) }
-        guard digits.count == 6, digits.allSatisfy(\.isHexDigit), let value = UInt32(digits, radix: 16) else {
-            return nil
-        }
-        return RGB8(UInt8(value >> 16 & 0xFF), UInt8(value >> 8 & 0xFF), UInt8(value & 0xFF))
+        guard let color = HexText.parse(text), HexText.byte(color.a) == 255 else { return nil }
+        return HexColor(color).rgb
     }
 
     public func committed(_ text: String, old: RGB8) -> RGB8 { parse(text) ?? old }
 
-    public func format(_ color: RGB8) -> String {
-        "#" + [color.red, color.green, color.blue].map { byte in
-            let hex = String(byte, radix: 16, uppercase: true)
-            return hex.count == 1 ? "0" + hex : hex
-        }.joined()
-    }
+    public func format(_ color: RGB8) -> String { HexText.format(HexColor(color).fill) }
 }
 
 /// One gesture, one end, for a color row, over the suite's EditRun: a hex
@@ -96,14 +90,19 @@ public struct HexColor: Hashable, Sendable {
     /// "#RRGGBB", upper case.
     public var text: String { HexColorText().format(rgb) }
 
-    /// The nearest 8-bit sRGB color to `resolved`; components outside 0...1
-    /// are clamped.
+    /// The nearest 8-bit color to the kernel's `fill` (both sRGB), its alpha
+    /// dropped; HexText's rounding, so out-of-range clamps and NaN reads 0.
+    public init(_ fill: FillColor) {
+        self.init(HexText.byte(fill.r), HexText.byte(fill.g), HexText.byte(fill.b))
+    }
+
+    /// This color as the kernel's FillColor, opaque.
+    public var fill: FillColor { FillColor(r: Double(red) / 255, g: Double(green) / 255, b: Double(blue) / 255) }
+
+    /// The nearest 8-bit sRGB color to `resolved` (Color.Resolved is sRGB);
+    /// its opacity is dropped, components outside 0...1 are clamped.
     public init(_ resolved: Color.Resolved) {
-        func byte(_ value: Float) -> UInt8 {
-            guard value.isFinite else { return 0 }
-            return UInt8((min(max(value, 0), 1) * 255).rounded())
-        }
-        self.init(byte(resolved.red), byte(resolved.green), byte(resolved.blue))
+        self.init(FillColor(r: Double(resolved.red), g: Double(resolved.green), b: Double(resolved.blue)))
     }
 
     public var resolved: Color.Resolved {
