@@ -2,17 +2,17 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a17be7aff8-ivwy · Started: 2026-10-23 (this run resumed 2026-10-27T05:55Z; prior act-1a178669406-n4me)
-Stage: 3 #5011 merged c21b2834 (08:06Z) and #5825 merged 3f68fdea (10:18Z); waiting for a green design-scoped or full ci.yml run on dev holding each; dev-red #5818 open (SuiteUI + Library test compile breaks, not ours)
+Stage: 4 every slice done: Belt-Slice-Done DK-u (gaps #4990 #4991) and DK-z on scoped design run 40494076820 at 4a7d926f (holds #5011 c21b2834 and #5825 3f68fdea); Mac-Finish-Wanted DK-u DK-z posted
 Base: origin/dev; main verified at fef52e66
-Next: a green design-scoped or full ci.yml run on dev at or after c21b2834: Belt-Slice-Done DK-u (gaps #4990 #4991). When #5825 lands and a green run holds it: Belt-Slice-Done DK-z, then Belt-Contact-Sheet
+Next: journeys run 40500688446 (after CI run 40494076820) finishes, then Belt-Contact-Sheet on #3441, push final record, stop
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 2 | done; gaps #3865 #3871 #3873 | 39670298178 | wanted (posted) |
-| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 2 | #4864, #5002 (fa5d340f) and #5011 (c21b2834) merged; rounds spent; gaps #4990 #4991 | – | – |
+| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 2 | done, run 40494076820, gaps #4990 #4991 | – | – |
 | DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d | no | 2 | #4888 merged (63592c7b); #4916 merged (9810d71b); rounds spent | done: https://github.com/qbtrix/creative-apps/actions/runs/40414010435 | – |
-| DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | #5825 merged 3f68fdea | – | – |
+| DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | done, run 40494076820 | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
