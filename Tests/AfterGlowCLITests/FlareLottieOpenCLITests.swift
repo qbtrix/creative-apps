@@ -63,7 +63,7 @@ import Testing
         let io = FakeIO(files: ["/tmp/mcp/bounce.json": input])
         var sessions = MCPSessions(MCPOptions(apps: Apps.all, roots: ["/tmp/mcp"]), io: io)
         let opened = sessions.call(.open(app: "flare"), .object(["path": .string("/tmp/mcp/bounce.json")]), now: 0)
-        guard case .object(let fields)? = opened.structured, let doc = fields["doc"] else {
+        guard case .object(let fields) = opened.structured, let doc = fields["doc"] else {
             Issue.record("open failed: \(opened.text)")
             return
         }
