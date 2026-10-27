@@ -44,9 +44,10 @@ extension HaloProject: HeadlessDocument {
         // TS-9: the kernel's text commands but text.set-size, which stays Halo's own
         let texts = ["text.read", "text.set-font", "text.set-italic", "text.set-alignment", "text.set-line-height", "text.set-tracking"]
         let files = FileFlowCommands.specs(HaloProject.self).map(\.id)  // HF-3: the suite's file flow, its file.open-recent too
+        let clip = ["edit.copy-frame", "edit.paste"]  // CB-10: Copy Frame and Paste
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
         let all = ids.filter { $0 != "file.open-recent" } + shapes + fills + strokes + history + transforms + rates + places + styles
-            + texts + files + window
+            + texts + files + clip + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
