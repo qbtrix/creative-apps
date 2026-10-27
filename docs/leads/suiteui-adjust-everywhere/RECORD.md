@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-27T17:28Z
+Polled: 2026-10-27T17:38Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -386,3 +386,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T17:16Z 17:16Z: dev moved to 79a9f50c (halo CB-10 #4905) and #5249 (AJ-12) went dirty on the Halo command catalog; merging dev into it locally (union of filter and clipboard commands), gate running. main still fef52e66; dev-red #5818 open, not ours.
 - 2026-10-27T17:28Z 17:28Z: #5249 merged dev (89b9e92a3, Halo catalog: filters then clipboard commands, golden 129 ids); scripts/ci --changed PASS (AfterGlowCLITests + HaloModelTests); pushed, Head moved. Note: the session's GitHub proxy re-appends a tool footer on every PR body edit (#5249 #5252 #5247 #5245); the lane strips it from the squash, flagged to the user.
 - 17:31Z check-in: #5249 got needs-rebase from dev's halo clipboard work (#4905); dev merged in, both command sets kept, gate PASS, golden + LiveStandIn tests green, Head 89b9e92a3. #5247 and #5252 clean. All three wait for local-ci/prescreen. main fef52e668 still holds none of AJ-k/AJ-u/AJ-library, so no Belt-Slice-Done yet. The PR tooling re-appends an attribution footer to PR bodies on every edit; the lane strips it from the squash.
+- 2026-10-27T17:38Z 17:38Z: #5249 at 89b9e92a, mergeable, the lane's fast-lane check running on it; others clean. dev 7c15c049, main fef52e66, #5818 open.
