@@ -137,3 +137,4 @@ utc	stage	event	ref	note
 03:39Z	3	wave2-merged	#5233,#5235,#5236	wave 2 merged (308591c9d, 8e2ab5fd8, ebcdbb35e); restacking wave 3
 03:43Z	3	restack	#5247 #5248 #5249	AJ-photo merged dev, gate running; AJ-library and AJ-halo restacked onto dev (15 and 13 files, under cap), gates queued
 03:53Z	3	ship	#5247	AJ-photo gate PASS on a07fda892 (fixture switch fix for dev), pushed, Head moved; AJ-library gate running; dependents restacked locally
+04:03Z	3	ship	#5247 #5248	AJ-library gate PASS on a01a609aa, force-pushed, Head moved; AJ-halo gate running
