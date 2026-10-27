@@ -319,3 +319,4 @@ time	kind	note
 2026-10-27T01:01Z	wait	heartbeat	#5321	01:01 poll: #5002/#5011 queued behind dev-red
 2026-10-27T01:15Z	wait	heartbeat	#5321	01:15 poll: #5002/#5011 queued behind dev-red
 2026-10-27T01:28Z	wait	heartbeat	#5321	01:28 poll: #5002/#5011 queued behind dev-red
+2026-10-27T01:33Z	DK-z	PR #5825 opened (DK-8 journey live + old file; DK-9 built); #5002 merged fa5d340f
