@@ -2,19 +2,19 @@
 
 Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: restack FH-7 (#5107) on FH-7a: PhotoStroke conflict resolved (2aeaa1d23), gate running
-Base: main fef52e66 (verified) / dev 66d4c6d8
-Next: FH-u's #4889 (a602e1d5) and #4896 (60b1ea53) merged on dev on 2026-10-27; Belt-Slice-Done goes up once a green main run contains 60b1ea53. FH-c: #4577, #5121 and #5137 merged; finding #5093 has its fix in #5129 (on FH-7, conflicts with its base). FH-photo: #5245 (FH-7a, 4c69e7fb) is clean and waits for local-ci/prescreen; then #5107, #5108 and #5129 restack on it, and #5109 and #5251 after them.
-Polled: 2026-10-27T12:24Z
+Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
+Base: main fef52e66 (verified) / dev 5e4a0922
+Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
+Polled: 2026-10-27T12:26Z · 12:26Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (still being triaged; newest guess #5334). #5093 awaiting supervisor.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FH-a | rules, commands and dab coverage as stubs, checks disabled | FH-1, FH-2 | MJ-FH | suite-imaging:IM-a, brush-keys:BK-m (FH-1 only) | false | 0 | done (Belt-Slice-Done posted) | 39957675362 | – |
-| FH-u | palette Paint Bucket, Spot Heal, Remove on the stubs | FH-3, FH-4 | PJ-FH1 | FH-a, AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo | true | 0 | merged on dev (#4889 a602e1d5, #4896 60b1ea53); waits for a green main run | – | – |
+| FH-u | palette Paint Bucket, Spot Heal, Remove on the stubs | FH-3, FH-4 | PJ-FH1 | FH-a, AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo | true | 0 | lane (FH-3 #4889 head ccf9d81; FH-4 #4896 stacked on FH-3) | – | – |
 | FH-r | bucket and heal bodies over core | FH-5b, FH-5h | MJ-FH | FH-a | false | 0 | done (Belt-Slice-Done posted) | 40005632479 | – |
-| FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | merged on dev (#4577; fixes #5121, #5137); #5093 fix #5129 open | – | – |
-| FH-photo | Photo adopts live, old tone-match heal gone, jobs pass | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u, AJ-photo, BK-photo | true | 0 | building (#5245 clean; #5107, #5108 stacked; #5109, #5251 clean; FH-9 #5253 merged) | – | – |
+| FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | lane (#4577 base dev, head 7d32ede) | – | – |
+| FH-photo | Photo adopts live, old tone-match heal gone, jobs pass | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u, AJ-photo, BK-photo | true | 0 | waiting | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -63,5 +63,3 @@ Polled: 2026-10-27T12:24Z
 
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
-- 2026-10-27T12:21Z Resumed after Belt's 30-min nudge. My heartbeats had gone to lead/fill-heal, not this branch. FH-u and FH-c PRs are on dev; FH-9 #5253 merged. 0 open findings except #5093 (fix #5129).
-- 2026-10-27T12:24Z FH-7 merged FH-7a; PhotoStroke.path comment covers Heal and Remove (each tool uses path only for itself)
