@@ -333,3 +333,4 @@ utc	stage	event	ref	note
 2026-10-27T03:38Z	wait	heartbeat	#5321	poll 03:37: waiting lane batch; dev-red #5818
 2026-10-27T03:51Z	wait	heartbeat	#5321	poll 03:51: waiting lane batch; dev-red #5818 (suite home tests)
 2026-10-27T04:05Z	wait	heartbeat	#5321	poll 04:04: waiting lane batch; dev-red #5818 (suite home tests)
+2026-10-27T04:18Z	wait	heartbeat	#5321	poll 04:18: waiting lane batch; dev-red #5818 (suite home tests)
