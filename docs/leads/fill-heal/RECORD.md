@@ -61,3 +61,5 @@ Polled: 2026-10-27T05:57Z · 05:5xZ: #5137 (FH-c, fix for #5094) merged into dev
 - 2026-10-21T04:29Z: run act-1a15c4e2e3b-zh3u was released by Belt at 04:25Z; act-1a15cb4e0f5-ipbr carries its state (lead branches, open slice PRs) rather than redoing it. The supervisor (04:24Z, #3778): wait, do not build IM-a or BK-m; the p0 issues start next shift; release at 06:30Z if nothing has landed.
 - 2026-10-22T16:40Z: FH-u and FH-photo wait on Photo adopts AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo, AJ-photo; checked each wave.
 
+
+- 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
