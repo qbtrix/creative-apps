@@ -268,3 +268,4 @@ utc	stage	event	ref	note
 2026-10-27T21:42Z	3	waiting	lane	poll: lane waits for local-ci/prescreen on our new heads
 2026-10-27T21:49Z	3	heartbeat	lane	poll 2026-10-27T21:49Z: 2026-10-27T21:49Z check-in: no change. All five PRs open, no fix labels, no footers. dev-red #5818 open (not ours). No #5093 answer, no main run newer than 38363734665.
 2026-10-27T22:08:21Z	3	waiting	lane	parents wait on prescreen; main fef52e66
+2026-10-27T22:35Z	3	waiting	lane	heads clean, waiting on prescreen; dev-red #5818 open
