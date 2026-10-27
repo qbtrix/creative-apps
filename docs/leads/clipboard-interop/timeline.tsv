@@ -296,3 +296,4 @@ utc	stage	event	ref	note
 2026-10-27T11:25:17Z	3	heartbeat	lane	CB-design #4904, CB-halo #4905 queued in lane; CB-photo other lead; CB-15 waits
 2026-10-27T11:29Z	3	heartbeat	lane	poll 2026-10-27T11:29Z: 11:30Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (captain working it; revert #5827 Linux red since 02:42Z, needs a human). #5093 awaiting supervisor.
 2026-10-27T11:52:40Z	3	heartbeat	lane	CB-design #4904, CB-halo #4905 queued in lane; CB-photo other lead; CB-15 waits
+2026-10-27T12:24:26Z	3	heartbeat	lane	CB-design #4904, CB-halo #4905 queued; lane held by dev-red #5818 (now a Linux red at 25aa0ac in flake check too); CB-15 waits
