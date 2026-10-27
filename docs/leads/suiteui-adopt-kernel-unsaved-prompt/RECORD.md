@@ -323,3 +323,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-27T12:00:34Z UP-photo: no green scoped-photo/full macOS run on dev since ef31726a (scoped suiteui 40492777537 green, doesn't count); #5089 #5091 #5231 open, none needs-fix
 - 2026-10-27T12:30:11Z UP-photo Slice-Done posted (run 40492782438); #5089 #5091 #5231 open, not needs-fix
 - 2026-10-27T12:57:28Z UP-photo done; #5089 #5091 #5231 open, not needs-fix
+- 2026-10-27T13:33:23Z UP-photo done; #5089 #5091 #5231 open, not needs-fix
