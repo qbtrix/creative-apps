@@ -46,9 +46,10 @@ extension HaloProject: HeadlessDocument {
         let files = FileFlowCommands.specs(HaloProject.self).map(\.id)  // HF-3: the suite's file flow, its file.open-recent too
         let filters = ["adjust.black-and-white", "adjust.invert"] + ImagingFilter.ids.map { "filter.\($0)" }
             + ["filter.set-hidden", "filter.remove"]  // AJ-12: the layer's kinds, filters and list
+        let clip = ["edit.copy-frame", "edit.paste"]  // CB-10: Copy Frame and Paste
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
         let all = ids.filter { $0 != "file.open-recent" } + shapes + fills + strokes + history + transforms + rates + places + styles
-            + texts + files + filters + window
+            + texts + files + filters + clip + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 

@@ -2,9 +2,11 @@
 // process records every open and save in the shared recents list, reads one app's recent files, hands a
 // document to another app and answers which apps read an extension. It keeps the list it last read and
 // refreshes it after each note, on `refresh()` and on each change `watch()` hears, so a menu reads it without
-// waiting. A refresh drops every file gone from disk from the shared list. Open In's targets and its refusal
-// come from the services' routing slot. `thumbnails` is the services' shared previews, the one store a
-// process's saves publish to.
+// waiting. A refresh drops every file gone from disk from the shared list. Reopening a file this app last used
+// goes straight to its document host: a hand-off to itself through Launch Services can reach another copy of the
+// app, or none, when this one runs outside AfterGlow.app (#4332). Open In's targets and its refusal come from
+// the services' routing slot. `thumbnails` is the services' shared previews, the one store a process's saves
+// publish to.
 import Foundation
 import Observation
 import SuiteKernel
@@ -17,6 +19,8 @@ import SuiteModel
     public nonisolated let registry: SuiteTypeRegistry
     /// The shared recents list as last read, newest first.
     public private(set) var items: [RecentItem] = []
+    /// The host a reopen of this app's own file goes to; nil uses the suite delegate's (tests inject one).
+    @ObservationIgnored public var host: (any SuiteDocumentHost)?
     @ObservationIgnored private let services: SuiteServices
     /// The suite's previews this process publishes saved documents' thumbnails to.
     public var thumbnails: any ThumbnailPublishing { services.thumbnails }
@@ -69,9 +73,14 @@ import SuiteModel
         await refresh()
     }
 
-    /// Opens a recent file in the app that last used it.
+    /// Opens a recent file in the app that last used it: this app's own through its host, another's by hand-off.
     public func reopen(_ fileID: String) async throws(SuiteError) {
         guard let item = items.first(where: { $0.ref.fileID == fileID }) else { return }
+        if item.ref.app == app, let host = host ?? SuiteAppRegistry.delegate?.host {
+            let handOff = HandOff(id: HandOff.newID(), from: app, to: app, verb: .open, documents: [item.ref], createdAt: now())
+            _ = try await host.accept(handOff)
+            return
+        }
         try await openIn(item.ref, app: item.ref.app)
     }
 

@@ -88,13 +88,13 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     public internal(set) var exportState = ExportState.idle
     public internal(set) var assist = AssistState()
     /// The open file's name, unsaved changes, the last save failure, the
-    /// open under way, and recently opened files (FlareFiles.swift).
+    /// open under way, and the path last opened or saved (FlareFiles.swift).
     public internal(set) var fileName: String?
     /// The document as last opened or saved; `isDirty` compares against it.
     var savedDocument: Document?
     public internal(set) var saveError: String?
     public internal(set) var loadState = LoadState.idle
-    public internal(set) var recent: [String] = []
+    public internal(set) var filePath: String?
     /// The suite's recents as the window last read them, and the requests the file-flow commands leave it.
     public internal(set) var fileFlow = FlareFileFlowState()
     /// The note a Lottie open leaves: one sentence per part left out; nil once dismissed or another document
@@ -155,7 +155,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     /// first scene, and clears the per-document state: selections, drafts,
     /// playback, the symbol and machine being edited, export, assist and the
     /// file's name and save state. Tool, loop, auto-key, onion, motion path
-    /// and the recent list are preferences and stay.
+    /// and the file path last noted stay.
     mutating func load(_ document: Document) {
         engine = CommandEngine(document: document)
         selectedSceneID = document.scenes.first?.id
@@ -298,7 +298,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
             && lhs.paintError == rhs.paintError && lhs.placeStatus == rhs.placeStatus && lhs.selectedKeys == rhs.selectedKeys
             && lhs.timelineError == rhs.timelineError
         let files = lhs.fileName == rhs.fileName && lhs.isDirty == rhs.isDirty && lhs.saveError == rhs.saveError
-            && lhs.loadState == rhs.loadState && lhs.recent == rhs.recent && lhs.importNote == rhs.importNote
+            && lhs.loadState == rhs.loadState && lhs.filePath == rhs.filePath && lhs.importNote == rhs.importNote
         return editing && animating && panels && files
     }
 }

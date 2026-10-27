@@ -24,6 +24,8 @@ easing.move-handle
 easing.select-key
 easing.select-lane-keys
 easing.set-custom
+edit.copy-frame
+edit.paste
 edit.redo
 edit.undo
 file.answer-unsaved

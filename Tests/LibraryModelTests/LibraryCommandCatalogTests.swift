@@ -50,6 +50,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
             ("empty", LibraryCatalog(services: .fake())), ("grid", grid), ("two selected", two), ("culled", culled),
             ("undone", with(culled) { $0.undo() }), ("loupe", loupe),
             ("cropping", with(loupe) { $0.toggleCrop(); $0.setCropAngle(-3) }),
+            ("black & white", with(two) { $0.setKinds([.blackAndWhite(.neutral)], name: "Black & White") }),  // AJ-10: {} removes it
             ("every slider", with(two) { c in  // CS-5: each Reset <slider> has a value to reset
                 for slider in ToneSlider.develop { c.setDevelop(slider, to: 1, coalesceKey: nil); c.endCoalescing() }
             }),
@@ -102,6 +103,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "catalog.restore-backup": .some(c.importState != .idle ? LibraryBackups.importing
                                              : c.backup.backups == nil ? LibraryBackups.noBackups : nil)
         case "thumbnails.stats": .some(c.thumbnailDisk == nil ? "Thumbnails aren't kept on disk yet." : nil)
+        case "adjust.black-and-white", "adjust.invert", "look.apply": .some(c.services.unavailable["develop"] ?? c.developHelp)
+        case let id where id.hasPrefix("filter."): .some(c.services.unavailable["develop"] ?? c.developHelp ?? LibraryCatalog.filtersInPhoto)
+        case "look.list", "look.save", "look.delete": .some(nil)
         case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
         default: nil
         }
@@ -168,7 +172,8 @@ struct LibraryCatalogDoc: HeadlessDocument {
                 let noOpEdit = unchanged && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes", "redoRestoresBytes"]
                     .contains { problem.contains(": \($0):") }
                 // Library has no recent files, so Open Recent's example names one it can't find.
-                let needsFile = id == "file.open-recent" && problem.contains("exampleRuns")
+                // Nor saved looks: Delete Look's example names one the fake store doesn't hold.
+                let needsFile = ["file.open-recent", "look.delete"].contains(id) && problem.contains("exampleRuns")
                 // The kernel's image.flip is titled Flip while its step names the axis (OC-8).
                 let flipStep = problem == "image.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""
                 return !((off || needsFile) && problem.contains("exampleRuns")) && !noOpEdit && !flipStep
@@ -180,7 +185,8 @@ struct LibraryCatalogDoc: HeadlessDocument {
                 if step == spec.title || (spec.id == "image.flip" && step == "Flip Horizontal") { stepped.insert(spec.id) }
             }
         }
-        let edits = Set(LibraryCatalog.commands.filter { $0.kind == .edit }.map(\.id))
+        // AJ-10: Library runs no filter, so no filter.<id> ever records a step.
+        let edits = Set(LibraryCatalog.commands.filter { $0.kind == .edit && !$0.id.hasPrefix("filter.") }.map(\.id))
         #expect(edits.subtracting(stepped).isEmpty, "never recorded its step: \(edits.subtracting(stepped))")
     }
 
@@ -234,4 +240,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
            "image.flip | Flip | on"]
         + ["crop.set-aspect | Crop Ratio", "crop.swap | Swap Crop", "crop.set-frame | Crop Frame", "crop.apply | Crop",
            "crop.reset | Reset Crop"].map { "\($0) | Open a photo in the loupe to crop it." }
+        + ["adjust.black-and-white | Black & White | on", "adjust.invert | Invert | on"]
+        + ["Gaussian Blur", "Motion Blur", "Sharpen", "Reduce Noise", "Add Noise"].map { title in
+            "filter.\(title.lowercased().replacingOccurrences(of: " ", with: "-")) | \(title) | Filters are in Photo."
+        }
+        + ["look.list | Looks | on", "look.apply | Apply Look | on", "look.save | Save Look | on", "look.delete | Delete Look | on"]
 }
