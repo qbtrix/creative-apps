@@ -264,3 +264,4 @@ utc	stage	event	ref	note
 2026-10-27T07:57Z	check	#5860 open, no lane decision; dev-red #5818 open. Full CI 40470141862 and scoped photo 40470145594 running at ef9d2ace (no PT-z PR in it yet; a green one may close #5818 and free the lane). Waiting
 2026-10-27T08:26Z	stage	#5860 (PT-7) merged 08:04Z (batch of 1, Linux 40467742739). -pt8 merged with dev c21b2834 (b51db845, 2 files docs-only; PG-z and PP-z built); scripts/ci --changed running
 2026-10-27T08:26Z	stage	PT-8 #5871 opened (b51db845, docs-only, fast-lane + feature-done). scripts/ci --changed: every lint OK, swift build impossible here (no toolchain in container), so no Fast-Check marker; lane Linux run is the proof
+2026-10-27T08:47Z	check	#5871 open (p0, beta added by lane); lane Linux check 40475180242 running on b51db845. dev-red #5818 open; dev CI 40473728719 pending at c21b2834. No tone-controls findings (#5820 suiteui tone-rows, #5331 Tier-1 Levels are other features). Waiting
