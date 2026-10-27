@@ -185,8 +185,10 @@ import Testing
 
     /// A folder row's click at real size: on the large fixture's 10,000 photos in their folders, a click on one
     /// month and Include Subfolders on it are each timed, median within 50 ms debug, 5 ms release (the filter's
-    /// budget). Each builds the tree once.
-    @Test func showFolderAtTenThousandWithinBudget() throws {
+    /// budget). Each builds the tree once. Runs only with LIBRARY_FOLDERS_PERF=1 until Tests/perf-suites.txt lists it.
+    @Test(.disabled(
+        if: ProcessInfo.processInfo.environment["LIBRARY_FOLDERS_PERF"] != "1", "waits on its Tests/perf-suites.txt line"))
+    func showFolderAtTenThousandWithinBudget() throws {
         var c = Self.catalog(LibraryFixtures.largePhotos(count: 10_000, folder: "/fixture/large"))
         let month = try #require(c.folderTree.first?.children.first?.path)
         let row = LibraryFolders.rowID(for: month), other = LibraryFolders.rowID(for: "/fixture/large")

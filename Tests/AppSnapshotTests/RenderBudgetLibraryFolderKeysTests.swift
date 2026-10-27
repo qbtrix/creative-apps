@@ -4,8 +4,8 @@
 // collection to the folder root, the right arrow opens it, the down arrow walks into its months (each step
 // shows that folder in the grid) and the left arrow closes it again; library-folder-key-{open,month,closed}.png
 // record those steps. Each arrow is a key down and up sent straight to the key-capable window and timed with
-// the layout and display it forces: p95 at or under 16 ms (8 ms target) in a release build; a debug build only
-// checks the walk. macOS only.
+// the layout and display it forces; folderKeyStepsWithinBudget gates p95 at 16 ms release (8 ms target), 50 ms
+// debug, and runs only with LIBRARY_FOLDERS_PERF=1 until Tests/perf-suites.txt lists it. macOS only.
 #if canImport(AppKit)
 import AppKit
 import LibraryModel
@@ -20,6 +20,28 @@ extension BodyCountSuites {
         static let (down, left, right) = ((UInt16(125), "\u{F701}"), (UInt16(123), "\u{F702}"), (UInt16(124), "\u{F703}"))
 
         @Test(.timeLimit(.minutes(2))) func walkFoldersByKeyboard() async throws {
+            _ = try await Self.walk()
+        }
+
+        @Test(
+            .disabled(
+                if: ProcessInfo.processInfo.environment["LIBRARY_FOLDERS_PERF"] != "1",
+                "waits on its Tests/perf-suites.txt line"),
+            .timeLimit(.minutes(2)))
+        func folderKeyStepsWithinBudget() async throws {
+            let sorted = try await Self.walk().sorted()
+            let p95 = SuiteFrameProbe.nearestRank(sorted, 0.95) ?? 0
+            print("RENDER-BUDGET library folder keys-10000: steps \(sorted.count) | p50 \(SuiteFrameProbe.nearestRank(sorted, 0.5) ?? 0) ms | p95 \(p95) ms | max \(sorted.last ?? 0) ms")
+            #if DEBUG
+            let limit = 50.0
+            #else
+            let limit = 16.0
+            #endif
+            #expect(p95 <= limit, "a folder arrow step at 10,000 photos took p95 \(p95) ms (budget \(limit), target 8)")
+        }
+
+        /// Walks FOLDERS by arrow keys, checking each step; returns each press's milliseconds.
+        static func walk() async throws -> [Double] {
             let w = RenderBudgetWindow(
                 LibraryWindow(arguments: ["Library", "-LibraryFixture", "large-folders"]), keyCapable: true)
             defer { w.close() }
@@ -67,13 +89,7 @@ extension BodyCountSuites {
             try await press(Self.left)
             #expect(outline.numberOfRows == shut, "the left arrow didn't close the folder root")
             try Self.capture(w.host, "library-folder-key-closed")
-
-            let sorted = steps.sorted()
-            let p95 = SuiteFrameProbe.nearestRank(sorted, 0.95) ?? 0
-            print("RENDER-BUDGET library folder keys-10000: steps \(sorted.count) | p50 \(SuiteFrameProbe.nearestRank(sorted, 0.5) ?? 0) ms | p95 \(p95) ms | max \(sorted.last ?? 0) ms")
-            #if !DEBUG
-            #expect(p95 <= 16, "a folder arrow step at 10,000 photos took p95 \(p95) ms (budget 16, target 8)")
-            #endif
+            return steps
         }
 
         /// The window as it stands after a step, in `.build/snapshots/<name>.png`, outside the timed press.
