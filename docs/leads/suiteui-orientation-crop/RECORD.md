@@ -110,3 +110,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T03:28:58Z Full CI 40439893721 (9c320a9a, contains OC-z) in progress; critic panel on its full journeys ui-screens once done
 - 2026-10-27T03:49:29Z Full CI 40439893721 red (macOS tests, dev-red #5818 not ours); full journeys 40445248646 at 9c320a9a in progress -> critic panel when done
 - 2026-10-27T04:09:05Z Full journeys 40445248646 at 9c320a9a still in progress (waiting on journeys-wait); critic panel when done
+- 2026-10-27T04:30:13Z OC complete; full journeys 40445248646 in progress, critic panel when done
