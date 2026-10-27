@@ -89,3 +89,4 @@ ts	kind	note
 2026-10-26T14:00:10Z	all	heartbeat	dev-red #5321 open; OC-library-u awaiting run
 2026-10-26T14:40:40Z	all	resume	#3721	#5088 #5089 #5091 #5231 clean, waiting lane
 2026-10-27T05:56:32Z	all	resume	#3721	#5088 merged; #5089 restacked to 258 lines
+2026-10-27T06:04:31Z	all	heartbeat	#5089 rebased on dev by another push; UP-halo/UP-z restacked on it, gating
