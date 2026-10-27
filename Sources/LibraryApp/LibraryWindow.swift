@@ -58,6 +58,9 @@ struct LibraryWindow: View {
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
 
+    /// What the drop mark calls the catalog photos go into: "Place in Library", not "the document".
+    nonisolated static let dropTarget = "Library"
+
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetLibraryTests counts an interaction's.
     static var bodyRuns = 0
@@ -107,7 +110,8 @@ struct LibraryWindow: View {
         .focusedSceneValue(\.libraryCatalog, model)
         .focusedSceneValue(\.libraryFilters, filters)
         .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
-                       places: model.placesExtensions, perform: { try? model.perform($0) })
+                       places: model.placesExtensions, documentName: Self.dropTarget,
+                       perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
