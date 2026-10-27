@@ -126,3 +126,4 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 - 2026-10-27T00:37Z (act-1a177ff0916-4jm7): poll: dev 352d9d56; lane merged #4903 only; #5819 AN-u still queued at 9dfc99f3; AN-10 waits on #4902 (needs-rebase, not ours)
 - 2026-10-27T00:58Z (act-1a177ff0916-4jm7): poll: dev f3ed4b32; lane merged 12 docs/test PRs, none ours; #5819 AN-u still queued at 9dfc99f3; AN-10 waits on #4902
 - 2026-10-27T01:17Z (act-1a177ff0916-4jm7): poll: dev f3ed4b32; dev unchanged; #5819 AN-u still queued at 9dfc99f3; AN-10 waits on #4902
+- 2026-10-27T01:40Z (act-1a177ff0916-4jm7): poll: dev 2cf71ce9; dev-red #5818 open (linux red, range main..2c20134c), lane holds PRs on the failing module; not ours to fix; #5819 AN-u still queued at 9dfc99f3; AN-10 waits on #4902
