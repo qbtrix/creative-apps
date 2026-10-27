@@ -252,10 +252,10 @@ public struct PhotoWorkspace: Sendable {
     public var toolOptions: ToolOptions { tool == .eraser ? eraserOptions : brushOptions }
 
     /// The brush cursor's diameter in canvas pixels: the size of the selected
-    /// brush, eraser, clone stamp or heal. Nil with no image open or another tool
+    /// brush, eraser, clone stamp, heal, spot heal or remove. Nil with no image open or another tool
     /// selected.
     public var brushCursorDiameter: Double? {
-        guard canvas != nil, [.brush, .eraser, .clone, .heal].contains(tool) else { return nil }
+        guard canvas != nil, [.brush, .eraser, .clone, .heal, .spotHeal, .remove].contains(tool) else { return nil }
         return toolOptions.size
     }
 
