@@ -192,19 +192,28 @@ struct PhotoCanvas: View {
 
 /// The Pen over the canvas (#5072): SuiteUI's PathEditOverlay draws the draft and the path in edit and turns presses
 /// and keys into the kernel's PathIntents, sent as `.path` (PhotoWorkspace.runPath runs each as its catalog command).
-/// While Command is held it edits points (Direct Selection); whether it is held is the view's own state.
+/// While Command is held it edits points (Direct Selection); whether it is held is the view's own state. A press is
+/// held until release (#5145): a point drag moves the overlay's copy, and the window runs once, at mouse-up.
 struct PhotoPenOverlay: View {
     let model: PhotoWorkspace
     let zoom: Double
     var perform: PhotoPerform = { _ in }
     @State private var editsPoints = false
+    /// Edits points without Command held: the render budget test's way in, since a scripted event can't hold a key.
+    @Environment(\.photoPenEditsPoints) private var alwaysEditsPoints
 
     var body: some View {
         PathEditOverlay(draft: model.penDraft, path: model.pathInEdit, selection: model.anchorSelection,
-                        tool: editsPoints ? .directSelect : .pen, zoom: zoom) { perform(.path($0)) }
+                        tool: editsPoints || alwaysEditsPoints ? .directSelect : .pen, zoom: zoom) { perform(.path($0)) }
+            .holdsPressesUntilRelease()
             .onModifierKeysChanged(mask: .command) { _, keys in editsPoints = keys.contains(.command) }
             .accessibilityIdentifier("photo.canvas.pen")
     }
+}
+
+extension EnvironmentValues {
+    /// True: the Pen's overlay edits points as if Command were held (RenderBudgetPhotoPenAnchorTests).
+    @Entry var photoPenEditsPoints = false
 }
 
 extension PixelRect {
