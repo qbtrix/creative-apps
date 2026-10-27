@@ -21,9 +21,9 @@ import Testing
         let id = try HaloProject.catalog.run("shape.draw", params: params, on: &project).result
         let layer = try #require(project.selectedLayer)
         #expect(id == .object(["id": .string(layer.id)]))
-        #expect(layer.name == "Draw Star" && layer.shape == HaloShapeTests.star)
+        #expect(layer.name == "Star 1" && layer.shape == HaloShapeTests.star)
         #expect(layer.rect == HaloLayerRect(x: 760, y: 340, width: 400, height: 400))
-        #expect(project.history.undo.count == 1)
+        #expect(project.history.undo.count == 1 && project.history.undo.last?.name == "Draw Star")
         project.undo()
         #expect(project.document == before)
     }
