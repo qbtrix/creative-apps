@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main ef37711d (verified) / dev ae3efdb8
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-27T02:59Z · #4896 FH-4 dev merge pushed 4d643f79, gate PASS, Head moved, fast-lane back, needs-split cleared (7 files). Gates running: #5125 CB-14 then #5096 AR-11 merges.
+Polled: 2026-10-27T03:09Z · CB-14 (#5125) and AR-11 (#5096) dev merges resolved locally; both gates crash (signal 11, stack overflow in AfterGlowCLI headless inits, not our code). Probing plain dev for the same crash before pushing.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
