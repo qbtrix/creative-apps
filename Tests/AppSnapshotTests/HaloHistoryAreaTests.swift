@@ -46,6 +46,22 @@ extension BodyCountSuites {
             #expect(hosted.frame(of: "suite.history") == nil, "the History button didn't hide the panel")
         }
 
+        /// #5844, H-J13: at the journeys' 1000 by 640 window the shown panel sits over the viewer, clear of its
+        /// own button, the status row and the timeline, so the button still hides it and the playhead stays readable.
+        @Test(.timeLimit(.minutes(2))) func thePanelCoversNeitherItsButtonNorTheTimeline() async throws {
+            let hosted = try await HostedHaloWindow(try Self.edited(4), size: CGSize(width: 1000, height: 640))
+            defer { hosted.close() }
+            let shown = try await hosted.press("halo.history.show")
+            #expect(shown, "no halo.history.show button by the transport")
+            let panel = try #require(hosted.frame(of: "suite.history"), "the History button didn't show the panel")
+            for id in ["halo.history.show", "halo.timeline", "halo.transport.play"] {
+                let other = try #require(hosted.frame(of: id), "no \(id) with the panel shown")
+                #expect(!panel.intersects(other), "the History panel \(panel) covers \(id) \(other)")
+            }
+            let canvas = try #require(hosted.frame(of: "halo.viewer"), "no halo.viewer")
+            #expect(canvas.contains(panel), "the History panel \(panel) spills out of the viewer \(canvas)")
+        }
+
         @Test(.timeLimit(.minutes(2))) func aRowPressSendsOneJump() async throws {
             let hosted = try await HostedHaloWindow(try Self.edited(4))
             defer { hosted.close() }
@@ -107,6 +123,7 @@ struct HaloHistoryAreaHost: View {
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .overlay { HaloHistoryOverlay(model: model) }
         .modifier(HaloHistoryArea(model: model) { _ in jumps.count += 1 })
         .environment(\.haloHistoryShelf, shelf)
     }

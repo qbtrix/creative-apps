@@ -223,8 +223,8 @@ final class HaloJourneyTests: XCTestCase {
             halo.press(.escape)
             halo.press(character: "z", .command)
             // The History panel is the window's presentation state, not an undo
-            // step, so ⌘Z leaves it over the timeline for every later shot
-            // (run 39947432602: it hid halo.timeline.track). Its button hides it.
+            // step, so ⌘Z leaves it over the viewer for every later shot
+            // (run 39947432602, when it sat over halo.timeline.track). Its button hides it.
             if entry.id == "halo.history.show" { control.click() }
             let start = halo.element("halo.transport.start")
             if start.exists, start.isEnabled { start.click() }
