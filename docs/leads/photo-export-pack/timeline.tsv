@@ -337,3 +337,4 @@ utc	stage	event	ref	note
 2026-10-27T14:44Z	check-in	#5353 still open clean; #5758 open, no needs-fix/rebase; no new photo findings; dev-red #5818 not ours; PX-9 waits on #5353
 2026-10-27T15:42Z	check-in	#5353 still open clean; #5758 open, no needs-fix/rebase; no new photo findings; dev-red #5818 not ours; PX-9 waits on #5353
 2026-10-27T16:18Z	check-in	#5758 (text.add style fix) merged 15:47Z; #5353 still open clean; no new photo findings; dev-red #5818 not ours; PX-9 waits on #5353
+2026-10-27T16:50Z	check-in	#5353 still open clean; no new photo findings; dev-red #5818 not ours; render-contract update #5899 merged (read before PX-5); PX-9 waits on #5353
