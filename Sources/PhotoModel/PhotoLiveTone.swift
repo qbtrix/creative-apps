@@ -11,12 +11,16 @@
 // composite: no compositing, no upload, no readback. The program is SuiteImaging's step list, the one
 // `applied(to:)` runs (exposure, levels with its output, curves in sRGB), skipped at identity, and Hue/Saturation is
 // Photo's own colour matrix and lightness (HueSaturation.swift) as a ToneProgram matrix operation, so the GPU
-// picture matches the CPU's. `liveStack` is nil, and the region takes the dispatcher route, when the image's
-// Blur is on (it reads neighbours), when a visible layer has an enabled mask, when a layer's opacity
-// is outside 0...1, or when the services' adjustment layers are not the live ones. The dispatcher route keeps
-// its own base per region in the same `PhotoCompositeCache` (`composite`): the layers the stack still shares,
-// from the bottom, with the last render, so a Move, transform, opacity or visibility step composites the
-// changed layer and the ones above it, not a hundred layers. Linux-safe.
+// picture matches the CPU's. With the tone section's Sharpen on, the unsharp pass runs where export runs it, over
+// every layer and before the image's adjustments: no adjustment layer folds into the write, and the region
+// draws over a margin of the unsharp's reach, then is sharpened and cropped. With no adjustment layer the
+// sharpened base is what the cache keeps, so a slider step still draws over kept pixels. `liveStack` is nil,
+// and the region takes the dispatcher route, when the image's Blur is on (it reads neighbours), when a visible
+// layer has an enabled mask, when a layer's opacity is outside 0...1, or when the services' adjustment layers
+// are not the live ones. The dispatcher route keeps its own base per region in the same `PhotoCompositeCache`
+// (`composite`): the layers the stack still shares, from the bottom, with the last render, so a Move,
+// transform, opacity or visibility step composites the changed layer and the ones above it, not a hundred
+// layers. Linux-safe.
 import CoreRaster
 import CoreRender
 import Synchronization
@@ -47,6 +51,11 @@ struct PhotoLiveStack: Sendable {
     let steps: [Step]
     /// The top adjustment layers' operations, lowest first, then the image's.
     let display: ToneProgram
+    /// The tone section's unsharp pass, run over the layers before `display`; nil when Sharpen is off.
+    var unsharp: (amount: Double, sigma: Double, threshold: Double)? = nil
+
+    /// Pixels a region reads beyond itself for the unsharp pass, ceil(3 sigma); 0 when Sharpen is off.
+    var margin: Int { unsharp.map { Int((3 * $0.sigma).rounded(.up)) } ?? 0 }
 }
 
 extension PhotoWorkspace {
@@ -66,7 +75,8 @@ extension PhotoWorkspace {
         let split = shown.firstIndex { if case .adjustment = $0.kind { true } else { false } } ?? shown.endIndex
         var above = Array(shown[split...])
         var folded: [ToneProgram.Operation] = []
-        while let top = above.last, let ops = operations[top.id], top.opacity == 1, top.blendMode == .normal {
+        let unsharp = adjustments.unsharp
+        while unsharp == nil, let top = above.last, let ops = operations[top.id], top.opacity == 1, top.blendMode == .normal {
             folded = ops + folded
             above.removeLast()
         }
@@ -75,21 +85,39 @@ extension PhotoWorkspace {
                 guard let ops = operations[layer.id] else { return .pixels(layer) }
                 return .adjustment(layer, try ToneProgram(operations: ops))
             }
-            return PhotoLiveStack(base: Array(shown[..<split]), steps: steps, display: try ToneProgram(operations: folded + image))
+            return PhotoLiveStack(
+                base: Array(shown[..<split]), steps: steps, display: try ToneProgram(operations: folded + image), unsharp: unsharp)
         } catch {
             return nil  // render-contract: cpu-op tone-program-op (the dispatcher route draws it)
         }
     }
 
     /// `rect` of the canvas on the live route, written through `writeToned`: the cached base, then `stack`'s
-    /// steps on GPU passes, then the display program in the write.
+    /// steps on GPU passes, then its unsharp pass, then the display program in the write.
     func liveRegion(
         _ rect: PixelRect, stack: PhotoLiveStack, on dispatcher: RenderDispatcher, resident: ResidentSurfaces,
         tone: any ToneRendering, cache: PhotoCompositeCache,
         write: (_ surface: RenderSurface, _ rect: PixelRect, _ tone: ToneProgram) throws -> Void
     ) throws {
-        let base = try cache.surface(rect, key: PhotoCompositeCache.key(stack.base, pixels: pixels), on: tone) {
-            try residentComposited(rect, layers: stack.base, on: dispatcher, resident: resident)
+        guard let canvas, let outer = rect.expanded(by: stack.margin).intersection(canvas.rect) else {
+            throw RasterError.invalid("region \(rect) is outside the image")
+        }
+        /// `picture` (of `outer`) sharpened and cropped to `rect`; releases `picture` unless it is `keep`.
+        func sharpened(_ picture: RenderSurface, keep: RenderSurface?) throws -> RenderSurface {
+            guard let s = stack.unsharp else { return picture }
+            defer { if picture != keep { dispatcher.release(picture) } }
+            let whole = try dispatcher.unsharpMask(picture, amount: s.amount, sigma: s.sigma, threshold: s.threshold)
+            defer { dispatcher.release(whole) }
+            return try dispatcher.cropped(whole, x: rect.x - outer.x, y: rect.y - outer.y, width: rect.width, height: rect.height)
+        }
+        let layers = PhotoCompositeCache.key(stack.base, pixels: pixels)
+        // With no steps the cache keeps the sharpened region; with steps it keeps the padded composite they run on.
+        let sharpenBase = stack.steps.isEmpty && stack.unsharp != nil
+        let work = stack.unsharp == nil || sharpenBase ? rect : outer
+        let key = PhotoCompositeCache.Key(layers: layers, unsharp: sharpenBase ? stack.unsharp : nil)
+        let base = try cache.surface(work, key: key, on: tone) {
+            let composite = try residentComposited(sharpenBase ? outer : work, layers: stack.base, on: dispatcher, resident: resident)
+            return sharpenBase ? try sharpened(composite, keep: nil) : composite
         }
         var picture = base
         defer { if picture != base { dispatcher.release(picture) } }
@@ -112,8 +140,11 @@ extension PhotoWorkspace {
                 }
             case .pixels(let layer):
                 try owned()
-                try dispatcher.composite(residentSteps([layer], in: rect, resident: resident), onto: &picture)
+                try dispatcher.composite(residentSteps([layer], in: work, resident: resident), onto: &picture)
             }
+        }
+        if work != rect {
+            picture = try sharpened(picture, keep: base)
         }
         try write(picture, rect, stack.display)
     }
@@ -136,9 +167,20 @@ public final class PhotoCompositeCache: Sendable {
         let mask: TiledPixels?
     }
 
+    /// The layers a region composites, and the unsharp pass it keeps sharpened, if any.
+    struct Key: Equatable, Sendable {
+        let layers: [LayerKey]
+        let sharpen: [Double]
+
+        init(layers: [LayerKey], unsharp: (amount: Double, sigma: Double, threshold: Double)? = nil) {
+            self.layers = layers
+            sharpen = unsharp.map { [$0.amount, $0.sigma, $0.threshold] } ?? []
+        }
+    }
+
     private struct Entry: Sendable {
-        /// The layers composited into `surface`, bottom first.
-        let key: [LayerKey]
+        /// The layers composited into `surface`, bottom first, and the unsharp pass kept in it, if any.
+        let key: Key
         /// The whole stack at the render that made it (`composite` picks the next base from it).
         var stack: [LayerKey] = []
         let surface: RenderSurface
@@ -181,8 +223,9 @@ public final class PhotoCompositeCache: Sendable {
         let copy = { (kept: RenderSurface) in try dispatcher.cropped(kept, x: 0, y: 0, width: rect.width, height: rect.height) }
         if let gpu {
             let hit: (RenderSurface, Int)? = try entries.withLock { entries in
-                guard let held = entries[rect], held.backend.name == gpu.name, stack.starts(with: held.key) else { return nil }
-                return (try copy(held.surface), held.key.count)
+                guard let held = entries[rect], held.backend.name == gpu.name, held.key.sharpen.isEmpty,
+                      stack.starts(with: held.key.layers) else { return nil }
+                return (try copy(held.surface), held.key.layers.count)
             }
             if let hit {
                 PhotoRenderCount.base(made: false)
@@ -201,7 +244,7 @@ public final class PhotoCompositeCache: Sendable {
         if let gpu, made.backend == gpu.name {
             return try entries.withLock { entries in
                 if let old = entries[rect] { old.backend.release(old.surface) }
-                entries[rect] = Entry(key: Array(stack[..<laid]), stack: stack, surface: made, backend: gpu)
+                entries[rect] = Entry(key: Key(layers: Array(stack[..<laid])), stack: stack, surface: made, backend: gpu)
                 return (try copy(made), laid)
             }
         }
@@ -218,7 +261,7 @@ public final class PhotoCompositeCache: Sendable {
 
     /// The kept composite of `rect` under `key` on `backend`, else `make()`'s, kept. The cache owns it: the
     /// caller never releases it.
-    func surface(_ rect: PixelRect, key: [LayerKey], on backend: any RenderBackend,
+    func surface(_ rect: PixelRect, key: Key, on backend: any RenderBackend,
                  make: () throws -> RenderSurface) throws -> RenderSurface {
         if let held = entries.withLock({ $0[rect] }), held.key == key, held.backend.name == backend.name { return held.surface }
         let made = try make()

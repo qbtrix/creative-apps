@@ -87,7 +87,7 @@ extension PhotoWorkspace {
         _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil,
         cache: PhotoCompositeCache? = nil
     ) throws -> RenderSurface {
-        guard let canvas, let outer = rect.expanded(by: adjustments.blurMargin).intersection(canvas.rect),
+        guard let canvas, let outer = rect.expanded(by: adjustments.readMargin).intersection(canvas.rect),
             let inner = rect.intersection(canvas.rect)
         else { throw RasterError.invalid("region \(rect) is outside the image") }
         let picture = try resident.flatMap { try residentComposited(outer, on: dispatcher, resident: $0) }
@@ -249,14 +249,17 @@ extension PhotoWorkspace {
 
 extension AdjustmentSettings {
     /// The enabled adjustments applied to `surface` through `dispatcher`:
-    /// ImagingProgram's steps (`imagingSteps`, the list `applied(to:)` runs),
-    /// then the blur. Takes `surface`: it is released on the way.
+    /// the tone section's unsharp pass, then ImagingProgram's steps (`imagingSteps`,
+    /// the list `applied(to:)` runs), then the blur. Takes `surface`: it is released on the way.
     func applied(to surface: RenderSurface, on dispatcher: RenderDispatcher) throws -> RenderSurface {
         var result = surface
         func step(_ next: () throws -> RenderSurface) throws {
             result = PhotoWorkspace.replace(result, with: try next(), on: dispatcher)
         }
         do {
+            if let s = unsharp {
+                try step { try dispatcher.unsharpMask(result, amount: s.amount, sigma: s.sigma, threshold: s.threshold) }
+            }
             // ImagingProgram leaves out each step at its identity, where CoreRaster returns the buffer
             // itself, so the result is the same bits and an untouched section costs the GPU no round trip.
             for adjustment in imagingSteps {
