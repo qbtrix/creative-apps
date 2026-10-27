@@ -339,3 +339,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 04:08Z ship: AJ-halo #5249 restacked on dev, scripts/ci --changed PASS, pushed 04acff930, Head moved. #5247/#5248/#5249 carry fast-lane+beta. Dependents #5250 #5252 #5257-#5260 restacked locally, push after parents land.
 - 04:22Z check-in: #5247/#5248/#5249 open, clean, fast-lane, awaiting lane batch. AJ-k f14778f87 and AJ-u ebcdbb35e not yet on main; scoped suiteui run 40448467567 on dev 870080fb4 in progress. dev-red #5818 (not ours) open.
 - 04:42Z fix: #5247 needs-rebase. Merged origin/dev; PhotoModel.PhotoLiveTone.json kept our Blur entry + dev's 4 Sharpen entries; mutate --validate OK; scripts/ci --changed running.
+- 04:48Z ship: #5247 dev merged in, scripts/ci --changed PASS, pushed a2241375f, Head line moved; now clean, lane drops needs-rebase on the new head.
