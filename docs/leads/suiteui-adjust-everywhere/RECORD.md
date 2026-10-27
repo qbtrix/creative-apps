@@ -393,3 +393,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T18:23Z 18:23Z: no change; every PR clean and fast-lane, still no local-ci/prescreen on our heads (supervisor). dev 7c15c049, main fef52e66, #5818 open.
 - 18:31Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev 7c15c0498, main fef52e668.
 - 2026-10-27T18:45Z 18:45Z: no change on AJ; every PR clean and fast-lane, still waiting on local-ci/prescreen. dev fe9ba972, main fef52e66, #5818 open.
+- 18:51Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev fe9ba9720, main fef52e668.
