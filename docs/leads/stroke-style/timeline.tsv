@@ -328,3 +328,4 @@ utc	stage	event	ref	note
 2026-10-27T02:28Z	wait	heartbeat	#5321	poll 02:27: Linux checks on new heads
 2026-10-27T02:42Z	wait	heartbeat	#5321	poll 02:41: Linux checks on new heads
 2026-10-27T02:55Z	wait	heartbeat	#5321	poll 02:55: waiting lane batch; dev-red #5818
+2026-10-27T03:10Z	wait	heartbeat	#5321	poll 03:09: waiting lane batch; dev-red #5818
