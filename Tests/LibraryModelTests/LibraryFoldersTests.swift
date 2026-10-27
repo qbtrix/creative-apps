@@ -183,22 +183,28 @@ import Testing
         #expect(one.first?.missingNote == "The photo in this folder is missing from disk.")
     }
 
-    /// A folder row's click at real size: `view.show-folder` on the large fixture's 10,000 photos in their folders,
-    /// one month with and without its subfolders, median within 50 ms debug, 5 ms release (the filter's budget).
+    /// A folder row's click at real size: on the large fixture's 10,000 photos in their folders, a click on one
+    /// month and Include Subfolders on it are each timed, median within 50 ms debug, 5 ms release (the filter's
+    /// budget). Each builds the tree once.
     @Test func showFolderAtTenThousandWithinBudget() throws {
         var c = Self.catalog(LibraryFixtures.largePhotos(count: 10_000, folder: "/fixture/large"))
         let month = try #require(c.folderTree.first?.children.first?.path)
-        let cost = Budget.measure("folders show-folder-10000") {
-            c.selectSidebarRow(LibraryFolders.rowID(for: month))
-            c.toggleFolderSubfolders(row: LibraryFolders.rowID(for: month))
+        let row = LibraryFolders.rowID(for: month), other = LibraryFolders.rowID(for: "/fixture/large")
+        var flip = false
+        let click = Budget.measure("folders click-10000") {
+            flip.toggle()
+            c.selectSidebarRow(flip ? row : other)
         }
+        let include = Budget.measure("folders include-subfolders-10000") { c.toggleFolderSubfolders(row: row) }
         #expect(c.activeFilter.folder?.path == month)
         #expect(!c.shownItems.isEmpty)
         #if DEBUG
-        #expect(cost.median <= 50, "a folder click at 10,000 photos took a median \(cost.median) ms")
+        let limit = 50.0
         #else
-        #expect(cost.median <= 5, "a folder click at 10,000 photos took a median \(cost.median) ms")
+        let limit = 5.0
         #endif
+        #expect(click.median <= limit, "a folder click at 10,000 photos took a median \(click.median) ms")
+        #expect(include.median <= limit, "Include Subfolders at 10,000 photos took a median \(include.median) ms")
     }
 
     @Test func theLaunchFixturesSitInFolders() throws {
