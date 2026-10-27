@@ -400,3 +400,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T19:38Z 2026-10-27T19:38Z poll: dev 15ff48a3, main fef52e66, dev-red #5818 open (not ours); no lead PR merged; lane dropped needs-rebase on #5096; all parent PRs clean with fast-lane, waiting on local-ci/prescreen. AJ children dirty until their parents land.
 - 19:53Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev 15ff48a3a, main fef52e668.
 - 2026-10-27T20:02Z 2026-10-27T20:02Z poll: dev still 15ff48a3 (no lane merge since 19:12), main fef52e66, dev-red #5818 open (not ours); all lead PRs clean with fast-lane, waiting on local-ci/prescreen (supervisor). AJ children dirty until parents land.
+- 20:13Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev 15ff48a3a, main fef52e668.
