@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-27T18:45Z
+Polled: 2026-10-27T18:58Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -65,3 +65,4 @@ Polled: 2026-10-27T18:45Z
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
 - 2026-10-27T18:23Z 18:23Z: no change; every PR clean and fast-lane, still no local-ci/prescreen on our heads (supervisor). dev 7c15c049, main fef52e66, #5818 open.
 - 2026-10-27T18:45Z 18:45Z: #5245 (FH-7a) got needs-rebase: same Photo list-commands golden conflict; merged dev, union (137 ids), gate running.
+- 2026-10-27T18:58Z 18:58Z: #5245 (FH-7a) dev merged at 00ac40566 (Photo list-commands golden: union, 137 ids); scripts/ci --changed PASS (AfterGlowCLITests + PhotoModelTests); pushed, Head moved; the lane drops needs-rebase on its next sweep.
