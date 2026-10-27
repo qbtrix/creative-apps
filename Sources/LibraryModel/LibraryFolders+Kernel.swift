@@ -79,6 +79,11 @@ extension LibraryCatalog {
         guard Self.hasFolder(path, in: LibraryFolders.tree(items)) else {
             throw CatalogError.unavailable(id: "view.show-folder", why: "There is no folder \(given).")
         }
+        applyFolder(path, subfolders: subfolders)
+    }
+
+    /// Sets the folder rule to `path`, a path taken from the tree, so it is not looked up again.
+    mutating func applyFolder(_ path: String, subfolders: Bool) {
         var next = activeFilter
         next.folder = FolderScope(path: path, subfolders: subfolders)
         setFilter(next)
