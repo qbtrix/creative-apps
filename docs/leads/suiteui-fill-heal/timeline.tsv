@@ -264,3 +264,4 @@ utc	stage	event	ref	note
 2026-10-27T20:26Z	3	waiting	lane	poll: no merges; dev unmoved since 19:12
 2026-10-27T20:51Z	3	waiting	lane	poll: dev 7d9c09b0, none of ours merged; PRs clean
 2026-10-27T21:02Z	3	heartbeat	lane	poll 2026-10-27T21:02Z: 2026-10-27T21:02Z check-in: no change. All five PRs open, no fix labels, no footers. dev-red #5818 still open (rerun at 15ff48a red; triage still names #3651, not ours). No #5093 answer, no main run newer than 38363734665.
+2026-10-27T21:17Z	3	waiting	lane	poll: dev ddd9b77a, none of ours merged; PRs clean
