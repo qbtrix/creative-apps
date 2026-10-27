@@ -234,3 +234,4 @@ utc	stage	event	ref	note
 2026-10-27T12:21Z	3	resume	lane	Belt nudge; FH-u on dev; #5245 waits local-ci/prescreen
 2026-10-27T12:24Z	3	restack	lane	#5107 FH-7 merged FH-7a, gate running
 2026-10-27T12:26Z	3	heartbeat	lane	poll 2026-10-27T12:26Z: 12:26Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (still being triaged; newest guess #5334). #5093 awaiting supervisor.
+2026-10-27T12:45Z	3	restack	lane	#5107 pushed 2aeaa1d2; #5108 #5129 gating
