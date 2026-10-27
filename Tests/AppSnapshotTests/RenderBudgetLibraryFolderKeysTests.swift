@@ -13,6 +13,7 @@ import SwiftUI
 import Testing
 
 @testable import LibraryApp
+@testable import SuiteUI
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetLibraryFolderKeysTests {
