@@ -11,7 +11,7 @@
 // the draft's layer resampled (`draftPlaced`), and commit lays that same
 // resample as one "Free Transform" step, so Return shows nothing new; a box on
 // part of the layer keeps the layer's extent, so later strokes outside it still
-// land. A drag whose layer lifts (PhotoTransformLift.swift) draws no frames:
+// land. A drag whose layer lifts (PhotoTransformLift+Kernel.swift) draws no frames:
 // the compositor moves the layer's pixels. Any other drag's frames
 // (`transformPreview(live:)`) draw the layer through the draft's matrix region
 // by region (PhotoRenderRoute.swift, bilinear); the exact frame follows at the release.

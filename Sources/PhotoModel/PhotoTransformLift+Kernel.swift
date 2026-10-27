@@ -1,4 +1,4 @@
-// PhotoTransformLift.swift: what a Free Transform drag lifts off the canvas so the compositor moves it
+// PhotoTransformLift+Kernel.swift: what a Free Transform drag lifts off the canvas so the compositor moves it
 // (SuiteUI's CanvasLiveLayer): the draft layer's pixels in the draft's box as premultiplied sRGB bytes, and
 // the workspace without that layer, rendered once as the picture under it. Each drag sample then only places
 // those pixels through the draft's matrix (`liftPlacement`); no pixel work runs until the release draws the

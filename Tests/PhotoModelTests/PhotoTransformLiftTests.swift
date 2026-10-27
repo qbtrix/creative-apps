@@ -1,4 +1,4 @@
-// PhotoTransformLiftTests.swift: what a Free Transform drag lifts for the compositor (PhotoTransformLift.swift).
+// PhotoTransformLiftTests.swift: what a Free Transform drag lifts for the compositor (PhotoTransformLift+Kernel.swift).
 // The draft's layer lifts only when a plain over draws it as the canvas does: here the Logo under a visible
 // translucent Wash doesn't lift, and does once the Wash is hidden, unless its blend mode isn't normal or the
 // image's adjustments change it. A lift's pixels are the layer's in the box (premultiplied sRGB), its base is the
