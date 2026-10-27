@@ -327,3 +327,4 @@ utc	stage	event	ref	note
 2026-10-27T02:14Z	poll	quarantine renewed (#5826); merged dev into #5011 df0715e2 and #5825 008df629, every lint passes locally
 2026-10-27T02:28Z	wait	heartbeat	#5321	poll 02:27: Linux checks on new heads
 2026-10-27T02:42Z	wait	heartbeat	#5321	poll 02:41: Linux checks on new heads
+2026-10-27T02:55Z	wait	heartbeat	#5321	poll 02:55: waiting lane batch; dev-red #5818
