@@ -125,3 +125,4 @@ utc	stage	event	ref	note
 23:40Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	no batches: dev-red #5818 flake-rerun at 9810d71 (macos, run 40411399952) holding the lane; #5817/#4903 back in queue; ours clean
 00:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batching again: #5817 (p0), #4903, #4917..#5025 in flight; #5064 next; ours clean; dev-red #5818 rerun pending
 00:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5817,#4923,#4924,#4958,#4963,#4988,#4999 (dev a80e88f4d); #4917,#4937,#5002,#5025 in flight; #5064 next; ours clean
+00:39Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batches in flight for #5064 (003016) and #5800 (003234, bisect probes -3/-6); all six open+clean; dev-red #5818 not ours
