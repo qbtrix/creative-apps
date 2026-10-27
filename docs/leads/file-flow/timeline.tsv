@@ -239,3 +239,4 @@ utc	stage	event	ref	note
 2026-10-27T05:02:47Z	wait	poll	-	no change
 2026-10-27T05:23:45Z	wait	poll	-	no change
 2026-10-27T05:44:47Z	wait	poll	-	no change
+2026-10-27T05:58:00Z	relaunch	stage	-	act-1a17bed1e9b-xhpo; lead branches rebased onto main; #4936 waits on prescreen

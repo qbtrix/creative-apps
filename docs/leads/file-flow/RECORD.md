@@ -1,18 +1,18 @@
 # file-flow lead record
 
 Issue: #3474 · Packet: docs/blueprints/halo/features/file-flow.md
-Run: act-1a1783581a6-fo4a · Started: 2026-10-26T12:45Z (resumed after auto-relaunch; earlier runs act-1a175f40239-xop3 and before)
-Stage: 3 polling (every task in a PR: HF-3 #4894, HF-4 #4936, HF-z #5092 feature-done; HF-a, HF-u done)
-Base: 746be6b1 (origin/dev); main d3323f6a checked
-Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5092 (HF-z); then a CI run on dev whose Linux job contains each slice's last PR, Belt-Slice-Done HF-m and HF-z, Belt-Contact-Sheet
+Run: act-1a17bed1e9b-xhpo · Started: 2026-10-27T05:55Z (relaunch; earlier runs act-1a1783581a6-fo4a, act-1a175f40239-xop3 and before)
+Stage: 3 polling: HF-a, HF-u, HF-z done; HF-m waits on #4936 (local-ci/prescreen) → #5123 → #5801 (last PR)
+Base: ad29aeaf (origin/dev); main fef52e66 verified at relaunch
+Next: when #4936 lands, merge dev into #5123 then #5801, gate, push, Head; once #5801 is in a green halo-scoped or full ci.yml run on dev, Belt-Slice-Done: HF-m, then Belt-Contact-Sheet; packet lines 47 and 95 rename to aPNGOffTheCanvasGoesToPhoto
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | HF-a | adapter stubs; scene adopts suiteApp, Open Recent via SuiteFileCommands, file drop | HF-1, HF-2 | - | transform:HT-a, shape-tools:HS-a, placed-images:PH-u | yes | 0 | done #4855 (f2955985) | [40029046141](https://github.com/qbtrix/creative-apps/actions/runs/40029046141) | wanted |
-| HF-m | adapter bodies, catalog ids, recents imported once, RJ-H42 | HF-3, HF-4 | - | HF-a; gradient-fill:HG-m, autosave-history:HA-m, transform:HT-m, shape-tools:HS-m, stroke-style:HK-m, placed-images:PH-m | yes | 0 | pr #4894 (HF-3, on dev), #4936 (HF-4) | - | - |
+| HF-m | adapter bodies, catalog ids, recents imported once, RJ-H42 | HF-3, HF-4 | - | HF-a; gradient-fill:HG-m, autosave-history:HA-m, transform:HT-m, shape-tools:HS-m, stroke-style:HK-m, placed-images:PH-m | yes | 0 | #4894 merged (c4cf4a75); #4936 (HF-4), #5123, #5801 open | - | - |
 | HF-u | snapshots, render budget, journey skipped | HF-5, HF-6 | - | HF-a | yes | 0 | done #4868 (10642721) | [40116034771](https://github.com/qbtrix/creative-apps/actions/runs/40116034771) | wanted |
-| HF-z | journey live; halo.md, built, feature-done | HF-7, HF-8 | HaloFileFlowJourneyTests | HF-m, HF-u; export-pack:HX-z, placed-images:PH-z | yes | 0 | pr #5092 | - | - |
+| HF-z | journey live; halo.md, built, feature-done | HF-7, HF-8 | HaloFileFlowJourneyTests | HF-m, HF-u; export-pack:HX-z, placed-images:PH-z | yes | 0 | done #5092 (2cf71ce9) | [40439890285](https://github.com/qbtrix/creative-apps/actions/runs/40439890285) | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -31,6 +31,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-27T05:58Z (relaunch act-1a17bed1e9b-xhpo): brief rules 2-3 done: lead/file-flow and lead/layer-styles rebased onto origin/main (fef52e66) and pushed with --force-with-lease (docs/leads/* only, no conflicts). Halo layer-styles record stays at lead/halo-layer-styles (docs/leads/halo-layer-styles/), mirrored to the same folder on lead/layer-styles; docs/leads/layer-styles/ there is SuiteUI #3937's and is not touched. PRs stay on dev.
 - 2026-10-26 Packet-Review 2 (6d5f8b92, #3474 comment 6407188805), rule 24:
   1. Host stays HaloDocumentHost: already so in HF-m's code; packet lines 8 and 54 fixed in HF-z (#5092).
   2. Retire Halo's file.open-recent spec, add the four ids: already done in HF-m (#4894: filter in specs, halo.txt). Packet HF-3 row says so.
@@ -48,6 +49,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 2026-10-27T05:58Z relaunch: #4936 (4f8863ff) Linux check 40412395828 green, still no local-ci/prescreen; #5123 (0fb13ae9) and #5801 stacked, no needs-* label. dev ad29aeaf.
 - 05:44Z poll: no change. #4936 waits on local-ci/prescreen; #5123/#5801 stacked; dev macOS red (#5818), not ours.
 - 05:23Z poll: no change. #4936 waits on local-ci/prescreen; #5123/#5801 stacked; dev macOS red (#5818), not ours.
 - 05:02Z poll: no change. #4936 waits on local-ci/prescreen; #5123/#5801 stacked; dev macOS red (#5818), not ours.
