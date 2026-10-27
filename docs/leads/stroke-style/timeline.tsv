@@ -362,3 +362,4 @@ utc	stage	event	ref	note
 2026-10-27T10:18Z	3	merged	#5825	merged at 3f68fdea by lane batch (Linux 40482064028)
 2026-10-27T10:38Z	wait	heartbeat	#5825	scoped design 40487513936 on f8e851c7 queued, full CI 40489065455 on 4a7d926f pending; dev-red #5818 open
 2026-10-27T10:57Z	wait	heartbeat	#5825	scoped design 40487513936 on f8e851c7 (holds #5011 + #5825) running; dev-red #5818 open
+2026-10-27T11:17Z	wait	heartbeat	#5825	design 40487513936 on f8e851c7 red: same Library test compile break (dev-red #5818); next design 40494076820 on 4a7d926f queued
