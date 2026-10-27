@@ -64,6 +64,7 @@ Next: #5157 (HY-a) ready on fcdeb1b2, in the lane; when it lands merge dev into 
 - 2026-10-24 (revised): the supervisor answered (#3936, 10:55Z) that building HY-7 ahead on the StyleRoute stub with a Wire line is right, superseding the earlier "not built ahead". Open point asked on #3936: the viewer draws items in a SwiftUI Canvas and no app holds a RenderDispatcher yet; feeding StyleRoute a layer RenderSurface per frame means a PixelBuffer upload per step (render-contract rule 3). HY-7 is built once the route shape is answered; until then the viewer draws styled layers unstyled and the journey stays skipped.
 
 ## Open
+- 14:04Z #5157 (HY-a) waits on prescreen; #5161/#5218 draft; halo findings >5 open, only finding fixes start (#5892 in progress)
 - 13:41Z HY-a #5157 unchanged, waiting on local-ci/prescreen; HY-u #5161 draft stacked on it; HY-m done (run 40490171439); HY-z #5218 draft until LS-9. Finding #5891 (H-J12, core-loop CL-z) lists e83dec8c9 (#5158, HY-m) among its candidates; it is core-loop's to bisect, watching it.
 - 13:20Z HY-a #5157 unchanged since 06:13Z: open in the lane, waiting on local-ci/prescreen; HY-u #5161 draft stacked on it; HY-m done (run 40490171439); HY-z #5218 draft until LS-9. No new line:halo findings.
 - 12:49Z HY-a #5157 open in the lane waiting on local-ci/prescreen; HY-u #5161 draft stacked on it; HY-m done (run 40490171439); HY-z #5218 draft until LS-9. No new line:halo findings.

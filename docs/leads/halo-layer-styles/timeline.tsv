@@ -190,3 +190,4 @@ utc	stage	event	ref	note
 2026-10-27T12:49:34Z	check	-	HY-a #5157 open in the lane waiting on local-ci/prescreen; HY-u #5161 draft stacked on it; HY-m done (run 40490171439); HY-z #5218 draft until LS-9. No new line:halo findings.
 2026-10-27T13:20:26Z	check	-	HY-a #5157 unchanged since 06:13Z: open in the lane, waiting on local-ci/prescreen; HY-u #5161 draft stacked on it; HY-m done (run 40490171439); HY-z #5218 draft until LS-9. No new line:halo findings.
 2026-10-27T13:41:41Z	check	-	HY-a #5157 unchanged, waiting on local-ci/prescreen; HY-u #5161 draft stacked on it; HY-m done (run 40490171439); HY-z #5218 draft until LS-9. Finding #5891 (H-J12, core-loop CL-z) lists e83dec8c9 (#5158, HY-m) among its candidates; it is core-loop's to bisect, watching it.
+2026-10-27T14:04:01Z	check	-	#5157 (HY-a) waits on prescreen; #5161/#5218 draft; halo findings >5 open, only finding fixes start (#5892 in progress)
