@@ -63,8 +63,8 @@ public struct LibraryServices: Sendable {
     /// file and sets that type's `unavailable` to nil, so nobody edits this.
     /// Sidecars stay off, with their reason, until the window passes a writer.
     public static func live(decoder: any PhotoDecoding, writer: any JPEGWriting, store: any CatalogStoring,
-                            sidecars: any SidecarWriting = UnconnectedSidecars(),
-                            looks: any PresetStoring = FakePresetStore()) -> LibraryServices {
+                            looks: any PresetStoring = FakePresetStore(),
+                            sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {
         let develop = LiveDevelop()
         let reasons: [(String, String?)] = [
             ("importer", LiveImporter.unavailable), ("thumbnails", LiveThumbnails.unavailable),
