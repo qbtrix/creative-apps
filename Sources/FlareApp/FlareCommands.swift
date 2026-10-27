@@ -31,7 +31,6 @@ struct FlareMenu {
     var help: @MainActor (FlareIntent) -> String? = { _ in "Open a Flare window first." }
     var undoTitle = "Undo"
     var redoTitle = "Redo"
-    var recent: [String] = []
     var loops = false
     /// The selection's Edit reasons as values (#2618). `help` is a closure, which never reads as a changed menu,
     /// so without these a LAYERS pick left Edit > Copy disabled with its launch reason until something else
