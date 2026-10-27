@@ -344,3 +344,4 @@ utc	stage	event	ref	note
 2026-10-27T06:05Z	wait	heartbeat	#5818	PR bodies moved to this run's Belt-Lead; waiting lane batch; dev-red #5818 open
 2026-10-27T05:53Z	wait	heartbeat	#5321	poll 05:53: waiting lane batch; dev-red #5818 (suite home tests)
 2026-10-27T06:25Z	wait	heartbeat	#5818	no change; lane batching others (Linux); #5011 #5825 not in a batch; dev-red #5818 open
+2026-10-27T06:45Z	wait	heartbeat	#5818	no change; supervisor asked about run n4me (no answer yet)
