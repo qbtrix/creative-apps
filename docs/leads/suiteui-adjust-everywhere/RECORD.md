@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-27T21:42Z
+Polled: 2026-10-27T22:08:21Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -411,3 +411,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T21:42Z 2026-10-27T21:42Z poll: dev 6dab26f7 (generated refresh), main fef52e66, dev-red #5818 open (not ours). #5247 has local-ci/prescreen=success and is in lane/batch-20261027212306 (Linux check running; its own proof was stale after dev moved, the batch run is the proof). #5096/#5245 merged-dev heads still wait for local-ci/prescreen (supervisor). AJ children dirty, wait on #5247/#5249.
 - 21:56Z #5247 (AJ-photo) MERGED as 014429488. Restacked #5250 (photo-catalog) onto dev: 2 commits, golden photo.list-commands.json union with dev winning shared ids (dev's newer file.new summary). Gate running; then force-push, Head line, fast-lane label back. #5249, #5252 clean, waiting for local-ci/prescreen.
 - 22:08Z #5250 (photo-catalog) force-pushed a04ba7720 on dev 014429488: scripts/ci --changed PASS, AfterGlowCLITests|LiveStandInTests|PhotoCommandCatalogTests 179 pass, mutate --validate OK. Head line moved; fast-lane added back, needs-split removed; now clean +54-12 f=12. Waits for local-ci/prescreen. #5259 photo-ui restacks after it lands.
+- 2026-10-27T22:08:21Z #5247 merged as 014429488 (AJ-8). Restacking #5250 #5259 #5260 onto dev as their own commits only (catalog 64, ui 268, journeys 200 lines; the needs-split size was the squashed parent): conflicts resolved as unions (ToneCommands + AdjustCommands, tone + adjust ids, golden 144 commands, newImageMode + filterDraft); gate running. #5249 #5252 wait on prescreen; #5257 #5258 restack after #5249. main fef52e66, dev-red #5818 open (not ours).
