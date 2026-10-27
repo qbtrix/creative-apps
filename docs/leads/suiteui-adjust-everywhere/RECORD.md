@@ -415,3 +415,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 22:16Z check-in: #5249, #5252 clean; #5250 unstable only because the fast-lane job is in progress on a04ba7720. All wait for local-ci/prescreen. dev 014429488, main fef52e668.
 - 2026-10-27T22:35Z AJ-photo restacked on dev 7b2c4373f: #5250 (12 files, +54/-11) base dev, #5259 (11 files) on catalog, #5260 (1 file) on ui; each passed scripts/ci --changed; needs-split removed, fast-lane back. #5257/#5258 restack after #5249. All heads wait on prescreen; dev-red #5818 open.
 - 22:35Z check-in: #5250 restacked by the other session to df908bed4 (dev 7b2c4373f, Head line current, clean +54-11 f=12); local worktree reset to it. #5249, #5252 clean. All wait for local-ci/prescreen. main fef52e668.
+- 22:55Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 7b2c4373f, main fef52e668.
