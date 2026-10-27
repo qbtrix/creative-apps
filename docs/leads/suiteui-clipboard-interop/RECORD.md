@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T16:44Z · 16:45Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (macOS red; triage now guesses #5066, a non-Belt SuiteUI sweep PR; not ours). #5093 awaiting supervisor.
+Polled: 2026-10-27T17:31Z · 17:31Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (macOS red, re-run at c08adcb pending). #5093 awaiting supervisor.
 
 
 

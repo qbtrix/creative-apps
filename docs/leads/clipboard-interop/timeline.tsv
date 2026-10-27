@@ -284,3 +284,4 @@ utc	stage	event	ref	note
 2026-10-27T14:59Z	3	heartbeat	lane	poll 2026-10-27T14:59Z: 15:00Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (real red, now at 95e60fe on macOS too). #5093 awaiting supervisor.
 2026-10-27T15:56Z	3	heartbeat	lane	poll 2026-10-27T15:56Z: 15:57Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (still red at d52f481). #5093 awaiting supervisor.
 2026-10-27T16:44Z	3	heartbeat	lane	poll 2026-10-27T16:44Z: 16:45Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (macOS red; triage now guesses #5066, a non-Belt SuiteUI sweep PR; not ours). #5093 awaiting supervisor.
+2026-10-27T17:31Z	3	heartbeat	lane	poll 2026-10-27T17:31Z: 17:31Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (macOS red, re-run at c08adcb pending). #5093 awaiting supervisor.
