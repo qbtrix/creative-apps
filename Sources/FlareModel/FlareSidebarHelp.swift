@@ -24,10 +24,9 @@ extension FlareWorkspace {
     }
 
     /// Layer `id`'s context menu: Hide or Show, Lock or Unlock, Duplicate, Delete; empty for an id that isn't a layer.
+    /// Duplicate's reason is `editHelp(.duplicate)` with that layer picked: the shapes service's, when it has one.
     public func layerRowMenu(_ id: String) -> [FlareRowCommand] {
         guard let layer = layers.first(where: { $0.id == id }) else { return [] }
-        var picked = self
-        picked.selectItem(id)
         return [
             FlareRowCommand(title: layer.isVisible ? "Hide Layer" : "Show Layer",
                             systemImage: layer.isVisible ? "eye.slash" : "eye",
@@ -36,7 +35,7 @@ extension FlareWorkspace {
                             systemImage: layer.isLocked ? "lock.open" : "lock",
                             intent: .toggle(id: id, flag: FlareLayerFlag.locked.rawValue), help: nil),
             FlareRowCommand(title: "Duplicate Layer", systemImage: "plus.square.on.square",
-                            intent: .duplicate(id: id), help: picked.editHelp(.duplicate)),
+                            intent: .duplicate(id: id), help: services.shapes.unavailableHelp(for: .select)),
             FlareRowCommand(title: "Delete Layer", systemImage: "trash", intent: .remove(id: id), help: nil),
         ]
     }
