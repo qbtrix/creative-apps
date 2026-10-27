@@ -64,6 +64,7 @@ Next: #5157 (HY-a) ready on fcdeb1b2, in the lane; when it lands merge dev into 
 - 2026-10-24 (revised): the supervisor answered (#3936, 10:55Z) that building HY-7 ahead on the StyleRoute stub with a Wire line is right, superseding the earlier "not built ahead". Open point asked on #3936: the viewer draws items in a SwiftUI Canvas and no app holds a RenderDispatcher yet; feeding StyleRoute a layer RenderSurface per frame means a PixelBuffer upload per step (render-contract rule 3). HY-7 is built once the route shape is answered; until then the viewer draws styled layers unstyled and the journey stays skipped.
 
 ## Open
+- 10:41Z #5157 (HY-a) still in the lane, no needs-fix; #5161, #5218 draft. HY-m e83dec8c9 waits on full run 40489065455 / halo-scoped 40490171439 at 4a7d926f3 (queued). No new halo findings.
 - 10:18Z check: HY-a #5157 waits in the lane (clean). HY-m e83dec8c9: no green run yet (full runs 40484007992, 40487248024 pending; dev macOS red on Library #5128). No new findings.
 - 09:56Z check: HY-a #5157 waits in the lane (clean); HY-m e83dec8c9 has no green run yet (dev-red #5818; halo-scoped 40478391622 red on Library's #5128 compile error, not Halo).
 - 09:31Z check: #5157 (HY-a) open, clean, waiting in the lane at fcdeb1b2; #5161/#5218 draft; full CI 40470141862 red on macOS test shards (#5818, range of 85 PRs), so HY-m waits for a later green halo-scoped or full run
