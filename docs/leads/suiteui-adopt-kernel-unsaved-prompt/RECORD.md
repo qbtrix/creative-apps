@@ -315,3 +315,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-27T09:05:43Z scoped photo 40470145594 red: PhotoToolsKeyTests.letterPicksTool (from #4889 spot heal/bucket keys), not ours; waiting a green run for UP-photo
 - 2026-10-27T09:25:17Z UP-photo merged; full CI 40470141862 and 40473728719 red on non-ours PhotoToolsKeyTests (#4889); waiting for a green run; #5089/#5091/#5231 open
 - 2026-10-27T09:45:50Z no green ci.yml with ef31726a yet: scoped photo 40478386204 at 9d3e5e32 failed at macOS compile (not ours); #5089/#5091/#5231 open, no needs-fix
+- 2026-10-27T10:06:38Z no green macOS ci.yml with ef31726a yet (only Linux checks green); #5089/#5091/#5231 open, no needs-fix
