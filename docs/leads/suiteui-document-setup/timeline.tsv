@@ -273,3 +273,4 @@ utc	stage	event	ref	note
 2026-10-27T01:40Z	3	poll	-	dev-red #5818 open (linux red, range main..2c20134c), lane holds PRs on the failing module; not ours to fix; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
 2026-10-27T02:02Z	3	poll	-	dev-red #5818 still open; lane merged #4899 and #5826, none ours; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
 2026-10-27T02:25Z	3	poll	-	dev-red #5818 still open; lane merged #5041 only, not ours; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
+2026-10-27T02:47Z	3	poll	-	dev-red #5818 still open, none of ours merged; #4901 DS-photo needs-rebase fixed: merged dev, golden photo.list-commands.json resolved (dev's 3 tool ids + our file.new), head eb9a00d9; #4918 DS-halo waiting
