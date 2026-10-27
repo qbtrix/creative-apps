@@ -16,6 +16,7 @@ Snap: Snap Snapping
 Easing: Easing
 Keyframe: Keyframe
 Layers: Layers LayerTree
+Clipping: ClipRules ClipBase ClippingMask
 Crop: Crop Cropping Cropper
 Export: Export Exporter Exporting
 Clipboard: Clipboard
