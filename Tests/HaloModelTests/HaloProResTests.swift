@@ -37,6 +37,13 @@ import Testing
         #expect(Self.movie.choosing(codec: .hevcAlpha) == Self.movie)
     }
 
+    /// A refusal is a tooltip a person reads, so it never names a build slice ("HX-4").
+    @Test func codecRefusalsNeverNameASlice() {
+        for codec in HaloRenderSettings.codecs + [.hevcAlpha] {
+            #expect(!(HaloRenderSettings.codecRefusal(codec) ?? "").contains("HX-"))
+        }
+    }
+
     @Test func h264RefusesTransparencyInExportRulesWords() {
         #expect(Self.movie.alphaRefusal == "H.264 can't keep transparency. Choose ProRes 4444.")
         #expect(Self.movie.choosing(alpha: true) == Self.movie)
