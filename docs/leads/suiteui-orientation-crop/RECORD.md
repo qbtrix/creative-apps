@@ -124,3 +124,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T08:24:09Z critic panel: full CI 40470141862 compiled green at ef9d2ace, tests queued; journeys follow
 - 2026-10-27T08:44:36Z critic panel waits on journeys after full CI 40470141862 (tests running)
 - 2026-10-27T09:05:39Z critic panel waits on journeys after full CI 40470141862 (tests still running)
+- 2026-10-27T09:25:13Z critic panel waits on journeys 40478044887/40478272983 (in progress)

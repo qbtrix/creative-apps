@@ -199,3 +199,4 @@ utc	stage	event	ref	note
 2026-10-27T08:24:09Z	done	poll	#3756	critic panel: full CI 40470141862 compiled green at ef9d2ace, tests queued; journeys follow
 2026-10-27T08:44:36Z	done	poll	#3756	critic panel waits on journeys after full CI 40470141862 (tests running)
 2026-10-27T09:05:39Z	done	poll	#3756	critic panel waits on journeys after full CI 40470141862 (tests still running)
+2026-10-27T09:25:13Z	done	poll	#3756	critic panel waits on journeys 40478044887/40478272983 (in progress)
