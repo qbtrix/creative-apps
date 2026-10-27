@@ -16,11 +16,13 @@ public struct HelpReports: HelpProviding, Hashable {
     public var crashes: [CrashFile]
     public var now: Date
     public var home, user, host: String
+    /// `--bundle`'s AfterGlow.app; nil when the CLI finds its own (MCPConfig.bundle).
+    public var bundleFlag: String?
 
     public init(version: String, build: String, macOS: String, model: String, crashes: [CrashFile], now: Date,
-                home: String, user: String, host: String) {
+                home: String, user: String, host: String, bundleFlag: String? = nil) {
         (self.version, self.build, self.macOS, self.model, self.crashes) = (version, build, macOS, model, crashes)
-        (self.now, self.home, self.user, self.host) = (now, home, user, host)
+        (self.now, self.home, self.user, self.host, self.bundleFlag) = (now, home, user, host, bundleFlag)
     }
 
     /// The report's fields and its text, the shape the sheet's provider answers with.
@@ -52,10 +54,11 @@ public struct HelpReports: HelpProviding, Hashable {
     }
 
     /// The document in a `.suitehelp` file. Throws when it isn't one or names an app the suite doesn't have.
-    static func open(_ data: Data) throws -> SuiteHelpDocument {
+    /// `bundle` is `--bundle`'s AfterGlow.app.
+    static func open(_ data: Data, bundle: String? = nil) throws -> SuiteHelpDocument {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return try document(decoder.decode(File.self, from: data))
+        return try document(decoder.decode(File.self, from: data), bundle: bundle)
     }
 
     /// A new document for `options`' app with no crashes: `{"app": "photo"}`.
@@ -64,12 +67,12 @@ public struct HelpReports: HelpProviding, Hashable {
     /// A file naming an app the suite doesn't have.
     struct UnknownApp: Error, CustomStringConvertible { let name: String; var description: String { "the suite has no app \(name)" } }
 
-    static func document(_ file: File) throws -> SuiteHelpDocument {
+    static func document(_ file: File, bundle: String? = nil) throws -> SuiteHelpDocument {
         guard SuiteApp(rawValue: file.app) != nil else { throw UnknownApp(name: file.app) }
         let reports = HelpReports(
             version: file.version ?? "", build: file.build ?? "", macOS: file.macOS ?? "", model: file.model ?? "",
             crashes: (file.crashes ?? []).map { CrashFile(name: $0.name, modified: $0.modified, text: $0.text) },
-            now: file.now ?? Date(), home: file.home ?? "", user: file.user ?? "", host: file.host ?? "")
+            now: file.now ?? Date(), home: file.home ?? "", user: file.user ?? "", host: file.host ?? "", bundleFlag: bundle)
         return SuiteHelpDocument(app: file.app, provider: reports)
     }
 }

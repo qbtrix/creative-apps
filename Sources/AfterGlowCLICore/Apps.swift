@@ -97,7 +97,11 @@ public enum Apps {
         HeadlessApp(HaloHeadless.self), HeadlessApp(LibraryHeadless.self),
     ]
     /// The suite's Help commands ("suite"), over the `.suitehelp` files `HelpReports` reads. Never in `all`.
-    public static let suite = HeadlessApp(SuiteHelpDocument.self, open: { data, _ in try HelpReports.open(data) }, new: HelpReports.new)
+    public static let suite = suite(bundle: nil)
+    /// The suite's Help commands answering for the AfterGlow.app at `bundle` (`--bundle`), or the CLI's own when nil.
+    public static func suite(bundle: String?) -> HeadlessApp {
+        HeadlessApp(SuiteHelpDocument.self, open: { data, _ in try HelpReports.open(data, bundle: bundle) }, new: HelpReports.new)
+    }
     /// The fake app ("fake", SuiteKernel's FakeCanvasDocument). Never in `all`; the tests add it.
     public static let fake = HeadlessApp(FakeCanvasDocument.self)
     /// The tone fake ("fake-tone", SuiteImaging's FakeToneDocument): one picture's tone settings, for RJ-X41.

@@ -1,0 +1,4 @@
+[
+  {"label": "the provider ignores --bundle", "file": "Sources/AfterGlowCLICore/MCPConfig.swift", "find": "MCPConfig.bundle(flag: bundleFlag, executable:", "replace": "MCPConfig.bundle(flag: nil, executable:", "tests": "BundleFlagTests"},
+  {"label": "a given --bundle loses to the executable's path", "file": "Sources/AfterGlowCLICore/MCPConfig.swift", "find": "if let flag, !flag.isEmpty {", "replace": "if let flag, flag.isEmpty {", "tests": "BundleFlagTests|MCPConfigTests"}
+]
