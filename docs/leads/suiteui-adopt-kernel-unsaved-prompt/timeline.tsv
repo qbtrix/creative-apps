@@ -213,3 +213,4 @@ ts	kind	note
 2026-10-27T10:06:38Z	waiting	poll	#5088	no green macOS ci.yml with ef31726a yet (only Linux checks green); #5089/#5091/#5231 open, no needs-fix
 2026-10-27T10:26:59Z	waiting	poll	#5088	UP-photo slice-done waits on a green macOS ci.yml; scoped photo 40484860852 red at compile, not ours
 2026-10-27T10:47:49Z	waiting	poll	#5088	UP-photo waits on a green macOS ci.yml; scoped halo 40487486320 red, not ours
+2026-10-27T11:13:02Z	waiting	poll	#5088	UP-photo: scoped photo 40487492253 at a5879e2d (contains ef31726a) failed, not ours; #5089 #5091 #5231 open, none needs-fix
