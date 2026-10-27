@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 06:07Z handover: Belt relaunched this feature as act-1a17bed1e9b-xhpo at 05:55Z (lead/file-flow 4e4d449d). Run act-1a1783581a6-fo4a stops acting so the two leads don't double-post on #3474 or race pushes. State at handover: #4936 Linux + local-ci/prescreen green, should land next sweep; #5123/#5801 stacked; HF-m slice-done, contact sheet and packet rename (lines 47, 95) are the relaunch's.
 - 06:06Z poll: #4936 got local-ci/prescreen success (Linux already green); lane should merge it next sweep, then retarget #5123/#5801. Dev runs on ad29aeaf in flight (halo scoped 40457994899 queued); #5818 open, not ours.
 - 05:44Z poll: no change. #4936 waits on local-ci/prescreen; #5123/#5801 stacked; dev macOS red (#5818), not ours.
 - 05:23Z poll: no change. #4936 waits on local-ci/prescreen; #5123/#5801 stacked; dev macOS red (#5818), not ours.
