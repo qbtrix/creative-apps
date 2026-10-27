@@ -229,3 +229,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 - 2026-10-27T16:17:50Z blocked on SC-f #5262/#5265
 - 2026-10-27T16:38:54Z blocked on SC-f #5262/#5265 (open)
 - 2026-10-27T16:59:27Z blocked on SC-f #5262/#5265 (open)
+- 2026-10-27T17:19:04Z blocked on SC-f #5262/#5265 (open)
