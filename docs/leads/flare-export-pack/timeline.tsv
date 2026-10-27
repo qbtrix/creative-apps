@@ -246,3 +246,4 @@ utc	stage	event	ref	note
 2026-10-26T23:30Z	poll	5025 still queued; last batches 4903/5817/5369 green; recent lane sweeps cancelled (no log); dev-red 5818 open; 3481 no new comments
 2026-10-26T23:54Z	poll	5025 batched in lane/batch-20261026234912 (running); dev-red 5818 open; 3481 no new comments
 2026-10-27T00:16Z	poll	5025 batch Linux green 40422334271, mac gate pending; dev-red 5818 open; 3481 no new comments
+2026-10-27T00:38Z	poll	5025 still awaiting batch mac gate; dev-red 5818 open; 3481 no new comments
