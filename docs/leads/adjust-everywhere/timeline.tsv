@@ -204,3 +204,4 @@ utc	stage	event	ref	note
 22:16Z	3	check-in	#5249 #5252 #5250	#5249/#5252 clean; #5250 unstable only from the running fast-lane job; wait for local-ci/prescreen
 22:35Z	3	check-in	#5249 #5252 #5250	all clean; #5250 restacked by the other session to df908bed4 on dev 7b2c4373f; wait for local-ci/prescreen
 22:55Z	3	check-in	#5249 #5252 #5250	all clean, unmerged; wait for local-ci/prescreen
+23:14Z	3	check-in	#5249 #5252 #5250	all clean, unmerged; wait for local-ci/prescreen
