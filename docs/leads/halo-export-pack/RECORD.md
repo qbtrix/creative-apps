@@ -10,9 +10,9 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | HX-a | codec and alpha settings, ProRes refused; Render sheet Codec row and Transparent checkbox | HX-1, HX-2 | - | gradient-fill:HG-a, placed-images:PH-a | yes | 0 | done #4841 (a8e0e252) | [40029046141](https://github.com/qbtrix/creative-apps/actions/runs/40029046141) | wanted |
-| HX-m | codec and alpha plan rules, alpha frames, RJ-H41; live renderer through services.media.movie | HX-3, HX-4 | - | HX-a | no | 0 | pr #4874, #4917 | - | - |
+| HX-m | codec and alpha plan rules, alpha frames, RJ-H41; live renderer through the suite media service | HX-3, HX-4 | - | HX-a | no | 1 | #4874 merged, pr #4917 (1895fd75) | - | - |
 | HX-u | snapshots, budget, journey skipped | HX-5, HX-6 | - | HX-a | yes | 0 | done #4858 (151b422a) | [40116034771](https://github.com/qbtrix/creative-apps/actions/runs/40116034771) | wanted |
-| HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | pr #4942 (HX-7, HX-8) | - | - |
+| HX-z | journey live; halo.md, built, feature-done | HX-7, HX-8 | HaloExportPackJourneyTests | HX-m, HX-u; gradient-fill:HG-z | yes | 0 | pr #4942 (d0553017) | - | - |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -119,3 +119,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 12:38Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane batch 20261025122638 (one at a time) holds none of ours; dev at 58bb6d4d5; no slice done, 0 findings
 - 13:00Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane landed #4953 (dev 930337d52), batch 20261025125743 holds none of ours; no slice done, 0 findings
 - 03:50Z (10-27) heartbeat, run act-1a17b7080fc-gy1j: #4917 (HX-4) needs-fix from the lane's Linux check (LiveStandInTests flagged the new HaloServices media slot) and conflicted with dev's refusal rewording. Merged dev (kept codecRefusalsNeverNameASlice), moved LiveMedia to the render call; gate rerunning after a toolchain reinstall. #4942 (HX-z) restacks after. 0 findings.
+- 03:59Z (10-27): #4917 fix pushed 1895fd75 (gate PASS, LiveStandInTests PASS), Head/Belt-Lead moved; #4942 restacked on it d0553017 (gate PASS; merge took HX-4's HaloServices/HaloLaunch), Head/Belt-Lead moved. Waiting on the lane. 0 findings.
