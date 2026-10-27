@@ -131,3 +131,4 @@ utc	stage	event	ref	note
 01:37Z	3	check-in	#5064,#5233,#5235,#5236	dev moved (#4937,#5002,#5025,#5092); #5064 batch dropped again without label or comment, waiting for next batch; all four open clean; dev-red #5818 not ours
 01:58Z	3	check-in	#5064,#5233,#5235,#5236	#5064 in lane/batch-20261027015306, marked -red (base holds dev-red #5818 commit); waits for dev green; all four open clean, no needs-fix
 02:18Z	3	check-in	#5064,#5233,#5235,#5236	dev at 7703c60d6 (#5826 quarantine renew, #5041); #5064 in fresh lane/batch-20261027021504; all four open clean, no needs-fix; dev-red #5818 not ours
+02:38Z	3	check-in	#5064,#5233,#5235,#5236	lane held on dev-red #5818: bisect named #5263 (photo), revert #5827 open p0; flake check says real; all batches -red incl #5064 021504; ours open clean
