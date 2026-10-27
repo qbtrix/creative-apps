@@ -166,3 +166,4 @@ utc	stage	event	ref	note
 11:48Z	3	waiting-lane	#5247 #5248 #5249	#5249 trimmed to 394 lines at 15ade3a63, gate pass, Head moved
 12:21Z	3	waiting-lane	#5247 #5248 #5249	Belt nudge; wave 2 on dev, not main; #5247/#5249 wait local-ci/prescreen
 12:37Z	3	waiting-lane	#5247 #5248 #5249	#5248 eligible (prescreen ok); #5247 #5249 wait prescreen; dev 66d4c6d83
+13:05Z	3	check-in	#5247 #5248 #5249	no merges; #5248 eligible (prescreen ok), #5247/#5249 wait local-ci/prescreen; dev 9def47788 main fef52e668
