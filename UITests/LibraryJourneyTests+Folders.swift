@@ -2,7 +2,8 @@
 // (packet docs/blueprints/library/features/folders.md, Journey step 1). Three fixture folders are imported
 // into one catalog, `trips` with 2025/ and 2026/ inside: FOLDERS shows each with its count, a subfolder's click
 // shows only its photos, and Include Subfolders off on `trips` shows only its own, which a later click on it
-// keeps. The three sit in the temporary folder, so FOLDERS roots there and the test opens each collapsed
+// keeps. The arrow keys walk the same rows: down and up move the selection, left closes trips and right
+// opens it. The three sit in the temporary folder, so FOLDERS roots there and the test opens each collapsed
 // group until the row it wants shows. Rows are found by title in `suite.sidebar`, grid cells by id prefix.
 // On since FO-6.
 import XCTest
@@ -45,6 +46,19 @@ final class LibraryFoldersJourneyTests: XCTestCase {
         year.click()
         expectCells(2, browser, "2025's click")
         browser.shot("library-folder-selected")
+
+        // Keyboard parity: arrows move the selection, left closes trips and right opens it again.
+        browser.press(.downArrow, step: "library-folder-key-down")
+        expectCells(1, browser, "down arrow from 2025 to 2026")
+        browser.press(.upArrow)
+        expectCells(2, browser, "up arrow back to 2025")
+        browser.press(.upArrow)
+        expectCells(4, browser, "up arrow to trips, subfolders included")
+        browser.press(.leftArrow, step: "library-folder-key-collapse")
+        let gone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: year)
+        XCTAssertEqual(XCTWaiter.wait(for: [gone], timeout: 5), .completed, "left arrow didn't close trips")
+        browser.press(.rightArrow, step: "library-folder-key-expand")
+        XCTAssert(year.waitForExistence(timeout: 5), "right arrow didn't open trips")
 
         // Include Subfolders off on trips: only its own photo, and a click on trips keeps it.
         root.rightClick()
