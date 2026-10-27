@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-27T09:10Z · 09:10Z: #5125 and #5096 needs-rebase (photo golden) fixed: dev merged, golden regenerated, gate PASS; heads b55116d5 and 8f97ea1e, Head lines moved. #4896 FH-u merged. dev-red #5818 open. #5093 awaiting supervisor.
+Polled: 2026-10-27T09:50Z (#5247 AJ-photo needs-fix (looks stand-in unlisted) fixed: baseline line until AJ-photo-ui #5259, gate PASS, head fef4bfd9; #5096/#5245 needs-rebase cleared; main held by dev-red #5818)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
