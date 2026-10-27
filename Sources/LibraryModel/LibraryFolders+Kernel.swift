@@ -2,8 +2,8 @@
 // the sidebar, the afterglow CLI and an agent browse folders one way. `folders.list` is a query returning the
 // tree as rows in pre-order, each with its `depth` (the schema builders can't nest a node in itself);
 // `view.show-folder` sets the filter's folder rule (`FolderScope`) to one folder, with or without its
-// subfolders, as view state, not an undo step, and refuses a path that isn't in the tree. Both are unavailable
-// while no photo sits in a folder. Linux-safe.
+// subfolders, as view state, not an undo step, drops a trailing `/` and refuses a path that isn't in the
+// tree. Both are unavailable while no photo sits in a folder. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -71,9 +71,13 @@ extension LibraryCatalog {
     }
 
     /// Shows the folder at `path`, with its subfolders' photos when `subfolders`, keeping the filter's other rules.
+    /// A trailing `/` is dropped first, so `/trips/` shows `/trips`.
     mutating func showFolder(_ path: String, subfolders: Bool) throws {
+        let given = path
+        var path = path
+        while path.count > 1, path.hasSuffix("/") { path.removeLast() }
         guard Self.hasFolder(path, in: LibraryFolders.tree(items)) else {
-            throw CatalogError.unavailable(id: "view.show-folder", why: "There is no folder \(path).")
+            throw CatalogError.unavailable(id: "view.show-folder", why: "There is no folder \(given).")
         }
         var next = activeFilter
         next.folder = FolderScope(path: path, subfolders: subfolders)

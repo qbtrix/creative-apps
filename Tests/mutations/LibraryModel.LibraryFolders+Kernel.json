@@ -33,5 +33,12 @@
     "find": "folderRows(node.children, depth: depth + 1)",
     "replace": "folderRows(node.children, depth: depth)",
     "tests": "LibraryFoldersTests/list"
+  },
+  {
+    "label": ".trailingSlash: view.show-folder keeps a trailing slash, so /trips/ is refused",
+    "file": "Sources/LibraryModel/LibraryFolders+Kernel.swift",
+    "find": "while path.count > 1, path.hasSuffix(\"/\") { path.removeLast() }",
+    "replace": "_ = path.count",
+    "tests": "LibraryFoldersTests/showFolder"
   }
 ]
