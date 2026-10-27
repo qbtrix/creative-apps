@@ -419,3 +419,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T23:01Z poll: every lead head is clean with fast-lane and has no local-ci/prescreen status yet; dev-red #5818 open (the lane's flake rerun is in flight at 6dab26f); main fef52e668, dev 7b2c4373f.
 - 23:14Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev bddf9c033, main fef52e668.
 - 2026-10-27T23:25Z poll: no change on our PRs (all clean with fast-lane, no prescreen yet). dev-red #5818 is real after the lane's flake rerun (macos, range main..6dab26f, ~170 PRs); not ours to fix, the lane bisects. main fef52e668, dev bddf9c033.
+- 23:33Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev bddf9c033, main fef52e668.
