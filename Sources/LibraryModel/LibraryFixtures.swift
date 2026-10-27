@@ -1,5 +1,6 @@
 // LibraryFixtures.swift: the named fixtures `-LibraryFixture <name>` loads
-// (blueprint 4.1), built in code so every run sees the same photos.
+// (blueprint 4.1), built in code so every run sees the same photos. `large-folders` is the large-catalog
+// photos with paths, for the FOLDERS render budget; `folders` is the FOLDERS snapshot's small tree.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -18,6 +19,8 @@ public enum LibraryFixtures {
         case "cameras", "cameras-unimported": cameras()
         case "large": large()
         case "large-missing": largeMissing()
+        case "large-folders": largePhotos(count: 10_000, folder: "/fixture/large")
+        case "folders": folders()
         default: []
         }
     }
@@ -95,6 +98,22 @@ public enum LibraryFixtures {
         large().enumerated().map { index, photo in
             var photo = photo
             if index % 20 == 19 { photo.availability = .missing }
+            return photo
+        }
+    }
+
+    /// The FOLDERS snapshot's tree under `/fixture/folders/`: trips (one photo, with 2025 holding two and 2026
+    /// one), trip (a name prefix of trips) with one, and family with two, both missing from disk.
+    static func folders() -> [PhotoItem] {
+        let files = ["trips/coast", "trips/2025/lisbon", "trips/2025/porto", "trips/2026/kyoto", "trip/tripod",
+                     "family/birthday", "family/picnic"]
+        let start = Date(timeIntervalSince1970: 1_780_308_000)  // 2026-06-01 10:00 UTC
+        return files.enumerated().map { index, file in
+            let path = "/fixture/folders/" + file + ".jpg"
+            var photo = PhotoItem(
+                id: path, name: String(file.split(separator: "/").last ?? ""), captureDate: start.addingTimeInterval(Double(index) * 60),
+                color: Color3(0.3 + 0.08 * Double(index), 0.5, 0.7 - 0.08 * Double(index)), path: path)
+            if file.hasPrefix("family/") { photo.availability = .missing }
             return photo
         }
     }

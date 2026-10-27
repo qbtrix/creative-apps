@@ -33,5 +33,19 @@
     "find": "folderRows(node.children, depth: depth + 1)",
     "replace": "folderRows(node.children, depth: depth)",
     "tests": "LibraryFoldersTests/list"
+  },
+  {
+    "label": ".trailingSlash: view.show-folder looks a path up as typed, so /trips/ is refused",
+    "file": "Sources/LibraryModel/LibraryFolders+Kernel.swift",
+    "find": "let path = Self.folderPath(path)",
+    "replace": "let path = path",
+    "tests": "LibraryFoldersFixtureTests/showFolder"
+  },
+  {
+    "label": ".oneSlashOnly: only one trailing slash is dropped, so /trips/2025// is refused",
+    "file": "Sources/LibraryModel/LibraryFolders+Kernel.swift",
+    "find": "while path.count > 1, path.hasSuffix(\"/\") { path.removeLast() }",
+    "replace": "if path.count > 1, path.hasSuffix(\"/\") { path.removeLast() }",
+    "tests": "LibraryFoldersFixtureTests/showFolder"
   }
 ]
