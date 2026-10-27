@@ -522,3 +522,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 16:15Z check-in: #3482 quiet, no open Flare file-flow findings. Gaps #4764 and #1829 still open.
 
 - 16:47Z check-in: #3482 quiet, no open Flare file-flow findings. Gaps #4764 and #1829 still open.
+
+- 17:19Z check-in: #3482 quiet, no open Flare file-flow findings. Gaps #4764 and #1829 still open.
