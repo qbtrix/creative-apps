@@ -312,3 +312,4 @@ utc	stage	event	ref	note
 2026-10-27T00:19Z	check-in	batch of 7 merged 00:08Z (incl. Photo PT-5 #5817, not ours); dev-red #5818 open (not ours); #5353 open (p0, clean); #5758/#5763 unlabelled, still not batched; no new findings; PX-9 waits on #5353
 2026-10-27T00:51Z	check-in	#5353 still open (clean); #5758/#5763 open, no needs-fix/rebase; no new findings; dev-red #5818 open, not ours; 13 merges 00:29-00:44Z (incl. suiteui XP-10 #5805/#5806), none ours
 2026-10-27T01:23Z	check-in	#5353 still open (clean); #5758/#5763 open, no needs-fix/rebase; no new findings; dev-red #5818 open, not ours; batch of 4 at 01:19-01:20Z, none ours
+2026-10-27T01:55Z	check-in	#5353 still open (clean); #5758/#5763 open, no needs-fix/rebase; new finding #5828 (revert of #5263) belongs to orientation-crop lead act-1a178a4b1c2-ibn1, not ours; dev-red #5818 open; #4899 merged, not ours
