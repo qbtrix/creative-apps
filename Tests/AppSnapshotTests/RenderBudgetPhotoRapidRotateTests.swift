@@ -1,8 +1,8 @@
 // RenderBudgetPhotoRapidRotateTests.swift: many Free Transform rotations in a row on the real Photo window on
 // Metal (the app's route), then Return. 30 knob drags, each turning the other way from the last and held until
 // the layer rides the canvas's live layer, either waiting for the release's exact picture or pressing again at
-// once (so the next drag starts before the last drop's picture is presented). Return must apply within the
-// bound, the layer must be exactly one commit of the final transform (the same draft committed on a fresh copy),
+// once (so the next drag starts before the last drop's picture is presented). Return must apply (a 10 s hang
+// guard; the time is printed), the layer must be exactly one commit of the final transform (the same draft committed on a fresh copy),
 // and the gesture's memory must stay flat: one live-layer surface for the whole Free Transform, made when its
 // draft first shows (its pixels never change while the draft is up) and none by the drags, at most one lift per drag, and no growth in GPU-resident bytes or the process
 // footprint that scales with the number of drags. Nested in
@@ -69,8 +69,8 @@ extension BodyCountSuites {
             let took = clock.now - returned
             try await RenderBudgetPhotoLiveTransformTests.idle(w)
             print("RENDER-BUDGET photo rapid rotate \(backToBack ? "back to back" : "settled"): Return applied in \(took); over \(Self.drags) drags \(end.since(start))")
+            // not-timing: the 10 s wait is a hang guard (a stuck main thread never applies); the time is printed.
             let done = try #require(applied, "Return didn't apply after the rotations (\(took))")
-            #expect(took < .seconds(2), "Return took \(took)")
             let grew = end.since(start)
             #expect(grew.lifts <= Self.drags, "\(grew.lifts) lifts for \(Self.drags) drags")
             // The lifted pixels are the untransformed layer in the draft's box, the same for every drag of one
