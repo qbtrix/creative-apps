@@ -16,6 +16,8 @@
 // 4. Click the palette's Move (`design.tool.move`): it is selected, the status line reads Move, A still selected
 //    ("1 Layer").
 // 5. Keyboard parity: press I, the Eyedropper is selected; press V, Move is back.
+// The Fill/Stroke picker is a system segmented Picker, so a segment's state is read as selected or as its
+// value (1 for the picked one), the accessibility value a radio button carries.
 // Shots: design-eyedropper-active, -fill, -stroke, -stroke-target, -move.
 import XCTest
 
@@ -64,7 +66,7 @@ final class DesignEyedropperJourneyTests: XCTestCase {
         let stroke = control(design, Self.target).descendants(matching: .any)["Stroke"].firstMatch
         XCTAssert(stroke.waitForExistence(timeout: 5), "the picker has no Stroke choice")
         stroke.click()
-        XCTAssert(Self.waitUntil { stroke.isSelected }, "clicking Stroke didn't pick it")
+        XCTAssert(Self.waitUntil { Self.isPicked(stroke) }, "clicking Stroke didn't pick it")
         let five = control(design, "suite.sample.size.5")
         XCTAssert(five.waitForExistence(timeout: 5), "the inspector shows no 5 × 5 chip (suite.sample.size.5)")
         five.click()
@@ -142,6 +144,11 @@ final class DesignEyedropperJourneyTests: XCTestCase {
     @MainActor private static func text(_ element: XCUIElement) -> String {
         let value = element.value as? String ?? ""
         return value.isEmpty ? element.label : value
+    }
+
+    /// Whether a system segmented picker's segment is the picked one: selected, or valued 1.
+    @MainActor private static func isPicked(_ segment: XCUIElement) -> Bool {
+        segment.isSelected || (segment.value as? NSNumber)?.intValue == 1
     }
 
     /// Whether `element`'s label reads `label` within `timeout` seconds.
