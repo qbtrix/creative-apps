@@ -394,3 +394,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 22:08Z #5250 (photo-catalog) force-pushed a04ba7720 on dev 014429488: scripts/ci --changed PASS, AfterGlowCLITests|LiveStandInTests|PhotoCommandCatalogTests 179 pass, mutate --validate OK. Head line moved; fast-lane added back, needs-split removed; now clean +54-12 f=12. Waits for local-ci/prescreen. #5259 photo-ui restacks after it lands.
 - 22:16Z check-in: #5249, #5252 clean; #5250 unstable only because the fast-lane job is in progress on a04ba7720. All wait for local-ci/prescreen. dev 014429488, main fef52e668.
 - 22:35Z check-in: #5250 restacked by the other session to df908bed4 (dev 7b2c4373f, Head line current, clean +54-11 f=12); local worktree reset to it. #5249, #5252 clean. All wait for local-ci/prescreen. main fef52e668.
+- 22:55Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 7b2c4373f, main fef52e668.
