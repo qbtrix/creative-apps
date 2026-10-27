@@ -2,7 +2,8 @@
 // (packet docs/blueprints/library/features/folders.md, Journey step 1). Three fixture folders are imported
 // into one catalog, `trips` with 2025/ and 2026/ inside: FOLDERS shows each with its count, a subfolder's click
 // shows only its photos, and Include Subfolders off on `trips` shows only its own, which a later click on it
-// keeps. The three sit in the temporary folder, so FOLDERS roots there and the test opens each collapsed
+// keeps. Then the keyboard (the packet's keyboard parity row): on the selected `trips`, ← closes it, → opens it
+// again and ↓ moves to 2025, whose two photos the grid shows. The three sit in the temporary folder, so FOLDERS roots there and the test opens each collapsed
 // group until the row it wants shows. Rows are found by title in `suite.sidebar`, grid cells by id prefix.
 // On since FO-6.
 import XCTest
@@ -52,17 +53,34 @@ final class LibraryFoldersJourneyTests: XCTestCase {
         expectCells(1, browser, "Include Subfolders off on trips")
         root.click()
         expectCells(1, browser, "a click on trips after Include Subfolders")
+
+        // Keyboard parity: the selected trips closes on ←, opens on →, and ↓ moves to 2025 and shows its photos.
+        let shown = row("2025", browser)
+        browser.app.typeKey(.leftArrow, modifierFlags: [])
+        let gone = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: shown)
+        XCTAssertEqual(XCTWaiter.wait(for: [gone], timeout: 5), .completed, "← didn't close trips")
+        browser.app.typeKey(.rightArrow, modifierFlags: [])
+        XCTAssert(shown.waitForExistence(timeout: 5), "→ didn't open trips")
+        browser.app.typeKey(.downArrow, modifierFlags: [])
+        expectCells(2, browser, "↓ from trips onto 2025")
+        XCTAssert(shown.isSelected, "↓ didn't select 2025")
+        browser.shot("library-folders-keyboard", element: browser.element("suite.sidebar"))
+    }
+
+    /// The sidebar row titled `title` as it is now, opening nothing.
+    @MainActor private func row(_ title: String, _ library: Journey) -> XCUIElement {
+        let types = [XCUIElement.ElementType.tableRow, .outlineRow, .cell].map { NSNumber(value: $0.rawValue) }
+        return library.element("suite.sidebar").descendants(matching: .any)
+            .matching(NSPredicate(format: "elementType IN %@", types))
+            .containing(NSPredicate(format: "label == %@ OR value == %@", title, title)).firstMatch
     }
 
     /// The sidebar row titled `title`, opening every collapsed group in the sidebar until it shows.
     @MainActor private func folderRow(_ title: String, _ library: Journey) -> XCUIElement {
-        let types = [XCUIElement.ElementType.tableRow, .outlineRow, .cell].map { NSNumber(value: $0.rawValue) }
-        let sidebar = library.element("suite.sidebar")
-        let row = sidebar.descendants(matching: .any).matching(NSPredicate(format: "elementType IN %@", types))
-            .containing(NSPredicate(format: "label == %@ OR value == %@", title, title)).firstMatch
-        let closed = sidebar.disclosureTriangles.matching(NSPredicate(format: "value == 0"))
-        for _ in 0..<12 where !row.waitForExistence(timeout: 2) && closed.count > 0 { closed.firstMatch.click() }
-        return row
+        let found = row(title, library)
+        let closed = library.element("suite.sidebar").disclosureTriangles.matching(NSPredicate(format: "value == 0"))
+        for _ in 0..<12 where !found.waitForExistence(timeout: 2) && closed.count > 0 { closed.firstMatch.click() }
+        return found
     }
 
     /// The grid shows `count` cells.
