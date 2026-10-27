@@ -48,12 +48,13 @@ import Testing
     @Test func everyExampleRunsInOrderAndUndoRestoresTheSavedBytes() throws {
         var workspace = opened()
         let saved = try FlareFormat.encode(try #require(workspace.document))
-        // FlareCore has not built shape keyframes yet (TrackCommands.notBuilt), so the dry run says so.
+        // FlareCore has not built shape keyframes yet (TrackCommands.notBuilt), so the dry run says that, not a
+        // generic refusal a caller can't tell from a bad param (#5283).
         let notBuilt: Set = ["shape-key.set", "shape-key.remove"]
         let coreIDs = Dictionary(uniqueKeysWithValues: CommandRegistry.builtIn.ids.map { (FlareWorkspace.catalogID($0), $0) })
         for spec in FlareWorkspace.coreCommands {
             guard !notBuilt.contains(spec.id) else {
-                #expect(catalog.availability(spec.id, on: workspace) == .unavailable("That change could not be made."))
+                #expect(catalog.availability(spec.id, on: workspace) == .unavailable("That isn\u{2019}t built in Flare yet."))
                 continue
             }
             if let coreID = coreIDs[spec.id], FlareWorkspace.notDrawnOnStage.contains(coreID) {

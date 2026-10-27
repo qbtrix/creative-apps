@@ -20,6 +20,7 @@ final class HaloSuiteMenusJourneyTests: XCTestCase {
             XCUIApplication(bundleIdentifier: Self.launcher).terminate()
             try? FileManager.default.removeItem(at: support)
         }
+        try JourneyLive.grant("halo", in: support)
         let halo = Journey("Halo", self, arguments: ["-HaloWindowSize", "1000x640", "-SuiteSupportDir", support.path],
                            bundle: Self.bundle)
         XCTAssert(halo.app.windows.firstMatch.waitForExistence(timeout: 10), "Halo opened no window")
@@ -30,7 +31,7 @@ final class HaloSuiteMenusJourneyTests: XCTestCase {
         XCTAssert(help.contains("Report a Problem…") && help.contains("Beta Notes"), "Help lacks the suite's items: \(help)")
         openAIAccess(in: halo)
         switchHome(from: halo)
-        attempt("live") { throw XCTSkip("the journey has no afterglow client to call Halo's live socket and answer its approval sheet") }
+        attempt("live") { try liveReachesProject(halo) }
         reopenFromDock(halo)
         if !skips.isEmpty { throw XCTSkip(skips.joined(separator: "; ")) }
     }
@@ -96,6 +97,23 @@ final class HaloSuiteMenusJourneyTests: XCTestCase {
         XCTAssertEqual(NSWorkspace.shared.frontmostApplication?.bundleIdentifier, Self.launcher, "clicking Home didn't bring the launcher forward")
         NSRunningApplication.runningApplications(withBundleIdentifier: Self.launcher).forEach { $0.terminate() }
         halo.app.activate()
+    }
+
+    /// A granted client's `composition.new` over the live socket lands in the front window: the reply names
+    /// its undo step, Edit's Undo item now names it too, and the new composition shows; shot as `suite-menus-live`.
+    @MainActor private func liveReachesProject(_ halo: Journey) throws {
+        halo.app.activate()
+        let before = JourneyLive.undoTitle(in: halo)
+        let result = try JourneyLive.run("halo", "composition.new", params: ["name": "Live Comp"])
+        let step = result["undoStep"] as? String ?? ""
+        XCTAssertFalse(step.isEmpty, "the live call named no undo step: \(result)")
+        let named = NSPredicate(format: "label == %@ OR value == %@ OR title == %@", "Live Comp", "Live Comp", "Live Comp")
+        let shown = halo.app.descendants(matching: .any).matching(named).firstMatch.waitForExistence(timeout: 5)
+        let after = JourneyLive.undoTitle(in: halo)
+        halo.shot("suite-menus-live")
+        XCTAssert(shown, "the live call's composition doesn't show in the window")
+        XCTAssertNotEqual(after, before, "the live call left Edit's Undo at \(before): the project didn't change")
+        XCTAssertEqual(after, "Undo \(step)", "Edit's Undo doesn't name the live call's step")
     }
 
     /// Closes every window by its close button, answering Don't Save if a window asks; then opens the

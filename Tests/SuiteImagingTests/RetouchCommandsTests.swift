@@ -1,15 +1,17 @@
 // RetouchCommandsTests.swift (fill-heal FH-1 written, FH-6 on): the four fill
 // and heal commands on a test target with a kernel `History`: their ids,
 // titles and availability, each run being one undo step that undo reverses
-// byte for byte, remove falling back to the selection, and the reasons a
-// command can't run. Mutations (FH-6): SuiteImaging.RetouchCommands
-// (`.undoRestoresBytes`, `.removeUsesSelection`).
+// byte for byte, remove falling back to the selection, the bucket weighting
+// a feathered edge by the selection once (#5094), and the reasons a command
+// can't run. Mutations (FH-6): SuiteImaging.RetouchCommands
+// (`.undoRestoresBytes`, `.removeUsesSelection`, `.selectionWeighsOnce`).
 import CoreRaster
 import Testing
 import SuiteKernel
 import SuiteImaging
 
 /// One pixel layer (or none), the merged picture, a selection, a paint colour, a clone source and a history of whole layers.
+/// Like an app's, its write mixes each new pixel in by the selection's coverage.
 struct RetouchDoc: RetouchTarget {
     var pixels: PixelBuffer? = RetouchDoc.texture
     var merged: PixelBuffer? = RetouchDoc.texture
@@ -24,7 +26,15 @@ struct RetouchDoc: RetouchTarget {
     var selectionCoverage: Mask? { selection }
     var paintColor: RGBA { color }
     var cloneOffset: (dx: Int, dy: Int)? { offset }
-    mutating func replaceTarget(_ p: PixelBuffer, name: String) throws { history.record(name, pixels); pixels = p }
+    mutating func replaceTarget(_ p: PixelBuffer, name: String) throws {
+        var out = p
+        if let selection, let old = pixels {
+            out = old
+            try out.composite(p, x: 0, y: 0, mode: .normal, opacity: 1, mask: selection, maskX: 0, maskY: 0)
+        }
+        history.record(name, pixels)
+        pixels = out
+    }
     /// Undoes the last step; false when there is none.
     mutating func undo() -> Bool {
         var current = pixels
@@ -103,6 +113,22 @@ struct RetouchDoc: RetouchTarget {
             try catalog.run("retouch.remove", params: .object([:]), on: &nothing)
         }
         #expect(nothing.history.steps.isEmpty && nothing.pixels == RetouchDoc.texture)
+    }
+
+    @Test func bucketWeighsAFeatheredSelectionOnce() throws {
+        let catalog = try #require(Self.catalog)
+        var alpha = try PixelBuffer(width: 8, height: 8)
+        for y in 2..<6 { for x in 2..<6 { try alpha.setPixel(x: x, y: y, RGBA(r: 0, g: 0, b: 0, a: 1)) } }
+        try alpha.setPixel(x: 6, y: 3, RGBA(r: 0, g: 0, b: 0, a: 0.5))
+        let black = RGBA(r: 0, g: 0, b: 0, a: 1)
+        let flat = try PixelBuffer(width: 8, height: 8, fill: black)
+        var doc = RetouchDoc(pixels: flat, merged: flat, selection: try Mask(from: alpha, .alpha), color: RGBA(r: 1, g: 1, b: 1, a: 1))
+        _ = try catalog.run("fill.bucket", params: .object(["x": .number(3), "y": .number(3), "tolerance": .number(0)]), on: &doc)
+        let pixels = try #require(doc.pixels)
+        #expect(try pixels.pixel(x: 3, y: 3) == RGBA(r: 1, g: 1, b: 1, a: 1))
+        let edge = try pixels.pixel(x: 6, y: 3)
+        for v in [edge.r, edge.g, edge.b] { #expect(abs(v - 0.5) <= 1 / 255, "the half-selected pixel is \(v), not half-way") }
+        #expect(try pixels.pixel(x: 7, y: 3) == black && pixels.pixel(x: 0, y: 0) == black)
     }
 
     @Test func unavailableCommandsSayWhy() throws {

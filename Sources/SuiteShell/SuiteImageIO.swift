@@ -4,6 +4,7 @@
 // one image encoded as a registry format, and frames written as an animated
 // GIF or APNG. Shared-codecs'
 // SC-2 and SC-4 add decoding, file info and the CoreRaster paths beside them.
+// Export-pack's XP-7 adds the metadata calls StillMetadata makes.
 // Formats come from SuiteImageFormats, so this file spells out no list of its own.
 import CoreGraphics
 import CoreRaster
@@ -114,6 +115,57 @@ public enum SuiteImageIO {
         guard CGImageDestinationFinalize(destination) else {
             throw .ioFailed("the \(format.title) image couldn't be encoded")
         }
+        return data as Data
+    }
+
+    // MARK: Export-pack's metadata calls (XP-7, for Media/StillMetadata.swift)
+
+    /// The first image's properties: top-level values (`Orientation`, `ProfileName`, ...) and the `{Exif}`,
+    /// `{TIFF}`, `{GPS}` and other dictionaries, keyed as ImageIO names them.
+    public static func properties(_ data: Data) throws(SuiteError) -> [String: Any] {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil), CGImageSourceGetCount(source) > 0,
+            let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [String: Any]
+        else { throw .readFailed("this image's metadata") }
+        return properties
+    }
+
+    /// `still` with `source`'s metadata tags for exactly the `kept` properties (`("{Exif}", "DateTimeOriginal")`)
+    /// as its only metadata, its compressed pixels copied as they are (`CGImageDestinationCopyImageSource`).
+    /// Nil when either can't be read or the still's format can't be copied this way.
+    public static func copyingTags(_ still: Data, from source: Data, keeping kept: [(dictionary: String, key: String)]) -> Data? {
+        guard let image = CGImageSourceCreateWithData(still as CFData, nil), let type = CGImageSourceGetType(image),
+            let origin = CGImageSourceCreateWithData(source as CFData, nil),
+            let tags = CGImageSourceCopyMetadataAtIndex(origin, 0, nil)
+        else { return nil }
+        let metadata = CGImageMetadataCreateMutable()
+        for (dictionary, key) in kept {
+            guard let tag = CGImageMetadataCopyTagMatchingImageProperty(tags, dictionary as CFString, key as CFString),
+                let prefix = CGImageMetadataTagCopyPrefix(tag), let name = CGImageMetadataTagCopyName(tag)
+            else { continue }
+            CGImageMetadataSetTagWithPath(metadata, nil, "\(prefix as String):\(name as String)" as CFString, tag)
+        }
+        let data = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(data as CFMutableData, type, 1, nil) else { return nil }
+        let options: [CFString: Any] = [kCGImageDestinationMetadata: metadata, kCGImageDestinationMergeMetadata: false]
+        // CopyImageSource writes the destination itself: no Finalize after it.
+        guard CGImageDestinationCopyImageSource(destination, image, options as CFDictionary, nil) else { return nil }
+        return data as Data
+    }
+
+    /// `still` encoded again in its own format at full quality with `properties` (the `{Exif}`-style
+    /// dictionaries and `Orientation`) added to its own: the route for a still `copyingTags` can't copy.
+    public static func reencoding(_ still: Data, properties: [String: Any]) throws(SuiteError) -> Data {
+        guard let image = CGImageSourceCreateWithData(still as CFData, nil), CGImageSourceGetCount(image) > 0,
+            let type = CGImageSourceGetType(image)
+        else { throw .readFailed("the still") }
+        let data = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(data as CFMutableData, type, 1, nil) else {
+            throw .notAvailable("This Mac can't write this still's format.")
+        }
+        var all = properties
+        all[kCGImageDestinationLossyCompressionQuality as String] = 1.0
+        CGImageDestinationAddImageFromSource(destination, image, 0, all as CFDictionary)
+        guard CGImageDestinationFinalize(destination) else { throw .ioFailed("the still's metadata couldn't be written") }
         return data as Data
     }
 

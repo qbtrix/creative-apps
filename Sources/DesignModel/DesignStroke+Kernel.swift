@@ -31,14 +31,26 @@ extension DesignWorkspace: StrokeTarget {
     public static let trimPathsHelp = "Trim paths are for animation, in Flare and Halo."
 
     /// "Open a design first." with no file; else the primary layer's reason (nothing selected, editing text,
-    /// locked); else "Show A to change it." for the first unlocked hidden layer, which the inspector refuses too.
-    /// Other locked layers in the selection don't refuse: `setStroke` skips them.
+    /// locked); else "Show A to change it." for the first hidden layer a stroke would reach. Other locked layers in
+    /// the selection don't refuse: both edit paths skip them (`strokeIDs`).
     public var strokeHelp: String? {
         guard isOpen else { return "Open a design first." }
         guard let node = selectedNode, editingTextID == nil else { return styleHelp(.stroke) }
         if let why = lockHelp(node.id) { return why }
-        guard let hidden = selectedNodeIDs.first(where: { !isLockedInTree($0) && isHiddenInTree($0) }) else { return nil }
+        guard let hidden = strokeIDs.first(where: isHiddenInTree) else { return nil }
         return DesignRefusal.hidden(findNode(hidden)?.name ?? hidden).help
+    }
+
+    /// The selected layers a stroke edit sets, from the catalog or the inspector: every one not locked in the tree.
+    var strokeIDs: [String] { selectedNodeIDs.filter { !isLockedInTree($0) } }
+
+    /// The inspector's stroke edit (`setStyle(.stroke)`) on `strokeIDs`, so it skips a locked layer as `setStroke`
+    /// does; the selection stays whole. With none to set, the whole selection, so the refusal names the lock.
+    func strokeEdit(_ stroke: DesignStroke?, on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        let ids = strokeIDs.isEmpty ? selectedNodeIDs : strokeIDs
+        var edit = try services.styling.setStroke(stroke, ids, on: page)
+        edit.selection = selectedNodeIDs
+        return edit
     }
 
     public var trimHelp: String? { Self.trimPathsHelp }
@@ -58,7 +70,7 @@ extension DesignWorkspace: StrokeTarget {
     public mutating func setStroke(_ stroke: VectorStroke?, name: String, drag: String?) throws {
         if let why = strokeHelp { throw CatalogError.failed(id: "stroke", message: why) }
         guard gesture == nil else { throw CatalogError.failed(id: "stroke", message: "Finish the drag first.") }
-        let ids = selectedNodeIDs.filter { !isLockedInTree($0) }
+        let ids = strokeIDs
         let before = snapshot
         for id in ids { _ = pages.update(id) { $0.stroke = stroke } }
         guard snapshot != before else { if drag != nil { return }; throw DesignRefusal.unchanged }
@@ -90,9 +102,4 @@ private struct StrokeProbe: StrokeTarget {
 
     static let catalog = (try? CommandCatalog(app: "design-stroke", StrokeCommands.specs(StrokeProbe.self),
                                               history: { _ in History<Int>() })) ?? .empty(app: "design-stroke")
-}
-
-extension DesignSVG {
-    /// A kernel stroke colour as SVG hex, rounded to bytes as `DesignColor` rounds it.
-    static func hex(_ color: FillColor) -> String { hex(DesignColor(kernel: color)) }
 }
