@@ -1,7 +1,7 @@
 // DesignJourneyTests+Export.swift: J19, File > Export… on the fakes
 // (design-export DE-6, DE-7; docs/blueprints/design/features/design-export.md,
 // Journeys). On `-DesignServices fake -DesignFixture cards` at 1024 × 768:
-// Desktop's row is clicked, ⇧⌘E opens the export sheet
+// Desktop's row is clicked, File > Export… opens the export sheet
 // (`design.export.sheet`), whose list (`design.export.items`) reads
 // "Desktop.png 1440 × 1024 pt, 1x"; the 2x chip (`design.export.scale.2x`)
 // makes it "2880 × 2048 px". Export (`design.export.start`) runs the fake
@@ -13,7 +13,10 @@
 // the folder panel: J17 writes Desktop as PNG 2x, SVG and PDF and reads each
 // file back; J18 exports PNG 1x twice ("Desktop 2.png" beside an unchanged
 // "Desktop.png"), Escape and Cancel write nothing, and a read-only folder
-// ends the run on the failed line with the system's reason.
+// ends the run on the failed line with the system's reason. Every opening
+// clicks File > Export…; ⇧⌘E (J19's last opening) and Escape (J18) are each
+// checked once, as the keyboard twins. Each live run is shot on its finished
+// line before Done, and J19 shoots the window after Done and after Cancel.
 import CoreGraphics
 import ImageIO
 import XCTest
@@ -32,13 +35,8 @@ final class DesignExportJourneyTests: XCTestCase {
         design.clickDesignLayer(Self.desktopRow)
 
         // 1. File > Export…: the sheet lists Desktop at 1x; 2x doubles it.
-        let file = design.app.menuBars.firstMatch.menuBarItems["File"]
-        file.click()
-        let export = file.menuItems["Export…"]
-        XCTAssert(export.waitForExistence(timeout: 3), "the File menu shows no Export…")
-        export.click()
+        openExportFromMenu(design, "Desktop selected")
         let sheet = design.element(Self.sheetID), items = design.element(Self.itemsID)
-        XCTAssert(sheet.waitForExistence(timeout: 5), "File > Export… opened no sheet")
         XCTAssert(Self.waitUntil { self.reads(items, "Desktop.png 1440 × 1024 pt, 1x") }, "the list doesn't name Desktop at 1x")
         design.element("design.export.scale.2x").click()
         XCTAssert(Self.waitUntil { self.reads(items, "2880 × 2048 px") }, "2x left the list without 2880 × 2048 px")
@@ -55,16 +53,15 @@ final class DesignExportJourneyTests: XCTestCase {
         XCTAssertEqual(image?.height, 2048, "Desktop.png isn't 2048 px high")
         design.element(Self.doneID).click()
 
-        // 3. ⇧⌘E, SVG, Export: Desktop.svg's first element is <svg with the frame's viewBox.
-        exportAgain(design, format: "svg", expecting: "Exported 1 file to")
+        // 3. File > Export…, SVG, Export: Desktop.svg's first element is <svg with the frame's viewBox.
+        exportAgain(design, format: "svg", expecting: "Exported 1 file to", shot: "export-live-svg")
         let svg = try String(contentsOf: folder.appendingPathComponent("Desktop.svg"), encoding: .utf8)
         XCTAssert(svg.hasPrefix("<svg") && svg.contains("viewBox=\"0 0 1440 1024\""), "Desktop.svg isn't the frame's SVG")
 
-        // 4. ⇧⌘E, PDF, Export: Desktop.pdf opens with one page.
-        exportAgain(design, format: "pdf", expecting: "Exported 1 file to")
+        // 4. File > Export…, PDF, Export: Desktop.pdf opens with one page.
+        exportAgain(design, format: "pdf", expecting: "Exported 1 file to", shot: "export-live-pdf")
         let pdf = CGPDFDocument(folder.appendingPathComponent("Desktop.pdf") as CFURL)
         XCTAssertEqual(pdf?.numberOfPages, 1, "Desktop.pdf doesn't open with one page")
-        design.shot("export-live-pdf")
     }
 
     /// J18: a second export never overwrites the first, Escape and Cancel write nothing, and a
@@ -87,22 +84,19 @@ final class DesignExportJourneyTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: first), bytes, "the second export changed Desktop.png")
         design.shot("export-no-overwrite")
 
-        // 2. Escape on an open sheet, then Cancel: no third file.
+        // 2. Escape on an open sheet (Escape's one check), then Cancel: no third file.
         let sheet = design.element(Self.sheetID)
-        design.press(character: "e", [.command, .shift])
-        XCTAssert(sheet.waitForExistence(timeout: 5), "⇧⌘E opened no sheet")
+        openExportFromMenu(design, "before Escape")
         design.press(.escape)
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "Escape left the sheet open")
-        design.press(character: "e", [.command, .shift])
-        XCTAssert(sheet.waitForExistence(timeout: 5), "⇧⌘E opened no sheet after Escape")
+        openExportFromMenu(design, "after Escape")
         design.element(Self.cancelID).click()
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "Cancel left the sheet open")
         XCTAssertEqual(try Self.listing(folder).count, 2, "Escape or Cancel wrote a file")
 
         // 3. Nothing selected: the sheet opens on Frame and lists every top-level frame.
         design.element("suite.canvas").coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.98)).click()
-        design.press(character: "e", [.command, .shift])
-        XCTAssert(sheet.waitForExistence(timeout: 5), "⇧⌘E opened no sheet with nothing selected")
+        openExportFromMenu(design, "nothing selected")
         XCTAssert(design.element("design.export.scope.frame").isSelected, "the sheet didn't open on Frame")
         XCTAssert(Self.waitUntil { self.reads(design.element(Self.itemsID), "Desktop") }, "the list doesn't hold Desktop")
 
@@ -124,10 +118,9 @@ final class DesignExportJourneyTests: XCTestCase {
         let design = launch(Self.arguments)
         design.clickDesignLayer(Self.desktopRow)
 
-        // 1. ⇧⌘E: the sheet lists Desktop at 1x.
-        design.press(character: "e", [.command, .shift])
+        // 1. File > Export…: the sheet lists Desktop at 1x.
+        openExportFromMenu(design, "J19")
         let sheet = design.element(Self.sheetID)
-        XCTAssert(sheet.waitForExistence(timeout: 5), "⇧⌘E opened no export sheet (\(Self.sheetID))")
         let items = design.element(Self.itemsID)
         XCTAssert(Self.waitUntil { self.reads(items, "Desktop.png 1440 × 1024 pt, 1x") }, "the list doesn't name Desktop at 1x")
         design.shot("export-sheet")
@@ -147,23 +140,36 @@ final class DesignExportJourneyTests: XCTestCase {
         // 4. Done closes the sheet.
         design.element(Self.doneID).click()
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "Done left the sheet open")
+        design.shot("export-closed")
 
-        // 5. ⇧⌘E then Cancel: no sheet remains.
+        // 5. ⇧⌘E (the menu item's one keyboard check) then Cancel: no sheet remains.
         design.press(character: "e", [.command, .shift])
-        XCTAssert(sheet.waitForExistence(timeout: 5), "the second ⇧⌘E opened no sheet")
+        XCTAssert(sheet.waitForExistence(timeout: 5), "⇧⌘E opened no sheet")
         design.element(Self.cancelID).click()
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "Cancel left the sheet open")
         XCTAssertFalse(design.app.sheets.firstMatch.exists, "a sheet is still attached after Cancel")
+        design.shot("export-cancelled")
     }
 
-    /// ⇧⌘E, the `format` chip, Export: the finished line reads `expecting`, then Done.
-    @MainActor private func exportAgain(_ design: Journey, format: String, expecting: String) {
+    /// Clicks the menu bar's File, then Export…: the sheet opens. `when` names the step in a failure.
+    @MainActor private func openExportFromMenu(_ design: Journey, _ when: String) {
+        let file = design.app.menuBars.firstMatch.menuBarItems["File"]
+        file.click()
+        let export = file.menuItems["Export…"]
+        XCTAssert(export.waitForExistence(timeout: 3), "the File menu shows no Export… (\(when))")
+        export.click()
+        XCTAssert(design.element(Self.sheetID).waitForExistence(timeout: 5), "File > Export… opened no sheet (\(when))")
+    }
+
+    /// File > Export…, the `format` chip, Export: the finished line reads `expecting` (shot as
+    /// `shot` when given), then Done.
+    @MainActor private func exportAgain(_ design: Journey, format: String, expecting: String, shot: String? = nil) {
         let sheet = design.element(Self.sheetID)
-        design.press(character: "e", [.command, .shift])
-        XCTAssert(sheet.waitForExistence(timeout: 5), "⇧⌘E opened no sheet for \(format)")
+        openExportFromMenu(design, format)
         design.element("design.export.format.\(format)").click()
         design.element(Self.startID).click()
         XCTAssert(Self.waitUntil(timeout: 10) { self.reads(sheet, expecting) }, "the \(format) run never read \(expecting)")
+        if let shot { design.shot(shot) }
         design.element(Self.doneID).click()
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "Done left the \(format) sheet open")
     }
