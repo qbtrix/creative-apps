@@ -28,6 +28,8 @@ public struct PhotoHeadless: HeadlessDropReceiver {
 
     /// The image the commands edit.
     public private(set) var workspace: PhotoWorkspace
+    /// The codec its file was read with, which hands back the read PNGs of images an edit left alone.
+    var files = PhotoReusingCodec(PhotoHeadless.codec)
 
     /// A headless document holding `workspace`.
     public init(workspace: PhotoWorkspace) {
@@ -47,12 +49,15 @@ public struct PhotoHeadless: HeadlessDropReceiver {
     /// `open(_:name:)` on `services`.
     public static func open(_ data: Data, name: String, services: PhotoServices) throws -> PhotoHeadless {
         var workspace = PhotoWorkspace(services: services)
+        let files = PhotoReusingCodec(codec)
         switch name.split(separator: ".").last.map({ $0.lowercased() }) ?? "" {
-        case "ora": try workspace.openDocument(workspace.services.archive.package(fromContainer: data), name: name, codec: codec)
-        case let ext where openExtensions.contains(ext): try workspace.openImage(data, name: name, codec: codec)
+        case "ora": try workspace.openDocument(workspace.services.archive.package(fromContainer: data), name: name, codec: files)
+        case let ext where openExtensions.contains(ext): try workspace.openImage(data, name: name, codec: files)
         default: throw CatalogError.unavailable(id: "open", why: openHelp)
         }
-        return PhotoHeadless(workspace: workspace)
+        var document = PhotoHeadless(workspace: workspace)
+        document.files = files
+        return document
     }
 
     /// A white image `width` x `height` (1024 x 768 when absent), its one layer "Background".
@@ -72,7 +77,7 @@ public struct PhotoHeadless: HeadlessDropReceiver {
 
     /// The Photo document's bytes (.ora), as the window's Save writes them.
     public func save() throws -> Data {
-        try workspace.services.archive.container(workspace.documentPackage(codec: Self.codec))
+        try workspace.services.archive.container(workspace.documentPackage(codec: files))
     }
 
     /// The flattened image as "png" or "jpeg" on the suite's export options (`SuiteExportOptions(json:)`: `size`,
