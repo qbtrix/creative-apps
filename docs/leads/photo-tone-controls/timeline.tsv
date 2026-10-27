@@ -245,3 +245,4 @@ utc	stage	event	ref	note
 2026-10-27T02:21Z	check	dev 7703c60d (quarantine renewal #5826 landed for dev-red #5818); #5816 (PT-m) still open/clean, unbatched; no scoped: photo run yet (library + Linux check on 9108a0bc running); PT-u slice-done waits
 2026-10-27T02:43Z	check	scoped: photo run 40439886020 in progress on b971f99b (contains PT-u 5a1094e1); full CI 40439893721 queued on 9c320a9a; #5816 (PT-m) still open/clean, unbatched
 2026-10-27T03:05Z	check	PT-u proof pending: scoped photo 40439886020 in tests, full CI 40439893721 packing build (Linux green). #5816 open, clean, unbatched.
+2026-10-27T03:26Z	check	PT-u proof still running (40439886020 tests, 40439893721 in progress). #5816 open, clean, unbatched; no supervisor reply on #3468.
