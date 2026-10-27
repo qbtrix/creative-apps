@@ -334,3 +334,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 03:19Z check-in: the rest of wave 2 is in the lane now: #5233 in lane/batch-20261027030248, #5235 in 030256, #5236 in 030303. dev unchanged since 547b958c5. dev-red #5818 open, revert #5827 open p0. Wave 3 restack waits for all three.
 - 03:39Z wave 2 merged: #5233 (AJ-6) 308591c9d, #5235 (AJ-4) 8e2ab5fd8, #5236 (AJ-3, fixes #5789) ebcdbb35e. Restacking wave 3 (#5247-#5260) on origin/dev. dev-red #5818 open, revert #5827 open (not ours).
 - 03:43Z wave 3 restack: #5247 AJ-photo gate running; #5248 AJ-library and #5249 AJ-halo cherry-picked onto dev, conflicts resolved, gates next. dev-red #5818 not ours.
+- 03:53Z #5247 AJ-photo: scripts/ci --changed PASS, pushed a07fda892, Head line moved. AJ-library gate running, AJ-halo next. #5250/#5252/#5257/#5258/#5259/#5260 restacked locally on their parents, push after parents land.
