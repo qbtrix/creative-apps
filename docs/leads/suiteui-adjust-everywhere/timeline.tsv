@@ -129,3 +129,4 @@ utc	stage	event	ref	note
 00:58Z	3	check-in	#5064,#5233,#5235,#5236	#5790 (packet) and #5800 (AJ-14) merged to dev; #5064 batch 003016 in flight; #5233/#5235/#5236 queued clean; dev-red #5818 not ours
 01:18Z	3	check-in	#5064,#5233,#5235,#5236	#5064 re-batched (lane/batch-20261027010923, earlier batch dropped on red base); #5233/#5235/#5236 queued clean; dev unchanged since f3ed4b32d; dev-red #5818 not ours
 01:37Z	3	check-in	#5064,#5233,#5235,#5236	dev moved (#4937,#5002,#5025,#5092); #5064 batch dropped again without label or comment, waiting for next batch; all four open clean; dev-red #5818 not ours
+01:58Z	3	check-in	#5064,#5233,#5235,#5236	#5064 in lane/batch-20261027015306, marked -red (base holds dev-red #5818 commit); waits for dev green; all four open clean, no needs-fix
