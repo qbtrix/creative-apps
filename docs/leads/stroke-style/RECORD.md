@@ -2,7 +2,7 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a178669406-n4me · Started: 2026-10-23 (this run resumed 2026-10-26T13:30Z)
-Stage: 3 #5011 rebased onto dev (8e83a267, needs-rebase fixed); DK-z open as #5825; dev-red #5818 open (not ours)
+Stage: 3 quarantine renewed on dev (#5826); dev merged into #5011 (df0715e2) and #5825 (008df629); lane Linux checks pending; dev-red #5818 open (not ours)
 Base: origin/dev; main verified at d3323f6a
 Next: when #5011 lands and a green design ci.yml run holds it: Belt-Slice-Done DK-u (gaps #4990 #4991). When #5825 lands and a green run holds it: Belt-Slice-Done DK-z, then Belt-Contact-Sheet. Supervisor asked on #3441 to renew 5 quarantine entries that expired 10-27 (they fail scripts/ci on dev)
 
