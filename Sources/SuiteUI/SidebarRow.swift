@@ -1,8 +1,9 @@
 // SidebarRow.swift: SidebarItem (id, title, SF Symbol or an app's mark,
-// optional count, row toggles, children, dimmed), SidebarToggle, and the row SuiteWindow draws for an
+// optional count, row toggles, children, dimmed, warning), SidebarToggle, and the row SuiteWindow draws for an
 // item. A dimmed item (a hidden or locked layer) draws its title and symbol in
 // SuiteColor.textSecondary (SidebarRowLook) and stays selectable; its toggles
-// draw as on any row. Row height follows the system sidebar size setting, so nothing here
+// draw as on any row. An item's `warning` (a folder whose photos are all missing) draws a warning symbol
+// before the toggles, its text the tooltip and accessibility label. Row height follows the system sidebar size setting, so nothing here
 // fixes a height. The row owns only presentation state (the rename field);
 // toggles and renames go out through closures, and a nil closure turns that
 // gesture off. A rename the app refuses (its `onRename` returns a message)
@@ -35,13 +36,18 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
     /// Draws the title and symbol in SuiteColor.textSecondary, for a hidden or
     /// locked layer. The row stays selectable and its toggles are unchanged.
     public let isDimmed: Bool
+    /// A warning the row shows as a badge before its count (a folder whose
+    /// files are all missing); the text is its tooltip and accessibility
+    /// label. Nil shows none.
+    public let warning: String?
 
     public init(
         id: String, title: String, systemImage: String, count: Int? = nil,
         toggles: [SidebarToggle] = [], children: [SidebarItem] = [], app: SuiteApp? = nil,
-        isDimmed: Bool = false
+        isDimmed: Bool = false, warning: String? = nil
     ) {
         self.isDimmed = isDimmed
+        self.warning = warning
         self.id = id
         self.title = title
         self.systemImage = systemImage
@@ -63,7 +69,8 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
         children.flatMap { child in
             [SidebarItem(
                 id: child.id, title: child.title, systemImage: child.systemImage, count: child.count,
-                toggles: child.toggles, app: child.app, isDimmed: child.isDimmed)] + child.secondLevelRows
+                toggles: child.toggles, app: child.app, isDimmed: child.isDimmed, warning: child.warning)]
+                + child.secondLevelRows
         }
     }
 }
@@ -219,6 +226,7 @@ public struct SidebarRow: View {
         HStack(spacing: SuiteSpacing.xs) {
             title
             Spacer(minLength: SuiteSpacing.s)
+            SidebarRowWarning(item: item)
             ForEach(item.toggles) { toggle in
                 Toggle(isOn: Binding(get: { toggle.isOn }, set: { _ in onToggle?(toggle.id) })) {
                     Label { Text(toggle.title) } icon: { SidebarToggleIcon(toggle: toggle) }
@@ -335,6 +343,23 @@ private struct SidebarRowIcon: View {
             AppMark(app: app, style: .line).symbolSized()
         } else {
             Image(systemName: item.systemImage)
+        }
+    }
+}
+
+/// A row's warning badge, when it has one: a filled triangle in the warning
+/// color, its text the tooltip and accessibility label. No gesture, so a click on it selects
+/// the row like a click on blank space.
+private struct SidebarRowWarning: View {
+    let item: SidebarItem
+
+    var body: some View {
+        if let text = item.warning {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(SuiteColor.stateWarning)
+                .help(text)
+                .accessibilityLabel(text)
+                .accessibilityIdentifier("suite.sidebar.\(item.id).warning")
         }
     }
 }
