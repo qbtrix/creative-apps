@@ -1,3 +1,170 @@
 utc	stage	event	ref	note
 2026-10-22T17:00Z	0	stage-start	#3936	setup on dev a41e7f1
 2026-10-22T17:05Z	0	stopped	#3937	blocked on suiteui LS-a, halo placed-images PH-a (#4426), file-flow HF-m
+2026-10-22T17:40Z	0	heartbeat	#3937	re-check 2: LS-a, PH-a #4426, HF-m all still open
+2026-10-22T18:01Z	0	question	#3936	re-check 3 identical: asked the supervisor whether to release until LS-a merges
+2026-10-24T05:20Z	1	stage-start	#3936	resumed as act-1a16c627cc6-nlss; building on LS-a stubs (#4911)
+2026-10-24T05:50Z	1	commit	HY-1	test-first, 64944d2 on lead/halo-layer-styles-HY-a
+2026-10-24T06:40Z	1	gate-pass	HY-1	e52c9ca scripts/ci --changed PASS; PR waits on #4911
+2026-10-24T06:40Z	1	blocked	HY-2	waits on suiteui LS-2 (LayerStylePanel placeholder)
+2026-10-24T06:51Z	HY-5	built, gate PASS, mutate 4/4, pushed lead/halo-layer-styles-HY-m 3290e96
+2026-10-24T08:10Z	HY-2	built on HY-a (mutate 4/4), gate rerun after command-path fix
+2026-10-24T09:05Z	HY-2	spec-built menu items + Done, mutate 5/5, pushed HY-a 786456f6d, scripts/ci --changed running
+2026-10-24T09:20Z	HY-2	scripts/ci --changed PASS at 786456f6d
+2026-10-24T14:05Z	3	stage-start	act-1a16e2f645b-47gj	resumed; #4911 merged, #5156 ready, HY-7 starts
+2026-10-24T13:57Z	3	check	act-1a16e2f645b-47gj	bodies moved to this run; #5156 and #5174 in the lane; HY-7 builder started; no findings
+2026-10-24T20:08Z	3	heartbeat	act-1a16e2f645b-47gj	resumed after container restart; HY-7 builder lost, restarting; #5156 #5174 still open
+2026-10-24T20:15Z	stage	HY-7 builder restarted; #5156 waits behind lane batch 20261024183708 (dev-red #5183)
+2026-10-24T21:46Z	stage	HY-7 PR #5218 opened (draft); question to supervisor on #5156 lane wait
+2026-10-24T22:03Z	check	supervisor lands #5156 then #5174; beta label added to #5157 #5158 #5161 #5218; dev-red #5183 closed
+2026-10-24T22:20Z	check	#4874 still in the Mac gate; #5156 #5174 not landed yet; nothing to merge
+2026-10-24T22:36Z	check	#4874 still open (supervisor lands it first); #5156 #5174 not landed; stack unchanged
+2026-10-24T22:53Z	check	#4874 #5156 #5174 still open; waiting on the supervisor landing per 21:55Z answer
+2026-10-24T23:12Z	check	#4874 #5156 #5174 still open (supervisor landing pending); stack unchanged
+2026-10-24T23:32Z	check	#4874/#5156/#5174 still open+clean; stack drafts unchanged; no new #3936 comments, no findings, no dev-red
+2026-10-24T23:51Z	check	#4874/#5156/#5174 still open+clean; stack unchanged; no new #3936 comments, no findings, no dev-red
+2026-10-25T00:10Z	check	#4874/#5156/#5174 still open+clean; dev unchanged since afef017c2 (21:32Z); no new #3936 comments, no findings, no dev-red
+2026-10-25T00:28Z	check	#4874/#5156/#5174 still open+clean; dev still afef017c2; no new #3936 comments, no findings, no dev-red
+2026-10-25T01:05Z	fix	supervisor 00:46Z: batch-20261024235353 red on LayerStyleGalleryTests/aSwitchThatCantActYetSaysWhy; #5174 test passed Optional.none for LayerStyle.none; fixed at 5d52b331d, Head moved, replied on #3936
+2026-10-25T01:15Z	check	#4874 merged at 01:02Z (dev ae3efdb83); #5156 and #5174 (fix head 5d52b331d) open+clean, no needs-fix; stack unchanged; no new comments, no dev-red
+2026-10-25T01:30Z	check	#5156/#5174 open+clean, no needs-fix; dev ae3efdb83; lane sweeping; stack unchanged; no new comments, no dev-red
+2026-10-25T01:58Z	stage	#5156 merged 01:41Z (dev c16bcd16c); #5158 merged dev (add/add -> ours, dev copies == HY-1 tip), scripts/ci --changed PASS, pushed 333603baa, Head moved, ready; #5174 open, unstable (gate running)
+2026-10-25T02:15Z	check	#5158 (333603baa) and #5174 (head now 6e467f797) open+clean, no needs-fix; no dev-red; no open findings; waiting on lane batch
+2026-10-25T02:32Z	check	#5158 (333603baa, body clean) and #5174 (6e467f797) open+clean, no needs-fix; lane busy on lane/batch-20261024235353-10 (Linux+macOS running); no dev-red; no open findings
+2026-10-25T02:49Z	check	#5158 (333603baa) and #5174 (6e467f797) both in lane/batch-20261025023716 (12 PRs; Linux running, macOS gate queued); no needs-fix; no dev-red; no open findings
+2026-10-25T03:10Z	check	lane/batch-20261025023716 (with #5158, #5174): Linux check success, macOS gate in progress; no needs-fix; no dev-red
+2026-10-25T03:27Z	check	lane/batch-20261025023716 macOS gate red (run 40155151356): DesignPlaceSnapshots.swift:39 type-check timeout, from #4963 (batch pos 2, Design), not ours; lane bisecting (-6 probe running); #5158/#5174 wait for next batch; no needs-fix on ours; no dev-red
+2026-10-25T03:49Z	check	bisect: -6 and -3 probes macOS red (culprit in first 3, #4963 as expected); #5158/#5174 open, no needs-fix, wait for next batch; no dev-red
+2026-10-25T04:10Z	check	bisect at -1 probe (running since 03:50Z); #5158/#5174 open+clean, no needs-fix; no dev-red
+2026-10-25T04:34Z	check	bisect still on -1 probe (#4888); #5158 clean in queue; #5174 got needs-fix (supervisor, LayerStyleGalleryTests reason), other lead pushed fix cb6c0a2f8 at 04:29Z; no dev-red, 0 findings
+2026-10-25T04:53Z	check	-1 macOS probe (#4888) still running since 03:50Z; #5158 clean; #5174 needs-fix dropped at cb6c0a2f8; #4963 pushed d709ee354; no dev-red, 0 findings
+2026-10-25T05:13Z	check	bisect moved to -2 probe (#4888+#4963) at 05:06Z; #5158 clean; #5174 clean at cb6c0a2f8; no dev-red, 0 findings
+2026-10-25T05:35Z	check	bisect done: -2 macOS red, #4888 merged, #4963 is the culprit (already on a new head d709ee354); #5158 and #5174 clean, wait for next batch; no dev-red, 0 findings
+2026-10-25T06:10Z	check	relaunch act-1a171ab9e77-es26	#5158	#5158/#5174 clean, not in lane/batch-20261025054232 (red, bisecting); Belt-Lead moved on 4 PRs; no dev-red, 0 findings
+2026-10-25T06:28Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane/batch-20261025054232 still bisecting at -6
+2026-10-25T06:47Z	check	third identical poll	#3936	Question for the supervisor posted (rule 23): #5158/#5174 unbatched while batch-20261025054232 -6 macOS probe runs since 05:56Z
+2026-10-25T07:05Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; batch-20261025054232 -6 macOS probe still running; no answer on #3936 yet
+2026-10-25T07:24Z	heartbeat	lane	#5158	batch-20261025054232 -6 macOS probe red 07:06Z (culprit in first 6, none ours), bisect continues; #5158/#5174 clean, unbatched; no answer on #3936
+2026-10-25T07:55Z	stage	lane	#5158	Belt nudge read; -3 probe macOS running since 07:07Z; #5158/#5174 clean, unbatched; no supervisor answer
+2026-10-25T08:13Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025054232 batch-20261025054232-3 batch-20261025054232-6 
+2026-10-25T08:31Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025054232 batch-20261025054232-3 batch-20261025054232-4 batch-20261025054232-6 
+2026-10-25T08:50Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: 
+2026-10-25T09:08Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025090316 
+2026-10-25T09:27Z	question	lane	#3936	follow-up: batch 090316 red again with same p0 head; #5158/#5174 still unbatched
+2026-10-25T09:45Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025090316 batch-20261025090316-6 
+2026-10-25T10:03Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025090316 batch-20261025090316-6 batch-20261025090316-red 
+2026-10-25T10:22Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025090316 batch-20261025090316-6 batch-20261025090316-red 
+2026-10-25T10:40Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025090316 batch-20261025090316-6 batch-20261025090316-9 batch-20261025090316-red 
+2026-10-25T11:17Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: 
+2026-10-25T11:35Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025111803 
+2026-10-25T11:53Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025114830 
+2026-10-25T12:12Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: 
+2026-10-25T12:49Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025122638 
+2026-10-25T13:07Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025125743 
+2026-10-25T13:25Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: 
+2026-10-25T13:43Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025132815 
+2026-10-25T14:02Z	stage	lane	#5158	57 p0 PRs queued ahead; one per batch; no supervisor answer
+2026-10-25T14:21Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025140134 
+2026-10-25T14:39Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025143843 
+2026-10-25T14:57Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: 
+2026-10-25T15:16Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025150758 
+2026-10-25T15:52Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025154953 
+2026-10-25T16:11Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025154953 
+2026-10-25T16:29Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025162747 
+2026-10-25T16:47Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025162747 
+2026-10-25T17:06Z	stage	lane	#5321	dev-red open (not ours); #5158/#5174 still queued
+2026-10-25T17:24Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025171159 
+2026-10-25T17:42Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025171159 
+2026-10-25T18:01Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025175740 
+2026-10-25T18:19Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: 
+2026-10-25T18:56Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025184758 
+2026-10-25T19:14Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: 
+2026-10-25T19:32Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025192620 batch-20261025192620-red 
+2026-10-25T19:50Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025192620 batch-20261025192620-0 batch-20261025192620-red 
+2026-10-25T20:27Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025200223 batch-20261025200223-0 batch-20261025200223-red 
+2026-10-25T20:45Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025204511 batch-20261025204511-red 
+2026-10-25T21:04Z	heartbeat	lane	#5158	#5158/#5174 clean, unbatched; lane: batch-20261025204511 batch-20261025204511-0 batch-20261025204511-red 
+2026-10-26T02:10Z	3	stage-start	#3936	relaunch act-1a175e3e638-skn9; Belt-Lead lines moved; amendment 2 on HY-u
+2026-10-26T01:51Z	heartbeat	lane	#5158	#5158/#5174 open, dev-red #5321 open; container lost swift, reinstalled 6.3.3; HY-u gate rerunning
+2026-10-26T02:00Z	3	push	#5161	HY-u fa7e3ca6c: journey expects 3 keyframes (amendment 2); gate PASS; Head moved
+2026-10-26T02:22Z	heartbeat	lane	#5158	#5158/#5174 open, ready, prescreen green; dev-red #5321 open; lane batch-20261026021314 is #5309 alone (not ours)
+2026-10-26T02:43Z	heartbeat	lane	#5158	no change: #5158/#5174 open; dev-red #5321 open; batch-20261026021314 (#5309) still in flight
+2026-10-26T03:05Z	heartbeat	lane	#5158	no change: #5158/#5174 open; dev-red #5321 open (code batches held); lane batch-20261026025626 is #5334 alone
+2026-10-26T03:27Z	heartbeat	lane	#5158	no change; lane is in verify-after mode, landing code PRs one per batch, p0 first (#5309, #5334, #5040 were p0); #5158/#5174 (beta, clean, prescreen green) queue behind them
+2026-10-26T03:49Z	heartbeat	lane	#5158	no change; batch-20261026032432 (#5040, p0) still in flight; #5158/#5174 queued behind p0
+2026-10-26T04:11Z	heartbeat	lane	#5158	no change; lane batch-20261026040750 is #5154 alone; #5158/#5174 still queued
+2026-10-26T04:33Z	heartbeat	lane	#5158	no change: #5158/#5174 ready+clean, lane batch 20261026040750 (#5154) red, bisecting; dev-red #5321 open
+2026-10-26T04:54Z	heartbeat	lane	#5158	#5154 merged; lane batch 20261026045308 holds #4948; #5158/#5174 ready+clean, queued; dev-red #5321 open
+2026-10-26T05:16Z	heartbeat	lane	#5158	#4948 merged (dev 7e13ba02b); no batch in flight; #5158/#5174 ready+clean, next sweep; dev-red #5321 open
+2026-10-26T05:33Z	heartbeat	lane	#5158	lane batch 20261026052705 holds p0 #5239; ~40 open p0 fast-lane PRs queue ahead of beta #5158/#5174 (one code PR per batch); dev-red #5321 open
+2026-10-26T05:55Z	heartbeat	lane	#5158	#5239 (p0) merged (dev c480d8488); #5158/#5174 still queued behind p0; dev-red #5321 open
+2026-10-26T06:20Z	heartbeat	lane	#5158	lane batch 20261026060924 holds p0 #5244; #5158/#5174 ready+clean, queued; dev-red #5321 open
+2026-10-26T06:42Z	heartbeat	lane	#5158	#5244 (p0) merged (dev 798f1f0ae); no batch in flight; #5158/#5174 queued behind p0; dev-red #5321 open
+2026-10-26T07:09Z	heartbeat	lane	#5158	#5043 merged (dev 99ace7038); no batch in flight; #5158/#5174 ready+clean, queued; dev-red #5321 open
+2026-10-26T07:30Z	heartbeat	lane	#5158	lane batch 20261026071921 holds p0 #5264; #5158/#5174 ready+clean, queued; dev-red #5321 open
+2026-10-26T07:53Z	heartbeat	lane	#5158	#5264 (p0) merged (dev 3e26fbe41); no batch in flight; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T08:19Z	heartbeat	lane	#5158	lane batch 20261026075747 holds #4956; #5158/#5174 ready+clean, queued; dev-red #5321 open
+2026-10-26T08:40Z	heartbeat	lane	#5158	#4956 merged (dev 1960c2d9a); lane batch 20261026083929 holds #5065; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T09:02Z	heartbeat	lane	#5158	dev be5f2c008 (lane fixes: red-dev rerun); batch 20261026083929 still #5065; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T09:23Z	heartbeat	lane	#5158	dev 1b843d159 (#5383); lane retrying #5065 in batch 20261026091205; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T09:45Z	heartbeat	lane	#5158	#5065 merged (dev 2ed77a2e5); no batch in flight; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T10:07Z	heartbeat	lane	#5158	dev 2ed77a2e5; lane batch 20261026095316 holds #5163; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T10:28Z	heartbeat	lane	#5158	#5163 merged (dev 2eab5aeb2); lane batch 20261026102509 holds #5266; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T10:50Z	heartbeat	lane	#5158	dev f3af1c007 (lane quarantine-skip fix); batch 20261026102509 still #5266; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T11:20Z	heartbeat	lane	#5158	dev c6700dba4 (lane quarantine changes); batch 20261026111622 retries #5266; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T11:42Z	heartbeat	lane	#5158	dev c6700dba4; no batch in flight (#5266 batch ended unmerged); #5158/#5174 queued; dev-red #5321 open
+2026-10-26T12:04Z	heartbeat	lane	#5158	dev c6700dba4; lane batch 20261026115104 holds #5146; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T12:55Z	relaunch	lane	#5158	dev 57dd31ff; run act-1a178432d32-jxt0; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T13:15Z	heartbeat	lane	#5158	dev 5f8925a35; batch 20261026130542 holds #5266 only; #5158/#5174 queued; dev-red #5321 open
+2026-10-26T13:36Z	heartbeat	lane	#5158	dev 01600e46c; lane sweep 40323409808: #5158 and #5174 eligible (marker + prescreen), queued behind 1-PR batches; dev-red #5321 open
+2026-10-26T13:57Z	question	lane	#5158	dev 01600e46c; 4th identical poll; Question for the supervisor posted on #3936 (land #5174 then #5158 via local Mac gate?); batch 20261026133530 (#5104) marked red
+2026-10-26T14:17Z	heartbeat	lane	#5158	#5158/#5174 eligible, unmerged; no answer yet on #3936; dev-red #5321 open
+2026-10-26T14:44Z	heartbeat	lane	#5158	dev f86f72f79; #5158/#5174 eligible, unmerged; no answer on #3936; dev-red #5321 open
+2026-10-26T15:04Z	heartbeat	lane	#5158	dev f86f72f79; batch 20261026150314 holds #5267 only; #5158/#5174 eligible, unmerged; no answer on #3936; dev-red #5321 open
+2026-10-26T15:25Z	heartbeat	lane	#5158	dev f86f72f79; batch 20261026150314 (#5267) in flight; #5158/#5174 eligible, unmerged; no answer on #3936; dev-red #5321 open
+2026-10-26T15:46Z	heartbeat	lane	#5158	dev 310d7d14a; lane forms only no-code (Linux-only) batches while dev-red #5321 names macOS, so code PRs #5158/#5174 wait for #5321 to close or the local Mac gate
+2026-10-26T16:06Z	heartbeat	waiting: dev-red #5321 (macOS) blocks code batches; #5174/#5158 eligible; no supervisor answer
+2026-10-26T16:28Z	heartbeat	lane	#5158	dev 527676af6; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
+2026-10-26T16:49Z	heartbeat	lane	#5158	dev 527676af6; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
+2026-10-26T17:11Z	heartbeat	lane	#5158	dev df48c0bac; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
+2026-10-26T17:33Z	heartbeat	lane	#5158	dev fef52e668; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
+2026-10-26T17:54Z	heartbeat	lane	#5158	dev fef52e668; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
+2026-10-26T18:16Z	heartbeat	lane	#5158	dev e69582e70; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
+2026-10-26T18:38Z	heartbeat	lane	#5158	dev e69582e70; dev-red #5321 open (macOS), code batches held; #5158/#5174 eligible, unmerged; no answer on #3936
+2026-10-26T18:40Z	question	lane	#5174	queue depth, not dev-red, holds #5158/#5174; asked supervisor re p0 (6424372363)
+2026-10-26T19:01Z	heartbeat	lane	#5174	dev 5cffd4cfe; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T19:23Z	heartbeat	lane	#5174	dev 17a7848b2; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T19:45Z	heartbeat	lane	#5174	dev 17a7848b2; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T20:08Z	heartbeat	lane	#5174	dev 17a7848b2; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T20:29Z	heartbeat	lane	#5174	dev 696d37fe8; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T20:51Z	heartbeat	lane	#5174	dev b59575ef0; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T21:12Z	heartbeat	lane	#5174	dev 3ebc8d439; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T21:34Z	heartbeat	lane	#5174	dev 3ebc8d439; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T21:55Z	heartbeat	lane	#5174	dev c4cf4a758; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T21:57Z	heartbeat	lane	#5174	dev c4cf4a758; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T21:59:09Z	rebase	lane	#5174	merged origin/dev c4cf4a758 locally (SuiteGallery areas union, ae52b60c2); toolchain lost on container restart, reinstalling before scripts/ci --changed
+2026-10-26T22:05:56Z	push	lane	#5174	merged origin/dev into LS-2, scripts/ci --changed PASS, pushed ae52b60c2; Head: moved
+2026-10-26T22:06:25Z	heartbeat	lane	#5174	dev c4cf4a758; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T22:26:31Z	heartbeat	lane	#5174	dev 9810d71ba; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T22:48:34Z	fix	body	#5157,#5158,#5161,#5174,#5218	lane flagged an attribution footer on #5174; the session proxy appends it on gh api PATCH; removed from all five bodies via the GitHub MCP update (no footer); later Head: moves go that way; #5161 gains its Mutate: line
+2026-10-26T22:48:43Z	heartbeat	lane	#5174	dev 3d94856cd; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T23:08:48Z	heartbeat	lane	#5174	dev 3d94856cd; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T23:28:53Z	heartbeat	lane	#5174	dev 22d07ab9e; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-26T23:48:59Z	heartbeat	lane	#5174	dev 22d07ab9e; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T00:09:04Z	heartbeat	lane	#5174	dev cf44d042e; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T00:29:09Z	heartbeat	lane	#5174	dev a80e88f4d; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T00:49:07Z	heartbeat	lane	#5174	dev f3ed4b32d; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T01:11:30Z	heartbeat	lane	#5174	dev f3ed4b32d; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T01:33:01Z	heartbeat	lane	#5174	dev 2cf71ce92; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T01:55:07Z	heartbeat	lane	#5174	dev 042704f26; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T02:16:47Z	heartbeat	lane	#5174	dev 7703c60d6; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T02:37:54Z	heartbeat	lane	#5174	dev 7703c60d6; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T02:59:38Z	heartbeat	lane	#5174	dev 547b958c5; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T03:21:37Z	heartbeat	lane	#5174	dev 547b958c5; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T03:43:08Z	heartbeat	lane	#5174	dev 870080fb4; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T04:05:07Z	heartbeat	lane	#5174	dev 870080fb4; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T04:27:26Z	heartbeat	lane	#5174	dev 91e1e5974; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T04:49:00Z	heartbeat	lane	#5174	dev 6f095caad; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T05:12:54Z	heartbeat	lane	#5174	dev 6f095caad; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T05:35:02Z	heartbeat	lane	#5174	dev 6f095caad; #5158/#5174 eligible, queued behind p0 and older beta PRs; no answer on #3936
+2026-10-27T06:00:00Z	relaunch	stage	#5157	act-1a17bed1e9b-xhpo; #5158/#5174 merged; HY-2/HY-u/HY-7 rebuilt on dev ad29aeaf, gating
