@@ -312,3 +312,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-27T08:04:13Z UP-photo: scoped photo 40470145594 + full 40470141862 running at ef9d2ace (contains ef31726a); UP-flare/halo/z open
 - 2026-10-27T08:24:13Z UP-photo: photo 40470145594 + full 40470141862 compile green, macOS tests queued; UP-flare/halo/z open
 - 2026-10-27T08:44:40Z UP-photo proof: scoped photo 40470145594 tests running; #5089 #5091 #5231 open, none needs-fix
+- 2026-10-27T09:05:43Z scoped photo 40470145594 red: PhotoToolsKeyTests.letterPicksTool (from #4889 spot heal/bucket keys), not ours; waiting a green run for UP-photo
