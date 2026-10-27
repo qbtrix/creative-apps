@@ -146,3 +146,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T17:39:38Z critic panel blocked: latest dev journeys 40542720369 (full) cancelled, no ui-screens
 - 2026-10-27T17:59:13Z critic panel blocked: no new completed dev journeys run since 40542720369 (cancelled)
 - 2026-10-27T18:19:02Z critic panel blocked: latest dev journeys 40550699151 (full) cancelled, no ui-screens
+- 2026-10-27T18:38:58Z slices done, contact sheet posted; critic panel waits on a successful photo/full journeys run (all cancelled since 12:26)

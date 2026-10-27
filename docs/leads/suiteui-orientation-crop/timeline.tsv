@@ -221,3 +221,4 @@ utc	stage	event	ref	note
 2026-10-27T17:39:38Z	done	poll	#3756	critic panel blocked: latest dev journeys 40542720369 (full) cancelled, no ui-screens
 2026-10-27T17:59:13Z	done	poll	#3756	critic panel blocked: no new completed dev journeys run since 40542720369 (cancelled)
 2026-10-27T18:19:02Z	done	poll	#3756	critic panel blocked: latest dev journeys 40550699151 (full) cancelled, no ui-screens
+2026-10-27T18:38:58Z	done	poll	#3756	slices done, contact sheet posted; critic panel waits on a successful photo/full journeys run (all cancelled since 12:26)
