@@ -117,7 +117,7 @@ enum HaloJob {
         return try script.expect.sorted { $0.key < $1.key }.flatMap { path, expectation -> [String] in
             guard let doc = outputs[path], case .object(let kind) = expectation else { return ["\(path): not written"] }
             if let json = kind["json"] {
-                return try JSONValue(json: doc.save()) == json ? [] : ["\(path): the saved JSON differs"]
+                return try JSONValue(json: doc.save()) == linux(json) ? [] : ["\(path): the saved JSON differs"]
             }
             let pixels = try (kind["pixels"] ?? .null).decode(Pixels.self)
             let want = try decodePNG(Data(contentsOf: folder.appendingPathComponent(pixels.reference)))
@@ -127,6 +127,17 @@ enum HaloJob {
             }
             let worst = zip(got.rgba, want.rgba).map { abs(Int($0) - Int($1)) }.max() ?? 0
             return worst <= pixels.tolerance ? [] : ["\(path): a channel is off by \(worst)"]
+        }
+    }
+
+    /// `value` with each `{"$linux": v}` as v. A job pins a Core Text measured box that way (the macOS CLI measures,
+    /// RealJobs.matches), and HaloModel's `.live` has no text rasterizer, so here it is the estimate on every platform.
+    static func linux(_ value: JSONValue) -> JSONValue {
+        switch value {
+        case .object(let fields) where fields.count == 1 && fields["$linux"] != nil: fields["$linux"] ?? .null
+        case .object(let fields): .object(fields.mapValues(linux))
+        case .array(let items): .array(items.map(linux))
+        default: value
         }
     }
 

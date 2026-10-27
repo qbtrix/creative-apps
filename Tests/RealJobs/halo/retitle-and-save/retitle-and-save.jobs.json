@@ -14,7 +14,7 @@
         "layers": [
           {"id": "comp-1-layer-2", "name": "Title", "kind": "text", "inFrame": 0, "outFrame": 48, "opacity": 1, "blendMode": "normal",
            "color": {"red": 0.1, "green": 0.1, "blue": 0.1}, "tracks": {},
-           "text": {"string": "Goodbye Halo", "fontSize": 32, "width": 230.39999999999998, "height": 32}},
+           "text": {"string": "Goodbye Halo", "fontSize": 32, "width": {"$linux": 230.39999999999998}, "height": {"$linux": 32}}},
           {"id": "comp-1-layer-1", "name": "Panel", "kind": "shape", "inFrame": 0, "outFrame": 48, "opacity": 1, "blendMode": "normal",
            "color": {"red": 0.25, "green": 0.55, "blue": 0.9}, "tracks": {},
            "rect": {"x": 0, "y": 0, "width": 320, "height": 180}}

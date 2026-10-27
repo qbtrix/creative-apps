@@ -199,6 +199,21 @@ struct RealJobsCompareTests {
         #expect(RealJobs.sha256Hex(Data(twoBlocks.utf8)) == "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1")
     }
 
+    @Test func aLinuxSentinelIsExactOnLinuxAndAnyNumberOnMacOS() throws {
+        let want = try JSONValue(json: Data(#"{"text": {"string": "Hi", "width": {"$linux": 43.2}}, "ids": [1, 2]}"#.utf8))
+        func got(_ width: String, _ ids: String = "[1, 2]") throws -> JSONValue {
+            try JSONValue(json: Data(#"{"text": {"string": "Hi", "width": \#(width)}, "ids": \#(ids)}"#.utf8))
+        }
+        #expect(RealJobs.matches(try got("43.2"), want))
+        #expect(!RealJobs.matches(try got("43.2", "[1, 3]"), want), "the rest of the value still has to be equal")
+        #expect(!RealJobs.matches(try got(#""wide""#), want), "the sentinel stands for a number")
+        #if os(Linux)
+        #expect(!RealJobs.matches(try got("51.7"), want), "Linux keeps the exact value")
+        #else
+        #expect(RealJobs.matches(try got("51.7"), want), "macOS takes any measured number")
+        #endif
+    }
+
     @Test func pixelsMatchWithinTheToleranceInclusiveAndOnlyAtTheSameSize() {
         #expect(RealJobs.pixelsMatch([10, 20, 30, 255], [12, 18, 30, 255], tolerance: 2))
         #expect(!RealJobs.pixelsMatch([10, 20, 30, 255], [13, 20, 30, 255], tolerance: 2))

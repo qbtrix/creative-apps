@@ -43,7 +43,8 @@
 //
 //   AfterGlowCLICore, AfterGlowCLI  the `afterglow` command line tool: the
 //             Linux-safe router library (Foundation, SuiteKernel, SuiteModel
-//             and every <X>Model) and its thin executable, product
+//             and every <X>Model; SuiteText on macOS, so headless Photo and
+//             Halo draw text) and its thin executable, product
 //             "afterglow". With AfterGlowCLITests, on Linux and macOS
 //             (docs/blueprints/suite/features/afterglow-cli.md). Headless, so
 //             not part of the Release graph in project.yml.
@@ -72,6 +73,14 @@ let core = "creative-core"
 let imagingMetal: [Target.Dependency] = [.product(name: "CoreRenderMetal", package: core)]
 #else
 let imagingMetal: [Target.Dependency] = []
+#endif
+
+// The CLI draws Photo and Halo text with SuiteText's LiveText, which is Core
+// Text and so macOS only; on Linux the CLI keeps the fakes.
+#if os(macOS)
+let cliText: [Target.Dependency] = ["SuiteText"]
+#else
+let cliText: [Target.Dependency] = []
 #endif
 
 func model(_ name: String, _ engines: [String], imaging: Bool = true) -> [Target] {
@@ -103,7 +112,7 @@ var targets: [Target] =
                 dependencies: ["SuiteKernel", "SuiteModel"] + ["CoreRaster", "CoreRender", "CoreColor"].map { .product(name: $0, package: core) } + imagingMetal),
         .testTarget(name: "SuiteImagingTests", dependencies: ["SuiteImaging"]),
         .testTarget(name: "AppAuditTests"),
-        .target(name: "AfterGlowCLICore", dependencies: ["SuiteKernel", "SuiteModel", "SuiteImaging"] + apps.map { .target(name: "\($0)Model") }),
+        .target(name: "AfterGlowCLICore", dependencies: ["SuiteKernel", "SuiteModel", "SuiteImaging"] + apps.map { .target(name: "\($0)Model") } + cliText),
         .executableTarget(name: "AfterGlowCLI", dependencies: ["AfterGlowCLICore"]),
         .testTarget(name: "AfterGlowCLITests", dependencies: ["AfterGlowCLICore"]),
     ]

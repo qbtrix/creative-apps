@@ -16,12 +16,23 @@
 //
 // check (SampleMakerTests, in scripts/ci) rebuilds every sample and reports each
 // committed copy that is missing or differs byte for byte, and a sample whose
-// two builds differ. write (MAKE_SAMPLES=1) writes them all.
+// two builds differ. write (MAKE_SAMPLES=1) writes them all. The maker runs the
+// five apps on their plain `.live` services, not the CLI's registry, whose Halo
+// measures text with Core Text on a Mac: a sample's bytes are the same on Linux
+// and macOS.
 import AfterGlowCLICore
+import DesignModel
+import FlareModel
 import Foundation
+import HaloModel
+import LibraryModel
+import PhotoModel
 import SuiteKernel
 
 enum SampleMaker {
+    /// The CLI's registry with the five apps on their plain `.live` services, so a sample is the same on every platform.
+    static let apps = [HeadlessApp(PhotoHeadless.self), HeadlessApp(DesignHeadless.self), HeadlessApp(FlareHeadless.self),
+                       HeadlessApp(HaloHeadless.self), HeadlessApp(LibraryHeadless.self), Apps.suite, Apps.fake]
     static let makeFolder = "Bundle/Samples/make", fixturesOnlyFolder = "fixtures-only"
     static let samplesFolder = "Bundle/Samples", fixturesFolder = "UITests/Fixtures/suite"
     static let suffix = ".jobs.json"
@@ -55,7 +66,7 @@ enum SampleMaker {
         let script = try Data(contentsOf: root.appendingPathComponent(recipe.path))
         let parsed: Script
         do { parsed = try Script.parse(script, path: recipe.path) } catch { throw Failure(description: "\(recipe.path): \(error.message)") }
-        guard let app = Apps.named(parsed.app, in: CLI.registry), let ext = app.openExtensions.first else {
+        guard let app = Apps.named(parsed.app, in: apps), let ext = app.openExtensions.first else {
             throw Failure(description: "\(recipe.path): unknown app \(parsed.app)")
         }
         var options = JSONValue.object([:])
@@ -63,7 +74,7 @@ enum SampleMaker {
         let scriptPath = "work/" + recipe.name + suffix, seedPath = "work/seed." + ext
         let io = FakeIO(files: [scriptPath: script, seedPath: try app.session(new: options).save()])
         let before = Set(io.files.keys)
-        let code = CLI.run(["run", scriptPath], io: io)
+        let code = CLI.run(["run", scriptPath], apps: apps, io: io)
         guard code == CLI.Exit.ok else {
             throw Failure(description: "\(recipe.path): afterglow run exited \(code): \(io.stdout.joined(separator: " "))")
         }
