@@ -50,11 +50,16 @@ struct LibraryWindow: View {
     /// `arguments` are the launch arguments (LibraryLaunch); a test passes a fixture's.
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         let launch = LibraryLaunch(arguments: arguments)
+        // The live grid keeps its thumbnails in <support>/Library/Thumbnails (ST-7); fixtures stay on fakes.
         let services = launch.services(
             decoder: ImageIODecoder(), writer: JPEGWriter(metadata: LibraryShell.services.metadata),
             store: CatalogStore(), sidecars: XMPSidecarWriter())
+            .withThumbnailDisk(folder: LibraryServices.thumbnailFolder(arguments: arguments, home: NSHomeDirectory()))
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
+
+    /// What the drop mark calls the catalog photos go into: "Place in Library", not "the document".
+    nonisolated static let dropTarget = "Library"
 
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetLibraryTests counts an interaction's.
@@ -105,7 +110,8 @@ struct LibraryWindow: View {
         .focusedSceneValue(\.libraryCatalog, model)
         .focusedSceneValue(\.libraryFilters, filters)
         .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
-                       places: model.placesExtensions, perform: { try? model.perform($0) })
+                       places: model.placesExtensions, documentName: Self.dropTarget,
+                       perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
@@ -114,6 +120,7 @@ struct LibraryWindow: View {
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
         .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
         .modifier(trashArea)  // Photo > Delete Rejected Photos… and its confirm (LibraryWindow+Trash.swift)
+        .modifier(filesArea)  // Remove from Catalog… and Locate… (LibraryWindow+Files.swift)
         .task {
             importAreaLaunch()
             persistAreaLaunch()

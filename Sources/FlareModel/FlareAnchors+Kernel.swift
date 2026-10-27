@@ -1,6 +1,9 @@
 // FlareAnchors+Kernel.swift (pen-paths FP-1, FP-7): FlareWorkspace as SuiteKernel's PathEditTarget on the one shape
-// Direct Select picked; `setPath` writes it as one "Edit Path". Picking, moving anchors and handles, and the anchor
-// marquee run here (FlareSelection.swift waits on adopt-kernel-selection); FP-6 adds the commands the catalog runs.
+// Direct Select picked. Every path gesture, the anchor marquee and point drags included, runs as its shared
+// `PathCommands` spec through the catalog, so the undo titles ("Move Points", "Move Handle"), the document-space
+// coordinate rule and the drag token are the kernel's, as in Photo; Flare maps no coordinates of its own. `setPath`
+// folds the edits under one drag token into one step. A press that picks an anchor and the drag preview stay here
+// (FlareSelection.swift waits on adopt-kernel-selection).
 import FlareCore
 import SuiteKernel
 
@@ -33,55 +36,35 @@ extension FlareWorkspace: PathEditTarget {
         return ownerLayers?.first(where: { $0.id == layerID && $0.isLocked }).map { "Unlock \($0.name) to edit its points." }
     }
 
-    /// Writes `path` to the item in edit as one step titled `name`; `drag` is the kernel's coalescing key (unused yet).
+    /// Writes `path` to the item in edit as one step titled `name`. Edits under one `drag` token, on the same item and
+    /// title, fold into one step: while the document is still the one the token's last edit left, that step is undone
+    /// and the whole edit written again, so one undo goes back to before the drag. Any other change, or
+    /// `endCoalescing`, starts a new step.
     public mutating func setPath(_ path: VectorPath, name: String, drag: String?) throws {
-        guard pathInEdit != nil, let address = selection.first else { throw FlareLayerError.refused(pathHelp ?? "") }
-        let shapes = services.shapes
+        guard let edit = pathInEdit, let address = selection.first else { throw FlareLayerError.refused(pathHelp ?? "") }
+        let shapes = services.shapes, key = drag.map { "\(edit.id)-\(name)-\($0)" }
+        let folds = key != nil && pathDrag?.key == key && pathDrag?.document == engine?.document
         layerError = nil
-        step(name) { try shapes.setPath(path, of: address, in: &$0) }
-        if let layerError { throw layerError }
-    }
-
-    /// Picks, moves anchors and moves a handle of the path in edit as one "Edit Path"; any other intent (the Pen's,
-    /// insert, remove, convert) runs through the catalog. Moves are in document space, mapped into the path's.
-    public mutating func runPath(_ intent: PathIntent) {
-        let edit = pathInEdit
-        switch intent {
-        case .select(let anchors, let rect, let extend):
-            guard let edit else { return }
-            var picked = (extend ? anchorSelection.ordered : []) + (anchors ?? [])
-            if let rect { picked += AnchorIndex(edit.path, toDocument: edit.toDocument).inside(rect) }
-            var seen = Set<AnchorRef>()
-            anchorSelectionStore.replace(picked.filter { seen.insert($0).inserted })
-        case .selectAll:
-            guard let edit else { return }
-            anchorSelectionStore.replace(Self.anchorRefs(edit.path))
-        case .move(let dx, let dy, let drag):
-            guard let edit, !anchorSelection.set.isEmpty, editable() else { return }
-            let m = edit.toDocument
-            guard let back = try? Matrix(a: m.a, b: m.b, c: m.c, d: m.d, tx: 0, ty: 0).inverted() else { return }
-            let local = back.apply(Point(x: dx, y: dy))
-            try? setPath(AnchorEdit.moved(edit.path, anchorSelection.set, dx: local.x, dy: local.y), name: "Edit Path", drag: drag)
-        case .handle(let ref, let end, let to, let breaking, let drag):
-            guard let edit, editable(), let back = try? edit.toDocument.inverted() else { return }
-            let path = AnchorEdit.movingHandle(edit.path, ref, end, to: back.apply(to), breaking: breaking)
-            try? setPath(path, name: "Edit Path", drag: drag)
-        default:
-            let command = intent.command
-            _ = try? Self.catalog.run(command.id, params: command.params, on: &self)
+        step { engine in
+            if folds { try engine.undo() }
+            try engine.group(name) { try shapes.setPath(path, of: address, in: &$0) }
         }
+        // A refusal the catalog passes through in the same words, as Photo's.
+        if let layerError { throw CatalogError.unavailable(id: "path", why: layerError.message) }
+        pathDrag = key.flatMap { key in engine.map { (key, $0.document) } }
     }
 
-    /// Every anchor of `path`, in order.
-    static func anchorRefs(_ path: VectorPath) -> [AnchorRef] {
-        path.contours.enumerated().flatMap { c, contour in contour.anchors.indices.map { AnchorRef(contour: c, index: $0) } }
-    }
-
-    /// Whether the path in edit can change; refuses with `pathHelp` when its layer is locked.
-    private mutating func editable() -> Bool {
-        guard let help = pathHelp else { return true }
-        refuse(.refused(help))
-        return false
+    /// Runs one Pen or point-editor gesture as its shared path command in the catalog; a refusal goes to `layerError`.
+    public mutating func runPath(_ intent: PathIntent) {
+        let command = intent.command
+        do {
+            _ = try Self.catalog.run(command.id, params: command.params, on: &self)
+        } catch {
+            switch error {
+            case .unavailable(_, let why): refuse(.refused(why))
+            default: refuse(.refused(error.description))
+            }
+        }
     }
 
     /// A Direct Select press on the path in edit: a selected anchor's handle, or an anchor, which it picks (Shift adds)

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P71, pending DS-z (suiteui/document-setup): DS-8 makes file.new take a DocumentSetup, but the PNG's pHYs (300 ppi) lands with DS-z, so platforms is [] and the harness skips the job on both. With an image open (input/open.png, which File > New replaces), a new 4 x 6 in image at 300 ppi on a transparent background, a 100 px square filled with the brush color (black: no command sets the color yet), exported as PNG. The trap: the image comes out 1920 x 1080 white, or 4 x 6 px. The assertion: the PNG is 1200 x 1800, its corner is clear and the square is opaque; the turn-on adds the pHYs check and sets platforms to linux and macos.",
+  "pending": "DS-z",
+  "waits_on": "DS-z",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "file.new", "params": {"width": 4, "height": 6, "unit": "in", "resolution": 300, "background": "transparent"}},
+    {"id": "select.rect", "params": {"x": 100, "y": 100, "width": 100, "height": 100}},
+    {"id": "edit.fill-selection", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "new-print-size", "format": "png", "options": {}},
+  "expect": {
+    "out/new-print-size.png": {"pixels": {"size": [1200, 1800], "at": [
+      {"x": 0, "y": 0, "rgba": [0, 0, 0, 0]},
+      {"x": 150, "y": 150, "rgba": [0, 0, 0, 255]}
+    ], "tolerance": 0}}
+  },
+  "platforms": []
+}

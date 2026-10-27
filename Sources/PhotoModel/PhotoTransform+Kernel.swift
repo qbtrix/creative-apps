@@ -2,20 +2,27 @@
 // (transform PT-1 contract, PT-5 bodies), and Free Transform's begin, commit
 // and cancel. The box the kernel sees is the draft's box
 // (scaled about its top-left and moved, turned about its centre), else the
-// selected pixel layer's bounds, cut to the selection when one is set.
+// bounds of the selected pixel layer's painted pixels (alpha above 0), cut to
+// the selection when one is set; a clear layer refuses "Nothing to transform.".
+// Availability reads only `transformArea` (layer and selection, no pixel scan).
 // A scale, turn or move edits the draft as one step whose undo puts the
 // previous draft back (a drag's steps fold under its token). The canvas shows
-// the draft live: each render draws `transformPreview`, the workspace with the
-// draft's layer resampled (`draftPlaced`), and commit lays that same resample
-// as one "Free Transform" step, so Return shows nothing new. A flip mirrors
-// the layer's pixels in place at once, never a draft. Canvas Size is PhotoImageOps'.
-// Linux-safe.
+// the draft live: a still frame draws `transformPreview`, the workspace with
+// the draft's layer resampled (`draftPlaced`), and commit lays that same
+// resample as one "Free Transform" step, so Return shows nothing new; a box on
+// part of the layer keeps the layer's extent, so later strokes outside it still
+// land. A drag's frames (`transformPreview(live:)`) draw the layer through the
+// draft's matrix region by region instead (PhotoRenderRoute.swift, bilinear),
+// so a 12 MP layer turns at frame rate; the exact frame follows at the release.
+// A flip mirrors the layer's pixels in place at once, never a draft. Canvas
+// Size is PhotoImageOps'. Linux-safe.
 import CoreRaster
 import SuiteKernel
 
 extension PhotoWorkspace: TransformTarget {
     /// The draft's box while Free Transform is up, else the selected pixel
-    /// layer's bounds (or the selection's part of it); nil with no pixel layer.
+    /// layer's painted bounds (in the selection when one is set); nil with no
+    /// pixel layer or nothing painted there.
     public var transformSelection: TransformBox? {
         if let draft = transformDraft {
             let b = draft.box, t = draft.transform
@@ -31,7 +38,7 @@ extension PhotoWorkspace: TransformTarget {
     /// Why Free Transform and the flips can't run: no pixel layer selected,
     /// else the transform service's help; nil when they can.
     public var transformHelp: String? {
-        guard transformBounds != nil else { return "Select a pixel layer to transform." }
+        guard transformArea != nil else { return "Select a pixel layer to transform." }
         return services.transform.unavailableHelp
     }
 
@@ -81,9 +88,19 @@ extension PhotoWorkspace: TransformTarget {
         touch(.all)
     }
 
-    /// The box Free Transform starts from: the selected pixel layer's bounds,
-    /// cut to the selection when one is set; nil without either.
+    /// The box Free Transform starts from: the bounds of the selected pixel
+    /// layer's pixels with alpha above 0 inside `transformArea`, on the canvas;
+    /// nil without a pixel layer or when nothing is painted there.
     var transformBounds: PixelRect? {
+        guard let layer = selectedLayer, let area = transformArea, let tiles = pixels[layer.id],
+            let painted = try? tiles.paintedBounds(in: area.offsetBy(-layer.offsetX, -layer.offsetY))
+        else { return nil }
+        return painted.offsetBy(layer.offsetX, layer.offsetY)
+    }
+
+    /// Where Free Transform looks for pixels: the selected pixel layer's
+    /// bounds, cut to the selection when one is set; nil without either.
+    var transformArea: PixelRect? {
         guard let layer = selectedLayer, layer.kind == .pixels, let bounds = bounds(of: layer), !bounds.isEmpty else {
             return nil
         }
@@ -94,15 +111,18 @@ extension PhotoWorkspace: TransformTarget {
 
 extension PhotoWorkspace {
     /// Edit > Free Transform: starts a draft on the selected pixel layer's box,
-    /// no step. Throws the help when it can't; a draft already up stays.
+    /// no step. Throws the help when it can't, "Nothing to transform." when no
+    /// pixel there is painted; a draft already up stays.
     public mutating func beginTransform() throws {
         if let help = transformHelp { throw PhotoRefusal(help) }
-        guard transformDraft == nil, let id = selectedLayerID, let box = transformBounds else { return }
+        guard transformDraft == nil, let id = selectedLayerID else { return }
+        guard let box = transformBounds else { throw PhotoRefusal("Nothing to transform.") }
         transformDraft = TransformDraft(layerID: id, box: box)
     }
 
     /// Return: resamples the layer once into its new bounds as one "Free
-    /// Transform" step; the identity records nothing. No draft: nothing.
+    /// Transform" step; a box on part of the layer keeps the layer's extent
+    /// (grown to the new bounds). The identity records nothing. No draft: nothing.
     /// A resample that fails keeps the draft and throws.
     public mutating func commitTransform() throws {
         guard let draft = transformDraft else { return }
@@ -110,7 +130,17 @@ extension PhotoWorkspace {
             transformDraft = nil
             return touch(.all)
         }
-        let (at, placed) = done
+        let at = done.at
+        var placed = done.placed
+        // A box on part of the layer (its painted pixels) keeps the layer's extent, so later strokes outside
+        // the box still land: the placed pixels go, exactly, onto a clear layer over both bounds.
+        if let was = bounds(of: layers[at]), draft.box != was {
+            let all = was.union(PixelRect(x: placed.x, y: placed.y, width: placed.pixels.width,
+                                          height: placed.pixels.height))
+            var kept = try TiledPixels(width: all.width, height: all.height)
+            try kept.replace(with: placed.pixels.flattened(), x: placed.x - all.x, y: placed.y - all.y)
+            placed = PlacedPixels(pixels: kept, x: all.x, y: all.y)
+        }
         record(.group([.stack(stackState), .draft(draft)]), named: "Free Transform")
         pixels[draft.layerID] = placed.pixels
         layers[at].offsetX = placed.x
@@ -142,8 +172,6 @@ extension PhotoWorkspace {
     /// `draftPlaced()`, so every route draws the draft and Return lays the same pixels. The revision and
     /// history stay as they are. Self with no draft, and when the resample fails (the layer shows as it is,
     /// and Return reports the failure).
-    /// ponytail: one full-layer resample per render (renders coalesce to the newest); a GPU affine composite
-    /// in CoreRender is the upgrade if a 12 MP layer drags too slowly.
     var transformPreview: PhotoWorkspace {
         guard let done = (try? draftPlaced()) ?? nil else { return self }
         let (at, placed) = done
@@ -153,4 +181,21 @@ extension PhotoWorkspace {
         shown.layers[at].offsetY = placed.y
         return shown
     }
+
+    /// `transformPreview` for a still frame; for a drag frame (`live`), self with `liveDraft` set, so every route
+    /// draws the draft's layer through its matrix on each region and nothing resamples (the exact frame comes
+    /// with the next still one). A masked layer, the identity and a layer without pixels take the still frame.
+    /// ponytail: a drag frame resamples the layer in 256 px chunks on the CPU (bilinear, the chunks across the cores); a
+    /// Metal `.affine` kernel is the upgrade.
+    func transformPreview(live: Bool) -> PhotoWorkspace {
+        guard live, let draft = transformDraft, draft.transform != .identity, let at = index(of: draft.layerID),
+            pixels[draft.layerID] != nil, shownMask(of: layers[at]) == nil
+        else { return transformPreview }
+        var shown = self
+        shown.liveDraft = true
+        return shown
+    }
+
+    /// The layer a drag frame draws through the draft's matrix; nil outside a drag frame.
+    var liveDraftLayer: PhotoLayer.ID? { liveDraft ? transformDraft?.layerID : nil }
 }

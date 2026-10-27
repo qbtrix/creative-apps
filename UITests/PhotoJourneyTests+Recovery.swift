@@ -65,10 +65,10 @@ final class PhotoRecoveryJourneyTests: XCTestCase {
 
         // 5. Command-Q asks; Don't Save quits and discards; the next launch offers nothing.
         photo.press(character: "q", .command)
-        let dontSave = photo.app.buttons["photo.unsaved.dontSave"]
-        XCTAssert(dontSave.waitForExistence(timeout: 15), "Command-Q on the restored image didn't ask (photo.unsaved.dontSave)")
-        XCTAssert(photo.app.buttons["photo.unsaved.save"].exists, "the unsaved alert has no Save (photo.unsaved.save)")
-        XCTAssert(photo.app.buttons["photo.unsaved.cancel"].exists, "the unsaved alert has no Cancel (photo.unsaved.cancel)")
+        let dontSave = photo.app.buttons["photo.close.dontSave"]
+        XCTAssert(dontSave.waitForExistence(timeout: 15), "Command-Q on the restored image didn't ask (photo.close.dontSave)")
+        XCTAssert(photo.app.buttons["photo.close.save"].exists, "the unsaved alert has no Save (photo.close.save)")
+        XCTAssert(photo.app.buttons["photo.close.cancel"].exists, "the unsaved alert has no Cancel (photo.close.cancel)")
         photo.shot("recovery-quit-prompt")
         dontSave.click()
         XCTAssert(photo.app.wait(for: .notRunning, timeout: 15), "Don't Save didn't quit Photo")

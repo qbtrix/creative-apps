@@ -97,6 +97,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "file.clear-recent": .some("No Recent Files")
         case "file.open-in": .some(c.openInHelp)
         case "file.share-prepare": .some(c.shareHelp)
+        case "edit.copy": .some(c.copyHelp)
         case "catalog.backups": .some(nil)
         case "catalog.restore-backup": .some(c.importState != .idle ? LibraryBackups.importing
                                              : c.backup.backups == nil ? LibraryBackups.noBackups : nil)
@@ -226,7 +227,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "file.show-catalog | Show Catalog in Finder | The catalog file isn't damaged.",
         "notice.close | Close Notice | There is no notice to close.",
         "notice.show-failures | Show Failures | No files failed to import.",
-    ] + ToneSlider.develop.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.title) | on" } + ["file.share-prepare | Share | on",
+    ] + ToneSlider.develop.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.title) | on" } + ["file.share-prepare | Share | on", "edit.copy | Copy | on",
         "thumbnails.stats | Thumbnail Stats | Thumbnails aren't kept on disk yet."]
         + ["catalog.backups | Catalog Backups | on", "catalog.restore-backup | Restore Catalog Backup | \(LibraryBackups.noBackups)"]
         + ["image.rotate-cw | Rotate Right | on", "image.rotate-ccw | Rotate Left | on", "image.rotate-180 | Rotate 180° | on",

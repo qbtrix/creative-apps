@@ -44,8 +44,9 @@ extension FlareWorkspace {
         endCoalescing()
     }
 
-    /// Ends every coalescing run: property scrubs, easing handle drags, guide drags and key drags.
+    /// Ends every coalescing run: property scrubs, easing handle drags, guide drags, key drags and path drags.
     mutating func endCoalescing() {
+        pathDrag = nil
         propertyScrubSerial &+= 1
         easingDragSerial &+= 1
         guideDragSerial &+= 1

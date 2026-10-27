@@ -21,8 +21,9 @@
 // PhotoCompositeCache of the panel's own, so a Levels or Exposure step
 // recounts without compositing a layer and a layer change lays only that
 // layer and the ones above it; a count through every layer was seconds of
-// CPU on a many-layer image after every toggle or slider step. Values in,
-// intents out.
+// CPU on a many-layer image after every toggle or slider step. Mid-drag on a
+// tone row the sections read the window's live copy (PhotoWindow+Tone.swift).
+// Values in, intents out.
 import CoreRaster
 import PhotoModel
 import SuiteModel
@@ -53,6 +54,8 @@ struct AdjustmentsPanel: View {
     /// `composites`.
     var count: (@Sendable (PhotoWorkspace) async -> ToneHistogram)?
     @State private var histogram = ToneHistogram.empty
+    /// The window's live copy, which a tone row's drag samples run on; the sections read it while it lasts.
+    @Environment(\.photoLiveTransform) private var live
     /// Each sampled row's composite, kept between counts (PhotoWorkspace.curvesHistogram(composites:)), so a
     /// count after a Levels or Exposure step composites nothing.
     @State private var composites = PhotoCompositeCache()
@@ -87,6 +90,7 @@ struct AdjustmentsPanel: View {
     }
 
     @ViewBuilder private var inspector: some View {
+        let model = live?.shown ?? self.model
         switch model.adjustTarget {
         case .image:
             AdjustmentsInspector(

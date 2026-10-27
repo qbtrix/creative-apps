@@ -25,16 +25,12 @@ private actor Delivered {
     func record(_ command: HaloCommand) { commands.append(command) }
 }
 
-/// The HF-1 stubs, on today: what the adapter answers before HF-3 writes the bodies.
-/// HF-3 replaces the not-built checks with the walk below.
-@Suite struct HaloFileFlowStubTests {
+/// What the adapter answers on its own: its name, what it places, its readers and Open In.
+@Suite struct HaloFileFlowAnswerTests {
     @Test func haloNamesItselfAndPlacesNothingYet() {
         let project = HaloProject(services: .fake)
         #expect(project.appID == "halo")
         #expect(project.placesExtensions.isEmpty)
-    }
-
-    @Test func theImageRefusalSaysWhy() {
         #expect(HaloProject.imageRefusal == "Halo can't place images yet.")
     }
 
@@ -43,37 +39,47 @@ private actor Delivered {
         #expect(try opened().hasDocument)
     }
 
-    @Test func noSuiteRecentsAndNoOpenInYet() throws {
-        let project = try opened()
-        #expect(project.recentFiles.isEmpty)
-        #expect(project.openInApps.isEmpty)
-        #expect(project.openInHelp == "Open In isn't built yet.")
-        #expect(project.readers(ofExtension: "halo").isEmpty)
+    @Test func aHaloIsReadByHaloAndAPNGByPhotoFirst() {
+        let project = HaloProject(services: .fake)
+        #expect(project.readers(ofExtension: "halo") == ["halo"])
+        #expect(project.readers(ofExtension: "png").first == "photo")
+        #expect(project.readers(ofExtension: "nope").isEmpty)
     }
 
-    @Test func theSavedProjectIsASuiteDocument() throws {
+    @Test func openInSaysNoOtherAppReadsAHalo() throws {
         var project = try opened()
         #expect(project.suiteDocument == nil, "an unsaved project hands Open In a document")
+        #expect(project.openInApps.isEmpty && project.openInHelp == "No other app opens Halo Project files.")
+        #expect(throws: CatalogError.self) { try project.openIn("flare") }
         project.didSave(name: "Intro.halo", path: "/w/Intro.halo")
         let document = try #require(project.suiteDocument)
         #expect(document.app == .halo && document.type == .haloProject && document.displayName == "Intro.halo")
         #expect(document.fileID == SuiteDocumentRef.fileID(forPath: "/w/Intro.halo"))
     }
 
-    @Test func fileFlowCommandsThrowNotBuiltAndChangeNothing() throws {
+    @Test func recentsComeFromTheWindowAndClearMenuEmptiesThem() throws {
         var project = try opened()
-        let before = project.document
-        let notBuilt = { (id: String) in CatalogError.notBuilt(id: id, feature: "file-flow") }
-        #expect(throws: notBuilt("file.open-recent")) { try project.openRecent("abc") }
-        #expect(throws: notBuilt("file.clear-recent")) { try project.clearRecent() }
-        #expect(throws: notBuilt("file.open-in")) { try project.openIn("flare") }
-        #expect(throws: notBuilt("file.drop")) { try project.perform([.open(path: "/w/Promo.halo")]) }
-        #expect(project.document == before)
+        let entry = RecentFileEntry(fileID: "path:/nowhere/Gone.halo", name: "Gone.halo", path: "/nowhere/Gone.halo",
+                                    app: "halo", lastUsed: Date(timeIntervalSince1970: 0))
+        project.updateFileFlow(recents: [entry])
+        #expect(project.recentFiles == [entry])
+        #expect(throws: CatalogError.self) { try project.openRecent(entry.fileID) }
+        #expect(project.recentFiles.isEmpty, "a missing file stayed in Open Recent")
+        #expect(project.takeFileRequests() == [.forget(fileID: entry.fileID)])
+        project.updateFileFlow(recents: [entry])
+        try project.clearRecent()
+        #expect(project.recentFiles.isEmpty && project.takeFileRequests() == [.clearRecent])
+    }
+
+    @Test func theCatalogRunsTheSuiteFileFlow() throws {
+        let ids = Set(HaloProject.commandSpecs.map(\.id))
+        #expect(["file.recent", "file.open-recent", "file.clear-recent", "file.open-in", "file.drop"].allSatisfy(ids.contains))
+        #expect(HaloProject.commandSpecs.filter { $0.id == "file.open-recent" }.count == 1)
     }
 }
 
 /// MHF, the behaviour HF-3 turns on.
-@Suite(.disabled("waits on HF-3")) struct HaloFileFlowTests {
+@Suite struct HaloFileFlowTests {
     /// The drop rule for `paths` into `target`.
     private func plan(_ target: HaloProject, _ paths: String...) -> [DropAction] {
         DropPlan.plan(paths, into: target.appID, hasDocument: target.hasDocument,
@@ -122,6 +128,7 @@ private actor Delivered {
         let before = project.document
         try project.perform(plan(project, "/w/Promo.halo", "/w/Sunset.png"))
         #expect(project.document == before)
+        #expect(project.takeFileRequests() == [.open(path: "/w/Promo.halo"), .handOff(path: "/w/Sunset.png", app: "photo")])
         #expect(project.undoTitle == nil, "a drop left an undo step")
     }
 }

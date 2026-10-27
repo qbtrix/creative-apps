@@ -9,7 +9,8 @@
 // layout) and opens each. Open Recent reads the focused window's list, so with
 // every window closed a reopen relaunches Photo with no file first (the list
 // is in the app's defaults). XCUITest reads no document-edited state, so
-// "edited" is `photo.bar.saved`'s label. Shots: `photo-documents-<step>`.
+// "edited" is `photo.bar.saved`'s label. PJ-DS (document-setup DS-8) makes a
+// 4 × 6 in image at 300 ppi from File > New's shared sheet. Shots: `photo-documents-<step>`.
 import CoreGraphics
 import ImageIO
 import XCTest
@@ -156,7 +157,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         photo.shot("documents-2-painted")
 
         // 2. Command-W asks; Cancel keeps the window, still Edited.
-        let cancel = askToClose(photo, "photo.unsaved.cancel")
+        let cancel = askToClose(photo, "photo.close.cancel")
         cancel.click()
         XCTAssert(cancel.waitForNonExistence(timeout: 5), "Cancel left the unsaved alert up")
         XCTAssert(photo.window(named: "beach.png").exists, "Cancel closed the window")
@@ -165,7 +166,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         photo.shot("documents-2-cancelled")
 
         // 3. Command-W, Don't Save closes; Open Recent's first entry reopens beach.png as it was on disk.
-        askToClose(photo, "photo.unsaved.dontSave").click()
+        askToClose(photo, "photo.close.dontSave").click()
         XCTAssert(photo.window(named: "beach.png").waitForNonExistence(timeout: 10), "Don't Save didn't close the window")
         photo.shot("documents-2-closed", screen: true)
         XCTAssertEqual(try Data(contentsOf: beach), original, "Don't Save wrote beach.png")
@@ -185,6 +186,34 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         XCTAssertFalse(items.first?.isEnabled ?? true, "Clear Menu is enabled with nothing to clear")
         photo.shot("documents-2-recent-cleared", screen: true)
         photo.press(.escape)
+    }
+
+    /// PJ-DS (document-setup DS-8): File > New opens the shared New sheet; 4 × 6 in at 300 ppi, Transparent,
+    /// Create makes a 1200 × 1800 image over the checkerboard.
+    @MainActor func testNewImageFromSheet() throws {
+        let photo = launch(photoArguments(), window: nil)
+        photo.press(character: "n", .command) // 1. File > New.
+        XCTAssert(photo.element("suite.newdoc").waitForExistence(timeout: 10), "File > New opened no New sheet (suite.newdoc)")
+        photo.shot("documents-ds-sheet")
+
+        photo.element("suite.newdoc.unit").click() // 2. Inches, 4 by 6 at 300.
+        photo.app.menuItems["in"].firstMatch.click()
+        for (id, value) in [("width", "4"), ("height", "6"), ("resolution", "300")] {
+            photo.element("suite.newdoc.\(id)").doubleClick()
+            photo.press(character: "a", .command)
+            photo.app.typeText(value)
+        }
+        XCTAssertEqual(photo.element("suite.newdoc.pixels").value as? String, "1200 × 1800 px")
+        photo.app.radioButtons["Transparent"].firstMatch.click() // 3. Transparent.
+        photo.shot("documents-ds-filled")
+
+        photo.element("suite.newdoc.create").click() // 4. Create.
+        XCTAssert(photo.element("suite.newdoc").waitForNonExistence(timeout: 10), "Create left the New sheet up")
+        let size = photo.app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '1200 × 1800 px'"))
+        XCTAssert(size.firstMatch.waitForExistence(timeout: 10), "the new image isn't 1200 × 1800 px")
+        let row = Self.rgba(steadyCanvas(photo)).enumerated().filter { $0.offset / 800 == 75 && $0.offset % 4 < 3 }
+        XCTAssertGreaterThan(Set(row.map(\.element)).count, 1, "the canvas is one flat color, not the checkerboard")
+        photo.shot("documents-ds-created")
     }
 
     // MARK: - Steps
@@ -276,9 +305,9 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let ask = alert(photo)
         let question = "Do you want to save the changes made to the document “beach.png”?"
         XCTAssert(text(question, in: ask).waitForExistence(timeout: 10), "Command-W asked no unsaved-changes question")
-        let ids = ["photo.unsaved.save", "photo.unsaved.dontSave", "photo.unsaved.cancel"]
+        let ids = ["photo.close.save", "photo.close.dontSave", "photo.close.cancel"]
         XCTAssert(ids.allSatisfy { ask.buttons[$0].exists }, "the unsaved alert lacks one of \(ids)")
-        photo.shot(identifier == "photo.unsaved.cancel" ? "documents-2-unsaved-alert" : "documents-2-unsaved-again")
+        photo.shot(identifier == "photo.close.cancel" ? "documents-2-unsaved-alert" : "documents-2-unsaved-again")
         return ask.buttons[identifier]
     }
 

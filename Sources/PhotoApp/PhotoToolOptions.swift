@@ -77,6 +77,8 @@ struct ToolOptionsSection: View {
                 PhotoFillToolOptions(model: model, perform: perform)
             case .text:
                 hint(Self.typeHint)
+            case .bucket, .spotHeal, .remove:
+                PhotoRetouchOptions(model: model, perform: perform)
             case .pen:
                 hint(Self.penHint)
             }

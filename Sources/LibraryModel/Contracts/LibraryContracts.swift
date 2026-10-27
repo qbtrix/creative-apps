@@ -77,6 +77,13 @@ public protocol PhotoImporting: Sendable {
     func importFolder(_ folder: String, known: Set<String>,
                       progress: @escaping @Sendable (ImportProgress) -> Void,
                       added: @escaping @Sendable ([PhotoItem]) -> Void) async throws -> ImportResult
+    /// This importer copying each new photo under `options.copyTo` before it is added (catalog-files LC-5); one
+    /// that can't copy returns itself and adds in place.
+    func copying(_ options: ImportCopyOptions) -> any PhotoImporting
+}
+
+extension PhotoImporting {
+    public func copying(_ options: ImportCopyOptions) -> any PhotoImporting { self }
 }
 
 /// J2. Grid thumbnails. Live: `LiveThumbnails(decoder:develop:)`, an actor

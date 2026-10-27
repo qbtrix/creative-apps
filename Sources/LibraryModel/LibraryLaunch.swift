@@ -44,6 +44,8 @@ public struct LibraryLaunch: Sendable, Equatable {
     public let windowSize: LibraryWindowSize?
     /// `-LibraryLargeFixture <count>`: fakes over the large fixture's `count` photos; nil unless at least 1.
     public let largeFixture: Int?
+    /// `-LibraryFixtureBackups <n>` with n at least 1: the fixture's catalog gets backups (`backups(catalogFolder:)`).
+    public let fixtureBackups: Bool
 
     public init(arguments: [String]) {
         let switches: Set<String> = [
@@ -51,7 +53,7 @@ public struct LibraryLaunch: Sendable, Equatable {
         ]
         let valued: Set<String> = [
             "-LibraryFixture", "-LibraryCatalogDir", "-LibraryImportFolder", "-LibraryExportTo",
-            "-LibraryFakeMode", "-LibraryWindowSize", "-LibraryLargeFixture",
+            "-LibraryFakeMode", "-LibraryWindowSize", "-LibraryLargeFixture", "-LibraryFixtureBackups",
         ]
         var values: [String: String] = [:]
         var present: Set<String> = []
@@ -77,6 +79,7 @@ public struct LibraryLaunch: Sendable, Equatable {
         reduceMotion = present.contains("-LibraryReduceMotion")
         windowSize = values["-LibraryWindowSize"].flatMap(LibraryWindowSize.init(parsing:))
         largeFixture = values["-LibraryLargeFixture"].flatMap { Int($0) }.flatMap { $0 >= 1 ? $0 : nil }
+        fixtureBackups = values["-LibraryFixtureBackups"].flatMap { Int($0) }.map { $0 >= 1 } ?? false
     }
 
     /// Fakes over the fixture's photos when there is a fixture, else the live

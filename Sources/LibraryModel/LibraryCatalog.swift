@@ -75,6 +75,9 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var order: [String] = []  // the shown ids in sort order (LibraryOrder.swift)
     public internal(set) var importState = ImportState.idle
     public internal(set) var importNotice: ImportNotice?
+    /// The copy choice of the import `file.import-folder` began (catalog-files LC-5), which the window hands
+    /// to `services.importer.copying(_:)`; `copyTo` nil adds in place.
+    public internal(set) var importCopy = ImportCopyOptions()
     /// The import notice whose failures are listed (CS-5); `showsImportFailures` reads it.
     public internal(set) var failuresShownFor: ImportNotice?
     /// Its own thumbnails; `thumbnails` and the rest forward to it (LibraryThumbnails.swift).
