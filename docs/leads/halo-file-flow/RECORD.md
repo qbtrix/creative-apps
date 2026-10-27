@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 10:41Z stage HF-m: #5123 and #5801 still in the lane, no needs-fix. dev at 4a7d926f3 (#5880 fixed the Library compile); full run 40489065455 and halo-scoped 40490171439 queued there, first runs that can go green with HF-4.
 - 10:18Z stage HF-m: check: #5123 and #5801 still wait in the lane (clean, no needs-fix). Scheduled full CI 40484007992 at 9d3e5e327 in progress; full CI 40487248024 at 42f18cbd4 pending. dev macOS compile still red on Library's #5128 test, not Halo. No new findings.
 - 09:56Z stage HF-m: check: halo-scoped run 40478391622 red at 9d3e5e327 is not Halo's: the macOS compile fails in Library's Tests/AppSnapshotTests/RenderBudgetLibraryExportPackTests.swift:37 (#5128, mutating beginExport inside #expect); dev-red #5818 open. #5157, #5123, #5801 wait in the lane, clean.
 - 09:31Z stage HF-m: #5801 gate PASS, pushed a80cda0d9, body Head moved (stacked on #5123, which is on dev). Both wait on the lane (Linux proof + local-ci/prescreen). Then HF-m slice-done on a green run, the contact sheet, and the packet rename (lines 47, 95).
