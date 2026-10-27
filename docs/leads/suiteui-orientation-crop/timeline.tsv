@@ -186,3 +186,4 @@ utc	stage	event	ref	note
 2026-10-27T03:49:29Z	done	poll	#3756	Full CI 40439893721 red (macOS tests, dev-red #5818 not ours); full journeys 40445248646 at 9c320a9a in progress -> critic panel when done
 2026-10-27T04:09:05Z	done	poll	#3756	Full journeys 40445248646 at 9c320a9a still in progress (waiting on journeys-wait); critic panel when done
 2026-10-27T04:30:13Z	done	poll	#3756	OC complete; full journeys 40445248646 in progress, critic panel when done
+2026-10-27T04:49:36Z	done	poll	#3756	OC complete; full journeys 40445248646 cancelled, re-run 40450411543 + photo journeys 40449642359 in progress; critic panel when done
