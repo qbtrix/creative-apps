@@ -272,3 +272,4 @@ utc	stage	event	ref	note
 2026-10-27T22:37Z	3	heartbeat	lane	poll 2026-10-27T22:37Z: 2026-10-27T22:37Z check-in: no change. All five PRs open, no fix labels, no footers. dev-red #5818 open (macOS flake rerun at 7d9c09b pending; not ours). No #5093 answer, no main run newer than 38363734665.
 2026-10-27T23:01Z	3	waiting	lane	waiting on prescreen; dev-red #5818 flake rerun
 2026-10-27T23:25Z	3	waiting	lane	dev-red #5818 real; waiting on lane and prescreen
+2026-10-27T23:51Z	3	waiting	lane	dev-red #5818 flake rerun at 7b2c437; waiting on prescreen
