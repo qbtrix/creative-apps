@@ -353,3 +353,4 @@ time	kind	note
 2026-10-27T08:27Z	wait	heartbeat	#5011	waiting green design/full ci.yml holding c21b2834 (scoped runs on 8054135bd predate it; flare/halo red on dev-red #5818); #5825 waits on lane
 2026-10-27T08:46Z	wait	heartbeat	#5011	full CI 40473728719 on c21b2834 pending, scoped design 40474742270 on aa899176 running; design 40471255516 on 8054135bd red (dev-red #5818 open); #5825 waits
 2026-10-27T09:06Z	wait	heartbeat	#5011	design 40474742270 on aa899176 red: macOS compile in Library test RenderBudgetLibraryExportPackTests.swift:37 (not ours; dev-red #5818 open); full CI 40473728719 on c21b2834 pending; #5825 waits
+2026-10-27T09:25Z	wait	heartbeat	#5011	full CI 40480510598 on 9d3e5e32 running (holds c21b2834); dev-red #5818 open; #5825 waits on lane macOS gate
