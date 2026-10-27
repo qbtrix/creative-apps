@@ -194,3 +194,4 @@ utc	stage	event	ref	note
 2026-10-27T06:43:15Z	done	poll	#3756	critic panel pending: full journeys 40460270856 failed in ui-test (dev macOS build red, not ours), no screens; waiting for a green photo/full journeys
 2026-10-27T07:03:41Z	done	poll	#3756	critic panel pending: dev still c367fbeb with macOS compile red (AdjustCommands.notBuilt, not ours); no journeys screens yet
 2026-10-27T07:23:14Z	done	poll	#3756	critic panel pending: dev compile fix #5868 landed (dev 841d4d88); waiting for photo/full journeys with screens
+2026-10-27T07:43:07Z	done	poll	#3756	critic panel pending: no photo/full journeys with screens since compile fix (dev 841d4d88)
