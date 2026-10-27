@@ -1,0 +1,147 @@
+utc	stage	event	ref	note
+2026-10-21T02:36Z	0	stage-start	-	setup, base 2ab0eb963
+2026-10-21T02:36Z	3	stage-start	wave1	FH-2 / AJ-2s; IM-a and BK-m not merged
+2026-10-21T03:28Z	3	pr-opened	#3846	AJ-2s preset store stubs; IM-a still open (re-read 03:3xZ)
+2026-10-21T04:01Z	3	blocked-poll-2	#3715	IM-a not started; AJ-2s #3846 in lane
+2026-10-21T04:20Z	3	supervisor-question	#3777	3 identical blocked polls on IM-a
+2026-10-21T04:29Z	3	relaunch	act-1a15cb4e0f5-ipbr	new run carries the state; IM-a/BK-m still not on dev (da68f32); waiting per supervisor
+04:51Z	3	poll	dev 0eca6ab	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments; #3845/#3846 open in fast lane; next poll 05:11Z
+05:13Z	3	poll	dev 229c5ef	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 05:34Z
+05:35Z	3	poll	dev 71ffa4d	no SuiteImaging; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 05:55Z
+05:56Z	3	poll	dev 71ffa4d	dev unchanged; IM-a #3715 and BK-m #3758 open, no new comments, no IM-a PR open; #3845/#3846 clean in fast lane; next poll 06:17Z
+2026-10-23T14:53Z	-	start	run act-1a1693a4009-hyio, line lead; wave 1 plan
+2026-10-23T14:53Z	AJ-a	builder	AJ-1+AJ-2l then AJ-k, AJ-7 launched, base dev 8021b0f5
+2026-10-24T06:57Z	AJ-k	recut	#4863 needs-split; AJ-5f-v2 on #4846, gating
+2026-10-24T07:18Z	AJ-k	pr	#5064 opened stacked on #4846; #4863 closed
+2026-10-24T07:40Z	check	check-in	no merges yet; all slice PRs open in fast lane, none needs-fix/rebase; scoped suiteui 40072349724 green on 830af22d holds none of ours; no open findings for this feature
+2026-10-24T08:02Z	check	check-in	no change: slice PRs still open in fast lane, none flagged; no new suiteui/full run holds ours; blockers unmerged; no open findings
+2026-10-24T08:33Z	check	check-in	#4846 needs-fix: macOS gate stall (Onboarding/Home 60s timeouts) unrelated; merged dev, gate PASS, pushed 3325d7a6, Head updated; restacking #5064
+2026-10-24T08:40Z	stage	restack	#5064 restacked on #4846 3325d7a6: gate PASS, pushed 80e6d515, Head updated, footer removed
+2026-10-24T08:48Z	check	check-in	no merges since last check; #4846 needs-fix awaits lane on 3325d7a6; #5064 restacked 80e6d515; no new findings; no waited slice merged since 10-24
+2026-10-24T09:10Z	check	check-in	no slice PR merged; #4846 waits on lane at 3325d7a6 (needs-fix pending re-eval); #5105/#5112 belong to lead act-1a16cd04539-4jc0 (Photo tone #3468); no new findings on my features; waits unchanged
+2026-10-24T09:32Z	check	check-in	no slice PR merged; dev macOS was red (lottie-oracle meson, fixed by #5117 at 9f476af7, CI 40081823899 running) so lane macOS gates stalled; #4846 still needs-fix at 3325d7a6 pending lane re-eval; no new findings on my features; waits unchanged
+2026-10-24T09:54Z	check	check-in	no slice PR merged; dev CI 40081823899 (post-#5117) still running, Linux check 40082286767 green; #4846 needs-fix at 3325d7a6 pending lane re-eval; waits unchanged
+2026-10-24T10:16Z	check	check-in	no merges; #4846 needs-fix pending lane re-eval (gate passed on 3325d7a); dev full CI 40081823899 still running; no slice done
+2026-10-24T10:39Z	check	check-in	dev full CI 40081823899 green at 9f476af7 (lane macOS gate unblocked); no slice PR merged yet; #4846 needs-fix pending lane re-eval; no slice done
+2026-10-24T11:01Z	check	check-in	no slice PR merged; #4846 needs-fix pending lane re-eval; dev full CI 40087964618 at 4f00afb running (has no slice PR); merged slices since 06Z (SR-2a, PL-10, others) clear none of my waits; no slice done
+2026-10-24T11:22Z	check	check-in	no slice PR merged; #4846 needs-fix pending lane re-eval; full CI 40087964618 at 4f00afb (#5150 lane fix, takes effect at promote) still running; merged slices since 10:40Z (PL-10 x2) clear no waits; no new findings; no slice done
+2026-10-24T11:45Z	check	check-in	no slice PR merged; #4846 still needs-fix (awaiting lane re-eval of 3325d7a); full CI 40087964618 at 4f00afb (#5150) still running, contains no slice PR; no new findings; no waits unblocked
+2026-10-24T12:08Z	check	check-in	no slice PR merged; #4846 still needs-fix (awaiting lane re-eval of 3325d7a); full CI 40087964618 at 4f00afb still running, no slice PR in it; new findings #5159 (flare) #5166 (photo) are other lines; no waits unblocked
+2026-10-24T12:30Z	check	check-in	#4846 lost needs-fix (lane accepted 3325d7a), awaiting batch; full CI 40087964618 at 4f00afb green 12:11Z so main promotes with the #5150 lane fix (no slice PR of mine in it); no new findings; only LS-1 #4911 merged, no waits unblocked
+2026-10-24T12:52Z	check	check-in	no slice PR merged; all 7 fast-lane PRs clean (no needs-fix/needs-rebase), awaiting batch; no new ci.yml run on dev since Linux check at 78983bc (LS-1) green 12:36Z; no new findings; no waits unblocked
+2026-10-24T13:15Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; no new dev CI, findings or unblocking slices
+2026-10-24T13:37Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; no new dev CI, findings or unblocking slices
+2026-10-24T13:59Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; no new dev CI, findings or unblocking slices
+2026-10-24T14:20Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch (lane merged #5087 at 14:16Z, not a wait of ours); #5064 waits on #4846; no new dev CI or findings
+2026-10-24T14:43Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; dev runs at e79e9af (Linux green, scoped design/photo) hold no slice of ours; no new findings or unblocking Slice merges
+2026-10-24T15:05Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; no new dev CI (scoped photo at e79e9af green, holds no slice of ours); no new findings or unblocking Slice merges
+2026-10-24T15:27Z	check	check-in	no change: 7 fast-lane PRs clean awaiting batch; #5064 waits on #4846; dev runs at e79e9af all green (Linux, photo, design), none holds a slice of ours; no new findings or unblocking Slice merges
+2026-10-24T15:50Z	check	check-in	OC-u #4582 merged 15:48Z (awaiting a suiteui/full green run for Belt-Slice-Done); 6 fast-lane PRs clean awaiting batch; #5064 waits on #4846; no new dev CI or findings; lane batch merged #4951 #4577 #3805 #4432 #4950 #4297 #4838 (no waits of ours)
+2026-10-24T16:12Z	check	check-in	7 PRs open, no needs-fix (#5064 waits on #4846); scoped suiteui run 40109073275 queued at 33cd6e97 (contains OC-u #4582) for Belt-Slice-Done; finding #5179 is line:photo (Photo journey testTier1Tone), not ours; no Slice: merges since 15:50Z
+2026-10-24T16:34Z	check	check-in	scoped suiteui run 40109073275 (33cd6e97, has OC-u) in progress; 7 PRs open, no needs-fix/needs-rebase; no new findings or Slice: merges since 16:10Z
+2026-10-24T16:56Z	check	check-in	scoped suiteui run 40109073275 (has OC-u) still in progress; 7 PRs open, no needs-fix/needs-rebase; no new findings or Slice: merges since 16:30Z
+2026-10-24T17:20Z	check	check-in	OC-u done (run 40109073275 green, Belt-Slice-Done posted); #4846 AJ-a, #4867 AJ-7, #4870 TC-7 merged; #5064 regating after dev merge; 0 new findings
+2026-10-24T17:31Z	stage	AJ-k	#5064 regated after AJ-a squash, pushed bfa7700e, fast-lane
+2026-10-24T17:42Z	check	check-in	suiteui run 40114493184 still queued; #4880 #4953 #5006 #5064 clean in lane; 0 new findings; no unblocking slice merges
+2026-10-24T18:04Z	check	check-in	suiteui run 40114493184 in_progress; #4880 #4953 #5006 #5064 clean in lane; 0 new findings; no unblocking slice merges
+2026-10-24T18:26Z	check	check-in	AJ-a done (run 40114493184 green, Belt-Slice-Done posted); TC-5 #4880 merged 18:20Z; #4953 #5006 #5064 clean in lane; findings #5184-#5191 are Halo/Photo, none ours
+2026-10-24T18:48Z	check	check-in	#4953 #5006 #5064 clean in lane; scoped suiteui 40120688017 (d13c3ff2, has TC-5) running; findings #5193-#5205 are other lines; only slice merge PD-a #3759 (design), unblocks nothing
+2026-10-24T19:10Z	check	check-in	#4953 #5006 #5064 clean in lane; scoped suiteui 40120688017 still running; 0 new findings; 0 slice merges since 18:45Z
+2026-10-24T19:33Z	check	check-in	#4953 #5006 #5064 clean in lane; scoped suiteui 40120688017 green (has TC-5, TC-m still needs #4953); 0 new findings; only slice merge #5114 (library perf), unblocks nothing
+2026-10-24T19:55Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean (no needs-fix/needs-rebase). No Slice: merges since 19:30Z; findings #5210 (photo), #5211 (suite) not ours.
+2026-10-24T20:17Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean. No PR merged on dev since 19:54Z; scoped library run 40129102226 in progress at ef37711d. Finding #5215 (design) not ours.
+2026-10-24T20:39Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean. No PR merged since 20:17Z; full CI 40129856269 running at ef37711d (predates our PRs). No new findings.
+2026-10-24T21:00Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean. Only #5059 (docs) merged since 20:38Z; full CI 40129856269 at ef37711d still running. No new findings.
+2026-10-24T21:22Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean. No merges since 21:00Z; full CI 40129856269 at ef37711d still running. Findings #5220 (photo), #5221 (suite), #5224 (design) not ours.
+2026-10-24T21:45Z	check	check-in	No change: #4953 TC-6, #5006 TC-u, #5064 AJ-k open on the lane, clean. Lane active (#5222 merged 21:32Z, lane run in progress). Finding #5225 (halo) not ours.
+2026-10-24T22:07Z	check	check-in	no merges since 21:44Z; #4953 #5006 #5064 in lane, no flags; no new findings; scoped design afef017c running
+2026-10-24T22:29Z	check	check-in	no merges since 22:06Z; #4953 #5006 #5064 in lane, no flags; no new findings; full CI 40137153379 at afef017c running
+2026-10-24T22:51Z	check	check-in	no merges since 22:28Z; #4953 #5006 #5064 in lane, no flags; finding #5227 is inspector-controls (not ours); full CI 40137153379 running
+2026-10-24T23:10Z	stage	wave 2 start	run act-1a1702c5766-a1ju; all outside waits met (contract-first); builders on AJ-c (AJ-6, stacked on #5064) and AJ-u (AJ-3+AJ-4); no open findings
+2026-10-25T00:26Z	stage	wave 3 start	wave 2 in lane: #5064 AJ-k, #5233 AJ-c, #5235 #5236 AJ-u; builders on AJ-photo, AJ-library, AJ-halo; no open findings
+2026-10-26T02:11Z	3	resume	#5064	run act-1a175f7cbe0-4gv1; wave 2+3 PRs queued in the lane, 0 findings
+2026-10-26T02:41Z	3	lane-check	#5064,#5233,#5235,#5236	all eligible in 01:45Z sweep; waiting on lane
+2026-10-26T03:10Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 still queued; attribution footers stripped from 12 PR bodies
+2026-10-26T03:30Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 still queued; no needs-fix, 0 findings
+2026-10-26T03:46Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 still queued; dev unmoved; 0 findings
+2026-10-26T04:06Z	3	check-in	#5064,#5233,#5235,#5236	lane moving (dev 75292afd); wave 2 still queued; 0 findings
+2026-10-26T04:26Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 still queued; 0 findings
+2026-10-26T04:46Z	3	check-in	#5064,#5233,#5235,#5236	dev 999895c8; wave 2 still queued; 0 findings
+2026-10-26T05:06Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 still queued (prescreen green); 0 findings
+2026-10-26T05:25Z	3	check-in	#5064,#5233,#5235,#5236	dev 7e13ba02; wave 2 still queued; 0 findings
+2026-10-26T05:44Z	3	check-in	#5064,#5233,#5235,#5236	dev 7e13ba02; wave 2 still queued; wave 3 relabelled fast-lane; 0 findings
+2026-10-26T06:08Z	3	check-in	#5064,#5233,#5235,#5236	dev c480d848; wave 2 still queued; 0 findings
+2026-10-26T06:28Z	3	check-in	#5064,#5233,#5235,#5236	dev c480d848; wave 2 eligible, still queued; 0 findings
+2026-10-26T06:48Z	3	check-in	#5064,#5233,#5235,#5236	dev 798f1f0a; wave 2 still queued; 0 findings
+2026-10-26T07:17Z	3	check-in	#5064,#5233,#5235,#5236	dev 99ace703; wave 2 still queued; 0 findings
+2026-10-26T07:37Z	3	check-in	#5064,#5233,#5235,#5236	dev 99ace703; wave 2 still queued; 0 findings
+2026-10-26T07:58Z	3	check-in	#5064,#5233,#5235,#5236	dev 3e26fbe4; wave 2 still queued; 0 findings
+2026-10-26T08:19Z	3	check-in	#5064,#5233,#5235,#5236	dev 3e26fbe4; wave 2 still queued; 0 findings
+2026-10-26T08:39Z	3	check-in	#5064,#5233,#5235,#5236	dev 1960c2d9; wave 2 eligible, queued behind one-PR batches; 0 findings
+2026-10-26T08:59Z	3	check-in	#5064,#5233,#5235,#5236	dev be5f2c00; wave 2 queued; 0 findings
+2026-10-26T09:19Z	3	check-in	#5064,#5233,#5235,#5236	dev 1b843d15; wave 2 queued behind #5065; 0 findings
+2026-10-26T09:40Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 queued behind lane batch 091205; 0 findings
+2026-10-26T10:00Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 queued behind lane batch 095316 (#5163); 0 findings
+2026-10-26T10:20Z	3	check-in	#5064,#5233,#5235,#5236	lane idle after #5163; wave 2 next; 0 findings
+2026-10-26T10:40Z	3	check-in	#5064,#5233,#5235,#5236	wave 2 ready, queued behind p0 #5266; 0 findings
+2026-10-26T11:00Z	3	check-in	#5064,#5233,#5235,#5236	lane idle, #5266 batch dropped; wave 2 ready; 0 findings
+2026-10-26T11:25Z	3	check-in	#5064,#5233,#5235,#5236	batch 111622 (#5266) in flight; wave 2 ready; 0 findings
+2026-10-26T11:45Z	3	check-in	#5064,#5233,#5235,#5236	batch 111622 dropped; lane idle; wave 2 ready; 0 findings
+2026-10-26T12:40Z	3	review	#3777,#5789	packet review answered; finding #5789 filed (AJ-u FilterSheet); wave 2 ready
+2026-10-26T12:42Z	3	fix	#5236,#5790	#5789 fixed in #5236 (4388fad4); packet PR #5790 open
+2026-10-26T12:54Z	3	check-in	#5064,#5233,#5235,#5236,#5790	no batch in flight; all clean and ready; dev 57dd31ff
+2026-10-26T13:03Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane: 5064/5233/5235/5790 eligible, 5236 waits local-ci/prescreen on 4388fad4; 125 ready PRs queued
+2026-10-26T13:22Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane landed #5266 (dev 01600e46); wave 2 still queued
+2026-10-26T13:43Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane batch 133530 runs #5104 alone; wave 2 queued; dev 01600e46
+2026-10-26T14:04Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane still on batch 133530 (#5104); wave 2 queued; dev 01600e46
+2026-10-26T14:26Z	3	check-in	#5064,#5233,#5235,#5236,#5790	lane batch 141727 (#5267) marked red-base; dev 68be32fc; AJ-14 job prepared
+2026-10-26T14:49Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5780 (dev f86f72f7); wave 2, #5790, #5800 queued
+2026-10-26T15:10Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batch 150314 retries #5267 on dev f86f72f7; ours queued
+2026-10-26T15:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	status back on lead/suiteui-adjust-everywhere; batch 150314 (#5267) in flight; ours queued
+2026-10-26T15:30Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5285 (dev 310d7d14); ours eligible, waiting on one-at-a-time batches
+2026-10-26T15:50Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	batch 154903 runs #5106 alone; dev 310d7d14; ours eligible and queued
+2026-10-26T16:16Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5106 (dev e14f65fa); no batch in flight; ours eligible and queued
+2026-10-26T16:36Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5803 (dev 527676af); batch 163022 retries #5267; 131 ready PRs queued
+2026-10-26T16:55Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 527676af unchanged; batch 163022 (#5267, third try) in flight; ours queued
+2026-10-26T17:16Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5267 (dev df48c0ba); no batch in flight; ours queued
+2026-10-26T17:36Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5808 (dev fef52e66); batch 171803 runs #5263; ours queued
+2026-10-26T17:56Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev fef52e66 unchanged; batch 175022 retries #5263; ours queued
+18:19Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev e69582e7 (#5263 landed from batch 175022); ours clean, eligible, beta; next batch pending
+18:39Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev e69582e7 unchanged; batch 182514 runs #5295 alone; ours clean, beta, queued
+18:59Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 5cffd4cf (#5295 landed); dev-red #5321 closed; no batch in flight; ours clean, beta, queued
+19:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 17a7848b (#5334 landed); lane lands one PR per batch; ours eligible (marker + prescreen), queued
+19:41Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 17a7848b; lane now runs parallel one-PR batches (12 in flight: p0 then beta by number, at #3651); ours eligible, next in the beta order
+20:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 17a7848b unchanged; the same 12 one-PR batches in flight; ours eligible, queued in beta order
+20:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 696d37fe (11 PRs landed, #5358..#3651); no batch in flight; ours clean, beta, next in order
+20:40Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 696d37fe; new round in flight: #5802 + beta #4848..#4903; ours clean, next in beta order
+21:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 3ebc8d43 (#5802, #5812 landed); beta round #4848..#4903 in flight; ours clean, next
+21:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	dev 3ebc8d43 unchanged; lane re-batched #4848..#4891 on new dev, bisecting #4899; ours clean, queued
+21:40Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batching #4848-#4916 (beta, one PR each); ours still queued, all clean; dev 3ebc8d43; findings: #5789
+22:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #4848-#4894 (dev c4cf4a758); bisecting #4904/#4905, #4916 in flight; ours next, all clean; findings: #5789
+22:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	#4916 landed (dev 9810d71ba); lane on p0 #5369 then #4903 retry; ours next in beta order, all clean; findings: #5789
+22:40Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane holding all ready PRs: dev-red #5818 (macos, real after rerun, no culprit placed, no revert/quarantine); none of ours in its range; ours clean+queued
+23:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batching again despite #5818: p0 #5369,#5817 and beta #4903 in flight; ours next, all clean
+23:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	#5369 landed; #5817 (p0) and #4903 in flight; ours next, all clean; dev-red #5818 open
+23:40Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	no batches: dev-red #5818 flake-rerun at 9810d71 (macos, run 40411399952) holding the lane; #5817/#4903 back in queue; ours clean
+00:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batching again: #5817 (p0), #4903, #4917..#5025 in flight; #5064 next; ours clean; dev-red #5818 rerun pending
+00:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane landed #5817,#4923,#4924,#4958,#4963,#4988,#4999 (dev a80e88f4d); #4917,#4937,#5002,#5025 in flight; #5064 next; ours clean
+00:39Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batches in flight for #5064 (003016) and #5800 (003234, bisect probes -3/-6); all six open+clean; dev-red #5818 not ours
+00:58Z	3	check-in	#5064,#5233,#5235,#5236	#5790 (packet) and #5800 (AJ-14) merged to dev; #5064 batch 003016 in flight; #5233/#5235/#5236 queued clean; dev-red #5818 not ours
+01:18Z	3	check-in	#5064,#5233,#5235,#5236	#5064 re-batched (lane/batch-20261027010923, earlier batch dropped on red base); #5233/#5235/#5236 queued clean; dev unchanged since f3ed4b32d; dev-red #5818 not ours
+01:37Z	3	check-in	#5064,#5233,#5235,#5236	dev moved (#4937,#5002,#5025,#5092); #5064 batch dropped again without label or comment, waiting for next batch; all four open clean; dev-red #5818 not ours
+01:58Z	3	check-in	#5064,#5233,#5235,#5236	#5064 in lane/batch-20261027015306, marked -red (base holds dev-red #5818 commit); waits for dev green; all four open clean, no needs-fix
+02:18Z	3	check-in	#5064,#5233,#5235,#5236	dev at 7703c60d6 (#5826 quarantine renew, #5041); #5064 in fresh lane/batch-20261027021504; all four open clean, no needs-fix; dev-red #5818 not ours
+02:38Z	3	check-in	#5064,#5233,#5235,#5236	lane held on dev-red #5818: bisect named #5263 (photo), revert #5827 open p0; flake check says real; all batches -red incl #5064 021504; ours open clean
+02:59Z	3	merged	#5064	AJ-k merged to dev (f14778f87); #5233/#5235/#5236 queued clean; wave 3 stacks on all three, restack after they land; dev-red #5818 revert #5827 open p0; Belt-Slice-Done AJ-k waits for a green main run
+03:19Z	3	check-in	#5233,#5235,#5236	all three in flight: batches 030248 (#5233), 030256 (#5235), 030303 (#5236); dev unchanged since 547b958c5; revert #5827 open p0; dev-red #5818 open
+03:39Z	3	wave2-merged	#5233,#5235,#5236	wave 2 merged (308591c9d, 8e2ab5fd8, ebcdbb35e); restacking wave 3
+03:43Z	3	restack	#5247 #5248 #5249	AJ-photo merged dev, gate running; AJ-library and AJ-halo restacked onto dev (15 and 13 files, under cap), gates queued
+03:53Z	3	ship	#5247	AJ-photo gate PASS on a07fda892 (fixture switch fix for dev), pushed, Head moved; AJ-library gate running; dependents restacked locally
+04:03Z	3	ship	#5247 #5248	AJ-library gate PASS on a01a609aa, force-pushed, Head moved; AJ-halo gate running
+04:08Z	3	ship	#5247 #5248 #5249	AJ-photo/library/halo gated, Head moved, fast-lane on; dependents restacked locally
+04:22Z	3	wait	#5247 #5248 #5249	queued in lane (clean, fast-lane); main lacks AJ-k/AJ-u; dev-red #5818 open
+04:42Z	3	fix	#5247	needs-rebase: merged dev, mutation plan PhotoLiveTone conflict resolved, gate running
+04:48Z	3	ship	#5247	merged dev, gate PASS, pushed a2241375f, Head moved; clean
+05:04Z	3	wait	#5247 #5248 #5249	all clean + fast-lane, awaiting lane batch; main still fef52e668; dev-red #5818 open
+05:23Z	3	wait	#5247 #5248 #5249	clean + fast-lane; lane holding (dev-red #5818 open); main fef52e668
+05:44Z	3	wait	#5247 #5248 #5249	clean + fast-lane; no lane run since 04:51Z; dev-red #5818 open
