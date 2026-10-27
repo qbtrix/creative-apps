@@ -1,6 +1,6 @@
 [
 {"label":".redactsEveryOccurrence: redaction only on first occurrence","file":"Sources/SuiteModel/Help/ProblemReport.swift","find":"ignoresCase(), with: term.with)","replace":"ignoresCase(), with: term.with, maxReplacements: 1)","tests":"ProblemReportTests"},
 {"label":".onlyRecentCrashes: age filter dropped","file":"Sources/SuiteModel/Help/ProblemReport.swift","find":"            .filter { now.timeIntervalSince($0.modified) <= 7 * 86_400 }\n","replace":"","tests":"ProblemReportTests"},
-{"label":".onlySuiteCrashes: process filter dropped","file":"Sources/SuiteModel/Help/ProblemReport.swift","find":"$0.name.hasSuffix(\".ips\") && suite.contains(CrashTrim.process(of: $0))","replace":"$0.name.hasSuffix(\".ips\")","tests":"ProblemReportTests"},
+{"label":".onlySuiteCrashes: process filter dropped","file":"Sources/SuiteModel/Help/ProblemReport.swift","find":"CrashFolder.isCrash($0.name) && suite.contains(CrashTrim.process(of: $0))","replace":"CrashFolder.isCrash($0.name)","tests":"ProblemReportTests"},
 {"label":"listed oldest first","file":"Sources/SuiteModel/Help/ProblemReport.swift","find":".sorted { $0.modified > $1.modified }","replace":".sorted { $0.modified < $1.modified }","tests":"ProblemReportTests"}
 ]
