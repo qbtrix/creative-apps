@@ -177,3 +177,4 @@ utc	stage	event	ref	note
 2026-10-27T11:52Z	check-in	11:52Z: no change; #5096 #5245 #5247 #5248 clean and ready, lane held by dev-red #5818, main fef52e66. FH-c chain (#5107 #5108 #5129) waits on #5093 (supervisor).
 12:37Z	3	waiting-lane	#5247 #5248 #5249	#5248 eligible (prescreen ok); #5247 #5249 wait prescreen; dev 66d4c6d83
 13:05Z	3	check-in	#5247 #5248 #5249	no merges; #5248 eligible (prescreen ok), #5247/#5249 wait local-ci/prescreen; dev 9def47788 main fef52e668
+13:36Z	3	check-in	#5247 #5248 #5249	no merges; dev green again, lane re-batching; #5248 eligible; #5247/#5249 wait prescreen; dev 95e60fed8 main fef52e668
