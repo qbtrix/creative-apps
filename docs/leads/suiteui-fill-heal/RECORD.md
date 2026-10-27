@@ -2,10 +2,10 @@
 
 Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
+Stage: FH stack restacked and gated: #5107 2aeaa1d2, #5108 1dff2f5f, #5129 7504d3f1 all clean; wait local-ci/prescreen and the lane
 Base: main fef52e66 / dev ef1a0ca7
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-27T13:20Z
+Polled: 2026-10-27T13:25Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -14,7 +14,7 @@ Polled: 2026-10-27T13:20Z
 | FH-u | palette Paint Bucket, Spot Heal, Remove on the stubs | FH-3, FH-4 | PJ-FH1 | FH-a, AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo | true | 0 | lane (FH-3 #4889 head ccf9d81; FH-4 #4896 stacked on FH-3) | – | – |
 | FH-r | bucket and heal bodies over core | FH-5b, FH-5h | MJ-FH | FH-a | false | 0 | done (Belt-Slice-Done posted) | 40005632479 | – |
 | FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | lane (#4577 base dev, head 7d32ede) | – | – |
-| FH-photo | Photo adopts live, old tone-match heal gone, jobs pass | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u, AJ-photo, BK-photo | true | 0 | building (#5245 clean; #5107 2aeaa1d2, #5108 1dff2f5f restacked clean; #5129 gating; #5109, #5251 clean; FH-9 #5253 merged) | – | – |
+| FH-photo | Photo adopts live, old tone-match heal gone, jobs pass | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u, AJ-photo, BK-photo | true | 0 | lane (#5245 clean; #5107, #5108 clean on FH-7a; #5109, #5251 clean; FH-9 #5253 merged) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -64,3 +64,4 @@ Polled: 2026-10-27T13:20Z
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
 - 2026-10-27T13:20Z heartbeat: no merges of ours; dev-red #5818 open (triage blames #5334)
+- 2026-10-27T13:25Z #5129 (fix #5093) restacked on FH-7 and pushed 7504d3f1 after gate PASS
