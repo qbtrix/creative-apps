@@ -243,3 +243,4 @@ utc	stage	event	ref	note
 2026-10-27T01:37Z	check	lane merging again (dev 2cf71ce9); scoped halo/flare runs in progress on 2cf71ce9, design red on 2c20134c; no photo/full run yet with 5a1094e1; #5816 (PT-m) still unbatched, no statuses (batches 013215..013239 are #4889 #5116 #5121 #5130)
 2026-10-27T01:59Z	check	dev 042704f2; #5816 (PT-m) open/clean, unbatched, no prescreen; no scoped: photo run yet (latest runs halo/flare cancelled, design/library red); PT-u slice-done still waits
 2026-10-27T02:21Z	check	dev 7703c60d (quarantine renewal #5826 landed for dev-red #5818); #5816 (PT-m) still open/clean, unbatched; no scoped: photo run yet (library + Linux check on 9108a0bc running); PT-u slice-done waits
+2026-10-27T02:43Z	check	scoped: photo run 40439886020 in progress on b971f99b (contains PT-u 5a1094e1); full CI 40439893721 queued on 9c320a9a; #5816 (PT-m) still open/clean, unbatched
