@@ -241,3 +241,4 @@ utc	stage	event	ref	note
 2026-10-27T13:47Z	3	poll	lane	check-in: no lane merge; dev c6ba84b3, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on prescreen and the lane
 2026-10-27T14:12Z	3	heartbeat	lane	poll 2026-10-27T14:12Z: 14:12Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (flake re-runs failed, red is real; LiveStandInTests, triage guess #5334). #5093 awaiting supervisor.
 2026-10-27T14:45Z	3	poll	lane	check-in: no lane merge; dev d52f4817, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on prescreen and the lane
+2026-10-27T14:59Z	3	heartbeat	lane	poll 2026-10-27T14:59Z: 15:00Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (real red, now at 95e60fe on macOS too). #5093 awaiting supervisor.
