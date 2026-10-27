@@ -380,3 +380,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 15:57Z check-in: #5247/#5249/#5252 clean, unmerged, waiting for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
 - 16:18Z check-in: #5247/#5249/#5252 clean, unmerged, waiting for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
 - 2026-10-27T16:27Z check-in: no lane merge; dev 33429ddf, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on local-ci/prescreen and the lane
+- 16:40Z check-in: #5247/#5249/#5252 clean, unmerged, waiting for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
