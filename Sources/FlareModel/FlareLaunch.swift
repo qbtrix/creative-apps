@@ -54,9 +54,7 @@ extension FlareWorkspace {
     /// Services by source: `.fake()` for a fixture, `.built` otherwise (DK-3); `.fixture` and `.sample` open their
     /// fixture document. `.file` opens nothing here: the window reads the file off the main thread (DK-12).
     public init(launch: FlareLaunch) {
-        var services = launch.usesFakes ? FlareServices.fake() : .built
-        if launch.usesFakes, let delay = launch.exportFrameDelay { services.export = FakeExport(frameDelay: delay) }
-        self.init(services: services)
+        self.init(services: launch.usesFakes ? FlareServices.fake(exportFrameDelay: launch.exportFrameDelay) : .built)
         switch launch.source {
         case .fixture(let name), .sample(let name):
             if let document = FlareFixtures.named(name) { load(document) }

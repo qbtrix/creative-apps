@@ -132,6 +132,20 @@ private func required(_ schema: JSONValue) -> [String]? {
         #expect(try picture.pixel(x: 50, y: 70) != picture.pixel(x: 10, y: 10), "the text layer isn't composited")
     }
 
+    @Test func addTakesAStyle() throws {
+        var workspace = try opened()
+        let style = JSONValue.object([
+            "family": .string("System"), "weight": .number(900), "italic": .bool(false), "size": .number(120),
+            "rgba": .array([.number(0), .number(0), .number(0), .number(255)]),
+            "paragraph": .object(["alignment": .string("center"), "lineHeight": .number(1.2), "tracking": .number(0),
+                                  "paragraphSpacing": .number(0)]),
+        ])
+        let params = JSONValue.object(["x": .number(40), "y": .number(60), "words": .string("SUMMER SALE"), "style": style])
+        _ = try #require(catalog).run("text.add", params: params, on: &workspace)
+        let kept = try #require(workspace.textStyle)
+        #expect(kept.weight == 900 && kept.size == 120 && kept.paragraph.alignment == .center)
+    }
+
     @Test func emptyWordsAreRefused() throws {
         var workspace = try opened()
         let params = JSONValue.object(["x": .number(40), "y": .number(60), "words": .string("")])

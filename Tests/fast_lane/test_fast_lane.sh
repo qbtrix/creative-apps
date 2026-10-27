@@ -2159,7 +2159,7 @@ verdict "$(head_of 602)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sw
 expect "removal: a green check lands it and CI on dev runs" \
   "$(quarantines),$(merges),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "3,pr merge 600,pr merge 602,2"
 # A Linux red whose bisect stopped short (no `Bisect:` verdict) has no certain culprit either.
-quardev linux "${TWO[@]}"
+quardev macos "${TWO[@]}"
 printf '%s\n' "Bisect on dev stopped after 8 Linux runs: the Linux job is green at aaaaaaa and red at ${RED:0:7}; the culprit is one of the 2 commits between them. $BISECT_MARK ${RED:0:7} -->" >>"$sw/520.comments"
 FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-quarantine: a Linux red with an inconclusive bisect quarantines the test and reverts nothing" \
@@ -2185,5 +2185,26 @@ expect "auto-quarantine: a test the lane can't place in the tree is noted, not q
 quardev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
 FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-quarantine: a certain culprit gets the revert and no quarantine" "$(creates),$(quarantines),$(qnotes)" "1,0,0"
+
+# A test process that dies (scripts/ci's TEST PROCESS DIED block) prints no
+# "recorded an issue" line: mac_tests reads the block's names and places each in
+# the Tests/ file whose `func <name>(` declares it on dev. The quarantine takes
+# it from there; a name in several files or none is left out.
+DIED=$'TEST PROCESS DIED: swift test printed no \'Test run with\' summary; 1 test(s) started and never finished:\n  opens()'
+quardev macos "${TWO[@]}"
+tip_red "$RED" 4343 "$DIED"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test the process died in is quarantined, its file found by func name" \
+  "$(quarantines),$(qjson | jq -c '[.[] | .test]')" '1,["PhotoModelTests.OpenTests/opens"]'
+w="$sw/work"
+for f in OpenTests AuthTests; do printf '%s\n' '    func twin() {}' >>"$w/Tests/PhotoModelTests/$f.swift"; done
+git -C "$w" add -A; git -C "$w" commit -qm "test(photo): twin"; git -C "$w" push -q "$sw/origin.git" dev
+SCRATCH=""; scratch dev
+PFX=$'macOS tests 1/3\tscripts/ci\t2026-10-27T01:02:03.4567890Z '
+printf '%s\n' "${PFX}Test run started." "${PFX}" "${PFX}TEST PROCESS DIED: swift test printed no 'Test run with' summary; 3 test(s) started and never finished:" \
+  "${PFX}  opens()" "${PFX}  twin()" "${PFX}  ghost()" "${PFX}" "${PFX}  saves()" "${PFX}✘ Test login() recorded an issue at AuthTests.swift:3:5: x" >"$sw/joblog.9100"
+DIEDRED="red|https://github.com/qbtrix/creative-apps/actions/runs/889/job/9100|macOS"
+expect "dev red: a died process's tests are named by file; an ambiguous or unfound name, and lines after the block, are left out" \
+  "$(mac_tests "$DIEDRED" 2>/dev/null | paste -sd, -)" "AuthTests.swift/login(),OpenTests.swift/opens()"
 
 exit "$fail"
