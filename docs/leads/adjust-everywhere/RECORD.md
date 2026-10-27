@@ -390,3 +390,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 20:54Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev 7d9c09b02, main fef52e668.
 - 21:14Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev e74363e92, main fef52e668.
 - 21:34Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev 6dab26f7e, main fef52e668.
+- 21:56Z #5247 (AJ-photo) MERGED as 014429488. Restacked #5250 (photo-catalog) onto dev: 2 commits, golden photo.list-commands.json union with dev winning shared ids (dev's newer file.new summary). Gate running; then force-push, Head line, fast-lane label back. #5249, #5252 clean, waiting for local-ci/prescreen.
