@@ -3,10 +3,12 @@
 // render budget harness, publishes the saved document's thumbnail to the
 // suite's previews after each save that lands: once per save, under the
 // file's path, off the main thread, and before Save reports done. A save that
-// fails publishes nothing. The window runs on fake services with the live
-// archive (the fake writes no thumbnail), a fake bridge and a recording store,
-// so nothing reaches the real support folder. Nests in BodyCountSuites:
-// hosted windows run one at a time. macOS only.
+// fails publishes nothing. The window publishes through the thumbnails its
+// documents bridge holds, never a store of its own. It runs on fake services
+// with the live archive (the fake writes no thumbnail) and a fake bridge whose
+// thumbnails are a recording store, so nothing reaches the real support
+// folder. Nests in BodyCountSuites: hosted windows run one at a time. macOS
+// only.
 #if os(macOS)
 import AppKit
 import CoreRaster
@@ -63,8 +65,9 @@ extension BodyCountSuites {
             let w = RenderBudgetWindow(PhotoWindow(model: PhotoWorkspace(services: services)))
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
             let files = try #require(edited.files)
-            files.bridge = SuiteDocumentsBridge(app: .photo, services: SuiteServices.fake())
-            files.thumbnails = thumbnails
+            var suite = SuiteServices.fake()
+            suite.thumbnails = thumbnails
+            files.bridge = SuiteDocumentsBridge(app: .photo, services: suite)
             let send = try #require(edited.send)
             send(.openFile(url))
             for _ in 0..<100 where edited.workspace?.documentName != url.lastPathComponent || files.working != nil {

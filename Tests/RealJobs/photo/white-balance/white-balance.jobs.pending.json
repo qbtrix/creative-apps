@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P12 (photo/tone-controls PT-4), pending its fixtures: named .jobs.pending.json so the harness skips it, because the folder has no input yet (the harness needs one). TC-6 (#4953) has built the tone.* bodies; it is renamed to white-balance.jobs.json when PT-7 adds the fixtures, with input/tungsten-grey.png (a grey card shot under 3200 K light, so it reads orange) and expected/tungsten-grey-balanced.png. The job: tone.set temperature -30 and tint 5 on the image, then a PNG export. The trap: white balance works only on the whole image, not on an adjustment layer. The assertion: the grey card's mean reads neutral in the export (|R - B| <= 3/255).",
+  "pending": "PT-7",
+  "waits_on": "PT-7",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "tone.set", "params": {"slider": "temperature", "value": -30}},
+    {"id": "tone.set", "params": {"slider": "tint", "value": 5}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-balanced", "format": "png", "options": {}},
+  "expect": {
+    "out/tungsten-grey-balanced.png": {"pixels": {"tolerance": 3, "reference": "expected/tungsten-grey-balanced.png"}}
+  },
+  "platforms": []
+}

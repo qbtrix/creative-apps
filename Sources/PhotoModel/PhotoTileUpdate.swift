@@ -6,7 +6,10 @@
 // With no revision shown (a new image, a new size) every tile comes, and the
 // update says it is complete. The full-frame `render` stays the reference: the
 // tiles laid where they belong equal its bytes, premultiplied the same way
-// (`premultiplied(_:)`). The live canvas renders through a PhotoRenderRoute
+// (`premultiplied(_:)`). While Free Transform is up, both draw the draft's
+// layer through the draft (`transformPreview`, resampled once per update), so
+// the cached base under it stands and only it and the layers above composite.
+// The live canvas renders through a PhotoRenderRoute
 // (CoreRender's dispatcher, CPU or GPU) and the update names the backend whose
 // display encode made its bytes; `completeUpdate` (snapshots) stays on
 // CoreRaster. A GPU route with resident tiles and a PhotoDisplayTarget writes
@@ -69,8 +72,12 @@ extension PhotoRenderer {
     ) async throws -> PhotoTileUpdate {
         guard let canvas = workspace.canvas else { throw RasterError.invalid("no image is open") }
         let clock = ContinuousClock()
+        // Free Transform's draft draws live: its layer resampled once per update, then composited as any layer.
+        let workspace = workspace.transformPreview
         let started = clock.now
         let damage = revision.map { workspace.damage(since: $0) } ?? .all
+        // A new picture or size: the kept composites belong to the old regions.
+        if revision == nil { route.composites.removeAll() }
         let rects = tiles(of: canvas, in: damage)
         let resident = route.isGPU ? route.residentTiles : nil
         resident?.prune(keeping: Set(workspace.layers.map(\.id)))
@@ -97,7 +104,7 @@ extension PhotoRenderer {
         let done = try await withThrowingTaskGroup(of: (PixelRect, [UInt8], String).self) { group in
             for rect in rects {
                 group.addTask {
-                    var (bytes, backend) = try workspace.displayed(rect, on: route.dispatcher())
+                    var (bytes, backend) = try workspace.displayed(rect, on: route.dispatcher(), cache: route.composites)
                     premultiply(&bytes)
                     return (rect, bytes, backend)
                 }
@@ -143,7 +150,8 @@ extension PhotoRenderer {
             let maxX = rects.map(\.maxX).max(), let maxY = rects.map(\.maxY).max()
         else { return ([], route.preferred?.name ?? CPUBackend().name) }
         let area = PixelRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
-        let (bytes, backend) = try workspace.displayed(area, on: route.dispatcher(), resident: route.residentTiles)
+        let (bytes, backend) = try workspace.displayed(
+            area, on: route.dispatcher(), resident: route.residentTiles, cache: route.composites)
         let tiles = rects.map { rect in
             var tile = [UInt8]()
             tile.reserveCapacity(rect.width * rect.height * 4)
@@ -177,7 +185,8 @@ extension PhotoRenderer {
                 area, stack: live, on: dispatcher, resident: resident, tone: gpu, cache: route.composites, write: toned)
             return ([], name)
         }
-        let picture = try workspace.renderedSurface(area, on: dispatcher, resident: route.residentTiles)
+        let picture = try workspace.renderedSurface(
+            area, on: dispatcher, resident: route.residentTiles, cache: route.composites)
         defer { dispatcher.release(picture) }
         try target.write(picture, area)
         return ([], name)
@@ -187,6 +196,7 @@ extension PhotoRenderer {
     /// thread, for a picture that can wait (snapshots). Throws as `update` does.
     public static func completeUpdate(_ workspace: PhotoWorkspace) throws -> PhotoTileUpdate {
         guard let canvas = workspace.canvas else { throw RasterError.invalid("no image is open") }
+        let workspace = workspace.transformPreview
         let tiles = try tiles(of: canvas, in: .all).map { rect in
             var bytes = try workspace.rendered(rect).rgba8()
             premultiply(&bytes)

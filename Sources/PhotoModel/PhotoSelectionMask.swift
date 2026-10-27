@@ -3,12 +3,16 @@
 // the selection, and a click deselects; the stroke keeps the modifier keys, so
 // PV-5 can make Shift add to the selection and Option subtract from it. Every
 // change to the selection (the marquee, Select All, Deselect, Apply Crop) goes
-// through `setSelection`, which also sets `selectionMask`. Paint, Delete and
-// Fill weight each pixel by `selectionCoverage(x:y:)`: the mask's coverage
-// when there is one, else 1 inside the rectangle and 0 outside, and 1
-// everywhere with no selection; `coverageWeight()` is nil then, so paint
-// skips the multiply. Linux-safe.
+// through `setSelection`, which also sets `selectionMask` and the kernel
+// recipe (PhotoArea+Kernel.swift, area-selection AR-10), so Reselect and the
+// area commands follow; `showArea` renders a recipe into the selection.
+// Paint, Delete and Fill weight each pixel by `selectionCoverage(x:y:)`: the
+// mask's coverage when there is one, else 1 inside the rectangle and 0
+// outside, and 1 everywhere with no selection; `coverageWeight()` is nil
+// then, so paint skips the multiply. Linux-safe.
 import CoreRaster
+import SuiteImaging
+import SuiteKernel
 
 extension PhotoWorkspace {
     /// Test hook: while set (`$forcedCoverage.withValue`), the coverage of
@@ -24,10 +28,29 @@ extension PhotoWorkspace {
     }
 
     /// Makes `rect` the selection (nil: none), with no coverage mask, so the
-    /// rectangle is exact.
+    /// rectangle is exact, and its recipe the area's.
     mutating func setSelection(_ rect: PixelRect?, mask: Mask? = nil) {
         selection = rect
         selectionMask = rect == nil ? nil : mask
+        var recipe = AreaRecipe.empty
+        if let rect { recipe.apply(.shape(.rect(Self.box(rect)), .replace)) }
+        area.set(recipe)
+    }
+
+    /// Makes `recipe` the area and its coverage at the canvas's size the
+    /// selection, the mask's covered bounds as the rectangle (none when it
+    /// covers nothing). Throws with no image, or when the mask can't render.
+    mutating func showArea(_ recipe: AreaRecipe) throws {
+        guard let canvas else { throw RasterError.invalid(Self.noImage) }
+        let mask = try AreaMask.mask(recipe, width: canvas.width, height: canvas.height, sources: try wandSources(recipe))
+        area.set(recipe)
+        selection = mask.coveredBounds.map { PixelRect(x: $0.x, y: $0.y, width: $0.width, height: $0.height) }
+        selectionMask = selection == nil ? nil : mask
+    }
+
+    /// `rect` in the kernel's document space.
+    static func box(_ rect: PixelRect) -> Rect {
+        Rect(minX: Double(rect.x), minY: Double(rect.y), maxX: Double(rect.maxX), maxY: Double(rect.maxY))
     }
 
     /// How much of canvas pixel (`x`, `y`) the selection covers, 0...1.

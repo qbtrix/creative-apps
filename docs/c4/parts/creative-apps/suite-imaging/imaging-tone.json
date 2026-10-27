@@ -4,7 +4,8 @@
   "description": "Tone/ (docs/blueprints/suiteui/features/tone-controls.md): the suite's one tone and sharpen adjustment. ToneSlider and ToneGroup (White Balance, Tone, Presence, Sharpen), ToneSettings with Library's Develop keys, ToneRules (the settings as one CoreRender tone program, the same CPU steps, one unsharp pass and Auto from CoreRaster's AutoTone, with the sliders still waiting on the engine), and ToneCommands: the ToneTarget protocol, the ToneIntents the SuiteUI tone rows send and the tone.read, tone.set, tone.reset and tone.auto specs every adopting app registers. tone-controls TC-1 declares them as stubs; TC-5 to TC-7 fill the bodies.",
   "technology": "Swift 6, Foundation (FoundationEssentials), SuiteKernel's command catalog, CoreRender and CoreRaster, Linux and macOS",
   "paths": [
-    "Sources/SuiteImaging/Tone/"
+    "Sources/SuiteImaging/Tone/",
+    "Sources/SuiteImaging/Fakes/FakeToneDocument.swift"
   ],
   "order": 120
 }

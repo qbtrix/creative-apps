@@ -13,8 +13,8 @@
 // runner writes a magenta 200 x 100 PNG to the general pasteboard; Edit >
 // Paste on beach.png gives a 200 x 100 layer at (300, 250), centered on the
 // 800 x 600 image (one "Paste" step); with no image open it opens a clean
-// 200 x 100 "Untitled" image; a 6000 x 4000 PNG opens as 5016 x 3344 with
-// "Pasted at 84%.".
+// 200 x 100 "Untitled" image; a 6000 x 4000 PNG, over the 16 MP paste limit
+// the journey launches with, opens as 5016 x 3344 with "Pasted at 84%.".
 // The sun is found by its yellow in the canvas pixels, so the marquee and the
 // checks don't depend on where the fitted image sits. `suite.canvas` is the
 // whole viewport (682 x 582 pt on the runner), not the artboard: the fitted
@@ -172,10 +172,11 @@ final class PhotoEditJourneyTests: XCTestCase {
         photo.shot("edit-pasted-new-image")
         photo.app.terminate()
 
-        // Error: a 6000 x 4000 image (24 MP) is over the open limit, so it opens
-        // scaled to 5016 x 3344. Decoding and a lanczos3 resize take a while: a long wait.
+        // Error: a 6000 x 4000 image (24 MP) is over a 16 MP paste limit
+        // (`-PhotoPasteLimit`: the 40 MP open limit would take a debug build minutes
+        // to resize to), so it opens scaled to 5016 x 3344. A long wait all the same.
         try putOnPasteboard(Self.magentaPNG(width: 6000, height: 4000))
-        photo = Journey("Photo", self, arguments: photoArguments())
+        photo = Journey("Photo", self, arguments: photoArguments() + ["-PhotoPasteLimit", "\(16 * 1024 * 1024)"])
         XCTAssert(photo.app.windows["Photo"].waitForExistence(timeout: 30), "the empty Photo window didn't open")
         choose("Paste", photo)
         expectStatus("Pasted at 84%.", photo, timeout: 180)

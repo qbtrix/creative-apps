@@ -3,7 +3,8 @@
 // (LiveCatalogCoding) and the photos under `images/`. Opening it imports every image the catalog doesn't list yet.
 // Commands are `LibraryCatalog.catalog`'s, lifted; saving writes the zip back; export writes the catalog file
 // ("json") or the picks as PNGs at a long side through CoreRaster's codec, which refuses until core's PNG lands
-// (qbtrix/creative-core#562). Linux-safe: no UI imports.
+// (qbtrix/creative-core#562). The catalog (about 1.7 KB inline) lives in a copy-on-write box, so copying the document
+// is a pointer copy and fits a small thread stack (#5032). Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -25,8 +26,16 @@ public struct LibraryHeadless: HeadlessDocument {
     static let catalogEntry = "catalog.json", imageFolder = "images/"
     static let pngFeature = "image-codecs (qbtrix/creative-core#562)"
 
-    /// The photos and their culling.
-    public private(set) var library: LibraryCatalog
+    /// The photos and their culling, stored in `box` and copied only when a shared box is written.
+    public private(set) var library: LibraryCatalog {
+        _read { yield box.value }
+        set { box = CatalogBox(newValue) }
+        _modify {
+            if !isKnownUniquelyReferenced(&box) { box = CatalogBox(box.value) }
+            yield &box.value
+        }
+    }
+    private var box: CatalogBox
     /// Each image's bytes by its path in the file ("images/<name>.png").
     public private(set) var images: [String: Data]
     /// The file's name without its extension, for the export's names.
@@ -35,15 +44,15 @@ public struct LibraryHeadless: HeadlessDocument {
     init(photos: [PhotoItem], images: [String: Data], stem: String) {
         var services = LibraryServices.fake()
         services.culling = LiveCulling(); services.coding = LiveCatalogCoding(); services.isPreview = false
-        library = LibraryCatalog(services: services)
-        library.restore(photos)
+        box = CatalogBox(LibraryCatalog(services: services))
         self.images = images; self.stem = stem
+        library.restore(photos)
     }
 
     /// The window's catalog as a headless document, for the live command channel (editor-menus EM-7). It keeps the
     /// window's services and holds no images: the window's photos are files on disk.
     public init(catalog: LibraryCatalog) {
-        library = catalog; images = [:]; stem = "Library"
+        box = CatalogBox(catalog); images = [:]; stem = "Library"
     }
 
     /// A `.library` file: its catalog's photos, then every listed-nowhere image under `images/` as a new photo.
@@ -165,4 +174,10 @@ public struct LibraryHeadless: HeadlessDocument {
     }
 
     struct ExportSize: Decodable { var longSide: Int? }
+
+    /// The catalog on the heap; `library`'s `_modify` copies it before writing a shared one.
+    final class CatalogBox: @unchecked Sendable {
+        var value: LibraryCatalog
+        init(_ value: LibraryCatalog) { self.value = value }
+    }
 }

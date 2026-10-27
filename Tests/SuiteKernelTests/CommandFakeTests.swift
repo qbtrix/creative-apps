@@ -56,7 +56,7 @@ import SuiteKernel
         #expect(try doc.save() == saved && doc.step(redo: true) && doc.rects.count == 3)
         #expect(try FakeCanvasDocument.open(doc.save(), name: "a.fake").rects == doc.rects)
         #expect(try doc.export("json", options: .null) == [ExportedFile(suggestedName: "canvas.json", format: "json", data: doc.save())])
-        #expect(throws: CatalogError.self) { try doc.export("png", options: .null) }
+        #expect(throws: CatalogError.self) { try doc.export("gif", options: .null) }
         #expect(FakeCanvasDocument.fixture.summary() == .object(["rects": .number(2), "selected": .string("Rect 1")]))
     }
 

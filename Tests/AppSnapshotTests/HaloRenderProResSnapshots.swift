@@ -1,7 +1,7 @@
 // HaloRenderProResSnapshots.swift: the render sheet's Codec row and
 // Transparent background checkbox (export-pack HX-2, HX-5's snapshot first)
 // on `keyed` with the fakes. A ProRes 4444 movie with alpha on, seeded through
-// `beginRender` since the Codec row refuses ProRes until HX-3: the checkbox
+// `beginRender` since the Codec row refuses ProRes until HX-4: the checkbox
 // enabled and checked. An H.264 movie: the checkbox off and disabled, its
 // help ExportRules' sentence. The control inventory stands in for the
 // accessibility tree. halo-render-prores-light/-dark.png and
@@ -37,7 +37,7 @@ import Testing
         let shown = try controls(prores)
         #expect(shown["halo.render.codec"]?.enabled == true)
         #expect(shown["halo.render.alpha"]?.enabled == true)
-        #expect(HaloRenderMovieRows.codecHelp(busy: nil) == "HEVC lands with HX-4. ProRes 4444 lands with HX-3.")
+        #expect(HaloRenderMovieRows.codecHelp(busy: nil) == "HEVC isn't available yet. ProRes 4444 isn't available yet.")
         try snapshot(prores, name: "halo-render-prores-light", scheme: .light)
         try snapshot(prores, name: "halo-render-prores-dark", scheme: .dark)
 

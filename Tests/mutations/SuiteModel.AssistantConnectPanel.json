@@ -19,5 +19,33 @@
   "find": "guard let index = parts.firstIndex(of: \"AfterGlow.app\") else { return nil }",
   "replace": "guard let index = parts.firstIndex(where: { $0.hasSuffix(\".app\") }) else { return nil }",
   "tests": "AssistantConnectPanelTests"
+ },
+ {
+  "label": ".installStaysDisabled: a known bundle still disables Install",
+  "file": "Sources/SuiteModel/Packaging/AssistantConnectPanel.swift",
+  "find": "            installUnavailable: nil)",
+  "replace": "            installUnavailable: Self.installNeedsBundle)",
+  "tests": "AssistantConnectPanelTests"
+ },
+ {
+  "label": ".installUnconfirmed: Install writes the link without the click",
+  "file": "Sources/SuiteModel/Packaging/CommandLineInstall.swift",
+  "find": "guard confirmed, case .link(let at, let to) = plan else { return nil }",
+  "replace": "guard case .link(let at, let to) = plan else { return nil }",
+  "tests": "CommandLineInstallTests"
+ },
+ {
+  "label": ".homeIgnoresFlag: -SuiteHomeDir's value is dropped",
+  "file": "Sources/SuiteModel/Packaging/CommandLineInstall.swift",
+  "find": "guard next < arguments.endIndex, !arguments[next].isEmpty else { return fallback }",
+  "replace": "guard next < arguments.endIndex, arguments[next].isEmpty else { return fallback }",
+  "tests": "CommandLineInstallTests"
+ },
+ {
+  "label": ".refusalWithoutReason: a refused install hides why",
+  "file": "Sources/SuiteModel/Packaging/CommandLineInstall.swift",
+  "find": "return Message(title: refusedTitle, message: reason, buttons: [doneTitle])",
+  "replace": "return Message(title: refusedTitle, message: \"\", buttons: [doneTitle])",
+  "tests": "CommandLineInstallTests"
  }
 ]

@@ -6,7 +6,7 @@
 // runs the window at most twice per switch, and so does ticking Transparent
 // background on the codec that keeps alpha. Both reach the hosted window's
 // model through its debug `renderDrive` hook (HaloWindow+Render.swift). The
-// switch writes the settings directly: until HX-3 the picker refuses ProRes
+// switch writes the settings directly: until HX-4 the picker refuses ProRes
 // 4444 (`HaloRenderSettings.choosing(codec:)`), but the sheet's redraw is
 // the same. Nested in BodyCountSuites, as every suite that reads a body
 // counter is. macOS only.
