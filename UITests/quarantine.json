@@ -57,5 +57,11 @@
     "owner": "#5883",
     "reason": "The heavy-pass process died inside this test in dev run 40489065455 (shard 2/3), with no summary and no crash report, the only red in that run. #5883 finds what kills it.",
     "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryShareTests/shareClearsTheGridAndFillsItsPill",
+    "owner": "#5883",
+    "reason": "The Library share-sheet budget suite kills the macOS heavy-pass test process: prepareThreeInTwoBodies in run 40489065455 (shard 2/3) and shareClearsTheGridAndFillsItsPill in run 40542085144 (shard 3/3), with no summary and no crash report. The whole suite is skipped until #5883 finds what kills it.",
+    "expires": "2026-10-29"
   }
 ]
