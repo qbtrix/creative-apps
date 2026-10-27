@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "RJ-X47, pending #5791: the grid's thumbnails survive a relaunch. Draws a four-photo shoot's grid (four decodes), relaunches on the same support folder and draws it again (the trap: a memory-only cache decodes all four again; the disk tier must serve every one), then resets beach's develop (exposure 1 to neutral), which must decode beach once and nothing else. The disk tier is built (ST-6, ST-7); it runs once LibraryHeadless keeps thumbnails on disk, a headless grid draw counts its decodes and the job runner has a relaunch block (#5791).",
+  "pending": "#5791",
+  "waits_on": "#5791",
+  "inputs": ["input/*.library"],
+  "steps": [
+    {"id": "view.grid", "params": {}},
+    {"id": "thumbnails.stats", "params": {"out": "first"}}
+  ],
+  "relaunch": {
+    "support": "same",
+    "steps": [
+      {"id": "view.grid", "params": {}},
+      {"id": "thumbnails.stats", "params": {"out": "relaunch"}},
+      {"id": "edit.select", "params": {"ids": ["beach"]}},
+      {"id": "photo.reset-develop", "params": {}},
+      {"id": "view.grid", "params": {}},
+      {"id": "thumbnails.stats", "params": {"out": "after-reset"}}
+    ]
+  },
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-stats", "format": "json", "options": {}},
+  "expect": {
+    "out/shoot-stats-first.json": {"json": {"decoded": 4, "fromDisk": 0}},
+    "out/shoot-stats-relaunch.json": {"json": {"decoded": 0, "fromDisk": 4}},
+    "out/shoot-stats-after-reset.json": {"json": {"decoded": 1, "fromDisk": 4}}
+  },
+  "platforms": []
+}

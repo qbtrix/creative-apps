@@ -22,12 +22,12 @@ for your PR alone, and you never start one yourself for routine work. So:
   that already builds. A UI mistake the batch gate catches comes back as
   `needs-fix` on your PR; one only the full run sees shows up in the next
   feature CI as a "dev is red" issue whose culprit range names your PR.
-- The `macOS` job uploads the `snapshots` artifact (PNGs written by
-  `Tests/AppSnapshotTests`), and the report-only `macOS journeys` job (its
+- The `macOS tests K/N` jobs upload the `snapshots-K` artifacts (PNGs written
+  by `Tests/AppSnapshotTests`; `macOS` is the gate job over them), and the report-only `macOS journeys` job (its
   own workflow, journeys.yml, which each CI run on `dev` dispatches) clicks
   through every app (`UITests/<X>JourneyTests.swift`), uploading
   whole-window screenshots as `ui-screens`. Find a run with `gh run list --workflow ci.yml --branch dev`
-  (`--workflow journeys.yml` for the journeys), then `gh run download <id> -n snapshots`
+  (`--workflow journeys.yml` for the journeys), then `gh run download <id> -p 'snapshots-*'`
   (`-n ui-screens` from a journeys run). A user-facing
   feature adds or extends its app's journey test (docs/engineering.md,
   Human-like UI tests).
@@ -254,7 +254,10 @@ something. One that can't act yet is disabled and says why:
   `docs/blueprints/*/features/waves.md` or `docs/blueprints/*/jobs.md` at all:
   edit your component's part in docs/c4/parts/, your feature's .wave.json or
   the app's jobs.json, and the generated workflow rewrites them on dev. Only
-  the supervisor edits the journey quarantine, `UITests/quarantine.json`, and
+  the supervisor edits the test quarantine, `UITests/quarantine.json`, with
+  one narrow exception: the fast lane adds and removes its own entries there
+  (a lane-quarantine PR from its bot on lane/quarantine that changes that
+  file and nothing else; Fast lane below), and only the supervisor edits
   the perf list the gate skips,
   `Tests/perf-suites.txt`.
   `scripts/` means all of it, the gate included. Every target already exists.
@@ -321,6 +324,33 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   shared code builds everything), comments its URL, and merges when it
   compiles; a failed build waits for your next push. A `Mac-Check: <run url>`
   line a supervisor adds counts too. Batches then check Linux only.
+- Verify after merge, `LANE_VERIFY_AFTER=1` (a repo variable, off by
+  default): a code PR lands on its own as soon as its head has the Linux
+  proof above and a green `local-ci/prescreen` status (the supervisor's
+  pre-screen on the Mac), with no batch and no macOS run, also while `dev`
+  is red; without the pre-screen it waits. A proof `dev` moved under (a
+  ratchet or baseline change) is checked again on today's `dev` first.
+  While a `dev-red` issue is open, the lane reverts the culprit
+  PR, the one the dev bisect names or the only PR in the issue's range. It
+  opens a `lane-revert` PR from `lane/revert-<n>` and lands it on its own
+  Linux check, then runs CI on `dev`. Your merged PR's feature-lead issue
+  (or the PR) gets a comment saying why and how to bring the change back
+  (a new PR that reverts the revert, plus the fix), and a `finding` is filed
+  for your app. One revert per `dev-red` issue, never a revert of a revert.
+  A real red the lane has no certain culprit to revert for (an inconclusive
+  bisect, a culprit on a protected path, a revert that didn't fix it) gets
+  its failing tests quarantined instead, so trunk never stops: one
+  `Quarantined: <id>` issue per test (`p0`, `finding`, `line:<app>`, naming
+  the run, the range's PRs and their leads, and a 24 h expiry) owns the fix,
+  and a `lane-quarantine` PR from `lane/quarantine` adds the entries to
+  `UITests/quarantine.json` (the one protected path the lane may change
+  itself: that file alone, on that branch, by the lane's bot) and lands on
+  its own Linux check; `scripts/ci` then skips those tests and dev's next
+  run is green. Past the expiry the issue is a `blocker`; the entry stays
+  until the issue closes, when the lane's PR removes it (red again: the issue
+  is reopened). Never more than 5 tests per sweep, never a security, billing
+  or auth test. `scripts/quarantine release` fails while a lane entry is in.
+  Details: `docs/fast-lane.md`.
 - A crew PR into `dev` whose body has a `Belt-Lead:` line but no `fast-lane`
   label gets the label from the lane's next sweep, with one comment, and is
   evaluated in that sweep under the same rules. `no-fast-lane` or
@@ -350,6 +380,19 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   `Head:` line; the lane drops the label on the new head. When `dev` alone is
   red on every job the batch is red on, the batch lands on each PR's own proof
   so a fix can get through; a job red only with the batch is still bisected.
+  A new `dev-red` first gets its run's failed jobs rerun once at the same
+  sha (the lane's flake check): a pass is a flake, which files a `finding`
+  labelled `flaky` for the test and holds nothing; a failure makes the red
+  real. While a real `dev-red` issue names a job a batch would run (Linux
+  always, macOS when the batch has code), ready PRs that touch the failing
+  module (its test target's `Tests/<X>Tests/` and `Sources/<X>/`) wait and
+  the rest batch as usual; when the lane can't place the red, no new batch
+  forms and every ready PR waits. A
+  batch already in flight on a base that holds the red commit is marked
+  (`lane/batch-<id>-red`); once `dev` is green again on a newer commit the
+  lane drops it and its probes, with no label or comment on its PRs, and
+  forms a fresh batch on today's `dev` in the same sweep. How the script
+  does all of this: `docs/fast-lane.md`.
   One batch runs at a time; a PR that becomes ready while one is in flight
   waits for the next sweep (a few minutes). A PR that is behind
   `dev` merges as it is. A PR that conflicts is integrated by the lane: in a
@@ -381,7 +424,8 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 - A PR that breaks a hard rule (author, size outside the docs tier, protected
   path, a looser app audit) loses the label with a comment saying why and
   waits for review.
-- Full CI (`Linux`; `macOS`, scripts/ci with the snapshots) runs on `dev`
+- Full CI (`Linux`; `macOS`: `macOS compile` then the `macOS tests K/N`
+  shards, scripts/ci with the snapshots) runs on `dev`
   once a feature is built, not per merge: when the supervisor or Belt
   dispatches it, when the lane merges a PR labelled `feature-done` or one
   touching `Sources/*App`, `Sources/SuiteUI`, `Tests/App*` or `UITests`, after
@@ -408,7 +452,11 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   run tested. Its concurrency group is
   `journeys-<branch>-<app|full>`, so a journeys job waiting for a macOS
   runner never holds `ci-dev`. A running journeys run is never cancelled;
-  only the newest pending run of each scope waits. On a branch, or to ask for one by hand: `gh workflow
+  only the newest pending run of each scope waits. Its `Journeys wait` job
+  (scripts/journeys-wait) holds the run on ubuntu until no CI run is queued
+  for a macOS runner and fewer than two older journeys runs are alive, so
+  journeys hold at most two macOS runners and the lane's gate goes first; a
+  run a newer one of its scope supersedes cancels itself. On a branch, or to ask for one by hand: `gh workflow
   run journeys.yml --ref <branch> [-f app=<app>]` (findings and the audit
   baseline move only on `dev`).
 - A scoped run proves one app: `gh workflow run ci.yml --ref dev -f
@@ -423,15 +471,19 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
 - A journey that keeps failing on `dev` for a known reason can be quarantined,
   by the supervisor only, in `UITests/quarantine.json`: entries of
   `{"test": "Target/Class/testName", "owner": "#<open issue>", "reason": ..., "expires": "YYYY-MM-DD", "scope": "all"|"full"}`,
-  at most 7 days out. `scope` is optional: `all` (the default) skips the
+  at most 7 days out. A swift test goes in the same file as
+  `Target.Suite/test` or `Target.freeTest` (the `Tests/perf-suites.txt`
+  form) and `scripts/ci` skips it; the fast lane's own entries carry a
+  `lane` block (Fast lane above). `scope` is optional: `all` (the default) skips the
   journey in every run; `full` skips it only in full runs, so a full run can
   go green and promote `main` while the owner's scoped run (`app=<app>`)
   still runs it and shows the truth. `scripts/ui-test` skips each live entry
   that applies and lists every entry, with where it is skipped, in its output
   and the job summary. `scripts/ci` fails on an expired entry, a closed or
   missing owner issue, an empty reason, a scope other than `all` or `full`, or
-  a test that isn't in `UITests/`. When the owner's fix merges, the
-  supervisor removes the entry and the next `dev` run proves it.
+  a test that isn't in `UITests/` or `Tests/`. When the owner's fix merges, the
+  supervisor removes the entry and the next `dev` run proves it (the lane
+  removes its own once the owner issue closes).
 
 ## Commands
 
@@ -444,14 +496,16 @@ swift test --filter "$(scripts/test-scope perf photo)" --no-parallel   # Photo's
 swift test --filter FlareModelTests          # one suite while iterating
 bash Tests/fast_lane/test_fast_lane.sh       # fast-lane decision tests (needs jq)
 bash Tests/audit_lower/test_audit_lower.sh   # decision tests for scripts/audit-lower, CI's baseline lowering (needs jq)
-scripts/quarantine check                     # the journey quarantine's entries: owned, reasoned, unexpired (needs jq; gh for owner state)
+scripts/quarantine check                     # the test quarantine's entries: owned, reasoned, unexpired (needs jq; gh for owner state)
+scripts/quarantine release                   # the release gate: fails while the fast lane's own quarantine entries are in
+bash Tests/quarantine/test_quarantine.sh     # scripts/quarantine's fixture tests (needs jq)
 scripts/bump-core [<core sha>]               # move the creative-core pin (default: core main's head): checks, then the bump PR
 bash Tests/bump_core/test_bump_core.sh       # scripts/bump-core against a fake gh and swift (needs jq)
 scripts/install-merge-drivers                # once per clone: .gitattributes merge drivers (JSON by key) and rebase.updateRefs; cloud-setup.sh runs it
 bash Tests/merge_drivers/test_merge_drivers.sh # the merge drivers on scratch repos (needs git, jq)
 gh run list --workflow ci.yml --branch dev    # feature CI runs on dev
 gh run list --workflow journeys.yml          # the UI journeys runs that follow them
-gh run download <run-id> -n snapshots        # the PNGs from a macOS CI run
+gh run download <run-id> -p 'snapshots-*'    # the PNGs from a CI run's macOS test shards
 gh run download <run-id> -n ui-screens       # whole-window PNGs from a journeys.yml run
 scripts/ui-test                              # macOS + Xcode + xcodegen: run the UI journeys locally
 scripts/contact-sheet                        # after ui-test: .build/ui-screens/contact-sheet.html, the page to review per run

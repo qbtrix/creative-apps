@@ -1,0 +1,5 @@
+[
+{"label": "a saved style is not read back", "file": "Sources/HaloModel/HaloLayer.swift", "find": "style = try c.decodeIfPresent(LayerStyle.self, forKey: .style)", "replace": "style = nil", "tests": "HaloLayerStyleTests"},
+{"label": "an unstyled layer reads as no selection, not as no style", "file": "Sources/HaloModel/HaloStyle+Kernel.swift", "find": "return layer.sampledStyle(in: c, at: c.playheadFrame) ?? LayerStyle.none", "replace": "return layer.sampledStyle(in: c, at: c.playheadFrame)", "tests": "HaloLayerStyleTests"},
+{"label": "the panel never opens", "file": "Sources/HaloModel/HaloStyle+Kernel.swift", "find": "{ stylePanel = kind }", "replace": "{ stylePanel = nil }", "tests": "HaloLayerStyleTests"}
+]

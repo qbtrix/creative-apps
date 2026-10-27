@@ -12,7 +12,7 @@
 // stroke draws on LiveStroke's LiveCopy and comes back once, at its end or before
 // any other intent, so drawing never re-runs the panels; a Free Transform
 // handle drag or row scrub runs on LiveTransformCopy the same way. Its workspace runs on
-// `fileServices(.live)`, or under `-PhotoFixture` on the fixture's fakes
+// `fileServices(liveServices)`, or under `-PhotoFixture` on the fixture's fakes
 // (`launchOptions`, read once from the process; S-12), whose picture it
 // renders and keeps fitted while the window settles, until the user zooms. Open, Save, Save As and their
 // launch arguments live in PhotoWindow+File.swift, Export's write in
@@ -51,8 +51,6 @@ struct PhotoWindow: View {
     @State var note: String?
     /// The error or refusal the window's alert shows; nil while it is closed.
     @State var problem: PhotoProblem?
-    @State var exportFormat = ImageFormat.png
-    @State var exportQuality = 0.9
     @State var isResizing = false
     /// The Straighten sheet's choices; nil while it is closed.
     @State var straightenDraft: StraightenDraft?
@@ -87,9 +85,9 @@ struct PhotoWindow: View {
     /// This process's `-PhotoFixture`, read once.
     nonisolated static let launchOptions = PhotoLaunchOptions(arguments: ProcessInfo.processInfo.arguments)
 
-    /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(.live)`.
+    /// The fixture on the fakes under `-PhotoFixture`, else a workspace on `fileServices(liveServices)`.
     nonisolated static func launchWorkspace() -> PhotoWorkspace {
-        PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(.live))
+        PhotoWorkspace.launch(launchOptions) ?? PhotoWorkspace(services: fileServices(liveServices))
     }
 
     /// A window on `model`: the launch workspace in the app, a test's own in tests, at `zoom`.
@@ -121,9 +119,8 @@ struct PhotoWindow: View {
                 model.clearStatus()
             }
             .sheet(isPresented: Binding(get: { model.isExportSheetOpen }, set: { if !$0 { model.dismissExport() } })) {
-                ExportSheet(
-                    format: exportFormat, quality: exportQuality, workspace: model, onFormat: { exportFormat = $0 },
-                    onQuality: { exportQuality = $0 }, onExport: exportChosen, onCancel: { model.dismissExport() })
+                PhotoExportSheetAdapter(
+                    model: model, onPick: { model.editExport($0) }, onExport: exportChosen, onClose: { model.dismissExport() })
             }
             .sheet(isPresented: $isResizing) {
                 if let canvas = model.canvas {
@@ -177,7 +174,7 @@ struct PhotoWindow: View {
         // Drag samples still waiting for the display frame land first, then a live stroke goes back.
         if case .drag = intent {} else {
             pacer.flush()
-            takeStroke(keepingTransform: Self.isTransformSample(intent))
+            takeStroke(keepingTransform: Self.isTransformSample(intent) || Self.isToneSample(intent))
         }
         switch intent {
         case .newImage:
@@ -190,6 +187,7 @@ struct PhotoWindow: View {
         case .saveAs: saveAs()
         case .imageSize: isResizing = model.canvas != nil
         case .rotate(let turn): model.rotateImage(turn)
+        case .flipCanvas(let axis): run("image.flip", ["axis": .string(axis.rawValue)], failing: "The image can't be flipped.")
         case .straighten: straightenDraft = model.canvas == nil ? nil : StraightenDraft()
         case .applyStraighten(let degrees, let cropToFit): straighten(degrees: degrees, cropToFit: cropToFit)
         case .undo: model.undo()
@@ -220,6 +218,7 @@ struct PhotoWindow: View {
             pacer.stop()
             model.endDrag()
         case .toolOption(let edit): model.setToolOption(edit)
+        case .bucketOption(let edit): model.setBucketOption(edit)
         case .gradientOption(let intent): model.runGradientOption(intent)
         case .adjust(let edit): model.adjust(edit)
         case .endAdjust: model.endAdjust()
@@ -258,6 +257,8 @@ struct PhotoWindow: View {
         case .sample(let intent): performSample(intent)
         case .place(let intent): performPlace(intent)
         case .text(let intent): performType(intent)
+        case .tone(let intent): performTone(intent)
+        case .path(let intent): model.runPath(intent)
         case .confirm: if confirmTransform() {} else { model.applyCrop() }
         case .dismiss:
             if dismissTransform() {} else if model.pendingCrop != nil { model.cancelCrop() } else { model.deselect() }
@@ -265,7 +266,7 @@ struct PhotoWindow: View {
     }
 
     /// A live paint stroke's, drag line's or transform's copy back into the workspace: one SwiftUI pass
-    /// for the gesture. A transform sample keeps the live transform going.
+    /// for the gesture. A transform or tone sample keeps the live copy going.
     func takeStroke(keepingTransform: Bool = false) {
         if let painted = liveStroke.take() { model.adoptLiveStroke(painted) }
         if let lined = dragLine.take() { model.adoptLiveStroke(lined) }

@@ -77,6 +77,43 @@ import Testing
     #expect(picked.visible == Array(order.prefix(picked.visible.count)))
 }
 
+/// #3635: the cells stretch to fill each row with their images 8 pt apart
+/// (each cell pads its image by 4 pt for the selection fill), inside the
+/// grid's 12 pt padding. 600 pt wide with 120 pt images (128 pt cells) fits
+/// four 144 pt cells across the 576 pt between the paddings.
+@MainActor @Test func cellsFillTheRowWithAnEightPointGap() {
+    let window = host(ThumbnailGrid(
+        (1...4).map { ThumbnailItem(id: "\($0)", caption: "\($0).heic") }, cellSize: CGSize(width: 120, height: 90),
+        selection: [], onSelectionChange: { _ in }, cellIdentifierPrefix: "t.cell."),
+        size: CGSize(width: 600, height: 300))
+    defer { window.orderOut(nil) }
+    let left = window.convertToScreen(window.contentView?.frame ?? .zero).minX
+    let images = cellFrames(in: window).map { $0.insetBy(dx: 4, dy: 4) }.sorted { $0.minX < $1.minX }
+    #expect(images.count == 4)
+    for (a, b) in zip(images, images.dropFirst()) { #expect(abs(b.minX - a.maxX - 8) <= 0.5, "gap \(b.minX - a.maxX)") }
+    #expect(abs((images.first?.minX ?? 0) - left - 16) <= 0.5)
+    #expect(abs((images.last?.maxX ?? 0) - left - 584) <= 0.5)
+}
+
+/// #3635: without captions a cell is just its image (aspect kept) and its
+/// padding, and it still reads its file name.
+@MainActor @Test func captionsAreOptional() {
+    let window = host(ThumbnailGrid(
+        (1...4).map { ThumbnailItem(id: "\($0)", caption: "\($0).heic") }, cellSize: CGSize(width: 120, height: 90),
+        selection: [], onSelectionChange: { _ in }, cellIdentifierPrefix: "t.cell.", showsCaptions: false),
+        size: CGSize(width: 600, height: 300))
+    defer { window.orderOut(nil) }
+    let cell = cellFrames(in: window).first ?? .zero
+    #expect(abs(cell.height - ((cell.width - 8) * 3 / 4 + 8)) <= 0.5, "cell \(cell)")
+    #expect(axElements(in: window).first { $0.id == "t.cell.1" }?.label.contains("1.heic") == true)
+}
+
+@MainActor private func cellFrames(in window: NSWindow) -> [CGRect] {
+    axNodes(in: window)
+        .filter { (($0.accessibilityIdentifier?() ?? nil) ?? "").hasPrefix("t.cell.") }
+        .map { $0.accessibilityFrame?() ?? .zero }
+}
+
 @MainActor private final class Picked {
     var selection: Set<String> = []
     var visible: [String] = []

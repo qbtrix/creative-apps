@@ -8,8 +8,11 @@
 # bisected by prefix; a proof gone stale on a ratchet or baseline change is
 # checked again on today's dev), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
 # per code batch scoped to its apps, priority order, slots, the timer, a red
-# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), and the red-dev
-# bisect, with its 2-of-3 vote mode for a timing budget test. No network,
+# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
+# bisect, with its 2-of-3 vote mode for a timing budget test, and the
+# auto-revert of a red dev's culprit, own-proof landing on the pre-screen and a
+# stale proof's batch of one holding only its own PR
+# (LANE_VERIFY_AFTER=1). No network,
 # needs bash, git and jq.
 #
 # checks-green.json is a check rollup shaped like a green flare-core PR: the CI
@@ -219,6 +222,8 @@ check "a red journeys check doesn't block" "eligible|150|2|Fast-Check marker" "$
   '[{"__typename":"CheckRun","name":"macOS journeys","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
 check "a red scoped journeys check doesn't block" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"macOS journeys (photo)","workflowName":"","status":"COMPLETED","conclusion":"FAILURE"}]'
+check "a journeys run waiting for a macOS slot doesn't block" "eligible|150|2|Fast-Check marker" "$MARKED" "$BASE_FILES" \
+  '[{"__typename":"CheckRun","name":"Journeys wait","workflowName":"Journeys","status":"IN_PROGRESS","conclusion":null}]'
 check "a green macOS check alone is no proof (a Linux check)" "linux-dispatch|feat/x" . "$BASE_FILES" \
   '[{"__typename":"CheckRun","name":"macOS","workflowName":"","status":"COMPLETED","conclusion":"SUCCESS"}]'
 check "a green Linux check alone is proof" "eligible|150|2|1 checks green" . "$BASE_FILES" \
@@ -633,7 +638,7 @@ gh() {
     "pr list "*)  # every open PR in the --json shape; the lane picks the labelled ones itself
       u=()
       for n in "$sw"/[0-9]*.json; do
-        [[ -e "${n%.json}.merged" ]] || u+=("$n")
+        [[ ! -e "$n" || -e "${n%.json}.merged" ]] || u+=("$n")
       done
       if (( ${#u[@]} )); then jq -s . "${u[@]}"; else echo '[]'; fi ;;
     "pr view "*"--json title "*) echo "title $2" ;;
@@ -650,8 +655,12 @@ gh() {
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
       else jq -rn '[{filename: "Sources/FlareModel/FlareWorkspace.swift", status: "modified"}]' | jq -r "${!#}"; fi ;;
     "api "*"/pulls/"*) n="${2##*/}"; jq -r "${!#}" "$sw/pull.$n.json" 2>/dev/null || true ;;  # a PR's body (bisect_post)
+    "api repos/"*"/issues?labels=dev-red&state=closed"*) jq -r "${!#}" "$sw/redclosed.json" 2>/dev/null || true ;;  # the last closed dev-red issue (flake_closed)
     "api repos/"*"/issues?labels=dev-red"*) jq -r "${!#}" "$sw/red.json" 2>/dev/null || true ;;  # the open dev-red issue
+    "issue list "*) cat "$sw/issues.json" 2>/dev/null || echo '[]' ;;  # the open finding issues (flake_finding)
+    "issue create "*) echo "$a" >>"$sw/calls"; echo "https://github.com/qbtrix/creative-apps/issues/$((699 + $(grep -c '^issue create' "$sw/calls")))" ;;  # #700, #701, ...
     "api search/issues"*) jq -r "${!#}" "$sw/search.json" 2>/dev/null || true ;;
+    "api "*"/actions/runs/"*"/jobs"*) u="${2#*/actions/runs/}"; jq -r "${!#}" "$sw/jobs.${u%%/*}.json" 2>/dev/null || true ;;  # a run's jobs (mac_tests' shards)
     "run view --job "*) cat "$sw/joblog.$4" 2>/dev/null || return 1 ;;  # a job's failed-step log (budget_failure)
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
     "run list "*"--commit "*)
@@ -702,12 +711,13 @@ gh() {
       (cd "$sw/refs/$u" 2>/dev/null && find . -type f | sed 's:^\./::') | jq -R '{path: ., type: "blob"}' | jq -s '{truncated: false, tree: .}' ;;
     "api "*"/contents/"*) u="${!#}"; u="${u#*/contents/}"; cat "$sw/refs/${u##*\?ref=}/${u%%\?*}" ;;
     "api "*"/issues/"*"/comments "*) n="${2#*/issues/}"; cat "$sw/${n%%/*}.comments" 2>/dev/null || true ;;
-    "api repos/"*"/issues/"*)  # an issue's labels: $sw/labels.<n>, none if absent, a failure if .fail
+    "api repos/"*"/issues/"*)  # an issue's state ($sw/state.<n>, OPEN if absent) and labels ($sw/labels.<n>, none if absent, a failure if .fail)
       n="${2##*/}"; echo "labels $n" >>"$sw/lookups"
       [[ ! -e "$sw/labels.$n.fail" ]] || return 1
-      jq -c '{labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
+      jq -c --arg s "$(cat "$sw/state.$n" 2>/dev/null || echo OPEN)" '{state: $s, labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
     "pr comment "*|"issue comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
-    "pr merge "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
+    "pr merge "*) [[ ! -e "$sw/merge.fail.$3" ]] || return 1  # $sw/merge.fail.<n>: GitHub refuses the merge
+      echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
     "pr edit "*"--body "*) echo "pr edit $3 --body" >>"$sw/calls"; printf '%s\n' "${!#}" >"$sw/$3.edited" ;;
     "pr edit "*"--base "*) echo "$a" >>"$sw/calls"; jq '.baseRefName = "dev"' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     "pr edit "*"--add-label fast-lane") echo "$a" >>"$sw/calls"
@@ -718,6 +728,18 @@ gh() {
       jq '.labels += [{"name": "needs-fix"}]' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     "pr edit "*"--remove-label needs-fix"*) echo "$a" >>"$sw/calls"
       jq '.labels |= map(select(.name != "needs-fix"))' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
+    "pr create "*)  # a lane PR (a revert or a quarantine change): the next fixture from #600 on the branch it pushed, by the
+      # lane's bot, with the command's labels; its files are the branch's diff against dev
+      echo "$a" >>"$sw/calls"; u="${a#*--head }"; u="${u%% *}"
+      n=600; while [[ -e "$sw/$n.json" ]]; do n=$((n + 1)); done
+      git -C "$sw/origin.git" diff --name-only dev "refs/heads/$u" | jq -R '{filename: ., status: "modified"}' | jq -s . >"$sw/files.$n.json"
+      jq -n --argjson n "$n" --arg b "$u" --arg h "$(git -C "$sw/origin.git" rev-parse "refs/heads/$u")" --arg body "${!#}" \
+        --argjson labels "$(grep -oE -- '--label [^ ]+' <<<"$a" | cut -d' ' -f2 | jq -R '{name: .}' | jq -s .)" '{number: $n, state: "OPEN",
+        isDraft: false, baseRefName: "dev", headRefName: $b, headRefOid: $h, labels: $labels,
+        author: {login: "app/github-actions", is_bot: true}, additions: 1, deletions: 1, changedFiles: 1,
+        mergeable: "MERGEABLE", mergeStateStatus: "CLEAN", body: $body}' >"$sw/$n.json"
+      echo "https://github.com/qbtrix/creative-apps/pull/$n" ;;
+    "pr close "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged" ;;  # a closed PR leaves the open list like a merged one
     *) echo "$a" >>"$sw/calls" ;;
   esac
 }
@@ -862,8 +884,8 @@ expect "needs-rebase: a PR that still conflicts keeps it" "$(grep -c '^pr edit 8
 expect "needs-rebase: an UNKNOWN mergeable state is left alone" "$(grep -cE '^pr edit 86 |--ref b86$' "$sw/calls")" 0
 
 # dispatch_reason: feature-done, then a UI change, then the 10-merge count.
-reason() {  # reason <name> <want> <feature> <ui> <since>
-  local got; got=$(dispatch_reason "$3" "$4" "$5")
+reason() {  # reason <name> <want> <feature> <ui> <since> [<revert>]
+  local got; got=$(dispatch_reason "$3" "$4" "$5" "${6:-0}")
   if [[ "$got" == "$2" ]]; then echo "ok   dispatch: $1"; else echo "FAIL dispatch: $1: want '$2', got '$got'"; fail=1; fi
 }
 reason "feature-done" "merged a feature-done PR" 1 0 ""
@@ -871,6 +893,7 @@ reason "UI change" "merged a UI change" 0 1 ""
 reason "10 merges since CI" "10 merged PRs since the last CI run" 0 0 10
 reason "9 merges wait" "" 0 0 9
 reason "unknown count waits" "" 0 0 ""
+reason "a landed lane revert dispatches first" "merged a revert of a red dev's culprit" 1 1 10 1
 # UI_RE: what counts as a UI change.
 for f in Sources/FlareApp/FlareApp.swift Sources/SuiteUI/Tokens.swift Tests/AppSnapshotTests/A.swift \
     Tests/AppAuditTests/AuditCore.swift UITests/PhotoJourneyTests.swift; do
@@ -1180,6 +1203,32 @@ expect "ratchet race: it forms again on today's dev, with a new Linux check" \
   "$(git -C "$sw/origin.git" rev-parse dev),2"
 batch_green; lane_sweep
 expect "ratchet race: the new batch lands on its check" "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -)" "pr merge 83,pr merge 84"
+# The Generated workflow (.github/workflows/generated.yml) pushes docs/c4/model.json,
+# docs/c4/parts, waves.md and jobs.md straight to dev every few hours. Those
+# commits touch no code, so they don't make a proof stale: a batch with a
+# ratchet-touching PR still lands (on 10-23 one dropped an 8-PR batch after 6 h).
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 85 h85 "$DOCS"; real_pr 85
+pr_at 86 h86 "$DOCS"; real_pr 86 Tests/placeholder-menu-baseline.txt
+lane_sweep
+OLD_TIP=$(batch_tip)
+dev_moves docs/c4/model.json; dev_moves docs/blueprints/photo/jobs.md; dev_moves docs/blueprints/photo/features/waves.md
+dev_moves docs/c4/parts/creative-apps/photo-model/photo-model-sources.json
+verdict "$OLD_TIP" success
+lane_sweep
+expect "generated: dev moved only by generated files: a batch with a ratchet PR lands on its check" \
+  "$(grep -oE '^pr merge [0-9]+' "$sw/calls" | paste -sd, -),$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" "pr merge 85,pr merge 86,1"
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+pr_at 85 h85 "$DOCS"; real_pr 85
+pr_at 86 h86 "$DOCS"; real_pr 86 Tests/placeholder-menu-baseline.txt
+lane_sweep
+OLD_TIP=$(batch_tip)
+dev_moves docs/c4/model.json; dev_moves Sources/HaloApp/HaloTransport.swift
+verdict "$OLD_TIP" success
+lane_sweep
+expect "generated: dev also moved by another path: the batch lands nothing and forms again on today's dev" \
+  "$(grep -c '^pr merge' "$sw/calls"),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~2"),$(grep -c '^workflow run ci.yml .*-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" \
+  "0,$(git -C "$sw/origin.git" rev-parse dev),2"
 
 # A red batch is bisected by prefix: #60 good, #61 bad, #62 good. The tip is
 # red; the chain after 1 PR is green; after 2 red: #61 is the culprit. #60
@@ -1226,6 +1275,50 @@ expect "dev red: and says so" "$(grep -c '^pr comment 71 .*dev was red on its ow
 expect "dev red: no needs-fix" "$(grep -c -- '--add-label needs-fix' "$sw/calls")" 0
 expect "dev red: the branches are gone" "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' | wc -l | tr -d ' ')" 0
 
+# A red dev (#5234): while an open dev-red issue names a red Linux job, no new
+# batch forms and ready PRs wait; once the issue closes, they batch.
+# redissue <sha or empty> [<failing jobs>]: the open dev-red issue #510 (jobs
+# default linux), its range main..<sha>, with a bisect verdict already posted
+# so red_bisect stays out of the way.
+redissue() {
+  jq -n --arg b "$(printf 'CI on dev is red.\n\n- Failing jobs: %s\n%s' "${2:-linux}" "${1:+- Culprit range: \`main..$1\`}")" \
+    '[{number: 510, body: $b, pull_request: null}]' >"$sw/red.json"
+  printf '%s\n' "$BISECT_MARK ${1:0:7} -->" >"$sw/510.comments"
+}
+redref() { git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*-red' --format='%(refname:short)' | wc -l | tr -d ' '; }
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 72 73; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+redissue ""; lane_sweep
+expect "red dev: no batch forms, nothing merges, nothing runs" "$(batch_tip),$(grep -oE "^pr merge [0-9]+" "$sw/calls" | paste -sd, -),$(grep -c '^workflow run' "$sw/calls")" ",,0"
+rm -f "$sw/red.json"; lane_sweep
+expect "red dev: once dev is green the ready PRs batch" "$(git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" | grep -oE '#[0-9]+' | paste -sd, -)" "#73,#72"
+
+# A batch in flight on a base that holds dev's red commit is marked
+# (<batch>-red) while dev is red; once dev is green again on a newer commit
+# it is dropped with its probes and marker, and the same sweep forms a fresh
+# batch on today's dev. Its PRs get no label and no comment.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 74 75; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+lane_sweep; TIP=$(batch_tip); BASE=$(git -C "$sw/origin.git" rev-parse dev)
+redissue "$BASE"; lane_sweep
+expect "red base: a batch on dev's red commit is marked" "$(redref)" 1
+verdict "$TIP" failure; lane_sweep
+expect "red base: it bisects meanwhile" "$( [[ -n "$(probe_sha 1)" ]] && echo probe)" "probe"
+rm -f "$sw/red.json"; dev_moves docs/fix.md; FIX=$(git -C "$sw/origin.git" rev-parse dev); lane_sweep
+expect "red base: once dev is green the marked batch, its probes and marker are gone" \
+  "$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/batch-*' --format='%(refname:short)' | grep -cvE '^lane/batch-[0-9]+$' || true),$(redref)" "0,0"
+expect "red base: a fresh batch forms on the fix" \
+  "$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~2"),$(git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" | grep -oE '#[0-9]+' | paste -sd, -)" "$FIX,#75,#74"
+expect "red base: its PRs get no label and no comment" "$(grep -cE '^pr (edit|comment) (74|75) ' "$sw/calls")" 0
+
+# A batch whose base predates dev's red commit is never marked or dropped.
+rm -rf "$sw"; mkdir -p "$sw"; : >"$sw/calls"
+for n in 76 77; do pr_at "$n" "h$n" "$DOCS"; real_pr "$n"; done
+lane_sweep; TIP=$(batch_tip)
+dev_moves docs/red.md; redissue "$(git -C "$sw/origin.git" rev-parse dev)"; lane_sweep
+rm -f "$sw/red.json"; lane_sweep
+expect "red base: a batch on a base before the red commit is kept" "$(redref),$(batch_tip)" "0,$TIP"
+
 # Culprit by bisect on a red dev (rung 2c): main at the base, dev three
 # first-parent commits past it (#101 good, #102 bad, #103 good), the dev-red
 # issue #500 naming main..<dev tip> with a Linux red, and red-triage's comment
@@ -1245,7 +1338,7 @@ git -C "$w" push -q "$sw/origin.git" main dev
 M=$(git -C "$w" rev-parse main); C1=$(git -C "$w" rev-parse dev~2); C2=$(git -C "$w" rev-parse dev~1); C3=$(git -C "$w" rev-parse dev)
 R7=${C3:0:7}
 jq -n --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9001\n- Failing jobs: linux\n- Culprit range: `main..%s`\n' "$C3")" '[{number: 500, body: $b, pull_request: null}]' >"$sw/red.json"
-printf '%s\n' "Likely cause: #102 feat(b): two (Clef 0.93). Flaky: 0.10." >"$sw/500.comments"
+printf '%s\n' "Likely cause: #102 feat(b): two (Clef 0.93). Flaky: 0.10." "$RERUN_MARK $R7 red -->" >"$sw/500.comments"
 jq -n '{body: "Adds two.\n\nFeature: easing\nFast-Check: pass"}' >"$sw/pull.102.json"
 jq -n '{items: [{number: 70, title: "Feature: easing (old)"}, {number: 78, title: "Feature: easing"}]}' >"$sw/search.json"
 verdict "$M" success; verdict "$C3" failure
@@ -1267,6 +1360,7 @@ expect "bisect dev: a red with its verdict posted is not redone (two runs, two c
 # the issue already has its verdict, so nothing is bisected again.
 echo c4 >"$w/c4.md"; git -C "$w" add -A; git -C "$w" commit -qm "docs: four (#104)"; git -C "$w" push -q "$sw/origin.git" dev
 C4=$(git -C "$w" rev-parse dev); verdict "$C4" failure
+printf '%s\n' "$RERUN_MARK ${C4:0:7} red -->" >>"$sw/500.comments"
 jq --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9002\n- Failing jobs: linux\n- Culprit range: `main..%s`\n' "$C4")" '.[0].body = $b' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
 lane_sweep
 expect "bisect dev: a newer red run on the same issue starts no second bisect" \
@@ -1648,6 +1742,448 @@ expect "dev red macOS: an unreadable log lands nothing and names nothing" "$(mer
 devred 116; printf 'macOS (photo)\tscripts/ci\t2026-10-23T04:39:07Z TEST PROCESS DIED\n' >"$sw/joblog.201"; mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
 expect "dev red macOS: a crash with no test named is red, never dev's" \
   "$(merges),$(grep -c '^pr edit 117 .*--add-label needs-fix' "$sw/calls"),$(grep -c "own proof" "$sw/calls")" "pr merge 116,1,0"
+# Sharded macOS tests (#5775): the `macOS` gate job only sums its shards, so
+# the failing tests are read from the run's failed `macOS tests i/n` jobs.
+fresh
+printf 'macOS\tUNKNOWN STEP\t2026-10-26T21:58:21Z | macOS tests 1/3 | failure | 26 |\n' >"$sw/joblog.300"
+jq -n '{jobs: [{id: 301, name: "macOS tests 1/3", conclusion: "failure"}, {id: 302, name: "macOS tests 2/3", conclusion: "failure"},
+  {id: 303, name: "macOS compile", conclusion: "success"}, {id: 300, name: "macOS", conclusion: "failure"}]}' >"$sw/jobs.889.json"
+printf 'macOS tests 1/3\tUNKNOWN STEP\t2026-10-26T21:32:14Z \xe2\x9c\x98 Test homeAtEachWidth() recorded an issue at AfterGlowHomeLayoutTests.swift:182:29: Expectation failed\n' >"$sw/joblog.301"
+printf 'macOS tests 2/3\tUNKNOWN STEP\t2026-10-26T21:32:14Z \xe2\x94\x81 Test opens(_:) recorded a known issue with 1 argument c at ImportTests.swift:55:13: x\n' >"$sw/joblog.302"
+SHARD_RED="red|https://github.com/qbtrix/creative-apps/actions/runs/889/job/300|macOS"
+expect "dev red macOS: a sharded run's failing test is read from its shard, a known issue isn't" "$(mac_tests "$SHARD_RED")" "AfterGlowHomeLayoutTests.swift/homeAtEachWidth()"
+rm "$sw/joblog.302"
+expect "dev red macOS: an unreadable shard log fails the read, never a partial list" "$(mac_tests "$SHARD_RED" || echo unread)" "unread"
+# dev red on macOS only (#5183's "Failing jobs: macos"): a batch that would
+# run the macOS gate can't pass on that base, so none forms, and one in flight
+# on the red sha is marked and dropped once dev is green on a fix. A docs batch
+# runs no macOS gate and still forms.
+fresh; cpr 140 Sources/PhotoModel/A.swift; cpr 141 Sources/PhotoModel/B.swift
+redissue "" macos; lane_sweep
+expect "dev red macOS only: no code batch forms, nothing runs" "$(batch_tip),$(merges),$(grep -c '^workflow run' "$sw/calls")" ",,0"
+fresh; pr_at 142 h142 "$DOCS"; real_pr 142; pr_at 143 h143 "$DOCS"; real_pr 143
+redissue "" macos; lane_sweep
+expect "dev red macOS only: a docs batch (no macOS gate) still forms" "$( [[ -n "$(batch_tip)" ]] && echo formed)" "formed"
+fresh; cpr 144 Sources/PhotoModel/A.swift; cpr 145 Sources/PhotoModel/B.swift
+lane_sweep; BASE=$(git -C "$sw/origin.git" rev-parse dev)
+redissue "$BASE" macos; lane_sweep
+expect "dev red macOS only: a code batch on the red sha is marked" "$(redref)" 1
+rm -f "$sw/red.json"; dev_moves docs/fix.md; FIX=$(git -C "$sw/origin.git" rev-parse dev); lane_sweep
+expect "dev red macOS only: green on a fix drops it and forms a fresh batch there, no PR writes" \
+  "$(redref),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~2"),$(git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" | grep -oE '#[0-9]+' | paste -sd, -),$(grep -cE '^pr (edit|comment) (144|145) ' "$sw/calls")" \
+  "0,$FIX,#145,#144,0"
+# Verify after merge, auto-revert (LANE_VERIFY_AFTER=1): a red dev gets its
+# culprit's squash commit reverted in a PR the lane opens (lane/revert-<n>,
+# lane-revert and p0, never fast-lane) and lands on its own Linux check, with
+# no prescreen and no batch; CI on dev runs once it lands. The culprit's
+# feature-lead issue hears why and a finding is filed for its app. One revert
+# call per culprit (its marker on the issue), never a revert of a revert.
+rvdev() {  # rvdev <jobs> <path|subject>...: main at a base, dev one commit per spec past it, dev-red #520 naming main..<dev tip> (RED), red on Linux there
+  local jobs="$1" w="$sw/work" spec; shift
+  fresh
+  git init -q --bare "$sw/origin.git"; git -C "$sw/origin.git" config uploadpack.allowFilter true
+  git init -q -b main "$w"; git -C "$w" config user.name t; git -C "$w" config user.email t@t; git -C "$w" config commit.gpgsign false
+  cp "$here/../../.gitattributes" "$w/"; echo base >"$w/base.md"; git -C "$w" add -A; git -C "$w" commit -qm base
+  git -C "$w" switch -qc dev
+  for spec in "$@"; do
+    mkdir -p "$w/$(dirname "${spec%%|*}")"; echo "$RANDOM" >>"$w/${spec%%|*}"; git -C "$w" add -A; git -C "$w" commit -qm "${spec#*|}"
+  done
+  git -C "$w" push -q "$sw/origin.git" main dev
+  RED=$(git -C "$w" rev-parse dev)
+  jq -n --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9500\n- Failing jobs: %s\n- Culprit range: `main..%s`\n' "$jobs" "$RED")" \
+    '[{number: 520, body: $b, pull_request: null}]' >"$sw/red.json"
+  tip_red "$RED" 4343 '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)'
+  # The flake check already judged this red real (its rerun failed), so these cases start where today's lane does.
+  printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+  jq -n '{body: "Adds a.\n\nFeature: easing"}' >"$sw/pull.201.json"
+  jq -n '{items: [{number: 78, title: "Feature: easing"}]}' >"$sw/search.json"
+}
+creates() { grep -c '^pr create' "$sw/calls" || true; }
+rvdev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+lane_sweep
+expect "auto-revert: off by default (LANE_VERIFY_AFTER=0): a red dev opens no revert" \
+  "$(creates),$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/revert-*' | wc -l | tr -d ' '),$(grep -c 'lane-revert' "$sw/calls")" "0,0,0"
+# One PR in range, Linux red: red_bisect names it and the same sweep reverts it.
+LANE_VERIFY_AFTER=1 lane_sweep
+RB=$(git -C "$sw/origin.git" rev-parse --verify -q refs/heads/lane/revert-201 || true)
+expect "auto-revert: one revert of the culprit's squash commit, on today's dev, as lane/revert-201" \
+  "$(git -C "$sw/origin.git" log -1 --format=%s "$RB"),$(git -C "$sw/origin.git" rev-parse "$RB~1"),$(git -C "$sw/origin.git" diff --name-only "$RB~1" "$RB")" \
+  "Revert \"feat(photo): a (#201)\",$RED,Sources/PhotoModel/A.swift"
+expect "auto-revert: opened as a lane-revert p0 PR, never fast-lane" \
+  "$(creates),$(grep -c -- '^pr create .*--head lane/revert-201 --label lane-revert --label p0 --title Revert "feat(photo): a (#201)" ' "$sw/calls"),$(grep -c -- '--label fast-lane' "$sw/calls")" "1,1,0"
+expect "auto-revert: its body names the failing job, test and run, and refs dev-red without closing it" \
+  "$(jq -r .body "$sw/600.json" | grep -cF "Reverts #201 (feat(photo): a (#201)): dev went red on linux at ${RED:0:7} (dev-red #520, run https://github.com/qbtrix/creative-apps/actions/runs/9500), failing OpenTests.swift/opens()."),$(jq -r .body "$sw/600.json" | grep -cE '(^|[^A-Za-z])([Cc]loses|[Ff]ixes|[Rr]esolves) #520')" "1,0"
+expect "auto-revert: the dev-red issue records the one call" \
+  "$(grep -c "^issue comment 520 .*Auto-revert: #201 (${RED:0:7}) is the culprit (the bisect on dev-red #520 named it); the lane opened #600 to revert it\. <!-- lane-revert ${RED:0:7} -->" "$sw/calls")" 1
+expect "auto-revert: the culprit's feature-lead issue hears why and how to bring it back" \
+  "$(grep -c '^issue comment 78 .*Fast lane: #201 was reverted by #600\. dev went red on linux .*reverts #600.s commit and fixes the failure' "$sw/calls")" 1
+expect "auto-revert: a finding is filed for its app" \
+  "$(grep -c '^issue create .*--title Reverted #201: dev red on linux --label finding --label line:photo --body #201 (feat(photo): a (#201)) was reverted by #600\.' "$sw/calls")" 1
+LANE_VERIFY_AFTER=1 lane_sweep; LANE_VERIFY_AFTER=1 lane_sweep
+RH=$(jq -r .headRefOid "$sw/600.json")
+expect "auto-revert: then one Linux check on the revert, once, and no second revert" \
+  "$(grep -c -- '-f linux_only=true --ref lane/revert-201$' "$sw/calls"),$(creates),$(merges)" "1,1,"
+verdict "$RH" success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: it lands on that check alone (no prescreen, no batch, dev red and all), and CI on dev runs" \
+  "$(merges),$(batch_tip),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls"),$(grep -c '^pr comment 600 .*merged into dev (.*its own Linux check' "$sw/calls")" "pr merge 600,,1,1"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: dev still red after its revert waits for a human: no second revert" "$(creates),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "1,1"
+
+# Never a revert of a revert: the only PR in range is one, so the issue says so, once.
+rvdev linux 'Sources/PhotoModel/A.swift|Revert "feat(photo): a (#201)" (#205)'
+LANE_VERIFY_AFTER=1 lane_sweep; LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: never reverts a revert, and says so once on the issue" \
+  "$(creates),$(grep -c "^issue comment 520 .*is a revert itself, and the lane never reverts a revert, so a human looks\. <!-- lane-revert ${RED:0:7} -->" "$sw/calls"),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "0,1,1"
+
+# A revert lands only under the dev-red issue it refs: one left open from an
+# older red is never landed under a new issue.
+rvdev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(jq -r .headRefOid "$sw/600.json")" success
+jq '.[0].number = 530' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+printf '%s\n' "Auto-revert: an earlier call. <!-- lane-revert none -->" "$RERUN_MARK ${RED:0:7} red -->" >"$sw/530.comments"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a revert from an older dev-red issue is never checked or landed under a new one" \
+  "$(merges),$(grep -c -- '--ref lane/revert-201$' "$sw/calls"),$(creates)" ",0,1"
+
+# A culprit on a protected path stays with a human (the lane's token can't push workflows either).
+rvdev linux "scripts/tool.sh|chore: tool (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a culprit touching a protected path is left to a human" \
+  "$(creates),$(git -C "$sw/origin.git" for-each-ref 'refs/heads/lane/revert-*' | wc -l | tr -d ' '),$(grep -c "^issue comment 520 .*touches protected paths (scripts/tool.sh), so a human reverts it\. <!-- lane-revert" "$sw/calls")" "0,0,1"
+
+# A revert GitHub refuses as conflicting (dev moved under it) is rebuilt on today's dev.
+rvdev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(jq -r .headRefOid "$sw/600.json")" success
+dev_moves docs/later.md; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+jq '.mergeable = "CONFLICTING"' "$sw/600.json" >"$sw/x" && mv "$sw/x" "$sw/600.json"; touch "$sw/merge.fail.600"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a revert refused as conflicting is rebuilt on today's dev, not merged" \
+  "$(merges),$(git -C "$sw/origin.git" rev-parse refs/heads/lane/revert-201~1),$(git -C "$sw/origin.git" diff --name-only "$DEV" refs/heads/lane/revert-201)" ",$DEV,Sources/PhotoModel/A.swift"
+
+# A Linux red with two PRs waits for the bisect, then reverts the PR it names.
+rvdev linux "docs/a.md|docs: a (#201)" "docs/b.md|docs: b (#202)"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: two PRs and no bisect verdict yet: no revert, no note" "$(creates),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "0,0"
+verdict "$(git -C "$sw/origin.git" rev-parse dev~1)" failure; LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: once the bisect names #201, only #201 is reverted" \
+  "$(creates),$(grep -c -- '^pr create .*--head lane/revert-201 ' "$sw/calls"),$(git -C "$sw/origin.git" diff --name-only dev refs/heads/lane/revert-201),$(grep -c 'line:suite' "$sw/calls")" "1,1,docs/a.md,1"
+
+# One call per certain culprit, not per issue (#5350): an open dev-red issue
+# whose first call was a no-culprit note still reverts the PR a later bisect
+# names, once; later sweeps on the same culprit open none.
+rvdev linux "docs/a.md|docs: a (#201)" "Sources/PhotoModel/B.swift|feat(photo): b (#202)"
+printf '%s\n' "Auto-revert: 2 PRs in main..abc1234 and no bisect verdict names one of them (red: macos), so a human picks the culprit. <!-- lane-revert none -->" >>"$sw/520.comments"
+LANE_VERIFY_AFTER=1 lane_sweep
+verdict "$(git -C "$sw/origin.git" rev-parse dev~1)" failure; C201=$(git -C "$sw/origin.git" rev-parse dev~1); LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: after a no-culprit note, a certain Linux culprit still gets exactly one revert" \
+  "$(creates),$(grep -c -- '^pr create .*--head lane/revert-201 ' "$sw/calls"),$(grep -c "^issue comment 520 .*<!-- lane-revert ${C201:0:7} -->" "$sw/calls")" "1,1,1"
+LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(jq -r .headRefOid "$sw/600.json")" success; LANE_VERIFY_AFTER=1 lane_sweep; LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: later sweeps on the same culprit, its revert open or landed, open no second one" \
+  "$(creates),$(merges),$(grep -c "^issue comment 520 .*<!-- lane-revert ${C201:0:7} -->" "$sw/calls")" "1,pr merge 600,1"
+
+# macOS-only reds: no bisect runs there. One PR in range is the culprit; with
+# two, the lane names none and leaves the pick to a human.
+rvdev macos "Sources/LibraryApp/A.swift|fix(library): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS red with one PR in range reverts it" \
+  "$(creates),$(grep -c "^issue comment 520 .*is the culprit (it is the only PR in main\.\.${RED:0:7}); the lane opened #600" "$sw/calls"),$(grep -c -- '--label line:library ' "$sw/calls")" "1,1,1"
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS red with two PRs reverts nothing and leaves the pick to a human" \
+  "$(creates),$(grep -c "^issue comment 520 .*2 PRs in main\.\.${RED:0:7} and no bisect verdict names one of them (red: macos), so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls")" "0,1"
+# Verify after merge, own-proof landing (LANE_VERIFY_AFTER=1): a code PR lands
+# alone as soon as its head has Linux proof and a green local-ci/prescreen (the
+# supervisor's pre-screen on the Mac), with no batch and no macOS run; without
+# the pre-screen it waits, a red one is red, a stale proof becomes a Linux
+# batch of one on today's dev, and a red dev holds nothing. PRs without code
+# need no pre-screen.
+PS='. + [{"__typename":"StatusContext","context":"local-ci/prescreen","state":"%s"}]'
+LANE_VERIFY_AFTER=1 check "verify after: Linux proof and a green prescreen make a code PR eligible" \
+  "eligible|150|2|4 checks green, local-ci/prescreen" . "$BASE_FILES" "$(printf "$PS" SUCCESS)"
+LANE_VERIFY_AFTER=1 check "verify after: no prescreen on the head waits" "pending|waiting for local-ci/prescreen on head $HEAD_SHA" . "$BASE_FILES" .
+LANE_VERIFY_AFTER=1 check "verify after: a pending prescreen waits" "pending|waiting for local-ci/prescreen on head $HEAD_SHA" . "$BASE_FILES" "$(printf "$PS" PENDING)"
+LANE_VERIFY_AFTER=1 check "verify after: a red prescreen is red" "red|local-ci/prescreen" . "$BASE_FILES" "$(printf "$PS" FAILURE)"
+LANE_VERIFY_AFTER=1 check "verify after: Linux proof still comes first" "linux-dispatch|feat/x" . "$BASE_FILES" "[] | $(printf "$PS" SUCCESS)"
+LANE_VERIFY_AFTER=1 check "verify after: a PR without code needs no prescreen" "eligible|150|2|4 checks green" . $'docs/a.md\ndocs/b.md' .
+check "verify after off: the prescreen is ignored, red or not" "eligible|150|2|4 checks green" . "$BASE_FILES" "$(printf "$PS" FAILURE)"
+prescreen() { jq -n --arg s "$2" '{statuses: [{context: "local-ci/prescreen", state: $s}]}' >"$sw/status.$1.json"; }
+head_of() { jq -r .headRefOid "$sw/$1.json"; }
+fresh; cpr 160 Sources/PhotoModel/A.swift; cpr 161 Sources/DesignModel/B.swift
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: code PRs with Linux proof and no prescreen wait: no merge, no batch, nothing runs" \
+  "$(merges),$(batch_tip),$(grep -c '^workflow run' "$sw/calls")" ",,0"
+prescreen "$(head_of 160)" success; prescreen "$(head_of 161)" success
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: with a green prescreen each lands on its own proof, no batch, no macOS run" \
+  "$(merges),$(batch_tip),$(grep -c '^workflow run' "$sw/calls")" "pr merge 160,pr merge 161,,0"
+expect "verify after: the merge comment names the prescreen" "$(grep -c '^pr comment 160 .*merged into dev (.*Fast-Check marker, local-ci/prescreen)' "$sw/calls")" 1
+fresh; cpr 162 Sources/PhotoModel/A.swift; cpr 163 Sources/DesignModel/B.swift
+prescreen "$(head_of 162)" success; prescreen "$(head_of 163)" success
+lane_sweep
+expect "verify after off: the same PRs still batch with a macOS gate" \
+  "$(merges),$( [[ -n "$(batch_tip)" ]] && echo batch),$(grep -c -- '-f mac_only=true' "$sw/calls")" ",batch,1"
+fresh; cpr 164 Sources/PhotoModel/A.swift; prescreen "$(head_of 164)" success
+dev_moves Tests/command-path-baseline/halo.txt; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: a stale proof re-waits as a Linux batch of one on today's dev, no macOS gate" \
+  "$(merges),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~1"),$(grep -c -- '-f mac_only=true' "$sw/calls"),$(grep -c -- '-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" ",$DEV,0,1"
+batch_green; LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: and lands on that check" "$(merges)" "pr merge 164"
+fresh; cpr 165 Sources/PhotoModel/A.swift; prescreen "$(head_of 165)" success; redissue "" linux
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: a red dev holds no code PR that has its own proof" "$(merges),$(batch_tip)" "pr merge 165,"
+# A stale proof's batch of one holds only its own PR (LANE_VERIFY_AFTER=1):
+# ready PRs with fresh proof land beside it, it never gets a second batch, and
+# a result on a base a landing made stale (proof_stale) is checked again on
+# today's dev, not merged. With LANE_VERIFY_AFTER=0 it holds the lane as before.
+held() {  # held <verify after 0|1>: #170 a batch of one on a stale proof, then #171 and #172 ready with fresh proof
+  fresh; cpr 170 Sources/PhotoModel/A.swift; prescreen "$(head_of 170)" success
+  dev_moves Tests/command-path-baseline/halo.txt; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+  LANE_VERIFY_AFTER=$1 lane_sweep; verdict "$(batch_tip)" in_progress
+  cpr 171 Sources/DesignModel/B.swift; cpr 172 Sources/LibraryModel/C.swift
+  prescreen "$(head_of 171)" success; prescreen "$(head_of 172)" success
+  LANE_VERIFY_AFTER=$1 lane_sweep
+}
+held 1
+expect "verify after: a batch of one in flight holds no other ready PR: both land this sweep" \
+  "$(merges),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~1")" "pr merge 171,pr merge 172,$DEV"
+expect "verify after: the PR in the batch of one gets no second batch" \
+  "$(batch_br | wc -l | tr -d ' '),$(grep -c -- '-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" "1,1"
+OLD_TIP=$(batch_tip)
+dev_moves Tests/format-lists-baseline.txt; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+verdict "$OLD_TIP" success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: its green result on a base a landing made stale is checked again on today's dev, not merged" \
+  "$(merges),$(git -C "$sw/origin.git" rev-parse "$(batch_tip)~1"),$(grep -c -- '-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls")" \
+  "pr merge 171,pr merge 172,$DEV,2"
+batch_green; LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: and lands on the new check" "$(merges)" "pr merge 171,pr merge 172,pr merge 170"
+held 0
+expect "verify after off: a batch of one in flight still holds every other ready PR" "$(merges),$(batch_br | wc -l | tr -d ' ')" ",1"
+# Several stale proofs re-check in parallel, each its own batch of one, at
+# most LANE_BATCH_MAX at once, and a sweep never sleeps for their verdicts.
+fresh; for n in 173 174 175; do cpr "$n" "Sources/PhotoModel/A$n.swift"; prescreen "$(head_of "$n")" success; done
+dev_moves Tests/command-path-baseline/halo.txt; DEV=$(git -C "$sw/origin.git" rev-parse dev)
+( sleep() { echo "sleep $*" >>"$sw/calls"; }; BATCH_WAIT=60 BATCH_POLL=60 LANE_BATCH_MAX=2 LANE_VERIFY_AFTER=1 lane_sweep )
+expect "verify after: stale proofs become batches of one on today's dev in one sweep, LANE_BATCH_MAX at most, no sleep" \
+  "$(merges),$(batch_br | wc -l | tr -d ' '),$(for t in $(batch_tip); do git -C "$sw/origin.git" rev-parse "$t~1"; done | sort -u),$(grep -c -- '-f linux_only=true --ref lane/batch-[0-9]*$' "$sw/calls"),$(grep -c '^sleep' "$sw/calls")" \
+  ",2,$DEV,2,0"
+for t in $(batch_tip); do verdict "$t" success; done; LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: each lands on its own check, and the one that waited gets its batch" "$(merges),$(batch_br | wc -l | tr -d ' ')" "pr merge 173,pr merge 174,1"
+# A stale PR that changes a ratchet path itself goes stale under every landing
+# beside it (proof_stale), so its batch of one still holds the lane.
+fresh; pr_at 176 h176 '[{"filename": "Sources/PhotoModel/A.swift", "status": "modified"}]'; real_pr 176 Tests/placeholder-menu-baseline.txt
+prescreen "$(head_of 176)" success; dev_moves docs/other.md
+LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(batch_tip)" in_progress
+cpr 177 Sources/DesignModel/B.swift; prescreen "$(head_of 177)" success
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "verify after: a batch of one changing a ratchet path still holds the lane" "$(merges),$(batch_br | wc -l | tr -d ' ')" ",1"
+
+# Flake check (dev red 10 h on a 3.1x-vs-3x timing ratio, 2026-10-26): before
+# the lane treats dev as red it reruns the red run's failed jobs once at the
+# red sha (gh run rerun --failed) and records that on the dev-red issue
+# (RERUN_MARK <sha7> started). While the rerun runs nothing is held, bisected
+# or reverted; a pass is a flake (one finding naming the tests, no hold, the
+# mark says flake); a failure makes the red real (the mark says red) and the
+# lane goes on as before. One rerun per sha, never a second.
+runstate() { jq -n --arg s "$1" --arg c "${2:-}" '{status: $s, conclusion: $c}' >"$sw/run.9500.json"; }
+bisects() { git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' '; }
+reruns() { grep -c '^run rerun 9500 -R qbtrix/creative-apps --failed$' "$sw/calls" || true; }
+findings() { grep -c -- '^issue create .*--label flaky ' "$sw/calls" || true; }  # the lane's flake findings (a revert files one too)
+FLAKE_RUN="https://github.com/qbtrix/creative-apps/actions/runs/9500"
+flakedev() {  # flakedev <jobs> <spec>...: rvdev with the red's test file in the tree (no PR's commit) and no flake check done yet
+  rvdev "$1" "Tests/PhotoModelTests/OpenTests.swift|test(photo): opens" "${@:2}"
+  : >"$sw/520.comments"; rm -f "$sw/run.9500.json"
+}
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+cpr 190 docs/flake.md
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a new red gets one rerun of its failed jobs, recorded on the dev-red issue with the failing tests" \
+  "$(reruns),$(grep -c "^issue comment 520 .*Flake check: re-running the failed jobs (linux) of $FLAKE_RUN once at ${RED:0:7}; failing OpenTests.swift/opens(). .* <!-- lane-rerun ${RED:0:7} started -->" "$sw/calls")" "1,1"
+expect "flake check: meanwhile dev is not red: no bisect, no revert, the ready docs PR lands" "$(bisects),$(creates),$(merges)" "0,0,pr merge 190"
+runstate in_progress; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a running rerun is waited for, never a second rerun, still no hold" "$(reruns),$(bisects),$(creates)" "1,0,0"
+runstate completed success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a passing rerun files one finding naming the test, labelled for a fixer and the app" \
+  "$(findings),$(grep -c -- "^issue create -R qbtrix/creative-apps --title Flaky test: OpenTests.swift/opens() --label finding --label flaky --label line:photo --body .*$FLAKE_RUN.*${RED:0:7}" "$sw/calls")" "1,1"
+expect "flake check: and marks the issue as a flake, with no bisect or revert" \
+  "$(grep -c "^issue comment 520 .*Flake check: the rerun of $FLAKE_RUN passed at ${RED:0:7}, so that red was a flake and the lane held nothing on it; filed https://github.com/qbtrix/creative-apps/issues/700\. <!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls"),$(bisects),$(creates)" "1,0,0"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a judged flake is not rerun, refiled or held on later sweeps" "$(reruns),$(findings),$(bisects)" "1,1,0"
+# An open finding with that title is updated, never duplicated.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+jq -n '[{number: 701, title: "Flaky test: OpenTests.swift/opens()"}]' >"$sw/issues.json"
+LANE_VERIFY_AFTER=1 lane_sweep; runstate completed success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: an open finding for the test gets a comment, not a duplicate" \
+  "$(findings),$(grep -c "^issue comment 701 .*Flaked again: .*$FLAKE_RUN.*${RED:0:7}" "$sw/calls"),$(grep -c "updated #701\. <!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls")" "0,1,1"
+# A rerun that fails too: the red is real, and the lane holds, bisects and reverts as today.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep; runstate completed failure; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a failing rerun makes the red real: marked once, then the culprit is reverted as before" \
+  "$(reruns),$(grep -c "^issue comment 520 .*Flake check: the rerun of $FLAKE_RUN failed too (failure), so this red is real\. <!-- lane-rerun ${RED:0:7} red -->" "$sw/calls"),$(creates),$(findings)" "1,1,1,0"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a judged red is never rerun again" "$(reruns)" 1
+# ci.yml's promote reruns with the passed jobs and closes the issue, usually
+# before a sweep sees the pass: the finding is still filed, off the closed issue.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep
+mv "$sw/red.json" "$sw/redclosed.json"; runstate completed success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a flake whose issue promote closed first still gets its one finding and mark" \
+  "$(findings),$(grep -c "<!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls")" "1,1"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: and only one" "$(findings),$(grep -c "<!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls")" "1,1"
+# A dev-red issue without a run to rerun is red at once, as today.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+jq '.[0].body |= sub("- Run: [^\n]*\n"; "")' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: no run named, nothing to rerun: red as today" "$(reruns),$(creates)" "0,1"
+
+# Scoped hold: a red dev holds only the ready PRs that touch the failing
+# module (red_scope: the failing tests' files in the tree give Tests/<Target>/
+# and Sources/<Target minus Tests>/); the rest batch as if dev were green. A
+# red whose module can't be placed (no test named, or a target with no
+# Sources module) holds the whole queue as before. LANE_VERIFY_AFTER=0 batches
+# code; code PRs on their own proof under LANE_VERIFY_AFTER=1 land as before.
+LANE_MAC_PER_PR=0
+batch_prs() { git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" 2>/dev/null | grep -oE '#[0-9]+' | sort | paste -sd, -; }
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+cpr 191 Sources/PhotoModel/B.swift; cpr 192 Sources/DesignModel/C.swift; cpr 193 docs/scope.md
+lane_sweep
+expect "scoped hold: PRs off the red module batch; the one touching it waits" "$(batch_prs),$(merges)" "#192,#193,"
+expect "scoped hold: the held PR gets no label and no comment" "$(grep -cE '^pr (edit|comment) 191 ' "$sw/calls")" 0
+# The module is read from the fixture remote's tree, never from the checkout
+# the tests run in: FooModel exists only at the fixture (a SCRATCH made in a
+# subshell died with it and the lane read this repo instead, which passed on a
+# Mac and failed on Linux).
+rvdev linux "Tests/FooModelTests/OpenTests.swift|test(foo): opens" "Sources/FooModel/A.swift|feat(foo): a (#201)"
+printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"; rm -f "$sw/run.9500.json"
+cpr 1001 Sources/FooModel/B.swift; cpr 1002 docs/scope.md
+lane_sweep
+expect "scoped hold: the red module comes from the remote's tree, not this checkout: the lone docs PR lands, the FooModel one waits" "$(batch_prs),$(merges)" ",pr merge 1002"
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+printf 'error: compile failed\nCI: FAIL\n' >"$sw/joblog.4343"
+cpr 194 Sources/DesignModel/C.swift; cpr 195 docs/scope.md
+lane_sweep
+expect "scoped hold: a red naming no test holds the whole queue as before" "$(batch_tip),$(merges)" ","
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Tests/AppSnapshotTests/SnapTests.swift|test(snap): s (#202)"
+printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+tip_red "$RED" 4343 '✘ Test snaps() recorded an issue at SnapTests.swift:9:5: Expectation failed: (a → 3) == (4 → 4)'
+cpr 196 Sources/DesignModel/C.swift; cpr 197 docs/scope.md
+lane_sweep
+expect "scoped hold: a test target with no Sources module holds the whole queue as before" "$(batch_tip),$(merges)" ","
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+cpr 198 Sources/PhotoModel/B.swift; prescreen "$(head_of 198)" success
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "scoped hold: verify after still lands a code PR on its own proof, red module or not" "$(merges)" "pr merge 198"
 LANE_MAC_PER_PR=1
+
+# Auto-quarantine (LANE_VERIFY_AFTER=1, "trunk never stops"): a real red the
+# lane has no revert for (revert_sweep ended in a note, or its revert is in
+# the red range and dev is still red) gets its failing tests quarantined: one
+# `Quarantined: <id>` p0 finding per test as owner, a `lane` entry in
+# UITests/quarantine.json (dev-red issue, culprit range, expiry 24 h out) on
+# the lane's one lane/quarantine PR (lane-quarantine, p0, never fast-lane),
+# landed on its own Linux check: the one protected-path change the lane lands,
+# keyed on the bot author, the branch, the label and the file set being exactly
+# that file. Past its expiry the owner is labelled blocker and the entry stays;
+# once the owner closes, the same PR path removes it. Never more than 5 tests
+# per sweep, never a security, billing or auth test, one call per red sha.
+quardev() {  # quardev <jobs> <spec>...: rvdev, then dev gains the red tests' real files and an empty quarantine; the red is that tip
+  rvdev "$@"
+  local w="$sw/work"
+  mkdir -p "$w/Tests/PhotoModelTests" "$w/UITests"
+  printf '%s\n' 'import Testing' '@Suite struct OpenTests {' '    @Test func opens() {}' '    @Test func saves() {}' '}' >"$w/Tests/PhotoModelTests/OpenTests.swift"
+  printf '%s\n' 'import Testing' '@Suite struct AuthTests {' '    @Test func login() {}' '}' >"$w/Tests/PhotoModelTests/AuthTests.swift"
+  echo '[]' >"$w/UITests/quarantine.json"
+  git -C "$w" add -A; git -C "$w" commit -qm "test(photo): fixtures"; git -C "$w" push -q "$sw/origin.git" dev
+  RED=$(git -C "$w" rev-parse dev)
+  jq --arg r "$RED" '.[0].body |= sub("main\\.\\.[0-9a-f]+"; "main..\($r)")' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+  tip_red "$RED" 4343 '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)'
+  printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+  jq -n '{body: "Adds b.\n\nFeature: easing"}' >"$sw/pull.202.json"
+}
+qbranch() { git -C "$sw/origin.git" rev-parse --verify -q refs/heads/lane/quarantine || true; }
+qjson() { git -C "$sw/origin.git" show "refs/heads/lane/quarantine:UITests/quarantine.json" 2>/dev/null || echo '[]'; }
+quarantines() { grep -c -- '^pr create .*--label lane-quarantine ' "$sw/calls" || true; }
+qnotes() { grep -c '^issue comment 520 .*Auto-quarantine' "$sw/calls" || true; }
+NOW=2026-10-26T10:00:00Z
+TWO=("Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)")
+check "a human PR touching the quarantine stays refused (the lane's exception is its own PR only)" \
+  "not-eligible|touches protected paths: UITests/quarantine.json" . $'UITests/quarantine.json\nTests/PhotoModelTests/OpenTests.swift' .
+quardev macos "${TWO[@]}"
+FAST_LANE_NOW=$NOW lane_sweep
+expect "auto-quarantine: off with LANE_VERIFY_AFTER=0: a red with no revert quarantines nothing" "$(quarantines),$(qbranch),$(qnotes)" "0,,0"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: no certain culprit (a macOS red, two PRs): the failing test is quarantined on lane/quarantine, off today's dev, that file only" \
+  "$(git -C "$sw/origin.git" diff --name-only dev "$(qbranch)" | paste -sd, -),$(git -C "$sw/origin.git" rev-parse "$(qbranch)~1")" "UITests/quarantine.json,$RED"
+expect "auto-quarantine: the entry carries the test id, its p0 issue as owner, the dev-red issue, the culprit range and a 24 h expiry" \
+  "$(qjson | jq -c '[.[] | .test, .owner, .expires, .lane.red, .lane.range, .lane.until]')" \
+  "[\"PhotoModelTests.OpenTests/opens\",\"#700\",\"2026-10-27\",\"#520\",\"main..${RED:0:7}\",\"2026-10-27T10:00:00Z\"]"
+expect "auto-quarantine: one p0 finding per test, labelled for its line, naming the run, the range's PRs with their leads, and the expiry" \
+  "$(grep -c -- "^issue create -R qbtrix/creative-apps --title Quarantined: PhotoModelTests.OpenTests/opens --label p0 --label finding --label line:photo --body .*runs/9500.*#201 (lead #78), #202 (lead #78).*2026-10-27T10:00:00Z" "$sw/calls")" 1
+expect "auto-quarantine: opened as a lane-quarantine p0 PR, never fast-lane, that refs dev-red without closing it" \
+  "$(quarantines),$(grep -c -- '^pr create .*--head lane/quarantine --label lane-quarantine --label p0 --title test(quarantine): skip PhotoModelTests.OpenTests/opens ' "$sw/calls"),$(grep -c -- '--label fast-lane' "$sw/calls"),$(jq -r .body "$sw/600.json" | grep -c 'Refs #520'),$(jq -r .body "$sw/600.json" | grep -cE '([Cc]loses|[Ff]ixes) #520')" "1,1,0,1,0"
+expect "auto-quarantine: the dev-red issue records the one call" \
+  "$(grep -c "^issue comment 520 .*Auto-quarantine: .*quarantined PhotoModelTests.OpenTests/opens (#700) for 24 h in #600.*<!-- lane-quarantine ${RED:0:7} -->" "$sw/calls")" 1
+# The exception is exactly that file: a lane-quarantine PR changing anything else is never landed.
+cp "$sw/files.600.json" "$sw/x"; jq '. + [{filename: "Sources/PhotoModel/A.swift", status: "modified"}]' "$sw/x" >"$sw/files.600.json"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a lane-quarantine PR touching more than the quarantine file gets no check, no merge, one comment" \
+  "$(grep -c -- '--ref lane/quarantine$' "$sw/calls"),$(merges),$(grep -c '^pr comment 600 .*changes more than UITests/quarantine.json (UITests/quarantine.json, Sources/PhotoModel/A.swift), so the lane will not land it' "$sw/calls")" "0,,1"
+mv "$sw/x" "$sw/files.600.json"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: then one Linux check on it, once; no second PR, issue or note" \
+  "$(grep -c -- '-f linux_only=true --ref lane/quarantine$' "$sw/calls"),$(quarantines),$(grep -c '^issue create' "$sw/calls"),$(qnotes)" "1,1,1,1"
+verdict "$(head_of 600)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: it lands on that check alone (no prescreen, no batch, dev red and all) and CI on dev runs" \
+  "$(merges),$(batch_tip),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "pr merge 600,,1"
+# Expiry: past `until` with the owner open, the owner is labelled blocker and told once; the entry stays.
+git -C "$sw/origin.git" update-ref refs/heads/dev "$(qbranch)"  # the merge landed on dev
+FAST_LANE_NOW=2026-10-27T10:00:01Z LANE_VERIFY_AFTER=1 lane_sweep
+expect "expiry: past its expiry with the issue open, the owner gets the blocker label and a comment, and the entry stays" \
+  "$(grep -c '^issue edit 700 -R qbtrix/creative-apps --add-label blocker$' "$sw/calls"),$(grep -c '^issue comment 700 .*expired at 2026-10-27T10:00:00Z.*stays skipped' "$sw/calls"),$(quarantines)" "1,1,1"
+echo '["p0", "blocker"]' >"$sw/labels.700"
+FAST_LANE_NOW=2026-10-27T10:00:01Z LANE_VERIFY_AFTER=1 lane_sweep
+expect "expiry: said once" "$(grep -c -- '--add-label blocker' "$sw/calls"),$(grep -c '^issue comment 700 ' "$sw/calls")" "1,1"
+# Removal: once the owner closes, the lane's PR removes the entry; its Linux check runs the test again.
+rm -f "$sw/red.json"; echo CLOSED >"$sw/state.700"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a closed owner gets a lane-quarantine PR removing its entry, off today's dev" \
+  "$(quarantines),$(qjson | jq length),$(grep -c -- '^pr create .*--head lane/quarantine --label lane-quarantine --label p0 --title test(quarantine): run PhotoModelTests.OpenTests/opens again ' "$sw/calls"),$(git -C "$sw/origin.git" rev-parse "$(qbranch)~1")" "2,0,1,$(git -C "$sw/origin.git" rev-parse dev)"
+verdict "$(head_of 601)" failure; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a red check means the fix didn't hold: the owner is reopened and told, the PR closed, nothing merged" \
+  "$(grep -c '^issue reopen 700 ' "$sw/calls"),$(grep -c '^issue comment 700 .*still fails without its quarantine entry' "$sw/calls"),$(grep -c '^pr close 601 ' "$sw/calls"),$(merges)" "1,1,1,pr merge 600"
+echo OPEN >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: with the owner open again nothing is opened" "$(quarantines)" 2
+echo CLOSED >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+verdict "$(head_of 602)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a green check lands it and CI on dev runs" \
+  "$(quarantines),$(merges),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "3,pr merge 600,pr merge 602,2"
+# A Linux red whose bisect stopped short (no `Bisect:` verdict) has no certain culprit either.
+quardev linux "${TWO[@]}"
+printf '%s\n' "Bisect on dev stopped after 8 Linux runs: the Linux job is green at aaaaaaa and red at ${RED:0:7}; the culprit is one of the 2 commits between them. $BISECT_MARK ${RED:0:7} -->" >>"$sw/520.comments"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a Linux red with an inconclusive bisect quarantines the test and reverts nothing" \
+  "$(quarantines),$(grep -c -- '--label lane-revert' "$sw/calls"),$(qjson | jq -r '.[0].test')" "1,0,PhotoModelTests.OpenTests/opens"
+# Never more than 5 tests in one sweep: more means something broke broadly, so today's red handling stands.
+quardev macos "${TWO[@]}"
+for t in a b c d e f; do echo "✘ Test $t() recorded an issue at OpenTests.swift:9:5: x"; done >"$sw/joblog.4343"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: 6 failing tests quarantine nothing and say so on the dev-red issue, once" \
+  "$(quarantines),$(grep -c "^issue comment 520 .*Auto-quarantine: 6 tests fail at ${RED:0:7}.*more than 5, so something broke broadly; nothing is quarantined.*<!-- lane-quarantine ${RED:0:7} -->" "$sw/calls")" "0,1"
+# Never a test on a security, billing or auth path.
+quardev macos "${TWO[@]}"
+printf '%s\n' '✘ Test login() recorded an issue at AuthTests.swift:3:5: x' 'CI: FAIL' >"$sw/joblog.4343"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test on a protected path is never quarantined, and the issue says why" \
+  "$(quarantines),$(grep -c '^issue comment 520 .*Auto-quarantine: nothing to quarantine: PhotoModelTests.AuthTests/login: a security, billing or auth test is never quarantined.*<!-- lane-quarantine' "$sw/calls")" "0,1"
+# A failing test whose file isn't in the tree (rvdev's bare fixtures) can't be placed: a note, no PR.
+rvdev macos "${TWO[@]}"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test the lane can't place in the tree is noted, not quarantined" \
+  "$(quarantines),$(grep -c '^issue comment 520 .*Auto-quarantine: nothing to quarantine: OpenTests.swift/opens(): its file is not under Tests/ on dev' "$sw/calls")" "0,1"
+# A certain culprit is reverted, never quarantined.
+quardev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a certain culprit gets the revert and no quarantine" "$(creates),$(quarantines),$(qnotes)" "1,0,0"
 
 exit "$fail"

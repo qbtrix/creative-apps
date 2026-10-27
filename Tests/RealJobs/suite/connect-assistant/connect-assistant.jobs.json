@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "app": "suite",
+  "why": "RJ-X62 (suite/cli-bundle CB-3, CB-7; pending the bundle runner, #4762): connect an AI assistant to the downloaded app. CB-7 found the in-process harness can't run it: RealJobs.check runs each step on FakeIO in this test process, which isn't inside an AfterGlow.app, so help.connect-assistant answers null, and it can't start the bundled binary, run codesign or speak MCP over stdio. So `platforms` stays empty and the harness skips it on both platforms until the bundle runner, a check that runs against the assembled .build/apps/AfterGlow.app (scripts/bundle-apps builds, signs and runs its Contents/Helpers/afterglow with --version), lands. input/launcher.suitehelp is the launcher's Help document. The job: help.connect-assistant returns the command an MCP client runs and the JSON block for clients that take one; the runner then starts that command and sends initialize and tools/list over stdio. The trap: the command points into the source tree, or at an unsigned binary that Gatekeeper stops. The assertion: the command's path is inside the bundle, quoted as one word, and starts the stdio server; codesign --verify passes on it; tools/list returns at least one tool for each of the five apps.",
+  "pending": "#4762",
+  "inputs": [
+    "input/*.suitehelp"
+  ],
+  "steps": [
+    {
+      "id": "help.connect-assistant",
+      "params": {}
+    }
+  ],
+  "atomic": true,
+  "output": {
+    "dir": "out",
+    "name": "{stem}-connect",
+    "format": "suitehelp"
+  },
+  "expect": {
+    "out/launcher-connect.suitehelp": {
+      "json": {
+        "answer": {
+          "command": "\"/Applications/AfterGlow.app/Contents/Helpers/afterglow\" mcp",
+          "json": "{\n  \"mcpServers\": {\n    \"afterglow\": {\n      \"command\": \"/Applications/AfterGlow.app/Contents/Helpers/afterglow\",\n      \"args\": [\"mcp\"]\n    }\n  }\n}"
+        },
+        "app": "launcher"
+      }
+    }
+  },
+  "platforms": []
+}

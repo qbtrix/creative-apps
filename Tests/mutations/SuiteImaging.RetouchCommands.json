@@ -1,0 +1,30 @@
+[
+  {
+    "label": ".undoRestoresBytes: a run that records two steps leaves undo short of the original",
+    "file": "Sources/SuiteImaging/Retouch/RetouchCommands.swift",
+    "find": "try t.replaceTarget(healed, name: \"Spot Heal\")",
+    "replace": "try t.replaceTarget(healed, name: \"Spot Heal\"); try t.replaceTarget(healed, name: \"Spot Heal\")",
+    "tests": "RetouchCommandsTests/eachCommandIsOneStepThatUndoRestoresByteForByte"
+  },
+  {
+    "label": ".removeUsesSelection: remove with no stroke ignores the selection",
+    "file": "Sources/SuiteImaging/Retouch/RetouchCommands.swift",
+    "find": "} else if let selection = t.selectionCoverage {",
+    "replace": "} else if let selection = Optional<Mask>.none {",
+    "tests": "RetouchCommandsTests/removeWithNoPointsUsesTheSelection"
+  },
+  {
+    "label": ".selectionWeighsOnce: the bucket's region takes the selection that the target's write applies again",
+    "file": "Sources/SuiteImaging/Retouch/RetouchCommands.swift",
+    "find": "options: options, selection: nil)",
+    "replace": "options: options, selection: t.selectionCoverage)",
+    "tests": "RetouchCommandsTests/bucketWeighsAFeatheredSelectionOnce"
+  },
+  {
+    "label": ".selectionWeighsOnce: the bucket's fill weighs its region by a second half",
+    "file": "Sources/SuiteImaging/Retouch/BucketRules.swift",
+    "find": "mode: .normal, opacity: 1, mask: region",
+    "replace": "mode: .normal, opacity: 0.5, mask: region",
+    "tests": "RetouchCommandsTests/bucketWeighsAFeatheredSelectionOnce"
+  }
+]

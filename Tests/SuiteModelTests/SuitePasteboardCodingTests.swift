@@ -94,4 +94,15 @@ import Testing
         #expect(coder.bestItem(from: [TypedData(type: .png, data: png)], for: .photo) == .image(png: png, pixelWidth: 400, pixelHeight: 200))
         #expect(coder.bestItem(from: [TypedData(type: .png, data: pngBytes)], for: .photo) == .image(png: pngBytes, pixelWidth: 0, pixelHeight: 0))
     }
+
+    /// Mutation `.styleTypeRead`: a copied style goes alone as its own type, comes back as the same JSON, and
+    /// no app pastes it as a layer; an offer with no style has none.
+    @Test func aCopiedStyleRoundTripsAndIsNoLayer() {
+        let json = Data(#"{"effects":[],"fillOpacity":0.5}"#.utf8)
+        let offered = SuitePasteboardCoding.style(json)
+        #expect(offered == [TypedData(type: .layerStyle, data: json)])
+        #expect(SuitePasteboardCoding.style(in: [TypedData(type: .plainText, data: Data("a".utf8))] + offered) == json)
+        #expect(SuitePasteboardCoding.style(in: [TypedData(type: .plainText, data: json)]) == nil)
+        for app in SuiteApp.allCases { #expect(coder.bestItem(from: offered, for: app) == nil, "\(app)") }
+    }
 }

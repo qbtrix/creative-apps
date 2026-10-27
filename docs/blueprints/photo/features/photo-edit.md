@@ -71,7 +71,9 @@ As blueprint 4.2 writes them, with note 3 for PJ-7:
    100 PNG to `NSPasteboard.general`; on `beach.png` Edit > Paste gives a
    200 × 100 layer at (300, 250) at Fit, "Undo Paste"; with no image open,
    Paste opens a 200 × 100 image titled "Untitled". Error: a 6000 × 4000
-   pasteboard image (24 MP) pastes scaled to fit `maxOpenPixels` (16,777,216) as 5016 × 3344, with
+   pasteboard image (24 MP), launched with `-PhotoPasteLimit 16777216` (the
+   open limit, `maxOpenPixels`, is 40 MP since #2969, too big to resize in a
+   debug build), pastes scaled to fit as 5016 × 3344, with
    "Pasted at 84%." (each side rounded down; the scale rounded to whole
    percent).
 3. **PJ-7 `testDuplicateMergeAndFlatten`** (`+LayerOps`): Command-J gives

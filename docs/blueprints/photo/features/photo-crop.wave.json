@@ -15,7 +15,7 @@
   "owned": [
     "Sources/PhotoModel/Live/LiveCrop.swift",
     "Tests/PhotoModelTests/LiveCropSizingTests.swift",
-    "Sources/PhotoModel/PhotoCropSize.swift",
+    "Sources/PhotoModel/PhotoCropTool+Kernel.swift",
     "Tests/PhotoModelTests/PhotoCropSizeTests.swift",
     "Tests/PhotoModelTests/PhotoCropBudgetTests.swift",
     "Sources/PhotoApp/CropOptions.swift",

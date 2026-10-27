@@ -1,7 +1,7 @@
 // FlareJourneyTests+Pen.swift (pen-paths FP-4, slice FP-u; packet docs/blueprints/flare/features/pen-paths.md,
 // Journey steps 1 to 5): on `-FlareSample empty` the Pen draws a four-point path, the second point dragged, closed on
 // the first (Path 1); Direct Select clicks it and its four anchors show (`suite.path.anchor-0-<i>`, PathEditOverlay's
-// probes); dragging the smooth anchor 30 pt moves it and its handles and no other anchor, one "Undo Edit Path";
+// probes); dragging the smooth anchor 30 pt moves it and its handles and no other anchor, one "Undo Move Points";
 // Option-dragging its out handle leaves the in handle (a corner now); a marquee over the last two anchors and Delete
 // leave two. On live services since FP-9 (slice FP-z). One shot per step, `flare-pen-<step>`.
 import XCTest
@@ -40,7 +40,7 @@ final class FlarePenJourneyTests: XCTestCase {
         XCTAssertFalse(flare.element("suite.path.anchor-0-4").exists, "Path 1 shows a fifth anchor")
         flare.shot("pen-2-anchors")
 
-        // 3. Drag the smooth anchor 30 pt right: it and its handles move, the other three don't; one Undo Edit Path.
+        // 3. Drag the smooth anchor 30 pt right: it and its handles move, the other three don't; one Undo Move Points.
         let before = anchors.map { $0.frame }, handleIn = flare.element("suite.path.handle-0-1-in").frame
         let shift = 30 * stage.frame.width / 550
         drag(center(before[1]), by: CGVector(dx: shift, dy: 0), on: stage)
@@ -50,7 +50,7 @@ final class FlarePenJourneyTests: XCTestCase {
                        "the smooth anchor's in handle stayed behind")
         let edit = flare.app.menuBars.firstMatch.menuBarItems["Edit"]
         edit.click()
-        XCTAssert(edit.menuItems["Undo Edit Path"].waitForExistence(timeout: 3), "the anchor drag isn't one Undo Edit Path")
+        XCTAssert(edit.menuItems["Undo Move Points"].waitForExistence(timeout: 3), "the anchor drag isn't one Undo Move Points")
         flare.press(.escape)
         flare.shot("pen-3-anchor-dragged")
 
