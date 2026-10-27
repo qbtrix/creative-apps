@@ -1,0 +1,30 @@
+[
+  {
+    "label": ".sizeCapInclusive: the size cap made exclusive, so 250 itself is pulled under it",
+    "file": "Sources/SuiteImaging/Style/LayerStyleRules.swift",
+    "find": "public static let sizeRange: ClosedRange<Double> = 0...250",
+    "replace": "public static let sizeRange: ClosedRange<Double> = 0...249.5",
+    "tests": "LayerStyleRulesTests"
+  },
+  {
+    "label": ".reachCountsSpread: spread left out of a shadow's reach",
+    "file": "Sources/SuiteImaging/Style/LayerStyleRules.swift",
+    "find": "s.distance + s.size * (1 + s.spread)",
+    "replace": "s.distance + s.size",
+    "tests": "LayerStyleRulesTests"
+  },
+  {
+    "label": ".onePerKind: decoding keeps a second instance of a kind",
+    "file": "Sources/SuiteImaging/Style/LayerStyleRules.swift",
+    "find": "guard !effects.contains(where: { $0.kind == kind }) else { continue }",
+    "replace": "",
+    "tests": "LayerStyleRulesTests"
+  },
+  {
+    "label": ".nonFiniteRefused: a NaN or infinite patch number is taken (and clamped) instead of refused",
+    "file": "Sources/SuiteImaging/Style/LayerStyleRules.swift",
+    "find": "guard case .number(let n) = field, n.isFinite else { throw malformed(\"/\\(key)\", \"must be a finite number\") }",
+    "replace": "guard case .number(let n) = field else { throw malformed(\"/\\(key)\", \"must be a finite number\") }",
+    "tests": "LayerStyleRulesTests"
+  }
+]
