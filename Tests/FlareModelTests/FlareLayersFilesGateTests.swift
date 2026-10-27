@@ -32,11 +32,13 @@ import Testing
         #expect(ws.document == nil)
     }
 
-    /// A document whose only layer is layer-7: the catalog examples all name layer-1.
+    /// A document with layers layer-8 and layer-7 (on top): the catalog examples all name layer-1.
     static func layerSeven() throws -> FlareHeadless {
         var doc = try FlareHeadless.new(.null)
-        let add: JSONValue = .object(["sceneID": .string("scene-1"), "layer": try JSONValue(encoding: Layer(id: "layer-7", name: "Ball"))])
-        _ = try FlareHeadless.catalog.run("layer.add", params: add, on: &doc)
+        for (id, name) in [("layer-8", "Ground"), ("layer-7", "Ball")] {
+            let add: JSONValue = .object(["sceneID": .string("scene-1"), "layer": try JSONValue(encoding: Layer(id: id, name: name))])
+            _ = try FlareHeadless.catalog.run("layer.add", params: add, on: &doc)
+        }
         return doc
     }
 
@@ -70,7 +72,9 @@ import Testing
     @Test func aFileWithNoScenesIsRefusedAtOpenAsDamaged() throws {
         let one = try FlareFormat.encode(Document(scenes: [Scene(id: "scene-1", name: "Scene 1")]))
         var json = try #require(try JSONSerialization.jsonObject(with: one) as? [String: Any])
-        json["scenes"] = [Any]()
+        var document = try #require(json["document"] as? [String: Any])
+        document["scenes"] = [Any]()
+        json["document"] = document
         let none = try JSONSerialization.data(withJSONObject: json)
         let damaged = "This file is damaged: it has no scenes."
         #expect(FlareWorkspace.decodeFile(none) == .failure(.invalid(FlareWorkspace.noScenes)))
