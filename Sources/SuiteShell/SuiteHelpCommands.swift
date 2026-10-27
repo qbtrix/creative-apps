@@ -69,7 +69,8 @@ public struct SuiteHelpCommands: Commands {
     /// Begins the report sheet on the front window, or shows it as its own window when none is open.
     func showReport(app: SuiteApp) {
         if let sheet, sheet.sheetParent != nil || sheet.isVisible { sheet.makeKeyAndOrderFront(nil); return }
-        report = Self.report(ShellHelpProvider().report(app: app.rawValue, note: ""))
+        // The report itself, not its JSON answer: only the report keeps the names that redact the note.
+        report = ShellHelpProvider().problemReport(app: app.rawValue)
         let view = ProblemReportSheet(
             report: report,
             onCopy: { text in
@@ -141,11 +142,6 @@ public struct SuiteHelpCommands: Commands {
             notes = window
         }
         notes?.makeKeyAndOrderFront(nil)
-    }
-
-    /// ShellHelpProvider's report object back as a ProblemReport; an empty one when it doesn't decode.
-    static func report(_ value: JSONValue) -> ProblemReport {
-        (try? value.decode(ProblemReport.self)) ?? ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
     }
 }
 

@@ -2,9 +2,9 @@
 // (Tests/render-budgets.md: ≤ 2 window bodies per keystroke), through the harness (RenderBudgetHarness.swift),
 // on a fixed report. It checks every control carries its `suite.help.report.<control>` id, types five
 // characters into the note field's editor one per 1/120 s, then clicks Copy: the copied text is the
-// report's text with the typed note, and Copy reads Copied. The sheet's own body is the window body: the note lives in its own
-// field view, so a keystroke runs none (target 0). Nested in BodyCountSuites, as every suite that reads a
-// body counter is. macOS only.
+// report's text with the typed note, and Copy reads Copied; ⌘C in the note field copies the same way. The
+// sheet's own body is the window body: the note lives in its own field view, so a keystroke runs none
+// (target 0). Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteModel
@@ -52,6 +52,23 @@ extension BodyCountSuites {
             try await w.settle(200)
             #expect(copied.texts == [Self.report.text(note: Self.typed)], "Copy copied \(copied.texts)")
             #expect(w.label(ProblemReportSheet.identifier("copy")) == "Copied", "Copy shows nothing happened (#4669)")
+        }
+
+        /// The packet's keyboard row: ⌘C, pressed while the note field is editing, copies the note plus the report.
+        @Test(.timeLimit(.minutes(2))) func commandCCopiesTheReport() async throws {
+            let copied = Copied()
+            let sheet = ProblemReportSheet(report: Self.report, onCopy: { copied.texts.append($0) }, onClose: {})
+            let w = RenderBudgetWindow(sheet, size: CGSize(width: 640, height: 560), keyCapable: true)
+            defer { w.close() }
+            try await w.settle(400)
+            let editor = try #require(try await Self.edit(ProblemReportSheet.identifier("note"), in: w), "the note field didn't start editing")
+            editor.insertText(Self.typed, replacementRange: editor.selectedRange())
+            let key = try #require(NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: .command, timestamp: 0, windowNumber: w.window.windowNumber,
+                context: nil, characters: "c", charactersIgnoringModifiers: "c", isARepeat: false, keyCode: 8))
+            #expect(w.window.performKeyEquivalent(with: key), "⌘C found no control")
+            try await w.settle(200)
+            #expect(copied.texts == [Self.report.text(note: Self.typed)], "⌘C copied \(copied.texts)")
         }
 
         /// The NSTextField under the element `identifier`, made first responder; its field editor.

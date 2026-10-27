@@ -1,6 +1,7 @@
 // ProblemReport.swift (report-problem RP-1 stubs, RP-4 bodies): what Help > Report a Problem… shows and the
 // person sends: the app, its version and build, macOS, the Mac model and the newest suite crashes, trimmed and
-// redacted. Built from values the caller reads; this file never reads a disk or a network. Linux-safe.
+// redacted, from `.ips` and `.crash` files alike. Built from values the caller reads; this file never reads a disk
+// or a network. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -38,7 +39,7 @@ public struct ProblemReport: Hashable, Sendable, Codable {
         let redaction = CrashRedaction(home: home, user: user, host: host)
         let suite = Set(SuiteApp.allCases.map(\.displayName))
         let picked = crashes
-            .filter { $0.name.hasSuffix(".ips") && suite.contains(CrashTrim.process(of: $0)) }
+            .filter { CrashFolder.isCrash($0.name) && suite.contains(CrashTrim.process(of: $0)) }
             .filter { now.timeIntervalSince($0.modified) <= 7 * 86_400 }
             .sorted { $0.modified > $1.modified }
             .prefix(3)
@@ -49,10 +50,18 @@ public struct ProblemReport: Hashable, Sendable, Codable {
         return report
     }
 
+    /// The app, version and build on one line, then macOS and the Mac model; a value the report lacks is left
+    /// out, never shown as an empty `()`.
+    var header: String {
+        let first = [app, version, build.isEmpty ? "" : "(\(build))"].filter { !$0.isEmpty }.joined(separator: " ")
+        return [first, macOS.isEmpty ? "" : "macOS \(macOS)", model.isEmpty ? "" : "Mac \(model)"]
+            .filter { !$0.isEmpty }.joined(separator: "\n")
+    }
+
     /// The note, then the report, as plain text, redacted.
     public func text(note: String) -> String {
         var parts = note.isEmpty ? [] : [note]
-        parts.append("\(app) \(version) (\(build))\nmacOS \(macOS)\nMac \(model)")
+        parts.append(header)
         if crashes.isEmpty {
             parts.append("No crash reports from AfterGlow in the last 7 days.")
         } else {
@@ -86,7 +95,8 @@ struct CrashRedaction: Hashable, Sendable {
 }
 
 /// An `.ips` crash file is a JSON header line, then a JSON body. The trim keeps the header and, from the body,
-/// the process path, the exception and the crashed thread's frames.
+/// the process path, the exception and the crashed thread's frames. A plain-text `.crash` file keeps its first
+/// 60 lines after the first.
 enum CrashTrim {
     struct Header: Decodable { var app_name: String?; var name: String? }
     struct Exception: Codable { var type, signal, subtype: String? }
@@ -101,10 +111,16 @@ enum CrashTrim {
         return (text[..<newline], text[text.index(after: newline)...])
     }
 
-    /// The crashing process: the header's app name, else the file name before its first "-".
+    /// The crashing process: an `.ips` header's app name, a `.crash` file's `Process:` line, else the process
+    /// its file name starts with.
     static func process(of file: CrashFile) -> String {
         let header = try? JSONDecoder().decode(Header.self, from: Data(split(file.text).header.utf8))
-        return header?.app_name ?? header?.name ?? String(file.name.prefix { $0 != "-" })
+        if let name = header?.app_name ?? header?.name { return name }
+        if let line = file.text.split(separator: "\n").prefix(40).first(where: { $0.hasPrefix("Process:") }),
+           let name = line.dropFirst("Process:".count).split(separator: " ").first {
+            return String(name)
+        }
+        return CrashFolder.process(named: file.name)
     }
 
     /// The header line and the trimmed body; a body that isn't `.ips` JSON keeps its first 60 lines.
