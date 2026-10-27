@@ -347,3 +347,4 @@ time	kind	note
 2026-10-27T07:08Z	wait	heartbeat	#5818	no change; dev-red #5818 rerun at ad29aea red again (SuiteUI compile; fix rides another line's PR); #5011 #5825 wait
 2026-10-27T07:24Z	wait	heartbeat	#5818	no change; #5011 #5825 wait on lane batch; dev-red #5818 open
 2026-10-27T07:40Z	wait	heartbeat	#5011	#5011 in lane/batch-20261027074019 (Linux check running); #5825 waits; dev-red #5818 open
+2026-10-27T07:57Z	wait	heartbeat	#5011	#5011 batch 20261027074019 Linux check 40468524462 still running; #5825 waits; dev-red #5818 open
