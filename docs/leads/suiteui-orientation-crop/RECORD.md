@@ -120,3 +120,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T07:03:41Z critic panel pending: dev still c367fbeb with macOS compile red (AdjustCommands.notBuilt, not ours); no journeys screens yet
 - 2026-10-27T07:23:14Z critic panel pending: dev compile fix #5868 landed (dev 841d4d88); waiting for photo/full journeys with screens
 - 2026-10-27T07:43:07Z critic panel pending: no photo/full journeys with screens since compile fix (dev 841d4d88)
+- 2026-10-27T08:04:09Z critic panel: full CI 40470141862 at ef9d2ace running; its journeys should give the Photo screens
