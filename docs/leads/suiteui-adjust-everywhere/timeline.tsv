@@ -151,3 +151,4 @@ utc	stage	event	ref	note
 07:21Z	3	waiting-lane	#5247 #5248 #5249	re-added fast-lane on #5249; dev-red #5818 cause (AdjustCommands.notBuilt, #5233 vs #5235 split batches) fixed on dev by #5868
 07:41Z	3	fix-eject	#5248	AJ-library needs-fix (Linux check 40464584742) already fixed by 7900f7c69 with Head moved; library-ui restacked locally on it
 08:01Z	3	waiting-lane	#5247 #5248 #5249	#5248 needs-fix cleared on 7900f7c69; all three clean; dev 1ab8f0913; main fef52e668
+08:22Z	3	waiting-lane	#5247 #5248 #5249	all clean, queued; lane running single-PR batches (batch-20261027080338 = #4939); dev c21b28343; main fef52e668
