@@ -367,3 +367,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 12:37Z The 12:02 lane run marks #5248 eligible (Fast-Check marker plus local-ci/prescreen). #5247 (fef4bfd91) and #5249 (15ade3a63) still wait for prescreen. All three are clean. dev 66d4c6d83, main fef52e668: no Slice-Done. dev-red #5818 still open.
 - 13:05Z check-in: #5247/#5248/#5249 open+clean, none merged. Lane: #5248 eligible (Fast-Check + local-ci/prescreen); #5247 (fef4bfd91) and #5249 (15ade3a63) wait for supervisor prescreen. main still fef52e668: no Belt-Slice-Done for AJ-k/AJ-u yet. Dependents stay local until parents land.
 - 2026-10-27T13:20Z heartbeat: no merges of ours; dev-red #5818 open (triage blames #5334)
+- 13:36Z check-in: none of #5247/#5248/#5249 merged yet (all clean). Lane 13:20: dev green again, stale batches dropped and re-forming; #5248 eligible, #5247/#5249 still wait for local-ci/prescreen. main unchanged (fef52e668), no Belt-Slice-Done yet.

@@ -168,3 +168,4 @@ utc	stage	event	ref	note
 12:37Z	3	waiting-lane	#5247 #5248 #5249	#5248 eligible (prescreen ok); #5247 #5249 wait prescreen; dev 66d4c6d83
 13:05Z	3	check-in	#5247 #5248 #5249	no merges; #5248 eligible (prescreen ok), #5247/#5249 wait local-ci/prescreen; dev 9def47788 main fef52e668
 13:20Z	3	lane	#5247 #5248 #5249	heartbeat: all clean, wait local-ci/prescreen; dev-red #5818 open
+13:36Z	3	check-in	#5247 #5248 #5249	no merges; dev green again, lane re-batching; #5248 eligible; #5247/#5249 wait prescreen; dev 95e60fed8 main fef52e668
