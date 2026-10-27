@@ -13,9 +13,14 @@
 // left on bounds.origin (so its baseline sits at height - descent), resized by
 // HaloTextPlacement's scale, turned by its degrees about its center and
 // composited at its world center; with no rasterizer, a mirror or any refusal
-// it is skipped and counted. Nulls are never in the list, so they never
-// count. Linux-safe.
+// it is skipped and counted. A styled solid or shape (layer-styles HY-6)
+// merges its fill and stroke, draws them through SuiteImaging's
+// StyleProgram with the style's numbers sampled at the frame, and composites
+// the result at the origin the program pads it to; when the program refuses
+// it draws unstyled. Nulls are never in the list, so they never count.
+// Linux-safe.
 import CoreRaster
+import SuiteImaging
 
 public struct LiveFrameRendering: FrameRendering {
     public init() {}
@@ -39,7 +44,13 @@ public struct LiveFrameRendering: FrameRendering {
             case .null:
                 continue
             }
-            for layer in [source, Self.strokeFill(item, width: width, height: height, scaleX: sx, scaleY: sy)] {
+            let layers = [source, Self.strokeFill(item, width: width, height: height, scaleX: sx, scaleY: sy)]
+            if let style = item.style, let styled = Self.styled(layers, style, width: width, height: height, scale: max(sx, sy)),
+               let next = try? composite(styled.pixels, onto: out, x: styled.x, y: styled.y, mode: item.blendMode, opacity: Float(item.opacity)) {
+                out = next
+                continue
+            }
+            for layer in layers {
                 guard let layer,
                       let next = try? composite(layer, onto: out, mode: item.blendMode, opacity: Float(item.opacity))
                 else { continue }
@@ -70,6 +81,20 @@ public struct LiveFrameRendering: FrameRendering {
         } catch {
             return nil
         }
+    }
+
+    /// `layers` merged into one `width` × `height` buffer and drawn with
+    /// `style` by StyleProgram, padded by its reach × `scale`, and where its
+    /// top left sits; nil for an empty style or when the program refuses.
+    static func styled(
+        _ layers: [PixelBuffer?], _ style: LayerStyle, width: Int, height: Int, scale: Double
+    ) -> (pixels: PixelBuffer, x: Int, y: Int)? {
+        guard style != .none, var merged = try? PixelBuffer(width: width, height: height) else { return nil }
+        for layer in layers {
+            if let layer, let next = try? composite(layer, onto: merged, mode: .normal, opacity: 1) { merged = next }
+        }
+        guard let (pixels, origin) = try? StyleProgram.render(style, layer: merged, scale: scale) else { return nil }
+        return (pixels, origin.x, origin.y)
     }
 
     /// `value` rounded to an Int, or nil when it is not finite or too large to

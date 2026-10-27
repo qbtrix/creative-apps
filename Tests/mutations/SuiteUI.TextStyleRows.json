@@ -1,0 +1,10 @@
+[
+{"label":"Justify asks for the leading alignment","file":"Sources/SuiteUI/TextStyleRows.swift","find":"if !current { onIntent(.alignment(alignment)) }","replace":"if !current { onIntent(.alignment(.leading)) }","tests":"TextStyleRowsTests.swift"},
+{"label":"A scrub skips the clamp","file":"Sources/SuiteUI/TextStyleRows.swift","find":"let kept = Self.value(field, of: TextStyleRules.setting(style, field, to: value))","replace":"let kept = value","tests":"TextStyleRowsTests.swift"},
+{"label":"A face pick in the same family asks for nothing","file":"Sources/SuiteUI/TextStyleRows.swift","find":"if next.family != pick.family || next.face != pick.face {","replace":"if next.family != pick.family {","tests":"TextStyleRowsTests.swift"},
+{"label":"Italic stays enabled on a family without one","file":"Sources/SuiteUI/TextStyleRows.swift","find":"!family.faces.contains(where: { $0.italic != style.italic }) else { return nil }","replace":"true else { return nil }","tests":"TextStyleRowsTests.swift"},
+{"label":"Letter Spacing carries no drag token","file":"Sources/SuiteUI/TextStyleRows.swift","find":"case .tracking: return .tracking(kept, drag: drag)","replace":"case .tracking: return .tracking(kept, drag: nil)","tests":"TextStyleRowsTests.swift"},
+{"label":"Design shows the text style rows for a layer that isn't text","file":"Sources/DesignApp/DesignInspectorText.swift","find":"guard let first = model.selectedNodes.first(where: { $0.kind == .text }) else { return nil }","replace":"guard let first = model.selectedNodes.first else { return nil }","tests":"RenderBudgetTextStyleTests.swift"},
+{"label":"Design's centred text reads as leading in the rows","file":"Sources/DesignApp/DesignInspectorText.swift","find":"case .center: kernel.paragraph.alignment = .center","replace":"case .center: kernel.paragraph.alignment = .leading","tests":"RenderBudgetTextStyleTests.swift"},
+{"label":"Halo's rows show the standard size, not the layer's","file":"Sources/HaloApp/HaloTextInspector.swift","find":"style.size = text.fontSize","replace":"style.size = TextStyle.standard.size","tests":"RenderBudgetTextStyleTests.swift"}
+]

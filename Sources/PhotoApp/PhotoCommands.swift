@@ -146,6 +146,7 @@ struct PhotoCommands: Commands {
         editMenu
         selectMenu
         imageMenu
+        filterMenu
         layerMenu
         viewMenu
     }

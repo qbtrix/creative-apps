@@ -76,7 +76,9 @@ public enum FlareIntent: Sendable, Equatable {
     /// case whose three payloads are three chips, so its name carries the format.
     public enum Export: Sendable, Equatable {
         case showSheet, setFormat(ExportFormat), setFrames(from: Int, to: Int), setStep(Int), setScale(Double),
-             setTransparent(Bool), start, cancel, dismiss, tryAgain, reveal
+             setTransparent(Bool), start, cancel, dismiss, tryAgain, reveal,
+             // MP4 and GIF (export-pack FV-2): the whole size (a scale, a long edge or pixels), the frame rate, GIF's loop.
+             setSize(SuiteExportSize), setFrameRate(Int), setLoop(Bool)
     }
     public enum Assist: Sendable, Equatable { case showPopover }
 
@@ -165,7 +167,8 @@ public enum FlareIntent: Sendable, Equatable {
         .interactions(.toggleEditor),
         .export(.showSheet), .export(.setFormat(.svgFrame)), .export(.setFrames(from: 0, to: 47)),
         .export(.setStep(1)), .export(.setScale(1)), .export(.setTransparent(false)), .export(.start),
-        .export(.cancel), .export(.dismiss), .export(.tryAgain), .export(.reveal),
+        .export(.cancel), .export(.dismiss), .export(.tryAgain), .export(.reveal), .export(.setSize(.scale(1))),
+        .export(.setFrameRate(30)), .export(.setLoop(true)),
         .assist(.showPopover),
     ]
 }
@@ -324,6 +327,9 @@ extension FlareIntent.Export {
         case .dismiss: "dismiss"
         case .tryAgain: "tryAgain"
         case .reveal: "reveal"
+        case .setSize: "setSize"
+        case .setFrameRate: "setFrameRate"
+        case .setLoop: "setLoop"
         }
     }
 }

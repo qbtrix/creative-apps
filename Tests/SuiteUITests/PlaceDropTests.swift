@@ -71,6 +71,18 @@ import Testing
         #expect(!called)
     }
 
+    /// A drop it can't take says why: the reason reaches `onRefuse`, so the page can show it, not drop it silently.
+    @Test func aRefusedDropSaysWhy() async {
+        var why: String?
+        let txt = PlaceItem.data(name: "notes.txt", Data("hello".utf8))
+        _ = await PlaceReader.drop([txt], at: .zero, formats: all, onPlace: { _, _ in true }, onRefuse: { why = $0 })
+        #expect(why == PlaceRules.formatHelp)
+        why = nil
+        let svg = PlaceItem.data(name: "logo.svg", Data(GalleryPlaceImage.logoSVG.utf8))
+        _ = await PlaceReader.drop([svg], at: .zero, formats: all, onPlace: { _, _ in true }, onRefuse: { why = $0 })
+        #expect(why == nil)
+    }
+
     @Test func largeFileOffMain() async throws {
         let large = try bigPNG("large.png", bytes: 30 << 20)
         let clock = ContinuousClock()

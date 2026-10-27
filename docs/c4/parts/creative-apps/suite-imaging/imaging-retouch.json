@@ -1,7 +1,7 @@
 {
   "id": "imaging-retouch",
   "name": "Retouch",
-  "description": "Retouch/: the paint bucket and the heal tools over creative-core. BucketOptions (tolerance 0 to 255, contiguous, all layers, anti-alias) and BucketRules (the seed's flood mask times the selection's coverage, the colour mixed in by it), HealRules (spot heal and remove through filledFromSurroundings, heal through healed from a source offset, and a stroke's DabCoverage grid placed into a buffer-sized mask), and RetouchCommands, the four edits a raster app adds on a RetouchTarget: fill.bucket, retouch.spot-heal, retouch.heal and retouch.remove, one undo step each. fill-heal FH-1 declares them as stubs; FH-5b, FH-5h and FH-6 fill the bodies.",
+  "description": "Retouch/: the paint bucket and the heal tools over creative-core. BucketOptions (tolerance 0 to 255, contiguous, all layers, anti-alias) and BucketRules (the seed's flood mask times the selection's coverage, the colour mixed in by it), HealRules (spot heal and remove through filledFromSurroundings, heal through healed from a source offset, and a stroke's DabCoverage grid placed into a buffer-sized mask), and RetouchCommands, the four edits a raster app adds on a RetouchTarget: fill.bucket, retouch.spot-heal, retouch.heal and retouch.remove, one undo step each. Photo adopts them through PhotoWorkspace's RetouchTarget conformance (PhotoModel/PhotoRetouch+Kernel.swift; its old per-dab tone-match heal is gone). Library's dust-spot fix is the next adopter: a conformance of its develop target to RetouchTarget, calling retouch.spot-heal.",
   "technology": "Swift 6, CoreRaster and SuiteKernel, Linux and macOS",
   "paths": [
     "Sources/SuiteImaging/Retouch/"

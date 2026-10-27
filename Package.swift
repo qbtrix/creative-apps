@@ -31,9 +31,13 @@
 //             Metal (SuiteImagingTests/ImagingBoundaryTests). Linked by the
 //             Design, Photo, Library and Halo Models, SuiteUI and the CLI.
 //             With SuiteImagingTests, on Linux and macOS.
+//   SuiteText  the live text service on Core Text (LiveText: measure, font
+//             list, glyph drawing), SuiteModel's TextServices made real. Kept
+//             apart from SuiteShell so headless tools can draw text without
+//             the UI glue. macOS only.
 //   SuiteShell  macOS glue every app process links: the shared menu commands
-//             (Window > Switch To) and, later, the live suite services.
-//             macOS only.
+//             (Window > Switch To) and the live suite services, with CoreAsset
+//             for the shared thumbnail store; re-exports SuiteText. macOS only.
 //   AfterGlowApp  the launcher: the home window that opens the five apps.
 //             macOS only.
 //
@@ -86,9 +90,9 @@ let apps = ["Flare", "Design", "Photo", "Library", "Halo"]
 var products: [Product] = [.executable(name: "afterglow", targets: ["AfterGlowCLI"])]
 var targets: [Target] =
     model("Flare", ["FlareCore"], imaging: false)
-    + model("Design", ["CoreColor"])
+    + model("Design", ["CoreColor", "CoreRaster"])
     + model("Photo", ["CoreRaster", "CoreColor", "CoreRender"])
-    + model("Library", ["CoreRaster", "CoreColor"])
+    + model("Library", ["CoreAsset", "CoreRaster", "CoreColor"])
     + model("Halo", ["FlareCore", "CoreRaster"])
     + [
         .target(name: "SuiteModel"),
@@ -108,7 +112,9 @@ var targets: [Target] =
 products += (apps + ["AfterGlow"]).map { .executable(name: "\($0)App", targets: ["\($0)App"]) }
 targets += [
     .target(name: "SuiteUI", dependencies: ["SuiteModel", "SuiteKernel", "SuiteImaging"]),
-    .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel"]),
+    // SuiteImageIO hands CoreRaster's PixelBuffer in and out (shared-codecs SC-2); ThumbnailWriter stores through CoreAsset.
+    .target(name: "SuiteText", dependencies: ["SuiteModel"]),
+    .target(name: "SuiteShell", dependencies: ["SuiteUI", "SuiteModel", "SuiteText", .product(name: "CoreAsset", package: core), .product(name: "CoreRaster", package: core)]),
     .executableTarget(name: "AfterGlowApp", dependencies: ["SuiteUI", "SuiteShell", "SuiteModel"]),
     .testTarget(name: "SuiteUITests", dependencies: ["SuiteUI", "SuiteModel"]),
     .testTarget(
@@ -117,11 +123,9 @@ targets += [
             + apps.flatMap { [.target(name: "\($0)App"), .target(name: "\($0)Model")] }
     ),
 ]
-// Photo draws its canvas through CoreRender's dispatcher, on the Metal backend when the View > Rendering choice allows.
-let appEngines: [String: [Target.Dependency]] = ["Photo": [.product(name: "CoreRenderMetal", package: core)]]
 targets += apps.map {
     .executableTarget(name: "\($0)App",
-                      dependencies: ["SuiteUI", "SuiteShell", .target(name: "\($0)Model")] + appEngines[$0, default: []])
+                      dependencies: ["SuiteUI", "SuiteShell", .target(name: "\($0)Model")])
 }
 #endif
 

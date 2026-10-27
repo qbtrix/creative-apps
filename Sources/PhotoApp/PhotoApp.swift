@@ -11,8 +11,8 @@
 //
 // PhotoAppDelegate (photo-documents D-10) sends files Finder hands the app
 // to an empty window or a new one (PhotoOpenQueue), and on Quit asks each
-// dirty window in turn (PhotoUnsavedFlow.quit); closing a dirty window asks
-// too (PhotoUnsavedFlow.close, from PhotoWindowEditedView's close guard).
+// dirty window in turn (PhotoUnsavedFlow.quit) through SuiteUI's
+// UnsavedGuard; closing a dirty window asks too (`.unsavedChangesGuard`).
 //
 // File-flow (PF-2): the scene takes part in switching (`.suiteApp`), File
 // gets the suite's Open Recent ▸ and Open In ▸ (SuiteFileCommands), and the
@@ -143,46 +143,29 @@ struct PhotoApp: App {
     }
 }
 
-/// One window's side of the unsaved-changes prompt; tests pass fakes.
+/// One window's side of Quit's unsaved-changes walk; tests pass fakes.
 @MainActor protocol PhotoUnsavedWindow: AnyObject {
     var isDirty: Bool { get }
+    /// The window the sheet goes on; nil asks modally.
+    var window: NSWindow? { get }
+    /// What SuiteUI's guard asks with.
+    var unsavedHooks: UnsavedHooks { get }
     /// Quit: the last autosave before asking.
     func prepareToQuit() async
-    func ask() async -> PhotoUnsavedPrompt.Answer
-    /// Save; true once it landed.
-    func save() async -> Bool
     /// Don't Save: drops the autosave.
     func discardChanges()
 }
 
-/// What close and Quit do with each window's answer.
+/// What Quit does with each window's answer.
 @MainActor enum PhotoUnsavedFlow {
-    /// Whether closing asks first: only a dirty window does.
-    static func asksOnClose(_ window: any PhotoUnsavedWindow) -> Bool { window.isDirty }
-
-    /// Close: true when the window may close (clean, saved, or Don't Save).
-    static func close(_ window: any PhotoUnsavedWindow) async -> Bool {
-        guard asksOnClose(window) else { return true }
-        switch await window.ask() {
-        case .save: return await window.save()
-        case .dontSave:
-            window.discardChanges()
-            return true
-        case .cancel: return false
-        }
-    }
-
     /// Quit: asks each dirty window in turn, autosaved first; true to quit.
     /// Don't Save drops autosaves once all answered, so a Cancel keeps them.
     static func quit(_ windows: [any PhotoUnsavedWindow]) async -> Bool {
         var dropped: [any PhotoUnsavedWindow] = []
         for window in windows where window.isDirty {
             await window.prepareToQuit()
-            switch await window.ask() {
-            case .save: guard await window.save() else { return false }
-            case .dontSave: dropped.append(window)
-            case .cancel: return false
-            }
+            guard await UnsavedGuard.proceed(window.unsavedHooks, in: window.window) else { return false }
+            if window.isDirty { dropped.append(window) }
         }
         for window in dropped { window.discardChanges() }
         return true

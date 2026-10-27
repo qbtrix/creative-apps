@@ -29,6 +29,7 @@ extension PhotoJourneyTests {
         adjExpect("Undo New Adjustment Layer", photo, "New Adjustment Layer > Exposure made no undo step")
         let slider = photo.app.sliders["Exposure"]
         XCTAssert(slider.waitForExistence(timeout: 10), "the Exposure adjustment layer shows no Exposure slider")
+        photo.reveal(slider)
         photo.shot("perf-adjustment-layer-added")
         let width = slider.frame.width
         XCTAssert(width > 20, "the Exposure slider is \(width) pt wide")

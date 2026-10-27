@@ -180,7 +180,10 @@ every step.
   uploads the folder as the `ui-screens` artifact of that journeys run
   (`gh run list --workflow journeys.yml`, then `gh run download <id> -n
   ui-screens`). Its own concurrency group means a journeys job waiting for a
-  macOS runner never holds CI's. A failed step fails that job and
+  macOS runner never holds CI's, and its `Journeys wait` job holds the run
+  on ubuntu until no CI run is queued for a macOS runner and fewer than two
+  older journeys runs are alive, so the journeys hold at most two of the
+  pool's five macOS runners and the lane's gate goes first. A failed step fails that job and
   files a `finding` issue on dev; the job is report-only, so it never holds
   `main` or a PR. Gate: none (report-only).
 - **Quarantine is owned and expires.** The supervisor can skip a journey that
@@ -190,7 +193,24 @@ every step.
   it and its owner keeps the proof while `main` can promote. `scripts/ui-test`
   lists every entry in its output and the job summary, and `scripts/ci` fails
   once an entry expires, its owner issue closes, or its test is gone, so the
-  list can't grow quietly. Agents never edit the file. Gate: `scripts/ci`.
+  list can't grow quietly. A swift test goes in the same file in the perf
+  list's form (`Target.Suite/test`) and `scripts/ci` skips it. Agents never
+  edit the file; the fast lane adds and removes its own entries (a `lane`
+  block: the dev-red issue, the culprit range, a 24 h expiry) when dev is red
+  with no culprit to revert, through its `lane-quarantine` PR that changes
+  that file alone (docs/fast-lane.md, Auto-quarantine); `scripts/quarantine
+  release` fails while one is in. Gate: `scripts/ci`.
+- **Key-press journeys run on the local Mac only.** A journey that posts key
+  events as CGEvents (a held Space, Escape mid-drag) needs the test runner's
+  Accessibility access, which GitHub's hosted macOS runners don't have. Those
+  journeys are listed in `localkeys` in `scripts/ui-test`, which skips them
+  when `RUNNER_ENVIRONMENT=github-hosted` and prints `ui-test: skipped: needs
+  local key events: <test>` (and a job summary list), so a skip never reads as
+  a pass. Run anywhere else, as `scripts/ui-test` on the Mac, they run. Unlike
+  the quarantine this is permanent, with no owner or expiry. A journey that
+  checks `CGPreflightPostEventAccess()` and skips only its key step by name
+  stays off the list, so its other steps keep their hosted coverage.
+  Gate: `scripts/ci` (Tests/ui_test).
 - **Every user-facing feature extends its app's journey.** When a PR adds
   something a person can see or do, it adds the steps that do it to
   `<X>JourneyTests`: a new `test...` method for a new journey, or more steps in
