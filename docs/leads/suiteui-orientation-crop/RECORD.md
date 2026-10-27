@@ -118,3 +118,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T06:21:53Z critic panel pending: journeys 40449642359/40450411543 cancelled, no screens; full journeys 40460270856 at ad29aeaf in Journeys wait (dev macOS compile red, AJ-4 PendingAdjustTarget, not ours)
 - 2026-10-27T06:43:15Z critic panel pending: full journeys 40460270856 failed in ui-test (dev macOS build red, not ours), no screens; waiting for a green photo/full journeys
 - 2026-10-27T07:03:41Z critic panel pending: dev still c367fbeb with macOS compile red (AdjustCommands.notBuilt, not ours); no journeys screens yet
+- 2026-10-27T07:23:14Z critic panel pending: dev compile fix #5868 landed (dev 841d4d88); waiting for photo/full journeys with screens
