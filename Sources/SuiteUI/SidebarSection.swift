@@ -102,9 +102,10 @@ struct SidebarNode: View {
         if let onToggle { toggle = { onToggle(id, $0) } }
         var rename: (@MainActor (String) -> String?)?
         if let onRename { rename = { onRename(id, $0) } }
+        var ask: (@MainActor () -> Void)?
+        if onRename != nil { ask = { renameAsk += 1 } }
         return SidebarRow(item, onToggle: toggle, refusableRename: rename, renameAsk: renameAsk)
-            .modifier(SidebarContextMenu(items: Self.menu(
-                for: id, from: contextActions, rename: onRename == nil ? nil : { renameAsk += 1 })))
+            .modifier(SidebarContextMenu(items: Self.menu(for: id, from: contextActions, rename: ask)))
             .tag(id)
     }
 
