@@ -37,8 +37,8 @@ extension BodyCountSuites {
             expectP95(select, atMost: 130, target: 33)  // dev: 108 ms
             expectP95(divider, atMost: 60, target: 8.3)  // dev: 28 ms release (67 to 76 before HaloBarAndKeyLayout)
             expectP95(viewer, atMost: 4, target: 8.3)  // dev: 2.9 ms
-            expectP95(playback, atMost: 8.3, target: 8.3)  // 3.3 to 4.4 ms release (8 to 17 before #5844)
-            expectP95(reference, atMost: 16, target: 8.3)  // 13.7 to 27.7 ms release under load (50 to 76 before #5844)
+            expectP95(playback, atMost: 16, target: 8.3)  // 3.3 to 4.4 ms release at load 30, 7 to 9.6 at load 200 (8 to 17 before #5844)
+            expectP95(reference, atMost: 16, target: 8.3)  // 13.7 to 27.7 ms release at load 30 (50 to 76 before #5844)
         }
 
         /// Select Ball, drag the inspector divider `dividerSamples` steps with Ball selected, then drag Floor
