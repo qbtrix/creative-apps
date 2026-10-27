@@ -268,3 +268,4 @@ utc	stage	event	ref	note
 2026-10-27T03:01Z	3	check-in	no halo coverage	40427092657 40428148802 cancelled, 0 Halo cases
 2026-10-27T05:05Z	3	check-in	no halo coverage	40447013481 build failed (SuiteUI, dev-red #5818); 40443770247 40445248646 cancelled; 40450411543 waiting
 2026-10-27T06:37Z	3	check-in	no halo coverage	40450411543 40459241859 cancelled; 40461752107 40460270856 waiting
+2026-10-27T08:16Z	3	check-in	no halo coverage	40461752107 40460270856 40463267313 build failed (SuiteUI, dev-red #5818)
