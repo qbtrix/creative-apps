@@ -123,3 +123,4 @@ utc	stage	event	ref	note
 23:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batching again despite #5818: p0 #5369,#5817 and beta #4903 in flight; ours next, all clean
 23:20Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	#5369 landed; #5817 (p0) and #4903 in flight; ours next, all clean; dev-red #5818 open
 23:40Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	no batches: dev-red #5818 flake-rerun at 9810d71 (macos, run 40411399952) holding the lane; #5817/#4903 back in queue; ours clean
+00:00Z	3	check-in	#5064,#5233,#5235,#5236,#5790,#5800	lane batching again: #5817 (p0), #4903, #4917..#5025 in flight; #5064 next; ours clean; dev-red #5818 rerun pending
