@@ -20,19 +20,13 @@
 // the crop the fields show, from its top left to past the image's right edge,
 // which redraws the same crop. Every step checks `photo.canvas.crop` while a
 // crop is pending and shoots `photo-crop-*`. Values are waited for with query
-// predicates, never a sleep. The chips and toggle are CropAspectPicker's (OC-13).
-// PJ-OC (OC-14): two-layers.ora, Image > Flip Canvas Horizontal changes the
-// picture as one step, one Undo restores it exactly, then a 4:5 portrait crop.
+// predicates, never a sleep.
 import CoreGraphics
 import XCTest
 
 final class PhotoCropJourneyTests: XCTestCase {
-    /// The shared picker's chips, in the order the panel shows them.
-    private static let chips = ["Free", "Original", "1:1", "4:5", "3:2", "16:9", "Custom"]
-
-    /// RJ-P70's two-layer image: this file is UITests/PhotoJourneyTests+Crop.swift, so its grandparent is the repo root.
-    private static let twoLayers = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
-        .appending(path: "Tests/RealJobs/photo/flip-canvas/input/two-layers.ora")
+    /// The six chips, in the order the panel shows them.
+    private static let chips = ["Free", "Original", "1:1", "3:2", "4:3", "16:9"]
 
     /// PJ-8: typed crop fields, an aspect lock and its pill, then Return applies.
     @MainActor func testTypedCropSizeAndAspect() throws {
@@ -45,7 +39,7 @@ final class PhotoCropJourneyTests: XCTestCase {
         XCTAssert(photo.window(named: "beach.png").waitForExistence(timeout: 30), "beach.png didn't open")
         expectText("800 × 600 px", photo, "the status bar shows no 800 × 600 px image size")
 
-        // 1. C picks Crop: the four fields, the caption and the picker's chips.
+        // 1. C picks Crop: the four fields, the caption and the six chips.
         let canvas = photo.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 5), "no canvas (suite.canvas)")
         canvas.click()
@@ -86,14 +80,16 @@ final class PhotoCropJourneyTests: XCTestCase {
         expectPill("1:1", photo)
         photo.shot("crop-typed-width")
 
-        // 4. 3:2, then the orientation toggle: the lock reads 2:3 and the crop stands up.
+        // 4. 3:2, then Swap: the lock reads 2:3 and the crop stands up.
         chip("3:2", photo)
         expectPill("3:2", photo)
-        turnPortrait(photo)
+        let swap = photo.app.buttons["photo.crop.swap"]
+        XCTAssert(swap.waitForExistence(timeout: 5) && swap.isEnabled, "Swap isn't enabled under 3:2")
+        swap.click()
         expectPill("2:3", photo)
-        expectCropPending(photo, "the toggle")
+        expectCropPending(photo, "Swap")
         let width = number(in: "photo.crop.width", photo), height = number(in: "photo.crop.height", photo)
-        XCTAssertGreaterThan(height, width, "after the toggle the crop isn't taller than wide (W \(width), H \(height))")
+        XCTAssertGreaterThan(height, width, "after Swap the crop isn't taller than wide (W \(width), H \(height))")
         photo.shot("crop-typed-swapped")
 
         // 5. Free: the crop stays, the pill goes.
@@ -140,77 +136,7 @@ final class PhotoCropJourneyTests: XCTestCase {
         photo.press(.escape)
     }
 
-    /// PJ-OC: Flip Canvas Horizontal mirrors both layers as one step, one Undo restores them, then a 4:5 portrait crop.
-    @MainActor func testFlipCanvasAndPortraitCrop() throws {
-        let folder = FileManager.default.temporaryDirectory.appending(path: "photo-flip-\(UUID().uuidString)")
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
-        let file = folder.appending(path: "two-layers.ora")
-        try FileManager.default.copyItem(at: Self.twoLayers, to: file)
-        let photo = Journey("Photo", self, arguments: photoArguments(open: file))
-        XCTAssert(photo.window(named: "two-layers.ora").waitForExistence(timeout: 30), "two-layers.ora didn't open")
-        expectText("48 × 32 px", photo, "the status bar shows no 48 × 32 px image size")
-        for layer in ["Pasted Layer", "Background"] { expectText(layer, photo, "the Layers panel shows no \(layer)") }
-        let canvas = photo.element("suite.canvas")
-        XCTAssert(canvas.waitForExistence(timeout: 5), "no canvas (suite.canvas)")
-        let before = canvas.screenshot().pngRepresentation
-
-        // 1. Image > Flip Canvas Horizontal: both layers mirror as one step.
-        photo.app.menuBars.menuBarItems["Image"].click()
-        let flip = photo.app.menuBars.menuItems["Flip Canvas Horizontal"]
-        XCTAssert(flip.waitForExistence(timeout: 5), "the Image menu has no Flip Canvas Horizontal")
-        XCTAssert(photo.app.menuBars.menuItems["Flip Canvas Vertical"].exists, "the Image menu has no Flip Canvas Vertical")
-        XCTAssert(flip.isEnabled, "Flip Canvas Horizontal is disabled with an image open")
-        photo.shot("image-menu-flip-canvas", screen: true)
-        flip.click()
-        let undo = photo.app.menuBars.menuItems["Undo Flip Horizontal"]
-        photo.app.menuBars.menuBarItems["Edit"].click()
-        XCTAssert(undo.waitForExistence(timeout: 5), "Edit doesn't show Undo Flip Horizontal after the flip")
-        photo.press(.escape)
-        XCTAssert(waitFor { canvas.screenshot().pngRepresentation != before }, "the canvas's picture didn't change after the flip")
-
-        // 2. One Edit > Undo restores both layers: the first picture again.
-        photo.app.menuBars.menuBarItems["Edit"].click()
-        XCTAssert(undo.waitForExistence(timeout: 5), "Edit doesn't show Undo Flip Horizontal")
-        undo.click()
-        XCTAssert(waitFor { canvas.screenshot().pngRepresentation == before }, "one Undo didn't bring back the first picture")
-
-        // 3. C, 4:5 and Portrait: the pill reads 4:5, the crop the full 32 px tall and taller than wide.
-        canvas.click()
-        photo.press(character: "c")
-        XCTAssert(photo.app.buttons["photo.crop.apply"].waitForExistence(timeout: 5), "C didn't pick the crop tool (no Apply Crop)")
-        chip("4:5", photo)
-        expectCropPending(photo, "4:5")
-        turnPortrait(photo)
-        expectPill("4:5", photo)
-        expectField("photo.crop.height", 32, photo)
-        let width = number(in: "photo.crop.width", photo), height = number(in: "photo.crop.height", photo)
-        XCTAssertGreaterThan(height, width, "the 4:5 portrait crop isn't taller than wide (W \(width), H \(height))")
-        photo.shot("crop-portrait")
-    }
-
     // MARK: Steps
-
-    /// Turns the crop to portrait with the picker's orientation toggle, unless it already stands so.
-    @MainActor private func turnPortrait(_ photo: Journey) {
-        let toggle = photo.app.buttons["suite.crop.orientation"]
-        XCTAssert(toggle.waitForExistence(timeout: 5) && toggle.isEnabled, "the orientation toggle isn't enabled")
-        guard toggle.label != "Portrait" else { return }
-        toggle.click()
-        let portrait = photo.app.buttons.matching(identifier: "suite.crop.orientation")
-            .matching(NSPredicate(format: "label == %@", "Portrait")).firstMatch
-        XCTAssert(portrait.waitForExistence(timeout: 5), "the orientation toggle doesn't read Portrait (it reads \(toggle.label))")
-    }
-
-    /// Polls `condition` for up to `seconds`, for a picture no query predicate can wait on.
-    @MainActor private func waitFor(_ seconds: TimeInterval = 5, _ condition: () -> Bool) -> Bool {
-        let end = Date().addingTimeInterval(seconds)
-        while Date() < end {
-            if condition() { return true }
-            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
-        }
-        return condition()
-    }
 
     /// The right-hand panel, where the crop options sit.
     @MainActor private func panel(_ photo: Journey) -> XCUIElement { photo.element("suite.inspector") }

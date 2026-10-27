@@ -1,8 +1,7 @@
 // CropOptions.swift: the crop tool's options in the inspector (PV-3): the
 // pending crop's X, Y, W and H as ScrubFields two per row in a Grid (X over
-// W, Y over H, equal columns), the shared CropAspectPicker (its chips, Custom
-// W:H and the landscape/portrait toggle on X; orientation-crop OC-13), then
-// Apply Crop over Cancel, each action full width and every row SuiteSpacing.xs apart.
+// W, Y over H, equal columns), the six aspect chips, Swap, then Apply Crop
+// over Cancel, each action full width and every row SuiteSpacing.xs apart.
 // Apply carries no Return shortcut, so Return in a field commits the field;
 // Return on the canvas applies through `.confirm`. Cancel carries
 // no Escape shortcut either, which would close a field being typed in before
@@ -14,7 +13,6 @@
 // a test measures the 2 x 2 grid without an assistive client; nothing in the
 // app reads it. Values in, intents out.
 import PhotoModel
-import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -41,11 +39,18 @@ struct CropOptions: View {
                     field(.height)
                 }
             }
-            CropAspectPicker(aspect: model.cropPickerAspect, orientation: model.cropPickerOrientation) {
-                perform(.crop(.pick($0)))
-            }
-            .disabled(model.canvas == nil)
-            .help(model.cropAspectGroupHelp)
+            // The chips are found by title until ChoiceChips takes per-chip identifiers (#1148).
+            ChoiceChips(
+                options: CropAspect.presets.map { InspectorOption(id: $0, title: $0.title) },
+                selected: Self.preset(for: model.cropAspect)
+            ) { perform(.crop(.aspect($0))) }
+                .disabled(model.canvas == nil)
+                .help(model.cropAspectGroupHelp)
+            // The title names the change ("Swap to 2:3"), so its tooltip does too.
+            InspectorAction(ToolbarAction(
+                model.cropSwapTitle, systemImage: "arrow.left.arrow.right", unavailableHelp: model.cropSwapHelp,
+                identifier: "photo.crop.swap"
+            ) { perform(.crop(.swap)) })
             InspectorAction(ToolbarAction(
                 "Apply Crop", systemImage: "crop", unavailableHelp: model.cropApplyHelp,
                 identifier: "photo.crop.apply"
@@ -55,6 +60,13 @@ struct CropOptions: View {
                 identifier: "photo.crop.cancel"
             ) { perform(.cancelCrop) })
         }
+    }
+
+    /// The chip a lock shows as on: a portrait-swapped ratio (2:3) lights its
+    /// landscape preset (3:2).
+    static func preset(for aspect: CropAspect) -> CropAspect {
+        guard case .ratio(let w, let h) = aspect, !CropAspect.presets.contains(aspect) else { return aspect }
+        return .ratio(h, w)
     }
 
     /// One of X, Y, W, H: whole canvas pixels, X and Y from 0, W and H from 1,

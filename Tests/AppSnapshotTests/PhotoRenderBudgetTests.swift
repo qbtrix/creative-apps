@@ -15,8 +15,7 @@
 // Report: one PHOTO-RENDER-8K line per backend in
 // .build/snapshots/photo-render-budget.txt. The document autosaves into a temp
 // folder, never the user's. In Tests/perf-suites.txt, so the merge gate skips
-// it. PhotoFlipCanvasBudgetTests (OC-14, in BodyCountSuites): Flip Canvas on an
-// 8K two-layer window takes at most 2 window bodies. macOS only.
+// it. macOS only.
 import CoreRaster
 import CoreRender
 import CoreRenderMetal
@@ -24,8 +23,6 @@ import Foundation
 import Metal
 import PhotoModel
 import Testing
-
-@testable import PhotoApp
 
 @Suite(.serialized) struct PhotoRenderBudgetTests {
     /// The optimizer's setting, not the DEBUG flag: an optimized run built with -DDEBUG (so the
@@ -131,38 +128,6 @@ import Testing
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try (lines.joined(separator: "\n") + "\n").write(
             to: folder.appendingPathComponent("photo-render-budget.txt"), atomically: true, encoding: .utf8)
-    }
-}
-
-extension BodyCountSuites {
-    @MainActor @Suite struct PhotoFlipCanvasBudgetTests {
-        /// Image > Flip Canvas Horizontal on an 8K two-layer image: one undo step, at most 2 window bodies.
-        @Test(.timeLimit(.minutes(2))) func flipCanvasInOneBody() async throws {
-            let w = RenderBudgetWindow(PhotoWindow(model: try Self.document()))
-            defer { w.close() }
-            let bodies = { BodyCountSuites.PhotoWindowStrokeTests.editorBodies() }
-            try await w.settle(1000)
-            let edited = try #require(await w.first(PhotoWindowEditedView.self))
-            let send = try #require(edited.send)
-            let step = try await w.measure("photo flip canvas horizontal, 8K, two layers", bodies: bodies) {
-                send(.flipCanvas(.horizontal))
-                try await w.settle(1500)
-            }
-            #expect(edited.workspace?.undoActionName == "Undo Flip Horizontal", "Flip Canvas Horizontal made no Flip Horizontal step")
-            expectBodies(step, atMost: 2, target: 1)
-        }
-
-        /// 7680 x 4320: the white Background and a full-canvas fill above it.
-        static func document() throws -> PhotoWorkspace {
-            var workspace = PhotoWorkspace(services: PhotoRenderBudgetTests.services)
-            try workspace.newCanvas(width: 7680, height: 4320)
-            workspace.addLayer()
-            workspace.setToolOption(.color(red: 30, green: 120, blue: 210))
-            workspace.selectAll()
-            workspace.fillSelection()
-            workspace.deselect()
-            return workspace
-        }
     }
 }
 

@@ -61,6 +61,14 @@ import Testing
         }
     }
 
+    /// A portrait-swapped ratio still lights its preset chip.
+    @Test func swappedRatioSelectsItsPreset() {
+        #expect(CropOptions.preset(for: .ratio(2, 3)) == .ratio(3, 2))
+        #expect(CropOptions.preset(for: .ratio(9, 16)) == .ratio(16, 9))
+        #expect(CropOptions.preset(for: .ratio(1, 1)) == .ratio(1, 1))
+        #expect(CropOptions.preset(for: .original) == .original)
+    }
+
     /// Blueprint 7.4 rule 5, measured from the bounds each field reports
     /// through CropFieldBoundsKey in a panel-wide host. SwiftUI builds a
     /// hosting view's accessibility tree only when an assistive client asks,
