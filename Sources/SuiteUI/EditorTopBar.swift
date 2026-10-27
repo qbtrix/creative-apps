@@ -95,19 +95,23 @@ public struct EditorBarItem: View {
 }
 
 /// A top bar command that opens a menu of `content`; disabled, saying why,
-/// while `unavailableHelp` is set.
+/// while `unavailableHelp` is set. With `showsTitle` false it draws its symbol
+/// alone; the title stays its help and accessibility label.
 public struct EditorBarMenu<Content: View>: View {
     private let title: String
     private let systemImage: String
     private let unavailableHelp: String?
+    private let showsTitle: Bool
     private let content: Content
 
     public init(
-        _ title: String, systemImage: String, unavailableHelp: String? = nil, @ViewBuilder content: () -> Content
+        _ title: String, systemImage: String, unavailableHelp: String? = nil, showsTitle: Bool = true,
+        @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.systemImage = systemImage
         self.unavailableHelp = unavailableHelp
+        self.showsTitle = showsTitle
         self.content = content()
     }
 
@@ -115,7 +119,7 @@ public struct EditorBarMenu<Content: View>: View {
         Menu {
             content
         } label: {
-            Label(title, systemImage: systemImage).labelStyle(EditorBarLabelStyle(showsTitle: true))
+            Label(title, systemImage: systemImage).labelStyle(EditorBarLabelStyle(showsTitle: showsTitle))
         }
         .menuStyle(.button)
         .buttonStyle(.accessoryBar)

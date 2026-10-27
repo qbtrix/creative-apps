@@ -1891,6 +1891,57 @@ rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignMo
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-revert: a macOS red with two PRs reverts nothing and leaves the pick to a human" \
   "$(creates),$(grep -c "^issue comment 520 .*2 PRs in main\.\.${RED:0:7} and no bisect verdict names one of them (red: macos), so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls")" "0,1"
+# macOS compile reds (10-27: #5235, #5128, #4912 sat red until a human
+# fixed them): the run's failed `macOS compile` job log names the files its
+# Swift errors are in (an `error:` line, or the `expanded code originates
+# here` note under a macro's error); the newest PR in range that changed one
+# of them is the culprit. One PR: reverted. None, or several for different
+# files: a note naming the files and PRs, no revert. A macOS test red is never
+# reverted this way. Two PRs in range each time, so the only-PR rule can't decide.
+R=/Users/runner/work/creative-apps/creative-apps
+CPFX=$'macOS compile\tRun scripts/ci --build-only\t2026-10-27T01:02:03.4567890Z '
+macjobs() {  # macjobs <compile conclusion> <tests conclusion>: run 9500's macOS jobs, the compile job's log at joblog.9601
+  jq -n --arg c "$1" --arg t "$2" '{jobs: [{id: 9601, name: "macOS compile", conclusion: $c},
+    {id: 9602, name: "macOS tests 1/3", conclusion: $t}, {id: 9603, name: "macOS", conclusion: "failure"}]}' >"$sw/jobs.9500.json"
+}
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/SuiteUI/Theme.swift|refactor(suite): drop gone (#202)"
+macjobs failure skipped
+printf '%s\n' "${CPFX}Building for debugging..." "${CPFX}$R/Sources/PhotoModel/A.swift:3:9: error: cannot find 'gone' in scope" \
+  "${CPFX}$R/Sources/SuiteUI/Theme.swift:10:5: note: 'gone' declared here" "${CPFX}CI: FAIL (swift build)" >"$sw/joblog.9601"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS compile error in one PR's file reverts that PR, not the newest one (a declared-here note is no blame)" \
+  "$(creates),$(grep -c -- '^pr create .*--head lane/revert-201 ' "$sw/calls"),$(grep -c "^issue comment 520 .*Auto-revert: #201 (.*) is the culprit (its macOS compile errors are in Sources/PhotoModel/A\.swift, last changed in main\.\.${RED:0:7} by #201); the lane opened #600 to revert it\. <!-- lane-revert " "$sw/calls"),$(grep -c -- '--label line:photo ' "$sw/calls")" "1,1,1,1"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS compile culprit is called once" "$(creates),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "1,1"
+
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)"
+macjobs failure skipped
+printf '%s\n' "${CPFX}$R/Sources/LibraryModel/C.swift:4:1: error: cannot find 'x' in scope" >"$sw/joblog.9601"
+LANE_VERIFY_AFTER=1 lane_sweep; LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: macOS compile errors in a file no PR in range changed: one note naming it, no revert" \
+  "$(creates),$(grep -c "^issue comment 520 .*Auto-revert: the macOS compile errors are in Sources/LibraryModel/C\.swift, which no PR in main\.\.${RED:0:7} changed, so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls"),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "0,1,1"
+
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Tests/AppSnapshotTests/X.swift|test(suite): snapshots (#202)"
+macjobs failure skipped
+printf '%s\n' "${CPFX}$R/Sources/PhotoModel/A.swift:3:9: error: cannot find 'gone' in scope" \
+  "${CPFX}/var/folders/q1/T/swift-generated-sources/@__swiftmacro_16AppSnapshotTests1XV4testyyF6expectfMf_.swift:1:5: error: type 'Y' has no member 'z'" \
+  "${CPFX}$R/Tests/AppSnapshotTests/X.swift:7:3: note: expanded code originates here" >"$sw/joblog.9601"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: macOS compile errors in two PRs' files (one under a macro): a note naming both, no revert" \
+  "$(creates),$(grep -c "^issue comment 520 .*Auto-revert: the macOS compile errors are in files 2 PRs in main\.\.${RED:0:7} changed: Tests/AppSnapshotTests/X\.swift (#202), Sources/PhotoModel/A\.swift (#201), so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls")" "0,1"
+
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)"
+macjobs success failure
+printf '%s\n' "${CPFX}$R/Sources/PhotoModel/A.swift:3:9: error: stale log line" >"$sw/joblog.9601"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS test red (compile green) is never reverted by file: the human-picks note as before" \
+  "$(creates),$(grep -c "^issue comment 520 .*Auto-revert: 2 PRs in main\.\.${RED:0:7} and no bisect verdict names one of them (red: macos), so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls")" "0,1"
+
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)"
+macjobs failure skipped
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS compile log not readable yet: no revert, no note, the next sweep looks again" \
+  "$(creates),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "0,0"
 # Verify after merge, own-proof landing (LANE_VERIFY_AFTER=1): a code PR lands
 # alone as soon as its head has Linux proof and a green local-ci/prescreen (the
 # supervisor's pre-screen on the Mac), with no batch and no macOS run; without
@@ -2159,7 +2210,7 @@ verdict "$(head_of 602)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sw
 expect "removal: a green check lands it and CI on dev runs" \
   "$(quarantines),$(merges),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "3,pr merge 600,pr merge 602,2"
 # A Linux red whose bisect stopped short (no `Bisect:` verdict) has no certain culprit either.
-quardev linux "${TWO[@]}"
+quardev macos "${TWO[@]}"
 printf '%s\n' "Bisect on dev stopped after 8 Linux runs: the Linux job is green at aaaaaaa and red at ${RED:0:7}; the culprit is one of the 2 commits between them. $BISECT_MARK ${RED:0:7} -->" >>"$sw/520.comments"
 FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-quarantine: a Linux red with an inconclusive bisect quarantines the test and reverts nothing" \
@@ -2185,5 +2236,26 @@ expect "auto-quarantine: a test the lane can't place in the tree is noted, not q
 quardev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
 FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-quarantine: a certain culprit gets the revert and no quarantine" "$(creates),$(quarantines),$(qnotes)" "1,0,0"
+
+# A test process that dies (scripts/ci's TEST PROCESS DIED block) prints no
+# "recorded an issue" line: mac_tests reads the block's names and places each in
+# the Tests/ file whose `func <name>(` declares it on dev. The quarantine takes
+# it from there; a name in several files or none is left out.
+DIED=$'TEST PROCESS DIED: swift test printed no \'Test run with\' summary; 1 test(s) started and never finished:\n  opens()'
+quardev macos "${TWO[@]}"
+tip_red "$RED" 4343 "$DIED"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test the process died in is quarantined, its file found by func name" \
+  "$(quarantines),$(qjson | jq -c '[.[] | .test]')" '1,["PhotoModelTests.OpenTests/opens"]'
+w="$sw/work"
+for f in OpenTests AuthTests; do printf '%s\n' '    func twin() {}' >>"$w/Tests/PhotoModelTests/$f.swift"; done
+git -C "$w" add -A; git -C "$w" commit -qm "test(photo): twin"; git -C "$w" push -q "$sw/origin.git" dev
+SCRATCH=""; scratch dev
+PFX=$'macOS tests 1/3\tscripts/ci\t2026-10-27T01:02:03.4567890Z '
+printf '%s\n' "${PFX}Test run started." "${PFX}" "${PFX}TEST PROCESS DIED: swift test printed no 'Test run with' summary; 3 test(s) started and never finished:" \
+  "${PFX}  opens()" "${PFX}  twin()" "${PFX}  ghost()" "${PFX}" "${PFX}  saves()" "${PFX}✘ Test login() recorded an issue at AuthTests.swift:3:5: x" >"$sw/joblog.9100"
+DIEDRED="red|https://github.com/qbtrix/creative-apps/actions/runs/889/job/9100|macOS"
+expect "dev red: a died process's tests are named by file; an ambiguous or unfound name, and lines after the block, are left out" \
+  "$(mac_tests "$DIEDRED" 2>/dev/null | paste -sd, -)" "AuthTests.swift/login(),OpenTests.swift/opens()"
 
 exit "$fail"

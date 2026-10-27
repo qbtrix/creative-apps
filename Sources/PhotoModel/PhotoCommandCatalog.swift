@@ -16,6 +16,8 @@ extension PhotoWorkspace {
     public struct CanvasSizeParams: Codable, Sendable { public var width, height: Int; public var anchor: BoxAnchor }
     public struct NameParams: Codable, Sendable { public var name: String }
     public struct ImageParams: Codable, Sendable { public var name: String?; public var width, height: Int; public var rgba8: [UInt8] }
+    /// edit.paste-as-image's: a file's name and its bytes in base64, as the shared Paste as Image takes them.
+    public struct PasteFileParams: Codable, Sendable { public var name, base64: String }
     public struct StraightenParams: Codable, Sendable { public var degrees: Double; public var cropToFit: Bool }
     /// Export's sheet values: the format and, for JPEG, the quality (0.1...1; the last choice when left out).
     public struct ExportParams: Codable, Sendable { public var format: String; public var quality: Double? }
@@ -38,6 +40,8 @@ extension PhotoWorkspace {
 
     /// The reasons menu items give that the Model has no help property for.
     static let noImage = "Open an image first.", noLayer = "Select a layer first."
+    /// Paste as Image's reason on an open image until Photo's pasteboard adapter (clipboard-interop CB-13) reads vector art.
+    public static let pasteAsImageHelp = "Paste as image arrives with Photo's pasteboard adapter."
     static let atTop = "The selected layer is already at the top.", atBottom = "The selected layer is already at the bottom."
 
     /// The catalog of `commands`; empty only if an id broke the id rule.
@@ -99,6 +103,8 @@ extension PhotoWorkspace {
     static let imageSchema = ParamSchema.object(
         ["name": .optional(.string("The file's name.", maxLength: 255)), "width": .integer(minimum: 1), "height": .integer(minimum: 1),
          "rgba8": .array(of: .integer(minimum: 0, maximum: 255))], required: ["name", "width", "height", "rgba8"])
+    static let pasteFileSchema = ParamSchema.object(["name": .string("The file's name, \"art.svg\".", maxLength: 255),
+                                                     "base64": .string("The file's bytes, base64: SVG.")], required: ["name", "base64"])
     static let sizeExample = JSONValue.object(["width": .number(24), "height": .number(18)])
     static let newExample = JSONValue.object(["width": .number(4), "height": .number(6), "unit": .string("in"),
                                               "resolution": .number(300), "background": .string("transparent")])
@@ -168,6 +174,12 @@ extension PhotoWorkspace {
             let center = Mask.Point(x: Double(w.canvas?.width ?? 0) / 2, y: Double(w.canvas?.height ?? 0) / 2)
             w.paste(ClipboardImage(image: DecodedImage(rgba8: p.rgba8, width: p.width, height: p.height), source: nil), viewCenter: center)
             return JSONValue.object([:])
+        },
+        .typed("edit.paste-as-image", title: "Paste as Image", summary: "Pastes vector art by name as pixels on a new layer, rasterized at the canvas size.",
+               kind: .edit, params: PasteFileParams.self, schema: pasteFileSchema,
+               example: .object(["name": .string("art.svg"), "base64": .string("PHN2Zy8+")]),
+               availability: menu { _ in pasteAsImageHelp }) { _, _ -> JSONValue in
+            throw CatalogError.unavailable(id: "edit.paste-as-image", why: pasteAsImageHelp)
         },
         act("edit.select-all", "Select All", "Selects the whole image.", .view, gate { $0.canSelectAll ? nil : noImage }) { $0.selectAll() },
         act("edit.delete-selection", "Delete", "Clears the selected pixels of the selected layer.", .edit, menu(selectionHelp)) { $0.deleteSelection() },

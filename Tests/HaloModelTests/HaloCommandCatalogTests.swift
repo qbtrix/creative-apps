@@ -41,10 +41,13 @@ extension HaloProject: HeadlessDocument {
         let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
         let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands
         let styles = StyleCommands.specs(HaloProject.self).map(\.id)  // HY-1: then the eleven style commands
+        // TS-9: the kernel's text commands but text.set-size, which stays Halo's own
+        let texts = ["text.read", "text.set-font", "text.set-italic", "text.set-alignment", "text.set-line-height", "text.set-tracking"]
         let files = FileFlowCommands.specs(HaloProject.self).map(\.id)  // HF-3: the suite's file flow, its file.open-recent too
+        let clip = ["edit.copy-frame", "edit.paste"]  // CB-10: Copy Frame and Paste
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
         let all = ids.filter { $0 != "file.open-recent" } + shapes + fills + strokes + history + transforms + rates + places + styles
-            + files + window
+            + texts + files + clip + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
@@ -126,7 +129,7 @@ extension HaloProject: HeadlessDocument {
             "animation.set-in-point transform.reset viewer.drag-end: undoRestoresBytes"],
         "the kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "undo of a duplicate keeps the bumped id counter": ["layer.duplicate: undoRestoresBytes"],
-        "the example needs a picked key, text layer, render, recent file or room to move": ["animation.easing animation.go-to-start animation.previous-frame composition.delete easing.delete-keys easing.end-drag easing.move-handle easing.set-custom file.open-recent layer.bring-forward render.cancel render.close-sheet text.end-size-scrub text.set text.set-size: exampleRuns"],
+        "the example needs a picked key, text layer, render, recent file or room to move": ["animation.easing animation.go-to-start animation.previous-frame composition.delete easing.delete-keys easing.end-drag easing.move-handle easing.set-custom file.open-recent layer.bring-forward render.cancel render.close-sheet text.end-size-scrub text.read text.set text.set-alignment text.set-font text.set-italic text.set-line-height text.set-size text.set-tracking: exampleRuns"],
         "files and rendering run through HaloHeadless in AC-h2": ["file.open file.save file.save-as render.start: exampleRuns"],
         "key editing's move is a stub until KE-4": ["timeline.move-keys: exampleRuns"],
         "the window's own steps need an open render or unsaved edits (CS-7)": ["file.answer-unsaved render.choose-folder: exampleRuns"],
