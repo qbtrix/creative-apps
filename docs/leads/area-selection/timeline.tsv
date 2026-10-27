@@ -204,3 +204,4 @@ time	task	event	note
 2026-10-27T02:56Z	3	heartbeat	lane	poll 2026-10-27T02:56Z: 03:0xZ: #4896 dev merge gating; #5125 (CB-14) and #5096 (AR-11) needs-rebase merges resolved locally, gates queued; #5093 waits on supervisor.
 2026-10-27T02:59Z	3	heartbeat	lane	poll 2026-10-27T02:59Z: #4896 FH-4 dev merge pushed 4d643f79, gate PASS, Head moved, fast-lane back, needs-split cleared (7 files). Gates running: #5125 CB-14 then #5096 AR-11 merges.
 2026-10-27T03:09Z	3	heartbeat	lane	poll 2026-10-27T03:09Z: CB-14 (#5125) and AR-11 (#5096) dev merges resolved locally; both gates crash (signal 11, stack overflow in AfterGlowCLI headless inits, not our code). Probing plain dev for the same crash before pushing.
+2026-10-27T03:14Z	3	heartbeat	lane	poll 2026-10-27T03:14Z: 03:15Z check-in: no supervisor answer on #5093, main unchanged, #5818 open. Dev probe running to tell whether the signal-11 crash blocking #5125/#5096 gates is dev's.
