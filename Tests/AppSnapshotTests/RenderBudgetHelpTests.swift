@@ -2,9 +2,9 @@
 // (Tests/render-budgets.md: ≤ 2 window bodies per keystroke), through the harness (RenderBudgetHarness.swift),
 // on a fixed report. It checks every control carries its `suite.help.report.<control>` id, types five
 // characters into the note field's editor one per 1/120 s, then clicks Copy: the copied text is the
-// report's text with the typed note, and Copy reads Copied; ⌘C in the note field copies the same way. The
-// sheet's own body is the window body: the note lives in its own field view, so a keystroke runs none
-// (target 0). Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
+// report's text with the typed note, and Copy reads Copied; ⌘C in the note field copies the same way and
+// Escape there closes the sheet. The sheet's own body is the window body: the note lives in its own field
+// view, so a keystroke runs none (target 0). Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteModel
@@ -69,6 +69,23 @@ extension BodyCountSuites {
             #expect(w.window.performKeyEquivalent(with: key), "⌘C found no control")
             try await w.settle(200)
             #expect(copied.texts == [Self.report.text(note: Self.typed)], "⌘C copied \(copied.texts)")
+        }
+
+        /// The packet's keyboard row: Escape, pressed while the note field is editing, closes the sheet.
+        @Test(.timeLimit(.minutes(2))) func escapeClosesTheSheet() async throws {
+            let closed = Copied()
+            let sheet = ProblemReportSheet(report: Self.report, onCopy: { _ in }, onClose: { closed.texts.append("closed") })
+            let w = RenderBudgetWindow(sheet, size: CGSize(width: 640, height: 560), keyCapable: true)
+            defer { w.close() }
+            try await w.settle(400)
+            let editor = try #require(try await Self.edit(ProblemReportSheet.identifier("note"), in: w), "the note field didn't start editing")
+            editor.insertText(Self.typed, replacementRange: editor.selectedRange())
+            let key = try #require(NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: w.window.windowNumber,
+                context: nil, characters: "\u{1b}", charactersIgnoringModifiers: "\u{1b}", isARepeat: false, keyCode: 53))
+            #expect(w.window.performKeyEquivalent(with: key), "Escape found no control")
+            try await w.settle(200)
+            #expect(closed.texts == ["closed"], "Escape didn't close the sheet")
         }
 
         /// The NSTextField under the element `identifier`, made first responder; its field editor.
