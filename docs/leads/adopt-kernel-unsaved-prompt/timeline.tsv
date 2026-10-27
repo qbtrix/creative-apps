@@ -93,3 +93,4 @@ ts	kind	note
 2026-10-27T06:22:39Z	3	heartbeat	lane	UP-flare #5089 is in the lane's Linux check; UP-halo and UP-z are stacked on it and pushed
 2026-10-27T06:35:58Z	3	heartbeat	lane	UP-flare #5089 Linux check green, awaiting batch; UP-halo/UP-z stacked
 2026-10-27T06:58:33Z	3	heartbeat	lane	check-in 07:00Z: lane holds open PRs; dev-red #5818 open; scoped suiteui 40460982303 red (dev-red)
+2026-10-27T07:24:19Z	3	heartbeat	lane	check-in 07:24Z: no change; dev-red #5818 open; SC-15/16 gap #5792 open (AK-8 blocked)
