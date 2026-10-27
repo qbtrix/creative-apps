@@ -172,3 +172,4 @@ utc	stage	event	ref	note
 13:47Z	3	waiting	-	check-in: no lane merge; dev c6ba84b3, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on prescreen and the lane
 14:02Z	3	check-in	#5247 #5248 #5249	no merges; lane batching one PR at a time, 19 eligible in queue incl #5248; #5247/#5249 wait prescreen; dev c6ba84b38
 14:37Z	3	check-in	#5247 #5248 #5249	no merges; #5248 queued eligible; #5247/#5249 wait prescreen; dev 0b94b3c7f main fef52e668
+14:45Z	3	waiting	-	check-in: no lane merge; dev d52f4817, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on prescreen and the lane
