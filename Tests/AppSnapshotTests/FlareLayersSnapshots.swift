@@ -47,15 +47,16 @@ import Testing
         try snapshot(LayersRows(model: model), name: "flare-sidebar-scenes", scheme: .light)
     }
 
-    /// Each row's context menu (LF-2): a layer's four items act, and the last scene's Delete is off and says why.
+    /// Each row's context menu (LF-2): Rename opens the row's field, a layer's other four items act, and the last
+    /// scene's Delete is off and says why.
     @Test func rowMenus() {
         let model = fixture("bounce")
         let layer = FlareRowMenu.actions(model.layerRowMenu("shadow"), perform: { _ in })
-        #expect(layer.map(\.title) == ["Hide Layer", "Lock Layer", "Duplicate Layer", "Delete Layer"])
+        #expect(layer.map(\.title) == ["Rename", "Hide Layer", "Lock Layer", "Duplicate Layer", "Delete Layer"])
         #expect(layer.allSatisfy { $0.unavailableHelp == nil })
         let scene = FlareRowMenu.actions(model.sceneRowMenu("scene-1"), perform: { _ in })
-        #expect(scene.map(\.title) == ["Delete Scene"])
-        #expect(scene.first?.unavailableHelp == "An animation needs at least one scene.")
+        #expect(scene.map(\.title) == ["Rename", "Delete Scene"])
+        #expect(scene.last?.unavailableHelp == "An animation needs at least one scene.")
     }
 
     @Test func emptyLayers() throws {

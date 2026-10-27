@@ -4,8 +4,8 @@
 // either kind of row by id, New Scene and New Layer. Remove takes a scene or a
 // layer; a scene's Remove is refused with the Model's removeSceneHelp, which
 // is also the remove control's tooltip. Right-clicking a row opens its context
-// menu (LF-2), the Model's `layerRowMenu` / `sceneRowMenu` as ToolbarActions,
-// each off with its reason. SCENES is a SuiteSidebarList section; LAYERS is
+// menu (LF-2): SuiteUI's Rename (the row's inline field), then the Model's
+// `layerRowMenu` / `sceneRowMenu` as ToolbarActions, each off with its reason. SCENES is a SuiteSidebarList section; LAYERS is
 // SuiteUI's LayerTreeList (adopt-kernel-layers AL-f3) over the kernel's
 // `layerRows`, top first, named `.sidebar`: rows `suite.sidebar.row.<id>`,
 // eye and lock `suite.sidebar.<id>.visible` / `.locked` (FlareLayerFlag's raw
@@ -26,10 +26,11 @@ extension SidebarSection {
     }
 }
 
-/// A row's context menu items as ToolbarActions that send their intent through `perform`.
+/// A row's context menu: Rename, then its commands as ToolbarActions that send their intent through `perform`.
 enum FlareRowMenu {
     static func actions(_ commands: [FlareRowCommand], perform: @escaping @MainActor (FlareIntent.Layers) -> Void) -> [ToolbarAction] {
-        commands.map { command in
+        guard !commands.isEmpty else { return [] }
+        return [SidebarRow.renameMenuItem] + commands.map { command in
             ToolbarAction(command.title, systemImage: command.systemImage, unavailableHelp: command.help) {
                 perform(command.intent)
             }
