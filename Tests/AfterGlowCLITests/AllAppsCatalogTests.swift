@@ -74,7 +74,9 @@ struct AllAppsCatalogTests {
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its
-    /// command says why it is unavailable on this file; and how many of its commands are available there.
+    /// command says why: unavailable on this file, or a run that refuses the example's params in a sentence (`failed`,
+    /// e.g. a Flare example naming a layer this file lacks: availability has no params, #5832). And how many of its
+    /// commands are available there.
     static func laws<D: HeadlessDocument>(_ type: D.Type, _ path: String) throws -> (problems: [String], available: Int) {
         let url = RealJobsHarness.root.appendingPathComponent(RealJobsHarness.jobsTree).appendingPathComponent(path)
         let doc = try D.open(try Data(contentsOf: url), name: url.lastPathComponent)
@@ -82,7 +84,9 @@ struct AllAppsCatalogTests {
             let parts = problem.split(separator: ":", maxSplits: 2).map { $0.trimmingCharacters(in: .whitespaces) }
             guard parts.count >= 2 else { return problem }
             let unavailable = D.catalog.availability(parts[0], on: doc).why != nil
-            return parts[1] == "exampleRuns" && unavailable ? nil : "\(parts[0]): \(parts[1])"
+            let refusedItsParams = parts.count == 3 && parts[2].contains("\(parts[0]) failed: ")
+                && !Set(tolerated.values.joined()).contains("\(parts[0]): exampleRuns")
+            return parts[1] == "exampleRuns" && (unavailable || refusedItsParams) ? nil : "\(parts[0]): \(parts[1])"
         }
         return (problems, D.catalog.ids.filter { D.catalog.availability($0, on: doc).why == nil }.count)
     }
