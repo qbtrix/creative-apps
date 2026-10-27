@@ -30,32 +30,28 @@ extension LibraryCatalog: AdjustTarget {
 
     public mutating func applyLook(_ l: LookPreset, name: String) {
         let ids = developTargets
-        let live = DevelopSlider.allCases.filter { sliderHelp($0) == nil }
+        let live = ToneSlider.develop.filter { sliderHelp($0) == nil }
         _ = developStep(name, ids: ids) { Self.developing(l, keeping: $0, sliders: live) }
     }
 
     /// The first develop target's settings as an unsaved look.
     public var currentLook: LookPreset {
         let s = firstDevelopTarget ?? .neutral
-        let tone = DevelopSlider.allCases.reduce(ToneSettings.neutral) { tone, slider in
-            ToneSlider(rawValue: slider.rawValue.lowercased()).map { tone.setting($0, to: s.value(slider)) } ?? tone
-        }
         let l = s.levels
         let adjust = AdjustSettings(
             levels: AdjustLevels(inputBlack: l.inBlack, inputWhite: l.inWhite, gamma: l.gamma, outputBlack: l.outBlack, outputWhite: l.outWhite),
             curve: AdjustCurve(points: s.curve.points.map { AdjustCurvePoint(x: $0.x, y: $0.y) }))
-        return LookPreset(id: "current", name: "Current", tone: tone, adjust: adjust, kinds: s.kinds)
+        return LookPreset(id: "current", name: "Current", tone: s.tone, adjust: adjust, kinds: s.kinds)
     }
 
     public var looks: any PresetStoring { services.looks }
 
     /// `look` over neutral settings with `old`'s crop: the `sliders` it carries (exposure adds the
     /// adjust exposure), its levels and curve, and its kinds.
-    static func developing(_ look: LookPreset, keeping old: DevelopSettings, sliders: [DevelopSlider]) -> DevelopSettings {
+    static func developing(_ look: LookPreset, keeping old: DevelopSettings, sliders: [ToneSlider]) -> DevelopSettings {
         var s = DevelopSettings.neutral.setting(crop: old.crop)
         for slider in sliders {
-            guard let tone = ToneSlider(rawValue: slider.rawValue.lowercased()) else { continue }
-            s = s.setting(slider, to: look.tone.value(tone) + (slider == .exposure ? look.adjust.exposure : 0))
+            s = s.setting(slider, to: look.tone.value(slider) + (slider == .exposure ? look.adjust.exposure : 0))
         }
         let a = look.adjust.levels
         let fields: [(DevelopLevels.Field, Double)] = [
