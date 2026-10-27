@@ -255,3 +255,4 @@ utc	stage	event	ref	note
 2026-10-27T05:02Z	check	#5860 (PT-7) open, clean, fast-lane, waiting for batch. No new photo/full ci.yml run on dev since 40444691641; dev-red #5818 open. PT-u/PT-m slice-done still waiting for a green run
 2026-10-27T05:24Z	check	#5860 open, clean, no lane comment; lane holds code batches while dev-red #5818 (macOS, #4889) is open. No new dev ci.yml run since 04:12Z. Waiting
 2026-10-27T05:46Z	check	No change: #5860 open/clean, no lane comment; dev-red #5818 open (last update 04:42Z); no dev ci.yml run since 04:12Z. Waiting
+2026-10-27T05:52Z	stage	Run act-1a17be7af84-ih2a takes over (PT-z only). lead/tone-controls rebuilt on main fef52e66 with the Photo record (SuiteUI record kept on lead/suiteui-tone-controls). #5860 open/clean; dev-red #5818 open; no green photo run since 04:12Z

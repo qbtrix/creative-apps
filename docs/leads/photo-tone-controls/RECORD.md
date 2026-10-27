@@ -1,18 +1,18 @@
-# tone-controls lead record
+# tone-controls lead record (Photo, #3468)
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
-Run: act-1a178602311-syy6 · Started: 2026-10-26T13:23Z (takes over from act-1a175ea563c-tbc1)
-Stage: 3 build; PT-a slice-done (run 40250716357); PT-4 re-land #5363 merged 20:14Z; PT-m #5816 and PT-u #5817 open in the lane (CI: PASS on 2e744f73 / 6efd72a1)
-Base: dev 01600e46
-Next: when #5816 merges, merge dev into -pt7, gate, open PT-7 (PT-z); PT-8 after those land; Belt-Slice-Done per slice from a green photo ci.yml run
+Run: act-1a17be7af84-ih2a · Started: 2026-10-27T05:45Z (takes over from act-1a178602311-syy6)
+Stage: 3 build; PT-a, PT-u, PT-m done; PT-z left: PT-7 #5860 (head 29cec5b1, fast-lane, clean) waits for the lane, which holds code batches while dev-red #5818 (macOS, #4889's PhotoToolsKeyTests, not ours) is open
+Base: dev (870080fb)
+Next: when #5860 merges, merge dev into -pt8, gate, open PT-8 (feature-done); Belt-Slice-Done PT-z from a green photo-scoped or full ci.yml run on dev that contains PT-8, then Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | PT-a | AdjustmentSettings.tone and the ToneTarget adapter as stubs; Adjust panel shows ToneRows | PT-1, PT-2 | MJ-PT | suiteui tone-controls TC-a (TC-1 #4555 merged; TC-2 building) | yes | 0 | done | 40250716357 | – |
-| PT-u | snapshots, render budget, journey written | PT-5, PT-6 | PJ-T1 | PT-a; TC-3 (PT-5) | yes | 0 | building (PT-6 merged; PT-5 #5817 in lane) | – | – |
-| PT-m | live route and export path; adapter bodies; catalog; RJ-P12–14 | PT-3, PT-4 | MJ-PT | PT-a; IM-photo (on dev), TC-5, TC-6 (stubs, rule 12); catalog chain (all built) | no | 0 | PT-3, PT-4 (#5363) merged; sharpen follow-up #5816 in lane | – | – |
-| PT-z | journey on live, feature-done | PT-7, PT-8 | PJ-T1 | PT-u, PT-m; PG-z (PT-8) | yes | 0 | PT-7 built on -pt7 (stacked on -pt3); PT-8 on -pt8 | – | – |
+| PT-u | snapshots, render budget, journey written | PT-5, PT-6 | PJ-T1 | PT-a; TC-3 (PT-5) | yes | 0 | done (PT-5 #5817, PT-6 #5008 merged) | – | – |
+| PT-m | live route and export path; adapter bodies; catalog; RJ-P12–14 | PT-3, PT-4 | MJ-PT | PT-a; IM-photo (on dev), TC-5, TC-6 (stubs, rule 12); catalog chain (all built) | no | 0 | done (PT-3, PT-4 #5363, sharpen #5816 merged) | – | – |
+| PT-z | journey on live, feature-done | PT-7, PT-8 | PJ-T1 | PT-u, PT-m; PG-z (PT-8) | yes | 0 | PT-7 #5860 in lane; PT-8 on -pt8 (opens after) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -21,9 +21,9 @@ Next: when #5816 merges, merge dev into -pt7, gate, open PT-7 (PT-z); PT-8 after
 | PT-2 | PT-a | 3 | Adjust panel ToneRows | Sources/PhotoApp/AdjustmentsInspector.swift | PhotoToneSnapshots.panel | #5007 | merged |
 | PT-3 | PT-m | 4 | live route and export | PhotoAdjust+Imaging.swift, PhotoRender.swift | PhotoToneTests | #5105 | merged |
 | PT-4 | PT-m | 4 | adapter bodies, catalog, jobs | PhotoTone+Kernel.swift, PhotoCommandCatalog.swift, RealJobs | PhotoToneCommandTests | #5112 → #5363 | merged (re-land, 20:14Z) |
-| PT-5 | PT-u | 4 | snapshots, budget | Tests/AppSnapshotTests/PhotoToneSnapshots.swift, RenderBudgetPhotoToneTests.swift | snapshots | #5817 | in lane |
+| PT-5 | PT-u | 4 | snapshots, budget | Tests/AppSnapshotTests/PhotoToneSnapshots.swift, RenderBudgetPhotoToneTests.swift | snapshots | #5817 | merged |
 | PT-6 | PT-u | 4 | journey skipped | UITests/PhotoJourneyTests+Tone.swift | compiles | #5008 | merged |
-| PT-7 | PT-z | 5 | journey on live | UITests/PhotoJourneyTests+Tone.swift | journey | – | waiting |
+| PT-7 | PT-z | 5 | journey on live, RJ-P12–14 live | UITests/PhotoJourneyTests+Tone.swift, RealJobs | PhotoToneJobsTests | #5860 | in lane |
 | PT-8 | PT-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, tone-controls.wave.json | scripts/ci | – | waiting |
 
 ## Waves (combined plan, all three features)
@@ -61,6 +61,9 @@ Next: when #5816 merges, merge dev into -pt7, gate, open PT-7 (PT-z); PT-8 after
 - PT-3 and PT-4 branch from dev, not stacked on #5008: they are Model-only, share no files with PT-2/PT-6, and stacking would push their diffs over 400 lines while #5007/#5008 wait in the lane.
 - PT-5 waits on TC-3 (#5006): snapshots and a render budget of the TC-2 placeholder rows would only be redone when TC-3 lands.
 - Run act-1a16f6941b7-zb0r (2026-10-24T19:30Z) takes over; same base-dev and status-branch choices. The brief named lead/tone-controls; it belongs to the live SuiteUI lead (#3476, last commit 19:33Z), so it is not force-pushed and status stays on lead/photo-tone-controls.
+
+- Run act-1a17be7af84-ih2a (2026-10-27T05:45Z) takes over with only PT-z left. Brief step one checked main at fef52e66. PRs stay based on dev: the fast lane merges only into dev and retargets PRs aimed at main.
+- Status moves back to `lead/tone-controls`, as the brief asks: the branch is rebuilt as origin/main plus this record (force-with-lease). It held the finished SuiteUI tone lead's record (#3476, "Done: all slices"), which stays intact on `lead/suiteui-tone-controls` (same commit, 10818a7d). `lead/photo-tone-controls` gets the same record.
 
 ## Open
 - [x] Wire: tone-controls:TC-2 (#4862 merged, dev 491ec5461): PT-2 #5007 builds on ToneRows(settings:help:hidden:onIntent:).
