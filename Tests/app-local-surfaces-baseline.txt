@@ -1,0 +1,10 @@
+# Tests/app-local-surfaces-baseline.txt: heavy AppKit surfaces and tab controls inside an
+# app (Sources/*App), grandfathered (docs/engineering/swiftui-rules.md rules 5 and 12).
+# Written by scripts/check-app-local-surfaces --update-baseline, never by hand. It only
+# shrinks: move the surface into SuiteUI and drop its line in the same PR.
+# Line: `path: token`.
+Sources/DesignApp/DesignClosePrompt.swift: NSViewRepresentable
+Sources/DesignApp/DesignSampleLoupe.swift: .pickerStyle(.segmented)
+Sources/FlareApp/FlareFilePanels.swift: NSViewRepresentable
+Sources/HaloApp/HaloWindowSizer.swift: NSViewRepresentable
+Sources/PhotoApp/PhotoWindow+File.swift: NSViewRepresentable

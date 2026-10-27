@@ -949,13 +949,25 @@ red_jobs() {
 # a known issue doesn't count), one <File>.swift/<name> per line, sorted. The
 # file and name stay put when lines move; suite lines interleave under
 # parallel tests, so they aren't used. Nothing for the local gate (its log
-# isn't readable here). Fails when the GitHub log can't be read.
+# isn't readable here). A sharded macOS gate job (`macOS`, #5775) only sums
+# its shards, so when its log names no test the run's failed `macOS tests`
+# jobs are read instead (each job's log, readable while the run goes on).
+# Fails when the GitHub log, or any shard's, can't be read.
 mac_tests() {
-  local log
+  local log ids jobs j re='s/.* Test (.+) recorded an issue.* at ([^ :]+\.swift):[0-9].*/\2\/\1/p'
   [[ "$1" != *"|$LOCAL_MAC_CONTEXT" ]] || return 0
   log=$(failure_log "$1")
   [[ -n "$log" ]] || return 1
-  LC_ALL=C sed -nE 's/.* Test (.+) recorded an issue.* at ([^ :]+\.swift):[0-9].*/\2\/\1/p' <<<"$log" | LC_ALL=C sort -u
+  ids=$(LC_ALL=C sed -nE "$re" <<<"$log")
+  if [[ -z "$ids" && "${1##*|}" =~ $MAC_GATE_RE && "$1" =~ /actions/runs/([0-9]+)/job/ ]]; then
+    jobs=$(gh api "repos/$REPO/actions/runs/${BASH_REMATCH[1]}/jobs?per_page=100" \
+      --jq '.jobs[] | select((.name | startswith("macOS tests")) and .conclusion != "success" and .conclusion != "skipped") | .id' 2>/dev/null) || return 1
+    for j in $jobs; do
+      log=$(failure_log "red|/job/$j"); [[ -n "$log" ]] || return 1
+      ids+=$'\n'$(LC_ALL=C sed -nE "$re" <<<"$log")
+    done
+  fi
+  grep . <<<"$ids" | LC_ALL=C sort -u || true
 }
 
 # mac_vs_base <red macOS verdict>: that red judged against BASE_MAC_FAILS:

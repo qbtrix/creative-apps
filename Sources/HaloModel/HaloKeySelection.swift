@@ -45,12 +45,12 @@ public struct HaloKeySegment: Identifiable, Sendable, Hashable {
 public enum HaloEasingHandle: Sendable { case first, second }
 
 extension HaloProject {
-    /// The selected layer's segments, in `HaloProperty.allCases` order, then
+    /// The selected layer's segments, in `HaloProperty.keyable` order, then
     /// by frame; empty with no selected layer.
     public var keySegments: [HaloKeySegment] {
         guard let layer = selectedLayer else { return [] }
         var segments: [HaloKeySegment] = []
-        for property in HaloProperty.allCases {
+        for property in HaloProperty.keyable {
             guard let track = layer.tracks[property.rawValue], track.count >= 2 else { continue }
             let sorted = track.sorted { $0.frame < $1.frame }
             for (key, next) in zip(sorted, sorted.dropFirst()) {

@@ -226,25 +226,33 @@ private final class LiveSink: @unchecked Sendable {
     /// Blur reads neighbours: with a tone section set, a region still takes the dispatcher route.
     @Test func blurStillFallsBack() async throws {
         var workspace = try Self.picture()
-        workspace.adjust(.tone(warm.setting(.sharpenAmount, to: 80)))
-        workspace.adjust(.blurSigma(1))
+        // Sharpen reads further than Blur here, and an edge sits 3 px above the seam at y 256 between
+        // the two rows of tiles (each row is one region), so a region that reads only Blur's margin
+        // shows the seam.
+        Self.fill(&workspace, (40, 40, 40), Mask.Point(x: 0, y: 230), Mask.Point(x: 600, y: 253))
+        workspace.adjust(.tone(warm.setting(.sharpenAmount, to: 80).setting(.sharpenRadius, to: 3)))
+        workspace.adjust(.blurSigma(0.3))
         #expect(workspace.liveStack() == nil)
         let canvas = try #require(workspace.canvas)
         let (route, _, sink) = Self.route(canvas)
         _ = try await PhotoRenderer.update(workspace, since: nil, route: route, target: sink.target)
         #expect(sink.toned == 0 && sink.plain > 0)
+        let export = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
+        #expect((zip(sink.bytes, export).map { abs(Int($0) - Int($1)) }.max() ?? 0) <= 2, "the dispatcher route sharpens as export does")
     }
 
-    /// RJ-P12: Temperature -30 on a grey card under tungsten reads neutral, |R - B| <= 3/255.
-    @Test(.disabled("waits on TC-5 #4880")) func temperatureCoolsTungstenToNeutral() async throws {
-        var workspace = try Self.picture(red: 160, green: 128, blue: 96)
+    /// RJ-P12: Temperature -30 on a grey card under a mild tungsten cast reads neutral, |R - B| <= 3/255. The
+    /// cast is the one -30 removes: white balance moves red and blue 0.15 stop each way in linear light, so
+    /// the card is about 0.3 stop warm (sRGB 124/118/112, linear R/B 1.23).
+    @Test func temperatureCoolsTungstenToNeutral() async throws {
+        var workspace = try Self.picture(red: 124, green: 118, blue: 112)
         workspace.adjust(.tone(.neutral.setting(.temperature, to: -30)))
         let pixel = (100 * 600 + 50) * 4, bytes = try await PhotoRenderer.render(workspace).rgba8
         #expect(abs(Int(bytes[pixel]) - Int(bytes[pixel + 2])) <= 3)
     }
 
     /// `.sharpenOnCanvas`: with Sharpen on, the live canvas is export's picture within 2 display levels.
-    @Test(.disabled("waits on TC-5 #4880")) func liveMatchesExportWithSharpenOn() async throws {
+    @Test func liveMatchesExportWithSharpenOn() async throws {
         var workspace = try Self.picture()
         workspace.adjust(.tone(warm.setting(.sharpenAmount, to: 80).setting(.sharpenRadius, to: 0.8)))
         #expect(workspace.adjustments.unsharp != nil)
@@ -254,5 +262,38 @@ private final class LiveSink: @unchecked Sendable {
         #expect(sink.toned > 0)
         let export = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
         #expect((zip(sink.bytes, export).map { abs(Int($0) - Int($1)) }.max() ?? 0) <= 2)
+    }
+
+    /// Export sharpens after every layer: an adjustment layer on top runs before the unsharp pass on the live
+    /// route too, not folded into the write after it.
+    @Test func liveMatchesExportWithSharpenUnderALayer() async throws {
+        var workspace = try Self.picture()
+        workspace.adjust(.tone(warm.setting(.sharpenAmount, to: 80).setting(.sharpenRadius, to: 0.8)))
+        workspace.addAdjustmentLayer(.levels)
+        try workspace.setTone(.neutral.setting(.contrast, to: 40), name: "Contrast", drag: nil)
+        #expect(workspace.liveStack()?.steps.count == 1)
+        let canvas = try #require(workspace.canvas)
+        let (route, _, sink) = Self.route(canvas)
+        _ = try await PhotoRenderer.update(workspace, since: nil, route: route, target: sink.target)
+        #expect(sink.toned > 0 && sink.plain == 0)
+        let export = PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8)
+        #expect((zip(sink.bytes, export).map { abs(Int($0) - Int($1)) }.max() ?? 0) <= 2)
+    }
+
+    /// With Sharpen on, a tone step still draws over the kept, sharpened composite: no composite again.
+    @Test func sharpenStepKeepsTheComposite() async throws {
+        var workspace = try Self.picture()
+        let sharp = warm.setting(.sharpenAmount, to: 80)
+        workspace.adjust(.tone(sharp))
+        let canvas = try #require(workspace.canvas)
+        let (route, _, sink) = Self.route(canvas)
+        let first = try await PhotoRenderer.update(workspace, since: nil, route: route, target: sink.target)
+        let made = route.composites.made
+        workspace.adjust(.tone(sharp.setting(.temperature, to: 40)))
+        _ = try await PhotoRenderer.update(workspace, since: first.revision, route: route, target: sink.target)
+        #expect(route.composites.made == made, "a tone step composited the layers again")
+        workspace.adjust(.tone(sharp.setting(.sharpenAmount, to: 40)))
+        _ = try await PhotoRenderer.update(workspace, since: first.revision, route: route, target: sink.target)
+        #expect(route.composites.made > made, "a new Sharpen amount kept the old sharpening")
     }
 }

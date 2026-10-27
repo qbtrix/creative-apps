@@ -81,12 +81,12 @@ supervisor's Mac before `Belt-Slice-Done:` (suiteui waves, Q10).
 
 | job | closes or adds | run | check | fixture |
 |---|---|---|---|---|
-| RJ-X47 | adds, closes with `suiteui/shared-thumbnails` | C | `Tests/RealJobs/library/relaunch-grid/relaunch-grid.jobs.json`: `file.load-samples`, `view.grid`, `thumbnails.stats`; a second run on the same `-SuiteSupportDir`: `view.grid`, `thumbnails.stats`; `photo.reset-develop` on one, `thumbnails.stats` | the samples |
+| RJ-X47 | adds, closes with `suiteui/shared-thumbnails` | C | `Tests/RealJobs/library/relaunch-grid/relaunch-grid.jobs.json`: `view.grid`, `thumbnails.stats`; a relaunch on the same `-SuiteSupportDir`: `view.grid`, `thumbnails.stats`; `edit.select` on beach, `photo.reset-develop`, `view.grid`, `thumbnails.stats`; pending #5791 (LibraryHeadless's disk thumbnails, a headless grid draw, the runner's relaunch block) | `input/*.library`, a four-photo shoot |
 
 Trap: the relaunch decodes every photo again (no disk tier), or a changed
 develop setting shows the old picture from disk. Assertion: the second run's
-stats read `decoded: 0, fromDisk: <visible count>`; after the reset,
-`decoded: 1`. Mutations: `LibraryModel.LiveThumbnailStoreAdapter.json`
+stats read `decoded: 4, fromDisk: 0`, the relaunch's `decoded: 0, fromDisk: 4`;
+after the reset, `decoded: 1, fromDisk: 4`. Mutations: `LibraryModel.LiveThumbnailStoreAdapter.json`
 (develop token left out of the content key → `.staleAfterDevelop`; store
 read skipped → `.relaunchDecodesNothing`). `thumbnails.stats` is a query ST-6
 adds to Library's catalog (Library's id list gains it). Its check is written by ST-1 and stays disabled
@@ -184,5 +184,6 @@ Longest chain: ST-1 → ST-2 → ST-5 → ST-7 → ST-8 (5). Chain of 5: the tes
 
 Per slice: ST-m green on the Linux job (`Mutate:` clean; the writer's plan on
 the supervisor's Mac); ST-u through the feel gate with its `Mac-Finish:`
-line; ST-z with the home journey green on live and RJ-X47 green on Linux.
+line; ST-z with the home journey green on live; RJ-X47 green on Linux once #5791
+lands (ST-z closes with that gap).
 Then `Belt-Contact-Sheet:` with `home-recents-previews-*`.

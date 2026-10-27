@@ -15,6 +15,10 @@
 // `route` (CoreRender's dispatcher, CPU or Metal); `follow` keeps it on the
 // app's View > Rendering choice, and a switch redraws the whole picture on the
 // new backend at once (a waiting request redraws all of it too). `backend` names the backend that drew the picture shown.
+// A live stroke's render (`quietly`) is a drag frame: Free Transform's draft
+// draws through its matrix, and the plain `show` that follows (the window
+// taking the copy back) redraws the whole picture exactly, even at the same
+// revision.
 // On the GPU route the renderer keeps the layer tiles resident on the backend
 // (ResidentSurfaces) and, while the view draws through its Metal presenter,
 // renders straight into the presenter's texture: no bytes come back, and an
@@ -45,6 +49,8 @@ final class CanvasRenderer {
     private static let timing = Duration.milliseconds(250)
     /// The latest ask was a live stroke's (`quietly`): its render time waits.
     @ObservationIgnored private var quiet = false
+    /// The picture shown is a drag frame of Free Transform's draft: the next plain `show` redraws it exactly.
+    @ObservationIgnored private var showsLiveDraft = false
     private var isRendering = false
     private var waiting: PhotoWorkspace?
     /// Called with each picture's revision as its tiles reach the view (the brush ink test times this).
@@ -112,8 +118,10 @@ final class CanvasRenderer {
         }
         let sameSize = canvas.width == tiles.width && canvas.height == tiles.height
         // A drag's revision is shown by the pacer's apply, then asked for again by
-        // the window's revision change: the second ask has nothing to draw.
-        if sameSize, workspace.revision == revision, failure == nil, !redrawAll { return }
+        // the window's revision change: the second ask has nothing to draw, unless
+        // the picture is a drag frame and this ask is the exact one.
+        let exact = showsLiveDraft && !quietly
+        if sameSize, workspace.revision == revision, failure == nil, !redrawAll, !exact { return }
         guard !isRendering else {
             waiting = workspace
             return
@@ -122,7 +130,7 @@ final class CanvasRenderer {
         #if DEBUG
         Self.inFlight += 1
         #endif
-        var since = sameSize && !redrawAll ? revision : nil
+        var since = sameSize && !redrawAll && !exact ? revision : nil
         let route = self.route
         redrawAll = false
         // The resident GPU path draws into the Metal presenter's texture; a new texture starts empty.
@@ -133,10 +141,11 @@ final class CanvasRenderer {
             target = resident.target
             if resident.isNew { since = nil }
         }
-        Task { [since, target] in
+        Task { [since, target, quietly] in
             do {
-                let update = try await PhotoRenderer.update(workspace, since: since, route: route, target: target)
+                let update = try await PhotoRenderer.update(workspace, since: since, route: route, target: target, live: quietly)
                 tiles.apply(update, prepared: await Self.prepared(update))
+                showsLiveDraft = update.liveDraft
                 if backend != update.backend { backend = update.backend }
                 #if DEBUG
                 Self.pictures += 1

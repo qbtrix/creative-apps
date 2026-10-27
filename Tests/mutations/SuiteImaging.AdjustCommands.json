@@ -1,0 +1,44 @@
+[
+  {
+    "label": ".lookIsOneStep: look.apply bypasses applyLook, so no undo step is recorded",
+    "file": "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+    "find": "try t.applyLook(look, name: \"Apply Look\")",
+    "replace": "_ = look",
+    "tests": "AdjustCommandsTests"
+  },
+  {
+    "label": ".lookKeepsTone: look.save drops the picture's tone",
+    "file": "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+    "find": "tone: now.tone, adjust: now.adjust",
+    "replace": "tone: .neutral, adjust: now.adjust",
+    "tests": "AdjustCommandsTests"
+  },
+  {
+    "label": ".nameTakenIgnoresCase: a name that differs only in case is saved",
+    "file": "Sources/SuiteImaging/Adjust/LookPresets.swift",
+    "find": "all(in: store).contains { $0.name.lowercased() == name.lowercased() }",
+    "replace": "all(in: store).contains { $0.name == name }",
+    "tests": "AdjustCommandsTests"
+  },
+  {
+    "label": ".builtInsStay: look.delete lets a built-in id through to the store",
+    "file": "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+    "find": "if BuiltInLooks.look(p.id) != nil { throw",
+    "replace": "if false && BuiltInLooks.look(p.id) != nil { throw",
+    "tests": "AdjustCommandsTests"
+  },
+  {
+    "label": ".noWeightsRemoves: adjust.black-and-white with no weights keeps the old kind",
+    "file": "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+    "find": "if let at { kinds.remove(at: at) }",
+    "replace": "if let at, p.weights != nil { kinds.remove(at: at) }",
+    "tests": "AdjustCommandsTests"
+  },
+  {
+    "label": ".invertToggles: adjust.invert always appends",
+    "file": "Sources/SuiteImaging/Adjust/AdjustCommands.swift",
+    "find": "t.kinds.contains(.invert) ? t.kinds.filter",
+    "replace": "false ? t.kinds.filter",
+    "tests": "AdjustCommandsTests"
+  }
+]
