@@ -64,7 +64,6 @@ Sources/HaloModel/Fakes/FakeKeyEasing.swift
 Sources/HaloModel/Fakes/FakePlaybackClock.swift
 Sources/HaloModel/Fakes/FakeProjectHistory.swift
 Sources/HaloModel/Fakes/FakeTextRasterizer.swift
-Sources/HaloModel/HaloFramePNG.swift
 Sources/HaloModel/HaloHistory.swift
 Sources/HaloModel/HaloKeySelection.swift
 Sources/HaloModel/HaloPlayback.swift

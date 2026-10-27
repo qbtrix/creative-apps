@@ -73,17 +73,15 @@ import Testing
         let frame = try doc.renderFrame(.object([:])).pixels, png = try HaloJob.decodePNG(file.data)
         #expect([png.width, png.height] == [frame.width, frame.height] as [Int])
         #expect(png.rgba == (try frame.rgba8()))
+        #expect(file.data == (try PNG.write(frame, bitsPerChannel: 8)), "core's PNG bytes, not a local writer's")
         let bytes = [UInt8](file.data)
         var at = 8, types: [String] = []
         while at + 12 <= bytes.count {
             let length = bytes[at..<(at + 4)].reduce(0) { $0 << 8 | Int($1) }
-            let tagged = [UInt8](bytes[(at + 4)..<(at + 8 + length)]), stored = bytes[(at + 8 + length)..<(at + 12 + length)]
-            #expect(HaloFramePNG.word(Int(HaloFramePNG.checksum(tagged))) == Array(stored), "a bad CRC")
-            types.append(String(decoding: tagged.prefix(4), as: UTF8.self))
+            types.append(String(decoding: bytes[(at + 4)..<(at + 8)], as: UTF8.self))
             at += 12 + length
         }
-        #expect(types == ["IHDR", "IDAT", "IEND"])
-        #expect(HaloFramePNG.checksum(Array("IEND".utf8)) == 0xAE42_6082)
+        #expect(types.first == "IHDR" && types.last == "IEND" && types.contains("IDAT"))
     }
 
     @Test(arguments: ["retitle-and-save", "render-frame"])
