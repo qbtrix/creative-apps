@@ -84,6 +84,12 @@ extension PhotoWorkspace {
         return base
     }
 
+    /// Whether the lifted layer is all the canvas shows: no other visible layer, so the picture under it is empty.
+    public var liftsAlone: Bool {
+        guard let (at, _) = liftPart else { return false }
+        return layers.indices.allSatisfy { $0 == at || !layers[$0].isVisible }
+    }
+
     /// The lifted pixels: the layer in the draft's box as premultiplied sRGB bytes, and the layer's opacity;
     /// nil when nothing lifts. Reads the layer's pixels once: a drag reuses them while `liftSprite` holds.
     public func liftedPixels() throws -> (width: Int, height: Int, rgba8: [UInt8], opacity: Double)? {
