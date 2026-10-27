@@ -11,7 +11,9 @@
 // a render that needs it throws `.renderFailed` with that reason. After
 // the tone, a crop (crop CR-4) turns the buffer by its angle and cuts
 // `LiveCrop`'s frame for the buffer's own size out of the turned pixels.
-// The photo's orientation (orientation-crop OC-8) faces the pixels first, so
+// Between them the kinds (adjust-everywhere AJ-11): Black & White, then
+// Invert, SuiteImaging's CPU steps, so the grid, loupe and export all show them.
+// The photo's orientation (orientation-crop OC-8) then faces the pixels, so
 // the crop's rect is in the oriented photo.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -73,6 +75,7 @@ public struct LiveDevelop: DevelopRendering {
                 throw LibraryError.renderFailed("\(error)")
             }
         }
+        b = try Self.kinds(settings.kinds, on: b)
         b = b.oriented(settings.orientation)
         guard let crop = settings.crop else { return b }
         do {
@@ -80,6 +83,19 @@ public struct LiveDevelop: DevelopRendering {
             let f = try LiveCrop().frame(crop, photo: PixelSize(width: b.width, height: b.height))
             return try turned.cropped(x: f.x, y: f.y, width: f.width, height: f.height)
         } catch let error as RasterError {
+            throw LibraryError.renderFailed("\(error)")
+        }
+    }
+
+    /// `kinds` on `b` through CoreRender's CPU backend; none returns `b` untouched.
+    static func kinds(_ kinds: [ImagingKind], on b: PixelBuffer) throws -> PixelBuffer {
+        guard !kinds.isEmpty else { return b }
+        do {
+            let cpu = CPUBackend()
+            var s = try cpu.surface(b)
+            for step in AdjustKinds.adjustments(kinds) { s = try cpu.adjusted(s, step) }
+            return try cpu.read(s)
+        } catch {
             throw LibraryError.renderFailed("\(error)")
         }
     }

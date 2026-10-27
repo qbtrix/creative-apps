@@ -129,8 +129,9 @@ final class DesignPageJourneyTests: XCTestCase {
         return words == number || words.hasPrefix(number + " ")
     }
 
-    /// What an element reads: its value where macOS puts a field's number or a Text's words, else its label.
+    /// What an element reads: a field's number (macOS gives a slider's value as a number), a Text's words, else its label.
     @MainActor private func text(_ element: XCUIElement) -> String {
+        if let number = element.value as? NSNumber { return number.stringValue }
         let value = element.value as? String ?? ""
         return value.isEmpty ? element.label : value
     }
