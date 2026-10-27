@@ -156,3 +156,4 @@ utc	stage	event	ref	note
 2026-10-27T07:35Z	check-in	check-in: #5248 (AJ-library) batch failed LiveStandInTests (sidecars stand-in line moved); fixed by ordering looks before sidecars, ci --changed PASS, pushed 7900f7c69, Head moved; lane re-batching; dev-red #5818 open, main fef52e66
 07:41Z	3	fix-eject	#5248	AJ-library needs-fix (Linux check 40464584742) already fixed by 7900f7c69 with Head moved; library-ui restacked locally on it
 2026-10-27T07:58Z	check-in	check-in: lane batching one PR at a time (#5096 in lane/batch-20261027074025); #5248 needs-fix cleared on 7900f7c69; none merged yet; dev-red #5818 open, #5862 open; main fef52e66
+08:01Z	3	waiting-lane	#5247 #5248 #5249	#5248 needs-fix cleared on 7900f7c69; all three clean; dev 1ab8f0913; main fef52e668
