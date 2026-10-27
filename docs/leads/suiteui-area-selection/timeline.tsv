@@ -210,3 +210,4 @@ time	task	event	note
 2026-10-27T05:09Z	3	heartbeat	lane	poll 2026-10-27T05:09Z: 05:1xZ: no change. The lane holds while dev-red #5818 is open (revert #5827 not landed). Five lead PRs are ready. #5093 still waits on the supervisor.
 2026-10-27T05:57Z	3	heartbeat	lane	poll 2026-10-27T05:57Z: 05:5xZ: #5137 (FH-c, fix for #5094) merged into dev as 73be788d in a batch of one. dev-red #5818 is still open. #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor. FH-c is done only once #5093 lands and a main ci.yml run contains both.
 2026-10-27T06:30Z	3	heartbeat	lane	poll 2026-10-27T06:30Z: 06:3xZ: no change. dev-red #5818 is open (revert #5827). #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor.
+2026-10-27T07:17Z	3	heartbeat	lane	poll 2026-10-27T07:17Z: 07:1xZ: no change. dev-red #5818 is open (revert #5827). #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor.
