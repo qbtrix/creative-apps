@@ -1,20 +1,20 @@
 # layer-styles (Halo) lead record
 
 Issue: #3936 · Packet: docs/blueprints/halo/features/layer-styles.md
-Run: act-1a178432d32-jxt0 · Session: claude/layer-styles-lead-nm0aoi · Started: 2026-10-24 (resumed 2026-10-26T12:45Z; earlier runs act-1a175e3e638-skn9, act-1a171ab9e77-es26, act-1a16c627cc6-nlss, act-1a1648ae75a-4dqz)
+Run: act-1a17bed1e9b-xhpo · Started: 2026-10-27T05:55Z (relaunch; earlier runs act-1a178432d32-jxt0, act-1a175e3e638-skn9, act-1a171ab9e77-es26, act-1a16c627cc6-nlss, act-1a1648ae75a-4dqz)
 Wire: suiteui layer-styles:LS-a
 Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTests.glowReachesItsKeyedSize and glowIsNotClipped; add the no-padding mutation, origin dropped in LiveFrameRendering's styled composite)
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
-Stage: 3 polling (12:55Z): #5156 (HY-1) merged; #5158 (HY-m, b84d8cb4) and #5174 (LS-2, cb6c0a2f) clean and queued; drafts #5157, #5161, #5218 wait on LS-2. dev-red #5321 open (macOS, Onboarding timeouts, not ours) holds code batches
-Base: 57dd31ff (origin/dev; main d3323f6a7 verified at relaunch)
-Next: wait for the lane to land #5158 (HY-m) and #5174 (LS-2); on #5174 merge: merge dev into #5157, #5161, #5218 in order, gate, push, Head, ready
+Stage: 2 building (06:00Z): #5158 (HY-m) and #5174 (LS-2) merged on dev; HY-2, HY-u and HY-7 rebuilt on dev ad29aeaf by cherry-picking their own commits (the old stacks carried LS-1, LS-2 and HY-1, all landed); gates running
+Base: ad29aeaf (origin/dev; main fef52e66 verified at relaunch)
+Next: HY-2 gate PASS → force-with-lease lead/halo-layer-styles-HY-a, #5157 marker, ready; then HY-u (#5161) on it, then refresh draft #5218 (HY-7 waits on LS-9)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | HY-a | `HaloLayer.style`, five style properties, `style.*` in the catalog on stubs, Layer > Layer Style… opens the panel | HY-1, HY-2 | MJ-HY | suiteui LS-a (#4911), LS-2 | yes | 0 | draft PRs #5156, #5157 | – | – |
 | HY-u | inspector style rows with stopwatches, snapshots, render budget, journey written | HY-3, HY-4 | HJ-Y1 | HY-a, HY-m | yes | 0 | draft PR #5161 | – | – |
-| HY-m | style commands one undo step, five properties key and ease, frame renderer draws keyed styles | HY-5, HY-6 | MJ-HY | HY-1; LS-m | no | 0 | draft PR #5158 | – | – |
+| HY-m | style commands one undo step, five properties key and ease, frame renderer draws keyed styles | HY-5, HY-6 | MJ-HY | HY-1; LS-m | no | 0 | merged #5158 (e83dec8c) | – | – |
 | HY-z | viewer draws through the live route, journey on live, halo.md built | HY-7, HY-8 | HJ-Y1 | HY-u, HY-m; LS-gpu (HY-7); file-flow:HF-z (HY-8) | yes | 0 | waiting | – | – |
 
 ## Tasks
@@ -34,6 +34,7 @@ Next: wait for the lane to land #5158 (HY-m) and #5174 (LS-2); on #5174 merge: m
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-27T06:00Z (relaunch act-1a17bed1e9b-xhpo): brief rules 2-3 done (lead/file-flow, lead/layer-styles rebased onto main fef52e66, force-with-lease; docs only). This record stays here, mirrored to docs/leads/halo-layer-styles/ on lead/layer-styles; docs/leads/layer-styles/ there is SuiteUI #3937's. HY-a, HY-u and HY-z branches rebuilt on dev by cherry-picking their own commits and pushed with --force-with-lease (my own branches; merging 287 dev commits conflicted only on already-landed LS/HY-1 files). PRs stay on dev.
 - 2026-10-26T02:00Z (relaunch act-1a175e3e638-skn9): Belt-Lead lines on #5157 #5158 #5161 #5218 moved to the new run id; attribution footers dropped from those bodies. Status channel and PR base unchanged (lead/halo-layer-styles, dev). Amendment 2 committed on HY-u: the journey expects 3 keyframes.
 - 2026-10-25T21:30Z Packet-Review 1 (#3936, 21:15Z), each amendment:
   1. `Param.property` lists `HaloProperty.keyable` (`allCases + styles`), so `inspector.set-property` / `inspector.toggle-animation` take a style property; on HY-m (#5158), since HY-1 is merged. RJ-H43's job uses `timeline.scrub` + `inspector.*`, not `key.set`, when it is written (HY-z).
