@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T08:06Z · 08:05Z check-in: #4896 (FH-u) merged to dev; FH-u done awaits a main ci run containing it. #5096 #5125 #5149 ready in lane; dev-red #5818 open (revert #5827 not landed). #5093 still awaiting supervisor answer.
+Polled: 2026-10-27T08:10Z · Polled: 2026-10-27T08:10Z. CB-flare #4902 merged 08:05Z. #4904 CB-design, #4905 CB-halo, #5149/#5125 CB-photo still waiting on the lane; dev-red #5818 open. CB-15 waits on design, halo, photo.
 
 
 
