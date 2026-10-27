@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-27T15:52Z
+Polled: 2026-10-27T15:44Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -376,3 +376,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T15:24Z #5248 (AJ-10) landed on dev 77666ac3 at 14:58Z; restacking #5252 (AJ-11) onto dev as one commit (9 files, +296/-7; looks before sidecars in LibraryLaunch.services to match live and keep the baselined line), gate running
 - 2026-10-27T15:52Z #5252 (AJ-11) restacked onto dev and gated: CI: PASS, pushed 362dfef1, Head moved; clean, 9 files +296/-7. Dropped the attribution footer from #5252, #5247, #5249 bodies
 - 15:36Z #5248 (AJ-10 library) MERGED as 77666ac30. Dependent #5252 (AJ-11 library UI) already restacked onto dev at 362dfef17 (clean, 296+7 / 9 files, Fast-Check/Head current). #5247/#5249 still wait for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
+- 2026-10-27T15:44Z check-in: no lane merge; dev c628cfe8, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on prescreen and the lane (the 15:52Z entry above was mis-stamped; it was written at about 15:40Z)
