@@ -272,3 +272,4 @@ utc	stage	event	ref	note
 2026-10-27T10:20Z	3	check-in	no halo coverage	4 runs cancelled; 40481638245 40487373655 waiting
 2026-10-27T11:56Z	3	check-in	no halo coverage	3 runs cancelled; 40498124928 40492127981 waiting
 2026-10-27T13:39Z	3	check-in	finding	H-J12 fails at 4a7d926f run 40498124928, filed #5891
+2026-10-27T15:21Z	3	check-in	ok	PlayHittable passed in 40498124928; testTextLayer shares #5891 cause; full 40525484170 pending
