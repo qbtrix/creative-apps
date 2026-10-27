@@ -3,7 +3,7 @@
 // SuiteDocumentHost: it names itself "flare", opens a dropped .flare, hands
 // a .halo to Halo, refuses an SVG (the host with "Flare can't import SVG
 // yet.") until SVG import (E11), accepts open and new hand-offs, reads its
-// recents from the suite's list, imports its old list once, registers the
+// recents from the suite's list and keeps no list of its own (#5126), registers the
 // shared file-flow ids, and runs RJ-F42 (Tests/RealJobs/flare/open-recent)
 // on the catalog. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
@@ -151,20 +151,15 @@ private func clearThroughFileFlow<T: FileFlowTarget>(_ target: inout T) throws {
         #expect(workspace.takeFileRequests() == [.clearRecent])
     }
 
-    @Test func theOldListIsImportedOnceIntoATempStore() async throws {
-        let recents = StoreRecents(store: FileStore(folder: try tempFolder().path))
-        var workspace = FlareWorkspace(services: .fake())
-        for path in ["/w/a.flare", "/w/notes.txt", "/w/b.flare"] { workspace.noteRecent(path) }
-        for round in 0..<2 {
-            let refs = workspace.takeOldRecents()
-            if round == 1 { #expect(refs.isEmpty, "the old list was imported twice") }
-            for (i, ref) in refs.enumerated() {
-                try await recents.note(ref, event: .opened, at: Date(timeIntervalSince1970: Double(i)), thumbnail: nil)
-            }
-        }
-        let items = try await recents.list().items
-        #expect(items.map(\.ref.path) == ["/w/b.flare", "/w/a.flare"])
-        #expect(items.allSatisfy { $0.ref.app == .flare && $0.ref.type == .flareAnimation })
+    @Test func openRecentIsTheSuitesListAndFlareKeepsNone() throws {
+        var workspace = try openedFile("/w/Bounce.flare")
+        workspace.noteRecent("/w/Title.flare")
+        #expect(workspace.filePath == "/w/Title.flare", "noting a file didn't make it the open file")
+        #expect(workspace.recentFiles.isEmpty, "Open Recent lists files the suite's list doesn't hold")
+        #expect(FlareWorkspace.catalog.availability("file.clear-recent", on: workspace).why == "No Recent Files")
+        workspace.updateFileFlow(recents: [entry("/w/Intro.flare")])
+        #expect(workspace.recentFiles.map(\.path) == ["/w/Intro.flare"])
+        #expect(FlareWorkspace.catalog.availability("file.clear-recent", on: workspace).why == nil, "Clear Menu didn't read the suite's list")
     }
 
     @Test func theSharedIDsAreInTheCatalog() {
