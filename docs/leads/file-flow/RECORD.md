@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 03:57Z poll: #4936 Linux check 40412395828 green, waits on local-ci/prescreen; #5123/#5801 stacked, unchanged; dev-red #5818 open (not ours); HF-m waits on #5801.
 - 03:33Z HF-z done: halo-scoped run 40439890285 green on b971f99b (contains 2cf71ce9/#5092); posted Belt-Slice-Done: HF-z on #3474 (comment 6433079815; server re-appends its footer on edit). Remaining: HF-m (#5801 behind #4936 → #5123), then Belt-Contact-Sheet
 - 03:20Z poll: full CI 40439893721 red on shard 3 (AfterGlowHomeLayoutTests.homeAtEachWidth, suite home, not ours); halo-scoped 40439890285 tests running: HF-z line if green; #4936/#5123/#5801 queued, no labels
 - 03:03Z poll: halo-scoped 40439890285 (b971f99b) compile+bundles green, tests queued; full CI 40439893721 on 9c320a9a running; either green gives HF-z its line; #4936/#5123/#5801 queued, no labels
