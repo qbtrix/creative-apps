@@ -100,3 +100,4 @@ Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #
 - 2026-10-27T00:58Z (act-1a177ff0916-4jm7): poll: dev f3ed4b32; lane merged 12 docs/test PRs, none ours; #4939 BK-u still queued at 2ea13868; #4965/#4961/#4982 keep needs-split until it lands
 - 2026-10-27T01:17Z (act-1a177ff0916-4jm7): poll: dev f3ed4b32; dev unchanged; #4939 BK-u still queued at 2ea13868, no return label
 - 2026-10-27T01:40Z (act-1a177ff0916-4jm7): poll: dev 2cf71ce9; dev-red #5818 open (linux red, range main..2c20134c), lane holds PRs on the failing module; not ours to fix; #4939 BK-u still queued at 2ea13868, no return label
+- 2026-10-27T02:02Z (act-1a177ff0916-4jm7): poll: dev 9108a0bc; dev-red #5818 still open; lane merged #4899 and #5826, none ours; #4939 BK-u still queued at 2ea13868, no return label
