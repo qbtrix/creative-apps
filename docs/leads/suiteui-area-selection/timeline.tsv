@@ -239,3 +239,4 @@ time	task	event	note
 2026-10-27T18:00Z	3	blocked	lane	waiting on local-ci/prescreen (supervisor)
 2026-10-27T18:19Z	3	heartbeat	lane	poll 2026-10-27T18:19Z: 18:20Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (triage now guesses #3651, flaky 0.68; not ours). #5093 awaiting supervisor.
 2026-10-27T18:23Z	3	blocked	lane	still waiting on local-ci/prescreen
+2026-10-27T18:45Z	3	fix	lane	needs-rebase: merge dev, gate running
