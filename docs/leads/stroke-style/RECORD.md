@@ -2,7 +2,7 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a17be7aff8-ivwy · Started: 2026-10-23 (this run resumed 2026-10-27T05:55Z; prior act-1a178669406-n4me)
-Stage: 3 quarantine renewed on dev (#5826); dev merged into #5011 (df0715e2) and #5825 (008df629); lane Linux checks pending; dev-red #5818 open (not ours)
+Stage: 3 waiting: #5011 (df0715e2) and #5825 (008df629) clean, lane Linux green; held by dev-red #5818 (macOS; scoped runs on dev red)
 Base: origin/dev; main verified at fef52e66
 Next: wait for the lane to merge #5011 and #5825, then a green design ci.yml run holding each: Belt-Slice-Done DK-u (gaps #4990 #4991), DK-z, then Belt-Contact-Sheet
 
