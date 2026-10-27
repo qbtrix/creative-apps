@@ -162,6 +162,17 @@ import Testing
         }
     }
 
+    @Test func showFolderTakesATrailingSlash() throws {
+        #expect(try Self.shown("/p/trips/", subfolders: false) == ["coast.png"])
+        #expect(try Self.shown("/p/trips//", subfolders: true) == ["coast.png", "kyoto.png", "lisbon.png", "porto.png"])
+        var c = Self.catalog(Self.trips)
+        try c.showFolder("/p/trips/2025/", subfolders: true)
+        #expect(c.activeFilter.folder?.path == "/p/trips/2025", "the rule keeps the tree's path, so the row selects")
+        #expect(throws: CatalogError.unavailable(id: "view.show-folder", why: "There is no folder /p/nowhere/.")) {
+            try c.showFolder("/p/nowhere/", subfolders: true)
+        }
+    }
+
     @Test func aSiblingWithASharedPrefixNeverLeaks() {
         let photos = ["/a/b/x.png", "/a/b/deep/z.png", "/a/bc/y.png"].map { Self.photo($0) }
         let names = { (scope: FolderScope) in photos.filter(LibraryFilter(folder: scope).matches).map(\.name) }
