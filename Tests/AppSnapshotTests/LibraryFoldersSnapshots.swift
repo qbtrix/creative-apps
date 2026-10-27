@@ -1,9 +1,9 @@
 // LibraryFoldersSnapshots.swift: the Library window's sidebar with the FOLDERS section (folders FO-3) under
-// Collections, Light and Dark, in library-sidebar-folders-{light,dark}.png. Until FO-4 builds the tree from
-// the photos, the section shows LibraryFoldersSection.sample (`stubTree`): trips (with 2025 and 2026 inside,
-// behind its disclosure), trip and family, each with its count. It also checks the section's rows: one per
-// root, `library.folder.<path-hash>` ids, and the context menu's Show Folder and Include Subfolders disabled
-// with the stub's reason. macOS only.
+// Collections, Light and Dark, in library-sidebar-folders-{light,dark}.png. The `folders` fixture's photos build
+// the tree: family (every file missing, so dimmed with the missing badge), trip, and trips (2025 and 2026 behind
+// its disclosure), each with its count. It also checks the section's rows: one per root,
+// `library.folder.<path-hash>` ids, the missing badge only on family, and the context menu's Show Folder and
+// Include Subfolders disabled with a reason while they can't run. macOS only.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -14,20 +14,21 @@ import Testing
 @MainActor
 @Suite struct LibraryFoldersSnapshots {
     @Test func sidebarWithFolders() throws {
-        let section = try #require(LibraryFoldersSection.section(LibraryFoldersSection.sample))
+        let tree = LibraryFolders.tree(LibraryFixtures.photos(named: "folders"))
+        let section = try #require(LibraryFoldersSection.section(tree))
         #expect(section.title == "Folders")
-        #expect(section.items.map(\.id) == LibraryFoldersSection.sample.map { LibraryFolders.rowID(for: $0.path) })
-        #expect(section.items.first?.children.map(\.title) == ["2025", "2026"])
+        #expect(section.items.map(\.id) == tree.map { LibraryFolders.rowID(for: $0.path) })
+        #expect(section.items.last?.children.map(\.title) == ["2025", "2026"])
+        #expect(section.items.map { $0.notice != nil } == [true, false, false], "only family is all missing")
+        #expect(section.items.first?.isDimmed == true)
         #expect(LibraryFoldersSection.section([])?.id == nil, "an empty tree drew an empty header")
-        let actions = LibraryFoldersSection.actions(help: "Folders arrive with FO-4.")
+        let actions = LibraryFoldersSection.actions(help: LibraryCatalog.noFolders)
         #expect(actions.map(\.title) == ["Show Folder", "Include Subfolders"])
-        #expect(actions.allSatisfy { !$0.isEnabled && $0.help == "Folders arrive with FO-4." })
+        #expect(actions.allSatisfy { !$0.isEnabled && $0.help == LibraryCatalog.noFolders })
 
-        LibraryFoldersSection.stubTree = LibraryFoldersSection.sample
-        defer { LibraryFoldersSection.stubTree = nil }
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
-                LibraryWindow(arguments: ["Library", "-LibraryFixture", "samples"]),
+                LibraryWindow(arguments: ["Library", "-LibraryFixture", "folders"]),
                 name: "library-sidebar-folders-\(scheme.name)", scheme: scheme)
         }
     }

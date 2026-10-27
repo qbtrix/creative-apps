@@ -3,36 +3,26 @@
 // its id is `library.folder.<path-hash>` (LibraryFolders.rowID). A row's context menu has Show Folder and
 // Include Subfolders, both disabled with view.show-folder's reason while it can't run. A row's click shows its
 // folder in the grid and Include Subfolders turns its subfolders' photos the other way (FO-6, the catalog's
-// selectSidebarRow and toggleFolderSubfolders). A tree with no folders draws no section. A test can show `sample`
-// through `stubTree` (DEBUG only).
+// selectSidebarRow and toggleFolderSubfolders). A folder whose photos are all missing is dimmed and carries the
+// missing badge (the grid's exclamationmark.triangle, as a SidebarNotice). A tree with no folders draws no section.
 import LibraryModel
 import SuiteUI
 import SwiftUI
 
 enum LibraryFoldersSection {
-    #if DEBUG
-    /// The tree the window shows instead of the catalog's, for a test while FO-4's stub builds none.
-    @MainActor static var stubTree: [FolderNode]?
-    #endif
-
-    /// The tree the sidebar shows for `model`.
-    @MainActor static func tree(_ model: LibraryCatalog) -> [FolderNode] {
-        #if DEBUG
-        if let stubTree { return stubTree }
-        #endif
-        return model.folderTree
-    }
-
     /// FOLDERS with one row per root, or nil when there are no folders.
     static func section(_ tree: [FolderNode]) -> SidebarSection? {
         tree.isEmpty ? nil : SidebarSection(id: "folders", title: "Folders", items: tree.map(row))
     }
 
-    /// A folder's row, dimmed when every photo under it is missing.
+    /// The badge on a folder whose photos are all missing: the grid's missing symbol.
+    static let missingNotice = SidebarNotice(systemImage: "exclamationmark.triangle", title: "Every photo in this folder is missing")
+
+    /// A folder's row, dimmed and badged when every photo under it is missing.
     static func row(_ node: FolderNode) -> SidebarItem {
         SidebarItem(
             id: LibraryFolders.rowID(for: node.path), title: node.name, systemImage: "folder", count: node.totalCount,
-            children: node.children.map(row), isDimmed: node.allMissing)
+            children: node.children.map(row), isDimmed: node.allMissing, notice: node.allMissing ? missingNotice : nil)
     }
 
     /// A folder row's context menu: each item disabled with `help` while view.show-folder can't run.
@@ -45,14 +35,4 @@ enum LibraryFoldersSection {
             ToolbarAction("Include Subfolders", systemImage: "folder.badge.plus", unavailableHelp: help, perform: toggleSubfolders),
         ]
     }
-
-    /// A small tree for tests and snapshots: trips with 2025 and 2026 inside, trip and family.
-    static let sample: [FolderNode] = [
-        FolderNode(path: "/Photos/trips", name: "trips", ownCount: 1, totalCount: 4, allMissing: false, children: [
-            FolderNode(path: "/Photos/trips/2025", name: "2025", ownCount: 2, totalCount: 2, allMissing: false, children: []),
-            FolderNode(path: "/Photos/trips/2026", name: "2026", ownCount: 1, totalCount: 1, allMissing: false, children: []),
-        ]),
-        FolderNode(path: "/Photos/trip", name: "trip", ownCount: 1, totalCount: 1, allMissing: false, children: []),
-        FolderNode(path: "/Photos/family", name: "family", ownCount: 2, totalCount: 2, allMissing: true, children: []),
-    ]
 }

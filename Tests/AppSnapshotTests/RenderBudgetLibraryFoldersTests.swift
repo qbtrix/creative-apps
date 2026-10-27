@@ -1,7 +1,7 @@
 // RenderBudgetLibraryFoldersTests.swift: the FOLDERS section's render budget (folders FO-3b,
-// Tests/render-budgets.md) on the real Library window at 10,000 photos (the `large` fixture), through the
-// harness (RenderBudgetHarness.swift). Until FO-4 builds the tree from the photos, the section shows
-// LibraryFoldersSection.sample (`stubTree`). Once the window body is still, it presses the first folder's
+// Tests/render-budgets.md) on the real Library window at 10,000 photos, through the harness
+// (RenderBudgetHarness.swift). The `large-folders` fixture gives every photo a path, so the section is the tree
+// the catalog builds from them: one root, a folder per month, each with selects inside. Once the window body is still, it presses the first folder's
 // disclosure button (a row below level 0: section headers expand too) open and then closed, as a finished
 // click does: flip its state, send its action. A scripted mouse-down would wait forever in AppKit's tracking
 // loop for a mouse-up the harness can't deliver, and performClick runs AppKit's event loop, which leaves a
@@ -20,9 +20,7 @@ import Testing
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetLibraryFoldersTests {
         @Test(.timeLimit(.minutes(2))) func expandFolderInTwoBodies() async throws {
-            LibraryFoldersSection.stubTree = LibraryFoldersSection.sample
-            defer { LibraryFoldersSection.stubTree = nil }
-            let w = RenderBudgetWindow(LibraryWindow(arguments: ["Library", "-LibraryFixture", "large"]))
+            let w = RenderBudgetWindow(LibraryWindow(arguments: ["Library", "-LibraryFixture", "large-folders"]))
             defer { w.close() }
             try await w.settle(800)
             let bodies = { () -> Int? in
