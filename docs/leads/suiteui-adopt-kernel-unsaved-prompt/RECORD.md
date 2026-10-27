@@ -310,3 +310,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-27T07:23:18Z UP-photo: waiting for green photo/full ci.yml at or after 841d4d88 (compile fix #5868); UP-flare/halo/z open, no needs-fix
 - 2026-10-27T07:43:11Z UP-photo: no scoped/full ci.yml at 841d4d88 yet (Linux check running); UP-flare/halo/z open, no needs-fix
 - 2026-10-27T08:04:13Z UP-photo: scoped photo 40470145594 + full 40470141862 running at ef9d2ace (contains ef31726a); UP-flare/halo/z open
+- 2026-10-27T08:24:13Z UP-photo: photo 40470145594 + full 40470141862 compile green, macOS tests queued; UP-flare/halo/z open
