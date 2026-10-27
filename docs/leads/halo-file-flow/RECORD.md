@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 01:00Z poll: #4936/#5092/#5123/#5801 unchanged, no labels; dev Linux red at f3ed4b32 on the quarantine check (supervisor-owned, #5818 open); no slice-done run yet
 - 00:38Z poll: slice PRs unchanged. dev Linux red at a80e88f4 on the quarantine check (UITests/quarantine.json, supervisor-owned; not ours); scoped halo/flare/suite/suiteui also red there. dev-red #5818 open.
 - 00:16Z poll: slice PRs unchanged; Linux check 40424557756 red on dev 4f277fbf (#4958, design/halo text inspectors, not ours); dev-red #5818 open (not ours).
 - 23:54Z poll: no change; #4936 waits on prescreen + sweep; #5092/#5123/#5801 unchanged; dev-red #5818 open (not ours).
