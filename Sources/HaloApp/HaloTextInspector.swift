@@ -21,8 +21,14 @@
 // commits, and the next keystroke starts a draft for the selected one. A new
 // selection, or an Undo or Redo that changes the words, drops the draft, ends
 // editing and rebuilds the field (keyed by `textFieldKey`, #4310), so a stale
-// edit buffer never shows over the stored words.
+// edit buffer never shows over the stored words. Above the colour row,
+// SuiteUI's TextStyleRows (text-style TS-4) over the layer's size on the
+// kernel's standard style, the font picker listing this Mac's families;
+// disabled with `textStylesHelp` until TS-9 gives Halo's text layer a style
+// and routes the rows' intents to its text commands.
 import HaloModel
+import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -37,6 +43,19 @@ struct HaloTextInspector: View {
     static let sizeID = "halo.inspector.text.size"
     static let colorID = "halo.inspector.text.color"
 
+    /// Why the shared text style rows can't act yet: Halo's text commands take them in TS-10.
+    nonisolated static let textStylesHelp = "Text styles aren't connected in this window yet."
+
+    /// The font families the shared rows' picker lists: this Mac's, read once.
+    nonisolated static let fontFamilies = FontCatalog().families()
+
+    /// The layer's style as the kernel's: the standard style at the layer's size, which is all Halo stores yet.
+    nonisolated static func kernelStyle(_ text: HaloTextContent) -> TextStyle {
+        var style = TextStyle.standard
+        style.size = text.fontSize
+        return style
+    }
+
     /// Whether `refusal` names a TEXT control, so it shows here and only here.
     static func owns(_ refusal: HaloRefusal) -> Bool { HaloProject.textOwns(refusal) }
 
@@ -47,6 +66,7 @@ struct HaloTextInspector: View {
                 caption(Self.stringID)
                 size(text)
                 caption(Self.sizeID)
+                TextStyleRows(style: Self.kernelStyle(text), families: Self.fontFamilies, help: Self.textStylesHelp) { _ in }
                 if let current = model.selectedLayerColor {
                     color(current)
                     caption(Self.colorID)

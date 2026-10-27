@@ -176,6 +176,7 @@ extension FlareWorkspace {
         + hiddenCommands  // the beta.2 items the menus hide (no-placeholders NP-3)
         + PathCommands.specs(FlareWorkspace.self)  // the twelve path.* commands, the Pen and Direct Select's points (pen-paths FP-6)
         + [importReportCommand]  // the last Lottie open's skipped parts (lottie-open LO-5, FlareLottieNote.swift)
+        + documentSetupCommands  // document.read-settings, document.set-settings (document-setup DS-14)
 }
 
 extension FlareWorkspace {

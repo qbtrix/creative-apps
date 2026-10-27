@@ -86,6 +86,7 @@ text.set-size
 text.set-tracking
 text.set-words
 tool.brush
+tool.bucket
 tool.clone
 tool.crop
 tool.eraser
@@ -94,6 +95,8 @@ tool.gradient
 tool.heal
 tool.marquee
 tool.move
+tool.remove
+tool.spot-heal
 tool.text
 transform.begin
 transform.cancel

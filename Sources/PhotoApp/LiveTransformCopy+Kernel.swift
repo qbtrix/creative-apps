@@ -11,7 +11,8 @@
 // VoiceOver steps, each its own gesture), so the window's workspace,
 // its edited dot and its undo stack catch up with one SwiftUI pass. The draft's
 // steps fold under their token on the copy, so the undo stack is the same as
-// running each sample on the workspace. PhotoWindow owns one and hands it down
+// running each sample on the workspace. A tone row's drag samples run on the
+// same copy, which the Adjust panel reads (tone-controls PT-5). PhotoWindow owns one and hands it down
 // as the `photoLiveTransform` environment value; without one (a view hosted
 // alone) the overlay and rows read the workspace. Presentation state only.
 import Observation
