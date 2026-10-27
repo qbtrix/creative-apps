@@ -352,3 +352,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 08:22Z All three clean and queued. Lane is running one batch at a time (current lane/batch-20261027080338 holds #4939). dev-red #5818 confirmed real (macOS, flake rerun failed 07:04); its SuiteUI cause is fixed on dev by #5868; our PRs don't touch SuiteUI. main fef52e668, no Slice-Done yet.
 - 08:42Z All three still clean and queued, not in the in-flight batches (lane/batch-20261027084056, -084102). dev aa8991762, main fef52e668 (AJ-k/AJ-u not on main yet, no Slice-Done). dev-red #5818 still open.
 - 09:02Z Still clean and queued. Lane log: dev-red #5818 is not a Linux red, so it doesn't hold us; the lane is landing single-PR batches and relabelled #5249 into the queue. dev aa8991762, main fef52e668, no Slice-Done yet.
+- 09:23Z Still clean and queued, not in any in-flight batch. dev 9d3e5e327, main fef52e668 (AJ-k/AJ-u not on main yet, no Slice-Done). dev-red #5818 still open.
