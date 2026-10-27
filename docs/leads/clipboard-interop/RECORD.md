@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T07:47Z · Polled: 2026-10-27T07:47Z. My 8 open PRs unchanged (no needs-* labels), waiting on the lane while dev-red #5818 is open. SC-15/16 (#5792) open; AK-8 blocked. No Belt-Slice-Done yet.
+Polled: 2026-10-27T08:06Z · 08:05Z check-in: #4896 (FH-u) merged to dev; FH-u done awaits a main ci run containing it. #5096 #5125 #5149 ready in lane; dev-red #5818 open (revert #5827 not landed). #5093 still awaiting supervisor answer.
 
 
 
