@@ -1,10 +1,10 @@
 # stroke-style lead record (Design)
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
-Run: act-1a178669406-n4me · Started: 2026-10-23 (this run resumed 2026-10-26T13:30Z)
-Stage: 3 quarantine renewed on dev (#5826); dev merged into #5011 (df0715e2) and #5825 (008df629); lane Linux checks pending; dev-red #5818 open (not ours)
-Base: origin/dev; main verified at d3323f6a
-Next: when #5011 lands and a green design ci.yml run holds it: Belt-Slice-Done DK-u (gaps #4990 #4991). When #5825 lands and a green run holds it: Belt-Slice-Done DK-z, then Belt-Contact-Sheet. Supervisor asked on #3441 to renew 5 quarantine entries that expired 10-27 (they fail scripts/ci on dev)
+Run: act-1a17be7aff8-ivwy · Started: 2026-10-23 (this run resumed 2026-10-27T05:55Z; prior act-1a178669406-n4me)
+Stage: 3 waiting (checked 2026-10-27T06:44Z): #5011 (df0715e2) and #5825 (008df629) open, clean, lane Linux green; no lane batch yet; dev-red #5818 open (macOS, not ours); supervisor asked on #3441 about the second run n4me
+Base: origin/dev; main verified at fef52e66
+Next: wait for the lane to merge #5011 and #5825, then a green design ci.yml run holding each: Belt-Slice-Done DK-u (gaps #4990 #4991), DK-z, then Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -45,3 +45,5 @@ Next: when #5011 lands and a green design ci.yml run holds it: Belt-Slice-Done D
 - 2026-10-26T22:14Z: #4916 (DK-m's last PR) merged as 9810d71b; #4919 closed. Full CI run https://github.com/qbtrix/creative-apps/actions/runs/40411399952 on 9810d71b holds it: Scoped design run 40414010435 on 9810d71b went green: Belt-Slice-Done: DK-m posted (issuecomment-6429472624). dev-red #5818 (macOS, range main..696d37fe; not ours) still holds code batches; #5002/#5011 wait in the lane. Open findings: 6.
 - Open stroke-style findings past the round cap (#4925 #4926 #4927 #4919 #4940 #4941 #4989 #5009 #5010) are partly fixed in #5002/#5011; the rest go to gaps once those PRs merge.
 - 2026-10-26T02:06:05Z: every open stroke-style finding is fixed by an open PR (#4916, #5002, #5011 Fixes lines); DK-z starts once they land and the combined open count is 5 or fewer.
+- 2026-10-27T05:55Z run act-1a17be7aff8-ivwy: lead/stroke-style shares no history with main (2686 heartbeat commits), so it was rebuilt from main fef52e66 with the current RECORD.md and timeline.tsv; the old tip b68c1b5e is kept at lead/stroke-style-archive-1027.
+- Status goes to both lead/design-stroke-style (Belt reads it) and lead/stroke-style (the brief's branch); same RECORD.md content.

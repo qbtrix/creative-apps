@@ -342,3 +342,4 @@ time	kind	note
 2026-10-27T05:27Z	wait	heartbeat	#5321	poll 05:27: waiting lane batch; dev-red #5818 (suite home tests)
 2026-10-27T05:40Z	wait	heartbeat	#5321	poll 05:40: waiting lane batch; dev-red #5818 (suite home tests)
 2026-10-27T05:53Z	wait	heartbeat	#5321	poll 05:53: waiting lane batch; dev-red #5818 (suite home tests)
+2026-10-27T06:44Z	wait	heartbeat	#5818	run act-1a17be7aff8-ivwy: record copied here; #5011 #5825 wait on lane batch; dev-red #5818 open
