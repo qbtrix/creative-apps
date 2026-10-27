@@ -249,3 +249,4 @@ utc	stage	event	ref	note
 2026-10-27T03:50Z	check	PT-u proof runs 40439886020/40439893721 red, not ours: PhotoToolsKeyTests.letterPicksTool from #4889 (dev-red #5818); told supervisor on #3468; waiting for next green run. #5816 clean, waiting for batch
 2026-10-27T04:12Z	check	scoped photo 40444691641 (dev 547b958c, has PT-u and #4889) in progress; #5816 clean, waiting for batch; dev-red #5818 open
 2026-10-27T04:34Z	stage	#5816 (PT-m) merged as 91e1e597; dev merged into -pt7 (15 files, +96/-73), scripts/ci --changed running. Scoped photo 40444691641 red only on #4889's PhotoToolsKeyTests (not ours)
+2026-10-27T04:40Z	check	PT-7 gate died on signal 11 in Swift Testing Backtrace._willThrow during AfterGlowCLITests MCP fuzz (not our code); rerunning scripts/ci --changed
