@@ -283,3 +283,4 @@ utc	stage	event	ref	note
 2026-10-27T08:06Z	3	heartbeat	lane	poll 2026-10-27T08:06Z: 08:05Z check-in: #4896 (FH-u) merged to dev; FH-u done awaits a main ci run containing it. #5096 #5125 #5149 ready in lane; dev-red #5818 open (revert #5827 not landed). #5093 still awaiting supervisor answer.
 2026-10-27T08:10:17Z	3	heartbeat	lane	08:10Z: CB-flare #4902 merged 08:05Z (lane batch)
 2026-10-27T08:43:25Z	3	heartbeat	lane	CB-halo #4905: ratchet fix + canonical-first rename gating; CB-design #4904 and CB-14 #5125 dev merges resolved, gating next
+2026-10-27T09:06:42Z	3	heartbeat	lane	Pushed #4905 (9aace0df, ratchet fix) and #4904 (08b08c1e, dev merge), both CI: PASS, Head: moved; #5125 dev merge gating

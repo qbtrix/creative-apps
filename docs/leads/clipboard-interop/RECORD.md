@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T08:43Z · Correction to 08:10Z: #4905 needs-fix, #4904 and #5125 needs-rebase; fixes in progress. #5149 clean. dev-red #5818 open, so no Belt-Slice-Done yet.
+Polled: 2026-10-27T09:06Z · Lane labels on #4904/#4905 await the next sweep. #5149 clean. dev-red #5818 open.
 
 
 
