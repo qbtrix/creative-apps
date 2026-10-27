@@ -1,7 +1,7 @@
 # export-pack lead record
 
 Issue: #3472 (runs before used #4509) · Packet: docs/blueprints/halo/features/export-pack.md
-Run: act-1a16fbc5164-vi4c · Started: 2026-10-24T21:10Z (took over from act-1a16cd045be-qv3g)
+Run: act-1a17b7080fc-gy1j · Started: 2026-10-27 (took over from act-1a16fbc5164-vi4c)
 Stage: 5 (every task in a PR: HX-3 #4874 07046e24, HX-4 #4917 cc83cdee, HX-z #4942 13e6000c feature-done; rebuilt on dev 2026-10-24)
 Base: 721168a8 (origin/dev; the brief says main, CLAUDE.md and the lane use dev)
 Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev holds its last PR, then Belt-Contact-Sheet
@@ -37,6 +37,8 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - ProRes 4444 stays refused in the Codec row until HX-4 ("ProRes 4444 lands with HX-4."): HX-3 has no writer that can make one.
 - RJ-H41 moves to the HX-4 PR. The CLI refuses render.start on Linux, and its catalog step takes no codec or alpha yet, so a real ProRes job is checkable only once the writer and those params exist.
 - RJ-H41 ships with HX-7 as `prores-alpha.jobs.pending.json`: the headless CLI writes png only, so gap #4929 asks for a movie render on macOS; the job is renamed when that lands.
+- HX-4 drops the `media` slot on HaloServices (LiveStandInTests counts a nil service default as a stand-in and its baseline only shrinks): the render sheet makes `LiveMedia()` at the call and passes it to `writeMovie`, the way Flare's export does. The packet's `services.media.movie` is read as the suite's media service.
+- Rule 2 (rebase lead/export-pack) not done: that branch is suiteui's #3477 lead; this lead keeps lead/halo-export-pack.
 - HX-4's shared MovieWriter takes whole-number fps only. #4857 (needs-ui, line:suiteui) asks for a rational rate; HaloMovieWriter stays for fractional rates until then.
 
 ## Open
@@ -116,3 +118,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 12:15Z heartbeat: all five PRs open, no needs-fix/needs-rebase; lane landing stale-proof PRs one at a time (#4886, #4943 merged; dev at 58bb6d4d5); ours still queued; no slice done, 0 findings
 - 12:38Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane batch 20261025122638 (one at a time) holds none of ours; dev at 58bb6d4d5; no slice done, 0 findings
 - 13:00Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane landed #4953 (dev 930337d52), batch 20261025125743 holds none of ours; no slice done, 0 findings
+- 03:50Z (10-27) heartbeat, run act-1a17b7080fc-gy1j: #4917 (HX-4) needs-fix from the lane's Linux check (LiveStandInTests flagged the new HaloServices media slot) and conflicted with dev's refusal rewording. Merged dev (kept codecRefusalsNeverNameASlice), moved LiveMedia to the render call; gate rerunning after a toolchain reinstall. #4942 (HX-z) restacks after. 0 findings.
