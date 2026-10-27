@@ -74,6 +74,8 @@ public struct CanvasSize: Sendable, Hashable {
 public struct PhotoWorkspace: Sendable {
     /// The open image's size; nil with no image open.
     public internal(set) var canvas: CanvasSize?
+    /// Pixels per inch: what File > New asked for (document-setup DS-8), 72 for anything else.
+    public internal(set) var resolution = 72.0
     /// The open file's name ("beach.jpg"); nil for a new image.
     public internal(set) var documentName: String?
     /// The layer stack, top first.
@@ -210,6 +212,7 @@ public struct PhotoWorkspace: Sendable {
     /// Replaces the open image with `background` as its one layer.
     mutating func start(with background: TiledPixels, name: String?) {
         canvas = CanvasSize(width: background.width, height: background.height)
+        resolution = 72
         documentName = name
         layers = []
         pixels = [:]
