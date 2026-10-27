@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T02:59Z · #4896 FH-4 dev merge pushed 4d643f79, gate PASS, Head moved, fast-lane back, needs-split cleared (7 files). Gates running: #5125 CB-14 then #5096 AR-11 merges.
+Polled: 2026-10-27T03:09Z · CB-14 (#5125) and AR-11 (#5096) dev merges resolved locally; both gates crash (signal 11, stack overflow in AfterGlowCLI headless inits, not our code). Probing plain dev for the same crash before pushing.
 
 
 
