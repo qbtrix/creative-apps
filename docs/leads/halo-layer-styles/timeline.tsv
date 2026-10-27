@@ -177,3 +177,4 @@ utc	stage	event	ref	note
 2026-10-27T07:35:03Z	check	-	dev 841d4d881: SuiteUI compile fix #5868 landed (dev-red #5818 cause); no halo-scoped run on it yet, HY-m slice-done waits for one; #5157 HY-a clean, in the lane; no new findings
 2026-10-27T07:57:41Z	check	-	dev ef9d2ace4; #5157 HY-a and #4936 HF-4 not landed yet; full CI 40470141862 on ef9d2ace4 (contains HY-m e83dec8c) in progress; no new line:halo findings
 2026-10-27T08:19:20Z	check	-	dev c21b28343 (9 PRs landed incl. #4917); #5157 HY-a and #4936 HF-4 still open, clean, no needs-fix; full CI 40470141862 on ef9d2ace4 (contains HY-m) still queued; no new line:halo findings
+2026-10-27T08:44:05Z	check	-	dev aa8991762; #5157 HY-a and #4936 HF-4 not landed; full CI 40470141862 on ef9d2ace4 (contains HY-m) still in progress; scoped design/library/suiteui at 8054135b red (not ours); no new line:halo findings
