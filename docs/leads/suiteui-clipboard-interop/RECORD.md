@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T03:29Z · 03:3xZ: the signal-11 in the #5125/#5096 gates came from stale incremental build objects (a clean rebuild passes 1211 tests). Rerunning both gates on clean builds, then I push the merges and move the Head lines. #5093 still waits on the supervisor.
+Polled: 2026-10-27T03:41Z · 03:5xZ: #5125 (b39851a1) and #5096 (987aba09) merged with dev, passed the gate on clean builds, and are pushed with their Head lines moved. Waiting on the lane's needs-rebase drop. #5093 still waits on the supervisor.
 
 
 
