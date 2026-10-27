@@ -15,8 +15,11 @@
 // format chip or the Size row calls `setRenderSettings`. The sheet's start
 // button (titled Export until #3402) asks for a folder when there is none
 // (#3297 tracks disabling it instead), then `renderStart(into:)`: the Model
-// starts the run, a detached task writes the frames through the PNG or movie
-// writer off the main actor, and its progress and outcome come back over a
+// starts the run, a detached task writes the frames off the main actor through
+// the PNG writer, or for a movie through the suite's LiveMedia, made here the
+// way Flare's export makes it (`writeMovie`, export-pack HX-4; HaloMovieWriter
+// keeps an H.264 movie at a fractional rate until the service times one
+// exactly), and its progress and outcome come back over a
 // stream that a main-actor task hands to `renderProgressed(done:)` and
 // `endRender(_:)`. Cancel stops a run under way (`cancelRender`, which
 // leaves it idle, so the sheet closes) or closes the editing sheet; Done
@@ -29,6 +32,8 @@
 import AppKit
 import HaloModel
 import SuiteKernel
+import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -82,6 +87,7 @@ extension HaloWindow {
         let output = folder.appending(path: name, directoryHint: settings.format == .movie ? .notDirectory : .isDirectory)
         let rendering = model.services.compositionRendering
         let text = model.services.text
+        let media: any MediaEncoding = LiveMedia()
         let (events, continuation) = AsyncStream.makeStream(of: HaloRenderRun.Event.self)
         let worker = Task.detached(priority: .userInitiated) {
             let report: (Int) -> Void = { continuation.yield(.progress($0)) }
@@ -91,8 +97,14 @@ extension HaloWindow {
                 var sink = HaloRenderProgress(base: HaloPNGWriter(folder: output), onWrite: report)
                 outcome = rendering.run(plan, of: composition, text: text, into: &sink, isCancelled: { Task.isCancelled })
             case .movie:
-                var sink = HaloRenderProgress(base: HaloMovieWriter(url: output), onWrite: report)
-                outcome = rendering.run(plan, of: composition, text: text, into: &sink, isCancelled: { Task.isCancelled })
+                if plan.movie != nil {
+                    outcome = await rendering.writeMovie(
+                        plan, of: composition, text: text, media: media, path: output.path(percentEncoded: false),
+                        onWrite: report, isCancelled: { Task.isCancelled })
+                } else {
+                    var sink = HaloRenderProgress(base: HaloMovieWriter(url: output), onWrite: report)
+                    outcome = rendering.run(plan, of: composition, text: text, into: &sink, isCancelled: { Task.isCancelled })
+                }
             }
             continuation.yield(.ended(outcome))
             continuation.finish()

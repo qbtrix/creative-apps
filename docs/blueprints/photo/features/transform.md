@@ -37,12 +37,17 @@ becomes `typealias FlipAxis = FlipDirection`, and Canvas Size's anchor is the
 kernel's `BoxAnchor` with `TransformRules.anchoredOrigin`. The only new Model
 file is the adapter `PhotoTransform+Kernel.swift`.
 
-**Render path.** The draft previews live through the existing layer route:
-each canvas render resamples the draft's layer once with CoreRaster's
-`transformed` (lanczos3, `PhotoWorkspace.transformPreview`), and the routes
-composite it on PhotoCompositeCache's kept base, so only that layer and the
-ones above it composite per step. Commit lays that same resample, so Return
-shows exactly the last preview. Flips use `flipped` (exact).
+**Render path.** The draft previews live through the existing layer route.
+A drag's frames (`PhotoRenderer.update(live: true)`, what CanvasRenderer asks
+for a live stroke) draw the draft's layer through its matrix on each canvas
+region, with CoreRender's affine composite (bilinear, CPU, the regions across
+the cores), so no frame resamples the whole layer; the routes lay it on
+PhotoCompositeCache's kept base, so only that layer and the ones above it
+composite per step. The still frame after the drag (the window taking the live
+copy back) resamples the layer once with CoreRaster's `transformed` (lanczos3,
+`PhotoWorkspace.transformPreview`), and commit lays that same resample, so
+Return shows exactly the frame on screen. One matrix serves both
+(`LayerTransforming.matrix`). Flips use `flipped` (exact).
 Canvas Size pads with `padded(anchor:)`. No new route.
 
 Blueprint sections: photo.md 4 (Edit and Image menus), 6 (canvas overlays).
