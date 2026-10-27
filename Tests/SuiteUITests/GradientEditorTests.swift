@@ -2,7 +2,8 @@
 // `GradientBarDrag`. A click on the bar is one `.add` at its offset, a drag on a stop is `.move`s under one token, a
 // drag 40 pt off the bar is one `.remove`, a two-stop remove is refused with the help; the angle row shows only for a
 // linear fill; a stop reads "Stop n of m, p percent, colour"; the end stops' handles sit half a handle inside the
-// bar's row and a press on one picks its stop; the colour row names the selected stop; the type switch is a system
+// bar's row and a press on one picks its stop; the colour row names the selected stop and the Location row reads its
+// offset in percent; the type switch is a system
 // segmented Picker under its identifier prefix; the bar dims while the editor is off. macOS only.
 import AppKit
 import CoreGraphics
@@ -90,6 +91,30 @@ import Testing
     @Test func colorRowNamesTheSelectedStop() {
         #expect(GradientEditorText.selectedStop(1, of: Self.three) == "Stop 2 · 50%")
         #expect(GradientEditorText.selectedStop(0, of: .solid(Self.red)) == "Color")
+    }
+
+    @Test func locationReadsTheSelectedStopInPercent() {
+        #expect(GradientEditorText.location(0.5) == "50%")
+        #expect(GradientEditorText.percent(Self.three.stops[1].offset) == 50)
+        #expect(GradientEditorText.offset(percent: 25) == 0.25)
+        #expect(GradientEditorText.offset(percent: 140) == 1 && GradientEditorText.offset(percent: -5) == 0)
+        #expect(GradientEditorText.offset(percent: .nan) == 0)
+    }
+
+    @Test func typeSwitchIsSharedAndNamesItsNote() {
+        #expect(GradientTypeSwitch.typeID(.linear, in: GradientTypeSwitch.defaultID) == "suite.gradient.type.linear")
+        #expect(GradientTypeSwitch.helpID(in: "design.inspector.fill-type") == "design.inspector.fill-type.help")
+    }
+
+    /// A solid's own switch is the same segmented Picker the editor shows.
+    @MainActor @Test func solidTypeSwitchIsASegmentedPicker() {
+        let host = NSHostingView(rootView: GradientTypeSwitch(type: .solid) { _ in }.frame(width: 260))
+        host.frame = CGRect(x: 0, y: 0, width: 260, height: 80)
+        host.layoutSubtreeIfNeeded()
+        func segmented(in view: NSView) -> [NSSegmentedControl] {
+            (view as? NSSegmentedControl).map { [$0] } ?? view.subviews.flatMap(segmented)
+        }
+        #expect(segmented(in: host).map(\.segmentCount) == [3], "the solid switch is not a segmented Picker")
     }
 
     @Test func typeSwitchTakesAPrefix() {

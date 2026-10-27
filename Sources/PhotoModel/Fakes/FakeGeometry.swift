@@ -117,4 +117,10 @@ public struct FakeTransform: LayerTransforming {
                             y: content.y + Int(t.dy.rounded()))
     }
     public func flipped(_ content: PlacedPixels, _ axis: FlipAxis) throws -> PlacedPixels { content }
+    /// The move `applied` makes, as a matrix.
+    public func matrix(_ draft: TransformDraft, origin: (x: Int, y: Int)) throws -> AffineMatrix {
+        let t = draft.transform
+        let (dx, dy) = t.dx.isFinite && t.dy.isFinite && abs(t.dx) < 1e6 && abs(t.dy) < 1e6 ? (t.dx.rounded(), t.dy.rounded()) : (0, 0)
+        return AffineMatrix(a: 1, b: 0, c: 0, d: 1, tx: Double(origin.x) + dx, ty: Double(origin.y) + dy)
+    }
 }

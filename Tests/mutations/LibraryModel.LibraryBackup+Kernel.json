@@ -3,5 +3,9 @@
 {"label":".fallbackToNewestGood: first backup used instead of the newest good one","file":"Sources/LibraryModel/LibraryBackup+Kernel.swift","find":"for entry in rotation.list() {","replace":"for entry in rotation.list().reversed() {","tests":"LibraryBackupTests"},
 {"label":"a backup after a save is never pruned","file":"Sources/LibraryModel/LibraryBackup+Kernel.swift","find":"try rotation.prune(now: now)","replace":"_ = now","tests":"LibraryBackupTests"},
 {"label":"a save within the hour backs up anyway","file":"Sources/LibraryModel/LibraryBackup+Kernel.swift","find":"try rotation.backUp(now: now, force: force)","replace":"try rotation.backUp(now: now, force: true)","tests":"LibraryBackupTests"},
-{"label":"restore leaves the old photos on screen","file":"Sources/LibraryModel/LibraryBackup+Kernel.swift","find":"c.restore(photos)","replace":"_ = photos","tests":"LibraryBackupTests"}
+{"label":"restore leaves the old photos on screen","file":"Sources/LibraryModel/LibraryBackup+Kernel.swift","find":"c.restore(photos)","replace":"_ = photos","tests":"LibraryBackupTests"},
+{"label":"a fixture's yesterday keeps the ratings of two days ago","file":"Sources/LibraryModel/LibraryBackup+Kernel.swift","find":"(86_400, rated(0))","replace":"(86_400, rated(1))","tests":"LibraryBackupJobTests"},
+{"label":"a fixture gets backups without -LibraryFixtureBackups","file":"Sources/LibraryModel/LibraryBackup+Kernel.swift","find":"guard fixtureBackups else { return nil }","replace":"_ = fixtureBackups","tests":"LibraryBackupJobTests"},
+{"label":"the live catalog launches with no backups","file":"Sources/LibraryModel/LibraryBackup+Kernel.swift","find":"return catalogFolder.map { LibraryBackups(folder: $0) }","replace":"return nil","tests":"LibraryBackupJobTests"},
+{"label":"a fixture's backups are seeded with no catalog file","file":"Sources/LibraryModel/LibraryBackup+Kernel.swift","find":"try rotation.store.writeData(rotation.file, coding.encode(set))","replace":"_ = set","tests":"LibraryBackupJobTests"}
 ]

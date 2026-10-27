@@ -19,5 +19,19 @@
     "find": "start(with: try Self.tiles(width: document.canvas.width, height: document.canvas.height, what: \"the canvas\"), name: name)",
     "replace": "start(with: try stack.pixels.values.min { $0.width < $1.width } ?? Self.tiles(width: document.canvas.width, height: document.canvas.height, what: \"the canvas\"), name: name)",
     "tests": "PhotoHeadlessTests"
+  },
+  {
+    "label": "aNewDocumentDrawsTextWithTheCallersTextService: new ignores the caller's services",
+    "file": "Sources/PhotoModel/PhotoHeadless.swift",
+    "find": "let o = try options.decode(NewOptions.self)\n        var workspace = PhotoWorkspace(services: services)",
+    "replace": "let o = try options.decode(NewOptions.self)\n        var workspace = PhotoWorkspace(services: .live); _ = services",
+    "tests": "PhotoHeadlessTextTests"
+  },
+  {
+    "label": "anOpenedImageDrawsTextWithTheCallersTextService: open ignores the caller's services",
+    "file": "Sources/PhotoModel/PhotoHeadless.swift",
+    "find": "public static func open(_ data: Data, name: String, services: PhotoServices) throws -> PhotoHeadless {\n        var workspace = PhotoWorkspace(services: services)",
+    "replace": "public static func open(_ data: Data, name: String, services: PhotoServices) throws -> PhotoHeadless {\n        var workspace = PhotoWorkspace(services: .live); _ = services",
+    "tests": "PhotoHeadlessTextTests"
   }
 ]

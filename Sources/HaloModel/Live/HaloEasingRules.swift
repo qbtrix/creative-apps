@@ -12,7 +12,7 @@ enum HaloEasingRules {
     /// Every key of the layer, by property then frame; empty for an unknown layer.
     static func keys(of layerID: String, in c: HaloComposition) -> [HaloKeyRef] {
         guard let layer = c.layers.first(where: { $0.id == layerID }) else { return [] }
-        return HaloProperty.allCases.flatMap { p in
+        return HaloProperty.keyable.flatMap { p in
             (layer.tracks[p.rawValue] ?? []).map(\.frame).sorted().map {
                 HaloKeyRef(layerID: layerID, property: p, frame: $0)
             }
@@ -52,6 +52,6 @@ enum HaloEasingRules {
     }
 
     private static func rank(_ p: HaloProperty) -> Int {
-        HaloProperty.allCases.firstIndex(of: p) ?? 0
+        HaloProperty.keyable.firstIndex(of: p) ?? 0
     }
 }

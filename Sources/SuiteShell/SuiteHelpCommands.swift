@@ -7,7 +7,8 @@
 // so the app sends nothing itself. Beta Notes opens a window titled Beta Notes over BetaNotes.current,
 // centred so it stays on a small screen. Connect an AI Assistant… (cli-bundle CB-5) begins AssistantConnectSheet
 // on the front window over the running AfterGlow.app's AssistantConnectPanel; Copy puts its text on the pasteboard
-// and Open AI Access opens Window > AI Access…'s list. The item is disabled, saying why, outside AfterGlow.app.
+// and Open AI Access opens Window > AI Access…'s list; Install Command-Line Tool… runs InstallCommandLineTool on the
+// sheet (CB-6). The item is disabled, saying why, outside AfterGlow.app.
 import AppKit
 import SuiteKernel
 import SuiteModel
@@ -61,7 +62,7 @@ public struct SuiteHelpCommands: Commands {
     private var host: NSWindow?
     private var sheet: NSWindow?
     private var notes: NSWindow?
-    private var connect: NSWindow?
+    private(set) var connect: NSWindow?
     private var connectHost: NSWindow?
     private var report = ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
 
@@ -106,6 +107,10 @@ public struct SuiteHelpCommands: Commands {
             onCopy: { text in
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(text, forType: .string)
+            },
+            onInstall: { [weak self] in
+                let window = self?.connect
+                Task { await InstallCommandLineTool.run(bundle: bundle, on: window) }
             },
             onOpenAIAccess: { AIAccessCenter.shared.showList() },
             onClose: { [weak self] in self?.closeConnect() })

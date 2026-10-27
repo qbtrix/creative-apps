@@ -376,10 +376,10 @@ capsule of round icon buttons (`textSecondary`, hover `rowHover`) and a
 larger round play button in `accentFill` with a white glyph. Timecode in
 `timecode`: the current value `textPrimary`, the total `textSecondary`.
 
-**Tabs and the tool rail.** Segmented tabs (`SegmentedTabs`): a `row`
-capsule with 2 pt padding and `chip`-tall pills, labels `textSecondary`; the
-selected pill is the `stateSelected` tint with `textPrimary`. It stays a
-`Picker` underneath. Tool rail (`ToolbarGroup(style: .rail)`): idle symbols
+**Tabs and the tool rail.** Segmented tabs (`SegmentedTabs`): the stock
+macOS segmented control exactly as the HIG and AppKit's `NSSegmentedControl`
+draw it (captain, 10-27), with no custom capsule, tint or fill; it fills the
+panel's width. A tabbed pane is `NSTabView`. Tool rail (`ToolbarGroup(style: .rail)`): idle symbols
 in `textSecondary`, hover `rowHover`, selected on the `stateSelected` tint
 with the symbol in `accentText`.
 

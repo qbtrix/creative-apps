@@ -210,7 +210,7 @@ struct MCPCallTests {
         #expect(export(out, false).isError && io.files[out] == kept)
         #expect(!export(out, true).isError && io.files[out] != kept)
         #expect(export("/etc/out.json", true).isError && io.files["/etc/out.json"] == nil)
-        #expect(export(Self.root + "/out.png", false, format: "png").isError && io.files[Self.root + "/out.png"] == nil)
+        #expect(export(Self.root + "/out.gif", false, format: "gif").isError && io.files[Self.root + "/out.gif"] == nil)
     }
 
     /// A clock the test moves.

@@ -125,6 +125,24 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     #expect(options.settings == ToolOptions().settings && options.red == 0)
 }
 
+/// The Move tool's transform rows show only while a picked layer can move:
+/// on an adjustment layer they would sit disabled under the refusal, their
+/// labels too faint to read (#2593). A picked image layer beside it still moves.
+@Test func moveOptionsShowOnlyForAMovableSelection() throws {
+    var workspace = try PhotoWorkspace.fixture(.layered)
+    workspace.selectTool(.move)
+    let background = try #require(workspace.layers.first { $0.name == "Background" })
+    let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
+    workspace.selectLayer(background.id)
+    #expect(workspace.canMoveSelection)
+    workspace.selectLayer(curves.id)
+    #expect(!workspace.canMoveSelection)
+    #expect(workspace.moveHint == "Select an image layer in the sidebar to move it.")
+    workspace.pickLayer(background.id, .toggle)
+    #expect(workspace.canMoveSelection)
+    #expect(workspace.moveHint == "Drag over the image to move the selected layer.")
+}
+
 /// Move refuses an adjustment layer, which has no origin on the canvas, and
 /// says why in the status and in its hint (#1630); an image layer moves.
 @Test func moveRefusesAnAdjustmentLayerAndSaysWhy() throws {

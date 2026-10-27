@@ -23,10 +23,13 @@ import Testing
         done.wait()
     }
 
-    /// Groups nested `depth` deep around a star with a gradient; the outermost group first.
+    /// Groups nested `depth` deep around a rectangle with a gradient, a star spec and a picture; the outermost first.
     static func chain(_ depth: Int) -> DesignNode {
-        var node = DesignNode(id: "leaf", name: "Star", kind: .shape, frame: rc(0, 0, 10, 10),
-                              gradient: .radial(stops: [], center: Point(x: 0.5, y: 0.5), radius: 1))
+        let asset = PlacedAsset(id: "asset-1", name: "photo.png", format: .png,
+                                natural: Size(width: 1200, height: 800), data: Data([1, 2, 3]))
+        var node = DesignNode(id: "leaf", name: "Photo", kind: .rectangle, frame: rc(0, 0, 10, 10),
+                              gradient: .radial(stops: [], center: Point(x: 0.5, y: 0.5), radius: 1),
+                              placedAsset: asset, placedFocus: Point(x: 0.2, y: 0.5))
         node.shape = ShapeSpec(kind: .star)
         for level in 0..<depth {
             node = DesignNode(id: "g\(level)", name: "Group", kind: .group, frame: rc(0, 0, 10, 10), children: [node])
@@ -55,9 +58,11 @@ import Testing
         var copy = original
         copy.shape = nil
         copy.gradient = nil
+        copy.placedAsset = nil
         #expect(original.shape?.kind == .star)
         #expect(original.gradient != nil)
-        #expect(copy.shape == nil && copy.gradient == nil)
+        #expect(original.placedAsset?.id == "asset-1" && original.placedFocus == Point(x: 0.2, y: 0.5))
+        #expect(copy.shape == nil && copy.gradient == nil && copy.placedAsset == nil)
         #expect(copy != original)
     }
 }

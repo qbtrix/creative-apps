@@ -17,6 +17,7 @@ import AppKit
 import Combine
 import Metal
 import QuartzCore
+import SuiteImaging
 import SwiftUI
 
 /// Fills a host's Metal drawable. The host never draws into it itself.
@@ -80,6 +81,15 @@ final class MetalRoute {
 extension CanvasHostView {
     /// The presenter filling the Metal layer; nil on the tile path.
     public var metalPresenter: (any MetalPresenting)? { presenter }
+
+    /// Where a resident render on `backend` writes a `width` x `height` picture: the live presenter's document
+    /// texture, so the app names no texture type. Nil off the Metal path or with another presenter.
+    public func residentTarget(on backend: ImagingGPU.Backend, width: Int, height: Int) -> ImagingGPU.Target? {
+        guard let presenter = presenter as? CanvasTilePresenter,
+            let texture = presenter.residentTexture(on: backend.device, width: width, height: height)
+        else { return nil }
+        return ImagingGPU.Target(texture, on: backend)
+    }
 
     /// The installed Metal layer; nil on the tile path.
     public var metalLayer: CAMetalLayer? {
