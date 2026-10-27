@@ -2,9 +2,9 @@
 
 Issue: #3468 · Packet: docs/blueprints/photo/features/tone-controls.md
 Run: act-1a17be7af84-ih2a · Started: 2026-10-27T05:45Z (takes over from act-1a178602311-syy6)
-Stage: 3 build; PT-a, PT-u, PT-m done; PT-z: PT-7 #5860 merged 08:04Z, PT-8 #5871 open (fast-lane, feature-done)
+Stage: 3 build; PT-a, PT-u, PT-m done; PT-z: PT-7 #5860 merged 08:04Z, PT-8 #5871 merged 12:51Z (2122d9b4); slice-done waits on a green run
 Base: dev (870080fb)
-Next: when #5871 merges, Belt-Slice-Done PT-z from a green photo-scoped or full ci.yml run on dev that contains it, then Belt-Contact-Sheet
+Next: Belt-Slice-Done PT-z from the first completed green photo-scoped or full ci.yml run on dev whose head contains 2122d9b4 (full CI 40508456519 at 9def4778 running; dev-red #5818 open), then Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -12,7 +12,7 @@ Next: when #5871 merges, Belt-Slice-Done PT-z from a green photo-scoped or full 
 | PT-a | AdjustmentSettings.tone and the ToneTarget adapter as stubs; Adjust panel shows ToneRows | PT-1, PT-2 | MJ-PT | suiteui tone-controls TC-a (TC-1 #4555 merged; TC-2 building) | yes | 0 | done | 40250716357 | – |
 | PT-u | snapshots, render budget, journey written | PT-5, PT-6 | PJ-T1 | PT-a; TC-3 (PT-5) | yes | 0 | done (PT-5 #5817, PT-6 #5008 merged) | – | – |
 | PT-m | live route and export path; adapter bodies; catalog; RJ-P12–14 | PT-3, PT-4 | MJ-PT | PT-a; IM-photo (on dev), TC-5, TC-6 (stubs, rule 12); catalog chain (all built) | no | 0 | done (PT-3, PT-4 #5363, sharpen #5816 merged) | – | – |
-| PT-z | journey on live, feature-done | PT-7, PT-8 | PJ-T1 | PT-u, PT-m; PG-z (PT-8) | yes | 0 | PT-7 #5860 merged; PT-8 #5871 open | – | – |
+| PT-z | journey on live, feature-done | PT-7, PT-8 | PJ-T1 | PT-u, PT-m; PG-z (PT-8) | yes | 0 | PT-7 #5860, PT-8 #5871 merged; awaiting green run | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -24,7 +24,7 @@ Next: when #5871 merges, Belt-Slice-Done PT-z from a green photo-scoped or full 
 | PT-5 | PT-u | 4 | snapshots, budget | Tests/AppSnapshotTests/PhotoToneSnapshots.swift, RenderBudgetPhotoToneTests.swift | snapshots | #5817 | merged |
 | PT-6 | PT-u | 4 | journey skipped | UITests/PhotoJourneyTests+Tone.swift | compiles | #5008 | merged |
 | PT-7 | PT-z | 5 | journey on live, RJ-P12–14 live | UITests/PhotoJourneyTests+Tone.swift, RealJobs | PhotoToneJobsTests | #5860 | merged 08:04Z |
-| PT-8 | PT-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, tone-controls.wave.json | scripts/ci | – | #5871 open |
+| PT-8 | PT-z | 6 | photo.md, built, feature-done | docs/blueprints/photo.md, tone-controls.wave.json | scripts/ci | #5871 | merged 12:51Z (2122d9b4) |
 
 ## Waves (combined plan, all three features)
 - 13:30Z: bisect probe -6 (first 6 of batch 20261024110214) macOS gate 40092825860 failed on `RenderBudgetToneRowsTests.sliderDragInThreeBodies` (120 Temperature steps sent 100 `tone.set`). That test comes from #5006 (TC-3, suiteui tone-controls lead act-1a1693a3ff0-mwrd, line:suiteui): not this run's to fix. Probe -3 running (40097887707/40097890001). PT-5 stays blocked on #5006; #5008 and #5007 don't touch ToneRows.
@@ -139,3 +139,5 @@ Next: when #5871 merges, Belt-Slice-Done PT-z from a green photo-scoped or full 
 - 07:27Z: the lane had flagged #5363 needs-rebase at 06:47Z (old head); fix at 5260e203 cleared it. Mergeable clean, waiting on the prescreen. dev 99ace703 merges clean with all heads.
 
 - 07:49Z: #5363 still waits on the prescreen of 5260e203. dev 3e26fbe4 (#5264) merges clean with #5363, PT-5, PT-7.
+
+- 13:24Z: #5871 merged 12:51:56Z as 2122d9b4. The lane landed its batch on each PR's own proof, because dev was red on its own. Full CI 40508456519 at 9def4778 contains it and is running. dev-red #5818 is open: macOS compile fails in DesignModelTests snap tests and SuiteUI PresetGrid (not tone-controls), so a photo-scoped run now would fail at compile. No scoped run is dispatched yet; the slice closes on the first green run that contains 2122d9b4.
