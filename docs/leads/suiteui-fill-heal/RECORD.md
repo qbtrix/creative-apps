@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-27T23:01Z
+Polled: 2026-10-27T23:25Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -64,3 +64,4 @@ Polled: 2026-10-27T23:01Z
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
 - 2026-10-27T23:01Z poll: every lead head is clean with fast-lane and has no local-ci/prescreen status yet; dev-red #5818 open (the lane's flake rerun is in flight at 6dab26f); main fef52e668, dev 7b2c4373f.
+- 2026-10-27T23:25Z poll: no change on our PRs (all clean with fast-lane, no prescreen yet). dev-red #5818 is real after the lane's flake rerun (macos, range main..6dab26f, ~170 PRs); not ours to fix, the lane bisects. main fef52e668, dev bddf9c033.
