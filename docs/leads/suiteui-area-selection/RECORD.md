@@ -2,10 +2,10 @@
 
 Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
-Base: main fef52e66 (verified) / dev 5e4a0922
-Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-27T11:29Z · 11:30Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (captain working it; revert #5827 Linux red since 02:42Z, needs a human). #5093 awaiting supervisor.
+Stage: 3 wave 2 (PRs open and gated; waiting on the lane)
+Base: main fef52e66 (verified) / dev 66d4c6d8
+Next: AR-photo-u #5096 (8f97ea1e) is clean with Fast-Check pass. The lane runs verify-after and waits for the supervisor's local-ci/prescreen on its head (not ours to supply); dev-red #5818 is still open. Now restacking #5103 (AR-12), which conflicts with AR-11 after its dev merge, then rechecking #5254 (16 files against its base). When #5096 merges, retarget #5103, then #5254 and #5256. Belt-Slice-Done goes up once a green main run contains the last AR-photo-u and AR-z PRs.
+Polled: 2026-10-27T12:21Z · #5096 #5254 #5256 clean; #5103 conflicts with its base; no needs-fix or needs-rebase; main fef52e66, no Slice-Done possible
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -15,9 +15,9 @@ Polled: 2026-10-27T11:29Z · 11:30Z: no change; #5096 #5125 #5149 ready. Lane he
 | AR-u | SuiteUI ants and area tool options | AR-7, AR-8 | SJ-AR | AR-a | true | 0 | done | – | – |
 | AR-r | recipe to CoreRaster mask in SuiteImaging | AR-5, AR-6 | MJ-AR-raster | AR-a, IM-a (met) | false | 0 | done (Belt-Slice-Done run 40029042081) | – | – |
 | AR-photo-m | Photo selection on the kernel recipe | AR-9, AR-10 | MJ-AR-photo | AR-r | false | 0 | done (Belt-Slice-Done 40179648854) | – | – |
-| AR-photo-u | Photo tools, Select menu, SuiteUI ants | AR-11, AR-12 | PJ-AR | AR-photo-m; adopt-suiteui-chrome:AC-colour | true | 0 | building (#5096 on #4877, #5103 on #5096) | – | – |
+| AR-photo-u | Photo tools, Select menu, SuiteUI ants | AR-11, AR-12 | PJ-AR | AR-photo-m; adopt-suiteui-chrome:AC-colour | true | 0 | lane (#5096 clean, waits local-ci/prescreen; #5103 stacked, restacking) | – | – |
 | AR-design | group click, enter, exit, deep pick | AR-13, AR-14 | DJ-AR | AR-m, AT-design (met) | true | 0 | done (Belt-Slice-Done posted) | 40129856269 | wanted (Mac-Finish-Wanted posted) |
-| AR-z | Photo copies deleted, C4, RJ-X70/71, built | AR-15, AR-16 | MJ-AR, PJ-AR, DJ-AR | AR-photo-m, AR-photo-u, AR-design; suite-imaging:IM-z | false | 0 | startable (contract-first: IM-a merged; Wire IM-z) | – | – |
+| AR-z | Photo copies deleted, C4, RJ-X70/71, built | AR-15, AR-16 | MJ-AR, PJ-AR, DJ-AR | AR-photo-m, AR-photo-u, AR-design; suite-imaging:IM-z | false | 0 | lane (#5254 AR-15, #5256 AR-16 stacked on #5103; C4 #5268 merged) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -61,3 +61,4 @@ Polled: 2026-10-27T11:29Z · 11:30Z: no change; #5096 #5125 #5149 ready. Lane he
 Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and a mutating setter; AreaRecipe init() and isEmpty) are already on dev c480d848. Only the packet text is stale; AR-photo-u and AR-z need no change.
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.
+- 2026-10-27T12:21Z Resumed after Belt's 30-min nudge. My heartbeats had gone to lead/area-selection, not this branch. State: #5096 clean and waiting on local-ci/prescreen (verify-after lane) and dev-red #5818; #5268 (AR-z C4) merged. 0 open findings.
