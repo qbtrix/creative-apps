@@ -180,6 +180,8 @@ public struct SidebarRow: View {
     private let item: SidebarItem
     private let onToggle: (@MainActor (SidebarToggle.ID) -> Void)?
     private let onRename: (@MainActor (String) -> String?)?
+    /// Bumped by the row's context menu Rename; each change opens the field.
+    private let renameAsk: Int
     @State private var field = SidebarRenameField()
     @FocusState private var editing: Bool
 
@@ -205,11 +207,13 @@ public struct SidebarRow: View {
     /// snapshot shows a refused rename.
     init(
         _ item: SidebarItem, onToggle: (@MainActor (SidebarToggle.ID) -> Void)?,
-        refusableRename: (@MainActor (String) -> String?)?, field: SidebarRenameField = SidebarRenameField()
+        refusableRename: (@MainActor (String) -> String?)?, field: SidebarRenameField = SidebarRenameField(),
+        renameAsk: Int = 0
     ) {
         self.item = item
         self.onToggle = onToggle
         self.onRename = refusableRename
+        self.renameAsk = renameAsk
         _field = State(initialValue: field)
     }
 
@@ -243,6 +247,7 @@ public struct SidebarRow: View {
         .badge(item.count ?? 0)
         .selectionDisabled(!SidebarRowLook(item).isSelectable)
         .onKeyPress(.return) { requestRename() }
+        .onChange(of: renameAsk) { _ = requestRename() }
         .accessibilityActions {
             if onRename != nil { Button(Self.renameActionName) { _ = requestRename() } }
         }

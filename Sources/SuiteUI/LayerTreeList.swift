@@ -24,6 +24,7 @@
 // App panels (#3194) add ids, options and decorations; `reorder` is the flat drop's pure rule.
 // `contextActions` gives a row its context menu: the app's spec-built layer
 // commands for that row's id (LayerActionBar.swift), none when it returns none.
+// A `SidebarRow.renameMenuItem` item in it opens that row's inline rename field.
 // Multi-select (multi-layer-select PM-1): the `selected:` init draws every
 // picked id selected and sends a click out through `onPick` with its mode,
 // `pick(shift:command:)` of the modifiers read once when the click lands.
@@ -81,6 +82,8 @@ public struct LayerTreeList: View {
     /// The row that starts with its rename field in this state: a snapshot's refused rename.
     private let renaming: (id: String, field: SidebarRenameField)?
     @State private var target: String?
+    /// The row the menu's Rename last asked, and a count bumped per ask; the row opens its field on each.
+    @State private var renameAsk = (id: "", count: 0)
     @Environment(\.gridProbe) private var probe
 
     /// The list with several rows picked: every id in `selected` draws
@@ -181,7 +184,8 @@ public struct LayerTreeList: View {
 
     /// Row `id`'s context menu: nil when the app gives it no actions.
     func contextMenu(for id: String) -> [SidebarMenuItem]? {
-        contextActions.flatMap { SidebarContextMenu.items(for: $0(id)) }
+        let rename: (@MainActor () -> Void)? = onRename == nil ? nil : { renameAsk = (id, renameAsk.count + 1) }
+        return contextActions.flatMap { SidebarContextMenu.items(for: $0(id), rename: rename) }
     }
 
     /// The move a drop of `id` onto `target` makes, or nil when the list
@@ -268,7 +272,8 @@ public struct LayerTreeList: View {
                 naming: naming,
                 options: options, decoration: decorations[row.id],
                 field: renaming?.id == row.id ? renaming?.field : nil,
-                onAction: onAction, onSelect: onSelect, onRename: rename(row.id))
+                onAction: onAction, onSelect: onSelect, onRename: rename(row.id),
+                renameAsk: renameAsk.id == row.id ? renameAsk.count : 0)
                 .equatable()
                 // Outside the equatable row, whose == leaves closures out, so the menu is never stale.
                 // ponytail: built per shown row on each list update (the modifier takes no lazy builder);
@@ -337,6 +342,7 @@ struct LayerTreeRow: View, Equatable {
     let onAction: @MainActor (LayerTreeAction) -> Void
     let onSelect: (@MainActor (String) -> Void)?
     let onRename: (@MainActor (String) -> String?)?
+    let renameAsk: Int
     @State var field: SidebarRenameField
     @State private var hovering = false
     @FocusState var editing: Bool
@@ -355,8 +361,9 @@ struct LayerTreeRow: View, Equatable {
         options: LayerTreeOptions,
         decoration: LayerRowDecoration?, field: SidebarRenameField?,
         onAction: @escaping @MainActor (LayerTreeAction) -> Void, onSelect: (@MainActor (String) -> Void)?,
-        onRename: (@MainActor (String) -> String?)?
+        onRename: (@MainActor (String) -> String?)?, renameAsk: Int = 0
     ) {
+        self.renameAsk = renameAsk
         self.row = row
         self.lit = lit
         self.selected = selected
@@ -372,7 +379,7 @@ struct LayerTreeRow: View, Equatable {
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.row == rhs.row && lhs.lit == rhs.lit && lhs.selected == rhs.selected && lhs.join == rhs.join
-            && lhs.naming == rhs.naming
+            && lhs.naming == rhs.naming && lhs.renameAsk == rhs.renameAsk
             && lhs.options == rhs.options && lhs.decoration == rhs.decoration
             && (lhs.onRename == nil) == (rhs.onRename == nil) && (lhs.onSelect == nil) == (rhs.onSelect == nil)
     }
@@ -418,6 +425,7 @@ struct LayerTreeRow: View, Equatable {
         .onTapGesture { onSelect?(row.id) }
         .focusable(onRename != nil)
         .onKeyPress(.return) { requestRename() }
+        .onChange(of: renameAsk) { _ = requestRename() }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(row.name)
         .accessibilityAddTraits(selected ? .isSelected : [])
