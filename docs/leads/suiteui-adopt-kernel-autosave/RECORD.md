@@ -215,3 +215,4 @@ Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (r
 - 2026-10-27T12:30:14Z AK-photo waits on SC-f #5262 #5265, both open
 - 2026-10-27T12:57:31Z AK-photo waits on SC-f #5262 #5265, both open
 - 2026-10-27T13:33:26Z AK-photo waits on SC-f #5262 #5265, both open
+- 2026-10-27T14:34:24Z AK-photo waits on SC-f #5262/#5265 (open)
