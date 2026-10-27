@@ -377,3 +377,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 16:18Z check-in: #5247/#5249/#5252 clean, unmerged, waiting for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
 - 16:40Z check-in: #5247/#5249/#5252 clean, unmerged, waiting for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
 - 17:00Z check-in: #5247/#5249/#5252 clean, unmerged, waiting for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
+- 17:31Z check-in: #5249 got needs-rebase from dev's halo clipboard work (#4905); dev merged in, both command sets kept, gate PASS, golden + LiveStandIn tests green, Head 89b9e92a3. #5247 and #5252 clean. All three wait for local-ci/prescreen. main fef52e668 still holds none of AJ-k/AJ-u/AJ-library, so no Belt-Slice-Done yet. The PR tooling re-appends an attribution footer to PR bodies on every edit; the lane strips it from the squash.
