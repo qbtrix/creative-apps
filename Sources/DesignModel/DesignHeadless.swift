@@ -65,7 +65,8 @@ public struct DesignHeadless: HeadlessDocument {
         let pages = scope == .selection ? workspace.selectedPage.map { [$0] } ?? [] : workspace.pages
         for page in pages {
             var onPage = workspace
-            onPage.selectPage(page.id)
+            // Selecting a page clears the layer selection, so a selection export keeps the selected page as it is.
+            if scope != .selection { onPage.selectPage(page.id) }
             let items: [DesignExportItem]
             do throws(DesignRefusal) { items = try onPage.exportPlan(DesignExportOptions(format: .svg, scope: scope), existing: taken) }
             catch .nothingToExport where scope != .selection { continue }

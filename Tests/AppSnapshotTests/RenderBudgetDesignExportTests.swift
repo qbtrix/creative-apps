@@ -173,7 +173,7 @@ extension BodyCountSuites {
             _ = Self.press("design.export.dismiss", in: sheet)
         }
 
-        /// The JPEG chip writes a JPEG: Desktop at 2x decodes at 2880 × 2048, its fill white, not black.
+        /// The JPEG chip writes a JPEG: Desktop at 2x decodes at 2880 × 2048 on its frame's fill, not black.
         @Test(.timeLimit(.minutes(2)))
         func jpegLiveRunWritesAJPEG() async throws {
             let folder = try Self.folder("jpeg")
@@ -196,7 +196,8 @@ extension BodyCountSuites {
             let file = folder.appendingPathComponent("Desktop.jpg")
             let image = try #require(RGBAImage(png: try Data(contentsOf: file)), "Desktop.jpg doesn't decode")
             #expect(image.width == 2880 && image.height == 2048, "Desktop.jpg is \(image.width) × \(image.height)")
-            #expect(image.bytes.prefix(3).allSatisfy { $0 >= 250 }, "the top-left reads \(Array(image.bytes.prefix(4)))")
+            // Desktop's own fill (DesignColor.shape, 217 gray), as the canvas paints it; a PNG under a .jpg name read black.
+            #expect(image.bytes.prefix(3).allSatisfy { abs(Int($0) - 217) <= 4 }, "the top-left reads \(Array(image.bytes.prefix(4)))")
             _ = Self.press("design.export.dismiss", in: sheet)
         }
 
@@ -242,7 +243,9 @@ extension BodyCountSuites {
             let (w, sheet) = try await Self.openSheet(model)
             defer { w.close() }
             guard let sheet else { return #expect(Bool(false), "no export sheet") }
-            #expect(Self.press("design.export.format.svg", in: sheet) && Self.press("design.export.scope.selection", in: sheet))
+            #expect(Self.press("design.export.format.svg", in: sheet), "no SVG chip")
+            try await w.settle(200)
+            #expect(Self.press("design.export.scope.selection", in: sheet), "no Selection chip")
             try await w.settle(200)
             #expect(Self.press("design.export.start", in: sheet), "no Export button")
             #expect(await Self.waitFor("Exported 1 file", in: sheet), "no finished line: \(Self.texts(in: sheet))")
