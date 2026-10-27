@@ -243,3 +243,4 @@ utc	stage	event	ref	note
 2026-10-27T06:15:00Z	wait	lane	#4936	Linux check 40412395828 green on 4f8863ff; waits on local-ci/prescreen; body Belt-Lead moved to act-1a17bed1e9b-xhpo; dev-red #5818 (SuiteUI compile) open
 2026-10-27T06:48:11Z	check	-	#4936 HF-4 4f8863ff waits on local-ci/prescreen; dev c367fbeb0; dev-red #5818 (SuiteUI) open
 2026-10-27T07:13:12Z	check	-	#4936 HF-4 not landed (waits on local-ci/prescreen); dev c367fbeb0; dev-red #5818 open
+2026-10-27T07:35:03Z	check	-	#4936 HF-4 now has local-ci/prescreen success, waits for the lane sweep; dev 841d4d881 has the SuiteUI fix #5868
