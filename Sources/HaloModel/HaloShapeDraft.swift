@@ -17,7 +17,7 @@ public struct HaloShapeDrawn: Sendable, Hashable {
         (self.spec, self.box) = (spec, dragged.box)
     }
 
-    /// The new layer's name: its kind ("Star").
+    /// Its kind's name ("Star"); the undo step reads "Draw Star".
     public var name: String { spec.kind.rawValue.prefix(1).uppercased() + spec.kind.rawValue.dropFirst() }
 
     /// The path as polylines in composition pixels; empty when the rules refuse the spec.
@@ -64,7 +64,7 @@ extension HaloProject {
             refusal = HaloRefusal(control: Self.shapeControl, message: help)
             return nil
         }
-        do { return try addShape(drawn.spec, in: drawn.box, name: drawn.name) } catch {
+        do { return try addShape(drawn.spec, in: drawn.box, name: "Draw \(drawn.name)") } catch {
             refusal = HaloRefusal(control: Self.shapeControl, message: "\(error)")
             return nil
         }

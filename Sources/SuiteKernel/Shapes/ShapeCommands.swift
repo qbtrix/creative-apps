@@ -85,9 +85,14 @@ public enum ShapeCommands {
         "cornerRadius": .optional(.number("A rectangle's corner radius, points.")),
         "head": .optional(.number("An arrow's head length, points.")),
     ]
+    /// A line or arrow end: a fraction of the box from its left or top edge, 0 to 1, not pixels.
+    static func end(_ what: String) -> ParamSchema {
+        .number("A line or arrow \(what), a fraction of the box from 0 to 1 (not pixels).", minimum: 0, maximum: 1)
+    }
     static let drawSchema = ParamSchema.object(options.merging([
         "x": .number(), "y": .number(), "w": .number(minimum: 0), "h": .number(minimum: 0),
-        "x1": .optional(.number()), "y1": .optional(.number()), "x2": .optional(.number()), "y2": .optional(.number()),
+        "x1": .optional(end("start's x")), "y1": .optional(end("start's y")),
+        "x2": .optional(end("end's x")), "y2": .optional(end("end's y")),
     ]) { old, _ in old }, required: ["kind", "x", "y", "w", "h"])
 
     /// shape.draw (an edit, one undo step) and tool.shape (view state), both unavailable while `shapeHelp` is set.

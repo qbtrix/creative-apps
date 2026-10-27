@@ -103,15 +103,17 @@ enum HaloOutlines {
 
     /// A shape layer's `spec` drawn in `bounds` (layer space) through the
     /// kernel's ShapeRules, every point mapped through `matrix`, flattened at
-    /// 0.25 / `scale` to a polygon. Nil for a spec ShapeRules refuses, an open
-    /// path (a line or arrow) or a non-finite point.
+    /// 0.25 / `scale` to a polygon. Only closed subpaths fill: an arrow fills
+    /// its head, not its shaft, and several join into one even-odd polygon.
+    /// Nil for a spec ShapeRules refuses, a line or a non-finite point.
     static func outline(_ spec: ShapeSpec, bounds r: HaloLayerRect, matrix m: HaloMatrix, scale: Double = 1) -> HaloOutline? {
         guard isFinite(m), m.determinant != 0, scale.isFinite, scale > 0,
               let path = try? ShapeRules.path(spec, in: Rect(minX: r.x, minY: r.y, maxX: r.x + r.width, maxY: r.y + r.height)),
-              let lines = try? path.transformed(by: m).flattened(tolerance: 0.25 / scale),
-              var points = lines.first, points.count >= 3
+              let lines = try? path.transformed(by: m).flattened(tolerance: 0.25 / scale)
         else { return nil }
-        if points.first == points.last { points.removeLast() }
+        let closed = lines.filter { $0.count >= 4 && $0.first == $0.last }
+        guard closed.count == 1, var points = closed.first else { return polygon(joining: closed) }
+        points.removeLast()
         guard points.allSatisfy({ $0.x.isFinite && $0.y.isFinite }) else { return nil }
         return .polygon(points)
     }
