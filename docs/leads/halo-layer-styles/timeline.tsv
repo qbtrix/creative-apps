@@ -182,3 +182,4 @@ utc	stage	event	ref	note
 2026-10-27T09:31:57Z	check	-	check: #5157 (HY-a) open, clean, waiting in the lane at fcdeb1b2; #5161/#5218 draft; full CI 40470141862 red on macOS test shards (#5818, range of 85 PRs), so HY-m waits for a later green halo-scoped or full run
 2026-10-27T09:56:41Z	check	-	check: HY-a #5157 waits in the lane (clean); HY-m e83dec8c9 has no green run yet (dev-red #5818; halo-scoped 40478391622 red on Library's #5128 compile error, not Halo).
 2026-10-27T10:18:00Z	check	-	check: HY-a #5157 waits in the lane (clean). HY-m e83dec8c9: no green run yet (full runs 40484007992, 40487248024 pending; dev macOS red on Library #5128). No new findings.
+2026-10-27T10:41:55Z	check	-	#5157 (HY-a) still in the lane, no needs-fix; #5161, #5218 draft. HY-m e83dec8c9 waits on full run 40489065455 / halo-scoped 40490171439 at 4a7d926f3 (queued). No new halo findings.
