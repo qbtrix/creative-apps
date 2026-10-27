@@ -208,3 +208,4 @@ utc	stage	event	ref	note
 20:54Z	3	check-in	#5247 #5249 #5252	all clean, unmerged; wait for local-ci/prescreen
 21:14Z	3	check-in	#5247 #5249 #5252	all clean, unmerged; wait for local-ci/prescreen
 21:17	3	waiting	#5247 #5249 #5252	poll: dev ddd9b77a, none of ours merged
+21:34Z	3	check-in	#5247 #5249 #5252	all clean, unmerged; wait for local-ci/prescreen

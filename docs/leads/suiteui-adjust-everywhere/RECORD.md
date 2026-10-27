@@ -407,3 +407,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 20:54Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev 7d9c09b02, main fef52e668.
 - 21:14Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev e74363e92, main fef52e668.
 - 2026-10-27T21:17Z 2026-10-27T21:17Z poll: dev ddd9b77a (#5927 #5123 #5242 landed, not ours), main fef52e66, dev-red #5818 open (not ours); all lead PRs clean with fast-lane, none red. AJ children wait on #5247/#5249.
+- 21:34Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev 6dab26f7e, main fef52e668.
