@@ -3,8 +3,9 @@
 // LF-1): select a scene or layer, its eye and lock toggles, reorder and rename
 // either kind of row by id, New Scene and New Layer. Remove takes a scene or a
 // layer; a scene's Remove is refused with the Model's removeSceneHelp, which
-// is also the remove control's tooltip. Duplicate waits for the row context
-// menus (LF-2) and says so. SCENES is a SuiteSidebarList section; LAYERS is
+// is also the remove control's tooltip. Right-clicking a row opens its context
+// menu (LF-2), the Model's `layerRowMenu` / `sceneRowMenu` as ToolbarActions,
+// each off with its reason. SCENES is a SuiteSidebarList section; LAYERS is
 // SuiteUI's LayerTreeList (adopt-kernel-layers AL-f3) over the kernel's
 // `layerRows`, top first, named `.sidebar`: rows `suite.sidebar.row.<id>`,
 // eye and lock `suite.sidebar.<id>.visible` / `.locked` (FlareLayerFlag's raw
@@ -25,6 +26,17 @@ extension SidebarSection {
     }
 }
 
+/// A row's context menu items as ToolbarActions that send their intent through `perform`.
+enum FlareRowMenu {
+    static func actions(_ commands: [FlareRowCommand], perform: @escaping @MainActor (FlareIntent.Layers) -> Void) -> [ToolbarAction] {
+        commands.map { command in
+            ToolbarAction(command.title, systemImage: command.systemImage, unavailableHelp: command.help) {
+                perform(command.intent)
+            }
+        }
+    }
+}
+
 /// The LAYERS panel: the shared list over the edited owner's layers, with eye, lock, rename and drag to reorder.
 /// New Layer shows while a scene is selected. Every gesture leaves as a `.layers` intent through `perform`.
 struct FlareLayersList: View {
@@ -40,12 +52,13 @@ struct FlareLayersList: View {
                 title: "Layers",
                 action: model.selectedScene == nil
                     ? nil : ToolbarAction("New Layer", systemImage: "plus") { perform(.addLayer) }),
-            options: LayerTreeOptions(reorders: true, embedded: embedded),
+            options: LayerTreeOptions(reorders: true, embedded: embedded, dimsLocked: true),
             onSelect: { perform(.select(id: $0)) },
             onRename: { id, name in
                 perform(.rename(id: id, name: name))
                 return nil
             },
+            contextActions: { FlareRowMenu.actions(model.layerRowMenu($0), perform: perform) },
             onAction: act)
     }
 
@@ -79,7 +92,7 @@ extension FlareWindow {
         case .addScene: model.addScene()
         case .remove(let id):
             if !isScene(id) { model.removeLayer(id) } else if model.removeSceneHelp(id) == nil { model.removeScene(id) }
-        case .duplicate: break
+        case .duplicate(let id): model.duplicateLayer(id)
         }
     }
 
@@ -90,7 +103,7 @@ extension FlareWindow {
         case .addLayer: model.selectedScene == nil ? "Select a scene to add a layer to." : nil
         case .addScene: model.document == nil ? "Open an animation to add a scene to." : nil
         case .remove(let id): isScene(id) ? model.removeSceneHelp(id) : nil
-        case .duplicate: "Duplicate comes with the row menus (F11a)."
+        case .duplicate(let id): model.layerRowMenu(id).first { $0.intent == intent }?.help
         }
     }
 

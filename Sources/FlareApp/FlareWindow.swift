@@ -74,7 +74,8 @@ struct FlareWindow: View {
         #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : model.title, actions: toolbar,
-            inspectorWidth: Self.inspectorWidth
+            inspectorWidth: Self.inspectorWidth,
+            contextActions: { FlareRowMenu.actions(model.sceneRowMenu($0), perform: { perform(.layers($0)) }) }
         ) {
             VStack(spacing: 0) {
                 SuiteSidebarList(
