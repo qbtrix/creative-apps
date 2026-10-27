@@ -55,7 +55,7 @@ final class AfterGlowHelpJourneyTests: XCTestCase {
         NSPasteboard.general.clearContents()
         sheet.descendants(matching: .any)["suite.help.report.copy"].click()
         let pasted = NSPasteboard.general.string(forType: .string) ?? ""
-        XCTAssert(pasted.hasPrefix("The brush lagged."), "Copy didn't put the note on top: \(pasted.prefix(80))")
+        XCTAssert(pasted.hasPrefix("The brush lagged in ~/Pictures."), "Copy didn't put the note on top: \(pasted.prefix(80))")
         XCTAssert(pasted.contains("Photo-journey.ips"), "Copy left the crash out of the report")
         XCTAssert(pasted.contains("~/Pictures") && !pasted.contains(Self.home + "/"), "the note's home path isn't redacted")
 
