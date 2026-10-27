@@ -280,3 +280,4 @@ utc	stage	event	ref	note
 2026-10-27T13:16Z	3	heartbeat	lane	poll 2026-10-27T13:16Z: 13:16Z: no change; #5096 #5125 #5149 ready, #5103 (7cc2792d) updated by its fixer and footer stripped. Lane held by dev-red #5818 (flake re-run of LiveStandInTests in progress; triage guess #5334). #5093 awaiting supervisor.
 2026-10-27T14:12Z	3	heartbeat	lane	poll 2026-10-27T14:12Z: 14:12Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (flake re-runs failed, red is real; LiveStandInTests, triage guess #5334). #5093 awaiting supervisor.
 2026-10-27T14:59Z	3	heartbeat	lane	poll 2026-10-27T14:59Z: 15:00Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (real red, now at 95e60fe on macOS too). #5093 awaiting supervisor.
+2026-10-27T15:56Z	3	heartbeat	lane	poll 2026-10-27T15:56Z: 15:57Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (still red at d52f481). #5093 awaiting supervisor.
