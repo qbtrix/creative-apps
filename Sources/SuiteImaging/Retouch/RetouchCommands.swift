@@ -4,6 +4,9 @@
 // retouch.spot-heal, retouch.heal and retouch.remove. Each is an edit of one
 // undo step named for its tool, over `BucketRules` and `HealRules`: it works
 // out the new pixels from the target's, then calls `replaceTarget` once.
+// The selection weighs each pixel once, in `replaceTarget`; no command
+// weighs its result by it as well (#5094: a half-selected pixel took a
+// quarter of the bucket's fill).
 import CoreRaster
 import SuiteKernel
 
@@ -16,12 +19,14 @@ public protocol RetouchTarget: Sendable {
     /// The merged picture, for All Layers.
     var mergedPixels: PixelBuffer? { get }
     /// The selection's coverage, document-sized; nil when nothing is selected.
+    /// `replaceTarget` applies it, so a command reads it only to choose what to rebuild.
     var selectionCoverage: Mask? { get }
     /// The colour the bucket paints, straight (not premultiplied).
     var paintColor: RGBA { get }
     /// The heal source as an offset from the stroke (Option-click); nil before one is sampled.
     var cloneOffset: (dx: Int, dy: Int)? { get }
-    /// Replaces the selected layer's pixels as one undo step called `name`.
+    /// Replaces the selected layer's pixels as one undo step called `name`,
+    /// mixing each new pixel in by the selection's coverage when there is one.
     mutating func replaceTarget(_ p: PixelBuffer, name: String) throws
 }
 
@@ -76,7 +81,7 @@ public enum RetouchCommands {
                 let pixels = try layer(t, "fill.bucket")
                 let options = BucketOptions(tolerance: p.tolerance ?? 32, contiguous: p.contiguous ?? true, sampleAllLayers: p.allLayers ?? false)
                 let sample = options.sampleAllLayers ? t.mergedPixels ?? pixels : pixels
-                let region = try BucketRules.region(seed: (x: pixel(p.x), y: pixel(p.y)), in: sample, options: options, selection: t.selectionCoverage)
+                let region = try BucketRules.region(seed: (x: pixel(p.x), y: pixel(p.y)), in: sample, options: options, selection: nil)
                 let color = p.color.map { RGBA(r: Float($0.r), g: Float($0.g), b: Float($0.b), a: Float($0.a)) } ?? t.paintColor
                 try t.replaceTarget(BucketRules.fill(pixels, region: region, color: color), name: "Paint Bucket")
                 return Done()
