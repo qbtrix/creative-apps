@@ -1,8 +1,10 @@
 // LibraryCommands.swift: every app item of Library's menu bar (blueprint
 // 6.2), fed by the focused window's LibraryMenu. File: Import Folder… ⇧⌘I,
 // Load Sample Photos, Export… ⇧⌘E (Close is the system's). Edit: Undo ⌘Z and
-// Redo ⇧⌘Z in place of the system pair, Select All ⌘A and Deselect ⇧⌘A in
-// place of the pasteboard group (Library has no text fields). View: Grid,
+// Redo ⇧⌘Z in place of the system pair, Copy ⌘C (the selected photo,
+// developed and location off, as a PNG and a clean copy's file URL), Select
+// All ⌘A and Deselect ⇧⌘A in place of the pasteboard group (Library has no
+// text fields). View: Grid,
 // Loupe, Zoom In ⌘+ and Zoom Out ⌘- (Larger and Smaller Thumbnails in the
 // grid), Zoom to Fit ⌘0, Actual Size ⌘1, Sort By. Photo: Copy Settings ⇧⌘C,
 // Paste Settings ⇧⌘V, Reset Develop, Crop, Reset Crop. Metadata: Set Rating,
@@ -30,6 +32,7 @@
 // selection; the grid's context menu shows the same four (`orientItems`).
 import LibraryModel
 import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -88,6 +91,20 @@ struct LibraryCommands: Commands {
 
     /// Why File > Share… is off: no window, else the window's reason.
     private var shareWhy: String { why(nil, menu.share.help ?? "Share isn't available right now.") }
+
+    /// Edit > Copy: the focused window's photo through export into `Clipboard/` beside the catalog file, then
+    /// onto the pasteboard; nil (disabled) with no window or nothing to copy.
+    private var copy: LibraryMenu.Action? {
+        guard let library = focusedCatalog, library.copyHelp == nil else { return nil }
+        return {
+            Task { @MainActor in
+                let folder = LibraryPasteboardAdapter.folder(support: CatalogStore().folder.path(percentEncoded: false))
+                try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
+                guard let items = try? await LibraryPasteboardAdapter().copy(library, folder: folder) else { return }
+                PasteboardBridge().write(items)
+            }
+        }
+    }
 
     /// `perform` applied to `value`, nil (disabled) while `perform` is nil.
     private func bind<Value>(_ perform: (@MainActor (Value) -> Void)?, _ value: Value) -> LibraryMenu.Action? {
@@ -171,6 +188,9 @@ struct LibraryCommands: Commands {
                 shortcut: KeyboardShortcut("z", modifiers: [.command, .shift]))
         }
         CommandGroup(replacing: .pasteboard) {
+            MenuCommand(
+                "edit.copy", on: catalog, title: "Copy", action: copy,
+                reason: why(nil, catalog.copyHelp ?? "Select a photo to copy it."), shortcut: KeyboardShortcut("c"))
             MenuCommand(
                 "edit.select-all", on: catalog, title: "Select All",
                 action: menu.edit.selectAll, reason: why(nil, "There are no photos to select."),
