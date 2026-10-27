@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 09:20Z stage HF-m: #5123 merged with dev (4c297b142), scripts/ci --changed PASS, pushed, base now dev, Head moved, body lines for act-1a17bed1e9b-xhpo. #5801 merged onto it (a80cda0d9, one comment conflict in HaloFileFlowSnapshots kept dev's wording plus PH-3), gate running. Full CI 40470141862 red on macOS test shards (#5818, not ours): no HY-m line yet.
 - 09:18Z (act-1a17bed1e9b-xhpo) stage HF-m: #4936 (HF-4) landed 09:07Z as 9d3e5e327. #5123 rebuilt as dev + its own diff (merge commit 4c297b142, 13 files +90/-100); scripts/ci --changed running, then push, base to dev, move Head. #5801 next. Record kept here (Belt reads this branch) and on lead/file-flow.
 - 06:07Z handover: Belt relaunched this feature as act-1a17bed1e9b-xhpo at 05:55Z (lead/file-flow 4e4d449d). Run act-1a1783581a6-fo4a stops acting so the two leads don't double-post on #3474 or race pushes. State at handover: #4936 Linux + local-ci/prescreen green, should land next sweep; #5123/#5801 stacked; HF-m slice-done, contact sheet and packet rename (lines 47, 95) are the relaunch's.
 - 06:06Z poll: #4936 got local-ci/prescreen success (Linux already green); lane should merge it next sweep, then retarget #5123/#5801. Dev runs on ad29aeaf in flight (halo scoped 40457994899 queued); #5818 open, not ours.
