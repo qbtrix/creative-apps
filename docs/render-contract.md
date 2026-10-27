@@ -43,7 +43,14 @@ its own render route. Every one was locally reasonable and globally slow:
    CPU pixel work, no full-layer upload and no GPU-to-CPU readback. Upload
    only the tiles that changed (resident tiles). Readback is for export, the
    eyedropper and parity tests; mark an allowed one
-   `// render-contract: allow <reason>`.
+   `// render-contract: allow <reason>`. A drag that moves, rotates or scales
+   pixels that already exist (Free Transform, move, pan, zoom) is a compositor
+   transform: the GPU moves the picture it already has, the way a browser's
+   CSS transform does, and the pixels are resampled once, on commit. Every
+   drag or slider budget test counts the CPU resamples during the gesture
+   (`PixelBuffer.sampled`), and that count is 0. Captain, 10-27: Free
+   Transform resampled per sample twice (#5285, #5863) and still read as
+   slow, until it moved to the compositor.
 
 4. **No canvas-sized SwiftUI offscreen passes.** Over the canvas, never use
    `.drawingGroup()`, `.compositingGroup()`, `ImagePaint`, a `Canvas`, or a
@@ -61,8 +68,13 @@ its own render route. Every one was locally reasonable and globally slow:
    once it merges, the lint gets a rule that every texture descriptor goes
    through it.
 
-6. **Budgets.** A slider or drag step: p95 at or under 16 ms (target), 33 ms
-   hard at 8K. Idle: under 10% CPU within 3 s of the last edit. The measured
+6. **Budgets: real time, for every feature.** Captain, 10-27: "this is the
+   kind of performance we need for all our features". A slider, drag, scrub
+   or key-repeat step updates the screen within one frame on a real-size
+   document (24 MP photo, 2,000 layers, the packet's fixture): p95 at or
+   under 8 ms (120 Hz), 16 ms hard. The budget is gated, never only printed,
+   and it is proven by profiling the real app process during the real gesture
+   (`sample <pid>`), not only by a harness. Idle: under 10% CPU within 3 s of the last edit. The measured
    rows and their ratchet are in `Tests/render-budgets.md`; the real-app perf
    journeys that judge the bundled apps from outside (`scripts/ui-test perf`)
    come with #3122 once it merges.
