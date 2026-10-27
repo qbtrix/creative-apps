@@ -12,7 +12,9 @@
 // artboard (a zero-size host) nothing is presented. A layout
 // presents a new drawable only for a new picture or a new drawable size, so a
 // pan or a rotation moves the one shown. The overlay stays on top on both
-// paths. macOS only.
+// paths. A lift dropped on the Metal path stays until the drawable that
+// replaces it is presented, so the release never flashes the picture without
+// the layer. macOS only.
 import AppKit
 import Combine
 import Metal
@@ -151,6 +153,10 @@ extension CanvasHostView {
         metal.drawableSize = size
         guard let drawable = metal.nextDrawable() else { return }
         (pictureChanged, presentedSize) = (false, size)
+        // A dropped lift goes once this drawable, the picture that replaces it, is on screen.
+        if droppedLift != nil {
+            drawable.addPresentedHandler { [weak self] _ in Task { @MainActor in self?.removeDroppedLift() } }
+        }
         presenter.present(drawable, on: metal)
     }
 

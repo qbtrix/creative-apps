@@ -58,6 +58,8 @@ public final class CanvasHostView: NSView {
     let liftSpace = CALayer()
     /// The lifted layer in `liftSpace`; nil with nothing lifted.
     var lifted: CALayer?
+    /// A dropped lift the Metal path keeps until the drawable with the exact picture is on screen.
+    var droppedLift: CALayer?
 
     override public init(frame: NSRect) {
         super.init(frame: frame)

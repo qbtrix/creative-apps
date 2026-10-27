@@ -3,7 +3,8 @@
 // (`lift`), which show in one CALayer above the picture (tiles or Metal) and under the overlay. Each drag
 // sample only sets that layer's affine transform in a transaction with actions off (`moveLift`), so the
 // compositor moves pixels it already has and no pixel work runs per sample, as a browser moves a layer
-// with a CSS transform. The release drops it (`dropLift`) in the same turn the exact picture arrives.
+// with a CSS transform. The release drops it (`dropLift`) in the turn the exact picture arrives; on the
+// Metal path it stays until that picture's drawable is presented.
 // A placement maps the lifted pixels (x right, y down from their top-left) to document pixels (y down); the
 // host turns that into the container's unflipped space, so it zooms, pans and turns with the picture.
 // Photo's Free Transform lifts; Design and Halo can adopt the same three calls. macOS only.
@@ -40,15 +41,29 @@ extension CanvasHostView {
         CATransaction.commit()
     }
 
-    /// Removes the lifted layer; nothing with no lift up.
+    /// Removes the lifted layer; nothing with no lift up. On the Metal path with a new picture still to
+    /// present, it goes once that picture is on screen (`removeDroppedLift`), at most 0.25 s later.
     public func dropLift() {
         guard let lifted else { return }
+        self.lifted = nil
+        removeDroppedLift()
+        droppedLift = lifted
+        guard metalLayer != nil, pictureChanged else { return removeDroppedLift() }
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(250))
+            if self?.droppedLift === lifted { self?.removeDroppedLift() }
+        }
+    }
+
+    /// Takes the dropped lift off the screen; nothing with none.
+    func removeDroppedLift() {
+        guard let gone = droppedLift else { return }
+        droppedLift = nil
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        lifted.removeFromSuperlayer()
-        lifted.contents = nil
+        gone.removeFromSuperlayer()
+        gone.contents = nil
         CATransaction.commit()
-        self.lifted = nil
     }
 
     /// Whether a layer is lifted.
