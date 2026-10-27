@@ -14,18 +14,15 @@ import Testing
 
 @Suite struct HaloFiltersTests {
     static let ball = "comp-1-layer-2", frame = 12
-
     /// `keyed` with Ball selected.
     static func ballSelected() -> HaloProject {
         var project = commandProject("keyed", .fake)
         project.selectLayer(ball)
         return project
     }
-
     static func blur(_ radius: Double, on project: inout HaloProject) throws {
         _ = try HaloProject.catalog.run("filter.gaussian-blur", params: .object(["radius": .number(radius)]), on: &project)
     }
-
     static func render(_ project: HaloProject) throws -> PixelBuffer {
         let comp = try #require(project.selectedComposition)
         return try #require(comp.renderFrame(at: frame)).pixels

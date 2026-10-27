@@ -2,8 +2,8 @@
 // layer. A layer keeps an ordered list of filters and kinds (`HaloLayer.filters`, each key at most once) that
 // LiveFrameRendering runs on that layer's pixels before its blend, so a frame and a render draw it alike. A filter
 // command edits its entry in place (keeping hidden) or appends it; the kinds keep their places. `filter.set-hidden`
-// and `filter.remove` change the list for the inspector's rows. Each change is one step through
-// `edit`. Looks stay Photo's and Library's: Halo lists no look commands. Linux-safe.
+// and `filter.remove` change the list for the inspector's rows. Each change is one step through `edit`. Looks stay
+// Photo's and Library's: Halo lists no look commands. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -17,11 +17,9 @@ import SuiteModel
 /// One entry of a layer's list: a filter or a kind, and whether it is hidden.
 public struct HaloLayerFilter: Hashable, Codable, Sendable, Identifiable {
     public enum Step: Hashable, Codable, Sendable { case filter(ImagingFilter), kind(ImagingKind) }
-
     public var step: Step
     /// A hidden entry stays in the list and draws nothing.
     public var hidden: Bool
-
     public init(_ step: Step, hidden: Bool = false) { (self.step, self.hidden) = (step, hidden) }
 
     /// The entry's key in its list: the filter's id, or "black-and-white", "invert".
@@ -47,8 +45,7 @@ public struct HaloLayerFilter: Hashable, Codable, Sendable, Identifiable {
             switch entry.step {
             case .filter(let f):
                 out = try FilterRules.apply(scaled(f, scale), to: out, coverage: nil)
-            case .kind(let k):
-                // The kinds' CPU twin, on CoreRaster's own channel mixer and invert.
+            case .kind(let k):  // the kinds' CPU twin, on CoreRaster's own channel mixer and invert
                 for made in AdjustKinds.adjustments([k]) {
                     switch made {
                     case .channelMixer(let m): out = try out.channelMixer(m)
@@ -85,7 +82,6 @@ extension HaloProject: AdjustTarget {
     }
 
     public var filterHelp: String? { nil }
-
     public var currentLook: LookPreset { LookPreset(id: "current", name: "Current", kinds: kinds) }
 
     /// The selected layer's kinds, in list order.
@@ -141,9 +137,8 @@ extension HaloProject: AdjustTarget {
     }
 
     /// One step named `name` that changes the selected layer's list; refused in `adjustHelp`'s words.
-    mutating func editFilters(
-        _ id: String, _ name: String, coalesceKey: String? = nil, _ change: (inout [HaloLayerFilter]) throws -> Void
-    ) throws {
+    mutating func editFilters(_ id: String, _ name: String, coalesceKey: String? = nil,
+                              _ change: (inout [HaloLayerFilter]) throws -> Void) throws {
         if let why = adjustHelp { throw CatalogError.unavailable(id: id, why: why) }
         let done = edit(name, control: "halo.inspector.filters", coalesceKey: coalesceKey) { doc in
             guard let c = doc.compositions.firstIndex(where: { $0.id == doc.selectedCompositionID }),
@@ -158,8 +153,7 @@ extension HaloProject: AdjustTarget {
     struct FilterHidden: Codable, Sendable { var id: String; var hidden: Bool }
 
     /// The kernel's kind and filter commands, then the list's own two.
-    static let filterSpecs: [CommandSpec<HaloProject>] =
-        AdjustCommands.specs(HaloProject.self).filter { !$0.id.hasPrefix("look.") } + listSpecs
+    static let filterSpecs: [CommandSpec<HaloProject>] = AdjustCommands.specs(HaloProject.self).filter { !$0.id.hasPrefix("look.") } + listSpecs
 
     static let listSpecs: [CommandSpec<HaloProject>] = {
         let key = ParamSchema.string("The entry's key.", oneOf: HaloLayerFilter.ids)
