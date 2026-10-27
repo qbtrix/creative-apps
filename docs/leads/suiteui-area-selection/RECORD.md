@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-27T19:38Z
+Polled: 2026-10-27T20:02Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -62,3 +62,4 @@ Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and 
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.
 - 2026-10-27T19:38Z 2026-10-27T19:38Z poll: dev 15ff48a3, main fef52e66, dev-red #5818 open (not ours); no lead PR merged; lane dropped needs-rebase on #5096; all parent PRs clean with fast-lane, waiting on local-ci/prescreen. AJ children dirty until their parents land.
+- 2026-10-27T20:02Z 2026-10-27T20:02Z poll: dev still 15ff48a3 (no lane merge since 19:12), main fef52e66, dev-red #5818 open (not ours); all lead PRs clean with fast-lane, waiting on local-ci/prescreen (supervisor). AJ children dirty until parents land.
