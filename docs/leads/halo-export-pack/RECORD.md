@@ -125,3 +125,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 05:05Z heartbeat (10-27): #4917 open clean on 1895fd75, still no local-ci/prescreen status; #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings
 - 05:27Z heartbeat (10-27): #4917 open clean on 1895fd75, still no local-ci/prescreen status (dev unmoved at 870080fb); #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings
 - 05:49Z heartbeat (10-27): #4917 open clean on 1895fd75, still no local-ci/prescreen status (dev unmoved at 870080fb); #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings
+- 06:16Z heartbeat (10-27): #4917 got local-ci/prescreen success at 06:14Z on 1895fd75 (no new failures; prescreen notes dev 5e4a092 itself fails PendingAdjustTarget.swift:22, not ours), now ready for the lane; #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings
