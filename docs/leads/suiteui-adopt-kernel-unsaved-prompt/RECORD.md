@@ -305,3 +305,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-27T05:31:59Z no new ci.yml run on dev since 40448467567 (red); no green photo/full with ef31726a yet (dev-red #5818); #5089 #5091 #5231 open, none needs-fix
 - 2026-10-27T05:51:59Z no new ci.yml run on dev since 40448467567 (red); no green photo/full with ef31726a yet (dev-red #5818); #5089 #5091 #5231 open, none needs-fix
 - 2026-10-27T06:21:57Z UP-photo ef31726a on dev; full CI 40457985904 at ad29aeaf red (macOS compile, SuiteUI PendingAdjustTarget AdjustCommands.notBuilt, not ours); UP-flare/halo/z open
+- 2026-10-27T06:43:19Z UP-photo ef31726a waiting for a green photo/full ci.yml; all dev runs at c367fbeb red (dev macOS compile, not ours); UP-flare/halo/z open
