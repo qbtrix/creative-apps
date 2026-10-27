@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-27T20:26Z
+Polled: 2026-10-27T20:51Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -64,3 +64,4 @@ Polled: 2026-10-27T20:26Z
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
 - 2026-10-27T20:26Z 2026-10-27T20:26Z poll: dev still 15ff48a3 (no lane merge since 19:12), main fef52e66, dev-red #5818 open (not ours); all lead PRs clean with fast-lane, waiting on local-ci/prescreen (supervisor). AJ children dirty until parents land.
+- 2026-10-27T20:51Z 2026-10-27T20:51Z poll: dev moved to 7d9c09b0 (#4942, #5925; not ours), main fef52e66, dev-red #5818 open (not ours); all lead PRs still clean with fast-lane, waiting on local-ci/prescreen. #5258 (AJ child on #5249) gained needs-split: split it when restacking after #5249 lands.
