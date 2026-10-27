@@ -320,3 +320,4 @@ utc	stage	event	ref	note
 2026-10-27T01:28Z	wait	heartbeat	#5321	01:28 poll: #5002/#5011 queued behind dev-red
 2026-10-27T01:33Z	DK-z	PR #5825 opened (DK-8 journey live + old file; DK-9 built); #5002 merged fa5d340f
 2026-10-27T01:44Z	wait	heartbeat	#5321	poll 01:44: #5825 open, #5011 awaiting lane
+2026-10-27T01:45Z	DK-u	#5011 needs-rebase: merged origin/dev (8e83a267), conflicts kept the PR side

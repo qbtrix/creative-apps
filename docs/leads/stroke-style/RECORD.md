@@ -2,7 +2,7 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a178669406-n4me · Started: 2026-10-23 (this run resumed 2026-10-26T13:30Z)
-Stage: 3 DK-z open as #5825 (fast-lane, feature-done); #5011 waits on lane integration; dev-red #5818 open (not ours)
+Stage: 3 #5011 rebased onto dev (8e83a267, needs-rebase fixed); DK-z open as #5825; dev-red #5818 open (not ours)
 Base: origin/dev; main verified at d3323f6a
 Next: when #5011 lands and a green design ci.yml run holds it: Belt-Slice-Done DK-u (gaps #4990 #4991). When #5825 lands and a green run holds it: Belt-Slice-Done DK-z, then Belt-Contact-Sheet. Supervisor asked on #3441 to renew 5 quarantine entries that expired 10-27 (they fail scripts/ci on dev)
 
@@ -10,7 +10,7 @@ Next: when #5011 lands and a green design ci.yml run holds it: Belt-Slice-Done D
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 2 | done; gaps #3865 #3871 #3873 | 39670298178 | wanted (posted) |
-| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 2 | #4864 and #5002 (fa5d340f) merged; #5011 (round 2) dirty, lane integrates; rounds spent; gaps #4990 #4991 | – | – |
+| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 2 | #4864 and #5002 (fa5d340f) merged; #5011 (round 2) needs-rebase fixed: dev merged at 8e83a267; rounds spent; gaps #4990 #4991 | – | – |
 | DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d | no | 2 | #4888 merged (63592c7b); #4916 merged (9810d71b); rounds spent | done: https://github.com/qbtrix/creative-apps/actions/runs/40414010435 | – |
 | DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | #5825 open (findings 2 open: #5009 #5010) | – | – |
 
