@@ -1,11 +1,11 @@
-// HaloPasteboardMenuState.swift (clipboard-interop CB-halo): what Halo's Edit pasteboard group reads, so every item is
+// HaloEditMenuSpecs.swift (clipboard-interop CB-halo): what Halo's Edit pasteboard group reads, so every item is
 // built from a spec (`MenuCommand(spec, on:)`, command-catalog CC-11). Copy Frame is the catalog's `edit.copy-frame`;
 // Paste is the catalog's `edit.paste` and then what the pasteboard offers (its refusal, "Paste: <why>"); Cut, Copy and
 // Select All have no Halo command yet, so they are off with why until a text field takes them (the App's
 // `givingWay(to:)`). The specs only decide availability: the menu's own action runs the item. Linux-safe.
 import SuiteKernel
 
-public struct HaloPasteboardMenuState: Sendable {
+public struct HaloEditMenuSpecs: Sendable {
     public var menu: HaloMenuState
     /// Why what is on the pasteboard can't be pasted into Halo, or nil when it can (or there's nothing to say).
     public var pasteRefusal: String?
