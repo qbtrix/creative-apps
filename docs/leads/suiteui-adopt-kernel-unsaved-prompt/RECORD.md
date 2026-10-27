@@ -297,3 +297,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-27T02:49:33Z UP-photo #5088 merged (ef31726a, in dev 75533612); awaiting a green photo-scoped/full ci run containing it. #5089 #5091 #5231 open, no needs-fix
 - 2026-10-27T03:09:12Z UP-photo ef31726a merged, not yet in any full/photo-scoped ci run (full 40439893721 is at 9c320a9a, older). #5089 #5091 #5231 open, no needs-fix
 - 2026-10-27T03:29:03Z UP-photo ef31726a merged, awaiting a green photo/full ci run containing it. #5089 #5091 #5231 open, no needs-fix
+- 2026-10-27T03:49:33Z UP-photo ef31726a in scoped photo 40444691641 (547b958c, queued); #5089 #5091 #5231 open, no needs-fix
