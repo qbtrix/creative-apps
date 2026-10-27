@@ -16,6 +16,7 @@ Snap: Snap Snapping
 Easing: Easing
 Keyframe: Keyframe
 Layers: Layers LayerTree
+Clipping: ClipRules ClipBase ClippingMask
 Crop: Crop Cropping Cropper
 Export: Export Exporter Exporting
 Clipboard: Clipboard
@@ -25,6 +26,7 @@ Bones: Bone
 Gradient: Gradient
 Autosave: Autosave
 Pen: PenDraft PenRules PenTool
+Path editing: PathCommand PathIntent AnchorEdit AnchorIndex AnchorMove
 Placed image: PlacedImage PlacedAsset ImageLayer PlaceImage
 Tone settings: AdjustmentSettings DevelopSettings DevelopValues DevelopLevels ToneCurve HueSaturation LiveTone LiveDevelop GammaTrack LevelsFormat
 Tone: ToneSettings ToneSlider

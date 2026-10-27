@@ -35,10 +35,10 @@ FV-u waits only on FV-a (rule 18); FV-m never waits on FV-u. MJ-FV is the Model 
 
 ## Journey steps
 
-1. Open `Bounce.flare` (2 s at 30 fps), File > Export… (FV-2,
+1. Launch on `-FlareSample bounce` (550 × 400, 24 fps, 48 frames, scene `scene-1`), File > Export… (FV-2,
    `FlareExportPackJourneyTests.testExportLoopAsGIFAndMP4`): MP4 and GIF chips.
-2. GIF, Long edge 480, Loop forever: Export writes `Bounce.gif`, 60 frames.
-3. MP4, Pixels 1080 × 1080: `Bounce.mp4` is 1080 × 1080, 2.0 s.
+2. GIF, Loop forever: Export writes `scene-1.gif`, 48 frames that loop forever.
+3. MP4: Export writes `scene-1.mp4` (an `ftyp` box).
 4. Cancel a running MP4 export: no partial file is left.
 
 ## Jobs

@@ -62,7 +62,7 @@ no third. Photo's whole-image blur (`AdjustmentKind.blur`, composite only)
 stays as the adjustment-layer kind it is; the filter is the per-layer one.
 
 **Render path.** B&W and Invert are program steps (`matrix` and an inverted
-sRGB `levels`), appended after `ImagingProgram`'s list, so a weight drag is
+`levels` with `encoding: .linear`), appended after `ImagingProgram`'s list, so a weight drag is
 one display write on the live route. Filters are one CPU pass over one
 layer's pixels when the person clicks OK (Photo) or when a Halo frame draws
 that layer; the sheet's Preview runs the same pass on a downsampled copy
@@ -93,7 +93,8 @@ Blueprint sections: photo.md 4 (adjustments), library.md (Develop), halo.md
 | AJ-z | RJ-X60 runs the same look in Photo and Library by command and both exports match, the C4 parts name the adopters, and the feature is built. | AJ-14, AJ-15 | MJ-AJ, PJ-AJ2, LJ-AJ, HJ-AJ | AJ-photo, AJ-library, AJ-halo |
 
 **Screen early.** AJ-u builds Photo's real menus and sheet on AJ-a's stubs
-(each command unavailable with the reason "Filters arrive with AJ-5.") and
+(each command on `PendingAdjustTarget` in `Sources/SuiteUI/PendingAdjustTarget.swift`,
+so it is unavailable with the reason "Filters arrive with AJ-5.") and
 waits on nothing but AJ-a, beside AJ-k and AJ-c. The adopt slices then swap the stubs
 for live and turn the journeys on. Library and Halo reuse AJ-u's two views.
 
@@ -109,7 +110,7 @@ Linux walks first, then the apps' journeys on the scoped run after each slice's 
 - `MJ-AJ`: `AdjustKindsTests`, `FilterRulesTests`, `AdjustCommandsTests` (SuiteImaging) and `PresetStoreTests` (SuiteModel).
 - `MJ-AJ-photo`, `MJ-AJ-library`, `MJ-AJ-halo`: `PhotoAdjustTests`, `LibraryLooksTests`, `HaloFiltersTests`.
 1. Photo: marquee the background, Filter > Blur > Gaussian Blur…, radius 8, OK; inside is soft, outside unchanged; Undo once restores it (AJ-3, AJ-9; `PJ-AJ1`, `PhotoFilterJourneyTests.testGaussianBlurInsideSelection`).
-2. Photo: Adjust tab, click the B&W High Contrast look, Save Look… "Mine", open a second image, click Mine (AJ-4, AJ-9; `PJ-AJ2`, `PhotoFilterJourneyTests.testApplyAndSaveLook`).
+2. Photo: Adjust tab, click the High Contrast B&W look (`bw-high-contrast`), Save Look… "Mine", open a second image, click Mine (AJ-4, AJ-9; `PJ-AJ2`, `PhotoFilterJourneyTests.testApplyAndSaveLook`).
 3. Library: select three photos, click the B&W look; the grid and the loupe go grey; Undo once restores all three (AJ-11; `LJ-AJ`, `LibraryLooksJourneyTests.testBlackAndWhiteLook`).
 4. Halo: select a title layer, Add Filter > Gaussian Blur, radius 6; scrub; change it to 2; hide it (AJ-13; `HJ-AJ`, `HaloFilterJourneyTests.testBlurTitleLayer`).
 
@@ -195,7 +196,7 @@ public protocol PresetStoring: Sendable {
     func delete(id: String, kind: String) throws(SuiteError)
 }
 public struct PresetRecord: Hashable, Codable, Sendable { public var id, name, kind: String; public var payload: Data }
-public struct PresetStore: PresetStoring { public init(folder: String) }   // presets/<kind>.json, revisioned
+public struct PresetStore: PresetStoring { public init(folder: String) }   // one revisioned presets/looks.json for every kind; the app window passes SuiteLocations.processSupportFolder
 ```
 
 Commands (ids go in each adopter's `Tests/command-ids/<app>.txt`):
@@ -217,7 +218,7 @@ Commands (ids go in each adopter's `Tests/command-ids/<app>.txt`):
   dominant hue pair, normalised so neutral weights keep mid grey. The CPU twin
   is core's `blackAndWhite(GrayMix)` with the same weights;
   `AdjustKindsTests.gpuMatchesCpu` renders both on a hue-wheel fixture.
-- **Invert.** sRGB `levels(inBlack 0, inWhite 1, gamma 1, outBlack 1, outWhite 0)`;
+- **Invert.** `levels(inBlack 0, inWhite 1, gamma 1, outBlack 1, outWhite 0, encoding: .linear)`;
   the test holds it against core's `inverted()` within 1 level.
 - **Filters in a selection.** `apply` runs the core op on the layer's bounds
   padded by the op's reach (3 sigma for blur, the distance for motion), then
@@ -240,13 +241,13 @@ Commands (ids go in each adopter's `Tests/command-ids/<app>.txt`):
 |---|---|---|---|---|---|
 | AJ-1 | – | **Checks first, then the stubs.** `AdjustKindsTests`, `FilterRulesTests` and `AdjustCommandsTests` written, disabled by name (`waits on AJ-5`, `AJ-6`); `ImagingKind`, `ImagingFilter` with ranges and neutral values, `FilterRules` and `AdjustCommands` (real ids, schemas and availability, runs throwing `NotBuilt`); the C4 part | `Sources/SuiteImaging/Adjust/AdjustKinds.swift`, `Sources/SuiteImaging/Adjust/FilterRules.swift`, `Sources/SuiteImaging/Adjust/AdjustCommands.swift`, `Tests/SuiteImagingTests/AdjustKindsTests.swift`, `Tests/SuiteImagingTests/FilterRulesTests.swift`, `Tests/SuiteImagingTests/AdjustCommandsTests.swift`, `docs/c4/parts/creative-apps/suite-imaging/imaging-adjust-kinds.json` | – | ~240, 7 |
 | AJ-2 | – | Looks and the store as stubs: `LookPreset` and `BuiltInLooks` (the six looks as data), `PresetStoring` with `PresetStore` over `FileStore` (`presets/looks.json`) and `FakePresetStore`; `PresetStoreTests` written, disabled (`waits on AJ-7`); the C4 part | `Sources/SuiteImaging/Adjust/LookPresets.swift`, `Sources/SuiteModel/Presets/PresetStore.swift`, `Sources/SuiteModel/Fakes/FakePresetStore.swift`, `Tests/SuiteModelTests/PresetStoreTests.swift`, `docs/c4/parts/creative-apps/suite-model/suite-presets.json` | – | ~170, 5 |
-| AJ-3 | – | **Reachable first.** Photo's Filter menu (Blur > Gaussian Blur…, Motion Blur…; Sharpen…; Noise > Reduce Noise…, Add Noise…) and Image > Adjustments > Black & White…, Invert, each a catalog command; SuiteUI `FilterSheet` (sliders from each kind's ranges, Preview, OK, Cancel; emits one intent); `PhotoFilterJourneyTests` written, skipped until AJ-8 | `Sources/SuiteUI/FilterSheet.swift`, `Sources/PhotoApp/PhotoCommands+Filter.swift`, `Sources/PhotoApp/PhotoCommands.swift`, `UITests/PhotoJourneyTests+Filter.swift`, `Tests/SuiteUITests/FilterSheetTests.swift` | AJ-1 | ~220, 5 |
+| AJ-3 | – | **Reachable first.** Photo's Filter menu (Blur > Gaussian Blur…, Motion Blur…; Sharpen…; Noise > Reduce Noise…, Add Noise…) and Image > Adjustments > Black & White…, Invert, each a catalog command; SuiteUI `FilterSheet` on `SuiteSheet`, one `InspectorSliderRow` per range of the kind (Preview, OK, Cancel; emits one intent); `PhotoFilterJourneyTests` written, skipped until AJ-8 | `Sources/SuiteUI/FilterSheet.swift`, `Sources/PhotoApp/PhotoCommands+Filter.swift`, `Sources/PhotoApp/PhotoCommands.swift`, `UITests/PhotoJourneyTests+Filter.swift`, `Tests/SuiteUITests/FilterSheetTests.swift` | AJ-1 | ~220, 5 |
 | AJ-4 | – | SuiteUI `LookGrid` on `PresetGrid`: built-in looks, then saved ones, Save Look… (name field), Delete with a confirm; shown in Photo's Adjust tab on the fake store; render budget test | `Sources/SuiteUI/LookGrid.swift`, `Sources/PhotoApp/PhotoAdjustTab.swift`, `Tests/SuiteUITests/LookGridTests.swift`, `Tests/AppSnapshotTests/RenderBudgetAdjustTests.swift` | AJ-3 | ~170, 4 |
-| AJ-5 | – | `AdjustKinds` bodies: B&W as a `matrix` step and core's `blackAndWhite` on the CPU, Invert as an inverted sRGB `levels` and core's `inverted()`; turns on `AdjustKindsTests` | `Sources/SuiteImaging/Adjust/AdjustKinds.swift`, `Tests/SuiteImagingTests/AdjustKindsTests.swift`, `Tests/mutations/SuiteImaging.AdjustKinds.json` | AJ-1 | ~150, 3 |
+| AJ-5 | – | `AdjustKinds` bodies: B&W as a `matrix` step and core's `blackAndWhite` on the CPU, Invert as an inverted linear `levels` and core's `inverted()`; turns on `AdjustKindsTests` | `Sources/SuiteImaging/Adjust/AdjustKinds.swift`, `Tests/SuiteImagingTests/AdjustKindsTests.swift`, `Tests/mutations/SuiteImaging.AdjustKinds.json` | AJ-1 | ~150, 3 |
 | AJ-5f | – | `FilterRules` bodies: the five filters over core on the layer's padded bounds, mixed by a coverage `Mask`; the seeded Add Noise; the 1024 px preview; turns on `FilterRulesTests` | `Sources/SuiteImaging/Adjust/FilterRules.swift`, `Tests/SuiteImagingTests/FilterRulesTests.swift`, `Tests/mutations/SuiteImaging.FilterRules.json` | AJ-1 | ~200, 3 |
 | AJ-6 | – | `AdjustCommands` bodies over `AdjustTarget`: `adjust.black-and-white`, `adjust.invert`, `filter.<id>`, `look.apply`, `look.save`, `look.delete`, `look.list`; a look snapshots `ToneSettings`, `AdjustSettings` and kinds; turns on `AdjustCommandsTests` | `Sources/SuiteImaging/Adjust/AdjustCommands.swift`, `Sources/SuiteImaging/Adjust/LookPresets.swift`, `Tests/SuiteImagingTests/AdjustCommandsTests.swift`, `Tests/mutations/SuiteImaging.AdjustCommands.json` | AJ-5, AJ-5f | ~230, 4 |
-| AJ-7 | – | `PresetStore` body: revisioned `presets/looks.json` under `SuiteLocations`, names unique ignoring case, a damaged file set aside, never a built-in overwritten; turns on `PresetStoreTests` | `Sources/SuiteModel/Presets/PresetStore.swift`, `Tests/SuiteModelTests/PresetStoreTests.swift`, `Tests/mutations/SuiteModel.PresetStore.json` | AJ-2 | ~150, 3 |
-| AJ-8 | – | **Test first.** `PhotoAdjustTests` (filters on a layer and in a selection, kinds as layers, the `.ora` round trip of the new kinds); `PhotoAdjust+Kernel.swift` conforms `PhotoWorkspace` to `AdjustTarget`; `AdjustmentKind` gains `blackAndWhite` and `invert`; the catalog appends `adjustCommands`; ids in the ledger; RJ-P50's job folder | `Tests/PhotoModelTests/PhotoAdjustTests.swift`, `Sources/PhotoModel/PhotoAdjust+Kernel.swift`, `Sources/PhotoModel/AdjustmentSettings.swift`, `Sources/PhotoModel/PhotoCommandCatalog.swift`, `Tests/command-ids/photo.txt`, `Tests/mutations/PhotoModel.PhotoAdjust+Kernel.json`, `Tests/RealJobs/photo/blur-background/blur-background.jobs.json`, `Tests/RealJobs/photo/blur-background/input/portrait.png` | AJ-6 | ~250, 8 |
+| AJ-7 | #4867 (merged) | `PresetStore` body: revisioned `presets/looks.json` under `SuiteLocations`, names unique ignoring case, a damaged file set aside, never a built-in overwritten; turns on `PresetStoreTests` | `Sources/SuiteModel/Presets/PresetStore.swift`, `Tests/SuiteModelTests/PresetStoreTests.swift`, `Tests/mutations/SuiteModel.PresetStore.json` | AJ-2 | ~150, 3 |
+| AJ-8 | – | **Test first.** `PhotoAdjustTests` (filters on a layer and in a selection, kinds as layers, the `.ora` round trip of the new kinds); `PhotoAdjust+Kernel.swift` conforms `PhotoWorkspace` to `AdjustTarget`; `AdjustmentSettings` stores `kinds: [ImagingKind]` (B&W and Invert; `AdjustmentKind` keeps its five sections), and PhotoModel's own enum is renamed `PhotoAdjustTarget` so the suite's `AdjustTarget` protocol is unambiguous; the catalog appends `adjustCommands`; ids in the ledger; RJ-P50's job folder | `Tests/PhotoModelTests/PhotoAdjustTests.swift`, `Sources/PhotoModel/PhotoAdjust+Kernel.swift`, `Sources/PhotoModel/AdjustmentSettings.swift`, `Sources/PhotoModel/PhotoCommandCatalog.swift`, `Tests/command-ids/photo.txt`, `Tests/mutations/PhotoModel.PhotoAdjust+Kernel.json`, `Tests/RealJobs/photo/blur-background/blur-background.jobs.json`, `Tests/RealJobs/photo/blur-background/input/portrait.png` | AJ-6 | ~250, 8 |
 | AJ-9 | – | The UI on live: the sheet's Preview on a 1024 px copy, OK runs the command; the look grid on the live store; `PhotoFilterJourneyTests` turned on | `Sources/PhotoApp/PhotoWindow+Filter.swift`, `UITests/PhotoJourneyTests+Filter.swift` | AJ-8, AJ-4 | ~150, 2 |
 | AJ-10 | – | **Test first.** `LibraryLooksTests` (B&W and Invert stored under `bw` and `invert`, old catalogs open unchanged, a look applied to 40 photos is one step); `LibraryLooks+Kernel.swift` conforms the catalog to `AdjustTarget` (kinds and looks only: the filter commands are unavailable with "Filters are in Photo."); the catalog appends the specs; ids in the ledger | `Tests/LibraryModelTests/LibraryLooksTests.swift`, `Sources/LibraryModel/LibraryLooks+Kernel.swift`, `Sources/LibraryModel/Contracts/DevelopValues.swift`, `Sources/LibraryModel/LibraryCommandCatalog.swift`, `Tests/command-ids/library.txt`, `Tests/mutations/LibraryModel.LibraryLooks+Kernel.json` | AJ-6 | ~250, 6 |
 | AJ-11 | – | Develop's BLACK & WHITE section (a switch and six weights) and the look grid above the tone rows; the loupe appends the kinds to its live program; `LibraryLooksJourneyTests` | `Sources/LibraryApp/DevelopInspector.swift`, `Sources/LibraryApp/LibraryDevelopLooks.swift`, `UITests/LibraryJourneyTests+Looks.swift` | AJ-10, AJ-4 | ~150, 3 |

@@ -104,7 +104,6 @@ Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift
 Sources/LibraryModel/Contracts/ExportPresets.swift
 Sources/LibraryModel/Contracts/ExportSidecar.swift
 Sources/LibraryModel/Fakes/FakeCropLeveling.swift
-Sources/LibraryModel/LibraryCrop.swift
 Sources/LibraryModel/LibraryExport.swift
 Sources/LibraryModel/LibraryExportAdapter.swift
 Sources/LibraryModel/LibraryLaunch.swift
@@ -150,7 +149,6 @@ Sources/PhotoModel/Live/LiveSelection.swift
 Sources/PhotoModel/Live/LiveTransform+Kernel.swift
 Sources/PhotoModel/Live/LiveTransform.swift
 Sources/PhotoModel/PhotoClipboard.swift
-Sources/PhotoModel/PhotoCropSize.swift
 Sources/PhotoModel/PhotoDocumentFile.swift
 Sources/PhotoModel/PhotoGradientTool+Kernel.swift
 Sources/PhotoModel/PhotoHistory.swift
