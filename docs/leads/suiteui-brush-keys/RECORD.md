@@ -98,3 +98,4 @@ Next: wait for the lane to merge BK-u #4939; then merge dev into #4965, #4961, #
 - 2026-10-27T00:19Z (act-1a177ff0916-4jm7): poll: dev a80e88f4; lane merged 7 PRs, none ours; #4939 BK-u in lane at 2ea13868
 - 2026-10-27T00:37Z (act-1a177ff0916-4jm7): poll: dev 352d9d56; lane merged #4903 only; #4939 BK-u still queued at 2ea13868, no return label; needs-split rebuilds wait on it
 - 2026-10-27T00:58Z (act-1a177ff0916-4jm7): poll: dev f3ed4b32; lane merged 12 docs/test PRs, none ours; #4939 BK-u still queued at 2ea13868; #4965/#4961/#4982 keep needs-split until it lands
+- 2026-10-27T01:17Z (act-1a177ff0916-4jm7): poll: dev f3ed4b32; dev unchanged; #4939 BK-u still queued at 2ea13868, no return label
