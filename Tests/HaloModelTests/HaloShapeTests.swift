@@ -80,8 +80,8 @@ import Testing
         for kind in [ShapeKind.line, .arrow] {
             _ = try project.addShape(.defaults(kind), in: Self.box, name: "Draw")
             let layer = try #require(project.selectedLayer)
-            let c = layer.color
-            #expect(layer.stroke == VectorStroke(color: Color(r: c.red, g: c.green, b: c.blue), width: 4), "\(kind)")
+            #expect(layer.stroke == HaloProject.lineStroke(layer.color), "\(kind)")
+            #expect(layer.stroke?.width == 4, "\(kind)")
         }
     }
 
