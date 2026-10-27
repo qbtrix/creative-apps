@@ -14,6 +14,8 @@
 // appear and whenever the cell size or the display scale changes, the grid
 // reports both to `menu.thumbnails.cellSizeChanged` (the scale a whole number
 // ≥ 1, `LibraryCatalog.thumbnailScale`), which picks the thumbnail bucket.
+// Its context menu turns or mirrors the selection (orientation-crop OC-9):
+// Photo's Rotate Left, Rotate Right, Flip Horizontal and Flip Vertical.
 // Values in, closures out; LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
@@ -28,6 +30,7 @@ struct LibraryGrid: View {
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.libraryFiles) private var files
 
     /// Each cell's identifier is this plus the photo's id.
     static let cellIdentifierPrefix = "library.grid.cell."
@@ -52,10 +55,17 @@ struct LibraryGrid: View {
             // The photo Sync copies from gets the heavier ring.
             active: model.syncSource?.id
         )
+        .contextMenu {
+            let reason = menu.help(for: "develop") ?? model.developHelp ?? "Select a photo first."
+            let turns = LibraryCommands.orientItems(menu.photo, on: model, reason: reason)
+            ForEach(Array(turns.enumerated()), id: \.offset) { $0.element }
+        }
         .onChange(of: cell, initial: true) { _, cell in
             guard cell.count == 2 else { return }
             cellSizeChanged?(cell[0], cell[1])
         }
+        .contextMenu { LibraryFilesContextMenu(model: model, files: files) }
+        .overlay(alignment: .bottomTrailing) { LibraryMissingBadge(model: model, files: files) }
     }
 }
 

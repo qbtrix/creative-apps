@@ -7,7 +7,7 @@
 // SuiteKernel's TransformCommands on its TransformTarget (transform DT-6); color.sample is SampleCommands on its
 // SampleTarget and color.pick the Eyedropper's click (eyedropper DY-6); shape.draw and tool.shape are ShapeCommands on its
 // ShapeTarget (shape-tools DS-6); select.pick, select.enter-group and select.exit-group are GroupPick's on its
-// GroupPickTarget (area-selection AR-14); the nine stroke.* are StrokeCommands on its StrokeTarget (stroke-style DK-6). Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
+// GroupPickTarget (area-selection AR-14); the nine stroke.* are StrokeCommands on its StrokeTarget (stroke-style DK-6); the five place.* are PlaceCommands on its PlacedImageTarget (placed-images PD-5). Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -35,6 +35,7 @@ extension DesignWorkspace {
         fileSpecs + editSpecs + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
             + [pick] + groupSpecs + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + ShapeCommands.specs(DesignWorkspace.self)
             + StrokeCommands.specs(DesignWorkspace.self)
+            + PlaceCommands.specs(DesignWorkspace.self)
             + HistoryCommands.specs(DesignWorkspace.self) + viewSpecs
 
     /// The specs as a catalog whose history is the workspace's own.
@@ -60,8 +61,11 @@ extension DesignWorkspace {
     }
 
     static let fileSpecs: [CommandSpec<DesignWorkspace>] = [
-        plain("file.new", "New File", "Opens a new file with one page holding a Desktop frame.", .edit,
-              { reason(DesignToolbarItem.newFile.unavailableHelp(in: $0)) }, { $0.newFile() }),
+        .typed("file.new", title: "New File", summary: "Opens a new file with one page of the given size holding a frame in its background.",
+               kind: .edit, params: DocumentSetup.self, schema: DocumentSetupCommands.setupSchema,
+               example: .object(["width": .number(1080), "height": .number(1920), "background": .string("transparent")]),
+               availability: { reason(DesignToolbarItem.newFile.unavailableHelp(in: $0)) }
+        ) { w, setup in try w.newFile(setup); return JSONValue.object([:]) },
         .typed("file.open", title: "Open…", summary: "Opens a Design file's text in a window that holds no file.", kind: .file,
                params: TextParams.self, schema: .object(["text": .string("The file's JSON text.")], required: ["text"]),
                example: .object(["text": .string("{}")]),

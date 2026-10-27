@@ -18,7 +18,15 @@
 // resident tiles (`residentTiles`, the GPU route's ResidentSurfaces) a region
 // composites from them in one batch, so a frame uploads only the tiles that
 // changed, those across the cores, and `composites` keeps the live route's
-// base composites (PhotoLiveTone.swift). Export and `composite()` stay on
+// base composites and this route's (PhotoLiveTone.swift): a region's layers
+// that the last render already laid come back composited, so a Move step on a
+// hundred-layer picture composites the moved layer and the ones above it. A
+// Free Transform drag frame (`liveDraft`) draws the draft's layer through its
+// matrix on each region (`compositeDraft`: the part of the layer under each
+// 256 px chunk resampled with CoreRaster's `transformed`, bilinear, the chunks
+// across the cores, then composited as tiles) and keeps it out of the resident
+// batch, so no frame resamples the whole layer.
+// Export and `composite()` stay on
 // `rendered(_:)` (CoreRaster directly), the reference both routes are held
 // to. Linux-safe: the Metal backend is the app's to make.
 import CoreColor
@@ -67,9 +75,10 @@ extension PhotoWorkspace {
     /// `rect` of the canvas through `dispatcher` as display bytes (sRGB,
     /// straight alpha, row-major) and the name of the backend that encoded them.
     func displayed(
-        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil
+        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil,
+        cache: PhotoCompositeCache? = nil
     ) throws -> (bytes: [UInt8], backend: String) {
-        let picture = try renderedSurface(rect, on: dispatcher, resident: resident)
+        let picture = try renderedSurface(rect, on: dispatcher, resident: resident, cache: cache)
         defer { dispatcher.release(picture) }
         let backend = dispatcher.backend(for: .display).name
         return (try dispatcher.display(picture, colorSpace: .sRGB), backend)
@@ -77,15 +86,17 @@ extension PhotoWorkspace {
 
     /// `rect` of the canvas composited and adjusted through `dispatcher`, as
     /// `rendered(_:)` makes it on CoreRaster. The caller releases the surface.
-    /// With `resident`, the layers' tiles come from it and composite in one batch (`residentComposited`).
+    /// With `resident`, the layers' tiles come from it and composite in one batch (`residentComposited`); with
+    /// `cache`, the layers the last render laid come from it composited (`composited(_:on:cache:)`).
     public func renderedSurface(
-        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil
+        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil,
+        cache: PhotoCompositeCache? = nil
     ) throws -> RenderSurface {
-        guard let canvas, let outer = rect.expanded(by: adjustments.blurMargin).intersection(canvas.rect),
+        guard let canvas, let outer = rect.expanded(by: adjustments.readMargin).intersection(canvas.rect),
             let inner = rect.intersection(canvas.rect)
         else { throw RasterError.invalid("region \(rect) is outside the image") }
         let picture = try resident.flatMap { try residentComposited(outer, on: dispatcher, resident: $0) }
-        let adjusted = try adjustments.applied(to: picture ?? composited(outer, on: dispatcher), on: dispatcher)
+        let adjusted = try adjustments.applied(to: picture ?? composited(outer, on: dispatcher, cache: cache), on: dispatcher)
         guard outer != inner else { return adjusted }
         defer { dispatcher.release(adjusted) }
         return try dispatcher.cropped(
@@ -102,7 +113,7 @@ extension PhotoWorkspace {
         guard
             shown.allSatisfy({ layer in
                 if case .adjustment = layer.kind { return false }
-                return shownMask(of: layer) == nil && (0...1).contains(Float(layer.opacity))
+                return shownMask(of: layer) == nil && (0...1).contains(Float(layer.opacity)) && layer.id != liveDraftLayer
             })
         else { return nil }
         return try residentComposited(rect, layers: shown, on: dispatcher, resident: resident)
@@ -149,31 +160,59 @@ extension PhotoWorkspace {
         }
     }
 
-    /// The visible layers over transparency in `rect`, bottom first.
-    func composited(_ rect: PixelRect, on dispatcher: RenderDispatcher) throws -> RenderSurface {
-        var picture = try dispatcher.surface(PixelBuffer(width: rect.width, height: rect.height))
+    /// The visible layers over transparency in `rect`, bottom first. With `cache`, the layers the last render
+    /// laid under the ones that changed come from it composited (PhotoCompositeCache.composite), so a Move,
+    /// transform, opacity or visibility step composites the changed layer and the ones above it.
+    func composited(_ rect: PixelRect, on dispatcher: RenderDispatcher, cache: PhotoCompositeCache? = nil) throws -> RenderSurface {
+        let shown = layers.reversed().filter { $0.isVisible && $0.opacity > 0 }
+        guard let cache else { return try composited(rect, layers: shown, on: dispatcher) }
+        let stack = PhotoCompositeCache.key(shown, pixels: pixels, masks: masks, draft: liveDraft ? transformDraft : nil)
+        var (picture, laid) = try cache.composite(rect, stack: stack, on: dispatcher) { laid in
+            try composited(rect, layers: Array(shown[..<laid]), on: dispatcher)
+        }
         PhotoRenderCount.region()
         do {
-            for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-                PhotoRenderCount.layers(1)
-                let onCPU: Bool
-                if case .adjustment = layer.kind { onCPU = true } else { onCPU = shownMask(of: layer) != nil }
-                if onCPU {
-                    // No RenderOp runs an adjustment layer or a layer mask: read back, CoreRaster, upload again.
-                    let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
-                    let done = try PhotoLayerComposite.composite(
-                        content, onto: dispatcher.read(picture), origin: (x: rect.x, y: rect.y),
-                        adjusting: services.adjustmentLayers, masking: services.masking)
-                    picture = try Self.replace(picture, with: dispatcher.surface(done), on: dispatcher)
-                } else if let tiled = pixels[layer.id] {
-                    try composite(tiled, of: layer, onto: &picture, at: rect, on: dispatcher)
-                }
-            }
+            for layer in shown[laid...] { try composited(layer, onto: &picture, at: rect, on: dispatcher) }
         } catch {
             dispatcher.release(picture)
             throw error
         }
         return picture
+    }
+
+    /// `layers` (bottom first) over transparency in `rect`.
+    private func composited(_ rect: PixelRect, layers: [PhotoLayer], on dispatcher: RenderDispatcher) throws -> RenderSurface {
+        var picture = try dispatcher.surface(PixelBuffer(width: rect.width, height: rect.height))
+        PhotoRenderCount.region()
+        do {
+            for layer in layers { try composited(layer, onto: &picture, at: rect, on: dispatcher) }
+        } catch {
+            dispatcher.release(picture)
+            throw error
+        }
+        return picture
+    }
+
+    /// `layer` onto `picture`, a surface of `rect`: an adjustment layer or a masked layer through CoreRaster, a
+    /// pixel layer's tiles through the dispatcher.
+    private func composited(_ layer: PhotoLayer, onto picture: inout RenderSurface, at rect: PixelRect,
+                            on dispatcher: RenderDispatcher) throws {
+        PhotoRenderCount.layers(1)
+        if layer.id == liveDraftLayer, let draft = transformDraft, let tiled = pixels[layer.id] {
+            return try compositeDraft(draft, tiled, of: layer, onto: &picture, at: rect, on: dispatcher)
+        }
+        let onCPU: Bool
+        if case .adjustment = layer.kind { onCPU = true } else { onCPU = shownMask(of: layer) != nil }
+        if onCPU {
+            // No RenderOp runs an adjustment layer or a layer mask: read back, CoreRaster, upload again.
+            let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
+            let done = try PhotoLayerComposite.composite(
+                content, onto: dispatcher.read(picture), origin: (x: rect.x, y: rect.y),
+                adjusting: services.adjustmentLayers, masking: services.masking)
+            picture = try Self.replace(picture, with: dispatcher.surface(done), on: dispatcher)
+        } else if let tiled = pixels[layer.id] {
+            try composite(tiled, of: layer, onto: &picture, at: rect, on: dispatcher)
+        }
     }
 
     /// `layer`'s tiles under `rect` composited onto `picture`, a surface of
@@ -209,6 +248,63 @@ extension PhotoWorkspace {
         }
     }
 
+    /// A drag frame's draft: `layer` drawn through the draft's matrix onto `picture`, a surface of `rect`, in
+    /// 256 px chunks across the cores. Each chunk resamples the part of the layer under it (its corners back
+    /// through the matrix, widened by bilinear's reach) with CoreRaster's `transformed`; the chunks make one
+    /// region-sized buffer that composites as a tile would, so the picture stays on the route's backend and a
+    /// band uploads once. A matrix with no inverse, or one that maps the region out of range, draws the layer
+    /// as it is.
+    func compositeDraft(_ draft: TransformDraft, _ tiled: TiledPixels, of layer: PhotoLayer, onto picture: inout RenderSurface,
+                        at rect: PixelRect, on dispatcher: RenderDispatcher) throws {
+        let m = try services.transform.matrix(draft, origin: (layer.offsetX, layer.offsetY))
+        let scale = min((m.a * m.a + m.b * m.b).squareRoot(), (m.c * m.c + m.d * m.d).squareRoot())
+        @Sendable func mapped(_ back: AffineMatrix, _ r: PixelRect) -> [(Double, Double)] {
+            [(r.x, r.y), (r.maxX, r.y), (r.x, r.maxY), (r.maxX, r.maxY)].map { x, y in
+                (back.a * Double(x) + back.c * Double(y) + back.tx, back.b * Double(x) + back.d * Double(y) + back.ty)
+            }
+        }
+        guard let back = m.inverse, scale > 0,
+            mapped(back, rect).allSatisfy({ $0.0.isFinite && $0.1.isFinite && abs($0.0) < 1e9 && abs($0.1) < 1e9 })
+        else { return try composite(tiled, of: layer, onto: &picture, at: rect, on: dispatcher) }
+        // Bilinear reads one source pixel around each sample, more when the layer shrinks; one more for rounding.
+        let reach = (max(1, 1 / scale) + 1).rounded(.up)
+        let size = PixelBuffer.tileSize
+        let chunks = stride(from: 0, to: rect.height, by: size).flatMap { y in
+            stride(from: 0, to: rect.width, by: size).map { x in
+                PixelRect(x: rect.x + x, y: rect.y + y, width: min(size, rect.width - x), height: min(size, rect.height - y))
+            }
+        }
+        let whole = PixelRect(x: 0, y: 0, width: tiled.width, height: tiled.height)
+        let drawn: [PixelBuffer?] = try PhotoLayerComposite.inParallel(chunks.count) { i in
+            let chunk = chunks[i]
+            let corners = mapped(back, chunk)
+            let xs = corners.map(\.0), ys = corners.map(\.1)
+            let (x0, y0) = (Int((xs.min()! - reach).rounded(.down)), Int((ys.min()! - reach).rounded(.down)))
+            let (x1, y1) = (Int((xs.max()! + reach).rounded(.up)), Int((ys.max()! + reach).rounded(.up)))
+            guard let part = PixelRect(x: x0, y: y0, width: x1 - x0, height: y1 - y0).intersection(whole) else { return nil }
+            var local = m
+            (local.tx, local.ty) = (m.tx + m.a * Double(part.x) + m.c * Double(part.y) - Double(chunk.x),
+                                    m.ty + m.b * Double(part.x) + m.d * Double(part.y) - Double(chunk.y))
+            return try tiled.flattened(part).transformed(local, width: chunk.width, height: chunk.height, filter: .bilinear)
+        }
+        // One surface and one composite per region: a band's chunks go into a region-sized buffer first (an
+        // exact copy onto clear), so the GPU route uploads once rather than once per chunk.
+        var region: PixelBuffer?
+        for (chunk, buffer) in zip(chunks, drawn) {
+            guard let buffer else { continue }
+            if chunks.count == 1 {
+                region = buffer
+                break
+            }
+            if region == nil { region = try PixelBuffer(width: rect.width, height: rect.height) }
+            try region?.composite(buffer, x: chunk.x - rect.x, y: chunk.y - rect.y, mode: .normal, opacity: 1)
+        }
+        guard let region else { return }
+        let surface = try dispatcher.surface(region)
+        defer { dispatcher.release(surface) }
+        try dispatcher.composite(surface, onto: &picture, x: 0, y: 0, mode: layer.blendMode, opacity: Float(layer.opacity))
+    }
+
     /// `next`, with `old` released.
     static func replace(_ old: RenderSurface, with next: RenderSurface, on dispatcher: RenderDispatcher) -> RenderSurface {
         dispatcher.release(old)
@@ -218,14 +314,17 @@ extension PhotoWorkspace {
 
 extension AdjustmentSettings {
     /// The enabled adjustments applied to `surface` through `dispatcher`:
-    /// ImagingProgram's steps (`imagingSteps`, the list `applied(to:)` runs),
-    /// then the blur. Takes `surface`: it is released on the way.
+    /// the tone section's unsharp pass, then ImagingProgram's steps (`imagingSteps`,
+    /// the list `applied(to:)` runs), then the blur. Takes `surface`: it is released on the way.
     func applied(to surface: RenderSurface, on dispatcher: RenderDispatcher) throws -> RenderSurface {
         var result = surface
         func step(_ next: () throws -> RenderSurface) throws {
             result = PhotoWorkspace.replace(result, with: try next(), on: dispatcher)
         }
         do {
+            if let s = unsharp {
+                try step { try dispatcher.unsharpMask(result, amount: s.amount, sigma: s.sigma, threshold: s.threshold) }
+            }
             // ImagingProgram leaves out each step at its identity, where CoreRaster returns the buffer
             // itself, so the result is the same bits and an untouched section costs the GPU no round trip.
             for adjustment in imagingSteps {

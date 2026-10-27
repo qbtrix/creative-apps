@@ -30,7 +30,7 @@ extension LibraryWindow {
         let canCull = model.cullHelp == nil
         return LibraryMenu.Cull(
             key: { key in
-                if let change = LibraryCatalog.cullChange(for: key) { try? model.run(.cull(change)) }
+                if let change = model.cullChange(forKey: key) { try? model.run(.cull(change)) }
             },
             setRating: enabled(canCull) { (stars: Int) in try? model.run(.setRating(stars)) },
             setFlag: enabled(canCull) { (flag: PhotoFlag) in try? model.run(.setFlag(flag)) },

@@ -47,7 +47,9 @@
     "Tests/SuiteKernelTests/ClipCommandsTests.swift",
     "Tests/mutations/SuiteKernel.ClipCommands.json",
     "Tests/SuiteUITests/LayerStylePanelLiveTests.swift",
-    "docs/blueprints/suiteui/features/layer-styles.wave.json"
+    "docs/blueprints/suiteui/features/layer-styles.wave.json",
+    "Sources/SuiteUI/LayerActionBar.swift",
+    "Tests/SuiteUITests/LayerPanelCommandsTests.swift"
   ],
   "slices": [
     {
@@ -235,7 +237,9 @@
         "Tests/SuiteUITests/LayerStylePanelLiveTests.swift",
         "docs/c4/parts/creative-apps/suite-imaging/imaging-style.json",
         "docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json",
-        "docs/blueprints/suiteui/features/layer-styles.wave.json"
+        "docs/blueprints/suiteui/features/layer-styles.wave.json",
+        "Sources/SuiteUI/LayerActionBar.swift",
+        "Tests/SuiteUITests/LayerPanelCommandsTests.swift"
       ]
     }
   ]

@@ -44,15 +44,22 @@ final class LibraryAreas {
 struct LibraryWindow: View {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
+    /// The loupe's GPU route (suite-imaging IM-11); nil in a test window.
+    @Environment(\.libraryLoupeGPU) var loupeGPU
 
     /// `arguments` are the launch arguments (LibraryLaunch); a test passes a fixture's.
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         let launch = LibraryLaunch(arguments: arguments)
+        // The live grid keeps its thumbnails in <support>/Library/Thumbnails (ST-7); fixtures stay on fakes.
         let services = launch.services(
             decoder: ImageIODecoder(), writer: JPEGWriter(metadata: LibraryShell.services.metadata),
             store: CatalogStore(), sidecars: XMPSidecarWriter())
+            .withThumbnailDisk(folder: LibraryServices.thumbnailFolder(arguments: arguments, home: NSHomeDirectory()))
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
+
+    /// What the drop mark calls the catalog photos go into: "Place in Library", not "the document".
+    nonisolated static let dropTarget = "Library"
 
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetLibraryTests counts an interaction's.
@@ -103,7 +110,8 @@ struct LibraryWindow: View {
         .focusedSceneValue(\.libraryCatalog, model)
         .focusedSceneValue(\.libraryFilters, filters)
         .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
-                       places: model.placesExtensions, perform: { try? model.perform($0) })
+                       places: model.placesExtensions, documentName: Self.dropTarget,
+                       perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
         .libraryControlsProbe()
@@ -112,6 +120,7 @@ struct LibraryWindow: View {
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
         .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
         .modifier(trashArea)  // Photo > Delete Rejected Photos… and its confirm (LibraryWindow+Trash.swift)
+        .modifier(filesArea)  // Remove from Catalog… and Locate… (LibraryWindow+Files.swift)
         .task {
             importAreaLaunch()
             persistAreaLaunch()
@@ -132,6 +141,7 @@ struct LibraryWindow: View {
         .onAppear {
             LibraryShell.read = { model }
             LibraryShell.take = { model.takeLive($0) }
+            loupeGPU?.onFailure = { loupeAreaRender(.full) }
         }
         .onDisappear {
             LibraryShell.read = nil
@@ -151,6 +161,8 @@ struct LibraryWindow: View {
         photo.cropTitle = crop.cropTitle
         photo.applyCrop = crop.applyCrop
         photo.resetCrop = crop.resetCrop
+        (photo.rotateLeft, photo.rotateRight) = (crop.rotateLeft, crop.rotateRight)
+        (photo.flipHorizontal, photo.flipVertical) = (crop.flipHorizontal, crop.flipVertical)
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
             view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
@@ -166,7 +178,8 @@ struct LibraryWindow: View {
         let action: LibraryMenu.Action?
         switch key {
         case .rating, .pick, .reject, .unflag, .label:
-            guard let cull = current.cull.key else { return .ignored }
+            // X with a crop draft open falls through to the aspect picker's swap.
+            guard let cull = current.cull.key, model.cullChange(forKey: key) != nil else { return .ignored }
             cull(key)
             return .handled
         case .first: action = current.view.first

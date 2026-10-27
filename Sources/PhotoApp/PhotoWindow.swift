@@ -71,12 +71,15 @@ struct PhotoWindow: View {
     @State var canvasSizeDraft: CanvasSizeDraft?
     /// The inspector's tab (PhotoWindow+History.swift, history-panel PH-2).
     @State var inspectorTab = PhotoInspectorTab.adjust
+    /// File > New's sheet: Photo's presets and the clipboard image's size; nil while it is closed (document-setup DS-8).
+    @State var newImageMode: NewDocumentMode?
     /// The app's View > Rendering; nil in tests, which draw on the CPU.
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
     var isPresenting: Bool {
         model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil
+            || newImageMode != nil
     }
 
     /// The launch file opens in the first window only.
@@ -136,6 +139,13 @@ struct PhotoWindow: View {
                         onCancel: { straightenDraft = nil })
                 }
             }
+            .sheet(isPresented: Binding(get: { newImageMode != nil }, set: { if !$0 { newImageMode = nil } })) {
+                if let mode = newImageMode {
+                    NewDocumentSheet(
+                        mode, setup: PhotoWorkspace.newImageSetup, limits: PhotoWorkspace.documentLimits,
+                        onDone: { setup, _ in makeImage(setup) }, onCancel: { newImageMode = nil })
+                }
+            }
             .alert("Rename Layer", isPresented: $isRenaming) {
                 TextField("Name", text: $renameText).accessibilityIdentifier("photo.layer.name")
                 if let spec = PhotoWorkspace.catalog.spec("layer.rename") {
@@ -174,19 +184,19 @@ struct PhotoWindow: View {
         // Drag samples still waiting for the display frame land first, then a live stroke goes back.
         if case .drag = intent {} else {
             pacer.flush()
-            takeStroke(keepingTransform: Self.isTransformSample(intent))
+            takeStroke(keepingTransform: Self.isTransformSample(intent) || Self.isToneSample(intent))
         }
         switch intent {
         case .newImage:
-            // 1920 x 1080 is a size CoreRaster always accepts, so this never throws.
-            try? model.newCanvas(width: 1920, height: 1080)
-            documentURL = nil
+            let clipboard = PhotoPasteboard.read().map { (width: $0.image.width, height: $0.image.height) }
+            newImageMode = .new(presets: PhotoWorkspace.newImagePresets, clipboard: clipboard)
         case .open: chooseFile()
         case .openFile(let url): open(url)
         case .save: save()
         case .saveAs: saveAs()
         case .imageSize: isResizing = model.canvas != nil
         case .rotate(let turn): model.rotateImage(turn)
+        case .flipCanvas(let axis): run("image.flip", ["axis": .string(axis.rawValue)], failing: "The image can't be flipped.")
         case .straighten: straightenDraft = model.canvas == nil ? nil : StraightenDraft()
         case .applyStraighten(let degrees, let cropToFit): straighten(degrees: degrees, cropToFit: cropToFit)
         case .undo: model.undo()
@@ -217,6 +227,7 @@ struct PhotoWindow: View {
             pacer.stop()
             model.endDrag()
         case .toolOption(let edit): model.setToolOption(edit)
+        case .bucketOption(let edit): model.setBucketOption(edit)
         case .gradientOption(let intent): model.runGradientOption(intent)
         case .adjust(let edit): model.adjust(edit)
         case .endAdjust: model.endAdjust()
@@ -264,7 +275,7 @@ struct PhotoWindow: View {
     }
 
     /// A live paint stroke's, drag line's or transform's copy back into the workspace: one SwiftUI pass
-    /// for the gesture. A transform sample keeps the live transform going.
+    /// for the gesture. A transform or tone sample keeps the live copy going.
     func takeStroke(keepingTransform: Bool = false) {
         if let painted = liveStroke.take() { model.adoptLiveStroke(painted) }
         if let lined = dragLine.take() { model.adoptLiveStroke(lined) }
@@ -317,6 +328,17 @@ struct PhotoWindow: View {
         isResizing = false
         run("image.resize", ["width": .number(Double(width)), "height": .number(Double(height))],
             failing: "The image can't be resized to \(width) × \(height).")
+    }
+
+    /// The New sheet's Create: a new image made to `setup`; a refusal opens the alert and keeps the open image.
+    private func makeImage(_ setup: DocumentSetup) {
+        newImageMode = nil
+        do {
+            try model.newImage(setup)
+            documentURL = nil
+        } catch {
+            problem = PhotoProblem("The image can't be made.", (error as? PhotoRefusal)?.message ?? error.localizedDescription)
+        }
     }
 
     /// Runs catalog command `id` with a sheet's values (command-state CS-10); a refusal opens the alert under `title`.

@@ -115,11 +115,43 @@ passes it. When the tip fails macOS too, it goes by failing test instead
 fail on the base's own gate (BASE_MAC_FAILS), so a batch failing only those
 lands, and one that adds a failing test is bisected to the PR that adds it,
 whose comment names the new tests. A log that can't be read waits; a red
-with no test to name (a build error, a crash) is never the base's.
+with no test to name (a build error, a crash) is never the base's. The
+sharded gate job (`macOS`) only sums its shards, so when its own log names
+no test, mac_tests reads the failed `macOS tests K/N` jobs of its run.
 
 ## A red dev
 
-A red BASE_BRANCH gets its culprit found the same way (red_sweep): while a
+### The flake check
+
+A new `dev-red` issue is not red to the lane until its flake check is in
+(flake_check, first thing in red_sweep). The issue's `- Run:` line names the
+red run and its culprit range the red sha; the lane reruns that run's failed
+jobs once at that sha (`gh run rerun <id> --failed`; fast-lane.yml has
+`actions: write`) and posts one comment on the issue naming the run, the
+failing jobs and the failing tests read from the red logs (red_tests, read
+then, since the rerun overwrites them), ending in `<!-- lane-rerun <sha7>
+started -->`. That mark is the record: a sha with one is never rerun again,
+whatever the issue body says later, and an issue whose comments can't be read
+is red as before, so nothing can rerun twice. While the rerun runs the sweep
+returns before BASE_RED is set: nothing is held, bisected or reverted.
+
+A rerun that passes was a flake. The lane files one finding for a fixer
+(flake_finding): an open `finding` issue titled `Flaky test: <File>.swift/<test>`
+(`Flaky tests:` for several; `Flaky <jobs> job on dev, no test named` when the
+logs named none) gets a "Flaked again" comment, else one is created with the
+labels `finding`, `flaky` and `line:<app>` (build_apps over the tests' files;
+shared or unknown is `line:suite`), and the issue gets `<!-- lane-rerun <sha7>
+flake -->`. ci.yml's `promote` job reruns with the passed jobs and closes the
+dev-red issue, usually before a sweep sees the pass, so a sweep that finds no
+open dev-red issue reads the last closed one (flake_closed): a `started` mark
+with no verdict whose run passed gets its finding and mark there. A rerun that
+fails too makes the red real: the issue gets `<!-- lane-rerun <sha7> red -->`
+and the sweep goes on exactly as below. An issue with no `- Run:` line is red
+at once. `--dry-run` reruns nothing.
+
+### Holding, scoped to the red module
+
+A real red BASE_BRANCH gets its culprit found the same way (red_sweep): while a
 `dev-red` issue for a red Linux job is open, each sweep bisects main..<red sha>
 by first-parent commit with `ci/bisect-<red7>-<i>` probe branches and
 Linux-only runs (at most MAX_BISECT per red), testing red-triage's confident
@@ -134,9 +166,23 @@ value within BUDGET_NEAR of its budget posts the culprit as "likely".
 
 While the dev-red issue names a job a batch would run (red_holds: Linux
 always, macOS when the batch runs the macOS gate; the issue never names the
-failing app, so any macOS gate counts), no new batch forms and ready PRs
-wait: every probe of a batch on a red base is red, so its bisect only burns
-runs and can blame an innocent PR. A docs batch, which runs no macOS gate,
+failing app, so any macOS gate counts), the ready PRs that touch the red
+module wait and the rest batch as usual (settle_ready). The module comes from
+the failing tests (red_scope): each `<File>.swift` red_tests names is found
+in the tree of origin/BASE_BRANCH under `Tests/<Target>/`, and the scope
+(BASE_RED_SCOPE, a path regex) is `Tests/<Target>/` plus `Sources/<Target
+minus Tests>/` for each, so a red in SuiteUITests holds Sources/SuiteUI and
+Tests/SuiteUITests; evaluate marks each eligible PR that touches it (READY's
+last field). When the lane can't place the red (no test named, a build error
+or a crash; a file not in the tree; a target with no such Sources module,
+AppSnapshotTests or AppAuditTests) the scope is empty and no new batch forms:
+every ready PR waits, as before, since every probe of a batch on a red base
+is red, so its bisect only burns runs and can blame an innocent PR. A batch
+that does form on a red base, its PRs off the module, still fails a Linux red
+(scripts/ci runs every Model test) and lands on the PRs' own proof through
+the base-red rule above; a macOS gate scoped to other apps passes. Every
+other gate stays: a PR with a red check or proof never lands, protected paths
+stay refused. A docs batch, which runs no macOS gate,
 still forms on a macOS-only red. A batch already in flight whose base holds
 the issue's red sha gets a `lane/batch-<id>-red` marker branch; once the
 issue is closed and BASE_BRANCH has moved past that base, a marked batch is
@@ -231,11 +277,86 @@ check on the revert, a rebuild that conflicts, or a revert left open after
 its issue closed waits for a human. GitHub Actions must be allowed to create pull requests in the repo
 settings, or the call records that the revert was pushed but not opened.
 
+### Auto-quarantine (trunk never stops)
+
+A real red the lane has no revert for must not hold the lane for more than
+one sweep. revert_sweep marks that state (RED_UNRESOLVED) when it ends in a
+revert_note (no bisect verdict, a "likely" one, a culprit on a protected path,
+a revert of a revert, no PR commit, a revert that won't apply or push, one
+already open or on dev) or when its one revert call is done and the red sha's
+range main..<red> already holds that revert (dev is still red with it). A red
+whose revert is open, or whose CI run after the revert hasn't reported, is
+not unresolved: nothing is quarantined while a fix is in flight.
+
+quarantine_sweep runs after revert_sweep (LANE_VERIFY_AFTER=1 only) and does
+three things, one PR at a time on QUAR_BRANCH (`lane/quarantine`). First it
+lands an open lane quarantine PR (quarantine_land, below). Else it reads the
+lane's entries in UITests/quarantine.json on BASE_BRANCH (those with a `lane`
+block): an owner issue past the entry's `until` gets the `blocker` label and
+one comment, and the entry stays, since an expired quarantine must never come
+back as a red; a closed owner (the fix merged and its issue closed) gets its
+entries removed in one PR titled `test(quarantine): run <ids> again`
+(quarantine_expiry). Then, when the red is unresolved and the dev-red issue
+has no `<!-- lane-quarantine <red7> -->` mark yet, quarantine_add quarantines
+the failing tests: red_tests names them as `<File>.swift/<test>()`; each file
+is placed under Tests/<Target>/ in the tree (test_paths) and resolved to its
+perf-list id, `Target.Suite/test` or `Target.freeTest`, with
+`scripts/test-scope ids <Target> <file>`. It stops, with one note on the
+dev-red issue carrying the mark, when the logs name no test, when more than
+QUAR_MAX (5) fail (something broke broadly: today's red handling stands and a
+human picks the culprit), or when none is left after dropping a test whose
+path or id matches QUAR_NEVER_RE (security, billing, auth, licence, payment,
+keychain, entitlement), one already quarantined, or one it can't place. For
+each test left it files, or comments on, the test's `Quarantined: <id>` issue
+(quarantine_issue: the open `finding` of that title, else a new one with
+`p0`, `finding` and `line:<app>`, naming the run, the range's PRs with their
+feature leads, and the expiry), writes the entry
+
+```json
+{"test": "PhotoModelTests.OpenTests/opens", "owner": "#700",
+ "reason": "Quarantined by the fast lane: ...", "expires": "2026-10-27",
+ "lane": {"red": "#520", "range": "main..abc1234", "until": "2026-10-27T10:00:00Z"}}
+```
+
+(the owner is that issue, `until` QUAR_HOURS = 24 h out, `expires` its date)
+and opens one PR from QUAR_BRANCH with QUAR_LABEL (`lane-quarantine`) and
+`p0`, never `fast-lane`, its body starting `Lane-Quarantine: add` (a removal
+says `Lane-Quarantine: remove #<owner>`) and `Refs #<dev-red>`. The mark goes
+on the dev-red issue, so each red sha gets one call. scripts/ci skips the live
+swift-test entries through `scripts/quarantine skip`, a `--skip` regex that
+rides with the perf list's, so the PR's own Linux check and dev's next run are
+green and normal batching resumes.
+
+**The protected-path exception, exactly.** UITests/quarantine.json is in
+PROTECTED and decide refuses every PR that touches it, the lane's own
+included: the lane's quarantine PR never goes through decide. quarantine_land
+lands a PR only when all of these hold: the author is a bot (the lane's
+token), the head branch is QUAR_BRANCH, the PR carries QUAR_LABEL
+(quarantine_sweep's filter), and `gh api pulls/<n>/files` lists exactly
+UITests/quarantine.json. A PR that changes anything else gets one comment and
+is never landed, whatever its labels. Like a revert, it lands on its own
+Linux-only check (dispatched once, its comment the record), with no prescreen,
+batch or macOS run, while the dev-red issue holds batches; a merge GitHub
+refuses as conflicting is cherry-picked onto today's BASE_BRANCH
+(rebuild_lane_pr) and checked again. The landing dispatches CI on BASE_BRANCH
+(UITests/ is a UI_RE path). A red check on a removal means the fix didn't
+hold: the owners are reopened with a comment, the PR is closed and the
+entries stay; a red check on an add waits for a human.
+
+`scripts/quarantine release` is the release gate: it fails while any lane
+entry is in the file, naming each test, owner and `until`. There is no
+release or promote script to wire it into yet (ci.yml's `promote` moves main
+to the last green dev sha, which is not a release, and gating it would grow
+every culprit range), so run it by hand, or from the release step once one
+exists. `scripts/quarantine check` passes a lane entry past its expiry or
+with a closed owner, with a note, since the lane owns both ends of its
+lifecycle; a hand entry fails as before.
+
 ## CI dispatch on dev
 
 A lead's PR (a `Feature:` body line) never closes a `feature-lead` issue
 (lead_refs). After its merges the lane dispatches CI on BASE_BRANCH at most
-once per run (dispatch_reason): a lane revert, a FEATURE_LABEL PR, a UI_RE change, or
+once per run (dispatch_reason): a lane revert, a FEATURE_LABEL PR, a UI_RE change (a lane quarantine PR is one), or
 DISPATCH_EVERY merged PRs since the last CI run. Promotion of main is
 ci.yml's job.
 

@@ -41,14 +41,16 @@ extension HaloProject: HeadlessDocument {
         let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
         let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands
         let styles = StyleCommands.specs(HaloProject.self).map(\.id)  // HY-1: then the eleven style commands
+        let files = FileFlowCommands.specs(HaloProject.self).map(\.id)  // HF-3: the suite's file flow, its file.open-recent too
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
-        let all = ids + shapes + fills + strokes + history + transforms + rates + places + styles + window
+        let all = ids.filter { $0 != "file.open-recent" } + shapes + fills + strokes + history + transforms + rates + places + styles
+            + files + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
     @Test func areaHelpMatches() {
         for (n, state) in Self.keyedStates().enumerated() {
-            for command in HaloCommand.allCases {
+            for command in HaloCommand.allCases where command.commandID != "file.open-recent" {  // HF-3: the suite's spec
                 let why = catalog.availability(command.commandID, on: state).why
                 #expect(why == state.unavailableHelp(for: command), "\(command.commandID) on state \(n)")
             }
@@ -133,6 +135,7 @@ extension HaloProject: HeadlessDocument {
         "the jump example needs steps; the fixture has none (HA-6)": ["history.jump: exampleRuns"],
         "flipping isn't in Halo yet; the flip refuses with flipHelp (HT-6)": ["transform.flip: exampleRuns"],
         "the examples need a placed image; Ball shows none (HaloPlaceTests run them, PH-6)": ["place.focus place.read place.replace place.reset-size: exampleRuns"],
+        "Ball has no recent files and no other app opens a .halo (HaloFileFlowTests run them, HF-3)": ["file.clear-recent file.open-in: exampleRuns"],
         "the style commands are LS-a's stubs until LS-6; Ball has no style to copy or clear (HY-5)": ["style.add style.clear style.copy style.enable style.fill-opacity style.panel style.paste style.preset style.read style.remove style.set: exampleRuns"],
     ]
 

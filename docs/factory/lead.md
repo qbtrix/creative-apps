@@ -85,7 +85,7 @@ Until beta, CI blocks only on compile and Model tests (captain, 2026-10-16).
   `Tests/App*` or `UITests`, or the 10th merged PR since the last CI run. A
   full run covers every app, so it counts as a scoped run for yours, and its
   `Linux` job is the one merged-done reads (rule 6). A full run's `macOS`
-  job (scripts/ci) gates `main` with Linux; the journeys run that follows
+  job (the gate over `macOS compile` and the `macOS tests K/N` shards, scripts/ci) gates `main` with Linux; the journeys run that follows
   is report-only in both: a red journey files a finding and never turns the gate red.
 - **Code must compile on macOS.** A PR changing any `.swift` file under
   `Sources/`, `Tests/` or `UITests/`, or `project.yml`, Models and shared

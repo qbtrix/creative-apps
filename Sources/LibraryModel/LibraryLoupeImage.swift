@@ -6,7 +6,10 @@
 // sample has already asked for another; a render asked for before the last
 // focus change never lands, and a preview never replaces a full of the same
 // token. A failure keeps the last picture and says why, for the current token
-// only. The loupe's neighbours are decoded ahead so stepping is quick.
+// only. The loupe's neighbours are decoded ahead so stepping is quick. A GPU
+// frame (suite-imaging IM-11) lands under the same rules as a full render,
+// keeping its develop steps for the view; a CPU render or a focus change
+// drops them.
 // Linux-safe.
 
 /// One render the loupe needs: which photo, with which settings, at what
@@ -36,6 +39,7 @@ extension LibraryCatalog {
         let thumbnails = cache?.thumbnails ?? self.thumbnails
         let held = mode == .loupe ? focusedItemID.flatMap { thumbnails[$0] } : nil
         loupeRender = held.map { RenderedPhoto(image: $0, histogram: .empty, quality: .preview) }
+        loupeSteps = nil
         loupeShownToken = loupeRenderToken
     }
 
@@ -53,6 +57,17 @@ extension LibraryCatalog {
         guard token >= loupeShownToken, token <= loupeRenderToken else { return }
         if token == loupeShownToken && loupeRender?.quality == .full && render.quality == .preview { return }
         loupeRender = render
+        loupeSteps = nil
+        loupeShownToken = token
+        loupeError = nil
+    }
+
+    /// `frame`'s base as a `.full` render with its histogram, and its steps for the view to write;
+    /// under `showLoupeRender`'s token rules.
+    public mutating func showLoupeFrame(_ frame: LoupeGPUFrame, token: Int) {
+        guard token >= loupeShownToken, token <= loupeRenderToken else { return }
+        loupeRender = RenderedPhoto(image: frame.base, histogram: frame.histogram, quality: .full)
+        loupeSteps = frame.steps
         loupeShownToken = token
         loupeError = nil
     }

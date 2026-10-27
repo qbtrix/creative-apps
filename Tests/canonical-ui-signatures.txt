@@ -19,3 +19,4 @@ transport | backward\.frame\.fill ; forward\.frame\.fill | use TransportCapsule
 menu-item | \.keyboardShortcut\(shortcut\) ; \.disabled\( | use MenuCommand
 pending-commit | @State private var (pending|draft\w*|scrubbed|start)\b ; onEnd: | use InspectorSliderRow(commit: .onEnd)
 file:app-inventory | PreferenceKey ; \[ControlEntry\] | use .suiteControl
+fill-type-switch | ChoiceChips\( ; FillType\.allCases | use GradientTypeSwitch

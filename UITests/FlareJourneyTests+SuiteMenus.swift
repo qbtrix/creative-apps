@@ -1,7 +1,7 @@
 // FlareJourneyTests+SuiteMenus.swift (editor-menus EM-5): Flare as a suite editor. Help holds the suite's
 // items with no empty Flare Help; Window > AI Access… opens its window, and its close button closes it;
 // Window > Switch To lists Home and the five apps, and clicking Home brings the AfterGlow launcher forward;
-// a live `afterglow` call reaches the open document; and with every window closed by its close button, a
+// a live `afterglow` call from a client granted in the support folder reaches the open sample (#4808); and with every window closed by its close button, a
 // Dock click opens a new one. Flare runs from inside .build/apps/AfterGlow.app, as a user's does, so Switch
 // To finds the launcher. A step XCUITest can't drive here is skipped with its reason, and the skips are
 // thrown together at the end, so the steps that can run always do.
@@ -20,12 +20,13 @@ final class FlareSuiteMenusJourneyTests: XCTestCase {
             XCUIApplication(bundleIdentifier: Self.launcher).terminate()
             try? FileManager.default.removeItem(at: support)
         }
-        let flare = Journey("Flare", self, arguments: ["-SuiteSupportDir", support.path], bundle: Self.bundle)
+        try JourneyLive.grant("flare", in: support)
+        let flare = Journey("Flare", self, arguments: ["-FlareSample", "bounce", "-SuiteSupportDir", support.path], bundle: Self.bundle)
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 10), "Flare opened no window")
         helpHoldsSuiteItems(flare)
         aiAccessOpens(flare)
         switchToReachesHome(flare)
-        step("live") { throw XCTSkip("the journey has no afterglow client to call Flare's live socket and answer its approval sheet") }
+        step("live") { try liveReachesDocument(flare) }
         dockReopens(flare)
         if !skipped.isEmpty { throw XCTSkip(skipped.joined(separator: "; ")) }
     }
@@ -93,6 +94,25 @@ final class FlareSuiteMenusJourneyTests: XCTestCase {
         XCTAssertEqual(NSWorkspace.shared.frontmostApplication?.bundleIdentifier, Self.launcher, "clicking Home didn't bring the launcher forward")
         NSRunningApplication.runningApplications(withBundleIdentifier: Self.launcher).forEach { $0.terminate() }
         flare.app.activate()
+    }
+
+    /// A granted client's `timeline.insert-frames` over the live socket lands in the front window: the reply
+    /// names its undo step, and Edit's Undo item now names it too; shot as `suite-menus-live`.
+    @MainActor private func liveReachesDocument(_ flare: Journey) throws {
+        flare.app.activate()
+        let before = JourneyLive.undoTitle(in: flare)
+        let result = try JourneyLive.run("flare", "timeline.insert-frames", params: ["count": 1])
+        let step = result["undoStep"] as? String ?? ""
+        XCTAssertFalse(step.isEmpty, "the live call named no undo step: \(result)")
+        let deadline = Date().addingTimeInterval(5)
+        var after = JourneyLive.undoTitle(in: flare)
+        while after == before, Date() < deadline {
+            Thread.sleep(forTimeInterval: 0.3)
+            after = JourneyLive.undoTitle(in: flare)
+        }
+        flare.shot("suite-menus-live")
+        XCTAssertNotEqual(after, before, "the live call left Edit's Undo at \(before): the document didn't change")
+        XCTAssertEqual(after, "Undo \(step)", "Edit's Undo doesn't name the live call's step")
     }
 
     /// Closes every window by its close button, answering Don't Save if a window asks; then opens the

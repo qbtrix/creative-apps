@@ -13,6 +13,7 @@
 // (`afterglow run --live library`). Closing the window quits (D2), so a Dock
 // click relaunches; `.suiteReopenWindow` opens the window if the app is still
 // running with none.
+// The window's loupe draws develop steps on the GPU (`\.libraryLoupeGPU`, suite-imaging IM-11).
 // Launch empties the last session's share copies (share-sheet SH-5).
 import Foundation
 import LibraryModel
@@ -58,7 +59,9 @@ struct LibraryApp: App {
     init() { try? SharePrep.cleanup(support: CatalogStore().folder.path(percentEncoded: false)) }
 
     var body: some Scene {
-        Window("Library", id: "library") { LibraryWindow().suiteReopenWindow(id: "library") }
+        Window("Library", id: "library") {
+            LibraryWindow().suiteReopenWindow(id: "library").environment(\.libraryLoupeGPU, .shared)
+        }
             .commands {
                 LibraryCommands()
                 LibraryBackupCommands()
