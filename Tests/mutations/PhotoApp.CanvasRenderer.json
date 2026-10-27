@@ -1,0 +1,16 @@
+[
+  {
+    "label": "spriteEveryDrag: each drag makes the live layer's pixels again, a full-layer copy and surface per drag",
+    "file": "Sources/PhotoApp/CanvasRenderer.swift",
+    "find": "var made = sprite.flatMap { $0.of == wanted ? $0 : nil }",
+    "replace": "var made: Sprite? = nil",
+    "tests": "BodyCountSuites/RenderBudgetPhotoRapidRotateTests"
+  },
+  {
+    "label": "spriteNeverPrepared: the draft's first show makes no sprite, so the first drag waits for one",
+    "file": "Sources/PhotoApp/CanvasRenderer.swift",
+    "find": "        prepareSprite(for: workspace)\n",
+    "replace": "",
+    "tests": "BodyCountSuites/RenderBudgetPhotoRapidRotateTests"
+  }
+]
