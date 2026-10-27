@@ -350,3 +350,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 06:50Z #5247/#5248/#5249 clean; lane dropped needs-rebase on #5249 (fast-lane relabel pending, Belt-Lead). dev idle at c367fbeb0 with dev-red #5818 (not ours) open; main fef52e668, no Slice-Done yet.
 
 Polled: 2026-10-27T06:56Z check-in: lane forming batches (6 Linux checks in flight); none of #5096 #4896 #5245 #5247 #5248 #5249 merged yet; dev-red #5818 open, #5862 (goldens fix) open; main fef52e66
+- 07:21Z Re-added fast-lane to #5249 (lane hadn't relabelled after needs-rebase cleared). dev-red #5818 traced to our AJ-u pair: #5233 removed AdjustCommands.notBuilt while #5235 (other batch) still threw it in SuiteUI/PendingAdjustTarget.swift; #5868 fixed it on dev (841d4d881). Our open/stacked branches don't touch that file. Note new ratchet #5870 (AppKit surfaces, tab controls in apps): check UI dependents against it at gate time. main still fef52e668.
