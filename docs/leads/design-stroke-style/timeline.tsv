@@ -324,3 +324,4 @@ time	kind	note
 2026-10-27T01:45Z	DK-u	#5011 needs-rebase: merged origin/dev (8e83a267), conflicts kept the PR side
 2026-10-27T01:58Z	wait	heartbeat	#5321	poll 01:58: #5011 rebased, #5825 open
 2026-10-27T01:59Z	poll	#5011 and #5825 clean; both Linux checks fail only on 5 expired quarantine entries (dev-wide, supervisor asked on #3441)
+2026-10-27T02:13Z	wait	heartbeat	#5321	poll 02:13: both PRs wait on quarantine renewal
