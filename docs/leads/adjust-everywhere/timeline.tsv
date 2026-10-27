@@ -168,3 +168,4 @@ utc	stage	event	ref	note
 10:08Z	3	waiting-lane	#5247 #5248 #5249	all clean; #5247 needs-fix dropped on fef4bfd91; dev 42f18cbd4; main fef52e668
 10:28Z	3	waiting-lane	#5247 #5248 #5249	none merged or ejected; dev 9d87b7a01; main fef52e668
 10:48Z	3	fix-conflict	#5249	#5249 dirty vs dev (text-style TS-9 catalog); merged dev locally b42175259, gating
+10:57Z	3	waiting-lane	#5247 #5248 #5249	#5249 dev merge b42175259 passed gate, pushed, Head moved; clean
