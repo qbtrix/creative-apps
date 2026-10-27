@@ -172,3 +172,4 @@ utc	stage	event	ref	note
 2026-10-27T11:00Z	check-in	11:00Z: no change; #5096 #5245 #5247 #5248 clean and ready, lane held by dev-red #5818, main fef52e66. FH-c chain (#5107 #5108 #5129) waits on #5093 (supervisor).
 11:23Z	3	waiting-lane	#5247 #5248 #5249	all clean, queued; dev 8a66c9833; main fef52e668
 2026-10-27T11:26Z	check-in	11:26Z: no change; #5096 #5245 #5247 #5248 clean and ready, lane held by dev-red #5818, main fef52e66. FH-c chain (#5107 #5108 #5129) waits on #5093 (supervisor).
+11:45Z	3	fix-size	#5249	#5249 403 lines > lane cap 400; trimmed to 394, gating. #5247/#5248 wait local-ci/prescreen
