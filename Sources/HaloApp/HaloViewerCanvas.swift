@@ -9,7 +9,8 @@
 // picture, SuiteUI's drawPlaced without strokes, PH-3), a shape the ellipse in it, a text layer
 // is a resolved Text on the pinned baseline rule (its line box's top-left at
 // bounds.origin, its first baseline at bounds.y + ascent). The selected
-// layer's world box gets SuiteUI's SelectionOutline. The frame Render Frame
+// layer's world box gets SuiteUI's SelectionOutline only when
+// HaloViewerHandles isn't drawing it (no transformSelection). The frame Render Frame
 // shows (HaloRenderedFrameView) and the viewer's gestures (HaloViewerGestures,
 // with ⌥-drag panning a placed picture, HaloPlaceFocusDrag) sit over it. The artboard's value is `viewerSummary` ("Frame 30:
 // Background, Badge, Title: Hello Halo"); its child `halo.viewer.canvas` reads
@@ -74,11 +75,17 @@ struct HaloLiveLayers: View {
         #endif
         let shown = live?.shown(model) ?? model
         if let list = shown.viewerDrawList {
-            HaloDrawnLayers(list: list, selectedLayerID: shown.selectedLayerID)
+            HaloDrawnLayers(list: list, selectedLayerID: Self.outlinedLayer(shown))
                 .aspectRatio(artboard, contentMode: .fit)
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)
                 .padding(SuiteSize.canvasInset)
         }
+    }
+
+    /// The layer the canvas outlines: none while HaloViewerHandles draws the
+    /// selection, whose turned box an upright outline would double.
+    nonisolated static func outlinedLayer(_ shown: HaloProject) -> String? {
+        shown.transformSelection == nil ? shown.selectedLayerID : nil
     }
 }
 

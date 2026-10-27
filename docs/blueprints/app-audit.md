@@ -39,7 +39,7 @@ apps, or one), a one-line `summary`, a `seeded` screen it must flag, and
 |---|---|---|
 | `disabled-dim` | A disabled control keeps more than 75% of the ink of the closest enabled control of its type: same parent first, else the same row, the most similar width first (icon-only meets icon-only), then the nearest. Pairs where the enabled ink is under 1.5:1 aren't judged. | #233 review |
 | `overlap` | Two enabled controls in one layer, neither inside the other, overlap by more than 2 pt both ways. | #215: the inspector's divider sat over Photo's New Image button |
-| `contrast` | Static text is under 4.5:1, or under 3:1 when its frame is at least 22 pt tall. Text inside a disabled control is exempt, as in WCAG. | #62, #101, #146 |
+| `contrast` | Static text is under 4.5:1, or under 3:1 when its frame is at least 22 pt tall. Text inside a disabled control is exempt, as in WCAG, and so are AppKit's own unnamed text parts (`_NS:` identifiers, inside its alerts). | #62, #101, #146 |
 | `identifier` | A control has no accessibility identifier. | #262: XCUITest reads SwiftUI values as "", so journeys find controls by identifier |
 | `offscreen` | A control or list row lies outside the part of the window on the display (for one in a sheet, popover or menu: outside the display), with 1 pt of slack. | #263: a 1280-wide window ran off the 1024 × 768 runner; #215 |
 | `unnamed` | A control has no label, title or placeholder. Controls AppKit makes for itself (window buttons, `_XCUI:` identifiers; outline disclosure triangles, `NS...`) are the system's. | review rubric, #63 |

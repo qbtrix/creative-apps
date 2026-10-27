@@ -1,6 +1,7 @@
 // ToolbarPickingTests.swift: ToolbarGroup's `.floating` palette asks its
 // picking rule (SuiteToolPicking by default) for each tool's tooltip and for
-// the tool a key picks, and a registered tool's reason is that tooltip;
+// the tool a key picks (Shift steps on from the selected tool through a shared
+// letter), and a registered tool's reason is that tooltip;
 // `.rail` keeps the action's own help and entry and picks nothing by key
 // (EC-8). No rendering. macOS only.
 @testable import SuiteUI
@@ -40,6 +41,16 @@ private var pickingTools: [ToolbarAction] {
     #expect(ToolbarGroup.pick("h", modifiers: [], in: pickingTools, style: .floating) == nil)
     let echoed = ToolbarGroup.pick("z", modifiers: [], in: pickingTools, style: .floating, picking: EchoToolPicking())
     #expect(echoed?.id == "Hand")
+}
+
+@Test func aFloatingShiftKeyCyclesFromTheSelectedTool() {
+    func tools(selected: String) -> [ToolbarAction] {
+        ["Spot Heal", "Heal", "Remove"].map { ToolbarAction($0, systemImage: "bandage", isSelected: $0 == selected, shortcut: "j") }
+    }
+    #expect(ToolbarGroup.pick("j", modifiers: [], in: tools(selected: "Heal"), style: .floating)?.id == "Spot Heal")
+    #expect(ToolbarGroup.pick("J", modifiers: .shift, in: tools(selected: "Heal"), style: .floating)?.id == "Remove")
+    #expect(ToolbarGroup.pick("J", modifiers: .shift, in: tools(selected: "Remove"), style: .floating)?.id == "Spot Heal")
+    #expect(ToolbarGroup.pick("J", modifiers: .shift, in: tools(selected: "none"), style: .floating)?.id == "Spot Heal")
 }
 
 @Test func aFloatingKeyPickSkipsCommandKeysAndLongerText() {

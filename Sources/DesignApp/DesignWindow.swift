@@ -217,7 +217,10 @@ struct DesignWindow: View {
         case .moveLayer(let id, let parent, let index):
             do { try model.moveLayer(id, into: parent, at: index) } catch { note = error.help }
         case .setStyle(let change):
-            do { try model.setStyle(change) } catch { note = error.help }
+            do {
+                try model.setStyle(change)
+                if case .textStyle = change { fitStyledText() }
+            } catch { note = error.help }
         case .renamePage(let id, let name):
             do { try model.renamePage(id, to: name) } catch {
                 // The page ids come from the model's own rows; only the name can be refused.
@@ -245,6 +248,12 @@ struct DesignWindow: View {
             node.id == id ? DesignTextFont.measure(model.textDraft, in: node) : nil
         }
         model.commitTextEdit(extent: extent)
+    }
+
+    /// Fits each selected text box to its text in the style just set, in that style's step (#3339).
+    private func fitStyledText() {
+        let texts = model.selectedNodes.filter { $0.kind == .text }
+        model.fitTextStyle(Dictionary(texts.map { ($0.id, DesignTextFont.measure($0.text, in: $0)) }) { first, _ in first })
     }
 
     /// Lands a live drag or scrub in the workspace as one step; with none live, `otherwise`.
