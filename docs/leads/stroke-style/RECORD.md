@@ -2,24 +2,24 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a17be7aff8-ivwy · Started: 2026-10-23 (this run resumed 2026-10-27T05:55Z; prior act-1a178669406-n4me)
-Stage: 3 waiting (checked 2026-10-27T06:44Z): #5011 (df0715e2) and #5825 (008df629) open, clean, lane Linux green; no lane batch yet; dev-red #5818 open (macOS, not ours); supervisor asked on #3441 about the second run n4me
+Stage: 3 #5011 merged to dev at c21b2834 (2026-10-27T08:07Z; closes findings #5009 #5010 #4928); #5825 waits on lane; dev-red #5818 open
 Base: origin/dev; main verified at fef52e66
-Next: wait for the lane to merge #5011 and #5825, then a green design ci.yml run holding each: Belt-Slice-Done DK-u (gaps #4990 #4991), DK-z, then Belt-Contact-Sheet
+Next: a green design-scoped or full ci.yml run on dev at or after c21b2834: Belt-Slice-Done DK-u (gaps #4990 #4991). When #5825 lands and a green run holds it: Belt-Slice-Done DK-z, then Belt-Contact-Sheet
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 2 | done; gaps #3865 #3871 #3873 | 39670298178 | wanted (posted) |
-| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 2 | #4864 and #5002 (fa5d340f) merged; #5011 (round 2) needs-rebase fixed: dev merged at 8e83a267; rounds spent; gaps #4990 #4991 | – | – |
+| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 2 | #4864, #5002 (fa5d340f) and #5011 (c21b2834) merged; rounds spent; gaps #4990 #4991 | – | – |
 | DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d | no | 2 | #4888 merged (63592c7b); #4916 merged (9810d71b); rounds spent | done: https://github.com/qbtrix/creative-apps/actions/runs/40414010435 | – |
-| DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | #5825 open (findings 2 open: #5009 #5010) | – | – |
+| DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | #5825 open (findings #5009 #5010 closed by #5011) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | DK-1 | DK-a | 1 | adapter and vectorStroke stubs | Sources/DesignModel/DesignStroke+Kernel.swift, Tests/DesignModelTests/DesignStrokeTests.swift | DesignStrokeTests | #3690 | merged |
 | DK-2 | DK-a | 1 | Stroke section is StrokeEditor | Sources/DesignApp/DesignInspectorStyle.swift, UITests/DesignJourneyTests+Stroke.swift | DesignInspectorSnapshots | #3690 | merged |
-| DK-3 | DK-u | 2 | canvas paints StrokeRules.paintedPath | Sources/DesignApp/DesignCanvas*.swift, Sources/DesignModel/DesignStrokeOutline.swift | DesignStrokeOutlineTests | #4864, #5002, #5011 | merged / merged / open |
+| DK-3 | DK-u | 2 | canvas paints StrokeRules.paintedPath | Sources/DesignApp/DesignCanvas*.swift, Sources/DesignModel/DesignStrokeOutline.swift | DesignStrokeOutlineTests | #4864, #5002, #5011 | merged |
 | DK-4 | DK-u | 2 | stroke snapshots, render budget | Tests/AppSnapshotTests/DesignStrokeSnapshots.swift | DesignStrokeSnapshots | #4864 | merged |
 | DK-5 | DK-m | 2 | DesignStroke = VectorStroke, migration | Sources/DesignModel/DesignStroke+Kernel.swift, Tests/DesignModelTests/DesignStrokeTests.swift | DesignStrokeTests | #4888 | merged |
 | DK-6 | DK-m | 2 | stroke.* commands | Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt | DesignCommandTests | #4888 | merged |

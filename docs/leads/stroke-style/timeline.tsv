@@ -352,3 +352,4 @@ utc	stage	event	ref	note
 2026-10-27T07:40Z	wait	heartbeat	#5011	#5011 in lane/batch-20261027074019 (Linux check running); #5825 waits; dev-red #5818 open
 2026-10-27T07:57Z	wait	heartbeat	#5011	#5011 batch 20261027074019 Linux check 40468524462 still running; #5825 waits; dev-red #5818 open
 2026-10-27T08:03Z	wait	heartbeat	#5011	#5011 batch 20261027074019 Linux green (40468524462); macOS gate not started; #5825 waits; dev-red #5818 open
+2026-10-27T08:07Z	3	merged	#5011	merged at c21b2834 by lane batch (Linux 40468524462); findings #5009 #5010 #4928 closed
