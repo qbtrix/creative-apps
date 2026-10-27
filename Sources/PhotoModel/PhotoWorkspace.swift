@@ -74,6 +74,8 @@ public struct CanvasSize: Sendable, Hashable {
 public struct PhotoWorkspace: Sendable {
     /// The open image's size; nil with no image open.
     public internal(set) var canvas: CanvasSize?
+    /// Pixels per inch: what File > New asked for (document-setup DS-8), 72 for anything else.
+    public internal(set) var resolution = 72.0
     /// The open file's name ("beach.jpg"); nil for a new image.
     public internal(set) var documentName: String?
     /// The layer stack, top first.
@@ -137,6 +139,9 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var cropAspect = CropAspect.free
     /// Free Transform in progress (PhotoTransform.swift).
     public internal(set) var transformDraft: TransformDraft?
+    /// A drag frame: the routes draw the draft's layer through its matrix at composite time instead of its
+    /// resample (`transformPreview(live:)`, PhotoTransform+Kernel.swift). Set on a render's copy, never the document.
+    var liveDraft = false
     /// The eyedropper's sample size (PhotoSample+Kernel.swift).
     public internal(set) var sampleSize = SampleSize.point
     /// The Export sheet's last choices (PhotoExportOptions.swift).
@@ -207,6 +212,7 @@ public struct PhotoWorkspace: Sendable {
     /// Replaces the open image with `background` as its one layer.
     mutating func start(with background: TiledPixels, name: String?) {
         canvas = CanvasSize(width: background.width, height: background.height)
+        resolution = 72
         documentName = name
         layers = []
         pixels = [:]
@@ -249,10 +255,10 @@ public struct PhotoWorkspace: Sendable {
     public var toolOptions: ToolOptions { tool == .eraser ? eraserOptions : brushOptions }
 
     /// The brush cursor's diameter in canvas pixels: the size of the selected
-    /// brush, eraser, clone stamp or heal. Nil with no image open or another tool
+    /// brush, eraser, clone stamp, heal, spot heal or remove. Nil with no image open or another tool
     /// selected.
     public var brushCursorDiameter: Double? {
-        guard canvas != nil, [.brush, .eraser, .clone, .heal].contains(tool) else { return nil }
+        guard canvas != nil, [.brush, .eraser, .clone, .heal, .spotHeal, .remove].contains(tool) else { return nil }
         return toolOptions.size
     }
 

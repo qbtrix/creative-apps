@@ -8,7 +8,8 @@
 // SampleTarget and color.pick the Eyedropper's click (eyedropper DY-6); shape.draw and tool.shape are ShapeCommands on its
 // ShapeTarget (shape-tools DS-6); select.pick, select.enter-group and select.exit-group are GroupPick's on its
 // GroupPickTarget (area-selection AR-14); the nine stroke.* are StrokeCommands on its StrokeTarget (stroke-style DK-6);
-// edit.copy-as and edit.paste-as-image are CopyAsCommands on DesignPasteboardAdapter's CopyAsTarget (clipboard-interop CB-6).
+// edit.copy-as and edit.paste-as-image are CopyAsCommands on DesignPasteboardAdapter's CopyAsTarget (clipboard-interop CB-6);
+// the five place.* are PlaceCommands on its PlacedImageTarget (placed-images PD-5).
 // Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -37,6 +38,7 @@ extension DesignWorkspace {
         fileSpecs + editSpecs + CopyAsCommands.specs(DesignWorkspace.self) + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
             + [pick] + groupSpecs + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + ShapeCommands.specs(DesignWorkspace.self)
             + StrokeCommands.specs(DesignWorkspace.self)
+            + PlaceCommands.specs(DesignWorkspace.self)
             + HistoryCommands.specs(DesignWorkspace.self) + viewSpecs
 
     /// The specs as a catalog whose history is the workspace's own.
