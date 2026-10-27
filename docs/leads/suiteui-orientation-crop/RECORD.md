@@ -101,3 +101,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T00:30:12Z OC complete; journeys photo 40414264597 superseded, critic panel waits on 40425715186 (c2b727ce)
 - 2026-10-27T00:49:49Z OC complete; critic panel waits on journeys photo 40425715186 (in progress)
 - 2026-10-27T01:10:47Z OC complete; critic panel waits on journeys photo 40425715186 (queued for macOS runner)
+- 2026-10-27T01:29:35Z OC complete; journeys photo 40425715186 on runner since ~01:22, critic panel when done
