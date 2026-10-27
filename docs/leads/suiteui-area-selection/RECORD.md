@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-27T18:45Z
+Polled: 2026-10-27T19:12Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -63,3 +63,4 @@ Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.
 - 2026-10-27T18:23Z 18:23Z: no change; every PR clean and fast-lane, still no local-ci/prescreen on our heads (supervisor). dev 7c15c049, main fef52e66, #5818 open.
 - 2026-10-27T18:45Z 18:45Z: #5096 (AR-11) got needs-rebase: conflict with dev fe9ba972 in the Photo list-commands golden; merged dev, union of both command sets (137 ids), gate running.
+- 2026-10-27T19:12Z 2026-10-27T19:12Z #5096 (AR-11) needs-rebase on photo.list-commands golden: merged origin/dev (union by command id, 137 commands), scripts/ci --changed PASS (AfterGlowCLITests, PhotoModelTests), pushed 6e1a5700; Head: moved; PR clean, waits on lane.
