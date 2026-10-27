@@ -233,3 +233,4 @@ utc	stage	event	ref	note
 2026-10-27T19:39:35Z	blocked	poll	#5262	AK-photo/AK-z wait on SC-f #5262/#5265 (open)
 2026-10-27T19:59:43Z	blocked	poll	#5262	AK-photo blocked on SC-f #5262/#5265, both open
 2026-10-27T20:18:59Z	blocked	poll	#5262	AK-photo blocked on SC-f #5262/#5265, both open
+2026-10-27T20:39:14Z	blocked	poll	#5262	AK-photo blocked on SC-f #5262/#5265, both open
