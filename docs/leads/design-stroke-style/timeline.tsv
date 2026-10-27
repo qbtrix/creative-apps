@@ -312,3 +312,4 @@ time	kind	note
 2026-10-26T23:22Z	wait	heartbeat	#5321	23:22 poll: DK-m done; #5002/#5011 queued
 2026-10-26T23:36Z	wait	heartbeat	#5321	23:36 poll: DK-m done; #5002/#5011 queued
 2026-10-26T23:52Z	wait	heartbeat	#5321	23:51 poll: DK-m done; #5002/#5011 queued
+2026-10-27T00:05Z	wait	heartbeat	#5321	00:06 poll: #5002/#5011 queued behind dev-red
