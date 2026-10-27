@@ -3,7 +3,7 @@
 // Flare and Halo it makes one edit and presses ⌘W: the sheet reads UnsavedPrompt's message for the document
 // with Save, Don't Save and Cancel (`<app>.close.save|dontSave|cancel`, from UnsavedPrompt.answers); Escape
 // cancels and the window stays, still dirty; ⌘W again and ⌘D (Don't Save) closes it. Then a fresh launch, an
-// edit and File > New ask the same; Save on the untitled document opens the Save panel, and cancelling the
+// edit and File > New (Open… in Halo, which has no New that replaces the project) ask the same; Save on the untitled document opens the Save panel, and cancelling the
 // panel (a sheet, or the app-modal dialog Design's runs) keeps the document. Each app's leg skips by name until its slice turns it on (UP-6 Design, UP-8 Photo,
 // UP-10 Flare, UP-12 Halo); the test runs every leg and skips at the end naming the legs still waiting.
 // The bundle doesn't link SuiteKernel, so the words below mirror UnsavedPrompt (Sources/SuiteKernel/Session/
@@ -17,13 +17,15 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
         let prefix: String
         let name: String
         let arguments: [String]
-        /// File's item that replaces the document ("New File" in Design, "New" elsewhere).
+        /// File's item that replaces the document ("New File" in Design, "Open…" in Halo, "New" elsewhere).
         var newItem = "New"
+        /// The canvas's id ("halo.viewer" in Halo, which draws no `suite.canvas`).
+        var canvas = "suite.canvas"
         let edit: @MainActor (Journey) -> Void
     }
 
     /// The editors whose leg runs; each slice adds its app here and deletes its skip.
-    private static let live: Set<String> = ["Design", "Photo", "Flare"]
+    private static let live: Set<String> = ["Design", "Photo", "Flare", "Halo"]
 
     /// UnsavedPrompt.message(for:).
     private static func message(for name: String) -> String {
@@ -92,6 +94,7 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
         guard Self.live.contains("Halo") else { throw XCTSkip("waits on UP-12") }
         askBeforeClosing(Editor(
             app: "Halo", prefix: "halo", name: "Untitled", arguments: ["-HaloSample", "two-comps"],
+            newItem: "Open\u{2026}", canvas: "halo.viewer",
             edit: { halo in
                 halo.element("halo.composition.new").click()
                 halo.click("Create", in: .sheet)
@@ -137,7 +140,7 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
         journey.shot("unsaved-save-panel")
         journey.press(.escape)
         XCTAssert(journey.app.windows.firstMatch.waitForExistence(timeout: 5), "\(editor.app): cancelling the panel closed the document")
-        XCTAssert(journey.element("suite.canvas").exists, "\(editor.app): cancelling the panel replaced the document")
+        XCTAssert(journey.element(editor.canvas).exists, "\(editor.app): cancelling the panel replaced the document")
         journey.app.terminate()
     }
 
@@ -145,7 +148,7 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
     @MainActor private func launch(_ editor: Editor) -> Journey {
         let journey = Journey(editor.app, self, arguments: editor.arguments)
         XCTAssert(journey.app.windows.firstMatch.waitForExistence(timeout: 30), "\(editor.app): no window opened")
-        XCTAssert(journey.element("suite.canvas").waitForExistence(timeout: 10), "\(editor.app): no canvas (suite.canvas)")
+        XCTAssert(journey.element(editor.canvas).waitForExistence(timeout: 10), "\(editor.app): no canvas (\(editor.canvas))")
         return journey
     }
 

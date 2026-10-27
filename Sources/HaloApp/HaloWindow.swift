@@ -19,8 +19,13 @@
 // `live` HaloLiveEdit and reaches `perform` once, at its end; RefreshLinkHandoff
 // hands `live` the `haloRefreshLink` its scrubs pace on, so this body never
 // reads that closure (SwiftUI can't compare closures, so every environment
-// change, such as a sheet opening, would re-run the window). The toolbar's New Composition… is `halo.composition.new`. Views only read HaloProject and call its methods; all
+// change, such as a sheet opening, would re-run the window). The toolbar's New Composition… is `halo.composition.new`.
+// Unsaved changes (adopt-kernel-unsaved-prompt UP-12): SuiteUI's `.unsavedChangesGuard` sits on the root with
+// Halo's hooks (`unsavedHooks`, buttons `halo.close.*`), so a close of a dirty project (File > Close, ⌘W, the
+// close button) asks Save, Don't Save or Cancel first; Open asks the same through `UnsavedGuard.proceed`
+// (HaloWindow+File.swift). Views only read HaloProject and call its methods; all
 // state lives in HaloModel (scripts/ci checks this).
+import AppKit
 import HaloModel
 import SuiteShell
 import SuiteUI
@@ -116,7 +121,30 @@ struct HaloWindow: View {
         .suiteLiveWindow(HaloLive.front, read: { HaloHeadless(workspace: model) }, write: { model.landLive($0.workspace) })
         .focusedSceneValue(\.haloPerform, perform)
         .focusedSceneValue(\.haloProject, model)
+        .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
         .haloControlsProbe(HaloLaunch.current.controlsProbe)
+    }
+
+    /// The unsaved guard's hooks for a window (`halo.close.*`): the name is the project's ("Untitled" before
+    /// its first save, nil with no composition and no file), the dirty state the project's DocumentSession, and
+    /// Save runs File > Save, landing only when the project then reads clean (an untitled project's Save opens
+    /// the Save panel, so it lands nothing and the close or open waits).
+    // view-static: main-actor
+    static func unsavedHooks(
+        model: @escaping @MainActor () -> HaloProject, perform: @escaping @MainActor (HaloCommand) -> Void
+    ) -> UnsavedHooks {
+        UnsavedHooks(
+            idPrefix: "halo",
+            documentName: {
+                let project = model()
+                if project.compositions.isEmpty, project.file.path == nil { return nil }
+                return project.file.name ?? "Untitled"
+            },
+            isDirty: { model().file.unsaved },
+            save: {
+                perform(.save)
+                return !model().file.unsaved
+            })
     }
 
     /// Does `command` through its area's file. A command its area hasn't
