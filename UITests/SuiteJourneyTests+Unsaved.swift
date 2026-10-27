@@ -23,7 +23,7 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
     }
 
     /// The editors whose leg runs; each slice adds its app here and deletes its skip.
-    private static let live: Set<String> = ["Design"]
+    private static let live: Set<String> = ["Design", "Photo"]
 
     /// UnsavedPrompt.message(for:).
     private static func message(for name: String) -> String {

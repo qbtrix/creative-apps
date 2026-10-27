@@ -92,7 +92,7 @@ private let style = TextStyle(family: "Helvetica", weight: 400, italic: false, s
 }
 
 @Test @MainActor func noStyleOrHelpDisablesEveryControlAndSaysWhy() {
-    #expect(TextStyleRows.reason(style: nil, help: nil) == TextStyleRows.noText)
+    #expect(TextStyleRows.reason(style: nil, help: nil) == "Select a text layer first.")
     #expect(TextStyleRows.reason(style: style, help: "Locked") == "Locked")
     #expect(TextStyleRows.reason(style: style, help: nil) == nil)
     let actions = TextStyleRows.alignments(style, reason: "Locked") { _ in }

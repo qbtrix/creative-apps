@@ -104,6 +104,9 @@ extension LibraryWindow {
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
         panel.prompt = "Import"
+        // Add in place or copy to a folder (catalog-files LC-3, LibraryImportOptions.swift).
+        panel.accessoryView = NSHostingView(rootView: LibraryImportOptions())
+        panel.isAccessoryViewDisclosed = true
         guard panel.runModal() == .OK, let url = panel.url else { return nil }
         return url.path(percentEncoded: false)
     }

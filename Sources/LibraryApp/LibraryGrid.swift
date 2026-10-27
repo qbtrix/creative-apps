@@ -30,6 +30,7 @@ struct LibraryGrid: View {
     var onSelect: @MainActor (Set<String>) -> Void = { _ in }
     var onOpen: @MainActor (String) -> Void = { _ in }
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.libraryFiles) private var files
 
     /// Each cell's identifier is this plus the photo's id.
     static let cellIdentifierPrefix = "library.grid.cell."
@@ -63,6 +64,8 @@ struct LibraryGrid: View {
             guard cell.count == 2 else { return }
             cellSizeChanged?(cell[0], cell[1])
         }
+        .contextMenu { LibraryFilesContextMenu(model: model, files: files) }
+        .overlay(alignment: .bottomTrailing) { LibraryMissingBadge(model: model, files: files) }
     }
 }
 

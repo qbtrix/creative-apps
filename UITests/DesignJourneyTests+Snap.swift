@@ -8,7 +8,9 @@
 // its label since XCUITest reads a SwiftUI value as empty (#262).
 // Screen positions come from the `design.canvas.selection` element's frame
 // after a click on each layer's row, so each drag stops 2 screen points short
-// of its target, inside the window's snap reach of 8 screen points.
+// of its target, inside the window's snap reach of 8 screen points. A file
+// opens with its rows collapsed, so Desktop's row is opened first, after each
+// launch (#2456), and a row is clicked off its name (#2496).
 // Written before its code (lead.md, contract rule 13): SN-6 writes it skipped
 // by name; SN-7 draws the guides; SN-8 adds View > Snap to Layers and lifts
 // the skip (the item enabled right after Fit Page, the checkmark, the
@@ -23,7 +25,7 @@ final class DesignSnapJourneyTests: XCTestCase {
     static let snapItem = "Snap to Layers"
     /// The Layers rows of `cards` (DesignFixtures.cards): A, B, C and Pair.
     static let rowA = "design.layer.node-2", rowB = "design.layer.node-3"
-    static let rowC = "design.layer.node-4", rowPair = "design.layer.node-6"
+    static let rowC = "design.layer.node-4", rowPair = "design.layer.node-6", rowDesktop = "design.layer.node-1"
     static let guides = "design.canvas.guides", selection = "design.canvas.selection"
     static let undo = "design.bar.undo"
 
@@ -44,6 +46,7 @@ final class DesignSnapJourneyTests: XCTestCase {
         XCTAssert(item.isEnabled, "View > \(Self.snapItem) is disabled")
         expectAfterFitPage(design)
         if isChecked(item) { closeView(design) } else { item.click() }
+        design.expandDesignLayer(Self.rowDesktop)
         let frames = Frames(a: frame(design, Self.rowA), b: frame(design, Self.rowB),
                             c: frame(design, Self.rowC), pair: frame(design, Self.rowPair))
         design.shot("snap-start")
@@ -135,7 +138,8 @@ final class DesignSnapJourneyTests: XCTestCase {
 
     /// Step 2's drag: click A's row, then drag A by its middle until its right edge is 2 pt short of B's left edge.
     @MainActor private func moveAToB(_ design: Journey, _ frames: Frames) {
-        row(design, Self.rowA).click()
+        design.expandDesignLayer(Self.rowDesktop)
+        design.clickDesignLayer(Self.rowA)
         let start = CGPoint(x: frames.a.midX, y: frames.a.midY)
         drag(design, from: start, to: CGPoint(x: start.x + frames.b.minX - 2 - frames.a.maxX, y: start.y))
     }
@@ -150,17 +154,10 @@ final class DesignSnapJourneyTests: XCTestCase {
 
     /// Clicks the Layers row `identifier` and returns the selection mark's screen frame.
     @MainActor private func frame(_ design: Journey, _ identifier: String) -> CGRect {
-        let layer = row(design, identifier)
-        XCTAssert(layer.waitForExistence(timeout: 5), "no Layers row \(identifier)")
-        layer.click()
+        design.clickDesignLayer(identifier)
         let mark = design.element(Self.selection)
         XCTAssert(mark.waitForExistence(timeout: 5), "clicking \(identifier) selected nothing (\(Self.selection))")
         return mark.frame
-    }
-
-    /// The Layers row with the id `identifier`.
-    @MainActor private func row(_ design: Journey, _ identifier: String) -> XCUIElement {
-        design.element("suite.sidebar").descendants(matching: .any)[identifier].firstMatch
     }
 
     /// The tool box's button `title`.

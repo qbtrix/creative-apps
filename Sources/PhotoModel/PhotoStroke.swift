@@ -173,7 +173,7 @@ extension PhotoWorkspace {
         case .move:
             if begun { current.layersBefore = layers }
             moveSelectedLayers(current, to: end)
-        case .eyedropper:
+        case .eyedropper, .bucket, .spotHeal, .remove:
             break
         case .gradient, .pen:
             current.end = end
@@ -247,7 +247,7 @@ extension PhotoWorkspace {
         case .clone, .heal:
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
-        case .marquee, .crop, .eyedropper:
+        case .marquee, .crop, .eyedropper, .bucket, .spotHeal, .remove:
             break
         case .gradient:
             guard let end = done.end else { return }

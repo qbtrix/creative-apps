@@ -3,7 +3,7 @@
 // (PhotoPlace.swift), Close, Save, Save As…, Export…. Save, Save As and Export
 // are off with no image. Close (Command-W) is the system's, which replacing
 // `.saveItem` drops: it sends performClose: to the key window, so an unsaved
-// window asks first (PhotoWindowCloseGuard). Open Recent and Open In are
+// window asks first (SuiteUI's `.unsavedChangesGuard`). Open Recent and Open In are
 // SuiteFileCommands over the process's documents bridge (PhotoShell): Open
 // Recent lists Photo's files from the suite's one recents list, newest first,
 // with Clear Menu, or a disabled "No Recent Files"; Open In hands the focused
