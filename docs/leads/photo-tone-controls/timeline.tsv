@@ -246,3 +246,4 @@ utc	stage	event	ref	note
 2026-10-27T02:43Z	check	scoped: photo run 40439886020 in progress on b971f99b (contains PT-u 5a1094e1); full CI 40439893721 queued on 9c320a9a; #5816 (PT-m) still open/clean, unbatched
 2026-10-27T03:05Z	check	PT-u proof pending: scoped photo 40439886020 in tests, full CI 40439893721 packing build (Linux green). #5816 open, clean, unbatched.
 2026-10-27T03:26Z	check	PT-u proof still running (40439886020 tests, 40439893721 in progress). #5816 open, clean, unbatched; no supervisor reply on #3468.
+2026-10-27T03:50Z	check	PT-u proof runs 40439886020/40439893721 red, not ours: PhotoToolsKeyTests.letterPicksTool from #4889 (dev-red #5818); told supervisor on #3468; waiting for next green run. #5816 clean, waiting for batch
