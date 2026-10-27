@@ -446,15 +446,15 @@ public struct HaloViewerDragState: Sendable, Equatable {
     }
 }
 
-/// A project in File > Open Recent: its name and where it is.
-public struct HaloRecentFile: Sendable, Hashable, Codable {
+/// A project file: its name and where it is.
+public struct HaloFileRef: Sendable, Hashable, Codable {
     public var name: String
     public var path: String
     public init(name: String, path: String) { self.name = name; self.path = path }
 }
 
 /// The project file: its name and path once saved or opened, whether it has
-/// unsaved edits, an open in progress, the last error, and the recent list.
+/// unsaved edits, an open in progress and the file it is opening, and the last error.
 public struct HaloFileState: Sendable, Equatable {
     /// Nil until the project is saved or opened ("Untitled Project").
     public var name: String?
@@ -463,14 +463,14 @@ public struct HaloFileState: Sendable, Equatable {
     public var opening: Bool
     /// The last open or save error's message; nil once handled.
     public var error: String?
-    /// Newest first.
-    public var recent: [HaloRecentFile]
+    /// The file being opened, from `beginOpen` until `finishOpen`.
+    public var pending: HaloFileRef?
     public init(
         name: String? = nil, path: String? = nil, unsaved: Bool = false, opening: Bool = false, error: String? = nil,
-        recent: [HaloRecentFile] = []
+        pending: HaloFileRef? = nil
     ) {
         self.name = name; self.path = path; self.unsaved = unsaved; self.opening = opening
-        self.error = error; self.recent = recent
+        self.error = error; self.pending = pending
     }
 }
 
