@@ -235,3 +235,4 @@ utc	stage	event	ref	note
 2026-10-27T00:19Z	3	poll	-	lane merged 7 PRs, none ours; #4939 BK-u in lane at 2ea13868
 2026-10-27T00:37Z	3	poll	-	lane merged #4903 only; #4939 BK-u still queued at 2ea13868, no return label; needs-split rebuilds wait on it
 2026-10-27T00:58Z	3	poll	-	lane merged 12 docs/test PRs, none ours; #4939 BK-u still queued at 2ea13868; #4965/#4961/#4982 keep needs-split until it lands
+2026-10-27T01:17Z	3	poll	-	dev unchanged; #4939 BK-u still queued at 2ea13868, no return label
