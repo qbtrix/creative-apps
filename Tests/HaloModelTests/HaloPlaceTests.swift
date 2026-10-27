@@ -117,6 +117,22 @@ import Testing
         #expect(project.selectedLayer?.placedFocus == Point(x: 1, y: 0.5))
     }
 
+    /// A solid holding a picture draws the picture in place of its colour, so FILL's commands and the colour row
+    /// are off and say why; a plain solid keeps them (#4745).
+    @Test func aPlacedPictureTurnsTheSolidsFillOff() throws {
+        let red = HaloCommand.setLayerColor(HaloLayerColor(red: 1, green: 0, blue: 0))
+        var project = try Self.project(select: "Background")
+        #expect(project.fillHelp == nil && project.unavailableHelp(for: red) == nil && project.fillSelection != nil)
+        _ = try HaloProject.catalog.run("place.image", params: Self.place(true), on: &project)
+        #expect(project.placedSelection != nil)
+        #expect(project.fillHelp == HaloProject.pictureCoversFill)
+        #expect(project.unavailableHelp(for: red) == HaloProject.pictureCoversFill)
+        #expect(project.fillSelection == nil)
+        let before = project.document
+        project.runFill(.type(.radial))
+        #expect(project.document == before, "a gradient went onto a solid its picture covers")
+    }
+
     @Test func undoOfAPlaceRemovesTheSolid() throws {
         var project = try Self.project(select: "Badge")
         let before = project.document

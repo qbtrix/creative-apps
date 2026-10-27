@@ -66,7 +66,8 @@ import Testing
         #expect(HaloRenderExportAdapter.formats.map { ExportSheetIDs("halo.render").format($0.id) }
             == ["halo.render.format.pngSequence", "halo.render.format.movie"])
         let found = try controls(view)
-        #expect(Set(found.keys) == ["halo.render.cancel", "halo.render.destination", "halo.render.format", "halo.render.start"])
+        // HX-2's checkbox shows for a PNG sequence too; the Codec row only for a movie.
+        #expect(Set(found.keys) == ["halo.render.alpha", "halo.render.cancel", "halo.render.destination", "halo.render.format", "halo.render.start"])
         #expect(found["halo.render.start"]?.enabled == true)
         #expect(found["halo.render.destination"]?.enabled == true)
         try shoot(view, "")

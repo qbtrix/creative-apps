@@ -61,5 +61,19 @@
     "find": "c.failuresShownFor = c.showsImportFailures ? nil : c.importNotice",
     "replace": "c.failuresShownFor = c.importNotice",
     "tests": "LibraryCommandPathTests"
+  },
+  {
+    "label": "runSendsAnAgentToThePrepare: File > Share… still reads as not built",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "throw CatalogError.unavailable(id: \"file.share\", why: shareInWindow)",
+    "replace": "throw CatalogError.notBuilt(id: \"file.share\", feature: \"SH-5\")",
+    "tests": "LibraryShareMenuSpecTests"
+  },
+  {
+    "label": "runSendsAnAgentToThePrepare: the refusal doesn't name file.share-prepare",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "in the window; file.share-prepare makes the copies.\"",
+    "replace": "in the window.\"",
+    "tests": "LibraryShareMenuSpecTests"
   }
 ]

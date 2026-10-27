@@ -1,0 +1,11 @@
+[
+{"label":"removing compares with case and misses another spelling","file":"Sources/LibraryModel/LibraryKeywords.swift","find":"photo.keywords.removeAll { $0.lowercased() == key }","replace":"photo.keywords.removeAll { $0 == key }","tests":"LibraryKeywordTests"},
+{"label":"each photo is its own undo step","file":"Sources/LibraryModel/LibraryKeywords.swift","find":"recordEdit(name, ids: ids) { $0.keywords = Self.adding(keyed, to: $0.keywords) }","replace":"for id in ids { recordEdit(name, ids: [id]) { $0.keywords = Self.adding(keyed, to: $0.keywords) } }","tests":"LibraryKeywordTests"},
+{"label":"suggestions skip the co-occurrence rank","file":"Sources/LibraryModel/LibraryKeywords.swift","find":"if a.company != b.company { return a.company > b.company }","replace":"","tests":"LibraryKeywordTests"},
+{"label":"a typed name keeps its own spelling over the catalog's","file":"Sources/LibraryModel/LibraryKeywords.swift","find":"return names.map { spelling[$0.lowercased()] ?? $0 }","replace":"return names","tests":"LibraryKeywordTests"},
+{"label":"inner runs of spaces are kept","file":"Sources/LibraryModel/LibraryKeywords.swift","find":"text.split(whereSeparator: { $0.isWhitespace }).joined(separator: \" \")","replace":"String(String(text.drop(while: \\.isWhitespace).reversed()).drop(while: \\.isWhitespace).reversed())","tests":"LibraryKeywordTests"},
+{"label":"suggestions offer what every target has","file":"Sources/LibraryModel/LibraryKeywords.swift","find":"guard !everyTarget.contains(key) else { continue }","replace":"","tests":"LibraryKeywordTests"},
+{"label":"with nothing typed the same hour does not rank first","file":"Sources/LibraryModel/LibraryKeywords.swift","find":"if gaps.contains(where: { $0 <= 3_600 }) { near.formUnion(photo.keywords) }","replace":"","tests":"LibraryKeywordTests"},
+{"label":"the step name ignores how many names were typed","file":"Sources/LibraryModel/LibraryKeywords.swift","find":"let name = names.count == 1 ? \"Add Keyword\" : \"Add Keywords\"","replace":"let name = \"Add Keywords\"","tests":"LibraryKeywordTests"},
+{"label":"a partial keyword counts every target","file":"Sources/LibraryModel/LibraryKeywords.swift","find":"states[key] = (name, (states[key]?.count ?? 0) + 1)","replace":"states[key] = (name, targets.count)","tests":"LibraryKeywordTests"}
+]

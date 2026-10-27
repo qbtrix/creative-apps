@@ -131,7 +131,8 @@ final class LibraryJourneyTests: XCTestCase {
     private static let menus: [(String, [[String]])] = [
         ("File", [
             ["New Collection"], ["New Smart Collection from Filter"], ["Delete Collection"], ["Import Folder…"],
-            ["Load Sample Photos"], ["Export…"],
+            ["Load Sample Photos"], ["Export…"], ["Share…"], ["Open Recent"], ["Open In"],
+            ["Restore Catalog Backup…"],
         ]),
         ("Edit", [["Undo"], ["Redo"], ["Select All"], ["Deselect"]]),
         ("View", [

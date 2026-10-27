@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".insideSelectionOnly: the selection ignored lets the fill run past it",
+    "file": "Sources/SuiteImaging/Retouch/BucketRules.swift",
+    "find": "        if let selection { try m.intersect(selection) }\n",
+    "replace": "        _ = selection\n",
+    "tests": "BucketRulesTests/nothingOutsideTheSelectionChanges"
+  },
+  {
+    "label": ".contiguousStopsAtEdges: contiguous read as off fills every matching region",
+    "file": "Sources/SuiteImaging/Retouch/BucketRules.swift",
+    "find": "contiguous: options.contiguous,",
+    "replace": "contiguous: false,",
+    "tests": "BucketRulesTests/toleranceZeroFillsOneRegionExactly"
+  }
+]

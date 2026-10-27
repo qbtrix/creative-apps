@@ -2,8 +2,9 @@
 // and the layer color can act now, answered from state only (#430). Each
 // needs a composition. The field, size and size scrub need a selected text
 // layer; the color row needs any layer `setLayerColor` can color (text,
-// solid or shape, `HaloLayerKind.takesColor`). An empty string is refused by
-// the edit itself, not here. Linux-safe.
+// solid or shape, `HaloLayerKind.takesColor`), except a solid whose placed
+// picture covers its colour. An empty string is refused by the edit itself,
+// not here. Linux-safe.
 
 extension HaloProject {
     /// The reason the text commands give while no text layer is selected.
@@ -15,7 +16,8 @@ extension HaloProject {
     func textHelp(_ command: HaloCommand) -> String? {
         guard selectedComposition != nil else { return HaloEditError.noComposition.message }
         if case .setLayerColor = command {
-            return selectedLayer?.kind.takesColor == true ? nil : Self.noColorLayerHelp
+            guard selectedLayer?.kind.takesColor == true else { return Self.noColorLayerHelp }
+            return selectedLayer?.placedAsset == nil ? nil : Self.pictureCoversFill
         }
         guard selectedLayer?.kind == .text else { return Self.noTextLayerHelp }
         return nil

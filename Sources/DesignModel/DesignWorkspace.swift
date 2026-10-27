@@ -100,6 +100,8 @@ public struct DesignWorkspace: Sendable, Equatable {
         get { selectedNodeIDs.last }
         set { selectedNodeIDs = newValue.map { [$0] } ?? [] }
     }
+    /// The groups a click picks inside (DesignGroupPick+Kernel); the root when none is entered. View state.
+    public internal(set) var groupScope = GroupScope.root
     public internal(set) var expandedNodeIDs: Set<String> = []
     public internal(set) var tool: DesignTool = .move
     /// The Shape tool's options, the spec its next drag draws: view state, never an undo step (DesignShape+Kernel).
@@ -255,11 +257,12 @@ public struct DesignWorkspace: Sendable, Equatable {
         expandAncestors(of: id, in: page.nodes)
     }
 
-    /// Clears the node selection, every selected layer (Escape, a click on empty canvas); the page stays selected.
+    /// Clears the node selection, every selected layer (Escape, a click on empty canvas), and leaves every entered
+    /// group; the page stays selected.
     public mutating func deselect() {
         commitTextEdit()
         endEditRun()
-        selectedNodeID = nil
+        (selectedNodeID, groupScope) = (nil, .root)
     }
 
     /// Expands every node that encloses `id` in `nodes`, so `id`'s own Layers row shows.

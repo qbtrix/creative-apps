@@ -24,7 +24,8 @@ private func grouped() throws -> DesignWorkspace {
     workspace.drag(from: pt(330, 330), to: pt(380, 360))
     workspace.drag(from: pt(380, 360), to: pt(330, 330))
     workspace.endDrag()
-    #expect(workspace.selectedNodeID == "node-3")
+    // The press on the rectangle picks its group (area-selection AR-14).
+    #expect(workspace.selectedNodeID == "node-2")
     #expect(workspace.pages == pages)
     #expect(workspace.undoActionName == "Undo Add Ellipse")
 }
@@ -82,7 +83,7 @@ private func grouped() throws -> DesignWorkspace {
     workspace.gesture(.move, pt(330, 330), pt(330, 330))
     #expect(workspace.editingTextID == nil)
     #expect(workspace.treeNode(text)?.text == "Hi")
-    #expect(workspace.selectedNodeID == "node-3")
+    #expect(workspace.selectedNodeID == "node-2")
     #expect(workspace.undoActionName == "Undo Add Text")
 }
 
@@ -105,7 +106,8 @@ private func grouped() throws -> DesignWorkspace {
     var generator = SplitMix(seed: 0x17_446)
     for _ in 0..<500 {
         let point = pt(Double(generator.next() % 800), Double(generator.next() % 800))
-        workspace.gesture(.move, point, point)
+        // A ⌘ press picks what the hit test finds; a plain one would lift to the group (AR-14).
+        workspace.gesture(.move, point, point, [.deep])
         #expect(workspace.selectedNodeID == workspace.hitTest(point))
     }
     #expect(workspace.pages == pages)

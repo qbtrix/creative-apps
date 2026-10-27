@@ -1,0 +1,52 @@
+{
+  "about": "What Library's ImageIODecoder scans and decodes today for each import fixture (shared-codecs SC-7), read from the files' own bytes on Linux: the PNG IHDR / JPEG SOF size, the Exif IFD0 Orientation, Make and Model, and DateTimeOriginal (Pillow 12.3 getexif, ImageMagick identify for the HEIC's ispe size). No fixture carries DateTimeOriginal, so each capture date is the file's creation date. LibraryImageIOTests holds SC-8 to these.",
+  "folders": [
+    {
+      "folder": "Tests/RealJobs/library/drop-import/input/shoot",
+      "files": [
+        { "name": "IMG_0001.jpg", "kind": "jpeg", "stored": [4, 3], "orientation": 1, "pixelSize": [4, 3], "dateTimeOriginal": null, "make": null, "model": null },
+        { "name": "IMG_0002.jpg", "kind": "jpeg", "stored": [4, 3], "orientation": 1, "pixelSize": [4, 3], "dateTimeOriginal": null, "make": null, "model": null },
+        { "name": "IMG_0003.jpg", "kind": "jpeg", "stored": [4, 3], "orientation": 1, "pixelSize": [4, 3], "dateTimeOriginal": null, "make": null, "model": null }
+      ]
+    },
+    {
+      "folder": "Tests/RealJobs/library/share-three/input/shoot",
+      "files": [
+        { "name": "IMG_0001.jpg", "kind": "jpeg", "stored": [2400, 1600], "orientation": 1, "pixelSize": [2400, 1600], "dateTimeOriginal": null, "make": "Fixture", "model": "Share Three" },
+        { "name": "IMG_0002.jpg", "kind": "jpeg", "stored": [1600, 2400], "orientation": 1, "pixelSize": [1600, 2400], "dateTimeOriginal": null, "make": "Fixture", "model": "Share Three" },
+        { "name": "IMG_0003.jpg", "kind": "jpeg", "stored": [2400, 1600], "orientation": 1, "pixelSize": [2400, 1600], "dateTimeOriginal": null, "make": "Fixture", "model": "Share Three" }
+      ]
+    },
+    {
+      "folder": "Tests/RealJobs/library/delete-rejects/input/images",
+      "files": [
+        { "name": "beach.png", "kind": "png", "stored": [4, 3], "orientation": 1, "pixelSize": [4, 3], "dateTimeOriginal": null, "make": null, "model": null },
+        { "name": "dock.png", "kind": "png", "stored": [4, 3], "orientation": 1, "pixelSize": [4, 3], "dateTimeOriginal": null, "make": null, "model": null },
+        { "name": "fog.png", "kind": "png", "stored": [4, 3], "orientation": 1, "pixelSize": [4, 3], "dateTimeOriginal": null, "make": null, "model": null },
+        { "name": "pier.png", "kind": "png", "stored": [4, 3], "orientation": 1, "pixelSize": [4, 3], "dateTimeOriginal": null, "make": null, "model": null }
+      ]
+    },
+    {
+      "folder": "Tests/AppSnapshotTests/Fixtures/media",
+      "files": [
+        { "name": "half-transparent.png", "kind": "png", "stored": [16, 8], "orientation": 1, "pixelSize": [16, 8], "dateTimeOriginal": null, "make": null, "model": null },
+        { "name": "quadrants.heic", "kind": "heic", "stored": [32, 16], "orientation": 1, "pixelSize": [32, 16], "dateTimeOriginal": null, "make": null, "model": null },
+        { "name": "rotated-orientation6.jpg", "kind": "jpeg", "stored": [16, 32], "orientation": 6, "pixelSize": [32, 16], "dateTimeOriginal": null, "make": null, "model": null }
+      ]
+    }
+  ],
+  "upright": [
+    {
+      "path": "Tests/AppSnapshotTests/Fixtures/media/rotated-orientation6.jpg",
+      "pixelSize": [32, 16],
+      "corners": { "topLeft": [254, 0, 0], "topRight": [0, 255, 1], "bottomLeft": [0, 0, 254], "bottomRight": [255, 255, 255] }
+    }
+  ],
+  "rjX46": {
+    "about": "RJ-X46's camera pair (packet Jobs table): 4032 x 3024 stored with Exif orientation 6, 3024 x 4032 shown, the JPEG and the HEIC within 3 levels. The files land with SC-3, so these values are the packet's, not read from bytes.",
+    "files": ["Tests/RealJobs/photo/rotated-photo/input/rotated-6.jpg", "Tests/RealJobs/photo/rotated-photo/input/rotated-6.heic"],
+    "stored": [4032, 3024],
+    "pixelSize": [3024, 4032],
+    "pairTolerance": 3
+  }
+}

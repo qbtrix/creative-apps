@@ -3,7 +3,8 @@
 // 3 levels of the sky, heal copies texture from its source offset, remove of
 // a square on a texture leaves no pixel of the square's colour, and the same
 // seed gives the same pixels. Mutations (FH-5h): SuiteImaging.HealRules
-// (`.removeIsRepeatable`, `.healCopiesFromSource`).
+// (`.removeIsRepeatable`, `.healCopiesFromSource`,
+// `.healSkipsOffCanvasSource`, `.healClipsBothAxes`).
 import CoreRaster
 import Testing
 import SuiteKernel
@@ -27,7 +28,7 @@ import SuiteImaging
     }
     static let square = (try? Mask.rectangle(width: 64, height: 64, x: 28, y: 28, w: 8, h: 8))
 
-    @Test(.disabled("waits on FH-5h")) func spotHealOnFlatSkyLeavesSky() throws {
+    @Test func spotHealOnFlatSkyLeavesSky() throws {
         var p = try PixelBuffer(width: 48, height: 48, fill: Self.sky)
         for y in 22..<27 { for x in 22..<27 { try p.setPixel(x: x, y: y, RGBA(r: 0.05, g: 0.05, b: 0.05, a: 1)) } }
         let healed = try HealRules.spotHeal(p, at: (24, 24), size: 12, seed: 1)
@@ -39,7 +40,7 @@ import SuiteImaging
         }
     }
 
-    @Test(.disabled("waits on FH-5h")) func healCopiesTextureFromTheSource() throws {
+    @Test func healCopiesTextureFromTheSource() throws {
         // Left half: grey stripes one column wide; right half flat grey. The square at x 40..<50 takes the stripes 24 px left.
         var p = try PixelBuffer(width: 64, height: 32)
         for y in 0..<32 {
@@ -54,7 +55,25 @@ import SuiteImaging
         #expect(try healed.pixel(x: 55, y: 15) == p.pixel(x: 55, y: 15) && healed.pixel(x: 10, y: 15) == p.pixel(x: 10, y: 15))
     }
 
-    @Test(.disabled("waits on FH-5h")) func removeLeavesNoPixelOfTheSquaresColour() throws {
+    @Test func healSkipsDabsWhoseSourceIsOffTheCanvas() throws {
+        // Flat grey with stripes from x 48. A band from x 10 to the right edge, source +40: x 10..<24 heal from
+        // the stripes, x 24 on read past the edge and stay as they were (#5095).
+        var p = try PixelBuffer(width: 64, height: 32)
+        for y in 0..<32 {
+            for x in 0..<64 {
+                let v: Float = x < 48 ? 0.5 : x % 2 == 0 ? 0.2 : 0.8
+                try p.setPixel(x: x, y: y, RGBA(r: v, g: v, b: v, a: 1))
+            }
+        }
+        let band = try Mask.rectangle(width: 64, height: 32, x: 10, y: 10, w: 54, h: 10)
+        let healed = try HealRules.heal(p, through: band, sourceOffset: (dx: 40, dy: 0))
+        for x in 11..<22 { #expect(abs(try healed.pixel(x: x + 1, y: 15).r - healed.pixel(x: x, y: 15).r) > 0.3, "x \(x)") }
+        for y in 0..<32 { for x in 24..<64 { #expect(try healed.pixel(x: x, y: y) == p.pixel(x: x, y: y), "(\(x), \(y))") } }
+        #expect(try HealRules.heal(p, through: band, sourceOffset: (dx: 0, dy: 30)) == p)
+        #expect(try HealRules.heal(p, through: band, sourceOffset: (dx: Int.min, dy: Int.max)) == p)
+    }
+
+    @Test func removeLeavesNoPixelOfTheSquaresColour() throws {
         let p = try Self.texture(), square = try #require(Self.square)
         let removed = try HealRules.remove(p, through: square, seed: 7)
         for y in 0..<64 {
@@ -65,13 +84,13 @@ import SuiteImaging
         }
     }
 
-    @Test(.disabled("waits on FH-5h")) func theSameSeedGivesTheSamePixels() throws {
+    @Test func theSameSeedGivesTheSamePixels() throws {
         let p = try Self.texture(), square = try #require(Self.square)
         #expect(try HealRules.remove(p, through: square, seed: 7) == HealRules.remove(p, through: square, seed: 7))
         #expect(try HealRules.spotHeal(p, at: (31, 31), size: 10, seed: 3) == HealRules.spotHeal(p, at: (31, 31), size: 10, seed: 3))
     }
 
-    @Test(.disabled("waits on FH-5h")) func maskPlacesTheGridInTheBuffer() throws {
+    @Test func maskPlacesTheGridInTheBuffer() throws {
         let grid = CoverageGrid(originX: -1, originY: 3, width: 3, height: 1, values: [1, 0.5, 1])
         let m = try HealRules.mask(grid, width: 8, height: 6)
         #expect(m.width == 8 && m.height == 6)

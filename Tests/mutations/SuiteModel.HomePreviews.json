@@ -1,0 +1,6 @@
+[
+  {"label": "a card asks on every load, not once", "file": "Sources/SuiteModel/Home/HomePreviews.swift", "find": "for ref in refs where !asked.contains(ref.fileID) {", "replace": "for ref in refs {", "tests": "HomePreviewsTests"},
+  {"label": "the mark shows before the answer is in", "file": "Sources/SuiteModel/Home/HomePreviews.swift", "find": "guard answered.contains(ref.fileID) else { return nil }", "replace": "", "tests": "HomePreviewsTests"},
+  {"label": "the recents' own thumbnail beats the preview", "file": "Sources/SuiteModel/Home/HomePreviews.swift", "find": "if let picture = pictures[ref.fileID] { return picture }\n        if let fallback { return fallback }", "replace": "if let fallback { return fallback }\n        if let picture = pictures[ref.fileID] { return picture }", "tests": "HomePreviewsTests"},
+  {"label": "the mark is drawn on every body", "file": "Sources/SuiteModel/Home/HomePreviews.swift", "find": "if let cached = marks[ref.app] { return cached }", "replace": "", "tests": "HomePreviewsTests"}
+]

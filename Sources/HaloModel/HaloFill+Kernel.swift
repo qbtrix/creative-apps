@@ -3,14 +3,17 @@
 // and the fill editor's gestures run on the selected solid or shape layer.
 // A layer keeps its gradient in a unit box over its bounds; the selection
 // maps it into the layer's box in composition pixels. Text and null layers
-// have no fill. Linux-safe.
+// have no fill, and a solid holding a placed picture draws the picture in
+// place of its fill, so its fill commands are off (`pictureCoversFill`).
+// Linux-safe.
 import SuiteKernel
 
 extension HaloProject: GradientFillTarget {
     /// Why the fill commands can't run: nothing selected, a text layer or a null.
     static let noFillLayer = "Select a solid or shape layer to fill.",
         textFillHelp = "A text layer takes a color, not a gradient.",
-        nullFillHelp = "A null layer has nothing to fill."
+        nullFillHelp = "A null layer has nothing to fill.",
+        pictureCoversFill = "The placed picture covers this solid's color."
 
     /// The selected solid's or shape's fill in its box; nil for text, null or
     /// no selection.
@@ -20,11 +23,13 @@ extension HaloProject: GradientFillTarget {
         return FillSelection(fill: layer.fill(in: box), box: box)
     }
 
-    /// Why the fill commands can't run on the selection; nil on a solid or shape.
+    /// Why the fill commands can't run on the selection; nil on a shape or on a solid without a picture (a placed
+    /// picture draws in place of the solid's colour).
     public var fillHelp: String? {
         guard selectedComposition != nil, let layer = selectedLayer else { return Self.noFillLayer }
         switch layer.kind {
-        case .solid, .shape: return nil
+        case .solid: return layer.placedAsset == nil ? nil : Self.pictureCoversFill
+        case .shape: return nil
         case .text: return Self.textFillHelp
         case .null: return Self.nullFillHelp
         }
@@ -36,7 +41,7 @@ extension HaloProject: GradientFillTarget {
     /// selection, changing nothing.
     public mutating func setFill(_ fill: Fill, in box: Rect, name: String, drag: String?) throws {
         if let fillHelp { throw CatalogError.failed(id: "fill", message: fillHelp) }
-        let key = drag.flatMap { drag in selectedLayerID.map { "\($0).fill.\(drag)" } }
+        let key = drag.flatMap { drag in selectedLayerID.map { CoalesceKey.key("fill", on: [$0], drag: drag) } }
         let set = edit(name, control: "halo.fill", coalesceKey: key) { doc in
             let (c, l) = try doc.selectedLayerIndices()
             doc.compositions[c].layers[l].setFill(fill, from: box)

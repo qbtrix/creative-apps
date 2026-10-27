@@ -1,6 +1,6 @@
 // ToneSettings.swift (tone-controls TC-1 values and stubs, TC-7 coding and clamping): the suite's one
-// tone and sharpen adjustment, the value Photo and Library both store. TC-1 stubs: `setting` doesn't
-// clamp, and Codable is synthesized until TC-7 codes Library's ten Develop keys by hand. Linux-safe.
+// tone and sharpen adjustment, the value Photo and Library both store. `setting` clamps to the slider's
+// range and refuses NaN; the coding is by hand, with Library's ten Develop keys. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -54,8 +54,8 @@ public enum ToneGroup: String, CaseIterable, Sendable {
     public var sliders: [ToneSlider] { ToneSlider.allCases.filter { $0.group == self } }
 }
 
-/// Edit instructions, never pixels; neutral renders the picture unchanged. Coded by hand (TC-7): a neutral
-/// slider writes no key, a missing key reads neutral, and the ten Develop keys are Library's own.
+/// Edit instructions, never pixels; neutral renders the picture unchanged. Coded by hand: a neutral slider
+/// writes no key, a missing key reads neutral, and the ten Develop keys are Library's own.
 public struct ToneSettings: Hashable, Codable, Sendable {
     /// The sliders off neutral; a neutral slider is never stored, so equal settings compare equal.
     private var values: [ToneSlider: Double] = [:]
@@ -64,10 +64,12 @@ public struct ToneSettings: Hashable, Codable, Sendable {
     public init() {}
     /// The slider's value, its neutral when unset.
     public func value(_ s: ToneSlider) -> Double { values[s] ?? s.neutral }
-    /// A copy with `s` at `v`. Stub: TC-7 clamps `v` to the range and keeps the old value for NaN.
+    /// A copy with `s` at `v`, clamped to the slider's range; NaN keeps the old value.
     public func setting(_ s: ToneSlider, to v: Double) -> ToneSettings {
+        guard !v.isNaN else { return self }
+        let clamped = min(max(v, s.range.lowerBound), s.range.upperBound)
         var copy = self
-        copy.values[s] = v == s.neutral ? nil : v
+        copy.values[s] = clamped == s.neutral ? nil : clamped
         return copy
     }
     /// A copy with group `g`'s sliders at neutral; nil resets every group.
@@ -78,4 +80,33 @@ public struct ToneSettings: Hashable, Codable, Sendable {
     }
     /// Whether group `g` (every group when nil) leaves the picture unchanged.
     public func isNeutral(_ g: ToneGroup?) -> Bool { !values.keys.contains { g == nil || $0.group == g } }
+
+    /// A slider's JSON key, its raw value: the ten Develop sliders' keys are Library's own (`DevelopSettings`'
+    /// `exposure`, `contrast`, ..., `saturation`), so a catalog written today decodes as is.
+    private struct Key: CodingKey {
+        let stringValue: String
+        var intValue: Int? { nil }
+        init(_ slider: ToneSlider) { stringValue = slider.rawValue }
+        init?(stringValue: String) { self.stringValue = stringValue }
+        init?(intValue: Int) { nil }
+    }
+
+    /// Each key present is read through `setting`, so it is clamped; a missing key reads neutral and a key
+    /// that is no slider (Library's crop, curve, levels) is ignored.
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: Key.self)
+        var s = ToneSettings()
+        for slider in ToneSlider.allCases {
+            if let v = try c.decodeIfPresent(Double.self, forKey: Key(slider)) { s = s.setting(slider, to: v) }
+        }
+        self = s
+    }
+
+    /// Only the sliders off neutral, so neutral writes `{}` and a new slider adds no key to old files.
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: Key.self)
+        for slider in ToneSlider.allCases where value(slider) != slider.neutral {
+            try c.encode(value(slider), forKey: Key(slider))
+        }
+    }
 }

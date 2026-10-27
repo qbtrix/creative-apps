@@ -33,8 +33,8 @@ drawn from this packet's `FontFamily` values.
 (`TextMeasuring`, `FontListing`, `GlyphRasterizing`), `suite-identity`
 (`Values/Text.swift`), `suite-fakes` (`FakeText`), `suite-services` (the
 `text` member); container `suite-shell`, ✚ new component `shell-text`
-(`docs/c4/parts/creative-apps/suite-shell/shell-text.json`, `paths:
-["Sources/SuiteShell/Text/"]`), added by ST-4 with its first file, and
+(`docs/c4/parts/creative-apps/suite-text/shell-text.json`, `paths:
+["Sources/SuiteText/"]`), added by ST-4 with its first file, and
 `shell-live` (`Live/TextSlot.swift`).
 
 **Clean-room.** Behaviour from Apple's Core Text and Core Graphics
@@ -137,12 +137,12 @@ Double }` to `Values/Text.swift`.
 | ST-1 | – | The contract: values, the three protocols, `FakeText`, the `text` member and `pending` reason, the fake slot; MJ-ST0 | `Sources/SuiteModel/Values/Text.swift`, `Sources/SuiteModel/Contracts/TextMeasuring.swift`, `Sources/SuiteModel/Fakes/FakeText.swift`, `Sources/SuiteModel/SuiteServices.swift`, `Sources/SuiteShell/SuiteServices+Live.swift`, `Sources/SuiteShell/Live/TextSlot.swift`, `Tests/SuiteModelTests/TextContractTests.swift`, `Tests/mutations/SuiteModel.TextValues.json` | shell-media:SM-1 | ~320, 8 |
 | ST-2 | – | Checks first: `TextRulesTests`, `FakeTextTests` (Linux), `ShellTextMeasureTests`, `ShellFontListTests`, `ShellTextDrawTests` (macOS) disabled by name | `Tests/SuiteModelTests/TextRulesTests.swift`, `Tests/SuiteModelTests/FakeTextTests.swift`, `Tests/AppSnapshotTests/ShellTextMeasureTests.swift`, `Tests/AppSnapshotTests/ShellFontListTests.swift`, `Tests/AppSnapshotTests/ShellTextDrawTests.swift` | ST-1 | ~300, 5 |
 | ST-3 | – | `TextRules`; turns on `TextRulesTests` | `Sources/SuiteModel/Values/Text+Rules.swift`, `Tests/SuiteModelTests/TextRulesTests.swift`, `Tests/mutations/SuiteModel.TextRules.json` | ST-2 | ~160, 3 |
-| ST-4 | – | `CoreTextMeasurer` and the `shell-text` C4 part; turns on `ShellTextMeasureTests`; `Unverified API:` for the glyph-to-cluster mapping | `Sources/SuiteShell/Text/CoreTextMeasurer.swift`, `Tests/AppSnapshotTests/ShellTextMeasureTests.swift`, `docs/c4/parts/creative-apps/suite-shell/shell-text.json` | ST-2 | ~260, 3 |
-| ST-5 | – | `FontCatalog`; turns on `ShellFontListTests` | `Sources/SuiteShell/Text/FontCatalog.swift`, `Tests/AppSnapshotTests/ShellFontListTests.swift` | ST-4 | ~140, 2 |
+| ST-4 | – | `CoreTextMeasurer` and the `shell-text` C4 part; turns on `ShellTextMeasureTests`; `Unverified API:` for the glyph-to-cluster mapping | `Sources/SuiteText/CoreTextMeasurer.swift`, `Tests/AppSnapshotTests/ShellTextMeasureTests.swift`, `docs/c4/parts/creative-apps/suite-text/shell-text.json` | ST-2 | ~260, 3 |
+| ST-5 | – | `FontCatalog`; turns on `ShellFontListTests` | `Sources/SuiteText/FontCatalog.swift`, `Tests/AppSnapshotTests/ShellFontListTests.swift` | ST-4 | ~140, 2 |
 | ST-6 | – | `FakeText`'s fixed advances and its parity with creative-core's numbers; turns on `FakeTextTests` | `Sources/SuiteModel/Fakes/FakeText.swift`, `Tests/SuiteModelTests/FakeTextTests.swift`, `Tests/mutations/SuiteModel.FakeText.json` | ST-2 | ~120, 3 |
-| ST-7 | – | `GlyphRasterizer` (moved from `HaloTextRasterizer`); turns on `ShellTextDrawTests` | `Sources/SuiteShell/Text/GlyphRasterizer.swift`, `Tests/AppSnapshotTests/ShellTextDrawTests.swift` | ST-4 | ~240, 2 |
-| ST-8 | – | `LiveText` joins the three; the slot goes live; MJ-ST4 | `Sources/SuiteShell/Text/LiveText.swift`, `Sources/SuiteShell/Live/TextSlot.swift`, `Tests/AppSnapshotTests/ShellTextLiveTests.swift` | ST-3, ST-5, ST-6, ST-7 | ~100, 3 |
-| ST-9 | – | The part's final words (measure here, lay out in core); `status: built`; `feature-done`. The `suite.md` line lands with the W3 adoption packets | `docs/c4/parts/creative-apps/suite-shell/shell-text.json`, `docs/blueprints/suite/features/shell-text.wave.json` | ST-8 | ~30, 2 |
+| ST-7 | – | `GlyphRasterizer` (moved from `HaloTextRasterizer`); turns on `ShellTextDrawTests` | `Sources/SuiteText/GlyphRasterizer.swift`, `Tests/AppSnapshotTests/ShellTextDrawTests.swift` | ST-4 | ~240, 2 |
+| ST-8 | – | `LiveText` joins the three; the slot goes live; MJ-ST4 | `Sources/SuiteText/LiveText.swift`, `Sources/SuiteShell/Live/TextSlot.swift`, `Tests/AppSnapshotTests/ShellTextLiveTests.swift` | ST-3, ST-5, ST-6, ST-7 | ~100, 3 |
+| ST-9 | – | The part's final words (measure here, lay out in core); `status: built`; `feature-done`. The `suite.md` line lands with the W3 adoption packets | `docs/c4/parts/creative-apps/suite-text/shell-text.json`, `docs/blueprints/suite/features/shell-text.wave.json` | ST-8 | ~30, 2 |
 
 ST-5 and ST-7 wait on ST-4 because it adds the `shell-text` part that owns
 their folder; they share no file with each other.

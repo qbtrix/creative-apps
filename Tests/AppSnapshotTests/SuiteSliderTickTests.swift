@@ -7,7 +7,9 @@
 // five, or none when the gap is too narrow to space them, on a mixed row so
 // the marker and the fill add no ink of their own. Every marker column lies
 // inside that gap, at a low, a middle and a high value (#2963). While typing,
-// a 140 pt Rotation row keeps its whole label (#2952). macOS only.
+// a 140 pt Rotation row keeps its whole label (#2952). The gap is measured
+// from the whole label, so a row that truncates its label to make room for
+// the ticks puts the first one outside it and fails. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -18,13 +20,13 @@ import Testing
 @Suite struct SuiteSliderTickTests {
     /// label, value, unit, decimals, row width, whether all five ticks must show.
     nonisolated static let cases: [(String, Double, String, Int, CGFloat, Bool)] = [
-        ("Position Y", 100, " px", 1, 156, false),  // Halo's TRANSFORM row: no room, no ticks
+        ("Position Y", 100, " px", 1, 156, false),  // Halo's TRANSFORM row: the whole label, ticks only if they fit
         ("Rotation", 0, "°", 0, 156, false),
         ("Position Y", 100, " px", 1, 216, true),  // the same row at a full inspector width
         ("X1", 0.42, "", 2, 216, true),  // Flare's and Halo's easing rows
     ]
 
-    @Test(.disabled("quarantine #3262 until 2026-10-22"), arguments: cases.indices)
+    @Test(arguments: cases.indices)
     func ticksSitBetweenLabelAndValue(index: Int) throws {
         let (label, value, unit, decimals, width, wide) = Self.cases[index]
         // Mixed: the ticks alone. On a narrow lane a marker between two ticks

@@ -250,13 +250,12 @@
     "closes_with": "photo/tone-controls",
     "trap": "Only the whole image, not as an adjustment layer",
     "run": "C",
-    "baseline": "fail",
+    "baseline": "pass",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/",
       "https://www.apple.com/pixelmator-pro/"
-    ],
-    "waits_on": "PT-4"
+    ]
   },
   "RJ-P13": {
     "id": "RJ-P13",
@@ -272,13 +271,12 @@
     "closes_with": "photo/tone-controls",
     "trap": "Clipped highlights with no warning",
     "run": "C",
-    "baseline": "fail",
+    "baseline": "pass",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/",
       "https://www.apple.com/pixelmator-pro/"
-    ],
-    "waits_on": "PT-4"
+    ]
   },
   "RJ-P14": {
     "id": "RJ-P14",
@@ -295,12 +293,11 @@
     "closes_with": "photo/tone-controls",
     "trap": "Halos; sharpen runs before resize",
     "run": "C",
-    "baseline": "fail",
+    "baseline": "pass",
     "since": "2026-10-19",
     "sources": [
       "https://affinity.serif.com/en-gb/photo/full-feature-list/"
-    ],
-    "waits_on": "PT-4"
+    ]
   },
   "RJ-P15": {
     "id": "RJ-P15",

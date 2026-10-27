@@ -72,13 +72,17 @@ view and brings back the clipped columns of #579 and #933.
 ✓ inspector.navigationSplitViewColumnWidth(min: SuiteSize.inspectorWidth.min, ideal: ..., max: ...)
 ```
 
-**5. Use LazyVStack (or LazyVGrid) for long lists.** A plain `VStack` in a
-`ScrollView` builds every row up front: every layer, keyframe, page or photo.
-Anything that can grow past one screen is lazy. `ThumbnailGrid` is the model.
+**5. Heavy surfaces are AppKit, and only in SuiteUI.** Captain, 10-27. A
+canvas, a layer list, a timeline, a live drag or hundreds of rows is AppKit
+(`NSView`, `NSOutlineView`, `NSTableView`) behind one canonical SuiteUI host
+every app shares; SwiftUI walks every row (Design's 2,000-row Layers hung the
+journeys, #4292). No app writes its own: use `CanvasHost`, `TimelineLanesView`
+or the SuiteUI outline host, and the first lane needing a missing host builds
+it in SuiteUI (rule 11). Panels and sheets stay SwiftUI; short lists are lazy.
 
 ```swift
-✗ ScrollView { VStack { ForEach(keyframes) { KeyRow($0) } } }
-✓ ScrollView { LazyVStack(spacing: SuiteSpacing.xs) { ForEach(keyframes) { KeyRow($0) } } }
+✗ List(layers, children: \.children) { LayerRow($0) }       // in DesignApp, every row walked
+✓ SuiteOutline(rows: layers.outline, cell: LayerCell.self) // the one SuiteUI NSOutlineView host
 ```
 
 **6. Prove feel on the real window.** A harness that drives the Model
@@ -169,14 +173,14 @@ The reference look is Flare's easing panel (`StudioScrubRow`, `ChoiceChips`).
 
 ## New APIs: macOS 27 and Swift 6.4
 
-**12. Check new or unfamiliar APIs against Apple's documentation.** Model
-training predates macOS 27 and Swift 6.4, so a remembered signature can be
-wrong or gone. On the Mac, look it up in Xcode's documentation (the xcode
-MCP `DocumentationSearch` tool, which reads the installed SDK) and build. On
-a Linux cloud machine, which can't compile SwiftUI, read the `apple-docs`
-MCP (CLAUDE.md, Rules) and still list each such call under
-`Unverified API:` in the PR body, so the Mac finisher checks it against the
-SDK.
+**12. Official docs first, always.** Captain, 10-27. Every AppKit or SwiftUI
+control, API and look comes from Apple's docs
+(developer.apple.com/documentation/appkit, /swiftui) and the HIG, never memory
+(training predates macOS 27). Controls look stock, as the HIG shows: tabs are a
+plain `NSSegmentedControl` (`.segmented` Picker) or `NSTabView` behind
+SuiteUI's `SegmentedTabs`, with no custom capsule, tint or fill. Check in
+Xcode's docs (xcode MCP `DocumentationSearch`) and build; on Linux use the
+`apple-docs` MCP and list the call under `Unverified API:`.
 
 ```text
 ✗ (PR body says nothing; the macOS build breaks on dev)
@@ -206,11 +210,11 @@ holds the old ones and only shrinks.
 - [ ] Rows have stable ids and Equatable inputs, no closures that break it (2)
 - [ ] Accessibility modifiers do constant work (3)
 - [ ] Every split column has a fixed min width (4)
-- [ ] Lists that grow are lazy (5)
+- [ ] Canvas, long lists, timelines, live drags: AppKit via the SuiteUI host, none app-local (5)
 - [ ] Render budget test on the real window for the drag you touched (6)
 - [ ] Ids on leaf controls only (7)
 - [ ] Each mode change has a visible control and a journey step that clicks it (8, 9)
 - [ ] Hover, pressed and selected on every new control (10)
 - [ ] SuiteUI searched; shared parts went there (11)
-- [ ] New APIs checked in Xcode docs, or listed as `Unverified API:` (12)
+- [ ] Controls and APIs checked in Apple's docs and HIG; stock look; else `Unverified API:` (12)
 - [ ] Pure statics on a View are `nonisolated` (13)

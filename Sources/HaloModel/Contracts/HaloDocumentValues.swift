@@ -5,7 +5,9 @@
 // stacks, on the kernel's History, in HaloHistory+Kernel.swift. Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
+import SuiteModel
 
 /// One layer as the viewer and the renderer draw it at a frame.
 public struct HaloDrawItem: Sendable, Hashable {
@@ -32,15 +34,18 @@ public struct HaloDrawItem: Sendable, Hashable {
     /// PH-1: a solid's picture and its box and focus; nil draws `color`. HaloDrawRules fills them in PH-5.
     public var placedAsset: PlacedAsset?
     public var placedImage: PlacedImage?
+    /// HY-6: the layer's style with its keyable numbers sampled at the frame; nil draws none.
+    public var style: LayerStyle?
     public init(
         layerID: String, kind: HaloLayerKind, bounds: HaloLayerRect, matrix: HaloMatrix, opacity: Double,
         color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil, gradient: Fill? = nil,
-        shape: ShapeSpec? = nil, stroke: VectorStroke? = nil, placedAsset: PlacedAsset? = nil, placedImage: PlacedImage? = nil
+        shape: ShapeSpec? = nil, stroke: VectorStroke? = nil, placedAsset: PlacedAsset? = nil, placedImage: PlacedImage? = nil,
+        style: LayerStyle? = nil
     ) {
         self.layerID = layerID; self.kind = kind; self.bounds = bounds; self.matrix = matrix
         self.opacity = opacity; self.color = color; self.blendMode = blendMode; self.text = text
         self.gradient = gradient; self.shape = shape; self.stroke = stroke
-        self.placedAsset = placedAsset; self.placedImage = placedImage
+        self.placedAsset = placedAsset; self.placedImage = placedImage; self.style = style
     }
 }
 
@@ -107,14 +112,94 @@ public struct HaloPlaybackTick: Sendable, Hashable {
     public init(frame: Int, ended: Bool) { self.frame = frame; self.ended = ended }
 }
 
-/// What Render… writes (tier 2, #429).
+/// What Render… writes (tier 2, #429). HX-1 (export-pack) adds the movie's
+/// codec and whether frames keep their transparency; the plan reads them from
+/// HX-3 (HaloRenderJob.swift) and the writers from HX-4.
 public struct HaloRenderSettings: Sendable, Hashable {
     public enum Format: String, CaseIterable, Sendable { case pngSequence, movie }
     public var format: Format
     /// Half size: width and height halved, then rounded down to even (movie
     /// encoders need even sizes), at least 2. The plan carries the pixel size.
     public var halfSize: Bool
-    public init(format: Format, halfSize: Bool = false) { self.format = format; self.halfSize = halfSize }
+    /// The movie's codec; a PNG sequence ignores it.
+    public var codec: MovieCodec = .h264
+    /// Frames without the composition's background, the movie keeping alpha.
+    public var alpha = false
+    public init(format: Format, halfSize: Bool = false, codec: MovieCodec = .h264, alpha: Bool = false) {
+        self.format = format; self.halfSize = halfSize; self.codec = codec; self.alpha = alpha
+    }
+
+    /// The Codec row's choices, in order.
+    public static let codecs: [MovieCodec] = [.h264, .hevc, .prores4444]
+    /// Why HEVC with alpha can't be picked: the Codec row doesn't offer it.
+    public static let hevcAlphaRefused = "HEVC with alpha isn't offered. Choose ProRes 4444 to keep transparency."
+
+    /// Why `codec` can't be picked, or nil: every codec the row offers can
+    /// be, since the suite's media service writes them all (HX-4).
+    public static func codecRefusal(_ codec: MovieCodec) -> String? {
+        switch codec {
+        case .h264, .hevc, .prores4444: nil
+        case .hevcAlpha: hevcAlphaRefused
+        }
+    }
+
+    /// The suite's export format for `codec`, which names it and says whether it keeps alpha.
+    static func formatID(_ codec: MovieCodec) -> String? {
+        switch codec {
+        case .h264: "mp4"
+        case .hevc: "mp4-hevc"
+        case .prores4444: "mov-prores"
+        case .hevcAlpha: nil
+        }
+    }
+
+    /// The codec's name on the Codec row: the suite's format name ("H.264", "ProRes 4444").
+    public static func codecTitle(_ codec: MovieCodec) -> String {
+        formatID(codec).flatMap { ExportFormats.spec($0)?.name } ?? "HEVC with alpha"
+    }
+
+    /// Why the Transparent background checkbox is off, or nil: a PNG
+    /// sequence always may; a movie only with a codec that keeps alpha, in
+    /// `ExportRules.refusal`'s words ("H.264 can't keep transparency. Choose ProRes 4444.").
+    public var alphaRefusal: String? {
+        guard format == .movie, !codec.keepsAlpha else { return nil }
+        let options = SuiteExportOptions(format: Self.formatID(codec) ?? "mp4", alpha: true)
+        return ExportRules.refusal(options, source: (width: 2, height: 2), formats: ExportFormats.all)
+            ?? "\(Self.codecTitle(codec)) can't keep transparency."
+    }
+
+    /// These settings with `format`; alpha goes off where the new format can't keep it.
+    public func choosing(format: Format) -> HaloRenderSettings {
+        var next = self
+        next.format = format
+        if next.alphaRefusal != nil { next.alpha = false }
+        return next
+    }
+
+    /// These settings at half or full size.
+    public func choosing(halfSize: Bool) -> HaloRenderSettings {
+        var next = self
+        next.halfSize = halfSize
+        return next
+    }
+
+    /// These settings with `codec`, alpha off where it can't keep it;
+    /// unchanged while `codecRefusal(codec)` refuses it.
+    public func choosing(codec: MovieCodec) -> HaloRenderSettings {
+        guard Self.codecRefusal(codec) == nil else { return self }
+        var next = self
+        next.codec = codec
+        if next.alphaRefusal != nil { next.alpha = false }
+        return next
+    }
+
+    /// These settings with alpha on or off; unchanged when `alphaRefusal` refuses turning it on.
+    public func choosing(alpha: Bool) -> HaloRenderSettings {
+        guard !alpha || alphaRefusal == nil else { return self }
+        var next = self
+        next.alpha = alpha
+        return next
+    }
 }
 
 /// The frames one render writes and what each is called.
@@ -126,12 +211,21 @@ public struct HaloRenderPlan: Sendable, Hashable {
     public var frameRate: FrameRate
     /// Composition frames in order, 0 through the last.
     public var frames: [Int]
-    /// "Intro_0001.png" for each frame of a PNG sequence; one "Intro.mp4" for a movie.
+    /// "Intro_0001.png" for each frame of a PNG sequence; one "Intro.mp4" or "Intro.mov" for a movie.
     public var fileNames: [String]
-    public init(width: Int, height: Int, framesPerSecond: Int, frameRate: FrameRate? = nil, frames: [Int], fileNames: [String]) {
+    /// Whether each frame is flattened over opaque black before it is written: a movie without alpha (HX-3).
+    public var opaque: Bool
+    /// What the suite's media service writes the movie as; nil for a PNG
+    /// sequence and for an H.264 movie at a fractional rate, which Halo's
+    /// own writer times exactly (HX-4).
+    public var movie: MovieSettings?
+    public init(
+        width: Int, height: Int, framesPerSecond: Int, frameRate: FrameRate? = nil, frames: [Int], fileNames: [String],
+        opaque: Bool = false, movie: MovieSettings? = nil
+    ) {
         self.width = width; self.height = height; self.framesPerSecond = framesPerSecond
         self.frameRate = frameRate ?? FrameRate(whole: framesPerSecond)
-        self.frames = frames; self.fileNames = fileNames
+        self.frames = frames; self.fileNames = fileNames; self.opaque = opaque; self.movie = movie
     }
 }
 

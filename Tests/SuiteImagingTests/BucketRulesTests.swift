@@ -26,7 +26,7 @@ import SuiteImaging
         return out
     }
 
-    @Test(.disabled("waits on FH-5b")) func toleranceZeroFillsOneRegionExactly() throws {
+    @Test func toleranceZeroFillsOneRegionExactly() throws {
         let p = try Self.twoSquares()
         let options = BucketOptions(tolerance: 0)
         let region = try BucketRules.region(seed: (3, 3), in: p, options: options, selection: nil)
@@ -40,13 +40,13 @@ import SuiteImaging
         }
     }
 
-    @Test(.disabled("waits on FH-5b")) func contiguousOffFillsEveryMatch() throws {
+    @Test func contiguousOffFillsEveryMatch() throws {
         let p = try Self.twoSquares()
         let region = try BucketRules.region(seed: (3, 3), in: p, options: BucketOptions(tolerance: 0, contiguous: false), selection: nil)
         #expect(try Self.covered(region) == Self.squares)
     }
 
-    @Test(.disabled("waits on FH-5b")) func nothingOutsideTheSelectionChanges() throws {
+    @Test func nothingOutsideTheSelectionChanges() throws {
         let p = try Self.twoSquares()
         let selection = try Mask.rectangle(width: 16, height: 8, x: 0, y: 0, w: 4, h: 8)
         let region = try BucketRules.region(seed: (3, 3), in: p, options: BucketOptions(tolerance: 0), selection: selection)
@@ -55,7 +55,7 @@ import SuiteImaging
         #expect(try filled.pixel(x: 3, y: 3) == Self.red && filled.pixel(x: 4, y: 3) == Self.white && filled.pixel(x: 5, y: 5) == Self.white)
     }
 
-    @Test(.disabled("waits on FH-5b")) func allLayersSamplesTheMergedPictureButWritesTheTarget() throws {
+    @Test func allLayersSamplesTheMergedPictureButWritesTheTarget() throws {
         let merged = try Self.twoSquares()
         let target = try PixelBuffer(width: 16, height: 8)
         let region = try BucketRules.region(seed: (11, 3), in: merged, options: BucketOptions(tolerance: 32, sampleAllLayers: true), selection: nil)
@@ -64,7 +64,7 @@ import SuiteImaging
         #expect(try BucketRules.fill(target, region: Mask(width: 16, height: 8), color: Self.red) == target)
     }
 
-    @Test(.disabled("waits on FH-5b")) func optionsDefaultToContiguousAntiAliasedOnOneLayer() throws {
+    @Test func optionsDefaultToContiguousAntiAliasedOnOneLayer() throws {
         let o = BucketOptions(tolerance: 32)
         #expect(o.contiguous && o.antiAlias && !o.sampleAllLayers)
         #expect(BucketOptions(tolerance: 900).tolerance == 255 && BucketOptions(tolerance: -4).tolerance == 0)

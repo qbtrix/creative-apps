@@ -40,8 +40,8 @@ final class LibraryExportJourneyTests: XCTestCase {
         addTeardownBlock { for url in [folder, catalog, out] { try? FileManager.default.removeItem(at: url) } }
         try LibraryFiles.writeShoot(in: folder)
         library = Journey("Library", self, arguments: [
-            "-LibraryImportFolder", folder.path, "-LibraryImportOnLaunch",
-            "-LibraryCatalogDir", catalog.path, "-LibraryExportTo", out.path,
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
+            "-LibraryExportTo", out.path, "-LibraryImportOnLaunch",
         ])
         openSheet(library, suffix: "-live")
         exportAt1024(library, shot: "exporting")

@@ -1,0 +1,37 @@
+[
+  {
+    "label": ".neutralWritesNoKey: neutral encoded",
+    "file": "Sources/SuiteImaging/Tone/ToneSettings.swift",
+    "find": "for slider in ToneSlider.allCases where value(slider) != slider.neutral {",
+    "replace": "for slider in ToneSlider.allCases {",
+    "tests": "ToneSettingsTests"
+  },
+  {
+    "label": ".clampsToRange: clamp skipped",
+    "file": "Sources/SuiteImaging/Tone/ToneSettings.swift",
+    "find": "let clamped = min(max(v, s.range.lowerBound), s.range.upperBound)",
+    "replace": "let clamped = v",
+    "tests": "ToneSettingsTests"
+  },
+  {
+    "label": ".resetKeepsOtherGroups: reset clears every group",
+    "file": "Sources/SuiteImaging/Tone/ToneSettings.swift",
+    "find": "copy.values = values.filter { g != nil && $0.key.group != g }",
+    "replace": "copy.values = [:]",
+    "tests": "ToneSettingsTests"
+  },
+  {
+    "label": ".clampsToRange: NaN stored instead of refused",
+    "file": "Sources/SuiteImaging/Tone/ToneSettings.swift",
+    "find": "guard !v.isNaN else { return self }",
+    "replace": "guard !v.isNaN else { return self.setting(s, to: s.neutral) }",
+    "tests": "ToneSettingsTests"
+  },
+  {
+    "label": ".libraryKeysDecode: a present key not read",
+    "file": "Sources/SuiteImaging/Tone/ToneSettings.swift",
+    "find": "if let v = try c.decodeIfPresent(Double.self, forKey: Key(slider)) { s = s.setting(slider, to: v) }",
+    "replace": "if let v = try c.decodeIfPresent(Double.self, forKey: Key(slider)), slider != .saturation { s = s.setting(slider, to: v) }",
+    "tests": "ToneSettingsTests"
+  }
+]

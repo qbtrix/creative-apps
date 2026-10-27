@@ -2,8 +2,8 @@
 // `PlacedImageTarget`, so the place commands in `PlaceCommands` put a PNG or JPEG into an open image the
 // way the other apps place theirs. A placed image becomes pixels in Photo: `insertPlaced` adds a pixel
 // layer above the selection, and nothing keeps the picture after it, so `placedSelection` is always nil
-// and `placeFillBox` refuses a fill. The size comes from the file's header (CoreRaster's `PNG.info` and
-// `JPEG.info`), the pixels from the workspace's image codec (`readImages(with:)`; the window's is ImageIO),
+// and `placeFillBox` refuses a fill. The size comes from the file's header (`SuiteImaging.rasterSize(of:)`),
+// the pixels from the workspace's image codec (`readImages(with:)`; the window's is ImageIO),
 // read straight at the fitted box's longest side when the box is smaller, so a 12 MP file is never decoded
 // whole and resampled on the main actor (#4248). The layer goes in through `insertPixelLayer`, the insert Paste
 // uses. Linux-safe.
@@ -13,6 +13,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
 import SuiteKernel
 
 extension PhotoWorkspace: PlacedImageTarget {
@@ -45,18 +46,9 @@ extension PhotoWorkspace: PlacedImageTarget {
 
     /// A PNG's or JPEG's pixel size from its header, without decoding the pixels; SVG is refused.
     public func rasterSize(_ data: Data, format: PlacedFormat) throws -> Size {
-        let size: (width: Int, height: Int)
-        switch format {
-        case .png:
-            guard let info = try? PNG.info(data) else { throw Self.placeFailed }
-            size = (info.width, info.height)
-        case .jpeg:
-            guard let info = try? JPEG.info(data) else { throw Self.placeFailed }
-            size = (info.width, info.height)
-        case .svg:
-            throw CatalogError.unavailable(id: "place.image", why: Self.placeFormatHelp)
-        }
-        return Size(width: Double(size.width), height: Double(size.height))
+        guard format != .svg else { throw CatalogError.unavailable(id: "place.image", why: Self.placeFormatHelp) }
+        guard let size = SuiteImaging.rasterSize(of: data) else { throw Self.placeFailed }
+        return size
     }
 
     /// Adds a pixel layer showing `asset` in `image.box`, above the selection, selected, as one step titled

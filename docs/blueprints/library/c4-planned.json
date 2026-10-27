@@ -67,7 +67,8 @@
                   "Sources/LibraryApp/LibraryWindow+Export.swift",
                   "Sources/LibraryApp/LibraryWindow+Trash.swift",
                   "Sources/LibraryApp/LibraryWindow+Files.swift",
-                  "Sources/LibraryApp/LibraryWindow+Backup.swift"
+                  "Sources/LibraryApp/LibraryWindow+Backup.swift",
+                  "Sources/LibraryApp/LibraryWindow+Share.swift"
                 ],
                 "status": "planned",
                 "authored": true
@@ -322,7 +323,7 @@
                 "description": "Crop rectangle and angle, aspect presets, the frame kept inside the straightened image, apply and cancel.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
-                  "Sources/LibraryModel/LibraryCrop.swift",
+                  "Sources/LibraryModel/LibraryCrop+Kernel.swift",
                   "Sources/LibraryModel/Live/LiveCrop.swift"
                 ],
                 "status": "planned",

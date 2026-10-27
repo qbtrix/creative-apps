@@ -19,6 +19,9 @@ public struct SwitchMenuItem: Equatable, Sendable {
 
 /// The Switch To items in order: Home, Flare, Design, Photo, Library, Halo.
 public enum SwitchMenu {
+    /// The SF Symbol Window > Switch To leads with, so it lines up with the system items around it.
+    public static let menuSymbol = "square.grid.2x2"
+
     public static func items(current: SuiteApp, states: [SuiteApp: AppRunState]) -> [SwitchMenuItem] {
         ([SuiteApp.launcher] + SuiteApp.apps).map { app in
             let reason = reason(for: app, current: current, state: states[app] ?? .notRunning)

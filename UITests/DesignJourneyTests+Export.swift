@@ -3,7 +3,7 @@
 // Journeys). On `-DesignServices fake -DesignFixture cards` at 1024 × 768:
 // Desktop's row is clicked, ⇧⌘E opens the export sheet
 // (`design.export.sheet`), whose list (`design.export.items`) reads
-// "Desktop.png 1440 × 1024, 1x"; the 2x chip (`design.export.scale.2x`)
+// "Desktop.png 1440 × 1024 pt, 1x"; the 2x chip (`design.export.scale.2x`)
 // makes it "2880 × 2048 px". Export (`design.export.start`) runs the fake
 // export, which writes nothing: progress fills, the sheet reads "Exported
 // 1 file" and the status line's note (`design.status.note`) repeats it.
@@ -39,7 +39,7 @@ final class DesignExportJourneyTests: XCTestCase {
         export.click()
         let sheet = design.element(Self.sheetID), items = design.element(Self.itemsID)
         XCTAssert(sheet.waitForExistence(timeout: 5), "File > Export… opened no sheet")
-        XCTAssert(Self.waitUntil { self.reads(items, "Desktop.png 1440 × 1024, 1x") }, "the list doesn't name Desktop at 1x")
+        XCTAssert(Self.waitUntil { self.reads(items, "Desktop.png 1440 × 1024 pt, 1x") }, "the list doesn't name Desktop at 1x")
         design.element("design.export.scale.2x").click()
         XCTAssert(Self.waitUntil { self.reads(items, "2880 × 2048 px") }, "2x left the list without 2880 × 2048 px")
 
@@ -129,7 +129,7 @@ final class DesignExportJourneyTests: XCTestCase {
         let sheet = design.element(Self.sheetID)
         XCTAssert(sheet.waitForExistence(timeout: 5), "⇧⌘E opened no export sheet (\(Self.sheetID))")
         let items = design.element(Self.itemsID)
-        XCTAssert(Self.waitUntil { self.reads(items, "Desktop.png 1440 × 1024, 1x") }, "the list doesn't name Desktop at 1x")
+        XCTAssert(Self.waitUntil { self.reads(items, "Desktop.png 1440 × 1024 pt, 1x") }, "the list doesn't name Desktop at 1x")
         design.shot("export-sheet")
 
         // 2. 2x: the row reads twice the pixels.

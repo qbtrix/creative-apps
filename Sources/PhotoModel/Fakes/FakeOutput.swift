@@ -1,5 +1,6 @@
-// Fakes/FakeOutput.swift: the output fakes (blueprint 5.2): export sizing
-// (PV-8) and the eyedropper's sample (PV-9). Deterministic and stateless.
+// Fakes/FakeOutput.swift: the output fake (blueprint 5.2): export sizing
+// (PV-8). The eyedropper has no fake: its mean is the kernel's, pure.
+// Deterministic and stateless.
 // Linux-safe.
 import CoreRaster
 
@@ -15,14 +16,5 @@ public struct FakeExportSizing: ExportSizing {
     public func resized(_ image: DecodedImage, to size: CanvasSize) throws -> DecodedImage {
         DecodedImage(rgba8: [UInt8](repeating: 128, count: size.width * size.height * 4),
                      width: size.width, height: size.height)
-    }
-}
-
-/// Always samples the fixtures' sun yellow.
-public struct FakeSampling: ColorSampling {
-    public var unavailableHelp: String? { nil }
-    public init() {}
-    public func sample(_ picture: PixelBuffer, center: (x: Int, y: Int), size: SampleSize) -> SampledColor? {
-        SampledColor(red: 255, green: 204, blue: 0)
     }
 }

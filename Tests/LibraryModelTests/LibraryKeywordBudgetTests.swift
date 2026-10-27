@@ -1,5 +1,6 @@
 // LibraryKeywordBudgetTests.swift: QB-LIB-M1 and QB-LIB-M2 (metadata-more) on the `large` fixture, each
-// within 20 ms debug (2 ms release). Written before its code (rule 13, MD-9): both wait on MD-10.
+// within 20 ms debug (2 ms release). Written before its code (rule 13, MD-9). MD-10 built the code; they are
+// timing tests, so they stay off here until Tests/perf-suites.txt lists them and perf-nightly runs them.
 @testable import LibraryModel
 import Testing
 
@@ -9,7 +10,7 @@ private let scale = 1.0
 private let scale = 0.1
 #endif
 
-@Test(.disabled("waits on MD-10")) func addToThousandWithinBudget() {
+@Test func addToThousandWithinBudget() {
     var catalog = LibraryCatalog()
     catalog.load(LibraryFixtures.photos(named: "large"))
     catalog.select(Set(catalog.order.prefix(1_000)))
@@ -23,7 +24,7 @@ private let scale = 0.1
     #expect(cost.median <= 20 * scale)
 }
 
-@Test(.disabled("waits on MD-10")) func suggestWithinBudget() {
+@Test func suggestWithinBudget() {
     let pool = (0..<500).map { $0.isMultiple(of: 2) ? "Subject \($0)" : "Place \($0)" }
     var photos = LibraryFixtures.photos(named: "large")
     for index in photos.indices {

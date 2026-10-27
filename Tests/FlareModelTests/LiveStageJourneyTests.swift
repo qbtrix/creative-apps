@@ -70,8 +70,10 @@ private func pen(_ clicks: [(Point, Point)]) -> ShapeDraft? {
         StageAddress(owner: owner, layerID: $0, item: .shape(0))
     })
     #expect(list.hiddenTextCount == 0)
-    let drawn = list.items.map(\.path), drafted = [rect, oval, triangle, wave].compactMap(\.shape.path)
-    #expect(drawn == drafted)
+    // Each layer's origin is its shape's centre (B1 stopgap), so the drafted path comes back through the item's matrix.
+    let drafted = [rect, oval, triangle, wave].compactMap(\.shape.path)
+    let drawn = try zip(list.items, drafted).map { item, path in try path.transformed(by: item.transform.inverted()) }
+    #expect(list.items.map(\.path) == drawn)
     #expect(drawn.map(cubics) == [0, 4, 0, 2])
 }
 

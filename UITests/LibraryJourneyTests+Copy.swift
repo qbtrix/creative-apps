@@ -12,7 +12,7 @@ import XCTest
 
 extension LibraryJourneyTests {
     /// The slice LJ-CB waits on; CB-12 sets it to nil.
-    private static let copyWaitsOn: String? = "CB-12"
+    private static let copyWaitsOn: String? = nil
 
     /// LJ-CB: select a photo, Edit > Copy; the pasteboard holds a PNG and a file URL (`edit-copy-photo`).
     @MainActor func testCopyPhotoOut() throws {
@@ -22,7 +22,7 @@ extension LibraryJourneyTests {
         addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
         let originals = try LibraryFiles.write(2, in: folder)
         let library = Journey("Library", self, arguments: [
-            "-LibraryImportFolder", folder.path, "-LibraryImportOnLaunch", "-LibraryCatalogDir", catalog.path,
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path, "-LibraryImportOnLaunch",
         ])
         XCTAssert(library.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         let cell = copyCell("jpeg-0001", library)

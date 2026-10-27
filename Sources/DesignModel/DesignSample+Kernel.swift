@@ -37,7 +37,9 @@ extension DesignWorkspace: SampleTarget {
         for id in selectedNodeIDs where !isLockedInTree(id) {
             _ = pages.update(id) { node in
                 if toStroke {
-                    node.stroke = DesignStroke(color: color, width: node.stroke?.width ?? DesignStroke.default.width)
+                    var stroke = node.stroke ?? .default
+                    stroke.color = color.kernelColor
+                    node.stroke = stroke
                 } else {
                     node.paint(.solid(color.kernelColor))
                 }
@@ -87,7 +89,7 @@ extension DesignNode {
         if covers(local, inset: 0) { colors.append(fillColor(at: local)) }
         if kind != .text, let stroke, stroke.width > 0, stroke.width.isFinite {
             let half = stroke.width / 2
-            if covers(local, inset: -half), !covers(local, inset: half) { colors.append(stroke.color.kernelColor) }
+            if covers(local, inset: -half), !covers(local, inset: half) { colors.append(stroke.color) }
         }
         return colors
     }

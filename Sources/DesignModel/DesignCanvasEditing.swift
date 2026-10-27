@@ -207,7 +207,7 @@ extension DesignWorkspace {
     public mutating func drag(from start: DesignPoint, to end: DesignPoint, modifiers: DesignModifiers = []) {
         guard isOpen, end.isFinite, gesture != nil || start.isFinite else { return }
         if gesture == nil {
-            gesture = beginGesture(at: start, shift: modifiers.contains(.shift), option: modifiers.contains(.option))
+            gesture = beginGesture(at: start, modifiers: modifiers)
         }
         guard var current = gesture else { return }
         if end != current.start { current.moved = true }
@@ -471,15 +471,17 @@ extension DesignWorkspace {
 
     /// Decides what the gesture starting at `start` does, selecting the node a Move press hits.
     /// With Shift a Move press on a node adds it to the selection or takes it out, and moves nothing.
-    private mutating func beginGesture(at start: DesignPoint, shift: Bool, option: Bool) -> DesignGesture {
+    private mutating func beginGesture(at start: DesignPoint, modifiers: DesignModifiers) -> DesignGesture {
         commitTextEdit()
         endEditRun()
+        let (shift, option) = (modifiers.contains(.shift), modifiers.contains(.option))
         var route = DesignGesture.Route.none
         var wasSelected = false
         let ids = selectedNodeIDs
         switch tool {
         case .move:
-            let hit = hitTest(start)
+            // The hit lifted to its group in the entered scope (DesignGroupPick+Kernel).
+            let hit = pressedLayer(at: start, modifiers: modifiers)
             if handle(at: start) == .rotate, let node = selectedNode {
                 route = .turn(node.transformBox)
             } else if let handle = handle(at: start), let node = selectedNode {

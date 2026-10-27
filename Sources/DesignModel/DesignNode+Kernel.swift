@@ -25,7 +25,7 @@ extension DesignNode {
         var bare = self
         bare.children = []
         return LayerNode(id: id, name: name, isHidden: isHidden, isLocked: isLocked,
-                         children: children.map(\.layerNode), payload: DesignNodePayload(node: bare))
+                         children: children.map { $0.layerNode }, payload: DesignNodePayload(node: bare))
     }
 
     /// The node `layer` holds, with the layer's id, name, flags and children.
@@ -40,7 +40,7 @@ extension DesignNode {
 
 extension [DesignNode] {
     /// These top-level nodes (back to front) as one kernel tree.
-    var layerTree: LayerTree<DesignNodePayload> { LayerTree(map(\.layerNode)) }
+    var layerTree: LayerTree<DesignNodePayload> { LayerTree(map { $0.layerNode }) }
 }
 
 extension LayerTree where Payload == DesignNodePayload {

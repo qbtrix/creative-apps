@@ -23,7 +23,7 @@ struct FlareIntentTests {
     @Test func examplesListEveryCase() {
         // The contract slices' case count: 9 file, 11 edit, 3 stage, 2 tools, 13 view, 18 inspector,
         // 19 timeline, 8 layers, 9 library, 1 interactions, 11 export (flare-export FX-1), 1 assist.
-        #expect(FlareIntent.examples.count == 105)
+        #expect(FlareIntent.examples.count == 108)
     }
 
     @Test func exportFormatChipsRegisterApart() {
@@ -41,11 +41,12 @@ struct FlareIntentTests {
 
     static let exportCases: [FlareIntent.Export] = [
         .showSheet, .setFormat(.svgFrame), .setFrames(from: 0, to: 47), .setStep(1), .setScale(2),
-        .setTransparent(true), .start, .cancel, .dismiss, .tryAgain, .reveal,
+        .setTransparent(true), .start, .cancel, .dismiss, .tryAgain, .reveal, .setSize(.scale(0.5)), .setFrameRate(15),
+        .setLoop(false),
     ]
 
     @Test func everyExportCaseKeepsItsArea() {
-        #expect(Self.exportCases.count == 11)
+        #expect(Self.exportCases.count == 14)
         for intent in Self.exportCases {
             let whole = FlareIntent.export(intent)
             #expect(whole.area == .export, "\(whole.identifier)")
@@ -55,6 +56,8 @@ struct FlareIntentTests {
         #expect(FlareIntent.export(.setFrames(from: 0, to: 9)).identifier == "flare.export.setFrames")
         #expect(FlareIntent.export(.reveal).identifier == "flare.export.reveal")
         #expect(FlareIntent.export(.tryAgain).identifier == "flare.export.tryAgain")
+        #expect(FlareIntent.export(.setFrameRate(12)).identifier == "flare.export.setFrameRate")
+        #expect(FlareIntent.export(.setLoop(true)).title == "Loop forever")
     }
 
     @Test func everyExportCaseHasATitle() {

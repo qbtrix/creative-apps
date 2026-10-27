@@ -1,8 +1,7 @@
 {
   "version": 1,
   "app": "library",
-  "why": "RJ-L56, pending LG-7 (large-catalog): open a catalog headless, select all and rate every photo 3 as one step; the trap is a scan per photo that is fine at 200 and stalls at 10,000. Until LG-7 the input is the four-photo shoot; LG-7 swaps in the 10,000-photo fixture's catalog, its expected file and the 1,000-photo export plan, and turns the job on.",
-  "pending": "LG-7",
+  "why": "RJ-L56 (large-catalog LG-7): open the 10,000-photo fixture's catalog headless (LibraryFixtures.largePhotos, no files), select all and rate every photo 3 as one step, then write the catalog back; the trap is a scan per photo that is fine at 200 and stalls at 10,000. The 1,000-photo export plan is timed by LargeCatalogModelBudgetTests.exportPlanWithinBudget, since the picks' PNG export waits on image-codecs (qbtrix/creative-core#562).",
   "inputs": ["input/*.library"],
   "steps": [
     {"id": "edit.select-all", "params": {}},
@@ -11,19 +10,7 @@
   "atomic": true,
   "output": {"dir": "out", "name": "{stem}-catalog", "format": "json", "options": {}},
   "expect": {
-    "out/shoot-catalog.json": {"json": {
-      "version": 1,
-      "photos": [
-        {"captureDate": 1760000000, "color": [0.902, 0.7843, 0.5882], "flag": "None", "id": "beach",
-         "name": "beach", "path": "images/beach.png", "pixelSize": {"height": 3, "width": 4}, "rating": 3},
-        {"captureDate": 1760000060, "color": [0.3529, 0.2745, 0.1961], "flag": "None", "id": "dock",
-         "name": "dock", "path": "images/dock.png", "pixelSize": {"height": 3, "width": 4}, "rating": 3},
-        {"captureDate": 1760000120, "color": [0.7843, 0.7843, 0.8039], "flag": "None", "id": "fog",
-         "name": "fog", "path": "images/fog.png", "pixelSize": {"height": 3, "width": 4}, "rating": 3},
-        {"captureDate": 1760000180, "color": [0.2353, 0.3137, 0.4314], "flag": "None", "id": "pier",
-         "name": "pier", "path": "images/pier.png", "pixelSize": {"height": 3, "width": 4}, "rating": 3}
-      ]
-    }}
+    "out/large-catalog.json": {"sha256": "ec3bb70a961996d297506d3276641f5d20105769e6b5191c48f1dd3711d2b8e9"}
   },
-  "platforms": []
+  "platforms": ["linux", "macos"]
 }

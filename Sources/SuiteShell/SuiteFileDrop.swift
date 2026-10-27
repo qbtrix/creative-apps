@@ -12,14 +12,14 @@ import UniformTypeIdentifiers
 
 extension View {
     /// Takes file drops for `app`: each file opens, is placed into the open document (`documentName`), is
-    /// handed to the app that reads it, or is refused, and `perform` gets every action at once.
+    /// handed to the app that reads it, or is refused, and `perform` gets every action at once. `opens` are
+    /// extensions the app opens itself though no suite type names them; `perform` must open those itself.
     public func suiteFileDrop(_ app: SuiteApp, bridge: SuiteDocumentsBridge, hasDocument: Bool,
-                              places: Set<String>, documentName: String? = nil,
+                              places: Set<String>, opens: Set<String> = [], documentName: String? = nil,
                               perform: @escaping ([DropAction]) -> Void) -> some View {
         let registry = bridge.registry
         let plan: ([String]) -> [DropAction] = { paths in
-            DropPlan.plan(paths, into: app.rawValue, hasDocument: hasDocument, places: places,
-                          readers: { @Sendable ext in SuiteDocumentsBridge.readers(in: registry, ofExtension: ext) })
+            DropPlan.plan(paths, into: app, registry: registry, hasDocument: hasDocument, places: places, opens: opens)
         }
         return modifier(SuiteFileDropModifier(app: app, documentName: documentName, plan: plan, perform: perform))
     }
@@ -31,6 +31,17 @@ extension View {
         suiteFileDrop(app, bridge: bridge, hasDocument: hasDocument, places: places, documentName: documentName) { actions in
             Task { await bridge.perform(actions, host: host) }
         }
+    }
+}
+
+extension DropPlan {
+    /// The drop rule for `app` over `registry`, as the drop modifier plans it. An extension in `opens` is the
+    /// app's own open, so its mark says "Open in" rather than refusing a file the app then opens.
+    public static func plan(_ paths: [String], into app: SuiteApp, registry: SuiteTypeRegistry, hasDocument: Bool,
+                            places: Set<String>, opens: Set<String> = []) -> [DropAction] {
+        plan(paths, into: app.rawValue, hasDocument: hasDocument, places: places, readers: { ext in
+            opens.contains(ext) ? [app.rawValue] : SuiteDocumentsBridge.readers(in: registry, ofExtension: ext)
+        })
     }
 }
 

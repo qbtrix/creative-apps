@@ -9,6 +9,8 @@
 // every keystroke updates the draft, as in ImageSizeSheet: a number field
 // can wait for Return to commit, and Return is Apply (the field submits it
 // itself, since it takes Return first), so "type 3, press Return" turns by 3. Controls carry `photo.straighten.*` identifiers.
+// The frame, the size line and Cancel / Apply are SuiteUI's SuiteSheet; Apply
+// is off, saying why, while the image can't turn that far.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -33,8 +35,13 @@ struct StraightenSheet: View {
     @State private var typed: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text("Straighten").font(SuiteFont.headline)
+        SuiteSheet(
+            "Straighten", message: frame.map { "New size \($0.size.width) × \($0.size.height) px" } ?? Self.tooFar,
+            width: SuiteSize.inspectorWidth.max, cancelID: "photo.straighten.cancel", onCancel: onCancel,
+            action: MenuCommand(PhotoMenuState.spec("image.straighten"), on: PhotoMenuState(workspace: workspace), title: "Apply",
+                                perform: onApply),
+            actionID: "photo.straighten.apply", reason: frame == nil ? Self.tooFar : nil
+        ) {
             Form {
                 LabeledContent("Angle") {
                     HStack(spacing: SuiteSpacing.s) {
@@ -61,23 +68,10 @@ struct StraightenSheet: View {
                     .toggleStyle(.checkbox)
                     .accessibilityIdentifier("photo.straighten.crop")
             }
-            Text(frame.map { "New size \($0.size.width) × \($0.size.height) px" } ?? "The image is too large to turn that far.")
-                .font(SuiteFont.caption)
-                .foregroundStyle(SuiteColor.secondaryText)
-            HStack {
-                Spacer()
-                Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("photo.straighten.cancel")
-                if let spec = PhotoWorkspace.catalog.spec("image.straighten") {
-                    MenuCommand(spec, on: workspace, title: "Apply", shortcut: .defaultAction, perform: onApply)
-                        .disabled(frame == nil)
-                        .accessibilityIdentifier("photo.straighten.apply")
-                }
-            }
         }
-        .padding(SuiteSpacing.l)
-        .frame(width: SuiteSize.inspectorWidth.max)
     }
+
+    nonisolated static let tooFar = "The image is too large to turn that far."
 
     private func setCropToFit(_ on: Bool) {
         onDraft(StraightenDraft(degrees: draft.degrees, cropToFit: on))

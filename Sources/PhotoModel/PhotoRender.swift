@@ -2,10 +2,11 @@
 // the canvas renders by compositing the visible layers bottom-up, each through
 // PhotoLayerComposite (a pixel layer at its offset with its blend mode and
 // opacity, CoreRaster's composite; an adjustment layer passes through), then
-// running the enabled adjustments in order: SuiteImaging's ImagingProgram steps
-// (exposure, levels, curves, hue/saturation), then blur. Levels and curves work on display (sRGB-encoded)
+// running the enabled adjustments in order: the tone section's unsharp pass,
+// then SuiteImaging's ImagingProgram steps (tone's own, exposure, levels,
+// curves, hue/saturation), then blur. Levels and curves work on display (sRGB-encoded)
 // values, as photo editors' tone tools do (CoreRaster's ToneEncoding.sRGB),
-// so mid grey sits near 0.5 on their axes; exposure stays linear. The blur reads a margin of 3 sigma around the region,
+// so mid grey sits near 0.5 on their axes; exposure stays linear. The blur and the unsharp pass read a margin of 3 sigma around the region,
 // so a region renders exactly as the same pixels of the whole image would.
 // `composite()` is the whole image at full size (export, tests); PhotoRenderer
 // turns a workspace into display bytes (sRGB, straight alpha) tile by tile, in
@@ -13,15 +14,18 @@
 // (PhotoWorkspace.damage(since:)) and timing itself for the status line. The
 // curve editor's line (`curveSamples`) runs the same CoreRaster curve over a
 // ramp, and its histogram (`curvesHistogram`, the suite's ToneHistogram, which
-// Levels draws too) counts the display values of the image as it enters
-// Curves, so both show what the render does; `curvesHistogramKey` changes
-// exactly when that count can. Linux-safe.
+// Levels draws too) counts the display values of 256 sampled rows of the image
+// as it enters Curves, so both show what the render does; `curvesHistogramKey`
+// changes exactly when that count can, and `curvesHistogram(composites:)` keeps
+// each row's composite in a PhotoCompositeCache so a count after a tone edit
+// composites no layer. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
 import SuiteModel
 
 /// One rendered picture: display bytes for the canvas, the revision they show
@@ -41,11 +45,27 @@ extension AdjustmentSettings {
         isEnabled(.blur) && blurSigma > 0 ? Int((3 * blurSigma).rounded(.up)) : 0
     }
 
-    /// The enabled adjustments applied to `buffer`, in order.
-    /// The tone sections are ImagingProgram's steps (`imagingSteps`), each
-    /// skipped at its identity, then the blur.
+    /// Pixels a region reads beyond itself: the blur's margin or the tone
+    /// section's unsharp radius, ceil(3 sigma), whichever is wider.
+    var readMargin: Int {
+        max(blurMargin, unsharp.map { Int((3 * $0.sigma).rounded(.up)) } ?? 0)
+    }
+
+    /// The enabled adjustments applied to `buffer`, in order: the tone
+    /// section's unsharp pass (`unsharp`), then ImagingProgram's steps
+    /// (`imagingSteps`: tone's own first, each section skipped at its
+    /// identity), then the blur. The canvas draws in the same order.
     func applied(to buffer: PixelBuffer) throws -> PixelBuffer {
-        var result = try runImaging(imagingSteps, on: buffer)
+        try applied(to: buffer, sharpening: unsharp)
+    }
+
+    /// `applied(to:)` with `sharpening` as the unsharp pass, nil for none.
+    func applied(
+        to buffer: PixelBuffer, sharpening: (amount: Double, sigma: Double, threshold: Double)?
+    ) throws -> PixelBuffer {
+        var result = buffer
+        if let s = sharpening { result = try result.unsharpMask(amount: s.amount, sigma: s.sigma, threshold: s.threshold) }
+        result = try runImaging(imagingSteps, on: result)
         if blurMargin > 0 { result = try result.gaussianBlur(sigma: blurSigma) }
         return result
     }
@@ -91,16 +111,36 @@ extension PhotoWorkspace {
     /// pixels composited, adjusted and counted, whatever the image's height.
     /// A cancelled task stops between rows and gets `empty`.
     public func curvesHistogram() -> ToneHistogram {
+        curvesHistogram { try composited($0) }
+    }
+
+    /// `curvesHistogram()` with each sampled row's composite kept in `composites` between counts
+    /// (PhotoCompositeCache, the canvas routes' seam, here over a CPU dispatcher): a count after a tone edit
+    /// composites nothing, and one after a layer change lays that layer and the ones above it on each row's kept
+    /// base, never the stack. The same bits as the plain count (both routes are held to `composited(_:)`).
+    public func curvesHistogram(composites: PhotoCompositeCache) -> ToneHistogram {
+        let dispatcher = PhotoRenderRoute.cpu.dispatcher()
+        // Counted as the reference path's rows and row layers, never as the canvas's renders.
+        return PhotoRenderCount.asRows {
+            curvesHistogram { row in
+                PhotoRenderCount.row()
+                let picture = try composited(row, on: dispatcher, cache: composites)
+                defer { dispatcher.release(picture) }
+                return try dispatcher.read(picture)  // render-contract: allow the CPU backend's own buffer, no GPU readback
+            }
+        }
+    }
+
+    /// The count over the sampled rows, each composited by `rows`; see `curvesHistogram()`.
+    private func curvesHistogram(rows: (PixelRect) throws -> PixelBuffer) -> ToneHistogram {
         guard let canvas else { return .empty }
         var counts = [Int](repeating: 0, count: 256)
         var shadows = 0, highlights = 0
-        // ponytail: recounts every sampled row on each call; cache counts per
-        // tile by damage(since:) if it shows up in a drag profile.
         for y in stride(from: 0, to: canvas.height, by: (canvas.height + 255) / 256) {
             guard !Task.isCancelled else { return .empty }
             let row = PixelRect(x: 0, y: y, width: canvas.width, height: 1)
             // Can't fail: the same pixels render on the canvas.
-            guard let pixels = try? adjustments.appliedBeforeCurves(to: composited(row)),
+            guard let pixels = try? adjustments.appliedBeforeCurves(to: rows(row)),
                 let histogram = try? Histogram(of: pixels, bins: counts.count, encoding: .sRGB)
             else { continue }
             counts = zip(counts, histogram.luminance).map(+)
@@ -112,21 +152,22 @@ extension PhotoWorkspace {
 
     /// A value that changes exactly when `curvesHistogram()` can: with any
     /// change to the layers or their pixels, and with exposure or levels as
-    /// they apply (a switched-off section counts as its defaults). A Curves,
+    /// they apply (a switched-off section counts as its defaults), and with the
+    /// tone section, whose steps run before them. A Curves,
     /// Hue/Saturation or Blur edit leaves it as it was, so the inspector
     /// recounts only when it must, never during a curve drag.
     public var curvesHistogramKey: CurvesHistogramKey {
         let defaults = AdjustmentSettings(), on = adjustments
         let exposure = on.isEnabled(.exposure) ? on : defaults, levels = on.isEnabled(.levels) ? on : defaults
         return CurvesHistogramKey(
-            content: contentRevision,
+            content: contentRevision, toneSection: on.tone,
             tone: [exposure.exposure, levels.blackPoint, levels.whitePoint, levels.gamma, levels.outputBlack,
                    levels.outputWhite])
     }
 
     /// `rect` of the canvas, composited and adjusted.
     func rendered(_ rect: PixelRect) throws -> PixelBuffer {
-        guard let canvas, let outer = rect.expanded(by: adjustments.blurMargin).intersection(canvas.rect),
+        guard let canvas, let outer = rect.expanded(by: adjustments.readMargin).intersection(canvas.rect),
             let inner = rect.intersection(canvas.rect)
         else { throw RasterError.invalid("region \(rect) is outside the image") }
         let adjusted = try adjustments.applied(to: composited(outer))
@@ -140,20 +181,25 @@ extension PhotoWorkspace {
     /// there), so every pixel blends exactly as it would from the whole layer.
     func composited(_ rect: PixelRect) throws -> PixelBuffer {
         var result = try PixelBuffer(width: rect.width, height: rect.height)
+        PhotoRenderCount.row()
         for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-            let content = LayerContent(
-                layer: layer, pixels: pixels[layer.id], mask: layer.isMaskEnabled ? masks[layer.id] : nil)
+            PhotoRenderCount.rowLayers(1)
+            let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
             result = try PhotoLayerComposite.composite(
                 content, onto: result, origin: (x: rect.x, y: rect.y),
                 adjusting: services.adjustmentLayers, masking: services.masking)
         }
         return result
     }
+
+    /// `layer`'s mask when it has one and it is enabled: what hides part of the layer on the canvas.
+    func shownMask(of layer: PhotoLayer) -> TiledPixels? { layer.isMaskEnabled ? masks[layer.id] : nil }
 }
 
 /// See `PhotoWorkspace.curvesHistogramKey`.
 public struct CurvesHistogramKey: Equatable, Sendable {
     let content: Int
+    let toneSection: ToneSettings
     let tone: [Float]
 }
 

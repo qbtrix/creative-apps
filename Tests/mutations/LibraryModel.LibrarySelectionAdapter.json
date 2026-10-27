@@ -1,0 +1,16 @@
+[
+  {
+    "label": "selectAllRespectsFilter: select all picks every photo, the ones the filter hides too",
+    "file": "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "find": "        next.replace(order)\n",
+    "replace": "        next.replace(items.map(\\.id))\n",
+    "tests": "LargeCatalogEquivalenceTests"
+  },
+  {
+    "label": "shiftRangeInclusive: a shift-click range adds only the clicked photo, not the photos between",
+    "file": "Sources/LibraryModel/LibrarySelectionAdapter.swift",
+    "find": "canAdd: { $0 != id || shown })",
+    "replace": "canAdd: { $0 == id && shown })",
+    "tests": "LargeCatalogEquivalenceTests"
+  }
+]

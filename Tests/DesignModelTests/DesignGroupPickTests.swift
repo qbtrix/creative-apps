@@ -4,7 +4,7 @@
 // the group again, and a deep pick (Command) takes the layer itself. Each pick is a view change, not an
 // undo step. The card is made by commands on `cards`: Group of A (node-2) and Title (node-5). Fails when
 // the press lifts nothing (the drag pulls Title out of its card) or Escape leaves every group.
-// Written against the catalog ids AR-14 adds (DesignGroupPick+Kernel.swift), so it compiles on dev now.
+// The catalog ids and the canvas press come from DesignGroupPick+Kernel.swift (AR-14).
 // Runs on Linux and macOS.
 @testable import DesignModel
 import SuiteKernel
@@ -36,7 +36,7 @@ import Testing
         _ = try run("select.pick", ["x": .number(point.x), "y": .number(point.y), "deep": .bool(deep)], on: &workspace)
     }
 
-    @Test(.disabled("waits on AR-14"))
+    @Test
     func aPressOnTheCardsTextPicksTheCardAndMakesNoStep() throws {
         var (workspace, card) = try Self.card()
         workspace.gesture(.move, Self.onTitle, Self.onTitle)
@@ -48,7 +48,7 @@ import Testing
         #expect(workspace.undoActionName == "Undo Group")
     }
 
-    @Test(.disabled("waits on AR-14"))
+    @Test
     func aDragOnTheCardsTextMovesTheCardWhole() throws {
         var (workspace, card) = try Self.card()
         workspace.gesture(.move, Self.onTitle, pt(190, 56))
@@ -58,7 +58,7 @@ import Testing
         #expect(workspace.undoActionName == "Undo Move")
     }
 
-    @Test(.disabled("waits on AR-14"))
+    @Test
     func enterThenAClickPicksTheTextAndADragMovesOnlyIt() throws {
         var (workspace, card) = try Self.card()
         #expect(DesignWorkspace.catalog.availability("select.enter-group", on: workspace).why != nil)
@@ -74,7 +74,7 @@ import Testing
         #expect(workspace.treeNode(card)?.children.map(\.id).contains(Self.title) == true)
     }
 
-    @Test(.disabled("waits on AR-14"))
+    @Test
     func exitStepsOutOneLevelAndPicksTheCardAgain() throws {
         var (workspace, card) = try Self.card()
         #expect(DesignWorkspace.catalog.availability("select.exit-group", on: workspace).why != nil)
@@ -89,11 +89,54 @@ import Testing
         #expect(workspace.selectedNodeIDs == [card])
     }
 
-    @Test(.disabled("waits on AR-14"))
+    @Test
     func aDeepPickTakesTheTextItselfFromTheRoot() throws {
         var (workspace, _) = try Self.card()
         try Self.pick(Self.onTitle, deep: true, on: &workspace)
         #expect(workspace.selectedNodeIDs == [Self.title])
         #expect(workspace.undoActionName == "Undo Group")
+        // A ⌘ press on the canvas does the same.
+        workspace.deselect()
+        workspace.gesture(.move, Self.onTitle, Self.onTitle, [.deep])
+        #expect(workspace.selectedNodeIDs == [Self.title])
+    }
+
+    /// A double-click (`.enter`) on the picked card enters it and picks Title under the pointer.
+    @Test func aDoubleClickOnThePickedCardEntersItAndPicksTheText() throws {
+        var (workspace, card) = try Self.card()
+        workspace.gesture(.move, Self.onTitle, Self.onTitle)
+        workspace.gesture(.move, Self.onTitle, Self.onTitle, [.enter])
+        #expect(workspace.selectedNodeIDs == [Self.title])
+        #expect(workspace.groupScope == GroupScope(path: [card]))
+    }
+
+    /// Leaving the card resets the scope: a deselect, or a press on B (node-3, 300, 140, 200, 80) outside it; then Title picks the card.
+    @Test func deselectOrAPressOutsideLeavesTheEnteredCard() throws {
+        var (workspace, card) = try Self.card()
+        try Self.pick(Self.onTitle, on: &workspace)
+        _ = try Self.run("select.enter-group", [:], on: &workspace)
+        workspace.deselect()
+        #expect(workspace.groupScope == .root)
+        try Self.pick(Self.onTitle, on: &workspace)
+        #expect(workspace.selectedNodeIDs == [card])
+        _ = try Self.run("select.enter-group", [:], on: &workspace)
+        let onB = pt(400, 180)
+        workspace.gesture(.move, onB, onB)
+        #expect(workspace.selectedNodeIDs == ["node-3"])
+        workspace.gesture(.move, Self.onTitle, Self.onTitle)
+        #expect(workspace.selectedNodeIDs == [card])
+    }
+
+    /// On the canvas, Return enters the picked card and Escape steps out of it; with no group entered Escape deselects.
+    @Test func returnEntersThePickedCardAndEscapeStepsOut() throws {
+        var (workspace, card) = try Self.card()
+        #expect(workspace.canvasKeyAction(.escape, modifiers: []) == .deselect)
+        try Self.pick(Self.onTitle, on: &workspace)
+        #expect(workspace.canvasKeyAction(.enter, modifiers: []) == .enterGroup)
+        workspace.enterGroup()
+        #expect(workspace.groupScope == GroupScope(path: [card]))
+        #expect(workspace.canvasKeyAction(.escape, modifiers: []) == .exitGroup)
+        workspace.exitGroup()
+        #expect(workspace.selectedNodeIDs == [card] && workspace.groupScope == .root)
     }
 }
