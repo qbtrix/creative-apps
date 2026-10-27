@@ -2,11 +2,10 @@
 // launcher. Help lists Report a Problem…, Beta Notes and Welcome to AfterGlow; Welcome opens the tour; Report a
 // Problem… opens the sheet with a crash from a fixture folder (`-SuiteCrashDir`), the home path shown as `~`,
 // takes a typed note (its home path redacted too), copies note plus report to the pasteboard and closes. With
-// the note being typed in, ⌘C copies note plus report and Escape closes; with keyboard navigation on (a global
-// setting: the journey skips that part, saying so, when it is off), Tab reaches every sheet control. Beta Notes opens the
-// known-issues window and Close closes it. Every menu click is a mouse click on an item found by title, and only
-// by title: SwiftUI doesn't carry `.accessibilityIdentifier` onto a menu item, so a live item reads AppKit's
-// "menuAction:" (#4647). The menu shot is a screen shot, since an open menu sits outside the window.
+// the note being typed in, ⌘C copies note plus report and Escape closes (the Tab walk is in +HelpTab, since it
+// needs keyboard navigation on). Beta Notes opens the known-issues window and Close closes it. Every menu
+// click is a mouse click on an item found by title, and only by title: SwiftUI doesn't carry
+// `.accessibilityIdentifier` onto a menu item, so a live item reads AppKit's "menuAction:" (#4647). The menu shot is a screen shot, since an open menu sits outside the window.
 import AppKit
 import XCTest
 
@@ -86,35 +85,6 @@ final class AfterGlowHelpJourneyTests: XCTestCase {
         launcher.shot("help-report-shortcuts")
         launcher.press(.escape)
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "Escape left the report sheet open")
-    }
-
-    /// The packet's keyboard row, Tab: with keyboard navigation on, Tab reaches the note and every sheet button.
-    /// AppKit reads keyboard navigation from the Mac's global setting, not from a launch argument
-    /// (`-AppleKeyboardUIMode 2` changes nothing), so this skips, saying so, on a Mac with it off.
-    @MainActor func testReportAProblemByTab() throws {
-        let mode = CFPreferencesCopyAppValue("AppleKeyboardUIMode" as CFString, kCFPreferencesAnyApplication) as? Int ?? 0
-        try XCTSkipUnless(mode & 2 != 0, "keyboard navigation is off on this Mac (AppleKeyboardUIMode \(mode)), so Tab visits text fields only")
-        let crashes = try Self.crashFolder()
-        defer { try? FileManager.default.removeItem(at: crashes) }
-        let launcher = SuiteHarness(self).launch(fixture: "firstLaunch", arguments: ["-SuiteCrashDir", crashes.path])
-        Self.openHelp(launcher).menuItems["Report a Problem…"].click()
-        let sheet = launcher.app.sheets.firstMatch
-        XCTAssert(sheet.waitForExistence(timeout: 10), "Help > Report a Problem… opened no sheet")
-        let stops = ["note", "copy", "save", "email", "close"]
-        func focused(_ control: String) -> Bool {
-            sheet.descendants(matching: .any).matching(identifier: "suite.help.report." + control).allElementsBoundByIndex
-                .contains { ($0.value(forKey: "hasKeyboardFocus") as? Bool) ?? false }
-        }
-        var reached: Set<String> = []
-        var walk: [String] = []
-        for _ in 0..<20 where reached.count < stops.count {
-            launcher.press(.tab)
-            reached.formUnion(stops.filter(focused))
-            walk.append(sheet.descendants(matching: .any).matching(NSPredicate(format: "hasKeyboardFocus == true"))
-                .allElementsBoundByIndex.map(\.identifier).joined(separator: "+"))
-        }
-        XCTAssertEqual(stops.filter { !reached.contains($0) }, [], "Tab never reached these controls; focus walked \(walk)")
-        launcher.shot("help-report-tab")
     }
 
     /// The app's home: built from the user name, since a sandboxed runner's NSHomeDirectory() is its container.
