@@ -1,6 +1,6 @@
 // CanvasHostView+Metal.swift: the canvas host's GPU path (canvas-host CH-10).
 // Under `.gpu` or `.automatic` with a Metal device the tile container hides
-// and a `CAMetalLayer` (sRGB colour space) takes its place under the overlay;
+// and a `CAMetalLayer` (sRGB colour space) takes its place under the lift and the overlay;
 // the presenter is handed every tile shown and fills each drawable
 // (CanvasTilePresenter live, the clearing fake in tests). `.cpu` or a nil
 // device keep the tile layers. On the Metal path the tile layers get no
@@ -121,7 +121,7 @@ extension CanvasHostView {
         metal.framebufferOnly = false
         // Not opaque (its default): a clear pixel shows the viewport's checkerboard, as a tile layer's does.
         metal.isOpaque = false
-        if metal.superlayer == nil { layer?.insertSublayer(metal, below: overlay) }
+        if metal.superlayer == nil { layer?.insertSublayer(metal, below: liftSpace) }
         container.isHidden = true
         self.presenter = presenter
         presenter.show(shown(), documentSize: documentSize)

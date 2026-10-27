@@ -12,10 +12,12 @@
 // (`residentTarget`) the renderer writes the picture into the view's Metal
 // presenter's texture instead, and an update brings no tiles, only the
 // present; its target (SuiteImaging's ImagingGPU.Target) also runs a tone
-// program in that write, the live route's one pass per slider step. Mouse input stays with CanvasViewport,
+// program in that write, the live route's one pass per slider step. A Free Transform drag's lifted layer
+// goes to the view's lift (`lift`, `moveLift`, `dropLift`). Mouse input stays with CanvasViewport,
 // which owns focus and Space-pan: the embedded view never takes a click.
 // Presentation state only.
 import AppKit
+import CoreRaster
 import IOSurface
 import SuiteImaging
 import PhotoModel
@@ -87,6 +89,22 @@ import SwiftUI
             write: { surface, rect in try resident.write(surface, x: rect.x, y: rect.y) },
             writeToned: { surface, rect, tone in try resident.write(surface, x: rect.x, y: rect.y, tone: tone) })
         return (target, targetTexture != id)
+    }
+
+    /// Free Transform's lifted layer (PhotoTransformLift) above the picture in the attached view, at `placement`.
+    func lift(_ surface: IOSurface, width: Int, height: Int, opacity: Double, placement: AffineMatrix) {
+        view?.lift(surface, size: CGSize(width: width, height: height), opacity: Float(opacity), placement: Self.affine(placement))
+    }
+
+    /// Moves the lifted layer to `placement`: a transaction on one CALayer, no pixels.
+    func moveLift(_ placement: AffineMatrix) { view?.moveLift(Self.affine(placement)) }
+
+    /// Drops the lifted layer.
+    func dropLift() { view?.dropLift() }
+
+    /// A canvas matrix (y down) as Core Graphics' affine transform, the same convention.
+    nonisolated static func affine(_ m: AffineMatrix) -> CGAffineTransform {
+        CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty)
     }
 
     /// Clears the picture (no image open).

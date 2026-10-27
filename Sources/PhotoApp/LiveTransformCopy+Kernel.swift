@@ -8,13 +8,13 @@
 // it through CanvasRenderer. The window takes the copy back once (`take()`):
 // before any other intent (a handle drag's release sends `endDrag`), and when
 // the samples go quiet for `quiet` (the end of a row scrub or of a run of
-// VoiceOver steps, each its own gesture). A handle drag `hold()`s the copy
+// VoiceOver steps, each its own gesture). A handle or canvas drag `hold()`s the copy
 // with every sample, so a pointer that rests mid-drag gets no quiet hand-back:
 // the copy waits for mouse-up (#4795). So the window's workspace,
 // its edited dot and its undo stack catch up with one SwiftUI pass. The draft's
 // steps fold under their token on the copy, so the undo stack is the same as
 // running each sample on the workspace. A tone row's drag samples run on the
-// same copy, which the Adjust panel reads (tone-controls PT-5). PhotoWindow owns one and hands it down
+// same copy, which the Adjust panel reads (`adjusting`, tone-controls PT-5). PhotoWindow owns one and hands it down
 // as the `photoLiveTransform` environment value; without one (a view hosted
 // alone) the overlay and rows read the workspace. Presentation state only.
 import Observation
@@ -29,6 +29,9 @@ import SwiftUI
     @ObservationIgnored private(set) var held = false
     /// The copy with the latest sample run on it; nil with none live.
     private(set) var shown: PhotoWorkspace?
+    /// The copy as the Adjust panel reads it: set only once a sample changes the adjustments it shows (a tone
+    /// row's drag), so a transform drag's samples never run the panel.
+    private(set) var adjusting: PhotoWorkspace?
     /// How long the samples stay quiet before the window takes the copy back.
     static let quiet = Duration.milliseconds(50)
 
@@ -51,6 +54,8 @@ import SwiftUI
         edit(&live)
         copy.begin(live)
         shown = live
+        let panel = adjusting ?? model
+        if live.adjustTarget != panel.adjustTarget || live.adjustments != panel.adjustments { adjusting = live }
         settle?.cancel()
         settle = nil
         if held { return live }
@@ -67,6 +72,7 @@ import SwiftUI
         settle = nil
         held = false
         if shown != nil { shown = nil }
+        if adjusting != nil { adjusting = nil }
         return copy.take()
     }
 }

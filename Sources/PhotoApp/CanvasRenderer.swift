@@ -18,7 +18,10 @@
 // A live stroke's render (`quietly`) is a drag frame: Free Transform's draft
 // draws through its matrix, and the plain `show` that follows (the window
 // taking the copy back) redraws the whole picture exactly, even at the same
-// revision.
+// revision. A drag sample of a draft that lifts (PhotoTransformLift) draws nothing: the first renders the
+// picture once without the draft's layer and lifts the layer's pixels onto the view (CanvasTiles' lift), every
+// later one only places them (`moveLift`), and the next plain picture drops the lift as it lands. A lift that
+// fails leaves its drag on the region path.
 // On the GPU route the renderer keeps the layer tiles resident on the backend
 // (ResidentSurfaces) and, while the view draws through its Metal presenter,
 // renders straight into the presenter's texture: no bytes come back, and an
@@ -29,11 +32,14 @@
 // Presentation state only: it never changes the workspace.
 import Combine
 import CoreGraphics
+import CoreRaster
 import CoreRender
 import Foundation
+import IOSurface
 import Observation
 import PhotoModel
 import SuiteImaging
+import SuiteUI
 
 @MainActor @Observable
 final class CanvasRenderer {
@@ -53,6 +59,13 @@ final class CanvasRenderer {
     @ObservationIgnored private var showsLiveDraft = false
     private var isRendering = false
     private var waiting: PhotoWorkspace?
+    /// Free Transform's lift for the drag under way: its key, the latest placement, and whether the view
+    /// shows it yet; nil with none.
+    @ObservationIgnored private var lift: (key: PhotoTransformLift.Key, placement: AffineMatrix, shown: Bool)?
+    /// A drag sample that lifts, waiting for the render in flight.
+    @ObservationIgnored private var liftWaiting: PhotoWorkspace?
+    /// A lift that failed: its drag draws through the region path instead.
+    @ObservationIgnored private var refusedLift: PhotoTransformLift.Key?
     /// Called with each picture's revision as its tiles reach the view (the brush ink test times this).
     @ObservationIgnored var onPicture: ((Int) -> Void)?
     #if DEBUG
@@ -110,6 +123,9 @@ final class CanvasRenderer {
     /// Draws `workspace` once the render in flight, if any, is done.
     /// `quietly` leaves the status line's render time as it is.
     func show(_ workspace: PhotoWorkspace, quietly: Bool = false) {
+        if quietly, moveLift(workspace) { return }
+        // Any other picture replaces the lift: one not shown yet is dropped now, a shown one as the picture lands.
+        if lift?.shown != true { (lift, liftWaiting) = (nil, nil) }
         quiet = quietly
         guard let canvas = workspace.canvas else {
             tiles.clear()
@@ -145,6 +161,10 @@ final class CanvasRenderer {
             do {
                 let update = try await PhotoRenderer.update(workspace, since: since, route: route, target: target, live: quietly)
                 tiles.apply(update, prepared: await Self.prepared(update))
+                if lift?.shown == true {
+                    tiles.dropLift()
+                    lift = nil
+                }
                 showsLiveDraft = update.liveDraft
                 if backend != update.backend { backend = update.backend }
                 #if DEBUG
@@ -160,18 +180,96 @@ final class CanvasRenderer {
             } catch {
                 failure = "The picture couldn't be drawn: \(error)"
             }
-            isRendering = false
-            #if DEBUG
-            Self.inFlight -= 1
-            #endif
-            // The render that drew from what `use` dropped is done: release it.
-            for dropped in retired { dropped.composites.removeAll() }
-            retired = []
-            if let latest = waiting {
-                waiting = nil
-                show(latest, quietly: quiet)
-            }
+            finished()
         }
+    }
+
+    /// A render is done: release what `use` dropped while it drew, then draw what waited.
+    private func finished() {
+        isRendering = false
+        #if DEBUG
+        Self.inFlight -= 1
+        #endif
+        for dropped in retired { dropped.composites.removeAll() }
+        retired = []
+        if let latest = waiting {
+            waiting = nil
+            show(latest, quietly: quiet)
+        } else if let lifting = liftWaiting {
+            liftWaiting = nil
+            if lift?.key == lifting.liftKey { runLift(lifting) }
+        }
+    }
+
+    /// A drag sample of a draft that lifts: the first lifts it (`runLift`), the rest place it. False when the
+    /// draft doesn't lift, so the sample draws as a drag frame.
+    private func moveLift(_ workspace: PhotoWorkspace) -> Bool {
+        guard workspace.canvas != nil, let key = workspace.liftKey, key != refusedLift,
+            let placement = workspace.liftPlacement
+        else { return false }
+        if let up = lift, up.key == key {
+            lift?.placement = placement
+            if up.shown { tiles.moveLift(placement) }
+            return true
+        }
+        if lift?.shown == true { tiles.dropLift() }
+        lift = (key, placement, false)
+        // The picture under the lift lacks the layer: the next plain picture redraws all of it.
+        showsLiveDraft = true
+        if isRendering { liftWaiting = workspace } else { runLift(workspace) }
+        return true
+    }
+
+    /// Renders `workspace` without its draft's layer, once, and lifts the layer's pixels onto the view at the
+    /// latest placement, unless a plain picture was asked for meanwhile. The pixels and the render are made off
+    /// the main thread.
+    private func runLift(_ workspace: PhotoWorkspace) {
+        guard let canvas = workspace.canvas, let key = workspace.liftKey else { return }
+        isRendering = true
+        #if DEBUG
+        Self.inFlight += 1
+        #endif
+        let route = self.route
+        redrawAll = false
+        var target: PhotoDisplayTarget?
+        if route.isGPU, route.residentTiles != nil, let gpu = route.preferred.flatMap(ImagingGPU.backend),
+            let resident = tiles.residentTarget(width: canvas.width, height: canvas.height, on: gpu)
+        {
+            target = resident.target
+        }
+        Task { [target] in
+            do {
+                let made = try await Self.lifted(workspace)
+                guard let made else { throw RasterError.invalid("the layer can't lift") }
+                let update = try await PhotoRenderer.update(made.lift.base, since: nil, route: route, target: target)
+                let prepared = await Self.prepared(update)
+                if let up = lift, up.key == key, !up.shown {
+                    tiles.apply(update, prepared: prepared)
+                    tiles.lift(made.surface, width: made.lift.width, height: made.lift.height,
+                               opacity: made.lift.opacity, placement: up.placement)
+                    lift?.shown = true
+                    if backend != update.backend { backend = update.backend }
+                    #if DEBUG
+                    Self.pictures += 1
+                    #endif
+                    revision = update.revision
+                    if failure != nil { failure = nil }
+                }
+            } catch {
+                // The drag goes on through the region path; the next plain picture redraws whatever this drew.
+                refusedLift = key
+                if lift?.key == key { lift = nil }
+            }
+            finished()
+        }
+    }
+
+    /// `workspace`'s lift and its pixels as an IOSurface, made off the main thread; nil when nothing lifts.
+    nonisolated static func lifted(_ workspace: PhotoWorkspace) async throws -> (lift: PhotoTransformLift, surface: IOSurface)? {
+        guard let lift = try workspace.lifted(),
+            let surface = CanvasTile.surface(premultipliedRGBA: lift.rgba8, width: lift.width, height: lift.height)
+        else { return nil }
+        return (lift, surface)
     }
 
     /// `update`'s tile images and surfaces, made off the main thread (a nonisolated async function runs on

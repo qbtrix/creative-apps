@@ -1,0 +1,30 @@
+[
+  {
+    "label": "liftsUnderACover: a layer under a visible layer lifts, so the drag draws it over what should cover it",
+    "file": "Sources/PhotoModel/PhotoTransformLift.swift",
+    "find": "layers[..<at].allSatisfy({ !$0.isVisible })",
+    "replace": "layers[..<at].allSatisfy({ _ in true })",
+    "tests": "PhotoTransformLiftTests/aLayerUnderAVisibleLayerDoesNotLiftAndLiftsOnceItIsHidden"
+  },
+  {
+    "label": "liftsBlended: a multiply layer lifts and the compositor draws it as a plain over",
+    "file": "Sources/PhotoModel/PhotoTransformLift.swift",
+    "find": "layer.blendMode == .normal,",
+    "replace": "layer.blendMode == layer.blendMode,",
+    "tests": "PhotoTransformLiftTests/aBlendModeOrAdjustmentKeepsTheLayerDown"
+  },
+  {
+    "label": "placementIgnoresBoxOrigin: the lifted pixels sit at the layer's corner, not the box's",
+    "file": "Sources/PhotoModel/PhotoTransformLift.swift",
+    "find": "(m.tx, m.ty) = (m.tx + m.a * Double(part.x) + m.c * Double(part.y), m.ty + m.b * Double(part.x) + m.d * Double(part.y))",
+    "replace": "(m.tx, m.ty) = (m.tx, m.ty)",
+    "tests": "PhotoTransformLiftTests/aSelectionLiftsItsPartAtItsPlace"
+  },
+  {
+    "label": "baseKeepsLayer: the picture under the lift still has the layer, so the drag shows it twice",
+    "file": "Sources/PhotoModel/PhotoTransformLift.swift",
+    "find": "base.layers[at].isVisible = false",
+    "replace": "base.layers[at].isVisible = true",
+    "tests": "PhotoTransformLiftTests/theLiftIsTheLayersPixelsOverTheWorkspaceWithoutIt"
+  }
+]
