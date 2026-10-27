@@ -38,6 +38,9 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     /// A layer style's keyable values (HY-1); their rows show only while the layer has that effect.
     public static let styles: [HaloProperty] = [.shadowDistance, .shadowSize, .shadowOpacity, .glowSize, .glowOpacity]
 
+    /// What `key.*`, the property commands, the lane and the easing pick list: the transforms, then the styles.
+    public static let keyable: [HaloProperty] = allCases + styles
+
     /// The inspector row's label.
     public var title: String {
         switch self {
@@ -68,7 +71,7 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         case .rotation: -36_000...36_000
         case .opacity, .trimStart, .trimEnd, .shadowOpacity, .glowOpacity: 0...1
         case .trimOffset: -100...100
-        case .shadowDistance: 0...30_000
+        case .shadowDistance: 0...1_000
         case .shadowSize, .glowSize: 0...250
         }
     }

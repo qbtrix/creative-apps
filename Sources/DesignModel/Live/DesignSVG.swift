@@ -23,6 +23,16 @@
 // `translate(cx cy) scale(±1 ±1) translate(-cx -cy)`, TransformRules.matrix's
 // order. As on the canvas, a frame's clip and background turn and its children
 // keep their own; a group has no shape of its own.
+// A rectangle's or frame's picture (placed-images PD-6) is an <image> between its
+// fill and its stroke, its file inline as a `data:` URI in `href`, at the kernel's
+// cover crop (PlaceRules.drawnRect), so it keeps its aspect, in a <clipPath> of the
+// rounded box. One <g> holds the node's opacity once; the stroke sits outside the
+// clip at full width, and a frame's children follow in the same clip.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import SuiteKernel
 import SuiteModel
 
@@ -54,6 +64,21 @@ enum DesignSVG {
         let box = "x=\"\(number(x))\" y=\"\(number(y))\" width=\"\(number(f.width))\" height=\"\(number(f.height))\""
         let turned = turn(node, x: x, y: y)
         if node.kind != .group, let defs = gradient(node, x: x, y: y) { lines.append(pad + defs) }
+        if let image = picture(node, x: x, y: y, then: turned) {
+            let clip = XMLText.escaped((node.kind == .frame ? "clip-" : "pic-") + node.id), inClip = "<g clip-path=\"url(#\(clip))\">"
+            lines.append(pad + "<clipPath id=\"\(clip)\"><rect \(box)\(turned)\(corner(node))/></clipPath>")
+            lines.append(pad + "<g\(alpha(node))>")
+            lines.append(pad + "  <rect \(box)\(corner(node))\(fill(node))\(turned)/>")
+            lines.append(pad + "  " + inClip + image + "</g>")
+            if !paint(node).isEmpty { lines.append(pad + "  <rect \(box)\(corner(node)) fill=\"none\"\(paint(node))\(turned)/>") }
+            if node.kind == .frame {
+                lines.append(pad + "  " + inClip)
+                for child in node.children { write(child, origin: origin, depth: depth + 2, into: &lines) }
+                lines.append(pad + "  </g>")
+            }
+            lines.append(pad + "</g>")
+            return
+        }
         switch node.kind {
         case .rectangle, .instance:
             lines.append(pad + "<rect \(box)\(corner(node))\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
@@ -88,6 +113,18 @@ enum DesignSVG {
             for child in node.children { write(child, origin: origin, depth: depth + 1, into: &lines) }
             lines.append(pad + "</g>")
         }
+    }
+
+    /// `node`'s picture as an `<image>` at the cover crop of its frame at `x`, `y` (box-relative), its file a
+    /// `data:` URI, `then` appended; nil when it shows none.
+    private static func picture(_ node: DesignNode, x: Double, y: Double, then: String) -> String? {
+        guard let asset = node.placedAsset else { return nil }
+        let frame = Rect(minX: x, minY: y, maxX: x + node.frame.width, maxY: y + node.frame.height)
+        let drawn = PlaceRules.drawnRect(PlacedImage(assetID: asset.id, box: frame, focus: node.placedFocus), natural: asset.natural)
+        let at = "x=\"\(number(drawn.minX))\" y=\"\(number(drawn.minY))\" width=\"\(number(drawn.width))\" height=\"\(number(drawn.height))\""
+        // A raster's media type is image/<its id> (image/png, image/jpeg); an SVG's is image/svg+xml.
+        let type = asset.format == .svg ? "image/svg+xml" : "image/" + asset.format.rawValue
+        return "<image \(at) href=\"data:\(type);base64,\(asset.data.base64EncodedString())\"\(then)/>"
     }
 
     /// A path's `d`: absolute M, L, Q and C commands, and Z only where the path closes (an open line or arrow
