@@ -200,6 +200,7 @@ public struct InspectorColorRow: View {
                     supportsOpacity: supportsOpacity
                 )
                 .labelsHidden()
+                .accessibilityIdentifier("suite.colorwell." + label.lowercased().replacingOccurrences(of: " ", with: "-"))
                 .frame(width: SuiteSize.swatch.width, height: SuiteSize.swatch.height)
                 .clipShape(Capsule())
                 .overlay(Capsule().strokeBorder(SuiteColor.outline, lineWidth: 1))

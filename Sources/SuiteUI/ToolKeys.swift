@@ -1,7 +1,10 @@
 // ToolKeys.swift: the one home of an editor's tool keys (EK-31). `tool(forKey:in:)`
 // picks the enabled PaletteTool whose one-key shortcut is `key`, in either
 // case, through SuiteToolPicking's rule (UC6), so a canvas and the floating
-// palette pick the same tool for a key. `KeyModifiers(flags:)` and
+// palette pick the same tool for a key. Tools may share a letter (Photo's J:
+// Spot Heal, Heal, Remove): the key picks the group's first enabled tool, and
+// with Shift (`cyclingFrom`, `id(forKey:in:after:)`) the next enabled one after
+// the current tool, wrapping, so every tool in the group has a key. `KeyModifiers(flags:)` and
 // `KeyModifiers(nsEvent:)` are the one map from AppKit's modifier flags to the
 // contracts' KeyModifiers: Shift, Option and Command; the rest are dropped.
 // TimelineLaneInput reads its press modifiers through it.
@@ -10,16 +13,33 @@ import AppKit
 import SuiteKernel
 
 public enum ToolKeys {
-    /// The enabled tool in `tools` whose shortcut is `key` (case-insensitive); nil when none has it.
+    /// The enabled tool in `tools` whose shortcut is `key` (case-insensitive); nil when none has it. With
+    /// `cyclingFrom` (Shift held), the next enabled tool on `key` after the one it matches, wrapping.
     public static func tool<Tool: PaletteTool>(
-        forKey key: Character, in tools: [Tool], picking: some ToolPicking = SuiteToolPicking()
+        forKey key: Character, in tools: [Tool], cyclingFrom isCurrent: ((Tool) -> Bool)? = nil,
+        picking: some ToolPicking = SuiteToolPicking()
     ) -> Tool? {
         let faces = tools.enumerated().map { index, tool in
             ToolFace(id: String(index), title: tool.title, shortcut: tool.shortcut, unavailableHelp: tool.unavailableHelp)
         }
-        guard let id = picking.tool(forKey: key, in: faces), let index = Int(id), tools.indices.contains(index)
+        let current = isCurrent.map { matches in tools.firstIndex(where: matches).map(String.init) ?? "" }
+        guard let id = self.id(forKey: key, in: faces, after: current, picking: picking), let index = Int(id),
+              tools.indices.contains(index)
         else { return nil }
         return tools[index]
+    }
+
+    /// The id `key` picks in `faces` through `picking`. With `current`, the enabled face on `key` after it,
+    /// wrapping; the rule's pick when `current` isn't on `key`.
+    public static func id(
+        forKey key: Character, in faces: [ToolFace], after current: String? = nil,
+        picking: some ToolPicking = SuiteToolPicking()
+    ) -> String? {
+        let first = picking.tool(forKey: key, in: faces)
+        guard let current else { return first }
+        let group = faces.filter { picking.tool(forKey: key, in: [$0]) != nil }.map(\.id)
+        guard let at = group.firstIndex(of: current) else { return first }
+        return group[(at + 1) % group.count]
     }
 
     /// The brush key `event` is, through BrushKeys' rule: nil for a key that isn't one, a key with Command or Option,
