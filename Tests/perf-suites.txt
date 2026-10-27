@@ -36,6 +36,7 @@ photo AppSnapshotTests.PhotoAdjustSliderLatencyTests
 photo AppSnapshotTests.BodyCountSuites/PhotoWindowLiveEditTests
 photo AppSnapshotTests.PhotoZoomSweepTests
 photo AppSnapshotTests.BodyCountSuites/PhotoZoomBudgetTests
+photo AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoLiveTransformTimingTests
 
 halo HaloModelTests.HaloFilesBudgetTests/openCrowd
 halo HaloModelTests.HaloFilesBudgetTests/saveCrowd

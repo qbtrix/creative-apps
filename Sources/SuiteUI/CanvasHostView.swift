@@ -9,7 +9,8 @@
 // straighten preview). A pinch zooms about the pointer: the pan moves so the
 // document point under it stays put (ZoomMath.anchoredOrigin); the scroll
 // wheel pans. Tile layers magnify nearest from 2 px per pixel up and minify
-// trilinear. macOS only.
+// trilinear. The live layer (CanvasHostView+LiveLayer.swift) rides above
+// the picture, in the tiles' document space, while a drag moves it. macOS only.
 import AppKit
 import Combine
 import IOSurface
@@ -30,7 +31,7 @@ public final class CanvasHostView: NSView {
         }
     }
     /// The filters the tile layers were last given, so a layout that keeps the scale's side of 2 touches none.
-    private var tileFilter: CALayerContentsFilter?
+    var tileFilter: CALayerContentsFilter?
     /// The picture turned clockwise on screen about its centre, in degrees.
     public var rotationDegrees = 0.0 {
         didSet { if rotationDegrees != oldValue { needsLayout = true } }
@@ -53,6 +54,12 @@ public final class CanvasHostView: NSView {
     private var tracking: NSTrackingArea?
     let container = CALayer()
     let overlay = CAShapeLayer()
+    /// The live layer's document space: over the picture (tiles or Metal), under the overlay, placed as `container` is.
+    let liftSpace = CALayer()
+    /// The live layer in `liftSpace`; nil with none up.
+    var lifted: CALayer?
+    /// A dropped live layer the Metal path keeps until the drawable with the exact picture is on screen.
+    var droppedLift: CALayer?
 
     override public init(frame: NSRect) {
         super.init(frame: frame)
@@ -64,7 +71,10 @@ public final class CanvasHostView: NSView {
         overlay.lineWidth = SuiteSpacing.xxs
         overlay.lineCap = .round
         overlay.actions = ["path": NSNull(), "bounds": NSNull(), "position": NSNull()]
+        liftSpace.anchorPoint = .zero
+        liftSpace.actions = ["sublayers": NSNull(), "transform": NSNull(), "bounds": NSNull(), "position": NSNull()]
         layer?.addSublayer(container)
+        layer?.addSublayer(liftSpace)
         layer?.addSublayer(overlay)
         setAccessibilityElement(true)
         setAccessibilityRole(.group)
@@ -164,11 +174,15 @@ public final class CanvasHostView: NSView {
         container.position = board.origin
         container.setAffineTransform(
             CGAffineTransform(scaleX: scale, y: scale).concatenating(Self.turn(rotationDegrees, in: board.size)))
+        liftSpace.bounds = container.bounds
+        liftSpace.position = board.origin
+        liftSpace.setAffineTransform(container.affineTransform())
         overlay.frame = bounds
         let magnify: CALayerContentsFilter = scale >= 2 ? .nearest : .linear
         if magnify != tileFilter {
             tileFilter = magnify
             for layer in tileLayers.values { layer.magnificationFilter = magnify }
+            lifted?.magnificationFilter = magnify
         }
         // A tile with no pixels yet shows its edge, a hairline at any zoom.
         for (rect, layer) in tileLayers { layer.borderWidth = images[rect, default: nil] == nil && scale > 0 ? 1 / scale : 0 }
