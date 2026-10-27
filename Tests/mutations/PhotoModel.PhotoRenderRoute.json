@@ -1,4 +1,6 @@
 [
 {"label": "everyStepMapped: the route leaves the curve out of ImagingProgram's steps", "file": "Sources/PhotoModel/PhotoRenderRoute.swift", "find": "            for adjustment in imagingSteps {", "replace": "            for adjustment in imagingSteps([.exposure, .levels, .hueSaturation]) {", "tests": "PhotoRenderRouteImagingTests"},
-{"label": "sharedOrder: the route runs the curve before levels", "file": "Sources/PhotoModel/PhotoRenderRoute.swift", "find": "            for adjustment in imagingSteps {", "replace": "            for adjustment in imagingSteps([.exposure, .curves]) + imagingSteps([.levels, .hueSaturation]) {", "tests": "PhotoRenderRouteImagingTests"}
+{"label": "sharedOrder: the route runs the curve before levels", "file": "Sources/PhotoModel/PhotoRenderRoute.swift", "find": "            for adjustment in imagingSteps {", "replace": "            for adjustment in imagingSteps([.exposure, .curves]) + imagingSteps([.levels, .hueSaturation]) {", "tests": "PhotoRenderRouteImagingTests"},
+{"label": "the dispatcher route drops the tone section's Sharpen", "file": "Sources/PhotoModel/PhotoRenderRoute.swift", "find": "            if let s = unsharp {\n", "replace": "            if let s = unsharp, false {\n", "tests": "PhotoToneRenderTests"},
+{"label": "the dispatcher route reads only Blur's margin", "file": "Sources/PhotoModel/PhotoRenderRoute.swift", "find": "rect.expanded(by: adjustments.readMargin)", "replace": "rect.expanded(by: adjustments.blurMargin)", "tests": "PhotoToneRenderTests"}
 ]
