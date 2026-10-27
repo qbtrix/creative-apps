@@ -6,7 +6,8 @@
 // labelled "Hide Layer" / "Lock Layer"). LayerTreeHeader is the optional
 // title and action button above the rows, drawn by SidebarSectionHeader. The
 // row's rename reuses SidebarRow's rules and state: SidebarRenameField holds
-// the draft and the refusal (a refused rename keeps its draft), and
+// the draft and the refusal (a refused rename keeps its draft, shakes once
+// and shows SidebarRenameMessage), and
 // SidebarRow.doubleClickRenames / keyRenames / renameActionName gate the
 // double-click on the title, Return on the focused row and the "Rename"
 // accessibility action. App panels (#3194): `.app` naming, LayerTreeOptions, LayerRowDecoration.
@@ -160,25 +161,18 @@ public struct LayerTreeHeader {
 }
 
 extension LayerTreeRow {
-    /// The name, or the rename field while renaming, with the app's refusal under it.
+    /// The name, or the rename field while renaming; the row draws a refusal under itself (`refusal`).
     @ViewBuilder var title: some View {
         if field.isOpen {
-            VStack(alignment: .leading, spacing: SuiteSpacing.xxs) {
-                TextField(row.name, text: Binding(get: { field.draft ?? row.name }, set: { field.type($0) }))
-                    .focused($editing)
-                    .onSubmit { field.commit(original: row.name, rename: onRename) }
-                    .onExitCommand { field.cancel() }
-                    .onChange(of: editing) { _, focused in
-                        if !focused { field.loseFocus(original: row.name, rename: onRename) }
-                    }
-                    .accessibilityIdentifier(naming.renameField(row.id))
-                if let refusal = field.message {
-                    Label(refusal, systemImage: "exclamationmark.triangle.fill")
-                        .font(SuiteFont.caption)
-                        .foregroundStyle(SuiteColor.stateError)
-                        .accessibilityIdentifier(naming.renameMessage(row.id))
+            TextField(row.name, text: Binding(get: { field.draft ?? row.name }, set: { field.type($0) }))
+                .focused($editing)
+                .onSubmit { field.commit(original: row.name, rename: onRename) }
+                .onExitCommand { field.cancel() }
+                .onChange(of: editing) { _, focused in
+                    if !focused { field.loseFocus(original: row.name, rename: onRename) }
                 }
-            }
+                .refusalShake(field.refusals)
+                .accessibilityIdentifier(naming.renameField(row.id))
         } else if let caption = decoration?.caption {
             VStack(alignment: .leading, spacing: 0) {
                 name
@@ -189,6 +183,14 @@ extension LayerTreeRow {
             }
         } else {
             name
+        }
+    }
+
+    /// The app's refusal of a rename, under the whole row so its icon stays beside the field (#3462).
+    @ViewBuilder var refusal: some View {
+        if let message = field.message {
+            SidebarRenameMessage(message, identifier: naming.renameMessage(row.id))
+                .padding(.leading, options.nests ? CGFloat(row.depth) * SuiteSpacing.l : 0)
         }
     }
 
