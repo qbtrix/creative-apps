@@ -166,3 +166,4 @@ utc	stage	event	ref	note
 2026-10-25T13:00Z	check	13:00Z heartbeat: all five PRs open and clean, no needs-fix/needs-rebase; lane landed #4953 (dev 930337d52), batch 20261025125743 holds none of ours; no slice done, 0 findings
 2026-10-27T03:50Z	check	03:50Z heartbeat (run act-1a17b7080fc-gy1j): #4917 needs-fix (LiveStandInTests on HaloServices media slot) fixed locally via call-site LiveMedia, dev merged; gate rerunning; #4942 restack next; 0 findings
 2026-10-27T03:59Z	check	03:59Z #4917 fixed and pushed (1895fd75), #4942 restacked (d0553017), both gate PASS with markers moved; 0 findings
+2026-10-27T04:21Z	check	04:21Z heartbeat (10-27): #4917 needs-fix dropped by the lane on 1895fd75, waits on prescreen/batch; #4942 open clean on d0553017; no slice done; 0 findings
