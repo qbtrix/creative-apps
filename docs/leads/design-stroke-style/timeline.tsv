@@ -361,3 +361,4 @@ time	kind	note
 2026-10-27T10:57Z	wait	heartbeat	#5825	scoped design 40487513936 on f8e851c7 (holds #5011 + #5825) running; dev-red #5818 open
 2026-10-27T11:17Z	wait	heartbeat	#5825	design 40487513936 on f8e851c7 red: same Library test compile break (dev-red #5818); next design 40494076820 on 4a7d926f queued
 2026-10-27T11:36Z	wait	heartbeat	#5825	Library test compile fix is on dev (at 4a7d926f); design 40494076820 on 4a7d926f queued, holds #5011 + #5825
+2026-10-27T11:55Z	wait	heartbeat	#5825	suiteui 40492777537 on 4a7d926f green (compile fixed); design 40494076820 on 4a7d926f running, holds #5011 + #5825
