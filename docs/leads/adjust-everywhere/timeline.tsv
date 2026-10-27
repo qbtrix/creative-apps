@@ -182,3 +182,4 @@ utc	stage	event	ref	note
 14:37Z	3	check-in	#5247 #5248 #5249	no merges; #5248 queued eligible; #5247/#5249 wait prescreen; dev 0b94b3c7f main fef52e668
 14:58Z	3	check-in	#5247 #5248 #5249	no merges; #5248 queued eligible; #5247/#5249 wait prescreen; dev d52f4817e main fef52e668
 15:36Z	3	merged	#5248 #5252	#5248 AJ-library merged (77666ac30); #5252 AJ-library-ui restacked on dev 362dfef17, clean 296+7/9, Fast-Check+Head set; #5247/#5249 wait prescreen
+15:57Z	3	check-in	#5247 #5249 #5252	no merges; all clean; code PRs wait for local-ci/prescreen; dev b2c96e858 main fef52e668
