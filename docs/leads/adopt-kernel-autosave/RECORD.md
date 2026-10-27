@@ -223,3 +223,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 - 2026-10-27T12:57:31Z AK-photo waits on SC-f #5262 #5265, both open
 - 2026-10-27T13:33:26Z AK-photo waits on SC-f #5262 #5265, both open
 - 2026-10-27T14:34:24Z AK-photo waits on SC-f #5262/#5265 (open)
+- 2026-10-27T14:55:12Z AK-photo waits on SC-f #5262/#5265 (open)
