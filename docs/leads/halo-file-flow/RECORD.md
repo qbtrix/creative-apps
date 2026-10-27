@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 02:06Z poll: no change; dev Linux check on 9108a0bc running, #5818 open; #4936/#5123/#5801 queued, no labels
 - 01:44Z poll: dev Linux at 2cf71ce9 red only on the quarantine check (supervisor-owned, #5818); halo scoped run on 2cf71ce9 cancelled; #4936/#5123/#5801 queued, no labels
 - 01:22Z poll: #5092 (HF-z last PR) merged 01:20Z as 2cf71ce9; awaiting a green ci.yml run on dev containing it (dev red, #5818, quarantine). #4936/#5123/#5801 queued, no labels. Packet lines 47/95 rename to aPNGOffTheCanvasGoesToPhoto after #5801 lands (it carries the plan rename)
 - 01:00Z poll: #4936/#5092/#5123/#5801 unchanged, no labels; dev Linux red at f3ed4b32 on the quarantine check (supervisor-owned, #5818 open); no slice-done run yet
