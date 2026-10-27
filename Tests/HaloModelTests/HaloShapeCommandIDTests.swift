@@ -42,7 +42,7 @@ import Testing
         let files = FileFlowCommands.specs(HaloProject.self).count - 1  // HF-3: the file flow, whose file.open-recent replaces Halo's
         #expect(HaloProject.catalog.ids.count  // FR-8b: + 1 for set-frame-rate
             == HaloCommand.allCases.count + 2 + fills + strokes + history + transforms + 1 + places + styles + files
-            + 2 + HaloProject.windowSpecs.count)  // CB-10: + 2 for edit.copy-frame and edit.paste
+            + HaloProject.textStyleSpecs.count + 2 + HaloProject.windowSpecs.count)  // TS-9: the kernel's text commands; CB-10: + 2 for edit.copy-frame and edit.paste
     }
 
     @Test func runShapeKeepsThePickedTool() throws {

@@ -43,7 +43,6 @@ Sources/HaloApp/HaloLayerInspector.swift::HaloPropertyRowView.keyState
 Sources/HaloApp/HaloTextInspector.swift::HaloTextInspector.owns
 Sources/HaloApp/HaloViewer.swift::HaloViewer.command
 Sources/HaloApp/HaloViewerCanvas.swift::HaloLiveLayers.bodyRuns
-Sources/HaloApp/HaloWindow+File.swift::HaloWindow.storeRecent
 Sources/HaloApp/HaloWindow.swift::HaloWindow.bodyRuns
 Sources/HaloApp/HaloWindow.swift::HaloWindow.shownProject
 Sources/LibraryApp/LibraryWindow+Import.swift::LibraryWindow.chooseImportFolder
