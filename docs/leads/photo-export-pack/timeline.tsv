@@ -315,3 +315,4 @@ utc	stage	event	ref	note
 2026-10-27T01:55Z	check-in	#5353 still open (clean); #5758/#5763 open, no needs-fix/rebase; new finding #5828 (revert of #5263) belongs to orientation-crop lead act-1a178a4b1c2-ibn1, not ours; dev-red #5818 open; #4899 merged, not ours
 2026-10-27T02:27Z	check-in	#5353 still open (clean); #5758/#5763 open, no needs-fix/rebase; no new findings; dev-red #5818 open, not ours; #5826 #5041 merged, not ours
 2026-10-27T02:59Z	check-in	#5353 still open (clean); #5758/#5763 open, no needs-fix/rebase; no new findings; dev-red #5818 open, not ours; batch of 11 at 02:40-02:42Z and #5829, none ours
+2026-10-27T03:30Z	check-in	#5353 still open (clean); #5758/#5763 open, no needs-fix/rebase; new quality-gate findings #5833 (file-flow) and #5840 (adjustment-layers) belong to other features (needs-mac-finish), not ours; dev-red #5818 open
