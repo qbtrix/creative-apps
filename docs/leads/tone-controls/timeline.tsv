@@ -1,0 +1,258 @@
+utc	stage	event	ref	note
+2026-10-20T20:40Z	0	stage-start	-	setup: brief main b3011ab verified; base origin/dev 6c2c7b0
+2026-10-20T21:00Z	0	stage-end	-	waits checked on photo-gradient-fill, photo-transform, history-panel, photo-eyedropper, placed-images, tone-controls
+2026-10-20T21:05Z	1	stage-end	-	packets read; slices and tasks copied
+2026-10-20T21:06Z	3	blocked	TC-a	PT-1 waits on suiteui TC-a (#3476); comment on #3468
+2026-10-20T21:08Z	2	stage-end	-	combined plan W1-W6 across place-image, tone-controls, multi-layer-select
+2026-10-20T21:27Z	3	check	W1	TC-a not started (PT-1 waits)
+2026-10-20T21:48Z	3 build W1	check	-	still blocked: TC-a has no PR
+2026-10-20T22:10Z	3 build W1	check	-	still blocked: TC-a has no PR
+2026-10-20T22:29Z	3 build W1	check	-	still blocked: TC-a has no PR
+2026-10-21T00:04:22Z	check	heartbeat	-	after worker restart; #3761 macOS build green, awaiting sweep / tone still blocked on TC-a
+2026-10-21T00:24:57Z	3 build W1	check	-	still blocked: TC-a has no PR
+2026-10-21T00:45Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T01:05Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T01:24Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T01:44Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T02:03Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T02:23Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T02:43Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T03:03Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T03:23Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T03:42Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T04:02Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T04:22Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T04:41Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:00Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:20Z	3 build W1	check	-	PG-a #3681 open; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T05:40Z	3 build W1	check	#3681	PG-1 #3681 merged 05:28Z; PG-a still needs PG-2 (no PR yet), not slice-done; no PL-2 PR; no TC-a PR; no builders started
+2026-10-21T06:00Z	3 build W1	check	#3416	no PG-2 PR yet, PG-a not slice-done (PM-2 blocked); no PL-2 PR (PP-3 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T06:22Z	3 build W1	check	#3416	no PG-2 PR yet, PG-a not slice-done (PM-2 blocked); no PL-2 PR (PP-3 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T06:41Z	3 build W1	check	#3931	PL-2 PR #3931 open (not merged, PP-3 still blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:03Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:23Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T07:42Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T08:03Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T08:22Z	3 build W1	check	#3931	PL-2 #3931 still open (PP-3 blocked); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked); no builders started
+2026-10-21T08:42Z	3 build W2	check	#3931	PL-2 #3931 merged 08:30Z: PP-3 builder started; no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T09:03Z	3 build W2	check	#3976	PP-3 #3976 in lane (clean, fast-lane, waiting on batch); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T09:23Z	3 build W2	check	#3976	PP-3 #3976 lane macOS build 39574519410 queued (per-PR build); no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T09:43Z	3 build W2	check	#3976	PP-3 #3976 macOS build 39574519410 green, awaiting lane merge; no PG-2 PR, PG-a not slice-done (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T10:05Z	3 build W2	check	#3976	PP-3 #3976 macOS build green; lane Linux run 39580807833 in progress on its head; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T10:27Z	3 build W2	check	#3976	PP-3 #3976 merged 10:20Z; its Linux run red on CommandPathTests photo (PhotoPlace.swift:36 bare MenuCommand), fixer started; PP-4 started; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T10:47Z	3 build W2	check	#4003 #4004	PP-4 #4003 and PP-3fix #4004 open in lane (no lane comments yet); gradient-fill run re-armed 10:44Z, PG-2 not yet open (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T11:10Z	3 build W2	check	#4003 #4004	#4003 and #4004 wait on per-PR macOS builds (runs 39587596123, 39587620209, queued since 10:51Z); #4008 (another session, fix/photo-place-command-spec) is a 1-file duplicate of the PP-3 fix; whichever lands first, the other gets resolved on needs-rebase; no PG-2 PR (PM-2 blocked); no TC-a PR (PT-1 blocked)
+2026-10-21T11:30Z	3 build W2	check	#4003 #4004	macOS builds 39587596123/39587620209 still queued (slots busy); #4008 duplicate in Linux check 39591166431; PG-2 and TC-a still no PR, PM-2/PT-1 blocked
+2026-10-21T11:59Z	3 build W2	check	#4003 #4004	#4008 merged 11:48Z (dup PP-3 fix); merged dev into #4004 keeping model-side placeMenuSpec+tests, head 360a99e, ci --changed PASS; #4004 mac build 39587620209 green on old head; #4003 mac build still queued; PG-2/TC-a no PR
+2026-10-21T12:23Z	3 build W2	check	#4003 #4004	#4004 needs-rebase cleared at 360a99e, new mac build 39597665667; #4003 mac build 39587596123 still queued; PG-2/TC-a no PR, PM-2/PT-1 blocked
+2026-10-21T12:44Z	3 build W2	check	#4003 #4004	#4003 macOS build green (39587596123), clean, awaiting lane sweep; #4004 macOS build 39597665667 running, clean; PM-2 waits PG-a, PT-1 waits TC-a
+2026-10-21T14:50Z	3 W1	check	PT-a	takeover; TC-a still not slice-done on #3476, ToneTarget/ToneRows absent on dev; PT-1 blocked
+2026-10-21T16:31Z	3	heartbeat	#3476	TC-a still not slice-done; rechecked
+2026-10-21T16:34Z	rule 23: Question for the supervisor posted on #3468 after repeated identical TC-a blocked polls
+2026-10-21T16:56Z	released by supervisor answer (c) on #3468; TC-a is SuiteUI's canonical contract
+2026-10-23T15:30Z	1 build W1	start	PT-1	takeover by act-1a16958d691-2ax3; TC-1 #4555 on dev; PT-1 built on lead/photo-tone-PT-a; PT-2 waits TC-2
+2026-10-23T16:00Z	1 build W1	ship	PT-1 #4845	scripts/ci --changed PASS at 39f902f; PhotoModel.PhotoTone+Kernel 4/4 caught; PT-2 waits TC-2 (building)
+2026-10-23T16:15Z	1 build W1	check-in	PT-1 #4845	mergeable clean, no needs-fix; attribution footer removed from body per lane comment; TC-2 and TC-5 still building, TC-6 waiting; dev 35a0b5e7e
+2026-10-23T16:35Z	1 build W1	check-in	PT-1 #4845	open, mergeable clean, waiting on lane batch; TC-2/TC-5 building, TC-6 waiting; dev 35a0b5e7e
+2026-10-23T16:57Z	1 build W1	check-in	PT-1 #4845	open, mergeable clean, no lane label change; dev unmoved at 35a0b5e7e since 16:13Z; TC-2/TC-5 building
+2026-10-23T17:18Z	1 build W1	check-in	PT-1 #4845	open, mergeable clean; dev unmoved at 35a0b5e7e since 16:13Z (no lane merges ~65 min); TC-2/TC-5 building
+2026-10-23T17:40Z	1 build W1	check-in	PT-1 #4845	open, mergeable clean; lane moving again (dev 8a54f64c9); TC-2/TC-5/TC-7 PRs open, TC-3/TC-4/TC-6 building
+2026-10-23T18:01Z	1 build W1	check-in	PT-1 #4845	open, mergeable clean; dev 985896623; TC-2 #4862, TC-5 #4880, TC-7 #4870 open (not merged); PT-2/PT-3 wait on their merge
+2026-10-23T18:21Z	1 build W1	check-in	PT-1 #4845	open, clean, in lane with TC-2 #4862, TC-5 #4880, TC-7 #4870 (all open, clean); dev 985896623
+2026-10-23T18:42Z	1 build W1	check-in	PT-1 #4845	open, clean; TC-2 #4862, TC-5 #4880, TC-7 #4870 still open; dev 0d4645bfb
+2026-10-23T19:04Z	1 build W1	check-in	PT-1 #4845	unchanged: #4845, TC-2 #4862, TC-5 #4880, TC-7 #4870 open, clean; dev 0d4645bfb
+2026-10-23T19:26Z	W1	check-in	PT-1 #4845	still in lane; dev 8419a4a6e; TC-2 #4862, TC-5 #4880 open; TC-6 now #4953 open; PT-2..PT-4 still waiting
+2026-10-23T19:48Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9; TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
+2026-10-23T20:10Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9; TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
+2026-10-23T20:31Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9; TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
+2026-10-23T20:54Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9 (no merge since 19:45Z); TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
+2026-10-23T21:15Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9 (no merge since 19:45Z; lane running, no dev-red); TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
+2026-10-23T21:38Z	W1	check-in	PT-1 #4845	still in lane; dev 61c481df9 (no merge since 19:45Z); TC-2 #4862, TC-5 #4880, TC-6 #4953 open; PT-2..PT-4 still waiting
+2026-10-23T22:20Z	W1	merged	PT-1 #4845	dev 491ec5461 with TC-2 #4862
+2026-10-23T22:20Z	W3	opened	PT-2 #5007	ToneRows under Exposure; scripts/ci --changed PASS at 2d6de51ff; TC-3 #5006, TC-5 #4880, TC-6 #4953 open
+2026-10-23T22:16Z	W4	opened	PT-6 #5008	journey PJ-T1 written, XCTSkip until PT-7; stacked on #5007; scripts/ci --changed PASS at f599711de
+2026-10-23T22:33Z	W3	check-in	PT-2 #5007, PT-6 #5008	both in lane, clean, no needs-fix; dev 491ec5461; TC-3 #5006, TC-5 #4880, TC-6 #4953 still open; PT-3..PT-5 waiting
+2026-10-23T22:55Z	W3	check-in	PT-2 #5007, PT-6 #5008	both in lane, clean; dev 654fb3632 (generated only); TC-3 #5006, TC-5 #4880, TC-6 #4953 open; PT-3..PT-5 waiting
+2026-10-23T23:17Z	W3	check-in	PT-2 #5007, PT-6 #5008	both in lane, clean; a CI run is in progress since 23:06Z (likely the batch); dev 654fb3632; TC-3 #5006, TC-5 #4880, TC-6 #4953 open
+2026-10-23T23:39Z	W3	check-in	PT-2 #5007, PT-6 #5008	both in lane, clean; dev 654fb3632 unchanged since 22:55Z; TC-3 #5006, TC-5 #4880, TC-6 #4953 open
+2026-10-24T00:01Z	W3	check-in	PT-2 #5007, PT-6 #5008	both in lane, clean; no Fast Lane run since 23:10Z (CI on dev in progress since 23:06Z, journeys running); dev 654fb3632; TC-3/5/6 open
+2026-10-24T00:23Z	W3	check-in	PT-2 #5007, PT-6 #5008	lane idle since 23:10Z, noted for supervisor in RECORD; dev 654fb3632; TC-3/5/6 open
+2026-10-24T00:24Z	W3	check-in	PT-2 #5007, PT-6 #5008	lane idle since 23:10Z, noted for supervisor in RECORD; dev 654fb3632; TC-3/5/6 open
+2026-10-24T00:45Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; lane 00:32Z runs cancelled/skipped, nothing merged; dev 654fb3632
+2026-10-24T01:07Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; no lane run since 00:32Z; dev 654fb3632
+2026-10-24T01:28Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; no lane run since 00:32Z; dev 654fb3632; supervisor note corrected
+2026-10-24T01:50Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; lane ran 01:29Z, merged nothing; dev 654fb3632
+2026-10-24T02:13Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; no lane run since 01:29Z; dev 654fb3632
+2026-10-24T02:34Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; no lane run since 01:29Z; dev 654fb3632
+2026-10-24T02:56Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; lane run in progress since 02:43Z; dev 654fb3632
+2026-10-24T03:17Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; lane 02:43Z merged nothing, 03:06Z in progress; dev 654fb3632
+2026-10-24T03:39Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; lane bisecting batch 20261023215139 (probe -7 macOS gate running since 02:43Z); dev 654fb3632
+2026-10-24T04:00Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; batch probe -7 macOS gate passed, awaiting lane sweep; dev 654fb3632
+2026-10-24T04:21Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; batch probe -8 macOS gate running; dev 654fb3632
+2026-10-24T04:43Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, waiting; probe -8 macOS gate still running; dev 654fb3632
+2026-10-24T05:05Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; lane batch-20261024050226 (#4839-#4875) running; dev 654fb3632
+2026-10-24T05:26Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; batch-20261024050226 Linux passed, macOS gate running; dev 654fb3632
+2026-10-24T05:47Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; batch-20261024050226 bisecting (probe -6); dev 654fb3632
+2026-10-24T06:15Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; probe -6 Linux passed, macOS gate running; dev 654fb3632
+2026-10-24T06:42Z	W3	lane	dev	dev moved 654fb3632 -> e5dcf9394; supervisor note ticked; #5007, #5008 queued
+2026-10-24T07:09Z	W3	check-in	PT-2 #5007, PT-6 #5008	clean, queued; dev 830af22de (lane landing again); TC-3/5/6 still open
+2026-10-24T07:35Z	W4	start	PT-3, PT-4	build-wave on dev 830af22de; TC-5/TC-6 stubs (rule 12); #5007, #5008 clean in lane
+2026-10-24T07:55Z	W4	check-in	PT-3, PT-4	builders running; #5007, #5008 queued; TC-3/5/6 open; dev f58e1190; no needs-fix
+2026-10-24T08:16Z	W4	check-in	PT-3, PT-4	builders in scripts/ci gate; lane landed a batch (dev 1bbaba6c1), #5007/#5008 not in it; TC-3/5/6 open
+2026-10-24T08:40Z	W4	check-in	PT-3, PT-4	PT-3 PR #5105 opened (CI: PASS; footer removed from body); PT-4 building; #5007/#5008/#5105 clean in lane; TC-3/5/6 open; dev 1bbaba6c1; no needs-fix; 0 tone findings
+2026-10-24T08:45Z	W4	done	PT-3, PT-4	build-wave wf_3eec3e40-086 done: #5105, #5112 open in lane (footers removed); 0 tone findings
+2026-10-24T09:04Z	W4	check-in	PT-5	#5105, #5112, #5007, #5008 clean in lane (bodies end on Head:); TC-3/5/6 open; dev 1bbaba6c1; lane sweep running; dev-red #5113 (macos, range has no tone PR); 0 tone findings
+2026-10-24T09:27Z	W4	check-in	PT-5	#5105, #5112, #5007, #5008 clean, not yet batched; TC-3/5/6 open; dev 9f476af74 (#5117 dev-red fix); dev-red #5113 open, no tone PR; 0 tone findings
+2026-10-24T09:48Z	W4	check-in	PT-5	no change: #5105, #5112, #5007, #5008 clean, queued behind bisecting batch 20261024081307; TC-3/5/6 open; dev 9f476af74; 0 tone findings
+2026-10-24T10:09Z	W4	check-in	PT-5	no change: #5105, #5112, #5007, #5008 clean, unmerged; TC-3/5/6 open; dev 9f476af74; 0 tone findings; lane stalled: every sweep since ~08:30 reports batch 20261024081307 "probe 0 running" though its runs finished red; reported to supervisor on #5113 at 10:04Z
+2026-10-24T10:31Z	W4	check-in	PT-5	no change: tracked PRs clean, unmerged; dev 9f476af74; 0 tone findings; lane still stalled on batch 20261024081307, no supervisor reply on #5113 yet
+2026-10-24T10:54Z	W4	check-in	PT-5	dev-red #5113 closed (green at 9f476af74, main moved); dev 6883dd335 (#4616 docs only); tracked PRs open, clean, unmerged; 0 tone findings
+2026-10-24T11:15Z	W4	check-in	PT-5	no change for us: dev 6ad8cadba (#4617 docs, #5150 lane lists every open PR); tracked PRs open, unmerged, no labels; no dev-red; 0 tone findings
+2026-10-24T11:38Z	W4	check-in	PT-5	lane batch 20261024110214 holds #5008 (PT-6), #5007 (PT-2), #5006 (TC-3): Linux green, macOS gate running since 11:02Z; #5105, #5112 not batched yet; dev 6ad8cadba; 0 tone findings
+2026-10-24T12:00Z	W4	check-in	PT-5	batch 20261024110214 (#5008, #5007, #5006) macOS gate run 40088280853 still in scripts/ci; tracked PRs clean, unmerged; dev 6ad8cadba; 0 tone findings
+2026-10-24T12:22Z	W4	check-in	PT-5	batch 20261024110214 macOS gate failed; lane bisecting (probe -6 running) with #5008, #5007, #5006 inside; none needs-fix yet; dev 78983bc33
+2026-10-24T12:44Z	W4	check-in	PT-5	bisect probe -6 (macOS 40092825860) still running; tracked PRs clean, unmerged; 0 tone findings (#5166 is export, not ours); no dev-red
+2026-10-24T13:07Z	W4	check-in	PT-5	bisect probe -6 macOS gate 40092825860 still running (its Linux check passed); tracked PRs clean, unmerged; 0 tone findings; no dev-red
+2026-10-24T13:30Z	W4	check-in	PT-5	probe -6 macOS failed: RenderBudgetToneRowsTests.sliderDragInThreeBodies (100 of 120 tone.set), test from #5006 (suiteui TC-3, other lead); probe -3 running; ours unlabelled
+2026-10-24T13:52Z	W4	check-in	PT-5	probe -3 Linux passed, macOS 40097890001 running; tracked PRs unlabelled, unmerged; no dev-red; dev 6be19b34e
+2026-10-24T14:14Z	W4	check-in	PT-5	no change: probe -3 macOS 40097890001 still running; tracked PRs unlabelled, unmerged; no dev-red
+2026-10-24T14:38:06Z	W2	check	PT-2	batch 20261024110214 order 5087,5097,5138,5144,5006,5007; probe -3 green, probe -4 macOS 40101697965 running; culprit is #5006 (RenderBudgetToneRowsTests, its own test) or #5007; dev e79e9afcb, no dev-red
+2026-10-24T15:00:36Z	W2	check	PT-2	probe -4 macOS 40101697965 still running; #5006/#5007 unlabelled; dev e79e9afcb, no dev-red, no tone findings
+2026-10-24T15:22:25Z	W2	check	PT-2	probe -4 green (Linux+macOS); culprit narrowed to #5006 or #5007, probe -5 not started; dev e79e9afcb, no dev-red, no tone findings
+2026-10-24T15:44:57Z	W2	check	PT-2	batch 20261024110214 probe -5 not started (probes -3, -4 green); #5006/#5007 unlabelled; dev e79e9afcb, no dev-red, no tone findings
+2026-10-24T16:08:44Z	W2	check	PT-2	batch 110214 resolved through #5144 (#5087, #5097 on dev); #5006/#5007 back in queue unlabelled; batch 144917 merged, 160327 running (older PRs); dev 33cd6e97c; finding #5179 testTier1Tone Curves fold red at e79e9afcb, predates our PRs (photo/suite range 1bbaba6c1..e79e9afcb: #5046, #5097, #5087), not ours
+2026-10-24T16:29:52Z	W2	check	PT-2	no change: batch 160327 macOS gate running; our PRs queued, unlabelled; dev 33cd6e97c; #5179 still open (not ours)
+2026-10-24T16:57:27Z	W2	check	PT-2	no change: batch 160327 macOS gate 40109793853 still running (45 min); our PRs queued, unlabelled; dev 33cd6e97c; no dev-red
+2026-10-24T17:24:09Z	W2	check	PT-2	batch 160327 green and merged (dev c09201386); batch 172211 running with #4880 (TC-5, a Wire trigger) among 12 older PRs; ours still queued, unlabelled; no dev-red
+2026-10-24T17:52:02Z	W2	check	PT-2	batch 172211 Linux green, macOS gate 40115812591 still queued; #4880 not merged yet; ours queued, unlabelled; dev c09201386; no dev-red
+2026-10-24T18:18:32Z	W2	check	PT-2	batch 172211 macOS gate in progress; #4880 not merged; ours queued, unlabelled; dev-red #5183 (macos, range main..33cd6e97c) has none of our PRs, not ours to fix
+2026-10-24T18:47:36Z	W2	fix	PT-2	needs-rebase on #5007, #5008, #5112 after the Pen (#5134) landed: merged dev; PT-2 kept .tone and .path in PhotoIntent/PhotoWindow; PT-6 took PT-2; PT-4 kept pathCommands and ToneCommands, ledger plus golden as union; gates running
+2026-10-24T18:47:36Z	W2	check	PT-2	#4880 TC-5 merged (batch 172211 macOS failed, a later batch carried it); the TC-5 tests turn on after our tone PRs land; dev 674461187; dev-red #5183 not ours
+2026-10-24T19:39:05Z	W4	fix	PT-4	new run act-1a16f6941b7-zb0r; needs-rebase on #5008 and #5112: merged dev; PT-6 kept PT-2 and dev; PT-4 kept pathCommands and ToneCommands, path.* and tone.* exclusions, ledger and golden as union; gates running
+2026-10-24T20:30:53Z	W4	check	PT-4	#5112 adopted the other session's equivalent dev merge 79358946 (gate PASS); Head and Belt-Lead moved; #5008 PT-6 head f126c565 gate PASS
+2026-10-24T20:58:29Z	W4	check	PT-4	all tone PRs open and clean; waits #5006 TC-3 and #4953 TC-6 still open; no scoped photo run yet
+2026-10-24T21:19:59Z	W4	check	PT-4	no merges; lane batch-20261024205137 red on macOS gate, bisect probes -3 and -6 running; our PRs and waits open and clean
+2026-10-24T21:41:51Z	W4	check	PT-4	no merges; batch-20261024205137 bisect macOS probes -3 and -6 still running (Linux green); our PRs and waits open and clean; no scoped photo run
+2026-10-24T22:04:15Z	W4	check	PT-4	no merges; batch-20261024205137 bisect macOS probes -3/-6 still running after 45 min; our PRs and waits open and clean (#5174 now beta); no scoped photo run
+2026-10-24T22:26:07Z	W4	check	PT-4	no merges; bisect macOS probes -3/-6 still running on runners (70 min); full CI 40137153379 on dev running; our PRs and waits open and clean
+2026-10-24T22:48:13Z	W4	check	PT-4	no merges; bisect probe -6 macOS green but -3 red (inconsistent), lane now probing -1; our PRs and waits open and clean, none labelled needs-fix
+2026-10-24T23:14:59Z	W4	check	PT-4	no merges; bisect probe -1 macOS running (Linux green); full CI on dev running; our PRs and waits open and clean
+2026-10-24T23:43:19Z	W4	check	PT-4	check-in: no merges; batch-20261024205137 probe -1 macOS still running, full CI 40137153379 running; no scoped photo run
+2026-10-25T00:07:46Z	W4	check	PT-4	check-in: full CI 40137153379 green (no tone slice merged yet); batch-20261024205137 resolved; batch-20261024235353 (12 PRs, none ours) running; our PRs clean, wait for next batch
+2026-10-25T00:31:24Z	W4	check	PT-4	check-in: batch-20261024235353 red on Linux+macOS, lane bisecting (probe -6 Linux green, macOS running); our PRs clean, not in it
+2026-10-25T00:55:08Z	W4	check	PT-4	check-in: no change; batch-20261024235353 bisect probe -6 macOS still running; our PRs clean
+2026-10-25T01:19:18Z	W4	check	PT-4	check-in: batch-20261024235353 probe -6 green, probe -9 running; our PRs clean, not in it
+2026-10-25T01:43:02Z	W4	check	PT-4	check-in: dev moved (batch head #5156 merged); probe -9 Linux green, macOS running; our PRs still clean after dev moved
+2026-10-25T02:07:17Z	W4	check	PT-4	check-in: no change; probe -9 macOS still running (since 01:18Z); our PRs clean
+2026-10-25T02:31:26Z	W4	check	PT-4	check-in: dev moved (#5050 #5219 #5216 #5238 merged); probe -9 macOS red, probe -10 running; full CI 40154669999 queued on dev; our PRs clean
+2026-10-25T02:55:09Z	W4	check	PT-4	check-in: new batch-20261025023716 (12 PRs, none ours) running; old batch probe -10 macOS running; full CI 40154669999 queued; our PRs clean
+2026-10-25T03:18:53Z	W4	check	PT-4	check-in: batch-20261025023716 macOS red (a Design PR: DesignPlaceSnapshots.swift:39 type-check timeout), bisecting, probe -6 running; full CI 40154669999 running; our PRs clean
+2026-10-25T03:42:29Z	W4	check	PT-4	no merges; ours clean; lane batch-20261025023716 probe -6 macOS red, probe -3 running; full CI 40154669999 still running
+2026-10-25T04:06:21Z	W4	check	PT-4	no merges; ours clean; lane batch-20261025023716 probe -3 macOS red, -1 running (culprit in first 3, none ours); full CI 40154669999 still running
+2026-10-25T04:30:41Z	W4	check	PT-4	no merges of ours; dev took #4877; ours unflagged; lane batch-20261025023716 probe -1 macOS running; full CI 40154669999 still running
+2026-10-25T04:55:29Z	W4	check	PT-4	#5112 needs-rebase (photo.list-commands.json golden); merged dev as cb5f2555 with an id-keyed union, gate running; scoped photo 40162166948 holds none of ours
+2026-10-25T05:12:13Z	W4	fix	PT-4	#5112 rebase: gate PASS at cb5f2555, pushed, Head moved
+2026-10-25T05:36:18Z	W4	check	PT-4	lane dropped needs-rebase on #5112; all ours clean beta+p0, unmerged; dev took #4888; scoped photo 40162166948 green but holds none of ours
+2026-10-25T06:00:53Z	W4	check	PT-4	all 9 PRs open, clean, no needs-fix/rebase; lane batch-20261025054232 Linux red, bisecting (probe -6); TC-3/TC-6 unmerged, PT-5 still waits
+2026-10-25T06:24:49Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; lane batch-20261025054232 bisect probe -6 Linux green, macOS gate running; no new dev merges; PT-5 waits on TC-3
+2026-10-25T06:48:04Z	W4	check	PT-4	unchanged: all 9 PRs open, clean, unflagged; lane probe batch-20261025054232-6 macOS gate still running (since 05:56Z); dev head 13fb2f59
+2026-10-25T07:12:13Z	W4	check	PT-4	lane batch-20261025054232 (12 PRs, holds our #5007 #5008 at 7-8 and TC-3 #5006, TC-6 #4953): Linux red is FormatListRatchetTests.realTreePasses on SuiteKernel FakeCanvasDocument.swift from #5074 (not ours); macOS red is in prefix 1-6 (probe -6 red), now probing -3; all 9 PRs clean, unflagged
+2026-10-25T07:35:54Z	W4	check	PT-4	no merges; all our PRs clean, unflagged; TC-3 #5006 pushed new head f2963229; lane probe batch-20261025054232-3 Linux green, macOS running
+2026-10-25T07:59:48Z	W4	check	PT-4	unchanged: no merges, all 9 PRs clean, unflagged; lane probe batch-20261025054232-3 macOS gate still running (since 07:07Z)
+2026-10-25T08:23:11Z	W4	check	PT-4	lane probe batch-20261025054232-3 green on Linux and macOS (#4886 #4943 #4953 TC-6), so the macOS culprit is in 4-6 (#4960 #4962 #5006 TC-3); probe -4 queued; all 9 PRs clean, unflagged; dev 7e5bcd82
+2026-10-25T08:48:16Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; batch-20261025054232 probe -4 macOS red, -3 green: macOS culprit #4960; lane should land #4886 #4943 #4953 next; dev 7e5bcd82 Linux green; no scoped photo run holds our slices yet
+2026-10-25T09:12:50Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; #4960 got needs-fix; old batch's prefix did not land; new batch-20261025090316 (12 PRs: #4886 #4943 #4953 #4962 #5006 #5007 #5008 #5039 #5044 #5074 #5075 #5105) Linux+macOS running; dev 8d3a12c4 (#5274), CI running
+2026-10-25T09:37:01Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; batch-20261025090316 red on Linux and macOS (macOS: OnboardingModelTests.continueOnTheLastPageSavesTheVersion 60s time limit, not ours); bisect probe -6 (#4886..#5007) Linux green, macOS running; dev 8d3a12c4 Linux green, CI running
+2026-10-25T10:01:07Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; dev 8d3a12c4 scheduled CI macOS red, dev-red #5316 open (range #3935 #4877 #4888 #5274 #5287, none ours); batch-20261025090316 bisect probe -6 macOS still running
+2026-10-25T10:24:55Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; dev 8d3a12c4: CI 40178111920 green, scheduled CI 40179648854 macOS red (dev-red #5316, none ours; same SHA so likely flaky); batch-20261025090316 probe -6 macOS still running (65 min)
+2026-10-25T10:49:49Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; batch-20261025090316 probe -6 (#4886 #4943 #4953 #4962 #5006 #5007) green on Linux and macOS; probe -9 (adds #5008 #5039 #5044) Linux green; awaiting lane merge; dev-red #5316 open, none ours
+2026-10-25T11:07:31Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; dev moved to 68bec9fe (SuiteText target refactor, direct), our PRs still mergeable; batch-20261025090316 probes -6 green, -9 Linux green, nothing merged yet; dev-red #5316 open, none ours
+2026-10-25T11:27:38Z	W4	check	PT-4	all 9 PRs open, clean, unflagged; old batch's green prefix did not land; lane started batch-20261025111803 with only #4886 (Linux check running); dev 68bec9fe: Linux, scoped photo and scoped suite runs in progress
+2026-10-26T01:58:06Z	W5	takeover	PT-4	run act-1a175ea563c-tbc1; PT-a slice-done (run 40250716357); PT-4 re-land started
+2026-10-26T02:21:44Z	W5	ship	PT-4	#5363 re-land opened (fast-lane), Fast-Check pass at 500006ca
+2026-10-26T02:57:34Z	W5	build	PT-3	live and dispatcher routes sharpen as export does; branch -pt3 at 42fbe440, CI PASS, mutations 13/13; PR waits for #5363 to land
+2026-10-26T03:09:20Z	W5	build	PT-5	tone drag samples on the live copy; branch -pt5 at c1fb913b, CI PASS; PR waits for #5363
+2026-10-26T03:19:21Z	W5	build	PT-7	jobs live on fixtures, journey on; branch -pt7, test-first; PR waits for #5363, PT-3
+2026-10-26T03:23:47Z	W5	gate	PT-7	CI PASS at 46e6878e, pushed
+2026-10-26T03:23:47Z	W6	build	PT-8	photo.md tone row and PJ-T1, wave built; held until the code PRs land
+2026-10-26T03:46Z	check: #5363 open, clean, unmerged (dev at d0859e01); PT-3/5/7/8 branches gated and waiting on it
+2026-10-26T04:07Z	check: #5363 open, clean; no local-ci/prescreen status on be2ad8ae yet (landed PRs carry one); waiting on the supervisor's pre-screen
+2026-10-26T04:28Z	check: #5363 open, still no local-ci/prescreen on be2ad8ae; dev unchanged at 75292afd
+2026-10-26T04:49Z	check: #5363 open, no prescreen on be2ad8ae; dev at 999895c8 (#5154 landed)
+2026-10-26T05:11Z	check: local-ci/prescreen success on be2ad8ae (05:05Z); #5363 not merged yet, should land on the next lane sweep
+2026-10-26T05:22Z	check: #5363 open, clean, pre-screen green, no lane comment; dev at 7e13ba02 (#4948 landed)
+2026-10-26T05:39:16Z	check	#5363 open, prescreen green since 05:05Z, no lane comment; dev at 7e13ba02; PT-3/PT-5/PT-7 PRs wait on its merge
+2026-10-26T05:55:55Z	check	#5363 open, prescreen green, no lane comment; dev at c480d848 (#5239 landed), no conflict with #5363 or PT-5
+2026-10-26T06:19:07Z	check	#5363 open, prescreen green, no lane comment; dev still c480d848; dev-red #5321 open
+2026-10-26T06:50:25Z	fix	#5244 conflicted #5363 (catalog tables, photo golden); merged dev, kept image.flip and tone.* entries, regenerated golden; gate PASS; head 5260e203, Head line moved; PT-3/PT-5/PT-7 re-merged, gates running
+2026-10-26T07:07:56Z	gate	PT-5 b1e44767, PT-3 e7544ba8, PT-7 a825b8de: CI PASS after re-merge, pushed; #5363 waits on prescreen of 5260e203
+2026-10-26T07:27:19Z	check	#5363 5260e203 clean, needs-rebase dropped, prescreen pending; dev 99ace703 (#5043) merges clean with #5363/PT-5/PT-7
+2026-10-26T07:49:10Z	check	#5363 5260e203 prescreen still pending; dev 3e26fbe4 (#5264) merges clean with all heads
+2026-10-26T08:10:44Z	check	#5363 5260e203 prescreen still pending; dev 3e26fbe4 clean with PT-3/4/5/7 heads
+2026-10-26T08:29:39Z	check	#5363 5260e203 prescreen still pending; dev 1960c2d9 clean with PT-3/4/5/7 heads
+2026-10-26T08:49:33Z	check	#5363 5260e203 prescreen still pending (~1h); dev 7f585b7a clean with PT-3/4/5/7 heads
+2026-10-26T09:11:01Z	check	#5363 5260e203 prescreen still pending (~80m); dev be5f2c00 clean with PT-3/4/5/7 heads
+2026-10-26T09:30:33Z	check	#5363 5260e203 prescreen still pending (~100m); dev 1b843d15 clean with PT-3/4/5/7 heads
+2026-10-26T09:50:50Z	check	#5363 prescreen still pending (~2h); dev 2ed77a2e: c176d2c3 (Move composite cache) conflicts with PT-3/PT-7 in PhotoLiveTone.swift; merging dev into PT-3, gate running
+2026-10-26T09:56:01Z	merge	PT-3 merged dev 2ed77a2e (PhotoLiveTone Entry/Key conflict resolved), gate PASS, pushed 5e09f02c; PT-7 merged PT-3 cleanly, gate running
+2026-10-26T10:01:31Z	merge	PT-7 gate PASS, pushed 131c8a3c; #5363 still awaiting prescreen; next check +18m
+2026-10-26T10:21:15Z	check	#5363 open, no prescreen status (~2h50m); all heads (PT-4 5260e203, PT-3 5e09f02c, PT-5 b1e44767, PT-7 131c8a3c) clean vs dev 2eab5aeb
+2026-10-26T10:41:08Z	check	#5363 open, still no prescreen status (~3h10m); all heads clean vs dev f3af1c00
+2026-10-26T11:01:43Z	merge	#5363 still no prescreen (~3h30m). Dev b200af5b (Curves histogram composite cache) conflicted with PT-5 in CurvesSection.swift; merged dev into PT-5 keeping both (live copy env + composites cache), gate running. PT-3/PT-7 clean
+2026-10-26T11:11:25Z	merge	PT-5 dev merge gate PASS (first run segfaulted in SampleOpenTests from a stale LibraryModel build; clean rebuild fixed it, passes on dev too), pushed 38204202
+2026-10-26T11:28:17Z	check	#5363 open, clean, no pre-screen; dev c6700dba merges clean with PT-4/3/5/7 heads
+2026-10-26T11:47:11Z	check	#5363 open, 0 statuses (no pre-screen); dev c6700dba unchanged, all heads merge clean
+2026-10-26T12:16:44Z	check	#5363 local-ci/prescreen success 12:15Z, awaiting lane sweep; dev 746be6b1, all heads merge clean
+2026-10-26T12:29:10Z	check	#5363 prescreened, still open (no lane sweep since); dev 746be6b1, heads merge clean
+2026-10-26T12:45:01Z	check	#5363 prescreened, still open; lane sweeping (12:42Z), dev 746be6b1; heads merge clean
+2026-10-26T13:24:16Z	check	run act-1a178602311-syy6 takes over; #5363 prescreened, open; dev 01600e46, all heads merge clean
+2026-10-26T13:43:29Z	check	#5363 still open (prescreened); dev 01600e46 unchanged; -pt3 dev-merged + CI PASS (pushed); -pt5/-pt7 gating
+2026-10-26T14:13:44Z	check	#5363 still open (prescreened, clean); lane merging others (dev 68be32fc); -pt3/-pt5/-pt7 dev-merged at 01600e46, CI PASS, pushed
+2026-10-26T14:29:03Z	check	-pt3/-pt5/-pt7 re-merged with dev 68be32fc, CI PASS, pushed (32d5683a/b3c8792a/f4fbe959); #5363 still awaiting lane
+2026-10-26T14:36Z	check	#5363 open, clean, prescreened; lane forms no code batch while dev-red #5321 names macOS; dev unchanged; slice branches -pt3/-pt5/-pt7 gated and waiting
+2026-10-26T14:58Z	check	#5363 still open and clean; dev-red #5321 open (macOS), lane holds code batches; slice branches waiting
+2026-10-26T15:21Z	check	#5363 still open and clean; dev-red #5321 open (macOS), lane holds code batches; slice branches waiting
+2026-10-26T15:43Z	check	#5363 still open and clean; dev-red #5321 open (macOS), lane holds code batches; slice branches waiting
+2026-10-26T16:10Z	check	#5363 still open and clean, held by dev-red #5321 (macOS) ~4h; posted status to supervisor on #3468; slice branches waiting
+2026-10-26T16:32Z	check	#5363 still open (clean, p0); dev-red #5321 (macos) open; no supervisor reply; slice branches wait
+2026-10-26T16:54Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T17:18Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T17:40Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T18:02Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T18:24Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T18:46Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T19:09Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T19:31Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T19:53Z	check	#5363 still open (clean, p0); dev-red #5321 open; no supervisor reply
+2026-10-26T20:15Z	stage	#5363 (PT-4 re-land) merged 20:14Z; dev 9919d325 merged into -pt3 (5 files +122/-29) and -pt5 (6 files +89/-12) clean; -pt3 into -pt7 (20 files vs dev, opens after PT-m lands); gating pt3/pt5
+2026-10-26T20:16Z	stage	#5363 merged; record stage updated; scripts/ci --changed running on -pt3 and -pt5 after dev merge
+2026-10-26T20:26Z	pr	opened #5816 (PT-m, PT-3 sharpen follow-up) and #5817 (PT-u, PT-5) with fast-lane; PT-7 waits on #5816
+2026-10-26T20:48Z	check	#5816 and #5817 open, clean, no lane comment yet; stripped a tool-added attribution footer from both bodies; PT-7 still waits on #5816
+2026-10-26T21:11Z	check	#5816, #5817 still open and clean, waiting for a lane batch (#5817 now p0/beta); dev at 3ebc8d43 (#5812) does not conflict; PT-7 waits on #5816
+2026-10-26T21:33Z	check	#5816, #5817 open, no label or comment; lane is draining a backlog of single-PR batches (#4848..#4916, 21:19-21:28Z); dev still 3ebc8d43; PT-7 waits on #5816
+2026-10-26T21:56Z	check	#5816 PT-m and #5817 PT-u open, clean, no needs-fix; lane still on backlog batches (#4905, #4916)
+2026-10-26T22:18Z	check	#5816 PT-m and #5817 PT-u open, clean, no needs-fix; dev at 9810d71b (#4916), lane batching #5369/#4903
+2026-10-26T22:40Z	check	#5816/#5817 still unmerged, clean; heads lack local-ci/prescreen (landed PRs carry it) -> noted to supervisor on #3468 (6429030603); stripped tool footers from 4 lead comments on #3468
+2026-10-26T23:02Z	check	#5817 (PT-u) in lane/batch-20261026225859; #5816 (PT-m) open, clean, no prescreen yet, not batched; no supervisor reply on #3468; -pt7 waits on #5816
+2026-10-26T23:24Z	check	dev 22d07ab9 (#5369 landed); #5817 (PT-u) still in lane/batch-20261026225859, no needs-fix; #5816 (PT-m) open, clean, unbatched; no supervisor reply; -pt7 waits on #5816
+2026-10-26T23:46Z	check	batch 225859 dropped without label/comment; #5817 (PT-u) rebatched in lane/batch-20261026234054; #5816 (PT-m) open, clean, unbatched; no supervisor reply; dev 22d07ab9
+2026-10-27T00:09Z	check	#5817 (PT-u) merged as 5a1094e1; no green photo/full ci.yml run on dev contains it yet (latest 23:18Z runs); #5816 (PT-m) open, clean, unbatched; no supervisor reply
+2026-10-27T00:30Z	check	dev holds 5a1094e1 (PT-u); no photo/full ci.yml run on dev since (only suite/flare/suiteui/Linux on a80e88f4, running); #5816 (PT-m) open, clean, not in batches 0030Z (#5029/#5035/#5064/#5069), no prescreen; no supervisor reply
+2026-10-27T00:53Z	check	dev red: scripts/ci quarantine gate, 5 UITests/quarantine.json entries expired 2026-10-27 (2 Halo, 3 Photo journeys); supervisor-only file, not ours; not caused by #5817. No photo/full green run with 5a1094e1 yet; #5816 (PT-m) open, clean, unbatched; no supervisor reply
+2026-10-27T01:15Z	check	no change: no new ci.yml run on dev since 40428879345 (red, expired quarantine entries, supervisor-only); #5816 (PT-m) open, clean, unbatched; #3468 no new comment since 22:40Z
+2026-10-27T01:37Z	check	lane merging again (dev 2cf71ce9); scoped halo/flare runs in progress on 2cf71ce9, design red on 2c20134c; no photo/full run yet with 5a1094e1; #5816 (PT-m) still unbatched, no statuses (batches 013215..013239 are #4889 #5116 #5121 #5130)
+2026-10-27T01:59Z	check	dev 042704f2; #5816 (PT-m) open/clean, unbatched, no prescreen; no scoped: photo run yet (latest runs halo/flare cancelled, design/library red); PT-u slice-done still waits
+2026-10-27T02:21Z	check	dev 7703c60d (quarantine renewal #5826 landed for dev-red #5818); #5816 (PT-m) still open/clean, unbatched; no scoped: photo run yet (library + Linux check on 9108a0bc running); PT-u slice-done waits
+2026-10-27T02:43Z	check	scoped: photo run 40439886020 in progress on b971f99b (contains PT-u 5a1094e1); full CI 40439893721 queued on 9c320a9a; #5816 (PT-m) still open/clean, unbatched
+2026-10-27T03:05Z	check	PT-u proof pending: scoped photo 40439886020 in tests, full CI 40439893721 packing build (Linux green). #5816 open, clean, unbatched.
+2026-10-27T03:26Z	check	PT-u proof still running (40439886020 tests, 40439893721 in progress). #5816 open, clean, unbatched; no supervisor reply on #3468.
+2026-10-27T03:50Z	check	PT-u proof runs 40439886020/40439893721 red, not ours: PhotoToolsKeyTests.letterPicksTool from #4889 (dev-red #5818); told supervisor on #3468; waiting for next green run. #5816 clean, waiting for batch
+2026-10-27T04:12Z	check	scoped photo 40444691641 (dev 547b958c, has PT-u and #4889) in progress; #5816 clean, waiting for batch; dev-red #5818 open
+2026-10-27T04:34Z	stage	#5816 (PT-m) merged as 91e1e597; dev merged into -pt7 (15 files, +96/-73), scripts/ci --changed running. Scoped photo 40444691641 red only on #4889's PhotoToolsKeyTests (not ours)
+2026-10-27T04:40Z	check	PT-7 gate died on signal 11 in Swift Testing Backtrace._willThrow during AfterGlowCLITests MCP fuzz (not our code); rerunning scripts/ci --changed
+2026-10-27T04:48Z	check	PT-7 pushed (29cec5b1). Gate crash traced to a stale incremental .build in the pt7 worktree: dev and PT-7 head both pass AfterGlowCLITests in a clean tree; full scripts/ci --changed rerunning there
+2026-10-27T04:51Z	stage	PT-7 PR #5860 opened (fast-lane, Slice: PT-z, head 29cec5b1, scripts/ci --changed PASS in a clean tree), footer stripped. PT-8 (-pt8) opens after it merges
+2026-10-27T05:02Z	check	#5860 (PT-7) open, clean, fast-lane, waiting for batch. No new photo/full ci.yml run on dev since 40444691641; dev-red #5818 open. PT-u/PT-m slice-done still waiting for a green run
+2026-10-27T05:24Z	check	#5860 open, clean, no lane comment; lane holds code batches while dev-red #5818 (macOS, #4889) is open. No new dev ci.yml run since 04:12Z. Waiting
+2026-10-27T05:46Z	check	No change: #5860 open/clean, no lane comment; dev-red #5818 open (last update 04:42Z); no dev ci.yml run since 04:12Z. Waiting
+2026-10-27T05:52Z	stage	Run act-1a17be7af84-ih2a takes over (PT-z only). lead/tone-controls rebuilt on main fef52e66 with the Photo record (SuiteUI record kept on lead/suiteui-tone-controls). #5860 open/clean; dev-red #5818 open; no green photo run since 04:12Z
