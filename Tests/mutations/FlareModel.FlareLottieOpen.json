@@ -2,8 +2,22 @@
   {
     "label": ".namesEverySkip: the open drops the skipped parts' sentences",
     "file": "Sources/FlareModel/FlareLottieOpen.swift",
-    "find": "return (document, read.1.skipped.map(sentence))",
+    "find": "return (document, sentences(entries, layers: named ? layerKinds(data) : []))",
     "replace": "return (document, [])",
+    "tests": "FlareLottieOpenTests"
+  },
+  {
+    "label": ".namesSkippedLayers: the note says the kind and never the layer's name",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "guard names.count == count else { return [sentence(entry)] }",
+    "replace": "guard names.count == count, false else { return [sentence(entry)] }",
+    "tests": "FlareLottieOpenTests"
+  },
+  {
+    "label": ".countMustMatch: a count the file's layers don't match still names them",
+    "file": "Sources/FlareModel/FlareLottieOpen.swift",
+    "find": "guard names.count == count else { return [sentence(entry)] }",
+    "replace": "guard !names.isEmpty else { return [sentence(entry)] }",
     "tests": "FlareLottieOpenTests"
   },
   {

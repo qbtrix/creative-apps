@@ -90,7 +90,7 @@ struct AdjustmentsPanel: View {
     }
 
     @ViewBuilder private var inspector: some View {
-        let model = live?.shown ?? self.model
+        let model = live?.adjusting ?? self.model
         switch model.adjustTarget {
         case .image:
             AdjustmentsInspector(
