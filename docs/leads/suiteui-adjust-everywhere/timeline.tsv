@@ -142,3 +142,4 @@ utc	stage	event	ref	note
 04:22Z	3	wait	#5247 #5248 #5249	queued in lane (clean, fast-lane); main lacks AJ-k/AJ-u; dev-red #5818 open
 04:42Z	3	fix	#5247	needs-rebase: merged dev, mutation plan PhotoLiveTone conflict resolved, gate running
 04:48Z	3	ship	#5247	merged dev, gate PASS, pushed a2241375f, Head moved; clean
+05:04Z	3	wait	#5247 #5248 #5249	all clean + fast-lane, awaiting lane batch; main still fef52e668; dev-red #5818 open
