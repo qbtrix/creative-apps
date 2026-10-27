@@ -20,7 +20,7 @@ import Testing
     @Test func thePlaceCanvasAndFileRowReportThePlacedImage() {
         let (asset, image) = GalleryPlaceImage.placed(GalleryPlaceImage.samples[0])
         let canvas = hostedValues(
-            "suite.place.canvas", GalleryPlaceCanvas(drawn: [(asset, image)], selected: asset),
+            "suite.place.canvas", GalleryPlaceCanvas(drawn: [(asset, image)], selected: asset, selectedImage: image),
             size: CGSize(width: 600, height: 500))
         #expect(!canvas.isEmpty && canvas.allSatisfy { $0 == "wide.png, 1200 by 400 pixels" }, "the canvas reads \(canvas)")
         let file = hostedValues(
