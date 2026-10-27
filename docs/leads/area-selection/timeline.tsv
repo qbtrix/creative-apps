@@ -213,3 +213,4 @@ time	task	event	note
 2026-10-27T05:09Z	3	heartbeat	lane	poll 2026-10-27T05:09Z: 05:1xZ: no change. The lane holds while dev-red #5818 is open (revert #5827 not landed). Five lead PRs are ready. #5093 still waits on the supervisor.
 2026-10-27T05:57Z	3	heartbeat	lane	poll 2026-10-27T05:57Z: 05:5xZ: #5137 (FH-c, fix for #5094) merged into dev as 73be788d in a batch of one. dev-red #5818 is still open. #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor. FH-c is done only once #5093 lands and a main ci.yml run contains both.
 2026-10-27T05:58Z	3	resume	run	act-1a17bed1eba-upw1 resumed; lead branch rebuilt on main fef52e66
+2026-10-27T06:02Z	3	heartbeat	lane	dev-red #5818 checked: shard 3/3 fails AfterGlowHomeLayoutTests, SuiteGridSmallSnapshots, SuiteTabsSnapshots (SuiteUI home/grid/tabs), not this feature. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.

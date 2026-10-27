@@ -59,3 +59,5 @@ Polled: 2026-10-27T05:57Z · 05:5xZ: #5137 (FH-c, fix for #5094) merged into dev
 ## Packet-Review 2 (7e13ba02, 05:56Z)
 
 Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and a mutating setter; AreaRecipe init() and isEmpty) are already on dev c480d848. Only the packet text is stale; AR-photo-u and AR-z need no change.
+
+- 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.
