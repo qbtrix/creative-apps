@@ -37,7 +37,7 @@ import Testing
         let shown = try controls(prores)
         #expect(shown["halo.render.codec"]?.enabled == true)
         #expect(shown["halo.render.alpha"]?.enabled == true)
-        #expect(HaloRenderMovieRows.codecHelp(busy: nil) == "HEVC lands with HX-4. ProRes 4444 lands with HX-4.")
+        #expect(HaloRenderMovieRows.codecHelp(busy: nil) == "HEVC isn't available yet. ProRes 4444 isn't available yet.")
         try snapshot(prores, name: "halo-render-prores-light", scheme: .light)
         try snapshot(prores, name: "halo-render-prores-dark", scheme: .dark)
 

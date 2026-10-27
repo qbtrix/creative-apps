@@ -4,7 +4,8 @@
 // the loupe photo's value (`library.loupe.photo`, "full 2048×1365 3f9a… 100%
 // No stars") carries the picture's size. The crop area's identifiers: the
 // frame `library.crop.frame` (its value "4000 × 4000 at 1000, 0"), the chips
-// `library.crop.aspect.<title>` ("library.crop.aspect.1:1"), Straighten
+// of SuiteUI's aspect picker `suite.crop.aspect-<title>` ("suite.crop.aspect-1-1",
+// `cropChip`) and its turn `suite.crop.orientation`, Straighten
 // `library.crop.straighten`, and `library.crop.auto`, `.apply`, `.cancel`.
 //
 // Written before its views (lead.md, contract rule 13): CR-5 wrote it
@@ -65,6 +66,44 @@ extension LibraryJourneyTests {
     /// The live 1:1 frame's side at 5° on a 6000 × 4000 photo (MJ6L).
     private static let cropLiveWidth = 3545
 
+    /// LJ-OC (orientation-crop OC-10): the sideways IMG_0001 selected, Photo >
+    /// Rotate Right stands its thumbnail up; then IMG_0002, a landscape photo,
+    /// cropped in the loupe on 4:5 turned portrait frames a tall 4:5.
+    @MainActor func testRotateFlipAndPortraitCrop() throws {
+        let library = Journey("Library", self, arguments: Self.cropFake)
+        cropSortByName(library)
+        let scan = cropCell("IMG_0001", library)
+        XCTAssert(scan.waitForExistence(timeout: 10), "no grid cell for IMG_0001")
+        XCTAssert(cropWait(10) { Self.cropRatio(Self.cropText(scan)) > 1 }, "IMG_0001's cell isn't wide: \(Self.cropText(scan))")
+        scan.click()
+        let photo = library.app.menuBars.firstMatch.menuBarItems["Photo"]
+        photo.click()
+        XCTAssert(photo.menuItems["Flip Horizontal"].waitForExistence(timeout: 3), "the Photo menu has no Flip Horizontal")
+        XCTAssert(photo.menuItems["Flip Vertical"].isEnabled, "Photo > Flip Vertical is off with a photo selected")
+        let right = photo.menuItems["Rotate Right"]
+        XCTAssert(right.isEnabled, "Photo > Rotate Right is off with a photo selected")
+        right.click()
+        XCTAssert(cropWait(10) { Self.cropRatio(Self.cropText(scan)) < 1 }, "Rotate Right left IMG_0001's cell \(Self.cropText(scan))")
+        cropExpectMenu("Edit", "Undo", "Undo Rotate Right", library)
+
+        cropCell("IMG_0002", library).doubleClick()
+        XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "IMG_0002 didn't open in the loupe")
+        let tab = library.element("suite.inspector").descendants(matching: .any)
+            .matching(NSPredicate(format: "label == 'Develop'")).firstMatch
+        XCTAssert(tab.waitForExistence(timeout: 5), "the inspector has no Develop tab")
+        tab.click()
+        cropKeyR(library)
+        let frame = library.element("library.crop.frame")
+        XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame")
+        library.element(Self.cropChip("4:5")).click()
+        let ratio = { Self.cropRatio(Self.cropText(frame).replacingOccurrences(of: " × ", with: "×")) }
+        if !cropWait(3, { ratio() < 1 }) { library.element("suite.crop.orientation").click() }
+        XCTAssert(cropWait(3) { ratio() == 0.8 }, "4:5 portrait framed \(Self.cropText(frame))")
+        library.shot("loupe-crop-portrait")
+        library.press(.escape)
+        library.app.terminate()
+    }
+
     // MARK: - Steps
 
     /// Step 1: by name, IMG_0001 in the loupe, the Develop tab, the photo clicked, R: the frame
@@ -87,7 +126,7 @@ extension LibraryJourneyTests {
         library.shot("crop\(suffix)")
         XCTAssert(Self.cropText(frame).hasPrefix("6000 × 4000"), "the frame reads \(Self.cropText(frame))")
         for aspect in Self.cropAspects {
-            XCTAssert(library.element("library.crop.aspect.\(aspect)").exists, "no \(aspect) chip (library.crop.aspect.\(aspect))")
+            XCTAssert(library.element(Self.cropChip(aspect)).exists, "no \(aspect) chip (\(Self.cropChip(aspect)))")
         }
         let straighten = library.element("library.crop.straighten")
         XCTAssert(straighten.exists, "no Straighten (library.crop.straighten)")
@@ -104,7 +143,7 @@ extension LibraryJourneyTests {
 
     /// Step 2: the 1:1 chip frames 4000 × 4000.
     @MainActor private func cropSquare(_ library: Journey) {
-        library.element("library.crop.aspect.1:1").click()
+        library.element(Self.cropChip("1:1")).click()
         let frame = library.element("library.crop.frame")
         XCTAssert(cropWait(3) { Self.cropText(frame).hasPrefix("4000 × 4000") }, "1:1 framed \(Self.cropText(frame))")
     }
@@ -157,7 +196,7 @@ extension LibraryJourneyTests {
     @MainActor private func cropChipWidths(_ library: Journey) {
         cropKeyR(library)
         XCTAssert(library.element("library.crop.frame").waitForExistence(timeout: 5), "R showed no crop frame")
-        let widths = Self.cropAspects.map { library.element("library.crop.aspect.\($0)").frame.width }
+        let widths = Self.cropAspects.map { library.element(Self.cropChip($0)).frame.width }
         let spread = (widths.max() ?? 0) - (widths.min() ?? 0)
         XCTAssertLessThanOrEqual(spread, 0.5, "the chips' widths differ: \(widths)")
         library.press(.escape)
@@ -168,7 +207,7 @@ extension LibraryJourneyTests {
         cropKeyR(library)
         let frame = library.element("library.crop.frame")
         XCTAssert(frame.waitForExistence(timeout: 5), "R showed no crop frame")
-        library.element("library.crop.aspect.1:1").click()
+        library.element(Self.cropChip("1:1")).click()
         frame.click()
         for _ in 0..<3 { library.press(.rightArrow) }
         XCTAssert(cropWait(3) { Self.cropText(frame).hasSuffix("at 1003, 0") }, "Right ×3 framed \(Self.cropText(frame))")
@@ -200,7 +239,7 @@ extension LibraryJourneyTests {
         XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "IMG_0002 didn't open in the loupe")
         cropKeyR(library)
         XCTAssert(library.element("library.crop.frame").waitForExistence(timeout: 5), "R showed no crop frame")
-        library.element("library.crop.aspect.1:1").click()
+        library.element(Self.cropChip("1:1")).click()
         library.element("library.loupe.photo").click()
         library.press(.return)
         XCTAssert(cropWait(5) { self.cropLoupeRatio(library) == 1 }, "IMG_0002 isn't square: \(cropLoupeValue(library))")
@@ -282,6 +321,11 @@ extension LibraryJourneyTests {
     }
 
     // MARK: - Helpers
+
+    /// The aspect picker's chip for `title`: "1:1" is `suite.crop.aspect-1-1`.
+    private static func cropChip(_ title: String) -> String {
+        "suite.crop.aspect-" + title.lowercased().replacingOccurrences(of: ":", with: "-")
+    }
 
     /// R with the loupe photo focused: a click on an inspector tab or chip
     /// takes the keys, and R goes only to the grid or the loupe.

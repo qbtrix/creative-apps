@@ -21,6 +21,7 @@ Sources/FlareApp/FlarePasteboard.swift
 Sources/FlareApp/FlareStageSelection.swift
 Sources/FlareApp/FlareWindow+Export.swift
 Sources/FlareApp/FlareWindow+Layers.swift
+Sources/FlareApp/FlareWindow+Stage.swift
 Sources/FlareApp/PlaybackDriver.swift
 Sources/FlareApp/StageRasterizer.swift
 Sources/FlareModel/Contracts/ExportContracts.swift
@@ -63,7 +64,6 @@ Sources/HaloModel/Fakes/FakeKeyEasing.swift
 Sources/HaloModel/Fakes/FakePlaybackClock.swift
 Sources/HaloModel/Fakes/FakeProjectHistory.swift
 Sources/HaloModel/Fakes/FakeTextRasterizer.swift
-Sources/HaloModel/HaloFramePNG.swift
 Sources/HaloModel/HaloHistory.swift
 Sources/HaloModel/HaloKeySelection.swift
 Sources/HaloModel/HaloPlayback.swift
@@ -88,7 +88,6 @@ Sources/LibraryModel/Contracts/ExportFormats.swift
 Sources/LibraryModel/Contracts/ExportPresets.swift
 Sources/LibraryModel/Contracts/ExportSidecar.swift
 Sources/LibraryModel/Fakes/FakeCropLeveling.swift
-Sources/LibraryModel/LibraryCrop.swift
 Sources/LibraryModel/LibraryExport.swift
 Sources/LibraryModel/LibraryLaunch.swift
 Sources/LibraryModel/LibraryThumbnails.swift
@@ -130,7 +129,6 @@ Sources/PhotoModel/Live/LiveRecovery.swift
 Sources/PhotoModel/Live/LiveSelection.swift
 Sources/PhotoModel/Live/LiveTransform.swift
 Sources/PhotoModel/PhotoClipboard.swift
-Sources/PhotoModel/PhotoCropSize.swift
 Sources/PhotoModel/PhotoDocumentFile.swift
 Sources/PhotoModel/PhotoHistory.swift
 Sources/PhotoModel/PhotoKeepLayers.swift

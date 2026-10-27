@@ -2,8 +2,8 @@
   {
     "label": "the importer drops the candidate's camera",
     "file": "Sources/LibraryModel/Live/LiveImporter.swift",
-    "find": "path: candidate.path, pixelSize: candidate.pixelSize,\n                                  camera: candidate.camera)",
-    "replace": "path: candidate.path, pixelSize: candidate.pixelSize)",
+    "find": "pixelSize: candidate.pixelSize, camera: candidate.camera)",
+    "replace": "pixelSize: candidate.pixelSize)",
     "tests": "LibraryCamerasFixtureTests.swift"
   },
   {

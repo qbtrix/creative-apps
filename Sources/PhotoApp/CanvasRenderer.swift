@@ -50,8 +50,9 @@ final class CanvasRenderer {
     /// Called with each picture's revision as its tiles reach the view (the brush ink test times this).
     @ObservationIgnored var onPicture: ((Int) -> Void)?
     #if DEBUG
-    /// Pictures every renderer in the process has handed its view (the idle-work tests read it).
-    static var pictures = 0
+    /// Pictures every renderer in the process has handed its view, and the renders in flight across every
+    /// renderer (0 once every queue drained): the idle-work tests read them.
+    static var pictures = 0, inFlight = 0
     #endif
     /// Where renders run; `use` switches it.
     @ObservationIgnored private(set) var route = PhotoRenderRoute.cpu
@@ -118,6 +119,9 @@ final class CanvasRenderer {
             return
         }
         isRendering = true
+        #if DEBUG
+        Self.inFlight += 1
+        #endif
         var since = sameSize && !redrawAll ? revision : nil
         let route = self.route
         redrawAll = false
@@ -148,6 +152,9 @@ final class CanvasRenderer {
                 failure = "The picture couldn't be drawn: \(error)"
             }
             isRendering = false
+            #if DEBUG
+            Self.inFlight -= 1
+            #endif
             // The render that drew from what `use` dropped is done: release it.
             for dropped in retired { dropped.composites.removeAll() }
             retired = []

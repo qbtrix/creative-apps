@@ -245,14 +245,10 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
 
     /// Picks `mode` from the inspector's Blend Mode menu (`photo.layer.blend`).
     @MainActor private func chooseBlend(_ mode: String, _ photo: Journey) {
-        let types = [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) }
-        let picker = photo.element("suite.inspector").descendants(matching: .any).matching(NSPredicate(format:
-            "elementType IN %@ AND (identifier == 'photo.layer.blend' OR label == 'Blend Mode')", types)).firstMatch
+        let picker = photo.inspectorMenu("photo.layer.blend", label: "Blend Mode")
         XCTAssert(picker.waitForExistence(timeout: 5), "no Blend Mode menu (photo.layer.blend)")
         picker.click()
-        let item = photo.app.menus.firstMatch.descendants(matching: .menuItem).matching(NSPredicate(format: "title == %@", mode)).firstMatch
-        XCTAssert(item.waitForExistence(timeout: 3), "the Blend Mode menu has no \(mode)")
-        item.click()
+        XCTAssert(photo.chooseShownMenuItem(mode), "the Blend Mode menu has no \(mode)")
         expect("Undo Blend Mode", photo)
     }
 

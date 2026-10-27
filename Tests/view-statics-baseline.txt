@@ -21,8 +21,6 @@ Sources/DesignApp/DesignWindow.swift::DesignWindow.lastWorkspace
 Sources/DesignApp/DesignWindow.swift::DesignWindow.launchSaveURL
 Sources/DesignApp/DesignWindow.swift::DesignWindow.reason
 Sources/FlareApp/FlareInspectorGeometry.swift::FlareGeometryRow.keyState
-Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet.number
-Sources/FlareApp/FlareNewSheet.swift::FlareNewAnimationSheet.text
 Sources/FlareApp/FlareStage.swift::FlareStage.sizeText
 Sources/FlareApp/FlareStage.swift::FlareStage.statusPills
 Sources/FlareApp/FlareStage.swift::FlareStageArt.paint
@@ -54,7 +52,6 @@ Sources/LibraryApp/LibraryWindow.swift::LibraryWindow.libraryKey
 Sources/LibraryApp/LibraryWindow.swift::LibraryWindow.symbol
 Sources/LibraryApp/MetadataInspector.swift::MetadataInspector.mixedID
 Sources/PhotoApp/AdjustmentsInspector.swift::AdjustmentsInspector.doubles
-Sources/PhotoApp/CropOptions.swift::CropOptions.preset
 Sources/PhotoApp/CurvesSection.swift::AdjustmentsPanel.showsEnable
 Sources/PhotoApp/CurvesSection.swift::CurvesEditor.unit
 Sources/PhotoApp/PhotoCommands+Layer.swift::PhotoLayerMenu.shortcut

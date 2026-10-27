@@ -5,10 +5,12 @@
 # from the trusted main branch. It reads PR metadata and file contents through
 # the GitHub API and never checks out or runs PR code.
 #
-# Each sweep: red_sweep reads the open dev-red issue (bisecting a Linux red
+# Each sweep: red_sweep reads the open dev-red issue (flake_check reruns a
+# new red's failed jobs once before it counts; a real Linux red is bisected
 # to its culprit), a batch left in flight resumes (batch_resume: land, bisect
 # by prefix, or drop), with LANE_VERIFY_AFTER=1 revert_sweep reverts a red
-# dev's culprit, every open fast-lane PR is evaluated (decide, the pure
+# dev's culprit and quarantine_sweep quarantines the failing tests of a red
+# it has no revert for, every open fast-lane PR is evaluated (decide, the pure
 # decision function), and settle_ready lands the ready ones or forms the next
 # `lane/batch-<id>` (BATCH_PREFIX). Invariants a change must keep:
 # - One batch at a time; while one is in flight nothing else merges, except
@@ -16,9 +18,16 @@
 # - The batch branch is the whole state: its merge commits (BATCH_SUBJECT_RE)
 #   name each PR and head, `<batch>-<i>` are its probes and `<batch>-red`
 #   marks a base that held dev's red commit (dropped once dev is green).
-# - No batch forms while dev is red on a job it would run (red_holds).
+# - A red's failed jobs are rerun at most once per sha (RERUN_MARK on the
+#   dev-red issue); until that rerun is judged, dev is not red to the lane.
+# - While dev is red on a job a batch would run (red_holds), a PR touching
+#   the red module (BASE_RED_SCOPE) waits; with no module placed, no batch forms.
 # - A dropped batch never labels or comments on its PRs.
-# - One revert call per dev-red issue (REVERT_MARK), never of a revert.
+# - One revert call per culprit on a dev-red issue (REVERT_MARK <sha7|none>),
+#   at most one revert per sweep, never two for one PR, never of a revert.
+# - One quarantine call per red sha (QUAR_MARK), at most QUAR_MAX tests, none
+#   on a QUAR_NEVER_RE path; the lane's own PR on QUAR_BRANCH that changes
+#   exactly QUAR_FILE is the one protected-path change it lands (quarantine_land).
 # - Merge drivers and helper scripts come from this checkout (main), never
 #   from a PR.
 # Rules for agents: CLAUDE.md, "Fast lane". How the gate, batches, bisects
@@ -206,11 +215,29 @@ BUDGET_NEAR="0.15"          # a measured value at most this far past its budget 
 CLEF_MIN="0.80"             # a red-triage culprit guess at or above this is probed first
 BISECT_MARK="<!-- lane-bisect"  # the culprit comment's marker: "<!-- lane-bisect <red7> -->"
 BASE_RED_RUN=""  # the dev-red issue's "- Run:" URL
+# Flake check (flake_check): a red run's failed jobs are rerun once at the red
+# sha before dev counts as red; the dev-red issue carries one mark per sha:
+# "<!-- lane-rerun <sha7> started|flake|red -->".
+RERUN_MARK="<!-- lane-rerun"
+FLAKY_LABEL="flaky"
+BASE_RED_SCOPE=""  # the red's module as a path regex (red_scope); a ready PR touching it waits, the rest batch. Empty: the whole queue waits.
 # Auto-revert (revert_sweep, LANE_VERIFY_AFTER=1).
 REVERT_PREFIX="lane/revert-"    # the revert's branch: lane/revert-<culprit PR>
 REVERT_LABEL="lane-revert"      # on the lane's revert PR (never fast-lane: revert_land lands it)
-REVERT_MARK="<!-- lane-revert"  # the lane's one revert call on a dev-red issue: "<!-- lane-revert <sha7|none> -->"
+REVERT_MARK="<!-- lane-revert"  # the lane's one revert call per culprit on a dev-red issue: "<!-- lane-revert <sha7|none> -->"
 FINDING_LABEL="finding"
+# Auto-quarantine (quarantine_sweep, LANE_VERIFY_AFTER=1): a real red the lane has no revert for.
+QUAR_FILE="UITests/quarantine.json"  # PROTECTED; the lane's own PR is the one exception (quarantine_land)
+QUAR_BRANCH="lane/quarantine"        # the lane's one quarantine PR at a time (adds or removes entries)
+QUAR_LABEL="lane-quarantine"         # on it (never fast-lane: quarantine_land lands it on its Linux check)
+QUAR_MARK="<!-- lane-quarantine"     # one quarantine call per red sha on the dev-red issue: "<!-- lane-quarantine <red7> -->"
+QUAR_LINE="Lane-Quarantine:"         # the PR body's kind line: "Lane-Quarantine: add" or "Lane-Quarantine: remove #<owner> ..."
+QUAR_MAX=5                           # more failing tests than this is a broad break: today's red handling stands
+QUAR_HOURS=24                        # an entry's expiry; past it the owner issue is labelled BLOCKER_LABEL and the entry stays
+QUAR_NEVER_RE='security|billing|auth|licen[cs]e|payment|keychain|entitlement'  # never quarantined (in the test's path or id, any case)
+BLOCKER_LABEL="blocker"
+quar_now() { echo "${FAST_LANE_NOW:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"; }  # the sweep's clock; tests pin it
+RED_UNRESOLVED=0  # revert_sweep: the red stands and the lane has no revert to make or land for it (quarantine_sweep acts)
 # Where integrate fetches and pushes; tests point it at a local bare repo.
 REMOTE="${FAST_LANE_REMOTE:-https://github.com/${GH_REPO:-qbtrix/creative-apps}.git}"
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
@@ -922,13 +949,25 @@ red_jobs() {
 # a known issue doesn't count), one <File>.swift/<name> per line, sorted. The
 # file and name stay put when lines move; suite lines interleave under
 # parallel tests, so they aren't used. Nothing for the local gate (its log
-# isn't readable here). Fails when the GitHub log can't be read.
+# isn't readable here). A sharded macOS gate job (`macOS`, #5775) only sums
+# its shards, so when its log names no test the run's failed `macOS tests`
+# jobs are read instead (each job's log, readable while the run goes on).
+# Fails when the GitHub log, or any shard's, can't be read.
 mac_tests() {
-  local log
+  local log ids jobs j re='s/.* Test (.+) recorded an issue.* at ([^ :]+\.swift):[0-9].*/\2\/\1/p'
   [[ "$1" != *"|$LOCAL_MAC_CONTEXT" ]] || return 0
   log=$(failure_log "$1")
   [[ -n "$log" ]] || return 1
-  LC_ALL=C sed -nE 's/.* Test (.+) recorded an issue.* at ([^ :]+\.swift):[0-9].*/\2\/\1/p' <<<"$log" | LC_ALL=C sort -u
+  ids=$(LC_ALL=C sed -nE "$re" <<<"$log")
+  if [[ -z "$ids" && "${1##*|}" =~ $MAC_GATE_RE && "$1" =~ /actions/runs/([0-9]+)/job/ ]]; then
+    jobs=$(gh api "repos/$REPO/actions/runs/${BASH_REMATCH[1]}/jobs?per_page=100" \
+      --jq '.jobs[] | select((.name | startswith("macOS tests")) and .conclusion != "success" and .conclusion != "skipped") | .id' 2>/dev/null) || return 1
+    for j in $jobs; do
+      log=$(failure_log "red|/job/$j"); [[ -n "$log" ]] || return 1
+      ids+=$'\n'$(LC_ALL=C sed -nE "$re" <<<"$log")
+    done
+  fi
+  grep . <<<"$ids" | LC_ALL=C sort -u || true
 }
 
 # mac_vs_base <red macOS verdict>: that red judged against BASE_MAC_FAILS:
@@ -1032,7 +1071,22 @@ settle_ready() {
   if (( ! LANE_MAC_PER_PR )); then
     for it in "${items[@]}"; do IFS='|' read -r _ _ _ _ apps _ <<<"$it"; [[ -z "$apps" ]] || need=1; done
   fi
-  if red_holds "$need"; then log "$BASE_BRANCH is red on a job this batch runs (dev-red #$BASE_RED: ${BASE_RED_JOBS#*: }): no batch forms; ${#items[@]} ready PR(s) wait"; return 0; fi
+  if red_holds "$need"; then
+    if [[ -z "$BASE_RED_SCOPE" ]]; then log "$BASE_BRANCH is red on a job this batch runs (dev-red #$BASE_RED: ${BASE_RED_JOBS#*: }): no batch forms; ${#items[@]} ready PR(s) wait"; return 0; fi
+    # A red the lane could place (red_scope) holds only the PRs touching its
+    # module (READY's last field, set by evaluate); the rest batch as usual.
+    local keep=() hit held=0
+    for it in "${items[@]}"; do
+      IFS='|' read -r _ _ _ _ _ _ _ hit <<<"$it"
+      if [[ "$hit" == 1 ]]; then held=$((held + 1)); else keep+=("$it"); fi
+    done
+    log "$BASE_BRANCH is red in $BASE_RED_SCOPE (dev-red #$BASE_RED: ${BASE_RED_JOBS#*: }): $held ready PR(s) touching it wait; ${#keep[@]} batch"
+    (( ${#keep[@]} )) || return 0
+    items=("${keep[@]}"); need=0
+    if (( ! LANE_MAC_PER_PR )); then
+      for it in "${items[@]}"; do IFS='|' read -r _ _ _ _ apps _ <<<"$it"; [[ -z "$apps" ]] || need=1; done
+    fi
+  fi
   if (( need )); then
     busy=$(mac_slots_busy)
     if (( busy >= LANE_MAC_SLOTS )); then
@@ -1047,7 +1101,7 @@ settle_ready() {
   batch_start "${items[@]}"
 }
 
-# batch_start <rank|n|head|branch|apps|since|proof>...: BASE_BRANCH plus the
+# batch_start <rank|n|head|branch|apps|since|proof|hit>...: BASE_BRANCH plus the
 # ready PRs in order on a scratch branch, pushed as lane/batch-<id>, then
 # batch_resume on it (which starts its checks). A PR whose branch can't be
 # fetched or moved past its head, or that conflicts with an earlier PR in the
@@ -1078,7 +1132,7 @@ batch_start() {
     fi
   done
   (( ${#merged[@]} )) || { log "batch: no PR could join; no batch"; return 0; }
-  IFS='|' read -r _ n head _ apps _ proof <<<"${merged[0]}"
+  IFS='|' read -r _ n head _ apps _ proof _ <<<"${merged[0]}"
   if (( ${#merged[@]} == 1 )) && { (( LANE_MAC_PER_PR || LANE_VERIFY_AFTER )) || [[ -z "$apps" ]]; }; then
     stale=$(proof_stale "$(git -C "$d" merge-base "$head" "origin/$BASE_BRANCH" 2>/dev/null || true)" "$head")
     if [[ -z "$stale" ]]; then
@@ -1390,23 +1444,173 @@ failure_log() {
   gh run view --job "${BASH_REMATCH[1]}" --log-failed -R "$REPO" 2>/dev/null || true
 }
 
-# red_sweep: when a dev-red issue for a red Linux job is open, bisects its
-# culprit range. Probes an earlier sweep left pin the red they bisect, since
-# ci.yml rewrites the issue body for every newer red run.
+# red_sweep: reads the open dev-red issue. A red the flake check hasn't judged
+# (flake_check) is not red yet: nothing is held, bisected or reverted. A real
+# red sets BASE_RED and its scope (red_scope), and a red Linux job gets its
+# culprit range bisected. Probes an earlier sweep left pin the red they
+# bisect, since ci.yml rewrites the issue body for every newer red run.
 red_sweep() {
-  local issue body bad pin
+  local issue body bad pin jobs run
   { read -r issue || true; body=$(cat); } < <(gh api "repos/$REPO/issues?labels=$RED_LABEL&state=open&per_page=5" \
       --jq 'first(.[] | select(.pull_request == null)) | .number, (.body // "")' 2>/dev/null || true)
-  [[ -n "${issue:-}" ]] || return 0
+  [[ -n "${issue:-}" ]] || { flake_closed; return 0; }
   bad=$(grep -oE '^- Culprit range: `main\.\.[0-9a-f]{40}`' <<<"$body" | grep -oE '[0-9a-f]{40}' | head -1 || true)
-  BASE_RED="$issue"; BASE_RED_SHA="$bad"
-  BASE_RED_JOBS=$(grep -iE '^- Failing jobs:' <<<"$body" | head -1 | tr '[:upper:]' '[:lower:]' || true)
-  BASE_RED_RUN=$(grep -oE '^- Run: [^ ]+' <<<"$body" | head -1 | cut -c8- || true)
+  jobs=$(grep -iE '^- Failing jobs:' <<<"$body" | head -1 | tr '[:upper:]' '[:lower:]' || true)
+  run=$(grep -oE '^- Run: [^ ]+' <<<"$body" | head -1 | cut -c8- || true)
+  flake_check "$issue" "$run" "$bad" "${jobs#*: }" || return 0
+  BASE_RED="$issue"; BASE_RED_SHA="$bad"; BASE_RED_JOBS="$jobs"; BASE_RED_RUN="$run"
+  # scratch runs here, in the sweep's shell: red_scope runs in a subshell, which must not be the one that creates SCRATCH.
+  BASE_RED_SCOPE=""; [[ -z "$bad" ]] || ! scratch "$BASE_BRANCH" || BASE_RED_SCOPE=$(red_scope "$bad")
+  [[ -z "$BASE_RED_SCOPE" ]] || log "dev-red #$issue: red in $BASE_RED_SCOPE; only ready PRs touching it wait"
   grep -qiE '^- Failing jobs:.*linux' <<<"$body" || { log "dev-red #$issue: not a Linux red; nothing to bisect"; return 0; }
   pin=$(git ls-remote --heads "$REMOTE" "refs/heads/${BISECT_PREFIX}*" 2>/dev/null | sed -E 's:.*refs/heads/'"$BISECT_PREFIX"'([0-9a-f]+)-[0-9]+$:\1:' | sort -u | head -1 || true)
   [[ -z "$pin" ]] || bad="$pin"
   [[ -n "$bad" ]] || { log "dev-red #$issue: no culprit range in the body"; return 0; }
   red_bisect "$issue" main "$bad" "$BASE_BRANCH"
+}
+
+# rerun_state <run id>: the run's state as one word: running, success, red
+# (any other finished conclusion) or unknown (the API could not be read).
+rerun_state() {
+  local json st
+  json=$(gh run view "$1" -R "$REPO" --json status,conclusion 2>/dev/null) || { echo unknown; return; }
+  st=$(jq -r '((.status // "") | ascii_downcase) + " " + ((.conclusion // "") | ascii_downcase)' <<<"$json" 2>/dev/null || echo unknown)
+  case "$st" in "completed success") echo success ;; completed*) echo "red|${st#completed }" ;; unknown) echo unknown ;; *) echo running ;; esac
+}
+
+# flake_check <issue> <run url> <red sha> <jobs>: true when dev is red for
+# real, false when the lane must not treat it as red this sweep. A red sha not
+# yet checked gets the run's failed jobs rerun once (gh run rerun --failed) and
+# a RERUN_MARK <sha7> started comment naming the run and the failing tests
+# (red_tests, read now: the rerun overwrites the logs). A running rerun waits;
+# a passing one is a flake (flake_finding, mark flake); a failing one is real
+# (mark red). An issue with no run, or comments the lane can't read, is red as
+# before: that never reruns, so a sha is rerun at most once. A judged sha is
+# never rerun or read again.
+flake_check() {
+  local issue="$1" url="$2" sha7="${3:0:7}" jobs="$4" id comments tests st
+  id=$(mac_run_id "$url"); [[ -n "$id" && -n "$3" ]] || return 0
+  comments=$(gh api "repos/$REPO/issues/$issue/comments" --paginate --jq '.[].body' 2>/dev/null) || return 0
+  if ! grep -qF -- "$RERUN_MARK $sha7 " <<<"$comments"; then
+    tests=$(red_tests "$3")
+    if ! write gh run rerun "$id" -R "$REPO" --failed; then log "flake check: could not rerun the failed jobs of run $id; $BASE_BRANCH counts as red"; return 0; fi
+    log "flake check: rerunning the failed jobs ($jobs) of run $id once at $sha7${tests:+ (failing $tests)}; $BASE_BRANCH is not held meanwhile"
+    write gh issue comment "$issue" -R "$REPO" --body "Flake check: re-running the failed jobs ($jobs) of $url once at $sha7${tests:+; failing $tests}. A pass makes this red a flake (the lane files a finding for the test and holds nothing); a second failure makes it real. $RERUN_MARK $sha7 started -->" \
+      || log "could not comment on #$issue"
+    return 1
+  fi
+  if grep -qF -- "$RERUN_MARK $sha7 red -->" <<<"$comments"; then return 0; fi
+  if grep -qF -- "$RERUN_MARK $sha7 flake -->" <<<"$comments"; then log "flake check: $sha7 was a flake; waiting for CI on $BASE_BRANCH to close dev-red #$issue"; return 1; fi
+  st=$(rerun_state "$id")
+  case "$st" in
+    success) flake_finding "$issue" "$sha7" "$url" "$comments"; return 1 ;;
+    red*)
+      log "flake check: the rerun of run $id failed too (${st#red|}); $BASE_BRANCH is red"
+      write gh issue comment "$issue" -R "$REPO" --body "Flake check: the rerun of $url failed too (${st#red|}), so this red is real. $RERUN_MARK $sha7 red -->" || log "could not comment on #$issue"
+      return 0 ;;
+    *) log "flake check: the rerun of run $id is $st; $BASE_BRANCH is not held meanwhile"; return 1 ;;
+  esac
+}
+
+# flake_closed: ci.yml's promote reruns with the passed jobs and closes the
+# dev-red issue, usually before a sweep sees the pass. With no open issue, the
+# last closed one is read: a started mark with no verdict whose rerun passed
+# gets its finding and mark there; one whose rerun failed gets the red mark.
+flake_closed() {
+  local issue comments sha7 line url st
+  issue=$(gh api "repos/$REPO/issues?labels=$RED_LABEL&state=closed&sort=updated&per_page=1" \
+    --jq 'first(.[] | select(.pull_request == null)) | .number' 2>/dev/null || true)
+  [[ -n "$issue" ]] || return 0
+  comments=$(gh api "repos/$REPO/issues/$issue/comments" --paginate --jq '.[].body' 2>/dev/null) || return 0
+  for sha7 in $(grep -oE -- "$RERUN_MARK [0-9a-f]{7} started -->" <<<"$comments" | awk '{ print $3 }' | sort -u); do
+    grep -qE -- "$RERUN_MARK $sha7 (flake|red) -->" <<<"$comments" && continue
+    line=$(grep -F -- "$RERUN_MARK $sha7 started -->" <<<"$comments" | head -1)
+    url=$(grep -oE 'https://[^ ]+/actions/runs/[0-9]+' <<<"$line" | head -1); [[ -n "$(mac_run_id "$url")" ]] || continue
+    st=$(rerun_state "$(mac_run_id "$url")")
+    case "$st" in
+      success) flake_finding "$issue" "$sha7" "$url" "$comments" ;;
+      red*) write gh issue comment "$issue" -R "$REPO" --body "Flake check: the rerun of $url failed too (${st#red|}), so that red was real. $RERUN_MARK $sha7 red -->" || log "could not comment on #$issue" ;;
+    esac
+  done
+}
+
+# flake_finding <issue> <sha7> <run url> <issue comments>: the flake's one
+# finding, for a fixer: an open FINDING_LABEL issue with the same title gets a
+# comment, else one is filed with FINDING_LABEL, FLAKY_LABEL and line:<app>
+# (build_apps over the tests' files; shared or unknown: line:suite). The tests
+# and jobs come from the sha's started mark. Then the mark on the dev-red
+# issue says flake. A finding list that fails files nothing (a duplicate
+# otherwise); the next sweep tries again.
+flake_finding() {
+  local issue="$1" sha7="$2" url="$3" line tests jobs title paths app n what body plural=""
+  line=$(grep -F -- "$RERUN_MARK $sha7 started -->" <<<"$4" | head -1)
+  tests=$(sed -nE 's/.*; failing (.*)\. A pass makes.*/\1/p' <<<"$line")
+  jobs=$(sed -nE 's/.*failed jobs \(([^)]*)\) of .*/\1/p' <<<"$line")
+  if [[ -n "$tests" ]]; then
+    [[ "$tests" != *,* ]] || plural=s
+    title="Flaky test$plural: $tests"
+  else
+    title="Flaky ${jobs:-CI} job on $BASE_BRANCH, no test named"
+  fi
+  scratch "$BASE_BRANCH" || true  # here, not in test_paths' subshell, so SCRATCH outlives it
+  paths=$(test_paths "$tests"); app=suite
+  if [[ -n "$paths" ]]; then app=$(build_apps <(printf '%s\n' "$paths")); [[ "$app" =~ ^[a-z]+$ && "$app" != all ]] || app=suite; fi
+  body="The ${jobs:-CI} job on $BASE_BRANCH failed in $url at $sha7${tests:+, failing $tests}, and passed when the fast lane reran the failed jobs once at the same sha, so the test is flaky. The lane held nothing on it. Make the assertion runner-speed proof (a wall-clock ratio needs 10x of slack, see Tests/perf-suites.txt), or ask the supervisor to move the test to Tests/perf-suites.txt so it runs nightly instead of in the gate."
+  if ! n=$(gh issue list -R "$REPO" --state open --label "$FINDING_LABEL" --limit 1000 --json number,title 2>/dev/null \
+      | jq -r --arg t "$title" 'first(.[] | select(.title == $t)) | .number // empty' 2>/dev/null); then
+    log "flake check: could not list the open findings; the next sweep files the flake"; return 0
+  fi
+  if [[ -n "$n" ]]; then
+    write gh issue comment "$n" -R "$REPO" --body "Flaked again: $body" || log "could not comment on #$n"
+    what="updated #$n"
+  else
+    write gh label create "$FLAKY_LABEL" -R "$REPO" --color fbca04 --force --description "A test that failed on dev and passed one rerun at the same sha" >/dev/null 2>&1 || true
+    what=$(write gh issue create -R "$REPO" --title "$title" --label "$FINDING_LABEL" --label "$FLAKY_LABEL" --label "line:$app" --body "$body" 2>/dev/null) || what=""
+    what="filed ${what:-a finding}"
+  fi
+  log "flake check: $sha7 was a flake ($title); $what"
+  write gh issue comment "$issue" -R "$REPO" --body "Flake check: the rerun of $url passed at $sha7, so that red was a flake and the lane held nothing on it; $what. $RERUN_MARK $sha7 flake -->" || log "could not comment on #$issue"
+}
+
+# test_files <tests>: the file names in red_tests' list (<File>.swift/<test>,
+# comma-separated), one per line, each once.
+test_files() {
+  # shellcheck disable=SC2086 # the comma list splits into words
+  printf '%s\n' ${1//,/ } | sed 's:/.*::' | grep '\.swift$' | sort -u || true
+}
+
+# test_paths <tests>: the Tests/ paths of the files red_tests named, from the
+# tree of origin/BASE_BRANCH in the scratch clone (trees only, so blob:none is
+# enough), one per line; a file not in the tree prints nothing. Callers run it
+# in a subshell, so they call scratch first: a SCRATCH made here would die with it.
+test_paths() {
+  local f tree
+  [[ -n "$1" ]] && scratch "$BASE_BRANCH" || return 0
+  tree=$(git -C "$SCRATCH" ls-tree -r --name-only "origin/$BASE_BRANCH" -- Tests 2>/dev/null) || return 0
+  while IFS= read -r f; do
+    [[ -z "$f" ]] || grep -E "^Tests/[^/]+/(.*/)?${f//./\\.}\$" <<<"$tree" || true
+  done < <(test_files "$1") | sort -u
+}
+
+# red_scope <red sha>: the paths a PR must not touch while that red stands, as
+# a regex: for each failing test's file (red_tests) under Tests/<Target>/,
+# Tests/<Target>/ and Sources/<Target minus Tests>/. Nothing (the whole queue
+# waits, as before) when no test is named, a file is not in the tree, or a
+# target has no such Sources module (AppSnapshotTests, AppAuditTests).
+red_scope() {
+  local tests paths f p target module re=""
+  tests=$(red_tests "$1"); [[ -n "$tests" ]] || return 0
+  paths=$(test_paths "$tests")
+  while IFS= read -r f; do
+    grep -qE "(^|/)${f//./\\.}\$" <<<"$paths" || return 0
+  done < <(test_files "$tests")
+  while IFS= read -r p; do
+    [[ -n "$p" ]] || return 0
+    target=$(cut -d/ -f2 <<<"$p"); module="${target%Tests}"
+    [[ "$module" != "$target" && -n "$(git -C "$SCRATCH" ls-tree -d "origin/$BASE_BRANCH" -- "Sources/$module" 2>/dev/null)" ]] || return 0
+    [[ "$re" == *"Sources/$module/|"* ]] || re+="${re:+|}Sources/$module/|Tests/$target/"
+  done <<<"$paths"
+  echo "^($re)"
 }
 
 # red_bisect <issue> <good> <bad> <branch>: finds the first commit in the
@@ -1549,38 +1753,48 @@ bisect_drop() {
 }
 
 # revert_sweep: with LANE_VERIFY_AFTER=1, lands the lane's open revert PR
-# (revert_land), or while a dev-red issue is open (red_sweep) makes the lane's
-# one revert call on it: a revert of the culprit revert_culprit names
-# (revert_open), or a note on why there is none. REVERT_MARK on the issue
-# records that call, so no sweep opens more than one revert and a dev still red
-# after one waits for a human. Never reverts a revert.
+# (revert_land), or while a dev-red issue is open (red_sweep) makes one revert
+# call per verdict revert_culprit gives: a revert of that culprit
+# (revert_open), or a note on why there is none. REVERT_MARK <sha7|none> on
+# the issue records each call, so a culprit (or "none") is called once, and a
+# later bisect naming a different culprit in the same issue gets its own call.
+# At most one revert per sweep, never two for one PR (an open lane revert of
+# it, or a revert of it on dev), never a revert of a revert.
 revert_sweep() {
   (( LANE_VERIFY_AFTER )) || return 0
-  local open comments got c subj n
+  local all open comments got c c7 subj n
   [[ -n "$BASE_RED" ]] || return 0
-  # The lane's revert PR for this dev-red issue: a bot's (the lane's token) on
-  # a REVERT_PREFIX branch with REVERT_LABEL, whose body refs the issue. One
+  # The lane's revert PRs: a bot's (the lane's token) on a REVERT_PREFIX branch
+  # with REVERT_LABEL. The one whose body refs this dev-red issue lands; one
   # left from an older red is never landed under a new one; a human closes it.
-  open=$(open_list 2>/dev/null | jq -r --arg l "$REVERT_LABEL" --arg p "$REVERT_PREFIX" --arg r "Refs #$BASE_RED." 'first(.[]
-    | select(.author.is_bot == true and ((.headRefName // "") | startswith($p)) and any(.labels[]?; .name == $l)
-        and ((.body // "") | contains($r))))
-    | "\(.number)|\(.headRefOid)|\(.headRefName)"' 2>/dev/null || true)
+  if ! all=$(open_list 2>/dev/null | jq -ce --arg l "$REVERT_LABEL" --arg p "$REVERT_PREFIX" '[.[]
+      | select(.author.is_bot == true and ((.headRefName // "") | startswith($p)) and any(.labels[]?; .name == $l))]' 2>/dev/null); then
+    log "auto-revert: could not list open PRs; the next sweep looks again"; return 0
+  fi
+  open=$(jq -r --arg r "Refs #$BASE_RED." 'first(.[] | select((.body // "") | contains($r)))
+    | "\(.number)|\(.headRefOid)|\(.headRefName)"' <<<"$all" 2>/dev/null || true)
   if [[ -n "$open" ]]; then revert_land "$open"; return 0; fi
   if ! comments=$(gh api "repos/$REPO/issues/$BASE_RED/comments" --paginate --jq '.[].body' 2>/dev/null); then
     log "auto-revert: could not read dev-red #$BASE_RED's comments; the next sweep looks again"; return 0
   fi
-  if grep -qF -- "$REVERT_MARK " <<<"$comments"; then
-    log "auto-revert: dev-red #$BASE_RED already had its revert call; waiting for CI on $BASE_BRANCH or a human"; return 0
-  fi
   [[ -n "$BASE_RED_SHA" ]] || { log "auto-revert: dev-red #$BASE_RED names no culprit range"; return 0; }
   if ! scratch main "$BASE_BRANCH"; then log "auto-revert: could not fetch main and $BASE_BRANCH"; return 0; fi
   got=$(revert_culprit "$comments") || return 0
-  c="${got%%|*}"
+  c="${got%%|*}"; c7=none; [[ "$c" == - ]] || c7="${c:0:7}"
+  if grep -qF -- "$REVERT_MARK $c7 -->" <<<"$comments"; then
+    # A call that made no revert, or a revert already in the red range (dev is still red with it), leaves the red to quarantine_sweep.
+    if [[ "$c7" == none ]] || [[ "$(git -C "$SCRATCH" log --format=%B "origin/main..$BASE_RED_SHA" 2>/dev/null)" == *"This reverts commit $c"* ]]; then RED_UNRESOLVED=1; fi
+    log "auto-revert: dev-red #$BASE_RED already had its revert call on $c7; waiting for CI on $BASE_BRANCH or a human"; return 0
+  fi
   if [[ "$c" == - ]]; then revert_note none "${got#*|}"; return 0; fi
   subj=$(git -C "$SCRATCH" log -1 --format=%s "$c")
   n=$(grep -oE '\(#[0-9]+\)$' <<<"$subj" | tr -dc 0-9 || true)
-  if [[ "$subj" == 'Revert "'* ]]; then revert_note "${c:0:7}" "the culprit ${c:0:7} ($subj) is a revert itself, and the lane never reverts a revert, so a human looks"; return 0; fi
-  [[ -n "$n" ]] || { revert_note "${c:0:7}" "the culprit ${c:0:7} ($subj) is no PR's squash commit, so a human looks"; return 0; }
+  if [[ "$subj" == 'Revert "'* ]]; then revert_note "$c7" "the culprit $c7 ($subj) is a revert itself, and the lane never reverts a revert, so a human looks"; return 0; fi
+  [[ -n "$n" ]] || { revert_note "$c7" "the culprit $c7 ($subj) is no PR's squash commit, so a human looks"; return 0; }
+  if jq -e --arg b "$REVERT_PREFIX$n" 'any(.[]; .headRefName == $b)' <<<"$all" >/dev/null 2>&1 \
+      || [[ "$(git -C "$SCRATCH" log --format=%B "origin/main..origin/$BASE_BRANCH" 2>/dev/null)" == *"This reverts commit $c"* ]]; then
+    revert_note "$c7" "#$n ($c7) is the culprit (${got#*|}), but a revert of it is already open or on $BASE_BRANCH, so a human looks"; return 0
+  fi
   revert_open "$c" "$n" "$subj" "${got#*|}"
 }
 
@@ -1606,9 +1820,10 @@ revert_culprit() {
   echo "-|$np PRs in main..${BASE_RED_SHA:0:7} and no bisect verdict names one of them (red: ${BASE_RED_JOBS#*: }), so a human picks the culprit"
 }
 
-# revert_note <sha7|none> <text>: the lane's one revert call on the dev-red
-# issue, logged and posted with REVERT_MARK.
+# revert_note <sha7|none> <text>: the lane's one revert call on that culprit
+# (or on none), logged and posted on the dev-red issue with REVERT_MARK.
 revert_note() {
+  RED_UNRESOLVED=1
   log "auto-revert: $2"
   write gh issue comment "$BASE_RED" -R "$REPO" --body "Auto-revert: $2. $REVERT_MARK $1 -->" || log "could not comment on #$BASE_RED"
 }
@@ -1661,6 +1876,7 @@ Refs #$BASE_RED. This reverts commit $c. The fast lane opened this PR and lands 
   fi
   m="${url##*/}"
   revert_note "${c:0:7}" "#$n (${c:0:7}) is the culprit ($how); the lane opened #$m to revert it"
+  RED_UNRESOLVED=0  # the one note that is a revert: the red has its fix in flight
   lead=$(feature_lead "$n")
   write gh issue comment "${lead:-$n}" -R "$REPO" --body "Fast lane: #$n was reverted by #$m. $why, and the lane found #$n as the culprit ($how). Nothing is lost: to bring it back, open a new PR that reverts #$m's commit and fixes the failure, run scripts/ci --changed, and send it through the lane again." \
     || log "could not comment on #${lead:-$n}"
@@ -1695,14 +1911,211 @@ revert_land() {
         [[ "$(gh pr view "$m" -R "$REPO" --json mergeable 2>/dev/null | jq -r '.mergeable // ""')" == CONFLICTING ]] || return 0
         stale="it conflicts with $BASE_BRANCH"
       fi
-      log "auto-revert: #$m's Linux check no longer holds ($stale); rebuilding it on today's $BASE_BRANCH"
-      if (( DRY_RUN )); then log "dry-run, would rebuild $br"; return 0; fi
-      if ! git -C "$SCRATCH" checkout -q -B revert "origin/$BASE_BRANCH" 2>/dev/null \
-          || ! git -C "$SCRATCH" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" cherry-pick "$head" >/dev/null 2>&1 \
-          || ! git -C "$SCRATCH" push -q -f origin "HEAD:refs/heads/$br" 2>/dev/null; then
-        git -C "$SCRATCH" cherry-pick --abort >/dev/null 2>&1 || true
-        comment_once "$m" "Fast lane: this revert's Linux check no longer holds ($stale) and the lane could not rebuild it on $BASE_BRANCH, so a human looks."
+      rebuild_lane_pr "$m" "$head" "$br" revert "$stale" ;;
+  esac
+}
+
+# rebuild_lane_pr <n> <head> <branch> <what> <why>: the lane's own PR (a
+# revert or a quarantine change) cherry-picked onto today's BASE_BRANCH and
+# force-pushed, so it gets a fresh Linux check; a pick that conflicts leaves it
+# to a human, with one comment.
+rebuild_lane_pr() {
+  local m="$1" head="$2" br="$3" what="$4" why="$5"
+  log "$what: #$m's Linux check no longer holds ($why); rebuilding it on today's $BASE_BRANCH"
+  if (( DRY_RUN )); then log "dry-run, would rebuild $br"; return 0; fi
+  if ! git -C "$SCRATCH" checkout -q -B rebuild "origin/$BASE_BRANCH" 2>/dev/null \
+      || ! git -C "$SCRATCH" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" cherry-pick "$head" >/dev/null 2>&1 \
+      || ! git -C "$SCRATCH" push -q -f origin "HEAD:refs/heads/$br" 2>/dev/null; then
+    git -C "$SCRATCH" cherry-pick --abort >/dev/null 2>&1 || true
+    comment_once "$m" "Fast lane: this $what's Linux check no longer holds ($why) and the lane could not rebuild it on $BASE_BRANCH, so a human looks."
+  fi
+}
+
+# quarantine_sweep: with LANE_VERIFY_AFTER=1, lands the lane's open
+# QUAR_BRANCH PR (quarantine_land), else reads the lane's entries in QUAR_FILE
+# on BASE_BRANCH: an owner past its `until` gets BLOCKER_LABEL and a comment
+# (quarantine_expiry), a closed owner gets the PR that removes its entries,
+# and, when revert_sweep left the red unresolved (RED_UNRESOLVED), the red's
+# failing tests are quarantined (quarantine_add). One PR at a time.
+quarantine_sweep() {
+  (( LANE_VERIFY_AFTER )) || return 0
+  local all open json
+  if ! all=$(open_list 2>/dev/null | jq -ce --arg l "$QUAR_LABEL" --arg b "$QUAR_BRANCH" '[.[]
+      | select(.author.is_bot == true and .headRefName == $b and any(.labels[]?; .name == $l))]' 2>/dev/null); then
+    log "auto-quarantine: could not list open PRs; the next sweep looks again"; return 0
+  fi
+  open=$(jq -r --arg q "$QUAR_LINE" 'first(.[]) | "\(.number)|\(.headRefOid)|\(.headRefName)|\((.body // "") | capture($q + " (?<k>add|remove)(?<o>[#0-9 ]*)") // {k: "add", o: ""} | "\(.k)|\(.o)")"' <<<"$all" 2>/dev/null || true)
+  if [[ -n "$open" ]]; then quarantine_land "$open"; return 0; fi
+  if ! scratch main "$BASE_BRANCH"; then log "auto-quarantine: could not fetch $BASE_BRANCH"; return 0; fi
+  json=$(git -C "$SCRATCH" show "origin/$BASE_BRANCH:$QUAR_FILE" 2>/dev/null) || json='[]'
+  jq -e 'type == "array"' <<<"$json" >/dev/null 2>&1 || { log "auto-quarantine: $QUAR_FILE on $BASE_BRANCH is not a JSON array; a human looks"; return 0; }
+  quarantine_expiry "$json" || return 0
+  (( RED_UNRESOLVED )) && [[ -n "$BASE_RED" && -n "$BASE_RED_SHA" ]] || return 0
+  quarantine_add "$json"
+}
+
+# quarantine_expiry <quarantine json>: each lane entry's owner is read once:
+# closed, its entries go into one removal PR (returns 1 once that is open);
+# open and past the entry's `until`, it gets BLOCKER_LABEL and a comment, once.
+# The entry stays either way: an expired quarantine never comes back as a red.
+quarantine_expiry() {
+  local json="$1" owner until tests st labels closed="" new ids
+  while IFS=$'\t' read -r owner until tests; do
+    [[ -n "$owner" ]] || continue
+    st=$(gh api "repos/$REPO/issues/${owner#\#}" --jq '"\(.state)\t\([.labels[]?.name] | join(","))"' 2>/dev/null) || { log "auto-quarantine: could not read $owner; the next sweep looks again"; continue; }
+    labels="${st#*$'\t'}"; st="${st%%$'\t'*}"
+    if [[ "$st" != OPEN ]]; then closed+="${closed:+ }$owner"; continue; fi
+    [[ "$until" < "$(quar_now)" ]] || continue
+    [[ ",$labels," != *",$BLOCKER_LABEL,"* ]] || continue
+    log "auto-quarantine: $owner is past its quarantine expiry ($until); labelling it $BLOCKER_LABEL"
+    write gh label create "$BLOCKER_LABEL" -R "$REPO" --color b60205 --force --description "A quarantined test whose fix is overdue" >/dev/null 2>&1 || true
+    write gh issue edit "${owner#\#}" -R "$REPO" --add-label "$BLOCKER_LABEL" || log "could not label $owner"
+    write gh issue comment "${owner#\#}" -R "$REPO" --body "Blocker: the quarantine of $tests expired at $until and this issue is still open. The test stays skipped on $BASE_BRANCH until this closes (the lane never un-quarantines into a red); \`scripts/quarantine release\` fails while it is in. Fix it, close this issue, and the lane removes the entry." \
+      || log "could not comment on $owner"
+  done < <(jq -r '[.[] | select((.lane | type) == "object")] | group_by(.owner)[] | [.[0].owner, .[0].lane.until, ([.[].test] | join(", "))] | @tsv' <<<"$json")
+  [[ -n "$closed" ]] || return 0
+  ids=$(jq -r --arg o " $closed " '[.[] | .owner as $w | select((.lane | type) == "object" and ($o | contains(" " + $w + " "))) | .test] | join(", ")' <<<"$json")
+  new=$(jq --arg o " $closed " 'map(.owner as $w | select(((.lane | type) == "object" and ($o | contains(" " + $w + " "))) | not))' <<<"$json")
+  log "auto-quarantine: $closed closed; removing $ids from the quarantine"
+  quarantine_pr remove "$new" "test(quarantine): run $ids again" "$QUAR_LINE remove $closed
+Removes the fast lane's quarantine entries of $ids: their owner issue ($closed) closed, so the fix should be on $BASE_BRANCH. This PR's own Linux check runs the test again; red, the lane reopens the owner and closes this PR." >/dev/null || return 0
+  return 1
+}
+
+# quarantine_add <quarantine json>: one call per red sha (QUAR_MARK on the
+# dev-red issue). The red's failing tests (red_tests) are placed in the tree
+# and resolved to perf-list ids (scripts/test-scope ids); more than QUAR_MAX
+# of them, a test on a QUAR_NEVER_RE path, one already quarantined, or one
+# that can't be placed is a note, not an entry. Each entry's owner is its
+# `Quarantined: <id>` finding (quarantine_issue); then the one PR.
+quarantine_add() {
+  local json="$1" red7="${BASE_RED_SHA:0:7}" comments tests n t f name path target id why="" e until prs p lead list="" app issue entry new added="" m title
+  local ids=()
+  comments=$(gh api "repos/$REPO/issues/$BASE_RED/comments" --paginate --jq '.[].body' 2>/dev/null) || { log "auto-quarantine: could not read dev-red #$BASE_RED's comments"; return 0; }
+  ! grep -qF -- "$QUAR_MARK $red7 -->" <<<"$comments" || return 0
+  tests=$(red_tests "$BASE_RED_SHA")
+  [[ -n "$tests" ]] || { quarantine_note "$red7" "no failing test is named in the red logs at $red7 (a build error or a crash), so nothing is quarantined and the red stays with today's handling"; return 0; }
+  n=$(tr ',' '\n' <<<"$tests" | grep -c .)
+  if (( n > QUAR_MAX )); then
+    quarantine_note "$red7" "$n tests fail at $red7 ($tests): more than $QUAR_MAX, so something broke broadly; nothing is quarantined and the red stays with today's handling (a human picks the culprit)"; return 0
+  fi
+  for t in ${tests//,/ }; do
+    f="${t%%/*}"; name="${t#*/}"; name="${name%%(*}"
+    path=$(test_paths "$t" | head -1)
+    [[ -n "$path" ]] || { why+="${why:+; }$t: its file is not under Tests/ on $BASE_BRANCH"; continue; }
+    target=$(cut -d/ -f2 <<<"$path")
+    id=$(git -C "$SCRATCH" show "origin/$BASE_BRANCH:$path" 2>/dev/null >"$SCRATCH/.quar.swift" \
+      && python3 "$HERE/test-scope" ids "$target" "$SCRATCH/.quar.swift" 2>/dev/null | grep -E "(/|\.)$name\$" | head -1 || true)
+    [[ -n "$id" ]] || { why+="${why:+; }$t: no @Test $name in $path"; continue; }
+    if grep -qiE -- "$QUAR_NEVER_RE" <<<"$path $id"; then why+="${why:+; }$id: a security, billing or auth test is never quarantined"; continue; fi
+    if jq -e --arg t "$id" 'any(.[]; .test == $t)' <<<"$json" >/dev/null; then why+="${why:+; }$id is already quarantined"; continue; fi
+    ids+=("$id|$path")
+  done
+  (( ${#ids[@]} )) || { quarantine_note "$red7" "nothing to quarantine: $why; the red stays with today's handling"; return 0; }
+  prs=$(git -C "$SCRATCH" log --first-parent --format=%s "origin/main..$BASE_RED_SHA" 2>/dev/null | grep -oE '\(#[0-9]+\)$' | tr -dc '0-9\n' | sort -un)
+  for p in $prs; do lead=$(feature_lead "$p"); list+="${list:+, }#$p${lead:+ (lead #$lead)}"; done
+  until=$(jq -rn --arg n "$(quar_now)" --argjson h "$QUAR_HOURS" '$n | fromdate + $h * 3600 | todate')
+  new="$json"
+  for e in "${ids[@]}"; do
+    id="${e%%|*}"; path="${e#*|}"
+    app=$(build_apps <(printf '%s\n' "$path")); [[ "$app" =~ ^[a-z]+$ && "$app" != all ]] || app=suite
+    issue=$(quarantine_issue "$id" "$app" "The fast lane quarantined \`$id\` ($path): $BASE_BRANCH is red on ${BASE_RED_JOBS#*: } at $red7 (dev-red #$BASE_RED, run ${BASE_RED_RUN:-not named}) and the lane found no culprit to revert. PRs in the culprit range main..$red7: ${list:-none found}; their leads own the fix. The test is skipped on $BASE_BRANCH until $until; past that this issue is a \`$BLOCKER_LABEL\`, and the test stays skipped until the fix lands and this issue closes, when the lane removes the entry (its PR's Linux check runs the test again). \`scripts/quarantine release\` fails while the entry is in.") || continue
+    entry=$(jq -nc --arg t "$id" --arg o "#$issue" --arg r "Quarantined by the fast lane: fails on $BASE_BRANCH at $red7 (dev-red #$BASE_RED) with no culprit to revert; #$issue owns the fix" \
+      --arg x "${until:0:10}" --arg red "#$BASE_RED" --arg range "main..$red7" --arg u "$until" \
+      '{test: $t, owner: $o, reason: $r, expires: $x, lane: {red: $red, range: $range, until: $u}}')
+    new=$(jq --argjson e "$entry" '. + [$e]' <<<"$new")
+    added+="${added:+, }$id (#$issue)"
+  done
+  [[ -n "$added" ]] || { log "auto-quarantine: could not file an issue for any failing test; the next sweep tries again"; return 0; }
+  title="test(quarantine): skip $(sed -E 's/ \(#[0-9]+\)//g' <<<"$added")"
+  m=$(quarantine_pr add "$new" "$title" "$QUAR_LINE add
+Quarantines $added for $QUAR_HOURS h: $BASE_BRANCH is red on ${BASE_RED_JOBS#*: } at $red7 and the lane has no culprit to revert (range main..$red7: ${list:-no PR}). Each entry's owner issue is the p0 finding for its line; the fix lands through a normal PR, then its owner closes and the lane removes the entry.
+
+Refs #$BASE_RED. The fast lane opened this PR and lands it on its Linux check alone: it changes only $QUAR_FILE, the one protected path the lane may edit itself (quarantine_land in scripts/fast-lane.sh). CI on $BASE_BRANCH runs once it lands.") || { quarantine_note "$red7" "the lane could not open its quarantine PR for $added (each has its issue); a human adds the entries"; return 0; }
+  quarantine_note "$red7" "quarantined $added for $QUAR_HOURS h in #$m, which lands on its own Linux check; then CI on $BASE_BRANCH runs green and normal batching resumes. Past the expiry each open owner is a $BLOCKER_LABEL"
+}
+
+# quarantine_issue <id> <app> <body>: the test's `Quarantined: <id>` finding,
+# its number on stdout: an open one (FINDING_LABEL, that title) gets a
+# comment, else one is filed with p0, FINDING_LABEL and line:<app>. Nothing
+# (non-zero) when the list fails or the filing does, so no duplicate is filed.
+quarantine_issue() {
+  local id="$1" app="$2" body="$3" title="Quarantined: $1" n url
+  if ! n=$(gh issue list -R "$REPO" --state open --label "$FINDING_LABEL" --limit 1000 --json number,title 2>/dev/null \
+      | jq -r --arg t "$title" 'first(.[] | select(.title == $t)) | .number // empty' 2>/dev/null); then
+    log "auto-quarantine: could not list the open findings; the next sweep tries again"; return 1
+  fi
+  if [[ -n "$n" ]]; then
+    write gh issue comment "$n" -R "$REPO" --body "Quarantined again: $body" || log "could not comment on #$n"
+    echo "$n"; return 0
+  fi
+  url=$(write gh issue create -R "$REPO" --title "$title" --label p0 --label "$FINDING_LABEL" --label "line:$app" --body "$body" 2>/dev/null) || { log "auto-quarantine: could not file the finding for $id"; return 1; }
+  [[ "$url" =~ /([0-9]+)$ ]] || { (( DRY_RUN )) && echo 0 && return 0; return 1; }
+  echo "${BASH_REMATCH[1]}"
+}
+
+# quarantine_pr <add|remove> <quarantine json> <title> <body>: QUAR_FILE
+# rewritten on today's BASE_BRANCH, pushed to QUAR_BRANCH and opened as a PR
+# with QUAR_LABEL and p0 (never fast-lane); its number on stdout.
+quarantine_pr() {
+  local kind="$1" json="$2" title="$3" body="$4" d="$SCRATCH" url
+  local bot=(-c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com")
+  if (( DRY_RUN )); then log "dry-run, would open the quarantine $kind PR: $title"; echo 0; return 0; fi
+  if ! git -C "$d" checkout -q -B quarantine "origin/$BASE_BRANCH" 2>/dev/null || ! mkdir -p "$d/$(dirname "$QUAR_FILE")" \
+      || ! jq . <<<"$json" >"$d/$QUAR_FILE" || ! git -C "$d" add "$QUAR_FILE" || ! git -C "$d" "${bot[@]}" commit -qm "$title" >/dev/null 2>&1 \
+      || ! git -C "$d" push -q -f origin "HEAD:refs/heads/$QUAR_BRANCH" 2>/dev/null; then
+    log "auto-quarantine: could not push the $kind to $QUAR_BRANCH"; return 1
+  fi
+  write gh label create "$QUAR_LABEL" -R "$REPO" --color b60205 --force --description "The fast lane's own change to UITests/quarantine.json" >/dev/null 2>&1 || true
+  url=$(gh pr create -R "$REPO" --base "$BASE_BRANCH" --head "$QUAR_BRANCH" --label "$QUAR_LABEL" --label p0 --title "$title" --body "$body" 2>/dev/null) \
+    || { log "auto-quarantine: pushed $QUAR_BRANCH but could not open the PR (can GitHub Actions create PRs in this repo?)"; return 1; }
+  echo "${url##*/}"
+}
+
+# quarantine_note <red7> <text>: the lane's one quarantine call on that red
+# sha, logged and posted on the dev-red issue with QUAR_MARK.
+quarantine_note() {
+  log "auto-quarantine: $2"
+  write gh issue comment "$BASE_RED" -R "$REPO" --body "Auto-quarantine: $2. $QUAR_MARK $1 -->" || log "could not comment on #$BASE_RED"
+}
+
+# quarantine_land <n>|<head>|<branch>|<add|remove>|<owners>: the lane's open
+# quarantine PR lands on its own Linux check, once no batch holds the lane.
+# THE protected-path exception, and all of it: the PR is the lane's bot's on
+# QUAR_BRANCH with QUAR_LABEL (quarantine_sweep's filter) AND changes exactly
+# QUAR_FILE; anything else is never landed. A red check on a removal means the
+# fix didn't hold: the owners are reopened and the PR closed (the entries
+# stay); on an add a human looks. A merge dev moved under is rebuilt.
+quarantine_land() {
+  local m head br kind owners files v o
+  IFS='|' read -r m head br kind owners <<<"$1"
+  files=$(gh api "repos/$REPO/pulls/$m/files" --paginate --jq '.[].filename' 2>/dev/null) || { log "auto-quarantine: could not read #$m's files; the next sweep looks again"; return 0; }
+  if [[ "$files" != "$QUAR_FILE" ]]; then
+    comment_once "$m" "Fast lane: this $QUAR_LABEL PR changes more than $QUAR_FILE ($(paste -sd, - <<<"$files" | sed 's/,/, /g')), so the lane will not land it; a human looks."; return 0
+  fi
+  v=$(check_verdict "$head")
+  case "$v" in
+    none)
+      if has_comment "$m" "started a Linux check on head $head"; then log "auto-quarantine: #$m: its Linux check on $head started; waiting"; return 0; fi
+      dispatch_linux "$br"
+      comment_once "$m" "Fast lane: started a Linux check on head $head; this quarantine change lands once it passes." ;;
+    running) log "auto-quarantine: #$m: its Linux check is running" ;;
+    red*)
+      if [[ "$kind" == remove ]]; then
+        for o in $owners; do
+          write gh issue reopen "${o#\#}" -R "$REPO" >/dev/null || log "could not reopen $o"
+          write gh issue comment "${o#\#}" -R "$REPO" --body "Reopened: the test still fails without its quarantine entry (#$m's Linux check: ${v#red|}), so the fix didn't hold. The entry stays until this closes again." || log "could not comment on $o"
+        done
+        write gh pr close "$m" -R "$REPO" --comment "Fast lane: the Linux check is red (${v#red|}), so the test still fails; its owner is reopened and the entry stays." >/dev/null || log "could not close #$m"
+      else
+        comment_once "$m" "Fast lane: the Linux check on this quarantine change is red (${v#red|}), so a human looks."
       fi ;;
+    green*)
+      if (( HOLD )); then log "auto-quarantine: #$m waits for the batch in flight"; return 0; fi
+      if ! scratch "$BASE_BRANCH" "$br"; then log "auto-quarantine: could not fetch $br; the next sweep looks again"; return 0; fi
+      land "$m" "$head" "its own Linux check, ${v#green|}" && return 0
+      [[ "$(gh pr view "$m" -R "$REPO" --json mergeable 2>/dev/null | jq -r '.mergeable // ""')" == CONFLICTING ]] || return 0
+      rebuild_lane_pr "$m" "$head" "$br" "quarantine change" "it conflicts with $BASE_BRANCH" ;;
   esac
 }
 
@@ -1920,15 +2333,17 @@ evaluate() {
       ;;
     eligible)
       # settle_ready lands it, or batches it with the pass's other eligible PRs:
-      # rank|n|head|branch|apps|ready since|proof. rank orders p0, beta, the
-      # rest; apps is what it needs on macOS (mac_scope; empty: nothing).
+      # rank|n|head|branch|apps|ready since|proof|hit. rank orders p0, beta, the
+      # rest; apps is what it needs on macOS (mac_scope; empty: nothing); hit is
+      # 1 when it touches the red module (BASE_RED_SCOPE), so a red dev holds it.
       # ponytail: "ready since" is the head commit's date (no state is kept),
       # unreadable counts as old: a smaller batch, never a stuck one.
-      local apps="" rank since
+      local apps="" rank since hit=0
       apps=$(mac_scope "$tmp/files.txt")
       rank=$(jq -r '[.labels[]?.name] as $l | if ($l | index("p0")) then 0 elif ($l | index("beta")) then 1 else 2 end' "$tmp/pr.json")
       since=$(jq -r '(.commits // [] | last // {} | .committedDate // "") as $d | if $d == "" then 0 else ($d | try fromdateiso8601 catch 0) end' "$tmp/pr.json" 2>/dev/null || echo 0)
-      READY+=("$rank|$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|$apps|$since|${rest#*|*|}")
+      [[ -z "$BASE_RED_SCOPE" ]] || ! grep -qE -- "$BASE_RED_SCOPE" "$tmp/files.txt" || hit=1
+      READY+=("$rank|$n|$head|$(jq -r '.headRefName // ""' "$tmp/pr.json")|$apps|$since|${rest#*|*|}|$hit")
       ;;
   esac
   rm -rf "$tmp"
@@ -2081,6 +2496,8 @@ main() {
   # With LANE_VERIFY_AFTER=1 a red dev gets its culprit reverted; after the
   # batches, so a revert waits for one holding the lane (HOLD).
   revert_sweep
+  # A red the revert left standing gets its failing tests quarantined; expired and closed entries are swept every time.
+  quarantine_sweep
   local explicit=${#prs[@]}
   if (( explicit == 0 )); then
     local list; list=$(open_list)

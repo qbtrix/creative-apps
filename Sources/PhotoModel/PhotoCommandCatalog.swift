@@ -4,6 +4,7 @@
 // the menu's label ("Rotate 90° Clockwise"). Zoom is window state, so the view.zoom commands are no-ops. Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
 
 extension PhotoWorkspace {
@@ -108,11 +109,13 @@ extension PhotoWorkspace {
     /// One command per menu item, toolbar item and palette tool, in menu order.
     public static let commands: [CommandSpec<PhotoWorkspace>] = fileCommands + editCommands + imageCommands + layerCommands + maskCommands
         + FileFlowCommands.specs(PhotoWorkspace.self) + PlaceCommands.specs(PhotoWorkspace.self) + viewCommands + transformCommands
+        + StyleCommands.specs(PhotoWorkspace.self)
         + PhotoTool.allCases.map { tool in
             act("tool.\(tool.rawValue)", tool.rawValue.capitalized, "Picks the \(tool.rawValue) tool for canvas drags.", .view,
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
         + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands + pathCommands
+        + ToneCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
@@ -180,6 +183,7 @@ extension PhotoWorkspace {
         act("image.rotate-cw", "Rotate", "Rotates the image 90° clockwise.", .edit, menu()) { $0.rotateImage(.degrees90) },
         act("image.rotate-ccw", "Rotate", "Rotates the image 90° counterclockwise.", .edit, menu()) { $0.rotateImage(.degrees270) },
         act("image.rotate-180", "Rotate", "Rotates the image 180°.", .edit, menu()) { $0.rotateImage(.degrees180) },
+    ] + CropCommands.orientationSpecs(PhotoWorkspace.self).filter { $0.id == "image.flip" } + [
         .typed("image.straighten", title: "Straighten", summary: "Rotates the image by an angle, cropped to fit or grown.", kind: .edit, params: StraightenParams.self,
                schema: .object(["degrees": .number("The angle.", minimum: -45, maximum: 45), "cropToFit": .boolean], required: ["degrees", "cropToFit"]),
                example: .object(["degrees": .number(3), "cropToFit": .bool(false)]), availability: menu()) { w, p in

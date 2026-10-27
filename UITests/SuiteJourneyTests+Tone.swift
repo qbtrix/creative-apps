@@ -25,6 +25,7 @@ final class SuiteToneJourneyTests: XCTestCase {
 
         // 2. Drag Temperature to the right: one tone.set per sample, all under one drag token.
         let temperature = gallery.element("suite.tone.temperature")
+        reveal(gallery, temperature)
         let grip = temperature.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         grip.press(forDuration: 0.1, thenDragTo: grip.withOffset(CGVector(dx: 40, dy: 0)))
         expectToneLog(gallery, "tone.set", "dragging Temperature logged no tone.set")
@@ -37,7 +38,9 @@ final class SuiteToneJourneyTests: XCTestCase {
         XCTAssert(toneReset.waitForExistence(timeout: 5), "TONE shows no Reset off neutral")
 
         // 4. Auto: one tone.auto.
-        gallery.element("suite.tone.auto").click()
+        let auto = gallery.element("suite.tone.auto")
+        reveal(gallery, auto)
+        auto.click()
         expectToneLog(gallery, "tone.auto", "Auto logged no tone.auto")
         XCTAssertEqual(logLines(gallery).filter { $0.hasPrefix("tone.auto") }.count, 1, "Auto logged more than one tone.auto")
 
@@ -49,6 +52,7 @@ final class SuiteToneJourneyTests: XCTestCase {
         gallery.shot("tone-rows-edited")
 
         // 6. TONE's Reset: its rows read 0, the other sections keep theirs; rows read "<Title>, <value>".
+        reveal(gallery, toneReset)
         toneReset.click()
         expectToneLog(gallery, "tone.reset", "TONE's Reset logged no tone.reset")
         let shadows = gallery.element("suite.tone.shadows")
@@ -62,10 +66,21 @@ final class SuiteToneJourneyTests: XCTestCase {
     @MainActor private func typeTone(_ gallery: Journey, _ slider: String, _ text: String) {
         let field = gallery.element("suite.tone.\(slider)")
         XCTAssert(field.waitForExistence(timeout: 5), "no suite.tone.\(slider)")
+        reveal(gallery, field)
         field.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).doubleClick()
         gallery.app.typeKey("a", modifierFlags: .command)
         gallery.app.typeText(text)
         gallery.press(.return)
+    }
+
+    /// Scrolls the page's rows until `element` is hittable (at most ten tries): Sharpen sits
+    /// below a 768-pt runner's window (#5324).
+    @MainActor private func reveal(_ gallery: Journey, _ element: XCUIElement) {
+        let rows = gallery.element("suite.gallery.tone-rows.scroll")
+        for _ in 0..<10 where !element.isHittable {
+            rows.scroll(byDeltaX: 0, deltaY: element.frame.midY > rows.frame.midY ? -120 : 120)
+        }
+        XCTAssert(element.isHittable, "\(element.identifier) stays out of reach")
     }
 
     /// The page's log, one line per intent.

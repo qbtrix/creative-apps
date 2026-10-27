@@ -14,9 +14,11 @@
 // (PhotoWorkspace.damage(since:)) and timing itself for the status line. The
 // curve editor's line (`curveSamples`) runs the same CoreRaster curve over a
 // ramp, and its histogram (`curvesHistogram`, the suite's ToneHistogram, which
-// Levels draws too) counts the display values of the image as it enters
-// Curves, so both show what the render does; `curvesHistogramKey` changes
-// exactly when that count can. Linux-safe.
+// Levels draws too) counts the display values of 256 sampled rows of the image
+// as it enters Curves, so both show what the render does; `curvesHistogramKey`
+// changes exactly when that count can, and `curvesHistogram(composites:)` keeps
+// each row's composite in a PhotoCompositeCache so a count after a tone edit
+// composites no layer. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -109,16 +111,36 @@ extension PhotoWorkspace {
     /// pixels composited, adjusted and counted, whatever the image's height.
     /// A cancelled task stops between rows and gets `empty`.
     public func curvesHistogram() -> ToneHistogram {
+        curvesHistogram { try composited($0) }
+    }
+
+    /// `curvesHistogram()` with each sampled row's composite kept in `composites` between counts
+    /// (PhotoCompositeCache, the canvas routes' seam, here over a CPU dispatcher): a count after a tone edit
+    /// composites nothing, and one after a layer change lays that layer and the ones above it on each row's kept
+    /// base, never the stack. The same bits as the plain count (both routes are held to `composited(_:)`).
+    public func curvesHistogram(composites: PhotoCompositeCache) -> ToneHistogram {
+        let dispatcher = PhotoRenderRoute.cpu.dispatcher()
+        // Counted as the reference path's rows and row layers, never as the canvas's renders.
+        return PhotoRenderCount.asRows {
+            curvesHistogram { row in
+                PhotoRenderCount.row()
+                let picture = try composited(row, on: dispatcher, cache: composites)
+                defer { dispatcher.release(picture) }
+                return try dispatcher.read(picture)  // render-contract: allow the CPU backend's own buffer, no GPU readback
+            }
+        }
+    }
+
+    /// The count over the sampled rows, each composited by `rows`; see `curvesHistogram()`.
+    private func curvesHistogram(rows: (PixelRect) throws -> PixelBuffer) -> ToneHistogram {
         guard let canvas else { return .empty }
         var counts = [Int](repeating: 0, count: 256)
         var shadows = 0, highlights = 0
-        // ponytail: recounts every sampled row on each call; cache counts per
-        // tile by damage(since:) if it shows up in a drag profile.
         for y in stride(from: 0, to: canvas.height, by: (canvas.height + 255) / 256) {
             guard !Task.isCancelled else { return .empty }
             let row = PixelRect(x: 0, y: y, width: canvas.width, height: 1)
             // Can't fail: the same pixels render on the canvas.
-            guard let pixels = try? adjustments.appliedBeforeCurves(to: composited(row)),
+            guard let pixels = try? adjustments.appliedBeforeCurves(to: rows(row)),
                 let histogram = try? Histogram(of: pixels, bins: counts.count, encoding: .sRGB)
             else { continue }
             counts = zip(counts, histogram.luminance).map(+)
@@ -159,9 +181,9 @@ extension PhotoWorkspace {
     /// there), so every pixel blends exactly as it would from the whole layer.
     func composited(_ rect: PixelRect) throws -> PixelBuffer {
         var result = try PixelBuffer(width: rect.width, height: rect.height)
-        PhotoRenderCount.region()
+        PhotoRenderCount.row()
         for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-            PhotoRenderCount.layers(1)
+            PhotoRenderCount.rowLayers(1)
             let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
             result = try PhotoLayerComposite.composite(
                 content, onto: result, origin: (x: rect.x, y: rect.y),

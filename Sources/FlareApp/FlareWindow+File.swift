@@ -1,5 +1,5 @@
 // FlareWindow+File.swift: the router's file area (FlareWindow+Router.swift).
-// New presents the New Animation sheet (FlareNewSheet.swift); its Create
+// New presents the shared New Document sheet (FlareDocumentSheet.swift); its Create
 // (`.create`) makes the document from the sheet's NewDocumentSpec and
 // dismisses it; a spec with a problem is refused (Create's help says why).
 // Open and Open Recent read the file's bytes off the main actor, show the
@@ -35,7 +35,7 @@ extension FlareWindow {
     /// Acts on a file intent.
     func performFile(_ intent: FlareIntent.File) {
         switch intent {
-        case .new: replacing { presented = .newAnimation }
+        case .new: replacing { presented = .new }
         case .open: replacing { if let url = FlareFileDialogs.chooseFile() { open(url) } }
         case .openRecent(let path): replacing { open(URL(fileURLWithPath: path)) }
         case .clearRecent:

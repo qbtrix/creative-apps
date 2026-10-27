@@ -1,0 +1,30 @@
+[
+ {
+  "label": ".fieldEditorTakesKeys: a read-only field editor loses Copy and Select All",
+  "file": "Sources/SuiteModel/EditMenu/TextFieldEditRouting.swift",
+  "find": "isText && (isEditable || isFieldEditor)",
+  "replace": "isText && isEditable",
+  "tests": "TextFieldEditRoutingTests"
+ },
+ {
+  "label": ".fieldTurnsItemOn: an item the app turned off stays off while a field has focus",
+  "file": "Sources/SuiteModel/EditMenu/TextFieldEditRouting.swift",
+  "find": "isEnabled: true, help: command.fieldHelp)",
+  "replace": "isEnabled: appEnabled, help: command.fieldHelp)",
+  "tests": "TextFieldEditRoutingTests"
+ },
+ {
+  "label": ".readOnlyTextIsTheApps: read-only text that isn't a field takes the app's item",
+  "file": "Sources/SuiteModel/EditMenu/TextFieldEditRouting.swift",
+  "find": "guard focus.takesEditKeys else",
+  "replace": "guard focus.isText else",
+  "tests": "TextFieldEditRoutingTests"
+ },
+ {
+  "label": ".deleteIsBackward: Backspace in a field sends delete:, which leaves the caret's character",
+  "file": "Sources/SuiteModel/EditMenu/TextFieldEditRouting.swift",
+  "find": "case .delete: \"deleteBackward:\"",
+  "replace": "case .delete: \"delete:\"",
+  "tests": "TextFieldEditRoutingTests"
+ }
+]

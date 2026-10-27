@@ -60,8 +60,11 @@ extension DesignWorkspace {
     }
 
     static let fileSpecs: [CommandSpec<DesignWorkspace>] = [
-        plain("file.new", "New File", "Opens a new file with one page holding a Desktop frame.", .edit,
-              { reason(DesignToolbarItem.newFile.unavailableHelp(in: $0)) }, { $0.newFile() }),
+        .typed("file.new", title: "New File", summary: "Opens a new file with one page of the given size holding a frame in its background.",
+               kind: .edit, params: DocumentSetup.self, schema: DocumentSetupCommands.setupSchema,
+               example: .object(["width": .number(1080), "height": .number(1920), "background": .string("transparent")]),
+               availability: { reason(DesignToolbarItem.newFile.unavailableHelp(in: $0)) }
+        ) { w, setup in try w.newFile(setup); return JSONValue.object([:]) },
         .typed("file.open", title: "Open…", summary: "Opens a Design file's text in a window that holds no file.", kind: .file,
                params: TextParams.self, schema: .object(["text": .string("The file's JSON text.")], required: ["text"]),
                example: .object(["text": .string("{}")]),

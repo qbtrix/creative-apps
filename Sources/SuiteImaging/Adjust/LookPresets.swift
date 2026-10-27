@@ -3,6 +3,12 @@
 // `look.apply` sets on a picture in one step. BuiltInLooks are the six every
 // app ships; saved looks live in the suite's PresetStore as kind `look`.
 // Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import SuiteModel
 
 /// A named adjustment: tone, adjust and kinds.
 public struct LookPreset: Hashable, Codable, Sendable, Identifiable {
@@ -45,5 +51,45 @@ public enum BuiltInLooks {
     /// Neutral tone with `values` set.
     static func tone(_ values: KeyValuePairs<ToneSlider, Double>) -> ToneSettings {
         values.reduce(ToneSettings.neutral) { $0.setting($1.key, to: $1.value) }
+    }
+}
+
+/// A look's place in the suite's preset store, and the lookups the look commands share.
+extension LookPreset {
+    /// This look as a store record of kind `look`, its values encoded as JSON.
+    public func record() throws -> PresetRecord {
+        PresetRecord(id: id, name: name, kind: Self.recordKind, payload: try JSONEncoder().encode(self))
+    }
+
+    /// The look `r` holds, named and identified by the record; nil when it isn't a readable look.
+    public init?(record r: PresetRecord) {
+        guard r.kind == Self.recordKind, var look = try? JSONDecoder().decode(LookPreset.self, from: r.payload) else { return nil }
+        (look.id, look.name, look.builtIn) = (r.id, r.name, false)
+        self = look
+    }
+
+    /// The built-in looks, then the readable saved ones in `store`.
+    public static func all(in store: any PresetStoring) -> [LookPreset] {
+        BuiltInLooks.all + store.list(kind: recordKind).compactMap(LookPreset.init(record:))
+    }
+
+    /// The built-in or saved look with `id`, or nil.
+    public static func find(_ id: String, in store: any PresetStoring) -> LookPreset? {
+        all(in: store).first { $0.id == id }
+    }
+
+    /// True when a built-in or saved look is already called `name`, ignoring case.
+    public static func nameTaken(_ name: String, in store: any PresetStoring) -> Bool {
+        all(in: store).contains { $0.name.lowercased() == name.lowercased() }
+    }
+
+    /// A new id for a look called `name`: its lowercase words joined by dashes, numbered past any id in use.
+    public static func newID(_ name: String, in store: any PresetStoring) -> String {
+        let words = name.lowercased().split { !($0.isLetter || $0.isNumber) }.joined(separator: "-")
+        let base = words.isEmpty ? recordKind : words
+        let used = Set(all(in: store).map(\.id))
+        var id = base, n = 1
+        while used.contains(id) { n += 1; id = "\(base)-\(n)" }
+        return id
     }
 }
