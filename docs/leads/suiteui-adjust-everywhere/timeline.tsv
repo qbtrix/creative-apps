@@ -139,3 +139,4 @@ utc	stage	event	ref	note
 03:53Z	3	ship	#5247	AJ-photo gate PASS on a07fda892 (fixture switch fix for dev), pushed, Head moved; AJ-library gate running; dependents restacked locally
 04:03Z	3	ship	#5247 #5248	AJ-library gate PASS on a01a609aa, force-pushed, Head moved; AJ-halo gate running
 04:08Z	3	ship	#5247 #5248 #5249	AJ-photo/library/halo gated, Head moved, fast-lane on; dependents restacked locally
+04:22Z	3	wait	#5247 #5248 #5249	queued in lane (clean, fast-lane); main lacks AJ-k/AJ-u; dev-red #5818 open
