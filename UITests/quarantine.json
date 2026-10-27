@@ -51,5 +51,11 @@
     "owner": "#5807",
     "reason": "Dev macOS shard 1/3 (run 40357785665) reads 3 bodies against a budget of 2 since the heavy tests moved into one heavy-pass process (#5781). #5807 finds the third body.",
     "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryShareTests/prepareThreeInTwoBodies",
+    "owner": "#5883",
+    "reason": "The heavy-pass process died inside this test in dev run 40489065455 (shard 2/3), with no summary and no crash report, the only red in that run. #5883 finds what kills it.",
+    "expires": "2026-10-29"
   }
 ]

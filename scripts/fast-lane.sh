@@ -944,27 +944,65 @@ red_jobs() {
   echo "$j"
 }
 
+# died_file <test name>: the Tests/ file whose `func <name>(` declares the test
+# a TEST PROCESS DIED block names (scripts/test-died prints `name(args)`, or
+# `-[Class name]` for XCTest), as <File>.swift, found in origin/BASE_BRANCH of
+# the scratch clone (callers run it in a subshell, so they scratch first).
+# Non-zero, with the reason logged, when the clone isn't there, no file has it
+# or more than one does.
+died_file() {
+  local n="$1" f
+  [[ "$n" != -\[* ]] || { n="${n##* }"; n="${n%]}"; }
+  n="${n%%(*}"
+  if [[ -z "$SCRATCH" ]] || ! git -C "$SCRATCH" rev-parse -q --verify "origin/$BASE_BRANCH" >/dev/null 2>&1; then
+    log "died test $n: no scratch clone of $BASE_BRANCH to place it in"; return 1
+  fi
+  f=$(git -C "$SCRATCH" grep -lF -e "func $n(" "origin/$BASE_BRANCH" -- Tests 2>/dev/null | sed 's|^[^:]*:||; s|.*/||' | sort -u || true)
+  case $(grep -c . <<<"$f") in
+    1) echo "$f" ;;
+    0) log "died test $n: no 'func $n(' under Tests/ on $BASE_BRANCH, so it isn't named"; return 1 ;;
+    *) log "died test $n: 'func $n(' is in several files on $BASE_BRANCH ($(paste -sd, - <<<"$f")), so it isn't named"; return 1 ;;
+  esac
+}
+
+# mac_log_ids <failed log>: the failing tests one log names, <File>.swift/<name>
+# per line: the `recorded an issue` lines, then scripts/ci's TEST PROCESS DIED
+# block (a test process that dies prints no issue lines), whose indented names
+# up to the first blank line are the tests that started and never finished.
+# They carry no file, so died_file places each one.
+mac_log_ids() {
+  local n f
+  LC_ALL=C sed -nE 's/.* Test (.+) recorded an issue.* at ([^ :]+\.swift):[0-9].*/\2\/\1/p' <<<"$1"
+  while IFS= read -r n; do
+    f=$(died_file "$n") && echo "$f/$n"
+  done < <(LC_ALL=C awk '{ s = $0; sub(/^[^\t]*\t[^\t]*\t[^ ]* ?/, "", s)
+      if (s ~ /TEST PROCESS DIED/) { on = 1; next }
+      if (on && s ~ /^[ \t]+[^ \t]/) { sub(/^[ \t]+/, "", s); sub(/[ \t\r]+$/, "", s); print s; next }
+      on = 0 }' <<<"$1")
+}
+
 # mac_tests <red macOS verdict>: the tests its job's failed log says recorded
 # an issue (swift-testing's `Test <name> recorded an issue ... at <File>.swift:`;
-# a known issue doesn't count), one <File>.swift/<name> per line, sorted. The
-# file and name stay put when lines move; suite lines interleave under
-# parallel tests, so they aren't used. Nothing for the local gate (its log
-# isn't readable here). A sharded macOS gate job (`macOS`, #5775) only sums
-# its shards, so when its log names no test the run's failed `macOS tests`
-# jobs are read instead (each job's log, readable while the run goes on).
+# a known issue doesn't count) or died unfinished (mac_log_ids), one
+# <File>.swift/<name> per line, sorted. The file and name stay put when lines
+# move; suite lines interleave under parallel tests, so they aren't used.
+# Nothing for the local gate (its log isn't readable here). A sharded macOS
+# gate job (`macOS`, #5775) only sums its shards, so when its log names no
+# test the run's failed `macOS tests` jobs are read instead (each job's log,
+# readable while the run goes on).
 # Fails when the GitHub log, or any shard's, can't be read.
 mac_tests() {
-  local log ids jobs j re='s/.* Test (.+) recorded an issue.* at ([^ :]+\.swift):[0-9].*/\2\/\1/p'
+  local log ids jobs j
   [[ "$1" != *"|$LOCAL_MAC_CONTEXT" ]] || return 0
   log=$(failure_log "$1")
   [[ -n "$log" ]] || return 1
-  ids=$(LC_ALL=C sed -nE "$re" <<<"$log")
+  ids=$(mac_log_ids "$log")
   if [[ -z "$ids" && "${1##*|}" =~ $MAC_GATE_RE && "$1" =~ /actions/runs/([0-9]+)/job/ ]]; then
     jobs=$(gh api "repos/$REPO/actions/runs/${BASH_REMATCH[1]}/jobs?per_page=100" \
       --jq '.jobs[] | select((.name | startswith("macOS tests")) and .conclusion != "success" and .conclusion != "skipped") | .id' 2>/dev/null) || return 1
     for j in $jobs; do
       log=$(failure_log "red|/job/$j"); [[ -n "$log" ]] || return 1
-      ids+=$'\n'$(LC_ALL=C sed -nE "$re" <<<"$log")
+      ids+=$'\n'$(mac_log_ids "$log")
     done
   fi
   grep . <<<"$ids" | LC_ALL=C sort -u || true
