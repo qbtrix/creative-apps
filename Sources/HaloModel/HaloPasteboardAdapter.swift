@@ -1,14 +1,15 @@
 // HaloPasteboardAdapter.swift (clipboard-interop CB-10): Halo's side of the suite's pasteboard. Copy Frame draws
 // the selected composition at the playhead at its full size (never the viewer's preview size) and writes it as PNG
-// through HaloFramePNG; Paste takes the coder's best item for Halo, an image (PNG or JPEG) or an SVG, and adds it as
-// a placed-image solid (HaloPlace+Kernel's `insertPlaced`) fitted and centred in the composition, its in point at
-// the playhead, one undo step named "Paste". The app's PasteboardBridge carries the bytes; the catalog's
-// `edit.copy-frame` and `edit.paste` run here too. Linux-safe.
+// through core's 8-bit `PNG.write`, as HaloHeadless does; Paste takes the coder's best item for Halo, an image (PNG
+// or JPEG) or an SVG, and adds it as a placed-image solid (HaloPlace+Kernel's `insertPlaced`) fitted and centred in
+// the composition, its in point at the playhead, one undo step named "Paste". The app's PasteboardBridge carries the
+// bytes; the catalog's `edit.copy-frame` and `edit.paste` run here too. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
+import CoreRaster
 import SuiteKernel
 import SuiteModel
 
@@ -38,7 +39,7 @@ public struct HaloPasteboardAdapter: Sendable {
         guard let frame = comp.renderFrame(at: comp.playheadFrame, scale: 1, text: project.services.text) else {
             throw CatalogError.failed(id: "edit.copy-frame", message: Self.cantDraw)
         }
-        return try HaloFramePNG.data(frame.pixels)
+        return try PNG.write(frame.pixels, bitsPerChannel: 8)
     }
 
     /// Nil when Paste can act on `offered`; else why not, in the coder's words ("Halo can't paste text yet.").
