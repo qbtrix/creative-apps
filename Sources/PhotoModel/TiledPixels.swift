@@ -122,6 +122,20 @@ public struct TiledPixels: Sendable, Equatable {
         }
     }
 
+    /// `rect` of the layer (layer pixels; outside it is clear) as one buffer.
+    func flattened(_ rect: PixelRect) throws -> PixelBuffer {
+        var part = try PixelBuffer(width: rect.width, height: rect.height)
+        for i in tileIndices(in: rect) where tiles.indices.contains(i) {
+            let at = tileRect(i)
+            guard let shared = at.intersection(rect) else { continue }
+            let tile = tiles[i]
+            let piece = shared == at ? tile
+                : try tile.cropped(x: shared.x - at.x, y: shared.y - at.y, width: shared.width, height: shared.height)
+            try part.composite(piece, x: shared.x - rect.x, y: shared.y - rect.y, mode: .normal, opacity: 1)
+        }
+        return part
+    }
+
     /// The whole layer as one buffer.
     public func flattened() throws -> PixelBuffer {
         var whole = try PixelBuffer(width: width, height: height)

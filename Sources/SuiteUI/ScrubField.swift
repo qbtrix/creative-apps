@@ -239,6 +239,8 @@ public struct ScrubField: View {
                     .labelsHidden()
                     .multilineTextAlignment(.trailing)
                     .focused($isTyping)
+                    // One field types at a time, so one id finds it (the audit's identifier check).
+                    .accessibilityIdentifier("suite.scrub.typing")
                     .task { await takeFocus() }
                     .onSubmit { commit(refocus: true) }
                     .onExitCommand {

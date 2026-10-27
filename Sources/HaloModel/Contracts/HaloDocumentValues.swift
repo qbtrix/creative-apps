@@ -134,17 +134,15 @@ public struct HaloRenderSettings: Sendable, Hashable {
 
     /// The Codec row's choices, in order.
     public static let codecs: [MovieCodec] = [.h264, .hevc, .prores4444]
-    /// Why ProRes 4444 can't be picked yet: Halo's own writer is H.264 only until HX-4.
-    public static let proResWaits = "ProRes 4444 isn't available yet."
-    /// Why HEVC can't be picked yet: Halo's own writer is H.264 only until HX-4.
-    public static let hevcWaits = "HEVC isn't available yet."
+    /// Why HEVC with alpha can't be picked: the Codec row doesn't offer it.
+    public static let hevcAlphaRefused = "HEVC with alpha isn't offered. Choose ProRes 4444 to keep transparency."
 
-    /// Why `codec` can't be picked yet, or nil.
+    /// Why `codec` can't be picked, or nil: every codec the row offers can
+    /// be, since the suite's media service writes them all (HX-4).
     public static func codecRefusal(_ codec: MovieCodec) -> String? {
         switch codec {
-        case .h264: nil
-        case .hevc, .hevcAlpha: hevcWaits
-        case .prores4444: proResWaits
+        case .h264, .hevc, .prores4444: nil
+        case .hevcAlpha: hevcAlphaRefused
         }
     }
 
@@ -220,13 +218,17 @@ public struct HaloRenderPlan: Sendable, Hashable {
     public var fileNames: [String]
     /// Whether each frame is flattened over opaque black before it is written: a movie without alpha (HX-3).
     public var opaque: Bool
+    /// What the suite's media service writes the movie as; nil for a PNG
+    /// sequence and for an H.264 movie at a fractional rate, which Halo's
+    /// own writer times exactly (HX-4).
+    public var movie: MovieSettings?
     public init(
         width: Int, height: Int, framesPerSecond: Int, frameRate: FrameRate? = nil, frames: [Int], fileNames: [String],
-        opaque: Bool = false
+        opaque: Bool = false, movie: MovieSettings? = nil
     ) {
         self.width = width; self.height = height; self.framesPerSecond = framesPerSecond
         self.frameRate = frameRate ?? FrameRate(whole: framesPerSecond)
-        self.frames = frames; self.fileNames = fileNames; self.opaque = opaque
+        self.frames = frames; self.fileNames = fileNames; self.opaque = opaque; self.movie = movie
     }
 }
 

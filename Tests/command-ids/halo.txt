@@ -101,9 +101,15 @@ style.read
 style.remove
 style.set
 text.end-size-scrub
+text.read
 text.set
+text.set-alignment
 text.set-color
+text.set-font
+text.set-italic
+text.set-line-height
 text.set-size
+text.set-tracking
 timeline.end-key-drag
 timeline.move-keys
 timeline.pick-keys

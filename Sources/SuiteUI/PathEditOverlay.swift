@@ -10,7 +10,9 @@
 // gesture, the pointer and focus; the app owns the draft, path and selection.
 // PN-4 adds one hidden accessibility element per anchor and drawn handle.
 // `pressesPassThrough()` keeps the marks and hover for a host whose own canvas
-// gesture takes the presses.
+// gesture takes the presses. `holdsPressesUntilRelease()` runs a press's intents
+// on a PathLiveDrag the overlay draws and hands them to the app once, at
+// release, so an anchor or handle drag updates the host's window once.
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -34,6 +36,9 @@ public struct PathEditOverlay: View {
     private let onIntent: (PathIntent) -> Void
     /// false: marks and hover only (`pressesPassThrough()`, the stand-in init); presses, drags and keys reach the view under it.
     var takesPresses = true
+    /// true: a press's intents go to `live` and reach `onIntent` together at release (`holdsPressesUntilRelease()`).
+    var holdsPresses = false
+    @State private var live: PathLiveDrag?
     @State private var tracker = PathGesture()
     @State private var pointer: CGPoint?
     @State private var hovered: PathHit?
@@ -60,10 +65,11 @@ public struct PathEditOverlay: View {
 
     public var body: some View {
         let hint = pointer.map { PathGesture.hint(at: $0, hit: hovered, in: context) }
+        let shown = live.map { ($0.pathInEdit, $0.anchorSelection) } ?? (context.path, context.selection)
         ZStack(alignment: .topLeading) {
             Color.clear.contentShape(.rect)
-            if let path = context.path {
-                PathEditMarks(path: path, selection: context.selection, hovered: context.tool == .directSelect ? hovered : nil,
+            if let path = shown.0 {
+                PathEditMarks(path: path, selection: shown.1, hovered: context.tool == .directSelect ? hovered : nil,
                               zoom: context.zoom).equatable()
             }
             if let draft = context.draft {
@@ -115,6 +121,14 @@ public struct PathEditOverlay: View {
     public func pressesPassThrough() -> Self {
         var overlay = self
         overlay.takesPresses = false
+        return overlay
+    }
+
+    /// The overlay holding each press's intents until release: the samples move a copy only this view draws, and the
+    /// host gets the press's intents in order at mouse-up, as one batch, its drag's edits under one token.
+    public func holdsPressesUntilRelease() -> Self {
+        var overlay = self
+        overlay.holdsPresses = true
         return overlay
     }
 
@@ -170,8 +184,18 @@ public struct PathEditOverlay: View {
         return indexed?.index.hit(context.document(location), reach: reach, selected: context.selection)
     }
 
+    /// Hands `intents` to the host, or, while a held press lasts, runs them on its copy; the release hands over all.
     private func send(_ intents: [PathIntent]) {
-        for intent in intents { onIntent(intent) }
+        guard holdsPresses else { return intents.forEach(onIntent) }
+        if tracker.pressed != nil {
+            var copy = live ?? PathLiveDrag(draft: context.draft, path: context.path, selection: context.selection)
+            intents.forEach { copy.run($0) }
+            live = copy
+        } else {
+            let held = (live?.held ?? []) + intents
+            live = nil
+            held.forEach(onIntent)
+        }
     }
 }
 

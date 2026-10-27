@@ -40,6 +40,7 @@ import Testing
             try base.applied(draft, to: content)
         }
         func flipped(_ content: PlacedPixels, _ axis: PhotoModel.FlipAxis) throws -> PlacedPixels { try base.flipped(content, axis) }
+        func matrix(_ draft: TransformDraft, origin: (x: Int, y: Int)) throws -> AffineMatrix { try base.matrix(draft, origin: origin) }
     }
 
     /// The selected layer's pixels, flattened.
