@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 05:44Z poll: no change. #4936 waits on local-ci/prescreen; #5123/#5801 stacked; dev macOS red (#5818), not ours.
 - 05:23Z poll: no change. #4936 waits on local-ci/prescreen; #5123/#5801 stacked; dev macOS red (#5818), not ours.
 - 05:02Z poll: no change. #4936 waits on local-ci/prescreen; #5123/#5801 stacked; dev macOS red (#5818), not ours.
 - 04:39Z poll: no change. #4936 waits on local-ci/prescreen; #5123/#5801 stacked; dev macOS still red (SuiteUI compile, #5818), not ours.
