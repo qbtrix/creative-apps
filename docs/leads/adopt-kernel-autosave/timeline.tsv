@@ -202,3 +202,4 @@ utc	stage	event	ref	note
 2026-10-27T11:52:48Z	3	heartbeat	lane	AK-8 blocked on gap #5792; AK-11 after AK-8
 2026-10-27T12:24:34Z	3	heartbeat	lane	AK-8 blocked on gap #5792; AK-11 after AK-8
 2026-10-27T12:54:02Z	3	heartbeat	lane	AK-8 blocked on gap #5792; AK-11 after AK-8
+2026-10-27T13:24:05Z	3	heartbeat	lane	AK-8 blocked on #5792 (open, p2, unclaimed); AK-z waits
