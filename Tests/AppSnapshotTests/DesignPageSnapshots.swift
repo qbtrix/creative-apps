@@ -1,6 +1,8 @@
 // DesignPageSnapshots.swift: the page's size and the layers past its edge (canvas-basics CB-9).
 // The inspector with the page selected and no layer shows Width and Height as ScrubFields
-// (design-inspector-page-size-{light,dark}.png); the hosted check finds both by their ids. On
+// (design-inspector-page-size-{light,dark}.png); the hosted check finds both by their ids. Cut
+// smaller than its layers, the section's note says what shows dimmed
+// (design-inspector-page-past-edge-{light,dark}.png). On
 // `cards` cut to 800 × 1024 pt, with a rectangle added up and left of the page, the canvas at 40%
 // draws Desktop's part past 800, Pair and the rectangle dimmed outside the page
 // (design-canvas-past-edge-{light,dark}.png); DesignPastEdge.layers picks exactly the layers that
@@ -34,6 +36,19 @@ import Testing
             try snapshot(
                 PageInspectorSample(model: model),
                 name: "design-inspector-page-size-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+    }
+
+    /// #3342: cut smaller than Desktop, the Page Size section says what shows dimmed and why.
+    @Test func inspectorPastEdgeNote() throws {
+        var model = DesignFixtures.cards
+        model.setPageSize(width: 800, height: 1024)
+        model.deselect()
+        #expect(model.selectedPage?.pastEdgeNote?.hasPrefix("Desktop reaches past the page") == true)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                PageInspectorSample(model: model),
+                name: "design-inspector-page-past-edge-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
 
