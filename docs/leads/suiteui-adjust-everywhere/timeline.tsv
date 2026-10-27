@@ -147,3 +147,4 @@ utc	stage	event	ref	note
 05:44Z	3	wait	#5247 #5248 #5249	clean + fast-lane; no lane run since 04:51Z; dev-red #5818 open
 06:11Z	3	fix-rebase	#5249	AJ-halo needs-rebase: merged dev (HY-6 layer styles), repointed 2 mutation anchors, gate running
 06:30Z	3	waiting-lane	#5247 #5248 #5249	AJ-halo pushed 3ff635a9b (gate PASS); all three clean in lane; dev-red #5818 open, main fef52e668
+06:50Z	3	waiting-lane	#5247 #5248 #5249	all clean; needs-rebase dropped on #5249; dev c367fbeb0 unchanged, dev-red #5818 open, main fef52e668
