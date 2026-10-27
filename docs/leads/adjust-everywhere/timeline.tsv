@@ -147,3 +147,4 @@ utc	stage	event	ref	note
 05:44Z	3	wait	#5247 #5248 #5249	clean + fast-lane; no lane run since 04:51Z; dev-red #5818 open
 2026-10-27T05:58Z	3	resume	run	act-1a17bed1eba-upw1 resumed; lead branch rebuilt on main fef52e66
 2026-10-27T06:02Z	3	heartbeat	lane	dev-red #5818 checked: shard 3/3 fails AfterGlowHomeLayoutTests, SuiteGridSmallSnapshots, SuiteTabsSnapshots (SuiteUI home/grid/tabs), not this feature. #5247 #5248 ready; #5249 (AJ-halo) conflicts in HaloModel (DocumentValues, DrawRules, LiveFrameRendering), fixing next; #5250..#5260 stacked.
+06:11Z	3	fix-rebase	#5249	AJ-halo needs-rebase: merged dev (HY-6 layer styles), repointed 2 mutation anchors, gate running
