@@ -233,3 +233,4 @@ utc	stage	event	ref	note
 2026-10-27T01:17Z	3	poll	-	dev unchanged; #4939 BK-u still queued at 2ea13868, no return label
 2026-10-27T01:40Z	3	poll	-	dev-red #5818 open (linux red, range main..2c20134c), lane holds PRs on the failing module; not ours to fix; #4939 BK-u still queued at 2ea13868, no return label
 2026-10-27T02:02Z	3	poll	-	dev-red #5818 still open; lane merged #4899 and #5826, none ours; #4939 BK-u still queued at 2ea13868, no return label
+2026-10-27T02:25Z	3	poll	-	dev-red #5818 still open; lane merged #5041 only, not ours; #4939 BK-u still queued at 2ea13868, no return label
