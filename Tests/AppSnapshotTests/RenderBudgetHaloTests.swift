@@ -31,11 +31,14 @@ extension BodyCountSuites {
         @Test(.timeLimit(.minutes(6))) func timing() async throws {
             let (select, divider, viewer) = try await Self.run(dividerSamples: 120)
             let (playback, _, _, _) = try await HaloWindowPlaybackTests.playOneSecond()
+            // Real size (#5844): `reference`, 50 layers and 4,000 keys, in the 1280 by 820 window.
+            let (reference, _, _, _) = try await HaloWindowPlaybackTests.playOneSecond(sample: "reference")
             // Targets: a step fits one 120 Hz frame (8.3 ms); selecting may take two 60 Hz frames.
             expectP95(select, atMost: 130, target: 33)  // dev: 108 ms
             expectP95(divider, atMost: 60, target: 8.3)  // dev: 28 ms release (67 to 76 before HaloBarAndKeyLayout)
             expectP95(viewer, atMost: 4, target: 8.3)  // dev: 2.9 ms
-            expectP95(playback, atMost: 27, target: 8.3)  // dev: 17.0 ms
+            expectP95(playback, atMost: 8.3, target: 8.3)  // 3.3 to 4.4 ms release (8 to 17 before #5844)
+            expectP95(reference, atMost: 16, target: 8.3)  // 13.7 to 27.7 ms release under load (50 to 76 before #5844)
         }
 
         /// Select Ball, drag the inspector divider `dividerSamples` steps with Ball selected, then drag Floor

@@ -60,6 +60,22 @@ extension BodyCountSuites {
             }
             let canvas = try #require(hosted.frame(of: "halo.viewer"), "no halo.viewer")
             #expect(canvas.contains(panel), "the History panel \(panel) spills out of the viewer \(canvas)")
+            // The real window as drawn, for review: halo-history-panel-window-light/dark.png.
+            for (scheme, name) in [(NSAppearance.Name.aqua, "light"), (.darkAqua, "dark")] {
+                hosted.window.appearance = NSAppearance(named: scheme)
+                try await Task.sleep(for: .milliseconds(300))
+                try Self.write(hosted.host, name: "halo-history-panel-window-\(name)")
+            }
+        }
+
+        /// `view` as drawn, a PNG in .build/snapshots.
+        static func write(_ view: NSView, name: String) throws {
+            guard let image = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { throw SnapshotError.render(name) }
+            view.cacheDisplay(in: view.bounds, to: image)
+            guard let png = image.representation(using: .png, properties: [:]) else { throw SnapshotError.encode(name) }
+            let folder = try packageRoot().appending(path: ".build/snapshots")
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try png.write(to: folder.appending(path: "\(name).png"))
         }
 
         @Test(.timeLimit(.minutes(2))) func aRowPressSendsOneJump() async throws {
