@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-27T22:35Z
+Polled: 2026-10-27T23:01Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -416,3 +416,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T22:35Z AJ-photo restacked on dev 7b2c4373f: #5250 (12 files, +54/-11) base dev, #5259 (11 files) on catalog, #5260 (1 file) on ui; each passed scripts/ci --changed; needs-split removed, fast-lane back. #5257/#5258 restack after #5249. All heads wait on prescreen; dev-red #5818 open.
 - 22:35Z check-in: #5250 restacked by the other session to df908bed4 (dev 7b2c4373f, Head line current, clean +54-11 f=12); local worktree reset to it. #5249, #5252 clean. All wait for local-ci/prescreen. main fef52e668.
 - 22:55Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 7b2c4373f, main fef52e668.
+- 2026-10-27T23:01Z poll: every lead head is clean with fast-lane and has no local-ci/prescreen status yet; dev-red #5818 open (the lane's flake rerun is in flight at 6dab26f); main fef52e668, dev 7b2c4373f.
