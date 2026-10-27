@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 13:20Z stage HF-m: #5123 and #5801 unchanged since 09:31Z: open, fast-lane + beta, no needs-fix or needs-rebase, no commit status on their heads; they wait on the supervisor's local-ci/prescreen. No new line:halo findings.
 - 12:49Z stage HF-m: #5123 and #5801 still open in the lane (fast-lane, beta; no needs-fix or needs-rebase), waiting on the supervisor's local-ci/prescreen. Full run 40489065455 at 4a7d926f3 ended red (dev-red #5818, Library, not ours). No new line:halo findings.
 - 12:17Z stage HF-m: #5123 (190 lines, 13 files, clean) and #5801 open, no needs-fix; no commit status on their heads yet, so they wait on the supervisor's local-ci/prescreen. Full 40489065455 at 4a7d926f3 in progress.
 - 11:51Z stage HF-m: #5123 and #5801 still in the lane, no needs-fix. Halo-scoped 40490171439 green at 4a7d926f3 (HF-4 included); full 40489065455 in progress.
