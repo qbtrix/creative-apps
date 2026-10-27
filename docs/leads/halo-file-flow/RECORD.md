@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 14:04Z stage HF-m: finding #5892 (HFJ1 Open Recent lacks Intro.halo): cause is the suite ref named by the project name, which drops .halo; fix on fix/halo-recent-name (suiteRef names the file by its last path component, test + 2 mutations), gate running; #5123/#5801 still wait on prescreen
 - 13:41Z stage HF-m: #5123 and #5801 unchanged: open, fast-lane + beta, no needs-fix or needs-rebase; waiting on the supervisor's local-ci/prescreen. New line:halo finding #5891 (H-J12 inspector scroll + unnamed 11x254 button at 4a7d926f) is core-loop's (Feature: core-loop, Slice: CL-z), not filed against this feature; #4936 is in its candidate list, so I watch it.
 - 13:20Z stage HF-m: #5123 and #5801 unchanged since 09:31Z: open, fast-lane + beta, no needs-fix or needs-rebase, no commit status on their heads; they wait on the supervisor's local-ci/prescreen. No new line:halo findings.
 - 12:49Z stage HF-m: #5123 and #5801 still open in the lane (fast-lane, beta; no needs-fix or needs-rebase), waiting on the supervisor's local-ci/prescreen. Full run 40489065455 at 4a7d926f3 ended red (dev-red #5818, Library, not ours). No new line:halo findings.
