@@ -12,7 +12,11 @@
 // files: at most 4 DesignEditor bodies (one per progress step plus the finish;
 // the run is the area's state, the canvas never redraws). The
 // sheet is its own window attached to the hosted one, so its controls are found
-// from `attachedSheet`'s accessibility tree. Nested in BodyCountSuites, as every
+// from `attachedSheet`'s accessibility tree. The proofs on the live services:
+// a read-only folder fails on Desktop.png with the system's reason, the JPEG
+// chip writes a 2x JPEG on white, a refused plan (Selection, nothing selected)
+// leaves Export off and starts nothing, and a finished run's options reach the
+// Model's export defaults. Nested in BodyCountSuites, as every
 // suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -100,6 +104,151 @@ extension BodyCountSuites {
             // One body per progress step plus the finish; the target is the finish alone.
             expectBodies(run, atMost: 4, target: 1)
             _ = Self.press("design.export.dismiss", in: sheet)
+        }
+
+        /// A temp folder, removed by the caller, set as DesignExportArea's DEBUG `testFolder`.
+        static func folder(_ name: String) throws -> URL {
+            let folder = FileManager.default.temporaryDirectory.appendingPathComponent("design-\(name)-\(UUID().uuidString)")
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            #if DEBUG
+            DesignExportArea.testFolder = folder
+            #endif
+            return folder
+        }
+
+        /// The real window on `model`'s live services with File > Export… open, and its sheet.
+        static func openSheet(_ model: DesignWorkspace) async throws -> (RenderBudgetWindow<DesignWindow>, NSWindow?) {
+            let w = RenderBudgetWindow(DesignWindow(seed: model))
+            try await w.settle(200)
+            #if DEBUG
+            DesignWindow.openExport?()
+            #endif
+            return (w, await Self.sheet(of: w.window))
+        }
+
+        /// Waits up to four seconds for a text in `window`'s accessibility tree to contain `text`.
+        static func waitFor(_ text: String, in window: NSWindow) async -> Bool {
+            for _ in 0..<200 {
+                if texts(in: window).contains(where: { $0.contains(text) }) { return true }
+                try? await Task.sleep(for: .milliseconds(20))
+            }
+            return false
+        }
+
+        /// Every label and string value under `element`.
+        static func texts(in element: Any, depth: Int = 0) -> [String] {
+            let node = element as AnyObject
+            let own = [(node.accessibilityLabel?() ?? nil), (node.accessibilityValue?() ?? nil) as? String].compactMap { $0 }
+            guard depth < 60 else { return own }
+            return own + ((node.accessibilityChildren?() ?? nil) ?? []).flatMap { texts(in: $0, depth: depth + 1) }
+        }
+
+        /// DE-11 (J18's bug): a folder Design can't write to fails the run on the first file, the line naming it
+        /// and carrying the system's own reason, and nothing is written.
+        @Test(.timeLimit(.minutes(2)))
+        func readOnlyFolderFailsWithTheSystemsReason() async throws {
+            var model = DesignFixtures.cards
+            model.selectItem("node-1")
+            let folder = try Self.folder("read-only")
+            defer {
+                try? FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: folder.path)
+                try? FileManager.default.removeItem(at: folder)
+                #if DEBUG
+                DesignExportArea.testFolder = nil
+                #endif
+            }
+            try FileManager.default.setAttributes([.posixPermissions: 0o500], ofItemAtPath: folder.path)
+            let (w, sheet) = try await Self.openSheet(model)
+            defer { w.close() }
+            guard let sheet else { return #expect(Bool(false), "no export sheet") }
+            #expect(Self.press("design.export.start", in: sheet), "no Export button")
+            let failed = await Self.waitFor("Desktop.png couldn't be written.", in: sheet)
+            #expect(failed, "no failed line: \(Self.texts(in: sheet))")
+            #expect(Self.texts(in: sheet).contains { $0.contains("Desktop.png couldn't be written. You don’t have permission") },
+                    "the line lacks the system's reason: \(Self.texts(in: sheet))")
+            #expect(((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? ["?"]).isEmpty)
+            _ = Self.press("design.export.dismiss", in: sheet)
+        }
+
+        /// The JPEG chip writes a JPEG: Desktop at 2x decodes at 2880 × 2048, its fill white, not black.
+        @Test(.timeLimit(.minutes(2)))
+        func jpegLiveRunWritesAJPEG() async throws {
+            let folder = try Self.folder("jpeg")
+            defer {
+                try? FileManager.default.removeItem(at: folder)
+                #if DEBUG
+                DesignExportArea.testFolder = nil
+                #endif
+            }
+            let (w, sheet) = try await Self.openSheet(DesignFixtures.cards)
+            defer { w.close() }
+            guard let sheet else { return #expect(Bool(false), "no export sheet") }
+            #expect(Self.press("design.export.format.jpeg", in: sheet), "no JPEG chip")
+            try await w.settle(100)
+            #expect(Self.press("design.export.scale.2x", in: sheet), "no 2x chip")
+            try await w.settle(100)
+            #expect(Self.press("design.export.start", in: sheet), "no Export button")
+            let done = await Self.waitFor("Exported 1 file", in: sheet)
+            #expect(done, "no finished line: \(Self.texts(in: sheet))")
+            let file = folder.appendingPathComponent("Desktop.jpg")
+            let image = try #require(RGBAImage(png: try Data(contentsOf: file)), "Desktop.jpg doesn't decode")
+            #expect(image.width == 2880 && image.height == 2048, "Desktop.jpg is \(image.width) × \(image.height)")
+            #expect(image.bytes.prefix(3).allSatisfy { $0 >= 250 }, "the top-left reads \(Array(image.bytes.prefix(4)))")
+            _ = Self.press("design.export.dismiss", in: sheet)
+        }
+
+        /// A refused plan disables Export, saying why: Scope Selection with nothing selected starts no run.
+        @Test(.timeLimit(.minutes(2)))
+        func refusedPlanDisablesExport() async throws {
+            let folder = try Self.folder("refused")
+            defer {
+                try? FileManager.default.removeItem(at: folder)
+                #if DEBUG
+                DesignExportArea.testFolder = nil
+                #endif
+            }
+            let (w, sheet) = try await Self.openSheet(DesignFixtures.cards)
+            defer { w.close() }
+            guard let sheet else { return #expect(Bool(false), "no export sheet") }
+            #expect(Self.press("design.export.scope.selection", in: sheet), "no Selection chip")
+            try await w.settle(200)
+            let start = try #require(Self.node("design.export.start", in: sheet))
+            #expect((start.isAccessibilityEnabled?() ?? true) == false, "Export is enabled on a refused plan")
+            _ = Self.press("design.export.start", in: sheet)
+            try await w.settle(200)
+            #expect(!Self.texts(in: sheet).contains { $0.contains("couldn't") || $0.contains("Exported") }, "a run started")
+            #expect(((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? ["?"]).isEmpty)
+            #expect(Self.press("design.export.scope.frame", in: sheet), "no Frame chip")
+            try await w.settle(200)
+            #expect((Self.node("design.export.start", in: sheet)?.isAccessibilityEnabled?() ?? false) == true, "Frame left Export off")
+            _ = Self.press("design.export.cancel", in: sheet)
+        }
+
+        /// A finished run's options reach the Model, so the next sheet (and the window's catalog) open with them.
+        @Test(.timeLimit(.minutes(2)))
+        func aFinishedRunIsRemembered() async throws {
+            var model = DesignFixtures.cards
+            model.selectItem("node-2")
+            let folder = try Self.folder("remember")
+            defer {
+                try? FileManager.default.removeItem(at: folder)
+                #if DEBUG
+                DesignExportArea.testFolder = nil
+                #endif
+            }
+            let (w, sheet) = try await Self.openSheet(model)
+            defer { w.close() }
+            guard let sheet else { return #expect(Bool(false), "no export sheet") }
+            #expect(Self.press("design.export.format.svg", in: sheet) && Self.press("design.export.scope.selection", in: sheet))
+            try await w.settle(200)
+            #expect(Self.press("design.export.start", in: sheet), "no Export button")
+            #expect(await Self.waitFor("Exported 1 file", in: sheet), "no finished line: \(Self.texts(in: sheet))")
+            _ = Self.press("design.export.dismiss", in: sheet)
+            try await w.settle(200)
+            #if DEBUG
+            let remembered = DesignWindow.lastWorkspace?.exportDefaults
+            #expect(remembered?.format == .svg && remembered?.scope == .selection, "the Model remembers \(String(describing: remembered))")
+            #endif
         }
 
         /// The sheet attached to `window`, waiting up to two seconds for SwiftUI to present it.

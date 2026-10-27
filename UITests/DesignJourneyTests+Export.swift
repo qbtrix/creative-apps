@@ -13,7 +13,8 @@
 // the folder panel: J17 writes Desktop as PNG 2x, SVG and PDF and reads each
 // file back; J18 exports PNG 1x twice ("Desktop 2.png" beside an unchanged
 // "Desktop.png"), Escape and Cancel write nothing, and a read-only folder
-// ends the run on the failed line with the system's reason.
+// ends the run on the failed line with the system's reason (its curly apostrophe,
+// "You don’t have permission", as Foundation words it).
 import CoreGraphics
 import ImageIO
 import XCTest
@@ -110,7 +111,7 @@ final class DesignExportJourneyTests: XCTestCase {
         try FileManager.default.setAttributes([.posixPermissions: 0o500], ofItemAtPath: folder.path)
         design.element(Self.startID).click()
         XCTAssert(
-            Self.waitUntil(timeout: 10) { self.reads(sheet, "Desktop 3.png couldn't be written. You don't have permission") },
+            Self.waitUntil(timeout: 10) { self.reads(sheet, "Desktop 3.png couldn't be written. You don’t have permission") },
             "the read-only folder didn't fail on Desktop 3.png with the system's reason")
         design.shot("export-failed")
         XCTAssert(design.element("suite.canvas").exists, "the window lost its document")
