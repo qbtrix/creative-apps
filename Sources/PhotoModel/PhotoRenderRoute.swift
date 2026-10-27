@@ -18,7 +18,10 @@
 // resident tiles (`residentTiles`, the GPU route's ResidentSurfaces) a region
 // composites from them in one batch, so a frame uploads only the tiles that
 // changed, those across the cores, and `composites` keeps the live route's
-// base composites (PhotoLiveTone.swift). Export and `composite()` stay on
+// base composites and this route's (PhotoLiveTone.swift): a region's layers
+// that the last render already laid come back composited, so a Move step on a
+// hundred-layer picture composites the moved layer and the ones above it.
+// Export and `composite()` stay on
 // `rendered(_:)` (CoreRaster directly), the reference both routes are held
 // to. Linux-safe: the Metal backend is the app's to make.
 import CoreColor
@@ -67,9 +70,10 @@ extension PhotoWorkspace {
     /// `rect` of the canvas through `dispatcher` as display bytes (sRGB,
     /// straight alpha, row-major) and the name of the backend that encoded them.
     func displayed(
-        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil
+        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil,
+        cache: PhotoCompositeCache? = nil
     ) throws -> (bytes: [UInt8], backend: String) {
-        let picture = try renderedSurface(rect, on: dispatcher, resident: resident)
+        let picture = try renderedSurface(rect, on: dispatcher, resident: resident, cache: cache)
         defer { dispatcher.release(picture) }
         let backend = dispatcher.backend(for: .display).name
         return (try dispatcher.display(picture, colorSpace: .sRGB), backend)
@@ -77,15 +81,17 @@ extension PhotoWorkspace {
 
     /// `rect` of the canvas composited and adjusted through `dispatcher`, as
     /// `rendered(_:)` makes it on CoreRaster. The caller releases the surface.
-    /// With `resident`, the layers' tiles come from it and composite in one batch (`residentComposited`).
+    /// With `resident`, the layers' tiles come from it and composite in one batch (`residentComposited`); with
+    /// `cache`, the layers the last render laid come from it composited (`composited(_:on:cache:)`).
     public func renderedSurface(
-        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil
+        _ rect: PixelRect, on dispatcher: RenderDispatcher, resident: ResidentSurfaces? = nil,
+        cache: PhotoCompositeCache? = nil
     ) throws -> RenderSurface {
         guard let canvas, let outer = rect.expanded(by: adjustments.blurMargin).intersection(canvas.rect),
             let inner = rect.intersection(canvas.rect)
         else { throw RasterError.invalid("region \(rect) is outside the image") }
         let picture = try resident.flatMap { try residentComposited(outer, on: dispatcher, resident: $0) }
-        let adjusted = try adjustments.applied(to: picture ?? composited(outer, on: dispatcher), on: dispatcher)
+        let adjusted = try adjustments.applied(to: picture ?? composited(outer, on: dispatcher, cache: cache), on: dispatcher)
         guard outer != inner else { return adjusted }
         defer { dispatcher.release(adjusted) }
         return try dispatcher.cropped(
@@ -149,31 +155,56 @@ extension PhotoWorkspace {
         }
     }
 
-    /// The visible layers over transparency in `rect`, bottom first.
-    func composited(_ rect: PixelRect, on dispatcher: RenderDispatcher) throws -> RenderSurface {
-        var picture = try dispatcher.surface(PixelBuffer(width: rect.width, height: rect.height))
+    /// The visible layers over transparency in `rect`, bottom first. With `cache`, the layers the last render
+    /// laid under the ones that changed come from it composited (PhotoCompositeCache.composite), so a Move,
+    /// transform, opacity or visibility step composites the changed layer and the ones above it.
+    func composited(_ rect: PixelRect, on dispatcher: RenderDispatcher, cache: PhotoCompositeCache? = nil) throws -> RenderSurface {
+        let shown = layers.reversed().filter { $0.isVisible && $0.opacity > 0 }
+        guard let cache else { return try composited(rect, layers: shown, on: dispatcher) }
+        let stack = PhotoCompositeCache.key(shown, pixels: pixels, masks: masks)
+        var (picture, laid) = try cache.composite(rect, stack: stack, on: dispatcher) { laid in
+            try composited(rect, layers: Array(shown[..<laid]), on: dispatcher)
+        }
         PhotoRenderCount.region()
         do {
-            for layer in layers.reversed() where layer.isVisible && layer.opacity > 0 {
-                PhotoRenderCount.layers(1)
-                let onCPU: Bool
-                if case .adjustment = layer.kind { onCPU = true } else { onCPU = shownMask(of: layer) != nil }
-                if onCPU {
-                    // No RenderOp runs an adjustment layer or a layer mask: read back, CoreRaster, upload again.
-                    let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
-                    let done = try PhotoLayerComposite.composite(
-                        content, onto: dispatcher.read(picture), origin: (x: rect.x, y: rect.y),
-                        adjusting: services.adjustmentLayers, masking: services.masking)
-                    picture = try Self.replace(picture, with: dispatcher.surface(done), on: dispatcher)
-                } else if let tiled = pixels[layer.id] {
-                    try composite(tiled, of: layer, onto: &picture, at: rect, on: dispatcher)
-                }
-            }
+            for layer in shown[laid...] { try composited(layer, onto: &picture, at: rect, on: dispatcher) }
         } catch {
             dispatcher.release(picture)
             throw error
         }
         return picture
+    }
+
+    /// `layers` (bottom first) over transparency in `rect`.
+    private func composited(_ rect: PixelRect, layers: [PhotoLayer], on dispatcher: RenderDispatcher) throws -> RenderSurface {
+        var picture = try dispatcher.surface(PixelBuffer(width: rect.width, height: rect.height))
+        PhotoRenderCount.region()
+        do {
+            for layer in layers { try composited(layer, onto: &picture, at: rect, on: dispatcher) }
+        } catch {
+            dispatcher.release(picture)
+            throw error
+        }
+        return picture
+    }
+
+    /// `layer` onto `picture`, a surface of `rect`: an adjustment layer or a masked layer through CoreRaster, a
+    /// pixel layer's tiles through the dispatcher.
+    private func composited(_ layer: PhotoLayer, onto picture: inout RenderSurface, at rect: PixelRect,
+                            on dispatcher: RenderDispatcher) throws {
+        PhotoRenderCount.layers(1)
+        let onCPU: Bool
+        if case .adjustment = layer.kind { onCPU = true } else { onCPU = shownMask(of: layer) != nil }
+        if onCPU {
+            // No RenderOp runs an adjustment layer or a layer mask: read back, CoreRaster, upload again.
+            let content = LayerContent(layer: layer, pixels: pixels[layer.id], mask: shownMask(of: layer))
+            let done = try PhotoLayerComposite.composite(
+                content, onto: dispatcher.read(picture), origin: (x: rect.x, y: rect.y),
+                adjusting: services.adjustmentLayers, masking: services.masking)
+            picture = try Self.replace(picture, with: dispatcher.surface(done), on: dispatcher)
+        } else if let tiled = pixels[layer.id] {
+            try composite(tiled, of: layer, onto: &picture, at: rect, on: dispatcher)
+        }
     }
 
     /// `layer`'s tiles under `rect` composited onto `picture`, a surface of

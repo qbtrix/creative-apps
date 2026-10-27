@@ -4,9 +4,9 @@
 // Clear Menu under it, and Open In off with its reason, since no other app reads a .halo yet. AppKit can't
 // draw an open NSMenu offscreen, so the image lays out what SuiteFileMenu gives the menu under its titles.
 // `menu` also fails when Halo's own Open Recent menu is still in its File menu beside the suite's, so File
-// shows one Open Recent. halo-drop-mark: the suite drop mark (SF-3) over the Halo window with Spot open,
+// shows one Open Recent. halo-drop-mark-{light,dark}: the suite drop mark (SF-3) over the viewer with Spot open,
 // saying what Halo's drop rule makes of a dropped Sunset.png ("Open in Photo": Halo places no images until
-// S20, so Photo, which reads a PNG, gets it), at the window's bottom as SuiteFileDropModifier puts it.
+// S20, so Photo, which reads a PNG, gets it), at the viewer's bottom as SuiteFileDropModifier puts it.
 // macOS only.
 #if os(macOS)
 import Foundation
@@ -52,15 +52,18 @@ import Testing
         #expect(actions == [.handOff(path: "/tmp/HaloFileFlowSnapshots/Sunset.png", app: "photo")])
         let sentence = try #require(SuiteDropMark.sentence(for: actions, app: .halo), "no mark for Sunset.png")
         #expect(sentence == "Open in Photo")
-        let window = HaloWindow(model: project)
-            .frame(width: SuiteSize.windowLaunch.width, height: SuiteSize.windowLaunch.height)
+        // The viewer, where HaloViewer.body attaches .suiteFileDrop: the mark sits at its bottom, over the
+        // timeline, as a real drag shows it. HaloWindow in an offscreen host draws a strip of chrome and a
+        // blank pane, so the mark landed nowhere the window draws it.
+        let view = HaloViewer(model: project)
             .overlay(alignment: .bottom) {
                 SuiteDropMarkView(sentence: sentence, refused: SuiteDropMark.refuses(actions))
                     .padding(SuiteSpacing.l)
                     .allowsHitTesting(false)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        try snapshot(window, name: "halo-drop-mark", scheme: .light)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(view, name: "halo-drop-mark-\(scheme.name)", scheme: scheme)
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 // PhotoLayerStyleTests.swift (layer-styles PY-1 contract, PY-5 behaviour): Photo as SuiteImaging's LayerStyleTarget.
-// The contract tests run now; the behaviour tests wait on PY-5's bodies.
-// Wire: layer-styles:PY-5 (turns on the tests marked "waits on PY-5")
+// setStyle runs on the workspace (PY-5); the tests through `style.*` wait on SuiteImaging's
+// StyleCommands bodies (LS-6).
+// Wire: layer-styles:LS-6 (turns on the tests marked "waits on LS-6")
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -65,20 +66,79 @@ struct PhotoLayerStyleTests {
         #expect(PhotoWorkspace.catalog.availability("style.add", on: ws).why == "Layer styles go on pixel and text layers.")
     }
 
-    @Test func setStyleThrowsUntilBuilt() throws {
-        var ws = try Self.twoLayers()
-        #expect(throws: CatalogError.self) { try ws.setStyle(.none, name: "Layer Style", drag: nil) }
+    /// A style with one stroke at `fill` fill opacity, so steps differ.
+    static func stroked(_ fill: Double = 1) -> LayerStyle {
+        LayerStyle(effects: [StyleRules.defaults(.stroke)], fillOpacity: fill)
     }
 
-    // PY-5's behaviour.
+    @Test func twoSelectedLayersTakeTheStyleInOneStep() throws {
+        var ws = try Self.twoLayers()
+        ws.selectAllLayers()
+        let steps = ws.historySteps.count
+        try ws.setStyle(Self.stroked(), name: "Add Layer Style", drag: nil)
+        #expect(ws.layers.count == 2)
+        #expect(ws.layers.allSatisfy { $0.style == Self.stroked() })
+        #expect(ws.historySteps.count == steps + 1)
+        #expect(ws.historySteps.last == "Add Layer Style")
+        #expect(ws.styleSelection == Self.stroked())
+        ws.undo()
+        #expect(ws.layers.allSatisfy { $0.style == .none })
+    }
 
-    @Test(.disabled("waits on PY-5")) func panelCommandSetsThePanel() throws {
+    @Test func adjustmentLayersRefuse() throws {
+        var ws = try Self.twoLayers()
+        ws.addAdjustmentLayer(.exposure)
+        let before = ws.layers, steps = ws.historySteps
+        #expect(throws: CatalogError.unavailable(id: "style", why: PhotoWorkspace.styleOnAdjustment)) {
+            try ws.setStyle(Self.stroked(), name: "Add Layer Style", drag: nil)
+        }
+        #expect(ws.layers == before)
+        #expect(ws.historySteps == steps, "a refusal is not an undo step")
+    }
+
+    @Test func anAdjustmentLayerInTheSelectionIsSkipped() throws {
+        var ws = try Self.twoLayers()
+        ws.addAdjustmentLayer(.exposure)
+        ws.selectAllLayers()
+        #expect(ws.styleHelp == nil, "an image layer in the selection can take the style")
+        let steps = ws.historySteps.count
+        try ws.setStyle(Self.stroked(), name: "Add Layer Style", drag: nil)
+        #expect(ws.historySteps.count == steps + 1)
+        #expect(ws.layers.filter { $0.style == Self.stroked() }.count == 2)
+        for layer in ws.layers {
+            if case .adjustment = layer.kind { #expect(layer.style == .none) } else { #expect(layer.style == Self.stroked()) }
+        }
+    }
+
+    @Test func dragIsOneStep() throws {
+        var ws = try Self.twoLayers()
+        try ws.setStyle(Self.stroked(), name: "Add Layer Style", drag: nil)
+        let before = ws.layers, steps = ws.historySteps.count
+        for i in 1...120 { try ws.setStyle(Self.stroked(Double(i) / 240), name: "Layer Style", drag: "d1") }
+        #expect(ws.historySteps.count == steps + 1)
+        #expect(ws.selectedLayer?.style == Self.stroked(0.5))
+        try ws.setStyle(Self.stroked(0.25), name: "Layer Style", drag: "d2")
+        #expect(ws.historySteps.count == steps + 2, "a new token is a new step")
+        try ws.setStyle(Self.stroked(0.75), name: "Layer Style", drag: nil)
+        try ws.setStyle(Self.stroked(0.8), name: "Layer Style", drag: nil)
+        #expect(ws.historySteps.count == steps + 4, "no token never folds")
+        ws.undo()
+        ws.undo()
+        ws.undo()
+        #expect(ws.selectedLayer?.style == Self.stroked(0.5))
+        ws.undo()
+        #expect(ws.layers == before)
+    }
+
+    // Through the catalog: StyleCommands' runs throw StyleRules.notBuilt until LS-6.
+
+    @Test(.disabled("waits on LS-6")) func panelCommandSetsThePanel() throws {
         var ws = try Self.twoLayers()
         _ = try PhotoWorkspace.catalog.run("style.panel", params: .object(["kind": .string("stroke")]), on: &ws)
         #expect(ws.stylePanel == .stroke)
     }
 
-    @Test(.disabled("waits on PY-5")) func addOnTwoSelectedLayersIsOneStep() throws {
+    @Test(.disabled("waits on LS-6")) func addOnTwoSelectedLayersIsOneStep() throws {
         var ws = try Self.twoLayers()
         ws.selectAllLayers()
         let steps = ws.historySteps.count
@@ -89,7 +149,7 @@ struct PhotoLayerStyleTests {
         #expect(ws.layers.allSatisfy { $0.style == .none })
     }
 
-    @Test(.disabled("waits on PY-5")) func anAdjustmentLayerIsSkippedOrRefused() throws {
+    @Test(.disabled("waits on LS-6")) func anAdjustmentLayerIsSkippedOrRefused() throws {
         var ws = try Self.twoLayers()
         ws.addAdjustmentLayer(.exposure)
         #expect(throws: CatalogError.self) {
@@ -102,7 +162,7 @@ struct PhotoLayerStyleTests {
         }
     }
 
-    @Test(.disabled("waits on PY-5")) func oneHundredTwentySetsUnderOneDragUndoInOne() throws {
+    @Test(.disabled("waits on LS-6")) func oneHundredTwentySetsUnderOneDragUndoInOne() throws {
         var ws = try Self.twoLayers()
         _ = try PhotoWorkspace.catalog.run("style.add", params: .object(["kind": .string("dropShadow")]), on: &ws)
         let before = ws.layers, steps = ws.historySteps.count
