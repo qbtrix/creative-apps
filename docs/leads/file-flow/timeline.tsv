@@ -245,3 +245,4 @@ utc	stage	event	ref	note
 2026-10-27T07:13:12Z	check	-	#4936 HF-4 not landed (waits on local-ci/prescreen); dev c367fbeb0; dev-red #5818 open
 2026-10-27T07:35:03Z	check	-	#4936 HF-4 now has local-ci/prescreen success, waits for the lane sweep; dev 841d4d881 has the SuiteUI fix #5868
 2026-10-27T07:57:41Z	check	-	dev ef9d2ace4; #5157 HY-a and #4936 HF-4 not landed yet; full CI 40470141862 on ef9d2ace4 (contains HY-m e83dec8c) in progress; no new line:halo findings
+2026-10-27T08:19:20Z	check	-	dev c21b28343 (9 PRs landed incl. #4917); #5157 HY-a and #4936 HF-4 still open, clean, no needs-fix; full CI 40470141862 on ef9d2ace4 (contains HY-m) still queued; no new line:halo findings
