@@ -107,7 +107,6 @@ Sources/PhotoApp/PhotoWindow+Crop.swift
 Sources/PhotoApp/PhotoWindow+Export.swift
 Sources/PhotoApp/PhotoWindow+History.swift
 Sources/PhotoApp/PhotoWindow+Transform.swift
-Sources/PhotoApp/SelectionOverlay.swift
 Sources/PhotoApp/StraightenSheet.swift
 Sources/PhotoApp/TransformOptions.swift
 Sources/PhotoApp/TransformOverlay.swift
