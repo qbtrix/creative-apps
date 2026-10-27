@@ -3,19 +3,20 @@
 Issue: #3777 · Packet: docs/blueprints/suiteui/features/adjust-everywhere.md
 Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15cb4e0f5-ipbr, act-1a15c4e2e3b-zh3u) · Session: claude/adjust-everywhere-lead-hyr1cx · Started: 2026-10-24T23:10Z
 Stage: 3 wave 3
-Base: afef017c (origin/dev)
-Next: wave 2 in lane: AJ-k #5064 (bfa7700e), AJ-c #5233 (a01fdf51, stacked on #5064), AJ-u #5235 look grid (039167d6) + #5236 filter sheet and menu (6240072f). Wave 3 building AJ-photo, AJ-library, AJ-halo on AJ-6 + both AJ-u branches; their PRs get fast-lane once wave 2 merges and each diff is its own. Then AJ-z.
+Base: main fef52e66 / dev 66d4c6d8
+Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
+Polled: 2026-10-27T12:21Z · #5247 #5248 #5249 clean; main fef52e66; dev-red #5818 open
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AJ-a | kinds, filters, commands, looks and the preset store as stubs | AJ-1, AJ-2 | – | suite-imaging:IM-a (AJ-1) | false | 0 | done (run 40114493184) | – | – |
-| AJ-u | shared adjust UI on the stubs | AJ-3, AJ-4 | – | AJ-a, OC-photo-u | true | 0 | in lane #5235, #5236 | – | – |
-| AJ-k | kind and filter bodies | AJ-5, AJ-5f | – | AJ-a, IM-m | false | 0 | in lane #5064 | – | – |
-| AJ-c | commands and looks live | AJ-6, AJ-7 | – | AJ-k, TC-m, AJ-a | false | 0 | in lane #5233 (AJ-7 merged #4867) | – | – |
-| AJ-photo | Photo adopts | AJ-8, AJ-9 | – | AJ-c, IM-photo, BK-photo, AJ-u | true | 0 | building (wave 3) | – | – |
-| AJ-library | Library adopts | AJ-10, AJ-11 | – | AJ-c, IM-z, ST-m, OC-library-m, AJ-u | true | 0 | building (wave 3) | – | – |
-| AJ-halo | Halo adopts | AJ-12, AJ-13 | – | AJ-c, AN-halo, AJ-u | true | 0 | building (wave 3) | – | – |
+| AJ-u | shared adjust UI on the stubs | AJ-3, AJ-4 | – | AJ-a, OC-photo-u | true | 0 | merged on dev (#5235, #5236); waits for a green main run | – | – |
+| AJ-k | kind and filter bodies | AJ-5, AJ-5f | – | AJ-a, IM-m | false | 0 | merged on dev (#5064); waits for a green main run | – | – |
+| AJ-c | commands and looks live | AJ-6, AJ-7 | – | AJ-k, TC-m, AJ-a | false | 0 | merged on dev (#5233, #4867); waits for a green main run | – | – |
+| AJ-photo | Photo adopts | AJ-8, AJ-9 | – | AJ-c, IM-photo, BK-photo, AJ-u | true | 0 | lane (#5247 clean; #5250, #5259, #5260 stacked) | – | – |
+| AJ-library | Library adopts | AJ-10, AJ-11 | – | AJ-c, IM-z, ST-m, OC-library-m, AJ-u | true | 0 | lane (#5248 clean, prescreen success; #5252 stacked) | – | – |
+| AJ-halo | Halo adopts | AJ-12, AJ-13 | – | AJ-c, AN-halo, AJ-u | true | 0 | lane (#5249 clean; #5257, #5258 stacked) | – | – |
 | AJ-z | finish | AJ-14, AJ-15 | – | all adopter slices | false | 0 | waiting | – | – |
 
 ## Tasks
@@ -362,3 +363,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 11:23Z All three PRs are clean and queued (#5249 at b42175259). dev 8a66c9833, main fef52e668: no Slice-Done yet. dev-red #5818 still open.
 - 11:45Z The lane log shows #5249 not eligible: 403 lines, over the 400 cap. Joined some wrapped lines and dropped blank lines in HaloFilters+Kernel.swift and HaloFiltersTests.swift, which brings it to 394; gate running. #5247 and #5248 are eligible and CLEAN, but the lane runs verify-after: it waits for the supervisor's local-ci/prescreen status on their heads (fef4bfd91, 7900f7c69). That status isn't ours to supply. main fef52e668: no Slice-Done.
 - 11:48Z #5249 is now 394 lines (373+21, 14 files) at 15ade3a63: scripts/ci --changed passed and mutate --validate is OK. Pushed and Head: moved. All three PRs are under the cap and wait for local-ci/prescreen.
+- 2026-10-27T12:21Z Resumed after Belt's 30-min nudge. Wave 2 is on dev and not yet on main. #5247 and #5249 wait for local-ci/prescreen; #5248 has it. 0 open findings.

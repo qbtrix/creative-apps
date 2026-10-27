@@ -164,3 +164,4 @@ utc	stage	event	ref	note
 11:23Z	3	waiting-lane	#5247 #5248 #5249	all clean, queued; dev 8a66c9833; main fef52e668
 11:45Z	3	fix-size	#5249	#5249 403 lines > lane cap 400; trimmed to 394, gating. #5247/#5248 wait local-ci/prescreen
 11:48Z	3	waiting-lane	#5247 #5248 #5249	#5249 trimmed to 394 lines at 15ade3a63, gate pass, Head moved
+12:21Z	3	waiting-lane	#5247 #5248 #5249	Belt nudge; wave 2 on dev, not main; #5247/#5249 wait local-ci/prescreen
