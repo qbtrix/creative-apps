@@ -1,6 +1,7 @@
 // FilterSheet.swift (adjust-everywhere AJ-3): the sheet every app shows for a
 // filter or Black & White…: a slider per value from the kind's range and start,
-// Preview, Cancel and OK (the kind's catalog command, off with its reason). The
+// Preview, Cancel and OK (the kind's catalog command, off with its reason), in
+// SuiteSheet with an InspectorSliderRow per value (#5789). The
 // host keeps the FilterSheetDraft; OK emits one intent, Cancel nothing.
 // FilterMenu lists the menu items. Controls carry `suite.filter.*` identifiers.
 import SuiteImaging
@@ -153,22 +154,16 @@ public struct FilterSheet<Target: AdjustTarget>: View {
     private func change(_ edit: (inout FilterSheetDraft) -> Void) { var next = draft; edit(&next); onDraft(next) }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text(draft.title).font(SuiteFont.headline)
-            Form {
+        SuiteSheet(
+            draft.title, width: SuiteSize.inspectorWidth.max, cancelID: "suite.filter.cancel", onCancel: onCancel,
+            action: ok, actionID: "suite.filter.ok"
+        ) {
+            VStack(alignment: .leading, spacing: SuiteSpacing.s) {
                 ForEach(draft.sliders) { s in
-                    LabeledContent(s.title) {
-                        HStack(spacing: SuiteSpacing.s) {
-                            Slider(value: Binding(get: { draft.value(s.id) }, set: { v in change { $0.set(s.id, to: v) } }),
-                                   in: s.range, step: s.step)
-                                .accessibilityLabel(s.title)
-                                .accessibilityIdentifier("suite.filter.slider.\(s.id)")
-                            Text("\(NumericInput.format(draft.value(s.id), decimals: s.step < 1 ? 1 : 0)) \(s.unit)")
-                                .font(SuiteFont.inspectorValue)
-                                .frame(width: SuiteSize.inspectorField, alignment: .trailing)
-                                .accessibilityIdentifier("suite.filter.value.\(s.id)")
-                        }
-                    }
+                    InspectorSliderRow(
+                        s.title, value: draft.value(s.id), in: s.range, step: s.step, unit: s.unit,
+                        decimals: s.step < 1 ? 1 : 0, onChange: { v in change { $0.set(s.id, to: v) } })
+                    .accessibilityIdentifier("suite.filter.slider.\(s.id)")
                 }
                 if draft.id == "add-noise" {
                     Toggle("Monochromatic", isOn: Binding(get: { draft.monochrome }, set: { on in change { $0.setMonochrome(on) } }))
@@ -179,19 +174,15 @@ public struct FilterSheet<Target: AdjustTarget>: View {
                     .toggleStyle(.checkbox)
                     .accessibilityIdentifier("suite.filter.preview")
             }
-            HStack {
-                Spacer()
-                Button("Cancel", action: onCancel).keyboardShortcut(.cancelAction)
-                    .accessibilityIdentifier("suite.filter.cancel")
-                if let spec = AdjustCommands.specs(Target.self).first(where: { $0.id == draft.command }) {
-                    MenuCommand(spec, on: target, title: "OK", shortcut: .defaultAction) {
-                        if let intent = draft.result(.ok) { onOK(intent) }
-                    }
-                    .accessibilityIdentifier("suite.filter.ok")
-                }
-            }
         }
-        .padding(SuiteSpacing.l)
-        .frame(width: SuiteSize.inspectorWidth.max)
+    }
+
+    /// OK: the draft's catalog command on the target, so the command's availability decides it.
+    var ok: MenuCommand {
+        let perform: @MainActor () -> Void = { if let intent = draft.result(.ok) { onOK(intent) } }
+        guard let spec = AdjustCommands.specs(Target.self).first(where: { $0.id == draft.command }) else {
+            return MenuCommand("OK", help: "OK: \(draft.title) has no command.", isEnabled: false, perform: {})
+        }
+        return MenuCommand(spec, on: target, title: "OK", perform: perform)
     }
 }

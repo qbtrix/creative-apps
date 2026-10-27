@@ -4,17 +4,20 @@
 // down to even (at least 2), a movie rounds its full size down to even (H.264
 // needs even sizes), a PNG sequence keeps the exact size; the base name is
 // SuiteModel's UniqueFileNames stem ("/" and ":" become "-", empty is
-// "Untitled"), and only the "_0001" frame suffix is Halo's. `run` is the frame
-// loop: it checks `isCancelled` before each frame, renders it with `drawing`
-// and `rendering`, writes it, and stops at the first error. Linux-safe.
+// "Untitled"), and only the "_0001" frame suffix is Halo's; alpha a movie's
+// codec can't keep is refused, and a movie without alpha is planned opaque
+// (export-pack HX-3). `run` is the frame loop: it checks `isCancelled` before
+// each frame, renders it with `drawing` and `rendering`, flattens it when the
+// plan is opaque, writes it, and stops at the first error. Linux-safe.
 import SuiteKernel
 import SuiteModel
 
 enum HaloRenderRules {
     /// The frames, size and file names for `s`. Throws `.noComposition` for a
-    /// composition with no frames.
+    /// composition with no frames and `.refused` for alpha the codec can't keep.
     static func plan(_ c: HaloComposition, _ s: HaloRenderSettings) throws -> HaloRenderPlan {
         guard c.durationFrames > 0 else { throw HaloEditError.noComposition }
+        try s.plannable()
         let even = { (n: Int) in max(2, n / 2 * 2) }
         let (w, h): (Int, Int) =
             if s.halfSize { (even(c.width / 2), even(c.height / 2)) }
@@ -23,10 +26,12 @@ enum HaloRenderRules {
         let frames = Array(0..<c.durationFrames)
         let base = UniqueFileNames.name(c.name, extension: "", among: [])
         let names: [String] = switch s.format {
-        case .movie: ["\(base).mp4"]
+        case .movie: ["\(base).\(s.outputExtension)"]
         case .pngSequence: frames.map { "\(base)_\(pad4($0 + 1)).png" }
         }
-        return HaloRenderPlan(width: w, height: h, framesPerSecond: c.framesPerSecond, frameRate: c.frameRate, frames: frames, fileNames: names)
+        return HaloRenderPlan(
+            width: w, height: h, framesPerSecond: c.framesPerSecond, frameRate: c.frameRate, frames: frames,
+            fileNames: names, opaque: s.format == .movie && !s.alpha)
     }
 
     /// Sends every planned frame to `sink` in order and says how it ended.
@@ -45,7 +50,8 @@ enum HaloRenderRules {
             }
             do {
                 let image = try rendering.render(
-                    drawing.drawList(c, at: frame), width: plan.width, height: plan.height, text: text)
+                    drawing.drawList(c, at: frame), width: plan.width, height: plan.height, text: text
+                ).written(keepingAlpha: !plan.opaque)
                 try sink.write(image, named: name(plan, i))
             } catch {
                 try? sink.finish(cancelled: true)

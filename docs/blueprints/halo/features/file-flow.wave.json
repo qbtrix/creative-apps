@@ -2,7 +2,7 @@
   "title": "Halo's Open Recent from the suite list, file drops, and Flare scenes arriving by Open In",
   "wave": "W4",
   "order": 30,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "halo/file-flow (adopter of suite/file-flow); #865 (adopt the suite: SuiteDocumentHost, .suiteApp); RJ-H42",

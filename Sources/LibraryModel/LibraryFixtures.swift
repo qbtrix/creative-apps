@@ -17,6 +17,7 @@ public enum LibraryFixtures {
         case "shoot", "shoot-unimported": shoot()
         case "cameras", "cameras-unimported": cameras()
         case "large": large()
+        case "large-missing": largeMissing()
         default: []
         }
     }
@@ -86,6 +87,15 @@ public enum LibraryFixtures {
             return PhotoItem(
                 name: "IMG_" + padded(index + 1, to: 5), captureDate: start.addingTimeInterval(Double(index) * step),
                 color: Color3(shade, 0.5, 1 - shade))
+        }
+    }
+
+    /// `large` with every twentieth photo's file missing: 500 missing badges to scroll past (catalog-files LC-4).
+    static func largeMissing() -> [PhotoItem] {
+        large().enumerated().map { index, photo in
+            var photo = photo
+            if index % 20 == 19 { photo.availability = .missing }
+            return photo
         }
     }
 

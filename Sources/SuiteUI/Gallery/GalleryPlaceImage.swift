@@ -5,7 +5,10 @@
 // runs through `PlaceCommands` in the board's catalog as one step and writes one line, `<command id> <outcome>`, to
 // `suite.gallery.log`. On the canvas a drag on the selected image's right edge resizes its box (one `Resize` step) and
 // a ⌥-drag inside it moves the picture in its box (`place.focus` per sample under one drag token: one `Move Inside`).
-// The canvas reads "Image, <name>, W by H pixels" to VoiceOver. The page is its own area in `SuiteGallery.areas`.
+// The selected image wears the accent outline and a right-edge handle (`SelectionHandles`), and the pointer turns
+// into the resize arrow over `edgeStrip`, the band a drag grabs, so the resize is found by mouse. A drop it refuses
+// shows why under the canvas. The canvas reads "Image, <name>, W by H pixels" to VoiceOver. The page is its own area
+// in `SuiteGallery.areas`.
 import AppKit
 import CoreGraphics
 import Foundation
@@ -39,6 +42,15 @@ enum GalleryPlaceImage {
         <svg xmlns="http://www.w3.org/2000/svg" width="240" height="80" viewBox="0 0 240 80">\
         <rect x="0" y="0" width="120" height="80" fill="#ff0000"/><rect x="120" y="0" width="120" height="80" fill="#0000ff"/></svg>
         """
+
+    /// The band (view points) where a drag grabs `image`'s right edge: `GalleryPlaceBoard.edgeSlop` either side of it,
+    /// its box's height.
+    static func edgeStrip(_ image: PlacedImage) -> CGRect {
+        let slop = GalleryPlaceBoard.edgeSlop
+        return PlacedImageText.cgRect(
+            Rect(minX: image.box.maxX - slop, minY: image.box.minY, maxX: image.box.maxX + slop, maxY: image.box.maxY),
+            scale: scale)
+    }
 
     /// The asset and its fitted, centred image for `sample`.
     static func placed(_ sample: Sample) -> (PlacedAsset, PlacedImage) {
@@ -186,9 +198,13 @@ private struct GalleryPlaceDrag {
 
 /// The `place-image` page: the canvas, Place… and the samples, the file row once placed, and the log.
 struct GalleryPlaceImagePage: View {
-    @State private var board = GalleryPlaceBoard()
+    @State private var board: GalleryPlaceBoard
     @State private var drag: GalleryPlaceDrag?
     @State private var log: [String] = []
+    @State private var refused: String?
+
+    /// The page on `board`; snapshots pass one with an image placed.
+    init(board: GalleryPlaceBoard = GalleryPlaceBoard()) { _board = State(initialValue: board) }
 
     var body: some View {
         let selected = board.placedSelection
@@ -203,7 +219,7 @@ struct GalleryPlaceImagePage: View {
                         .suiteControl(id: "suite.place.sample.\(sample.format.rawValue)", enabled: true, reason: nil)
                 }
             }
-            GalleryPlaceCanvas(drawn: board.drawn, selected: selected?.asset)
+            GalleryPlaceCanvas(drawn: board.drawn, selected: selected?.asset, selectedImage: selected?.image)
                 .gesture(DragGesture(minimumDistance: 1)
                     .onChanged(dragged)
                     .onEnded { _ in
@@ -214,7 +230,14 @@ struct GalleryPlaceImagePage: View {
                     let scale = GalleryPlaceImage.scale
                     for file in files { apply(.place(name: file.name, data: file.data, at: Point(x: point.x / scale, y: point.y / scale))) }
                     return true
+                } onRefuse: { why in
+                    refused = why
+                    send("drop refused: \(why)")
                 }
+            if let refused {
+                Text(refused).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
+                    .accessibilityIdentifier("suite.place.refused")
+            }
             if let selected {
                 PlacedImageRows(asset: selected.asset, formats: Set(PlacedFormat.allCases), onIntent: apply)
                     .frame(width: SuiteSize.inspectorWidth.ideal)
@@ -254,7 +277,10 @@ struct GalleryPlaceImagePage: View {
     }
 
     /// `intent` through the board's catalog, then its log line.
-    private func apply(_ intent: PlaceIntent) { send(board.run(intent)) }
+    private func apply(_ intent: PlaceIntent) {
+        refused = nil
+        send(board.run(intent))
+    }
 
     private func send(_ line: String) {
         log.append(line)
@@ -266,6 +292,8 @@ struct GalleryPlaceImagePage: View {
 private struct GalleryPlaceCanvas: View {
     let drawn: [(asset: PlacedAsset, image: PlacedImage)]
     let selected: PlacedAsset?
+    let selectedImage: PlacedImage?
+    @State private var hoveredHandle: EditorHandle?
 
     var body: some View {
         let canvas = GalleryPlaceImage.canvas, scale = GalleryPlaceImage.scale
@@ -280,10 +308,32 @@ private struct GalleryPlaceCanvas: View {
             }
         }
         .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+        .overlay(alignment: .topLeading) {
+            if let image = selectedImage { selection(image) }
+        }
         .contentShape(.rect)
+        .help(selectedImage == nil ? "" : "Drag the right edge to resize the box; ⌥-drag inside to move the picture in it.")
         .accessibilityElement()
         .accessibilityLabel(selected == nil ? "Empty canvas" : "Image")
         .accessibilityValue(selected.map(PlacedImageText.spoken) ?? "")
         .accessibilityIdentifier("suite.place.canvas")
+    }
+
+    /// The selected image's outline and right-edge handle, and the resize pointer over the band a drag grabs.
+    private func selection(_ image: PlacedImage) -> some View {
+        let middle = (image.box.minY + image.box.maxY) / 2
+        let edge = Rect(minX: image.box.maxX, minY: middle, maxX: image.box.maxX, maxY: middle)
+        let strip = GalleryPlaceImage.edgeStrip(image)
+        return ZStack(alignment: .topLeading) {
+            SelectionHandles(
+                box: image.box, handles: [.right: edge], zoom: GalleryPlaceImage.scale, hovered: hoveredHandle,
+                onHover: { hoveredHandle = $0 })
+            Color.clear
+                .frame(width: strip.width, height: strip.height)
+                .contentShape(.rect)
+                .pointerStyle(.frameResize(position: .trailing, directions: .all))
+                .offset(x: strip.minX, y: strip.minY)
+                .accessibilityHidden(true)
+        }
     }
 }

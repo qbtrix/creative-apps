@@ -156,7 +156,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         photo.shot("documents-2-painted")
 
         // 2. Command-W asks; Cancel keeps the window, still Edited.
-        let cancel = askToClose(photo, "photo.unsaved.cancel")
+        let cancel = askToClose(photo, "photo.close.cancel")
         cancel.click()
         XCTAssert(cancel.waitForNonExistence(timeout: 5), "Cancel left the unsaved alert up")
         XCTAssert(photo.window(named: "beach.png").exists, "Cancel closed the window")
@@ -165,7 +165,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         photo.shot("documents-2-cancelled")
 
         // 3. Command-W, Don't Save closes; Open Recent's first entry reopens beach.png as it was on disk.
-        askToClose(photo, "photo.unsaved.dontSave").click()
+        askToClose(photo, "photo.close.dontSave").click()
         XCTAssert(photo.window(named: "beach.png").waitForNonExistence(timeout: 10), "Don't Save didn't close the window")
         photo.shot("documents-2-closed", screen: true)
         XCTAssertEqual(try Data(contentsOf: beach), original, "Don't Save wrote beach.png")
@@ -245,14 +245,10 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
 
     /// Picks `mode` from the inspector's Blend Mode menu (`photo.layer.blend`).
     @MainActor private func chooseBlend(_ mode: String, _ photo: Journey) {
-        let types = [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) }
-        let picker = photo.element("suite.inspector").descendants(matching: .any).matching(NSPredicate(format:
-            "elementType IN %@ AND (identifier == 'photo.layer.blend' OR label == 'Blend Mode')", types)).firstMatch
+        let picker = photo.inspectorMenu("photo.layer.blend", label: "Blend Mode")
         XCTAssert(picker.waitForExistence(timeout: 5), "no Blend Mode menu (photo.layer.blend)")
         picker.click()
-        let item = photo.app.menus.firstMatch.descendants(matching: .menuItem).matching(NSPredicate(format: "title == %@", mode)).firstMatch
-        XCTAssert(item.waitForExistence(timeout: 3), "the Blend Mode menu has no \(mode)")
-        item.click()
+        XCTAssert(photo.chooseShownMenuItem(mode), "the Blend Mode menu has no \(mode)")
         expect("Undo Blend Mode", photo)
     }
 
@@ -280,9 +276,9 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let ask = alert(photo)
         let question = "Do you want to save the changes made to the document “beach.png”?"
         XCTAssert(text(question, in: ask).waitForExistence(timeout: 10), "Command-W asked no unsaved-changes question")
-        let ids = ["photo.unsaved.save", "photo.unsaved.dontSave", "photo.unsaved.cancel"]
+        let ids = ["photo.close.save", "photo.close.dontSave", "photo.close.cancel"]
         XCTAssert(ids.allSatisfy { ask.buttons[$0].exists }, "the unsaved alert lacks one of \(ids)")
-        photo.shot(identifier == "photo.unsaved.cancel" ? "documents-2-unsaved-alert" : "documents-2-unsaved-again")
+        photo.shot(identifier == "photo.close.cancel" ? "documents-2-unsaved-alert" : "documents-2-unsaved-again")
         return ask.buttons[identifier]
     }
 

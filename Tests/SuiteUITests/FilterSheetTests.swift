@@ -1,6 +1,7 @@
 // FilterSheetTests.swift (adjust-everywhere AJ-3): drafts take the kind's ranges
 // and starts, clamp and snap; OK emits one intent, Cancel nothing; FilterMenu's
-// items are catalog commands, off on the stub with the AJ-5 reason. macOS only.
+// items are catalog commands, off on the stub with the AJ-5 reason, and so is the
+// sheet's OK. macOS only.
 import SuiteImaging
 import SuiteKernel
 import Testing
@@ -80,5 +81,13 @@ import Testing
             #expect(spec?.availability(stub).why == "Filters arrive with AJ-5.", "\(item.command) isn't off with its reason")
             #expect(item.sheet.map { FilterSheetDraft($0) != nil } ?? true, "\(item.command) opens no sheet")
         }
+    }
+
+    /// SuiteSheet's default action is the draft's catalog command (#5789): off on the stub, with its reason as help.
+    @MainActor @Test func okIsTheCommandOnTheTarget() throws {
+        let sheet = FilterSheet(draft: try #require(FilterSheetDraft("gaussian-blur")), target: PendingAdjustTarget())
+        #expect(sheet.ok.title == "OK")
+        #expect(!sheet.ok.isEnabled, "OK runs on a target that has no filters")
+        #expect(sheet.ok.help == "OK: Filters arrive with AJ-5.")
     }
 }

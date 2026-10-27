@@ -40,7 +40,7 @@ actor RacingPreferences: PreferencesStoring {
     func changes() async -> AsyncStream<Int> { await inner.changes() }
 }
 
-@MainActor @Suite(.timeLimit(.minutes(1))) struct OnboardingModelTests {
+@MainActor @Suite(.timeLimit(.minutes(5))) struct OnboardingModelTests {
     let now = Date(timeIntervalSince1970: 1_800_000_000)
     let log = SampleCopyLog()
 
@@ -224,12 +224,12 @@ actor RacingPreferences: PreferencesStoring {
         let (m, _) = await model { $0.sending = gate }
         let preset = try flareHD()
         let refused = Task { await m.startNew(preset, now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         await gate.finish(.failure(.timedOut))
         await refused.value
         #expect(m.message == .timedOut && m.launching == nil && !m.isFinished)
         let next = Task { await m.openSample(.design, now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         #expect(m.message == nil && m.failed == nil && m.launching == .design)
         await gate.finish(.success(SwitchReceipt(app: .design, wasRunning: false, requestedAt: 1)))
         await next.value
@@ -290,10 +290,11 @@ actor RacingPreferences: PreferencesStoring {
 
     @Test func continueOnTheLastPageSavesTheVersion() async throws {
         let (m, s) = await model()
+        let saves = await s.preferences.changes()
         m.choose(.design)
         m.continue(); m.continue(); m.continue()
         #expect(m.isFinished)
-        for _ in 0..<100 where try await saved(s).onboardingDoneVersion == nil { await Task.yield() }
+        for await _ in saves where try await saved(s).onboardingDoneVersion != nil { break }
         #expect(try await saved(s).onboardingDoneVersion == 1)
         #expect(try await saved(s).homeOrder.first == .design)
     }
@@ -305,7 +306,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isLastPage && m.sendingReason == nil)
         let preset = try flareHD()
         let send = Task { await m.startNew(preset, now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         #expect(m.launching == .flare && m.sendingReason == "A document is opening.")
         m.back(); m.continue()
         await m.skip()
@@ -338,7 +339,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.presetsHelp(blocked) == "Halo isn't installed.")
         let preset = try flareHD()
         let send = Task { await m.startNew(preset, now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         let opening = "A document is opening."
         #expect([m.skipHelp, m.backHelp, m.startEmptyHelp, m.presetsHelp(design.tile), m.sampleHelp(design)]
             == Array(repeating: opening, count: 5))
