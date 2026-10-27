@@ -140,7 +140,7 @@ struct PhotoCommandCatalogTests {
         let adjust = ws.addAdjustmentLayerHelp
         return [row("New Image", true), row("Open…", true), row("Save", image), row("Save As…", image), row("Export…", image),
                 row(ws.undoActionName, ws.canUndo), row(ws.redoActionName, ws.canRedo),
-                row("Cut", image, ws.cutHelp), row("Copy", image, ws.copyHelp), row("Paste", true, ws.pasteHelp(true)),
+                row("Cut", image, ws.cutHelp), row("Copy", image, ws.copyHelp), row("Paste", true, ws.pasteHelp(true)), row("Paste as Image", false),
                 row("Select All", ws.canSelectAll), row("Delete Selection", ws.canEditSelection), row("Fill Selection", ws.canEditSelection),
                 row("All", image), row("Deselect", ws.canDeselect)]
             + [row("Image Size…", image), row("Canvas Size…", image && ws.flipHelp == nil)] + ["Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°"].map { row($0, image) }
