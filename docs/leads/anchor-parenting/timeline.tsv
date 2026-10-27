@@ -241,3 +241,4 @@ utc	stage	event	ref	note
 2026-10-27T01:40Z	3	poll	-	dev-red #5818 open (linux red, range main..2c20134c), lane holds PRs on the failing module; not ours to fix; #5819 AN-u still queued at 9dfc99f3; AN-10 waits on #4902
 2026-10-27T02:02Z	3	poll	-	dev-red #5818 still open; lane merged #4899 and #5826, none ours; #5819 AN-u still queued at 9dfc99f3; AN-10 waits on #4902
 2026-10-27T02:25Z	3	poll	-	dev-red #5818 still open; lane merged #5041 only, not ours; #5819 AN-u still queued at 9dfc99f3; AN-10 waits on #4902
+2026-10-27T02:47Z	3	poll	-	dev-red #5818 still open, none of ours merged; #5819 AN-u waiting; AN-10 waits on #4902
