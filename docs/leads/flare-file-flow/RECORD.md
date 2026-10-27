@@ -480,3 +480,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 02:51Z check-in: #3482 quiet, no open file-flow findings. Gaps #4764 and #1829 still open.
 
 - 03:23Z check-in: #3482 quiet. New finding #5833 matched "file-flow" but is the Photo feature (line:photo, #3471/#4500), so it is not this lead's to gap. Gaps #4764 and #1829 still open.
+
+- 03:55Z check-in: #3482 quiet, no open Flare file-flow findings. Gaps #4764 and #1829 still open.
