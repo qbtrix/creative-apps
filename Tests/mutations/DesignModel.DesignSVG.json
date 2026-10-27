@@ -131,5 +131,12 @@
     "find": "static let miterLimit = 10.0",
     "replace": "static let miterLimit = 4.0",
     "tests": "DesignSVGTests|DesignSVGWalkTests"
-  }
+  },
+  {"label": "imageKeepsAspect: the picture is stretched to the node's box", "file": "Sources/DesignModel/Live/DesignSVG.swift", "find": "let drawn = PlaceRules.drawnRect(PlacedImage(assetID: asset.id, box: frame, focus: node.placedFocus), natural: asset.natural)", "replace": "let drawn = frame", "tests": "DesignPlaceSVGTests|DesignSVGTests|DesignSVGWalkTests"},
+  {"label": "imageClipsToBox: a rectangle's picture is not clipped to its box", "file": "Sources/DesignModel/Live/DesignSVG.swift", "find": "lines.append(pad + \"  \" + inClip + image + \"</g>\")", "replace": "lines.append(pad + \"  \" + image)", "tests": "DesignPlaceSVGTests|DesignSVGTests|DesignSVGWalkTests"},
+  {"label": "aRectanglesOpacityIsWrittenOnce: a picture's fill carries the node's opacity again inside its <g>", "file": "Sources/DesignModel/Live/DesignSVG.swift", "find": "lines.append(pad + \"  <rect \\(box)\\(corner(node))\\(fill(node))\\(turned)/>\")", "replace": "lines.append(pad + \"  <rect \\(box)\\(corner(node))\\(fill(node))\\(alpha(node))\\(turned)/>\")", "tests": "DesignPlaceSVGTests|DesignSVGTests|DesignSVGWalkTests"},
+  {"label": "theStrokeIsWrittenAfterThePictureAtFullWidth: the stroke is painted under the picture", "file": "Sources/DesignModel/Live/DesignSVG.swift", "find": "lines.append(pad + \"  <rect \\(box)\\(corner(node))\\(fill(node))\\(turned)/>\")", "replace": "lines.append(pad + \"  <rect \\(box)\\(corner(node))\\(fill(node))\\(paint(node))\\(turned)/>\")", "tests": "DesignPlaceSVGTests|DesignSVGTests|DesignSVGWalkTests"},
+  {"label": "theStrokeIsWrittenAfterThePictureAtFullWidth: a picture's node writes no stroke", "file": "Sources/DesignModel/Live/DesignSVG.swift", "find": "            if !paint(node).isEmpty { lines.append(pad + \"  <rect \\(box)\\(corner(node)) fill=\\\"none\\\"\\(paint(node))\\(turned)/>\") }\n", "replace": "", "tests": "DesignPlaceSVGTests|DesignSVGTests|DesignSVGWalkTests"},
+  {"label": "aJPEGsAndAnSVGsHrefsNameTheirMediaTypes: an SVG's href says image/svg", "file": "Sources/DesignModel/Live/DesignSVG.swift", "find": "\"image/svg+xml\"", "replace": "\"image/svg\"", "tests": "DesignPlaceSVGTests|DesignSVGTests|DesignSVGWalkTests"},
+  {"label": "aJPEGsAndAnSVGsHrefsNameTheirMediaTypes: a JPEG's href says image/jpg", "file": "Sources/DesignModel/Live/DesignSVG.swift", "find": ": \"image/\" + asset.format.rawValue", "replace": ": \"image/jpg\"", "tests": "DesignPlaceSVGTests|DesignSVGTests|DesignSVGWalkTests"}
 ]

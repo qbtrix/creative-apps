@@ -127,6 +127,13 @@
 # stays green. It must be `nonisolated` (or opt out with `// view-static:
 # main-actor`) unless Tests/view-statics-baseline.txt lists it; that only shrinks.
 #
+# The app-local-surfaces check runs Tests/canonical/test_check_app_local_surfaces.sh, then
+# scripts/check-app-local-surfaces (docs/engineering/swiftui-rules.md rules 5 and 12): no
+# NSOutlineView, NSTableView, NSCollectionView, NSTabView, NSSegmentedControl,
+# NS(View|ViewController)Representable, `.pickerStyle(.segmented)` or TabView in Sources/*App.
+# Those live in SuiteUI (CanvasHost, TimelineLanesView, SegmentedTabs) or SuiteShell.
+# Tests/app-local-surfaces-baseline.txt grandfathers today's hits; it only shrinks.
+#
 # The render-contract check runs Tests/canonical/test_check_render_contract.sh, then
 # scripts/check-render-contract (docs/render-contract.md): no canvas-sized SwiftUI
 # offscreen pass (.drawingGroup, .compositingGroup, ImagePaint, Canvas) in a canvas or
@@ -396,6 +403,10 @@ python3 scripts/check-dup-views || fail "SuiteUI first: use the SuiteUI componen
 echo "== statics on Views (Tests/view-statics-baseline.txt)"
 bash Tests/canonical/test_check_view_statics.sh || fail "statics on Views: scripts/check-view-statics broke its tests"
 python3 scripts/check-view-statics || fail "statics on Views: mark the pure helper nonisolated (docs/engineering/swiftui-rules.md rule 13)"
+
+echo "== app-local surfaces (Tests/app-local-surfaces-baseline.txt)"
+bash Tests/canonical/test_check_app_local_surfaces.sh || fail "app-local surfaces: scripts/check-app-local-surfaces broke its tests"
+python3 scripts/check-app-local-surfaces || fail "app-local surfaces: move the AppKit surface or tab control into SuiteUI (docs/engineering/swiftui-rules.md rules 5 and 12)"
 
 echo "== render contract (Tests/render-contract-baseline.txt)"
 bash Tests/canonical/test_check_render_contract.sh || fail "render contract: scripts/check-render-contract broke its tests"
