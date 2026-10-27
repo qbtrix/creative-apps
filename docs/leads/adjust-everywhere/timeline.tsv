@@ -161,3 +161,4 @@ utc	stage	event	ref	note
 08:42Z	3	waiting-lane	#5247 #5248 #5249	all clean, queued; lane batches 084056 (SR-5) and 084102 (HF-4) in flight; dev aa8991762; main fef52e668
 2026-10-27T08:48Z	check-in	M
 09:02Z	3	waiting-lane	#5247 #5248 #5249	all clean, queued; lane draining 1-PR batches (084851/084856/084902 in flight, none ours); dev aa8991762; main fef52e668
+09:23Z	3	waiting-lane	#5247 #5248 #5249	all clean, queued, not in in-flight batches; dev 9d3e5e327; main fef52e668
