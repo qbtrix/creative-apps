@@ -277,3 +277,4 @@ utc	stage	event	ref	note
 2026-10-27T06:30Z	3	heartbeat	lane	poll 2026-10-27T06:30Z: 06:3xZ: no change. dev-red #5818 is open (revert #5827). #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor.
 2026-10-27T06:35:54Z	3	heartbeat	lane	CB-design #4904 restacked eab78f8e, CB-halo #4905 restacked b19cc2ae (PNG.write after HaloFramePNG removal); both CI: PASS, awaiting lane
 2026-10-27T06:58:21Z	3	heartbeat	lane	check-in 07:00Z: lane holds open PRs; dev-red #5818 open; scoped suiteui 40460982303 red (dev-red)
+2026-10-27T07:17Z	3	heartbeat	lane	poll 2026-10-27T07:17Z: 07:1xZ: no change. dev-red #5818 is open (revert #5827). #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor.

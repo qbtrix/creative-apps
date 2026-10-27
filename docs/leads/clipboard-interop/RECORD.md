@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T06:58Z · Polled: 2026-10-27T07:00Z. PRs #4902 #4904 #4905 needs-rebase dropped, waiting for batch; #5089 #5091 #5231 #5149 #5125 open, no needs-fix. dev-red #5818 open; no Belt-Slice-Done yet.
+Polled: 2026-10-27T07:17Z · 07:1xZ: no change. dev-red #5818 is open (revert #5827). #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor.
 
 
 
