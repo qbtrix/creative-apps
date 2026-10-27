@@ -249,3 +249,4 @@ utc	stage	event	ref	note
 2026-10-27T00:38Z	poll	5025 still awaiting batch mac gate; dev-red 5818 open; 3481 no new comments
 2026-10-27T01:02Z	poll	5025 batch red: dev-wide expired quarantine entries; commented #3481
 2026-10-27T01:24Z	poll	5025 merged 2c20134c; awaiting green flare/full dev run
+2026-10-27T01:46Z	poll	no green flare/full dev run with 2c20134c yet (scoped flare 40432981165 cancelled; dev red #5818)
