@@ -46,7 +46,10 @@ its own render route. Every one was locally reasonable and globally slow:
    `// render-contract: allow <reason>`. A drag that moves, rotates or scales
    pixels that already exist (Free Transform, move, pan, zoom) is a compositor
    transform: the GPU moves the picture it already has, the way a browser's
-   CSS transform does, and the pixels are resampled once, on commit. Every
+   CSS transform does, and the pixels are resampled once, on commit. The one
+   way to do it is SuiteUI's `CanvasLiveLayer` (`CanvasHostView.showLiveLayer`
+   at the drag's start, `moveLiveLayer` per sample, `dropLiveLayer` on commit
+   or cancel); Photo's Free Transform is its first caller. Every
    drag or slider budget test counts the CPU resamples during the gesture
    (`PixelBuffer.sampled`), and that count is 0. Captain, 10-27: Free
    Transform resampled per sample twice (#5285, #5863) and still read as
