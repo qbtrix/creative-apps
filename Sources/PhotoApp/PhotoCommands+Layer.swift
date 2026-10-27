@@ -6,7 +6,8 @@
 // disabled with the workspace's reason as its help when it can't run;
 // Rename…, Show/Hide, Bring Forward, Send Backward, Select Layer Above and
 // Below. The items are a view, PhotoLayerMenu, so the snapshot tests can draw
-// them; the three new items' shortcuts and symbols are tables the tests read.
+// them; shortcuts and symbols are tables the tests read, and `symbol(_:)` is
+// shared with the Layers panel's bar and row menus (PhotoLayerList).
 import AppKit
 import PhotoModel
 import SuiteUI
@@ -25,25 +26,25 @@ struct PhotoLayerMenu: View {
     let menu: PhotoMenu
 
     var body: some View {
-        menu.item("layer.new", systemImage: "plus", shortcut: KeyboardShortcut("n", modifiers: [.command, .shift])) {
+        menu.item("layer.new", systemImage: Self.symbol("layer.new"), shortcut: KeyboardShortcut("n", modifiers: [.command, .shift])) {
             menu.perform(.addLayer)
         }
         adjustmentLayerMenu
-        menu.item("layer.delete", systemImage: "trash") { menu.perform(.deleteLayer) }
+        menu.item("layer.delete", systemImage: Self.symbol("layer.delete")) { menu.perform(.deleteLayer) }
         Divider()
         item("layer.duplicate", .duplicateLayer)
         item("layer.merge-down", .mergeDown)
         item("layer.flatten", .flattenImage)
         Divider()
-        menu.item("layer.rename", systemImage: "pencil") { menu.perform(.renameLayer) }
-        menu.item("layer.toggle-visibility", systemImage: menu.visibilityTitle == "Show Layer" ? "eye" : "eye.slash") {
+        menu.item("layer.rename", systemImage: Self.symbol("layer.rename")) { menu.perform(.renameLayer) }
+        menu.item("layer.toggle-visibility", systemImage: Self.symbol("layer.toggle-visibility", visibility: menu.visibilityTitle)) {
             if let selected = menu.selectedLayer { menu.perform(.toggleVisibility(selected)) }
         }
         Divider()
-        menu.item("layer.bring-forward", systemImage: "square.2.layers.3d.top.filled", shortcut: KeyboardShortcut("]")) {
+        menu.item("layer.bring-forward", systemImage: Self.symbol("layer.bring-forward"), shortcut: KeyboardShortcut("]")) {
             menu.perform(.bringForward)
         }
-        menu.item("layer.send-backward", systemImage: "square.2.layers.3d.bottom.filled", shortcut: KeyboardShortcut("[")) {
+        menu.item("layer.send-backward", systemImage: Self.symbol("layer.send-backward"), shortcut: KeyboardShortcut("[")) {
             menu.perform(.sendBackward)
         }
         menu.item("layer.select-above", systemImage: "arrow.up", shortcut: KeyboardShortcut("]", modifiers: [.command, .option])) {
@@ -65,7 +66,7 @@ struct PhotoLayerMenu: View {
 
     /// The three layer commands' symbols. Merge Down's reads as two layers
     /// becoming one, not as a save (the square.and.arrow family).
-    static func systemImage(_ intent: EditIntent) -> String {
+    nonisolated static func systemImage(_ intent: EditIntent) -> String {
         switch intent {
         case .duplicateLayer: "plus.square.on.square"
         case .mergeDown: "rectangle.compress.vertical"
@@ -73,6 +74,23 @@ struct PhotoLayerMenu: View {
         case .cut: PhotoEditItem.cut.systemImage
         case .copy: PhotoEditItem.copy.systemImage
         case .paste: PhotoEditItem.paste.systemImage
+        }
+    }
+
+    /// A layer command's symbol by catalog id, for the Layer menu and the Layers panel alike;
+    /// Show/Hide follows the title the menu gives it (`visibility`).
+    nonisolated static func symbol(_ id: String, visibility: String = "Hide Layer") -> String {
+        switch id {
+        case "layer.new": "plus"
+        case "layer.delete": "trash"
+        case "layer.rename": "pencil"
+        case "layer.toggle-visibility": visibility == "Show Layer" ? "eye" : "eye.slash"
+        case "layer.bring-forward": "square.2.layers.3d.top.filled"
+        case "layer.send-backward": "square.2.layers.3d.bottom.filled"
+        case "layer.duplicate": systemImage(.duplicateLayer)
+        case "layer.merge-down": systemImage(.mergeDown)
+        case "layer.flatten": systemImage(.flattenImage)
+        default: "square.stack"
         }
     }
 

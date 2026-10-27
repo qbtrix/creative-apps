@@ -1,0 +1,30 @@
+[
+  {
+    "label": ".catalogKeysUnchanged: 0...255 row values written as 0...1",
+    "file": "Sources/LibraryModel/LibraryDevelop+Imaging.swift",
+    "find": "public var rowScale: Double { self == .gamma ? 1 : 255 }",
+    "replace": "public var rowScale: Double { 1 }",
+    "tests": "LibraryImagingTests"
+  },
+  {
+    "label": ".curveRoundTrip: curve points not mapped",
+    "file": "Sources/LibraryModel/LibraryDevelop+Imaging.swift",
+    "find": "public var adjustCurve: AdjustCurve { AdjustCurve(points: points) }",
+    "replace": "public var adjustCurve: AdjustCurve { .identity }",
+    "tests": "LibraryImagingTests"
+  },
+  {
+    "label": ".curveRoundTrip: AdjustCurve points not mapped back",
+    "file": "Sources/LibraryModel/LibraryDevelop+Imaging.swift",
+    "find": "self = ToneCurve(points: curve.points) ?? .identity",
+    "replace": "self = .identity",
+    "tests": "LibraryImagingTests"
+  },
+  {
+    "label": "Saturation isn't handed to the shared list",
+    "file": "Sources/LibraryModel/LibraryDevelop+Imaging.swift",
+    "find": "hueSaturation: AdjustHueSaturation(hue: 0, saturation: saturation, lightness: 0)",
+    "replace": "hueSaturation: AdjustHueSaturation(hue: 0, saturation: 0, lightness: 0)",
+    "tests": "LibraryImagingTests"
+  }
+]

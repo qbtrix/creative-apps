@@ -7,6 +7,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 import SuiteModel
 
 /// SuiteModel's `ProblemReport` and `BetaNotes`, built from a `.suitehelp` file's values.
@@ -26,14 +27,10 @@ public struct HelpReports: HelpProviding, Hashable {
     public func report(app: String, note: String) -> JSONValue {
         let report = ProblemReport.build(app: SuiteApp(rawValue: app) ?? .launcher, version: version, build: build, macOS: macOS,
                                          model: model, crashes: crashes, now: now, home: home, user: user, host: host)
-        guard case .object(var fields)? = try? JSONValue(encoding: report) else { return .null }
-        fields["text"] = .string(report.text(note: note))
-        return .object(fields)
+        return SuiteHelpCatalog.reportAnswer(report, text: report.text(note: note))
     }
 
-    public func betaNotes() -> JSONValue {
-        .object(["notes": .array(BetaNotes.current.map { .object(["title": .string($0.title), "detail": .string($0.detail)]) })])
-    }
+    public func betaNotes() -> JSONValue { SuiteHelpCatalog.notesAnswer(BetaNotes.current) }
 
     /// A `.suitehelp` file. Every field but `app` may be left out; a saved document's `answer` is ignored.
     struct File: Codable {

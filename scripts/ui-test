@@ -22,6 +22,13 @@
 # skipped only in a full run: when APP is set (journeys.yml's macOS journeys
 # job sets it for a scoped run) it isn't skipped, and is listed
 # as such. An unreadable quarantine fails the run before anything builds.
+# The local-key journeys (`localkeys` below) post key events as CGEvents, which
+# needs Accessibility access that GitHub's hosted macOS runners lack. On a
+# hosted runner (RUNNER_ENVIRONMENT=github-hosted) they are skipped, each with a
+# "skipped: needs local key events" line here and in the job summary; anywhere
+# else (this Mac's local gate, a self-hosted runner) they run. Unlike the
+# quarantine this is permanent, with no owner or expiry. Tested by
+# Tests/ui_test/test_local_keys.sh.
 #
 #   .build/ui-tests.xcresult   the result bundle (open it in Xcode)
 #   .build/ui-screens/         <app>-<step>.png per journey step, and audit-<app>-<step>.json per
@@ -53,6 +60,19 @@ while IFS=$'\t' read -r test owner expires scope reason; do
   fi
 done <<<"$live"
 [[ -n "$live" ]] || echo "ui-test: no journeys quarantined"
+# Journeys that post key events as CGEvents need the runner's Accessibility access, which GitHub's hosted macOS
+# runners lack (#3035, #3559, captain 2026-10-24). They run only on the local Mac gate: a hosted runner skips them.
+localkeys=(FlareJourneyTests/FlareDrawJourneys/testDrawShapesWithEachTool
+  FlareJourneyTests/FlareEditOrderJourneys/testSelectAllOrderAndEscape
+  FlareJourneyTests/FlareViewJourneys/testZoomPanAndGuides)
+localskipped=""
+if [[ "${RUNNER_ENVIRONMENT:-}" == github-hosted ]]; then
+  for test in "${localkeys[@]}"; do
+    skips+=("-skip-testing:$test")
+    localskipped+="- \`$test\`"$'\n'
+    echo "ui-test: skipped: needs local key events: $test"
+  done
+fi
 realperf=(PhotoJourneyTests/PhotoRealPerfJourneyTests DesignJourneyTests/DesignRealPerfJourneyTests
   FlareJourneyTests/FlareRealPerfJourneyTests)
 watcher=""
@@ -71,6 +91,7 @@ cols=$'| test | owner | expires | skipped in | reason |\n|---|---|---|---|---|\n
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
   [[ -z "$skipped" ]] || printf '### Quarantined journeys (skipped)\n\n%s%s\n' "$cols" "$skipped" >>"$GITHUB_STEP_SUMMARY"
   [[ -z "$running" ]] || printf '### Quarantined in full runs only (not skipped in this scoped run)\n\n%s%s\n' "$cols" "$running" >>"$GITHUB_STEP_SUMMARY"
+  [[ -z "$localskipped" ]] || printf '### Skipped: needs local key events (run on the local Mac gate)\n\n%s\n' "$localskipped" >>"$GITHUB_STEP_SUMMARY"
 fi
 scripts/bundle-apps || exit 1
 if [[ -n "$watcher" ]]; then

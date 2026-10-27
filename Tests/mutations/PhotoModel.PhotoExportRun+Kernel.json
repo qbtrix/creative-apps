@@ -1,0 +1,23 @@
+[
+  {
+    "label": "aPickChangesTheOpenSheetUntilExport: a pick is applied with no sheet open",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "guard isExportSheetOpen else { return false }\n        var picked = o",
+    "replace": "var picked = o",
+    "tests": "PhotoExportRunTests"
+  },
+  {
+    "label": "aPickChangesTheOpenSheetUntilExport: the sheet's quality isn't held to 0.1...1",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "min(max(picked.quality, 0.1), 1)",
+    "replace": "picked.quality",
+    "tests": "PhotoExportRunTests"
+  },
+  {
+    "label": "aPickChangesTheOpenSheetUntilExport: a pick is kept as the last choices before Export",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "return exportRun.begin(picked)",
+    "replace": "exportOptions = picked\n        return exportRun.begin(picked)",
+    "tests": "PhotoExportRunTests"
+  }
+]

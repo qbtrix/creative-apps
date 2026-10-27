@@ -21,10 +21,12 @@ public typealias HaloPoint = FlareCore.Point
 /// `HaloLayer.tracks`; x, y, scaleX, scaleY, rotation and opacity are the
 /// names FlareCore's `Layer.sample` uses, anchorX and anchorY are Halo's own.
 /// trimStart, trimEnd and trimOffset (HK-5) are a shape's stroke trim:
-/// fractions of the outline, the offset in turns.
+/// fractions of the outline, the offset in turns. The five style values (layer-styles HY-1) are a drop
+/// shadow's distance, size and opacity and an outer glow's size and opacity, keyed like opacity.
 public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     case x, y, scaleX, scaleY, rotation, opacity, anchorX, anchorY
     case trimStart, trimEnd, trimOffset
+    case shadowDistance, shadowSize, shadowOpacity, glowSize, glowOpacity
 
     /// The transform rows the inspector, the timeline and `key.*` list; the
     /// trims key through the stroke editor (`trims`), so they are left out.
@@ -32,6 +34,12 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
 
     /// A stroke's trim, keyed like position (HK-5).
     public static let trims: [HaloProperty] = [.trimStart, .trimEnd, .trimOffset]
+
+    /// A layer style's keyable values (HY-1); their rows show only while the layer has that effect.
+    public static let styles: [HaloProperty] = [.shadowDistance, .shadowSize, .shadowOpacity, .glowSize, .glowOpacity]
+
+    /// What `key.*`, the property commands, the lane and the easing pick list: the transforms, then the styles.
+    public static let keyable: [HaloProperty] = allCases + styles
 
     /// The inspector row's label.
     public var title: String {
@@ -47,6 +55,11 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         case .trimStart: "Trim Start"
         case .trimEnd: "Trim End"
         case .trimOffset: "Trim Offset"
+        case .shadowDistance: "Shadow Distance"
+        case .shadowSize: "Shadow Size"
+        case .shadowOpacity: "Shadow Opacity"
+        case .glowSize: "Glow Size"
+        case .glowOpacity: "Glow Opacity"
         }
     }
 
@@ -56,16 +69,18 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         case .x, .y, .anchorX, .anchorY: -100_000...100_000
         case .scaleX, .scaleY: -100...100
         case .rotation: -36_000...36_000
-        case .opacity, .trimStart, .trimEnd: 0...1
+        case .opacity, .trimStart, .trimEnd, .shadowOpacity, .glowOpacity: 0...1
         case .trimOffset: -100...100
+        case .shadowDistance: 0...1_000
+        case .shadowSize, .glowSize: 0...250
         }
     }
 
     /// One arrow-key step; Shift is ten, Option a tenth (ScrubField's rule).
     public var step: Double {
         switch self {
-        case .x, .y, .anchorX, .anchorY, .rotation: 1
-        case .scaleX, .scaleY, .opacity, .trimStart, .trimEnd: 0.01
+        case .x, .y, .anchorX, .anchorY, .rotation, .shadowDistance, .shadowSize, .glowSize: 1
+        case .scaleX, .scaleY, .opacity, .trimStart, .trimEnd, .shadowOpacity, .glowOpacity: 0.01
         case .trimOffset: 1.0 / 360
         }
     }
@@ -74,8 +89,8 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     /// factors (1 = 100%) and shown in percent.
     public var displayFactor: Double {
         switch self {
-        case .scaleX, .scaleY, .opacity, .trimStart, .trimEnd: 100
-        case .x, .y, .anchorX, .anchorY, .rotation: 1
+        case .scaleX, .scaleY, .opacity, .trimStart, .trimEnd, .shadowOpacity, .glowOpacity: 100
+        case .x, .y, .anchorX, .anchorY, .rotation, .shadowDistance, .shadowSize, .glowSize: 1
         case .trimOffset: 360
         }
     }
@@ -83,8 +98,8 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     /// The unit `InspectorSliderRow` shows after the value.
     public var unit: String {
         switch self {
-        case .x, .y, .anchorX, .anchorY: " px"
-        case .scaleX, .scaleY, .opacity, .trimStart, .trimEnd: "%"
+        case .x, .y, .anchorX, .anchorY, .shadowDistance, .shadowSize, .glowSize: " px"
+        case .scaleX, .scaleY, .opacity, .trimStart, .trimEnd, .shadowOpacity, .glowOpacity: "%"
         case .rotation, .trimOffset: "°"
         }
     }
@@ -93,8 +108,8 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     /// (docs/design.md, Editor shell).
     public var decimals: Int {
         switch self {
-        case .x, .y, .anchorX, .anchorY: 1
-        case .scaleX, .scaleY, .opacity, .rotation, .trimStart, .trimEnd, .trimOffset: 0
+        case .x, .y, .anchorX, .anchorY, .shadowDistance, .shadowSize, .glowSize: 1
+        case .scaleX, .scaleY, .opacity, .rotation, .trimStart, .trimEnd, .trimOffset, .shadowOpacity, .glowOpacity: 0
         }
     }
 
@@ -176,17 +191,22 @@ public enum HaloEasingPreset: String, CaseIterable, Sendable {
 /// the words or size last changed (HaloTextEdits sets them through
 /// `services.text`), so the viewer, hit testing, the default anchor and the
 /// rendered pixels all use one box, and a saved file keeps its layout.
-public struct HaloTextContent: Codable, Sendable, Hashable {
+public struct HaloTextContent: Sendable, Hashable {
     public var string: String
     /// In composition pixels.
     public var fontSize: Double
-    /// The measured line box; an estimate (0.6 em a character) until measured.
+    /// The measured box; an estimate (0.6 em a character, line height for each line after the first) until measured.
     public var width: Double
     public var height: Double
-    public init(string: String = "Text", fontSize: Double = 72, width: Double? = nil, height: Double? = nil) {
-        self.string = string; self.fontSize = fontSize
-        self.width = width ?? fontSize * 0.6 * Double(max(string.count, 1))
-        self.height = height ?? fontSize
+    /// The face and paragraph (TS-9); the size is `fontSize` and the colour the layer's. Its file keys are in
+    /// HaloText+Kernel.swift.
+    public var style: TextStyle
+    public init(string: String = "Text", fontSize: Double = 72, width: Double? = nil, height: Double? = nil,
+                style: TextStyle = .standard) {
+        self.string = string; self.fontSize = fontSize; self.style = Self.face(style)
+        let estimate = Self.estimate(string, fontSize: fontSize, style: self.style)
+        self.width = width ?? estimate.width
+        self.height = height ?? estimate.height
     }
 }
 
@@ -204,6 +224,8 @@ public enum HaloEditError: Error, Sendable, Hashable {
     case emptyText
     case noKeySelected
     case notBuilt(String)
+    /// A refusal already in words, such as ExportRules' sentence for alpha on H.264.
+    case refused(String)
 
     public var message: String {
         switch self {
@@ -218,6 +240,7 @@ public enum HaloEditError: Error, Sendable, Hashable {
         case .emptyText: "Enter some text."
         case .noKeySelected: "Pick a key in the EASING list first."
         case .notBuilt(let what): "\(what) isn't built yet."
+        case .refused(let sentence): sentence
         }
     }
 }

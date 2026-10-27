@@ -30,6 +30,16 @@ private func count(
     #expect(count(AppAudit.Identifier(), [button("Undo", rect(40, 30, 40, 20))]).counts["identifier"] == 0)
 }
 
+/// AppKit's own alert keeps unnamed text parts ("_NS:58", 2 pt wide) that read as text with no ink (#2486). They are
+/// the system's chrome, so contrast skips them; an app's own faint text beside them still fails.
+@Test func contrastSkipsAppKitsOwnTextParts() {
+    let alertPart = Node(type: "staticText", frame: rect(10, 40, 60, 14), identifier: "_NS:58")
+    let own = Node(type: "staticText", frame: rect(100, 40, 60, 14), identifier: "flare.status", name: "faint")
+    let report = count(
+        AppAudit.TextContrast(), [alertPart, own], paint: [(rect(12, 42, 30, 10), 0xAA), (rect(102, 42, 30, 10), 0xAA)])
+    #expect(report.violations.map(\.element) == ["staticText 'flare.status'"])
+}
+
 @Test func pixelChecksSkipTheWindowBehindAModal() {
     let text = Node(type: "staticText", frame: rect(10, 40, 60, 14), name: "dimmed")
     var fixture = AppAudit.Fixture(nodes: [text], paint: [(rect(12, 42, 30, 10), 0xAA)])
@@ -99,6 +109,20 @@ private func count(
         paint: [(rect(12, 32, 20, 8), 0x77), (rect(62, 32, 20, 8), 0x76), (rect(112, 34, 30, 16), 0x90)])
     #expect(report.violations.map(\.element) == ["staticText 'fails'"])
     #expect(report.samples.map(\.measure.limit) == [4.5, 4.5, 3])
+}
+
+/// A popover or menu over a window's text hides it, so the text's pixels are the popover's, not its own
+/// (Halo's shape popover over the inspector read 1.00:1, #3926). One off to the side still lets it be measured.
+@Test func pixelChecksSkipWindowTextUnderAPopover() {
+    let text = Node(type: "staticText", frame: rect(10, 40, 60, 14), name: "covered")
+    var fixture = AppAudit.Fixture(nodes: [text], paint: [(rect(12, 42, 30, 10), 0xAA)])
+    fixture.nodes.append(Node(type: "popover", frame: rect(150, 30, 100, 60)))
+    #expect(AppAudit.report(AppAudit.TextContrast(), on: fixture).counts["contrast"] == 1)
+    fixture.nodes.append(Node(type: "popover", frame: rect(0, 30, 100, 60)))
+    #expect(AppAudit.report(AppAudit.TextContrast(), on: fixture).counts["contrast"] == 0)
+    fixture.nodes.removeLast()
+    fixture.nodes.append(Node(type: "menu", frame: rect(40, 45, 80, 40)))
+    #expect(AppAudit.report(AppAudit.TextContrast(), on: fixture).counts["contrast"] == 0)
 }
 
 @Test func textInADisabledControlOrOffTheWindowIsNotMeasured() {

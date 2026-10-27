@@ -39,11 +39,13 @@ private final class Sink: @unchecked Sendable {
 }
 
 @Suite struct PhotoResidentRouteTests {
-    /// PhotoRenderRouteTests' document with its adjustment layer hidden, so every visible layer is pixels.
+    /// PhotoRenderRouteTests' document with its adjustment layer hidden and its mask dropped, so every visible
+    /// layer is unmasked pixels (a masked layer takes the dispatcher route, PhotoLiveMaskingTests).
     static func document() throws -> PhotoWorkspace {
         var workspace = try PhotoRenderRouteTests.document()
         for layer in workspace.layers {
             if case .adjustment = layer.kind { workspace.toggleVisibility(layer.id) }
+            workspace.masks[layer.id] = nil
         }
         return workspace
     }

@@ -2,8 +2,9 @@
 // docs/blueprints/flare/features/export-pack.md, Screens and states), the adapter's content view
 // (`FlareExportSheetAdapter.sheet`) on `bounce` with the fakes, each state reached through the Model's public
 // methods: GIF at its defaults (light and dark: the shared Size row, Frame rate at the scene's rate, Loop forever on,
-// no scale chips or Transparent checkbox) and MP4 at 0.5x and 24 fps (no Loop row). Each test checks the Model
-// state it shows first. flare-export-gif-*.png, flare-export-mp4-dark.png. macOS only.
+// no scale chips or Transparent checkbox), MP4 at 0.5x and 24 fps (no Loop row) and a GIF run at 24 of its 48
+// frames (FV-5). Each test checks the Model state it shows first. flare-export-gif-*.png, flare-export-mp4-dark.png,
+// flare-export-running-gif-dark.png. macOS only.
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -43,5 +44,15 @@ import Testing
         #expect(model.exportingOptions?.sheetScale == 0.5 && model.exportFrameRate == 24)
         #expect(model.exportProblem == nil)
         try shoot(model, "flare-export-mp4-dark")
+    }
+
+    @Test func running() throws {
+        var model = opened(.gif)
+        let started = model.startExport()
+        #expect(started)
+        model.exportProgressed(0.5)
+        let options = try #require(model.exportingOptions)
+        #expect(model.exportState == .running(options, done: 24, total: 48))
+        try shoot(model, "flare-export-running-gif-dark")
     }
 }

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "perDocument: key ignores the file key",
+    "file": "Sources/SuiteShell/ThumbnailWriter.swift",
+    "find": "PreviewKey(asset: SuiteDocumentRef.fileKey(ref.fileID), content: \"preview\", size: .medium)",
+    "replace": "PreviewKey(asset: \"preview\", content: \"preview\", size: .medium)",
+    "tests": "ThumbnailWriterTests"
+  },
+  {
+    "label": "flagReachesStore: folder on the real root under the flag",
+    "file": "Sources/SuiteShell/ThumbnailWriter.swift",
+    "find": "SuiteLocations.appFolder(\"Thumbnails\", arguments: arguments, home: home)",
+    "replace": "SuiteLocations.appFolder(\"Thumbnails\", arguments: [], home: home)",
+    "tests": "ThumbnailWriterTests"
+  }
+]

@@ -85,4 +85,36 @@ import Testing
         let lost = FakeBackend(name: "lost", supports: Set(RenderOp.allCases), healthy: false)
         #expect(!PhotoRenderRoute(preferred: lost).isGPU)
     }
+
+    /// A Move of the top layer (Paint), step after step, on a route with a cache of its own: the open's render
+    /// keeps every region whole; the first step makes the base under the moved layer once per region; the next
+    /// step lays the moved layer on that base and makes nothing; a slider step after it makes nothing either.
+    /// The picture is the reference at the end.
+    @Test(arguments: [PhotoRenderRoute.cpu, standIn])
+    func aMoveStepLaysOnlyTheMovedLayerOnItsKeptBase(route shared: PhotoRenderRoute) async throws {
+        var workspace = try Self.document()
+        let route = PhotoRenderRoute(preferred: shared.preferred)
+        let canvas = try #require(workspace.canvas)
+        let tiles = PhotoRenderer.tiles(of: canvas, in: .all)
+        // The CPU route composites a tile at a time, the GPU route a row of tiles.
+        let regions = route.isGPU ? Set(tiles.map(\.y)).count : tiles.count
+        let opened = try await PhotoRenderer.update(workspace, since: nil, route: route)
+        #expect(route.composites.made == regions, "the open's render keeps every region whole")
+
+        workspace.selectTool(.move)
+        workspace.drag(from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 110, y: 104))
+        let first = try await PhotoRenderer.update(workspace, since: opened.revision, route: route)
+        #expect(route.composites.made == regions * 2, "the first step makes the base under the moved layer once per region")
+
+        workspace.drag(from: Mask.Point(x: 110, y: 104), to: Mask.Point(x: 120, y: 110))
+        let second = try await PhotoRenderer.update(workspace, since: first.revision, route: route)
+        #expect(route.composites.made == regions * 2, "the next step composited the layers under the moved one again")
+        workspace.endDrag()
+
+        workspace.adjust(.gamma(1.4))
+        let adjusted = try await PhotoRenderer.update(workspace, since: second.revision, route: route)
+        #expect(route.composites.made == regions * 2, "a slider step composited the layers again")
+        #expect(adjusted.isComplete)
+        #expect(Self.laid(adjusted) == PhotoRenderer.premultiplied(try await PhotoRenderer.render(workspace).rgba8))
+    }
 }

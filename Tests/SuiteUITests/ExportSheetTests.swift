@@ -43,6 +43,18 @@ import Testing
         #expect(rows.rows == [.format("jpeg"), .quality(0.6)] && rows.editable)
     }
 
+    /// Up to four formats sit in one row of equal chips (no empty column, no orphan chip); more wrap by three.
+    @Test func formatChipsFillTheirRow() {
+        #expect([0, 1, 2, 3, 4, 5, 8].map(ExportSheetRows.formatColumns) == [1, 1, 2, 3, 4, 3, 3])
+    }
+
+    /// Size is a multiplier, so its row reads "1.00×", not a bare "1.00"; Quality stays a plain 0...1.
+    @Test func sizeReadsAsAMultiplier() {
+        let size = ExportSheetRows.Row.size(0.5), quality = ExportSheetRows.Row.quality(0.9)
+        #expect(size.unit == "×" && quality.unit.isEmpty)
+        #expect(NumericInput.text(0.5, unit: size.unit) == "0.50×" && NumericInput.spoken(1, unit: size.unit) == "1 times")
+    }
+
     @Test func idsTakeTheHostPrefix() {
         let ids = ExportSheetIDs("flare.export")
         let formats = ["svgFrame", "lottie", "pngSequence"].map(ids.format)

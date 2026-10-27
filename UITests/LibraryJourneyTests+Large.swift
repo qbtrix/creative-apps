@@ -2,9 +2,9 @@
 // docs/blueprints/library/features/large-catalog.md, Journey steps), on the
 // `-LibraryLargeFixture 10000` fakes, whose photo ids are their names
 // (IMG_00001 ... IMG_10000), so cells are `library.grid.cell.IMG_00001`.
-// Written with the window budgets before the grid and loupe fixes: it skips
-// "LG-grid" until LG-5 and LG-6 drop the skip and the steps judge the budgets
-// (first paint 1.5 s, scroll p95 16 ms, loupe step p95 50 ms).
+// Written with the window budgets before the grid and loupe fixes (LG-2); LG-7
+// turns it on once LG-5 and LG-6 are in, as RJ-L07 (first paint 1.5 s, scroll
+// p95 16 ms, loupe step p95 50 ms).
 import Foundation
 import XCTest
 
@@ -14,7 +14,6 @@ final class LibraryLargeCatalogJourneyTests: XCTestCase {
     /// LJ-LG: launch on 10,000 photos, the grid paints within 1.5 s, scroll
     /// 120 rows, select all, shift-click a range, open the loupe and step 20 times.
     @MainActor func testTenThousandPhotos() throws {
-        throw XCTSkip("LG-grid: the grid and loupe budgets on 10,000 photos wait on LG-5 and LG-6")
         let started = ProcessInfo.processInfo.systemUptime
         let library = Journey("Library", self, arguments: Self.large)
         let first = cell("IMG_00001", library)

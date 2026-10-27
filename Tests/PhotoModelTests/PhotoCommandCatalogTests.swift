@@ -72,14 +72,26 @@ struct PhotoCommandCatalogTests {
             // A jump moves the image to another step, as Undo does, so its bytes change (history-panel PH-5).
             if id == "history.jump" && problem.contains("queryOrViewChangesNoBytes") { return false }
             guard problem.hasPrefix("\(id): exampleRuns") else { return true }
+            // style.* runs throw notBuilt until layer-styles PY-5 fills the adapter; PhotoLayerStyleTests waits on it.
+            if id.hasPrefix("style.") && problem.contains("not built yet") { return false }
             let off = PhotoLawsDocument.catalog.availability(id, on: fixture).why != nil
             return !(off || needsFiles.contains(id))
         }
         #expect(problems == Self.tolerated)
     }
     /// The kernel's transform.flip is titled "Flip" while its step names the axis ("Flip Horizontal"), as the
-    /// transform packet asks. (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
-    static let tolerated = ["transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""]
+    /// transform packet asks, and image.flip does the same; tone.set likewise names its step for the slider
+    /// ("Temperature"). On this flat fill tone.auto has nothing to suggest, so it records no step;
+    /// PhotoToneCommandTests runs it on a range of tones.
+    /// (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
+    static let tolerated = [
+        "image.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
+        "tone.auto: stepNamedTitle: its undo step reads \"Delete\", not \"Auto Tone\"",
+        "tone.auto: editRecordsOneStep: it recorded 0 undo steps, not one",
+        "tone.auto: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
+        "tone.set: stepNamedTitle: its undo step reads \"Temperature\", not \"Tone\"",
+        "transform.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
+    ]
 
     @Test func ledger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/photo.txt")
@@ -131,7 +143,9 @@ struct PhotoCommandCatalogTests {
                 row("Cut", image, ws.cutHelp), row("Copy", image, ws.copyHelp), row("Paste", true, ws.pasteHelp(true)),
                 row("Select All", ws.canSelectAll), row("Delete Selection", ws.canEditSelection), row("Fill Selection", ws.canEditSelection),
                 row("All", image), row("Deselect", ws.canDeselect)]
-            + [row("Image Size…", image), row("Canvas Size…", image && ws.flipHelp == nil)] + ["Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°", "Straighten…"].map { row($0, image) }
+            + [row("Image Size…", image), row("Canvas Size…", image && ws.flipHelp == nil)] + ["Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°"].map { row($0, image) }
+            // Flip Canvas Horizontal and Vertical (orientation-crop OC-13): two items on one id, one row titled by its spec.
+            + [row("Flip", image && ws.flipHelp == nil), row("Straighten…", image)]
             + [row("New Layer", image),
                "New Adjustment Layer|\(!ws.adjustmentLayerKinds.isEmpty && adjust == nil)|\(adjust ?? "New Adjustment Layer")",
                row("Delete Layer", ws.canDeleteSelectedLayer), row("Duplicate Layer", ws.duplicateLayerHelp == nil, ws.duplicateLayerHelp),
@@ -142,9 +156,11 @@ struct PhotoCommandCatalogTests {
             + ["Zoom In", "Zoom Out", "Actual Size", "Fit on Screen"].map { row($0, image) }
     }
 
-    /// Commands with no menu item: the catalog's only (gradient-fill PG-3); the Layers list's pick, All Layers
+    /// Commands with no menu item: the catalog's only (gradient-fill PG-3; image.flip has Image > Flip Canvas since OC-13); the Layers list's pick, All Layers
     /// (Select menu, PM-3) and opacity (multi-layer-select PM-5); the eyedropper's sample query (PE-6), a tool's.
-    static let noMenu: Set = ["select.rect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
+    /// The area commands (area-selection AR-10) get their Select menu items in AR-photo-u.
+    static let noMenu: Set = ["select.rect", "select.ellipse", "select.lasso", "select.polygon", "select.wand", "select.invert",
+                              "select.feather", "select.expand", "select.contract", "select.reselect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
                               "color.sample"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones, the place ones and Free Transform's
     /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5) and text layers' (the Type tool and inspector run them), in menu order (the catalog lists them as the menus do).
@@ -152,6 +168,9 @@ struct PhotoCommandCatalogTests {
         !$0.hasPrefix("tool.") && !$0.hasPrefix("transform.") && !noMenu.contains($0) && !fileFlowIDs.contains($0)
             && !placeIDs.contains($0) && !$0.hasPrefix("history.") && !$0.hasPrefix("text.")
             && !$0.hasPrefix("layer.mask-") // masks-clipping PK-2 adds their Layer menu items.
+            && !$0.hasPrefix("tone.") // tone-controls PT-4: the inspector's Tone rows run them; no menu items.
+            && !$0.hasPrefix("style.") // layer-styles PY-2 adds their Layer menu items.
+            && !$0.hasPrefix("path.") && !$0.hasPrefix("paths.") // the Pen and its overlay run them (#5072); no menu yet.
     }
     /// The place commands (place-image PP-5): File > Place… runs place.image through PhotoPlace+Menu, not a catalog row.
     static let placeIDs = Set(PlaceCommands.specs(PhotoWorkspace.self).map(\.id))

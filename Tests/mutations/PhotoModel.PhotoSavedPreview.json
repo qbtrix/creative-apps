@@ -1,0 +1,30 @@
+[
+  {
+    "label": "an empty thumbnail entry is published",
+    "file": "Sources/PhotoModel/Live/PhotoSavedPreview.swift",
+    "find": "let png = package.files[entry], !png.isEmpty",
+    "replace": "let png = package.files[entry]",
+    "tests": "PhotoSavedPreviewTests"
+  },
+  {
+    "label": "a store that throws reads as published",
+    "file": "Sources/PhotoModel/Live/PhotoSavedPreview.swift",
+    "find": "        } catch {\n            return false\n        }",
+    "replace": "        } catch {\n            return true\n        }",
+    "tests": "PhotoSavedPreviewTests"
+  },
+  {
+    "label": "the merged image is published instead of the thumbnail",
+    "file": "Sources/PhotoModel/Live/PhotoSavedPreview.swift",
+    "find": "package.files[entry]",
+    "replace": "package.files[\"mergedimage.png\"]",
+    "tests": "PhotoSavedPreviewTests"
+  },
+  {
+    "label": "the ref is filed under the wrong app",
+    "file": "Sources/PhotoModel/Live/PhotoSavedPreview.swift",
+    "find": "fileID: SuiteDocumentRef.fileID(forPath: path), app: .photo,",
+    "replace": "fileID: SuiteDocumentRef.fileID(forPath: path), app: .library,",
+    "tests": "PhotoSavedPreviewTests"
+  }
+]

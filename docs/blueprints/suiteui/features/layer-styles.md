@@ -13,7 +13,7 @@ gets one `LayerStylePanel`; the model, rules, presets, commands, the SVG
 writer and the one mapping to creative-core's pixels live in SuiteImaging.
 SuiteKernel also gets the clipping rule (which layer a clipped layer clips to),
 the kernel half of Photo's clipping groups.
-**Line:** `line:suiteui` · **Wave:** 5 (`waves.md`) · **Lead branch:** `lead/layer-styles`
+**Line:** `line:suiteui` · **Wave:** 4 (`waves.md`; ahead of its wave-4 adopters, which wait on LS-a) · **Lead branch:** `lead/layer-styles`
 **Beta:** captain, 2026-10-21 ("layer styles in beta, shared"). Labels `beta`
 and `p1` when filed.
 
@@ -31,13 +31,16 @@ command-catalog (built: `CommandSpec`, `History`'s drag fold); brush-keys
 **creative-core:** `layer-style-engine` (core packet in this sprint): **LE-a**
 (the core types, through a `scripts/bump-core` PR) before LS-1, **LE-cpu**
 before LS-8, **LE-metal** before LS-9. Each reaches the apps only through a
-bump PR the supervisor merges.
+bump PR the supervisor merges. Bump #3825 has merged (pin 7966e5a, LE-a's
+types); LS-1 has landed on dev (#4911). LE-cpu (`styled`, creative-core #789
+and #791) and LE-metal (#792, #794, #796) are on core main and wait for a
+later bump (at or past d1a3ebb) before LS-8 and LS-9.
 
 **Hand-offs** (files other work owns; cross-line, so not in `waits`):
 - **Layers panel actions.** A local crew is building the shared Layers-panel
   action bar and row context menu from the command catalog (branch
   `feat/layers-panel-actions`), with an `fx` button reserved for styles. The
-  panel opens through one command, `style.panel` ("Layer Style…"), from three
+  panel opens through one command, `style.panel` ("Layer Style Panel"), from three
   places: that `fx` button, the row context menu, and each app's Layer menu.
   The row menu also lists `style.copy`, `style.paste` and `style.clear`.
   LS-1 puts all four ids in the catalog with their availability, so the bar
@@ -62,6 +65,9 @@ UI line (`LayerStylePanel StylePanel EffectsPanel`) land before this packet
 in their own PR, so `scripts/check-dup-logic` and `check-dup-views` fail an
 app file named for either. The clipping rule is a layer-tree concept (rule 20
 lists the layer tree), so it goes in `Sources/SuiteKernel/Layers/`.
+LS-10 adds `Clipping: ClipRules ClipBase ClippingMask` to
+`Tests/canonical-concepts.txt`, so `check-dup-logic` stops an app-local copy
+of the clip rule (Photo already stores `isClipped`).
 
 **Render path.** No app-local renderer. `StyleProgram` is the one mapping
 from a `LayerStyle` to creative-core's `LayerStyleStack`. The CPU path
@@ -92,7 +98,7 @@ Blueprint sections: suiteui.md 2.2 (components), 7.1 (budgets); suite.md 1.5
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| LS-a | SuiteImaging's `Style/` module declares the model, rules, presets, intents, the `style.*` command specs with ids and availability, the SVG writer and the program as stubs, the gallery has a `layer-style` page, and every check is written, disabled. | LS-1, LS-2 | SJ0, MJ-LS | suite-imaging:IM-a; gradient-fill:GF-a; brush-keys:BK-u (LS-2); core LE-a through a bump (cross-line) |
+| LS-a | SuiteImaging's `Style/` module declares the model, rules, presets, intents, the `style.*` command specs with ids and availability, the SVG writer and the program as stubs, the gallery has a `layer-style` page, and every check is written, disabled. | LS-1, LS-2 | SJ0, MJ-LS | suite-imaging:IM-a; gradient-fill:GF-a; brush-keys:BK-u (LS-2); core LE-a through bump #3825 (cross-line) |
 | LS-u | On the gallery page the panel lists the eight styles with their switches, shows the selected style's rows (colour, blend, opacity, angle, distance, size, position, gradient, bevel), applies a preset, and is reachable from the Layers panel's `fx` button and row menu where that work has landed, within the render budget. | LS-3, LS-4 | LJ1 | LS-a |
 | LS-m | The rules clamp and default every parameter and keep one effect per kind, every `style.*` command records one undo step (a drag one), copy and paste round-trip as JSON, the SVG writer emits a filter for each style it can express and a warning for the rest, and `StyleProgram` maps a style to the core stack and back. | LS-5, LS-6, LS-7, LS-8 | MJ-LS | LS-a; gradient-fill:GF-m (LS-7); core LE-cpu through a bump (LS-8, cross-line) |
 | LS-gpu | The live route draws a styled layer on the GPU in one pass per step and matches the CPU within the core's parity tolerance, within 16 ms p95 for a 2,000 × 2,000 layer. | LS-9, LS-9b | MJ-LS-gpu | LS-m; suite-imaging:IM-m; core LE-metal through a bump (cross-line) |
@@ -124,7 +130,7 @@ MJ-LS is `SuiteImagingTests` on Linux (`LayerStyleRulesTests`,
    a style) and VoiceOver reads "Drop Shadow, on".
 7. Where the Layers-panel actions have landed, the gallery's layers list shows
    the `fx` button; clicking it opens the panel (one `style.panel`), and the
-   row's menu shows Layer Style…, Copy Layer Style, Paste Layer Style and
+   row's menu shows Layer Style Panel, Copy Layer Style, Paste Layer Style and
    Clear Layer Style (LS-3).
 
 ## Jobs
@@ -137,7 +143,7 @@ Trap: the 120 distance samples land as 120 undo steps; the shadow is cut off
 at the layer's bounds (no padding); the angle is read as radians or with y
 up. Assertion: after one undo the second layer has no style and the first's
 distance is the last sample; in the PNG the shadow's darkest pixel sits at the
-disc's edge plus (distance·cos θ, distance·sin θ) with y down, within 1 px,
+disc's edge plus distance·(−cos θ, sin θ) with y down, within 1 px,
 and no row or column of the shadow ends at the layer's old edge. Mutations:
 `SuiteImaging.StyleCommands.json` (drag token not passed → `.dragIsOneStep`),
 `SuiteImaging.StyleProgram.json` (angle not converted to radians →
@@ -166,8 +172,9 @@ public struct StyleShadow: Hashable, Codable, Sendable { public var color: FillC
 public struct StyleGlow: Hashable, Codable, Sendable { public var color: FillColor; public var spread, size: Double }
 public struct StyleStroke: Hashable, Codable, Sendable { public var fill: Fill; public var size: Double; public var position: StrokePosition }
 public struct StyleOverlay: Hashable, Codable, Sendable { public var fill: Fill }          // solid for colour, linear or radial for gradient
-public enum BevelShape: String, Codable, CaseIterable, Sendable { case innerBevel, outerBevel, emboss, pillowEmboss }
-public enum BevelTechnique: String, Codable, CaseIterable, Sendable { case smooth, chiselHard, chiselSoft }
+// A style's `Fill` points are in the unit box (0,0)-(1,1) of the layer's bounds. `stack` and `render` map
+// them to the layer's px rect with `GradientRules.mapped`, and the SVG writer maps them to `box`.
+// `BevelShape`, `BevelTechnique`, `BlendMode`, `StrokePosition`: CoreRaster's (LE-a)
 public struct StyleBevel: Hashable, Codable, Sendable {
     public var shape: BevelShape, technique: BevelTechnique
     public var depth: Double, up: Bool, size: Double, soften: Double, angle: Double, altitude: Double
@@ -242,11 +249,13 @@ public final class StyleRoute {
 public struct LayerStylePanel: View {
     public init(style: LayerStyle?, selected: StyleKind, help: String?, onIntent: @escaping (StyleIntent) -> Void)
 }
-/// The one place a style's JSON goes on and comes off the pasteboard (its own type), so no app writes its own.
-public enum LayerStylePasteboard { public static func write(_ style: JSONValue); public static func read() -> JSONValue? }
+// A style's JSON goes on and comes off the pasteboard as its own `SuiteTypeID` in `SuitePasteboardCoding`,
+// through SuiteShell's `PasteboardBridge`; `PasteboardChangeWatch` drives Paste's enabled state. SuiteUI has
+// no pasteboard type of its own (SuiteShell depends on SuiteUI, not the other way).
 // Sources/SuiteKernel/Layers/ClipRules.swift (LS-10). Linux-safe.
 public enum ClipRules {
     public static let noBaseHelp = "There is no layer below to clip to."
+    public static let notClippedHelp = "This layer isn't clipped."
     /// The id `id` clips to among `siblings` (back to front): the nearest layer below it that isn't clipped.
     public static func base<P>(of id: String, in siblings: [LayerNode<P>], isClipped: (P) -> Bool) -> String?
     public static func clipped<P>(onto baseID: String, in siblings: [LayerNode<P>], isClipped: (P) -> Bool) -> [String]
@@ -256,6 +265,8 @@ public protocol ClipTarget: Sendable {
     var clipSelection: (id: String, isClipped: Bool, hasBase: Bool)? { get }
     mutating func setClipped(_ clipped: Bool, name: String) throws   // the selected layers; one undo step
 }
+// With several layers selected, availability reads the primary layer; `setClipped` changes every selected
+// layer that has a base, in one step.
 public enum ClipCommands { public static func specs<T: ClipTarget>(_ target: T.Type) -> [CommandSpec<T>] }
 ```
 
@@ -264,28 +275,29 @@ Commands (ids go in each adopter's `Tests/command-ids/<app>.txt`):
 | id | kind | title (undo step) | params | unavailable when |
 |---|---|---|---|---|
 | `style.read` | query | – | – → the style JSON | `styleHelp` |
-| `style.panel` | view | Layer Style… | `{kind?}` (default: the first enabled, else dropShadow) | `styleHelp` |
-| `style.add` | edit | Add Layer Style | `{kind}` | `styleHelp`; the kind already on |
+| `style.panel` | view | Layer Style Panel | `{kind?}` (default: the first enabled, else dropShadow) | `styleHelp` |
+| `style.add` | edit | Add Layer Style | `{kind}` | `styleHelp`; the kind present, on or off (use `style.enable`) |
 | `style.remove` | edit | Remove Layer Style | `{kind}` | `styleHelp`; the kind absent |
-| `style.enable` | edit | Turn Layer Style On or Off | `{kind, enabled}` | `styleHelp`; the kind absent |
+| `style.enable` | edit | Toggle Layer Style | `{kind, on}` | `styleHelp`; the kind absent |
 | `style.set` | edit | Change Layer Style | `{kind, blend?, opacity?, <parameters>?, drag?}` (a patch) | `styleHelp`; the kind absent |
-| `style.fill-opacity` | edit | Fill Opacity | `{opacity, drag?}` | `styleHelp` |
+| `style.fill-opacity` | edit | Fill Opacity | `{value, drag?}` | `styleHelp` |
 | `style.preset` | edit | Apply Style Preset | `{name}` | `styleHelp`; unknown name |
 | `style.copy` | query | Copy Layer Style | – → the style JSON | `styleHelp`; no style ("This layer has no style to copy.") |
 | `style.paste` | edit | Paste Layer Style | `{style}` | `styleHelp`; malformed style (`check`) |
 | `style.clear` | edit | Clear Layer Style | – | `styleHelp`; no style |
 | `layer.clip` | edit | Create Clipping Mask | – | nothing selected; `noBaseHelp` |
-| `layer.unclip` | edit | Release Clipping Mask | – | the selection isn't clipped |
+| `layer.unclip` | edit | Release Clipping Mask | – | nothing selected; `ClipRules.notClippedHelp` ("This layer isn't clipped.") |
 
 `style.copy` is a query and `style.paste` takes the JSON, so the CLI copies
 and pastes with no clipboard state. In an app, the menu and the row menu put
-the copy's JSON on the pasteboard through SuiteUI's `LayerStylePasteboard` and
-read it back for paste; Paste is disabled when the pasteboard holds no style.
+the copy's JSON on the pasteboard as the style `SuiteTypeID` through
+SuiteShell's `PasteboardBridge` and read it back for paste; Paste is disabled when the pasteboard holds no style.
 
 ## Pseudocode
 
 - **Ranges (clamped).** Opacity and fill opacity 0...1; angle wraps to
-  [0, 360), 0 points right, 90 down; distance 0...1,000 px; spread 0...1;
+  [0, 360), the light's angle: 0 is light from the right, 90 from above; the
+  shadow's offset in y-down px is distance·(−cos θ, sin θ); distance 0...1,000 px; spread 0...1;
   size 0...250 px; stroke size 1...250 px; bevel depth 0.01...10 (1 is 100%),
   size 0...250 px, soften 0...16 px, altitude 0...90. A non-finite value is
   refused (the command throws `malformed` with the field), never clamped.
@@ -299,6 +311,8 @@ read it back for paste; Paste is disabled when the pasteboard holds no style.
 - **One per kind.** `adding` replaces an existing effect of that kind with
   its defaults turned on; decoding keeps the first of a kind and `check`
   names the rest, so a pasted or imported style never holds two shadows.
+  `adding` replaces only when the rules or presets call it; `style.add` never
+  reaches it with the kind present.
 - **Paint order.** Under the layer, bottom up: drop shadow, outer glow, then
   the layer's pixels times fill opacity; over it, clipped to its alpha:
   gradient overlay, colour overlay, inner glow, inner shadow, bevel; then the
@@ -335,8 +349,8 @@ read it back for paste; Paste is disabled when the pasteboard holds no style.
   the new origin.
 - **Clipping.** `base` walks down from `id`'s index past clipped siblings to
   the first unclipped one; none (the bottom layer, or only clipped layers
-  below) gives nil. A group boundary stops the walk, so a clip never reaches
-  out of its group. Hiding the base hides its clipped layers (the renderer's
+  below) gives nil. `siblings` is one parent's children. A group sibling
+  (`holdsChildren`) is a valid base, and the walk never enters it. Hiding the base hides its clipped layers (the renderer's
   rule; the adopts test it).
 - **Panel.** A two-column sheet: the left column lists the eight kinds with a
   checkbox each (Toggle) and a Fill Opacity row under them; the right shows
@@ -350,9 +364,9 @@ read it back for paste; Paste is disabled when the pasteboard holds no style.
 
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
-| LS-1 | – | The `Style/` module as stubs: every type, `StyleRules`, `StylePreset`, `StyleIntent`, the eleven `style.*` specs with ids, schemas and availability, `LayerStyleSVG`, `StyleProgram`, `StyleRoute` (macOS); the C4 part; the four suites written, disabled by name | `Sources/SuiteImaging/Style/LayerStyle.swift`, `Sources/SuiteImaging/Style/LayerStyleRules.swift`, `Sources/SuiteImaging/Style/StyleCommands.swift`, `Sources/SuiteImaging/Style/LayerStyleSVG.swift`, `Sources/SuiteImaging/Style/StyleProgram.swift`, `Sources/SuiteImaging/Route/StyleRoute.swift`, `Tests/SuiteImagingTests/LayerStyleRulesTests.swift`, `Tests/SuiteImagingTests/StyleCommandsTests.swift`, `Tests/SuiteImagingTests/LayerStyleSVGTests.swift`, `Tests/SuiteImagingTests/StyleProgramTests.swift`, `docs/c4/parts/creative-apps/suite-imaging/imaging-style.json` | – | ~380, 11 |
-| LS-2 | – | The placeholder `LayerStylePanel`, `LayerStyleRows` and `LayerStylePasteboard`, the gallery's `layer-style` page on a local style, the journey written and skipped (`XCTSkip("waits on LS-4")`) | `Sources/SuiteUI/LayerStylePanel.swift`, `Sources/SuiteUI/LayerStyleRows.swift`, `Sources/SuiteUI/Gallery/GalleryLayerStyle.swift`, `Sources/SuiteUI/SuiteGallery.swift`, `UITests/SuiteJourneyTests+LayerStyle.swift` | LS-1 | ~220, 5 |
-| LS-3 | – | The panel: the kind list with switches, each kind's rows, the presets menu, Fill Opacity, Done; identifiers `suite.style.*`; `LayerStylePasteboard`'s body; the `fx` and row-menu bindings where the Layers-panel actions have landed (hand-off) | `Sources/SuiteUI/LayerStylePanel.swift`, `Sources/SuiteUI/LayerStyleRows.swift`, `Tests/SuiteUITests/LayerStylePanelTests.swift` | LS-2 | ~380, 3 |
+| LS-1 | #4911 (landed) | The `Style/` module as stubs: every type, `StyleRules`, `StylePreset`, `StyleIntent`, the eleven `style.*` specs with ids, schemas and availability, `LayerStyleSVG`, `StyleProgram`, `StyleRoute` (macOS); the C4 part; the four suites written, disabled by name | `Sources/SuiteImaging/Style/LayerStyle.swift`, `Sources/SuiteImaging/Style/LayerStyleRules.swift`, `Sources/SuiteImaging/Style/StyleCommands.swift`, `Sources/SuiteImaging/Style/LayerStyleSVG.swift`, `Sources/SuiteImaging/Style/StyleProgram.swift`, `Sources/SuiteImaging/Route/StyleRoute.swift`, `Tests/SuiteImagingTests/LayerStyleRulesTests.swift`, `Tests/SuiteImagingTests/StyleCommandsTests.swift`, `Tests/SuiteImagingTests/LayerStyleSVGTests.swift`, `Tests/SuiteImagingTests/StyleProgramTests.swift`, `docs/c4/parts/creative-apps/suite-imaging/imaging-style.json` | – | ~380, 11 |
+| LS-2 | – | The placeholder `LayerStylePanel` and `LayerStyleRows` (a no-op `LayerStylePasteboard` as shipped in #5174, which LS-3 deletes), the gallery's `layer-style` page on a local style, the journey written and skipped (`XCTSkip("waits on LS-4")`) | `Sources/SuiteUI/LayerStylePanel.swift`, `Sources/SuiteUI/LayerStyleRows.swift`, `Sources/SuiteUI/Gallery/GalleryLayerStyle.swift`, `Sources/SuiteUI/SuiteGallery.swift`, `UITests/SuiteJourneyTests+LayerStyle.swift` | LS-1 | ~220, 5 |
+| LS-3 | – | The panel: the kind list with switches, each kind's rows, the presets menu, Fill Opacity, Done; identifiers `suite.style.*`; the style `SuiteTypeID` in `SuitePasteboardCoding`, read and written through `PasteboardBridge` and `PasteboardChangeWatch` (LS-2's `LayerStylePasteboard` deleted); `LayerActionBar.styles(...)`, the `fx` item built from `style.panel`'s spec beside `effects(identifier:)`; the `fx` and row-menu bindings where the Layers-panel actions have landed (hand-off) | `Sources/SuiteUI/LayerStylePanel.swift`, `Sources/SuiteUI/LayerStyleRows.swift`, `Sources/SuiteUI/LayerActionBar.swift`, `Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift`, `Sources/SuiteModel/Values/SuiteTypes.swift`, `Tests/SuiteUITests/LayerStylePanelTests.swift` | LS-2 | ~380, 3 |
 | LS-4 | – | Snapshots, the render budget test, the journey turned on | `Tests/AppSnapshotTests/SuiteLayerStyleSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetLayerStyleTests.swift`, `UITests/SuiteJourneyTests+LayerStyle.swift` | LS-3 | ~220, 3 |
 | LS-5 | – | `StyleRules` bodies: ranges, defaults, one per kind, paint order, `reach`, presets, the JSON codec; turns on `LayerStyleRulesTests` | `Sources/SuiteImaging/Style/LayerStyle.swift`, `Sources/SuiteImaging/Style/LayerStyleRules.swift`, `Tests/SuiteImagingTests/LayerStyleRulesTests.swift`, `Tests/mutations/SuiteImaging.LayerStyleRules.json` | LS-1 | ~340, 4 |
 | LS-6 | – | `StyleCommands` bodies and `StyleIntent.command`; turns on `StyleCommandsTests` on a test target (one step per run, a drag one step, every why-not, copy and paste round-trip) | `Sources/SuiteImaging/Style/StyleCommands.swift`, `Tests/SuiteImagingTests/StyleCommandsTests.swift`, `Tests/mutations/SuiteImaging.StyleCommands.json` | LS-5 | ~320, 3 |
@@ -360,13 +374,16 @@ read it back for paste; Paste is disabled when the pasteboard holds no style.
 | LS-8 | – | `StyleProgram` bodies (`stack`, `style`, `render` on the CPU); turns on `StyleProgramTests` but `cpuEqualsGpu` | `Sources/SuiteImaging/Style/StyleProgram.swift`, `Tests/SuiteImagingTests/StyleProgramTests.swift`, `Tests/mutations/SuiteImaging.StyleProgram.json` | LS-5, core LE-cpu bump | ~300, 3 |
 | LS-9 | – | `StyleRoute` body: the core `.style` op through the dispatcher on a resident surface; turns on `cpuEqualsGpu`; macOS tests | `Sources/SuiteImaging/Route/StyleRoute.swift`, `Tests/SuiteImagingTests/StyleRouteTests.swift`, `Tests/mutations/SuiteImaging.StyleRoute.json` | LS-8, IM-m, core LE-metal bump | ~250, 3 |
 | LS-9b | – | `StyleRouteLatencyTests`: one style step on a resident 2,000 × 2,000 layer, release, p95 ≤ 16 ms (perf list line) | `Tests/AppSnapshotTests/StyleRouteLatencyTests.swift` | LS-9 | ~120, 1 |
-| LS-10 | – | `ClipRules` with its tests; the C4 part | `Sources/SuiteKernel/Layers/ClipRules.swift`, `Tests/SuiteKernelTests/ClipRulesTests.swift`, `Tests/mutations/SuiteKernel.ClipRules.json`, `docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json` | – | ~200, 4 |
+| LS-10 | – | `ClipRules` with its tests; the C4 part | `Sources/SuiteKernel/Layers/ClipRules.swift`, `Tests/SuiteKernelTests/ClipRulesTests.swift`, `Tests/mutations/SuiteKernel.ClipRules.json`, `Tests/canonical-concepts.txt`, `docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json` | – | ~200, 5 |
 | LS-11 | – | `ClipTarget` and `ClipCommands` (`layer.clip`, `layer.unclip`) with tests on a test target | `Sources/SuiteKernel/Layers/ClipCommands.swift`, `Tests/SuiteKernelTests/ClipCommandsTests.swift`, `Tests/mutations/SuiteKernel.ClipCommands.json` | LS-10 | ~180, 3 |
 | LS-12 | – | The gallery page runs each intent through `StyleCommands` on a local target with a `History` and draws its preview through `StyleRoute`; the live test | `Sources/SuiteUI/Gallery/GalleryLayerStyle.swift`, `Tests/SuiteUITests/LayerStylePanelLiveTests.swift` | LS-4, LS-6, LS-9 | ~150, 2 |
-| LS-13 | – | The C4 parts name the commands, the route and the adopters; `status: built`; `feature-done` | `docs/c4/parts/creative-apps/suite-imaging/imaging-style.json`, `docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json`, `docs/blueprints/suiteui/features/layer-styles.wave.json` | LS-12, LS-7, LS-9b, LS-11 | ~30, 3 |
+| LS-13 | – | The C4 parts name the commands, the route and the adopters; deletes `LayerActionBar.effectsPending` and `effects(identifier:)` and `LayerPanelCommandsTests.effectsWaitForLayerStyles`, once Photo's PY-2 has moved its `fx` button onto `style.panel` (hand-off, #5327); `status: built`; `feature-done` | `docs/c4/parts/creative-apps/suite-imaging/imaging-style.json`, `docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json`, `docs/blueprints/suiteui/features/layer-styles.wave.json`, `Sources/SuiteUI/LayerActionBar.swift`, `Tests/SuiteUITests/LayerPanelCommandsTests.swift` | LS-12, LS-7, LS-9b, LS-11 | ~45, 5 |
 
 LS-1 declares every type and spec so LS-5 to LS-8 each fill their own file.
 LS-10 and LS-11 touch no style file and start with the packet.
+`Tests/canonical-concepts.txt`, `SuitePasteboardCoding.swift` and `SuiteTypes.swift`
+get one appended line each and are shared registries, so the wave data
+leaves them out of the slices' `owned` (other features append to them too).
 
 ## Build waves
 
@@ -396,10 +413,10 @@ LS-13 is the status task.
 | LS-8 | `StyleProgramTests`: sRGB 0.5 grey becomes linear 0.214 premultiplied; 135° and 8 px map to core (dx, dy) = (5.66, 5.66); a gradient overlay's points equal `GradientRules.rotated`'s; `style(stack(s))` equals `s` for every preset; `render` of a disc with a 12 px glow is padded by 12 and the origin moves by −12 | a colour space, the angle, the padding or the round trip is wrong | `SuiteImaging.StyleProgram`: colour passed unconverted → `.colourIsLinear`; angle not converted to radians → `.angleIsDegreesYDown`; reach ignored → `.shadowIsPadded` |
 | LS-9 | `StyleRouteTests` (macOS): a step encodes one `.style` op and reads back nothing; the GPU picture equals `StyleProgram.render` within the core's `.style` tolerance; a disabled effect costs no pass | a step reads back, or the GPU drifts | `SuiteImaging.StyleRoute`: CPU forced on every step → `.stepStaysOnGPU`; padding dropped on the GPU path → `.gpuIsPadded` |
 | LS-9b | `StyleRouteLatencyTests` (release, perf list) | p95 over 16 ms | – (budget) |
-| LS-10 | `ClipRulesTests`: in [A, B(clipped), C(clipped)] C's base is A; B's base is A; A's base is nil; a clipped layer at the bottom has no base; a group boundary stops the walk; `clipped(onto: A)` is [B, C] | a base skips a layer, crosses a group, or the bottom layer clips | `SuiteKernel.ClipRules`: walk not stopping at the first unclipped → `.nearestUnclippedBase`; bottom layer given itself → `.bottomHasNoBase` |
+| LS-10 | `ClipRulesTests`: in [A, B(clipped), C(clipped)] C's base is A; B's base is A; A's base is nil; a clipped layer at the bottom has no base; a clipped layer above a group has that group as its base; `clipped(onto: A)` is [B, C] | a base skips a layer, crosses a group, or the bottom layer clips | `SuiteKernel.ClipRules`: walk not stopping at the first unclipped → `.nearestUnclippedBase`; bottom layer given itself → `.bottomHasNoBase` |
 | LS-11 | `ClipCommandsTests`: `layer.clip` on the bottom layer is unavailable with `noBaseHelp`; clip then unclip are one step each; `layer.unclip` on an unclipped layer is unavailable | a command runs with no base, or records two steps | `SuiteKernel.ClipCommands`: availability ignoring `hasBase` → `.clipNeedsBase`; `setClipped` called per layer → `.oneStepPerRun` |
 | LS-12 | `LayerStylePanelLiveTests`: a Distance scrub on the page leaves one undo step and the preview's shadow moves; `testLayerStylePanelEditsAStyle` on live | the page stays on the local log | – (UI) |
-| LS-13 | `scripts/waves render --dry-run`; `scripts/jobs check` | status not built | – |
+| LS-13 | `scripts/waves render --dry-run`; `scripts/jobs check`; `grep -rn effectsPending Sources Tests` finds nothing | status not built, or the fx placeholder is still there | – |
 
 ## Quality tests
 

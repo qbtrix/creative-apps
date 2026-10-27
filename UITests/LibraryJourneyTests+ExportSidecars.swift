@@ -22,8 +22,8 @@ final class LibraryExportSidecarsJourneyTests: XCTestCase {
         addTeardownBlock { for url in [folder, catalog, out] { try? FileManager.default.removeItem(at: url) } }
         try LibraryFiles.writeShoot(in: folder)
         let library = Journey("Library", self, arguments: [
-            "-LibraryImportFolder", folder.path, "-LibraryImportOnLaunch",
-            "-LibraryCatalogDir", catalog.path, "-LibraryExportTo", out.path,
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
+            "-LibraryExportTo", out.path, "-LibraryImportOnLaunch",
         ])
 
         // Step 1: IMG_0001 in the loupe, 3 then P; Export… with Write Sidecar on.

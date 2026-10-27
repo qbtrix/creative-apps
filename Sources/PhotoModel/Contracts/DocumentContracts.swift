@@ -3,7 +3,7 @@
 // `mimetype` entry, `stack.xml` with the layers, one 8-bit sRGB PNG per pixel
 // layer, `mergedimage.png` and `Thumbnails/thumbnail.png`, plus Photo's own
 // `photo/document.json` for what OpenRaster has no word for (adjustment
-// layers, masks, the whole-image adjustments). PNGs go through the
+// layers, masks, the whole-image adjustments, the paths). PNGs go through the
 // PhotoImageCodec the app already has, so the format code runs and is tested
 // on Linux. Recovery keeps the latest autosaved file. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -34,11 +34,13 @@ public struct PhotoDocumentSnapshot: Sendable, Equatable {
     /// The inspector's whole-image adjustments.
     public var adjustments: AdjustmentSettings
     public var selectedLayerID: PhotoLayer.ID?
+    /// The path list, in canvas pixels; a file from before paths has none.
+    public var paths: [PhotoPath]
     public init(canvas: CanvasSize, layers: [PhotoLayer], pixels: [PhotoLayer.ID: DecodedImage],
                 masks: [PhotoLayer.ID: DecodedImage] = [:], adjustments: AdjustmentSettings = AdjustmentSettings(),
-                selectedLayerID: PhotoLayer.ID? = nil) {
+                selectedLayerID: PhotoLayer.ID? = nil, paths: [PhotoPath] = []) {
         self.canvas = canvas; self.layers = layers; self.pixels = pixels; self.masks = masks
-        self.adjustments = adjustments; self.selectedLayerID = selectedLayerID
+        self.adjustments = adjustments; self.selectedLayerID = selectedLayerID; self.paths = paths
     }
 }
 

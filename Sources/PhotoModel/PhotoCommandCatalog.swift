@@ -4,6 +4,7 @@
 // the menu's label ("Rotate 90° Clockwise"). Zoom is window state, so the view.zoom commands are no-ops. Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
 
 extension PhotoWorkspace {
@@ -18,8 +19,6 @@ extension PhotoWorkspace {
     public struct StraightenParams: Codable, Sendable { public var degrees: Double; public var cropToFit: Bool }
     /// Export's sheet values: the format and, for JPEG, the quality (0.1...1; the last choice when left out).
     public struct ExportParams: Codable, Sendable { public var format: String; public var quality: Double? }
-    /// A rectangle in canvas pixels (select.rect).
-    public struct RectParams: Codable, Sendable { public var x, y, width, height: Int }
     /// image.gradient's: "linear" or "radial", stops as sRGB 0...1, and the two points in canvas pixels.
     public struct GradientParams: Codable, Sendable {
         public struct Stop: Codable, Sendable { public var offset, r, g, b, a: Double }
@@ -63,7 +62,7 @@ extension PhotoWorkspace {
     /// The tooltip of the menu item for `id`: what clicking it does, where the catalog's summary describes the agent call.
     public static func menuSummary(_ id: String) -> String { menuSummaries[id] ?? catalog.spec(id)?.summary ?? id }
     static let menuSummaries = [
-        "file.new": "Opens a new white 1920 × 1080 image.", "file.open": "Opens an image file.",
+        "file.new": "Opens a new image at the size, resolution and background you choose.", "file.open": "Opens an image file.",
         "file.save": "Saves the image to its file.", "file.save-as": "Saves the image to a new file.",
         "file.export": "Exports a flattened copy of the image.", "image.resize": "Changes the image's size.",
         "image.canvas-size": "Grows or crops the canvas around an anchor without scaling the image.",
@@ -101,6 +100,8 @@ extension PhotoWorkspace {
         ["name": .optional(.string("The file's name.", maxLength: 255)), "width": .integer(minimum: 1), "height": .integer(minimum: 1),
          "rgba8": .array(of: .integer(minimum: 0, maximum: 255))], required: ["name", "width", "height", "rgba8"])
     static let sizeExample = JSONValue.object(["width": .number(24), "height": .number(18)])
+    static let newExample = JSONValue.object(["width": .number(4), "height": .number(6), "unit": .string("in"),
+                                              "resolution": .number(300), "background": .string("transparent")])
     static let canvasSizeSchema = ParamSchema.object(
         ["width": .integer("Width in pixels.", minimum: 1), "height": .integer("Height in pixels.", minimum: 1),
          "anchor": .string("The point the image keeps its place by.", oneOf: BoxAnchor.allCases.map(\.rawValue))],
@@ -110,15 +111,19 @@ extension PhotoWorkspace {
     /// One command per menu item, toolbar item and palette tool, in menu order.
     public static let commands: [CommandSpec<PhotoWorkspace>] = fileCommands + editCommands + imageCommands + layerCommands + maskCommands
         + FileFlowCommands.specs(PhotoWorkspace.self) + PlaceCommands.specs(PhotoWorkspace.self) + viewCommands + transformCommands
+        + StyleCommands.specs(PhotoWorkspace.self)
         + PhotoTool.allCases.map { tool in
             act("tool.\(tool.rawValue)", tool.rawValue.capitalized, "Picks the \(tool.rawValue) tool for canvas drags.", .view,
                 gate { $0.toolHelp(tool) }) { $0.selectTool(tool) }
         }
-        + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands
+        + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands + pathCommands
+        + ToneCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
-        .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
-               params: SizeParams.self, schema: sizeSchema, example: sizeExample) { w, p in try w.newCanvas(width: p.width, height: p.height); return JSONValue.object([:]) },
+        .typed("file.new", title: "New Image", summary: "Opens a new image at a size, unit, resolution and background.", kind: .file,
+               params: DocumentSetup.self, schema: DocumentSetupCommands.setupSchema, example: newExample) { w, p in
+            try w.newImage(p); return JSONValue.object([:])
+        },
         .typed("file.open", title: "Open", summary: "Opens an image from straight-alpha RGBA bytes.", kind: .file, params: ImageParams.self,
                schema: imageSchema, example: .object(["name": .string("dot.png"), "width": .number(1), "height": .number(1), "rgba8": .array([0, 0, 0, 255].map(JSONValue.number))]),
                availability: bar(.open)) { w, p in try w.open(rgba8: p.rgba8, width: p.width, height: p.height, name: p.name ?? "Untitled.png"); return JSONValue.object([:]) },
@@ -168,17 +173,7 @@ extension PhotoWorkspace {
         act("edit.fill-selection", "Fill", "Fills the selected pixels with the brush color.", .edit, menu(selectionHelp)) { $0.fillSelection() },
         act("select.all", "All", "Selects the whole image.", .view, gate { $0.canSelectAll ? nil : noImage }) { $0.selectAll() },
         act("select.deselect", "Deselect", "Drops the selection.", .view, menu { $0.canDeselect ? nil : "Nothing is selected." }) { $0.deselect() },
-        .typed("select.rect", title: "Select Rectangle", summary: "Selects a rectangle of the image, clipped to it.", kind: .view,
-               params: RectParams.self, schema: .object(["x": .integer("Left, in pixels."), "y": .integer("Top, in pixels."),
-                                                         "width": .integer("Width in pixels.", minimum: 1), "height": .integer("Height in pixels.", minimum: 1)],
-                                                        required: ["x", "y", "width", "height"]),
-               example: .object(["x": .number(0), "y": .number(0), "width": .number(8), "height": .number(6)]), availability: menu()) { w, p in
-            guard let rect = w.canvas.flatMap({ PixelRect(x: p.x, y: p.y, width: p.width, height: p.height).intersection($0.rect) }) else {
-                throw CatalogError.failed(id: "select.rect", message: "The rectangle is outside the image.")
-            }
-            w.setSelection(rect); return JSONValue.object([:])
-        },
-    ]
+    ] + AreaSelectCommands.specs(PhotoWorkspace.self)
     static let selectionHelp: @Sendable (PhotoWorkspace) -> String? = { $0.canEditSelection ? nil : "Select part of the selected layer first." }
 
     static let imageCommands: [CommandSpec<PhotoWorkspace>] = [
@@ -192,6 +187,7 @@ extension PhotoWorkspace {
         act("image.rotate-cw", "Rotate", "Rotates the image 90° clockwise.", .edit, menu()) { $0.rotateImage(.degrees90) },
         act("image.rotate-ccw", "Rotate", "Rotates the image 90° counterclockwise.", .edit, menu()) { $0.rotateImage(.degrees270) },
         act("image.rotate-180", "Rotate", "Rotates the image 180°.", .edit, menu()) { $0.rotateImage(.degrees180) },
+    ] + CropCommands.orientationSpecs(PhotoWorkspace.self).filter { $0.id == "image.flip" } + [
         .typed("image.straighten", title: "Straighten", summary: "Rotates the image by an angle, cropped to fit or grown.", kind: .edit, params: StraightenParams.self,
                schema: .object(["degrees": .number("The angle.", minimum: -45, maximum: 45), "cropToFit": .boolean], required: ["degrees", "cropToFit"]),
                example: .object(["degrees": .number(3), "cropToFit": .bool(false)]), availability: menu()) { w, p in

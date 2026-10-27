@@ -7,7 +7,8 @@
 // so the app sends nothing itself. Beta Notes opens a window titled Beta Notes over BetaNotes.current,
 // centred so it stays on a small screen. Connect an AI Assistant… (cli-bundle CB-5) begins AssistantConnectSheet
 // on the front window over the running AfterGlow.app's AssistantConnectPanel; Copy puts its text on the pasteboard
-// and Open AI Access opens Window > AI Access…'s list. The item is disabled, saying why, outside AfterGlow.app.
+// and Open AI Access opens Window > AI Access…'s list; Install Command-Line Tool… runs InstallCommandLineTool on the
+// sheet (CB-6). The item is disabled, saying why, outside AfterGlow.app.
 import AppKit
 import SuiteKernel
 import SuiteModel
@@ -61,7 +62,7 @@ public struct SuiteHelpCommands: Commands {
     private var host: NSWindow?
     private var sheet: NSWindow?
     private var notes: NSWindow?
-    private var connect: NSWindow?
+    private(set) var connect: NSWindow?
     private var connectHost: NSWindow?
     private var report = ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
 
@@ -107,6 +108,10 @@ public struct SuiteHelpCommands: Commands {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(text, forType: .string)
             },
+            onInstall: { [weak self] in
+                let window = self?.connect
+                Task { await InstallCommandLineTool.run(bundle: bundle, on: window) }
+            },
             onOpenAIAccess: { AIAccessCenter.shared.showList() },
             onClose: { [weak self] in self?.closeConnect() })
         let panel = NSWindow(contentViewController: NSHostingController(rootView: view))
@@ -138,20 +143,9 @@ public struct SuiteHelpCommands: Commands {
         notes?.makeKeyAndOrderFront(nil)
     }
 
-    /// ShellHelpProvider's report object back as a ProblemReport; "" for a field it lacks.
+    /// ShellHelpProvider's report object back as a ProblemReport; an empty one when it doesn't decode.
     static func report(_ value: JSONValue) -> ProblemReport {
-        guard case .object(let fields) = value else {
-            return ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
-        }
-        func string(_ value: JSONValue?) -> String? {
-            if case .string(let text)? = value { return text }
-            return nil
-        }
-        var crashes: [String] = []
-        if case .array(let list)? = fields["crashes"] { crashes = list.compactMap(string) }
-        return ProblemReport(
-            app: string(fields["app"]) ?? "", version: string(fields["version"]) ?? "", build: string(fields["build"]) ?? "",
-            macOS: string(fields["macOS"]) ?? "", model: string(fields["model"]) ?? "", crashes: crashes)
+        (try? value.decode(ProblemReport.self)) ?? ProblemReport(app: "", version: "", build: "", macOS: "", model: "", crashes: [])
     }
 }
 

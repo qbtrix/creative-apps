@@ -14,7 +14,6 @@ import Testing
             ("crop", "PV-3", services.crop), ("selection", "PV-5", services.selection),
             ("masking", "PV-5", services.masking), ("adjustmentLayers", "PV-6", services.adjustmentLayers),
             ("transform", "PV-7", services.transform), ("exportSizing", "PV-8", services.exportSizing),
-            ("sampling", "PV-9", services.sampling),
         ]
     }
 

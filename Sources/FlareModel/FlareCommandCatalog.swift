@@ -24,8 +24,11 @@ extension FlareWorkspace {
     }
     typealias Help = @Sendable (FlareWorkspace) -> String?
 
-    /// The FlareCore commands, then the app's; empty only if an id broke the id rule.
-    public static let commands = coreCommands + appCommands
+    /// The FlareCore commands, then the app's, then Copy As (clipboard-interop CB-8); empty only if an id broke the
+    /// id rule. Paste as Image stays out: Flare places no pictures, and Edit > Paste places SVG through `place.image`.
+    public static let commands = coreCommands + appCommands + clipboardCommands
+    /// SuiteModel's Copy As, Flare's only clipboard command in the catalog.
+    public static let clipboardCommands = CopyAsCommands.specs(FlareWorkspace.self).filter { $0.id == "edit.copy-as" }
     public static let catalog = (try? CommandCatalog<FlareWorkspace>(app: "flare", commands, history: FlareCoreHistory.init)) ?? .empty(app: "flare")
     static let noFile: Help = { $0.document == nil ? "Open or create an animation first." : nil }
     static let noScene: Help = { $0.document == nil ? FlareLayerError.noDocument.message : nil }
@@ -176,6 +179,7 @@ extension FlareWorkspace {
         + hiddenCommands  // the beta.2 items the menus hide (no-placeholders NP-3)
         + PathCommands.specs(FlareWorkspace.self)  // the twelve path.* commands, the Pen and Direct Select's points (pen-paths FP-6)
         + [importReportCommand]  // the last Lottie open's skipped parts (lottie-open LO-5, FlareLottieNote.swift)
+        + documentSetupCommands  // document.read-settings, document.set-settings (document-setup DS-14)
 }
 
 extension FlareWorkspace {

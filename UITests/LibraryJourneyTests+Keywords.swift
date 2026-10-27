@@ -79,8 +79,9 @@ final class LibraryKeywordsJourneyTests: XCTestCase {
         let (folder, catalog) = (try LibraryFiles.freshPhotoFolder(), try LibraryFiles.freshCatalogDir())
         addTeardownBlock { [folder, catalog].forEach { try? FileManager.default.removeItem(at: $0) } }
         let names = try LibraryFiles.write(3, in: folder).map { "/" + $0.lastPathComponent }
-        let arguments = ["-LibraryImportFolder", folder.path, "-LibraryImportOnLaunch", "-LibraryCatalogDir"]
-        library = Journey("Library", self, arguments: arguments + [catalog.path])
+        library = Journey("Library", self, arguments: [
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path, "-LibraryImportOnLaunch",
+        ])
         XCTAssert(cell(names[2]).waitForExistence(timeout: 30), "the JPEGs weren't imported")
         select(names[0], plus: [names[1], names[2]])
         type("Pier", into: "library.metadata.keywords")

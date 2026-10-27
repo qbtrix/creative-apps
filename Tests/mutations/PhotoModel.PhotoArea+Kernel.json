@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".reselectRestores: a Deselect or a new shape never keeps the old area for Reselect",
+    "file": "Sources/PhotoModel/PhotoArea+Kernel.swift",
+    "find": "if !recipe.isEmpty, !new.steps.starts(with: recipe.steps) { last = recipe }",
+    "replace": "if recipe.isEmpty, !new.steps.starts(with: recipe.steps) { last = recipe }",
+    "tests": "PhotoAreaSelectionTests"
+  },
+  {
+    "label": ".maskMatchesCanvas: the mask is rendered with width and height swapped",
+    "file": "Sources/PhotoModel/PhotoSelectionMask.swift",
+    "find": "AreaMask.mask(recipe, width: canvas.width, height: canvas.height,",
+    "replace": "AreaMask.mask(recipe, width: canvas.height, height: canvas.width,",
+    "tests": "PhotoAreaSelectionTests"
+  }
+]

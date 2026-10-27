@@ -21,6 +21,8 @@
 // their kind. Each successful open and save is noted in Open Recent and,
 // through SuiteDocumentsBridge (file-flow PF-4), in the suite's shared
 // recents: `.opened` or `.saved`, once each, with the file's suite type.
+// A document save that lands first publishes the file's thumbnail, off the
+// main actor, to the previews the bridge holds (shared-thumbnails ST-7).
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
 // window and PhotoFileArea share. PhotoFileArea
@@ -33,8 +35,10 @@
 // NSAlert sheet (SwiftUI drops alert buttons' identifiers, and journeys find
 // `photo.recovery.restore` by its own), and Restore and Discard are
 // FileIntents. D-10: PhotoWindowEditedView is the window's hook for Quit and
-// Finder opens (PhotoApp.swift); its close guard
-// asks PhotoUnsavedPrompt's alert before a dirty window closes.
+// Finder opens (PhotoApp.swift). Closing a dirty window asks through SuiteUI's
+// `.unsavedChangesGuard` (adopt-kernel-unsaved-prompt UP-8) with Photo's hooks
+// (`unsavedHooks`, buttons `photo.close.*`); a window that closes dirty (Don't
+// Save) drops its autosave.
 import AppKit
 import CoreRaster
 import Observation
@@ -118,6 +122,14 @@ final class PhotoFileSession {
         return SuiteDocumentsBridge(app: .photo, services: .live(support: support, app: .photo, arguments: arguments))
     }()
 
+    /// Publishes the thumbnail of the document saved at `url` to the bridge's previews, off the main actor (ST-7).
+    func publishPreview(of url: URL, archive: any DocumentArchiving) async {
+        let (path, thumbnails) = (url.path(percentEncoded: false), (bridge ?? Self.suiteBridge).thumbnails)
+        _ = await Task.detached(priority: .utility) {
+            await PhotoSavedPreview.publish(documentAt: path, archive: archive, to: thumbnails)
+        }.value
+    }
+
     /// Notes `url` in Open Recent: the system's list, Photo's own (an app with
     /// no declared document types may not get the system's), and the suite's
     /// shared recents as `event`, when the suite knows the file's type.
@@ -152,6 +164,13 @@ final class PhotoFileSession {
 extension PhotoWindow {
     /// The services a window runs on when no fixture is asked for: `.live`,
     /// its autosaves in `-PhotoRecoveryDir`'s folder when one is given.
+    /// Photo's `.live` services with the suite's live text (Core Text), so text layers draw their words.
+    nonisolated static var liveServices: PhotoServices {
+        var services = PhotoServices.live
+        services.text = LiveText()
+        return services
+    }
+
     nonisolated static func fileServices(_ live: PhotoServices) -> PhotoServices {
         guard let folder = UserDefaults.standard.string(forKey: "PhotoRecoveryDir") else { return live }
         return live.recovering(in: URL(fileURLWithPath: folder, isDirectory: true))
@@ -173,7 +192,7 @@ extension PhotoWindow {
         case .flatten(let format):
             files.keepLayers = nil
             guard let url = documentURL else { return saveAs() }
-            write(to: url, as: format, quality: exportQuality, saving: true)
+            write(to: url, as: format, quality: model.exportOptions.quality, saving: true)
         case .clearRecent: files.clearRecent()
         case .restore(let offer):
             files.recoveryOffer = nil
@@ -269,7 +288,7 @@ extension PhotoWindow {
             writeDocument(to: url)
         case .writeImage(let format):
             guard let url = documentURL else { return saveAs() }
-            write(to: url, as: format, quality: exportQuality, saving: true)
+            write(to: url, as: format, quality: model.exportOptions.quality, saving: true)
         case .askKeepLayers(let format): files.keepLayers = format
         case .saveAs: saveAs()
         }
@@ -281,7 +300,7 @@ extension PhotoWindow {
         guard model.canvas != nil else { return }
         if let folder = Self.saveToFolder {
             if model.needsDocument { return writeDocument(to: folder.appending(path: model.documentFileName)) }
-            return write(to: folder.appending(path: model.fileName(for: .png)), as: .png, quality: exportQuality, saving: true)
+            return write(to: folder.appending(path: model.fileName(for: .png)), as: .png, quality: model.exportOptions.quality, saving: true)
         }
         let panel = NSSavePanel()
         panel.allowedContentTypes = Self.documentTypes + [.png, .jpeg]
@@ -289,7 +308,7 @@ extension PhotoWindow {
             ? model.documentFileName : model.fileName(for: ImageFormat(fileName: model.documentName ?? "") ?? .png)
         guard panel.runModal() == .OK, let url = panel.url else { return }
         if PhotoWorkspace.fileKind(forName: url.lastPathComponent) == .document { return writeDocument(to: url) }
-        write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: exportQuality, saving: true)
+        write(to: url, as: ImageFormat(fileName: url.lastPathComponent) ?? .png, quality: model.exportOptions.quality, saving: true)
     }
 
     /// `-PhotoSaveTo`'s folder, when given.
@@ -307,6 +326,7 @@ extension PhotoWindow {
             do {
                 let snapshot = try await Task.detached(priority: .userInitiated) { try workspace.snapshot() }.value
                 try await PhotoPackageIO.write(snapshot, to: url, archive: workspace.services.archive, codec: ImageIOCodec())
+                await files.publishPreview(of: url, archive: workspace.services.archive)
                 didSave(url, kind: .document, opened: opened)
             } catch {
                 didFailSave(error)
@@ -382,6 +402,7 @@ struct PhotoFileArea: ViewModifier {
             .environment(\.photoSaveStatus, model.saveStatus(
                 autosaved: files.autosave?.autosaved ?? false, saveFailed: files.saveFailed))
             .background { PhotoWindowEdited(model: model, files: files, perform: perform) }
+            .unsavedChangesGuard(PhotoWindowEditedView.unsavedHooks(model: { model }, files: files, perform: perform))
             .overlay {
                 // A quick save shows nothing: the note waits 100 ms.
                 if let work = files.working {
@@ -419,7 +440,7 @@ struct PhotoFileArea: ViewModifier {
                 if let choice = await hook.askToRestore(offer) { perform(.file(choice)) } else { files.recoveryOffer = nil }
             }
             .task { if let intent = PhotoOpenQueue.shared.windowAppeared(openWindow) { perform(intent) } }
-            // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards).
+            // A clean close leaves nothing to recover; a dirty one asked first (Don't Save discards on close).
             .onDisappear { if !model.isDirty { files.autosave?.discard() } }
     }
 }
@@ -436,8 +457,8 @@ struct PhotoWindowEdited: NSViewRepresentable {
 }
 
 /// An invisible view that keeps its window's edited dot on the image's dirty
-/// state, puts its close guard in front of the window's delegate, and answers
-/// the unsaved-changes prompt and the restore offer for its window.
+/// state, drops the autosave of a window that closes dirty, and hands Quit its
+/// window's unsaved hooks; it also asks the restore offer for its window.
 final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
     /// The visible Photo windows' hooks, front to back.
     static var shown: [PhotoWindowEditedView] {
@@ -449,7 +470,8 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
     private(set) var workspace: PhotoWorkspace?
     private(set) var files: PhotoFileSession?
     private(set) var send: PhotoPerform?
-    private let closeGuard = PhotoWindowCloseGuard()
+    /// The window whose close this view watches.
+    private weak var observed: NSWindow?
 
     var isDirty: Bool { workspace?.isDirty ?? false }
     var isEmpty: Bool { workspace?.canvas == nil }
@@ -466,15 +488,23 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
         attach()
     }
 
-    /// The edited dot, and the close guard in front of SwiftUI's delegate.
+    /// The edited dot, and a watch on the window's close.
     private func attach() {
         guard let window else { return }
         Self.all.add(self)
         window.isDocumentEdited = isDirty
-        guard window.delegate !== closeGuard else { return }
-        closeGuard.original = window.delegate
-        closeGuard.hook = self
-        window.delegate = closeGuard
+        guard observed !== window else { return }
+        if let observed {
+            NotificationCenter.default.removeObserver(self, name: NSWindow.willCloseNotification, object: observed)
+        }
+        observed = window
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(windowWillClose), name: NSWindow.willCloseNotification, object: window)
+    }
+
+    /// The guard let a dirty window close only after Don't Save, so its autosave goes.
+    @objc private func windowWillClose(_ notification: Notification) {
+        if isDirty { discardChanges() }
     }
 
     func prepareToQuit() async {
@@ -531,68 +561,38 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
         }
     }
 
-    func ask() async -> PhotoUnsavedPrompt.Answer {
-        guard let window, let message = workspace?.unsavedPromptMessage else { return .cancel }
-        window.makeKeyAndOrderFront(nil)
-        let alert = NSAlert()
-        alert.alertStyle = .warning
-        alert.messageText = message
-        alert.informativeText = PhotoUnsavedPrompt.informativeText
-        for choice in PhotoUnsavedPrompt.choices {
-            alert.addButton(withTitle: choice.title).setAccessibilityIdentifier(choice.identifier)
-        }
-        let response = await alert.beginSheetModal(for: window)
-        return PhotoUnsavedPrompt.answer(
-            forButton: response.rawValue - NSApplication.ModalResponse.alertFirstButtonReturn.rawValue)
+    var unsavedHooks: UnsavedHooks {
+        Self.unsavedHooks(model: { [weak self] in self?.workspace }, files: files, perform: send)
+    }
+
+    /// The hooks SuiteUI's guard asks with: buttons `photo.close.*`, the image's
+    /// name ("Untitled" before its first save, nil with no image), its dirty
+    /// state, and Save through the window.
+    static func unsavedHooks(
+        model: @escaping @MainActor () -> PhotoWorkspace?, files: PhotoFileSession?, perform: PhotoPerform?
+    ) -> UnsavedHooks {
+        UnsavedHooks(
+            idPrefix: "photo",
+            documentName: { model().flatMap { $0.canvas == nil ? nil : $0.documentName ?? "Untitled" } },
+            isDirty: { model()?.isDirty ?? false },
+            save: { await Self.save(files: files, perform: perform) })
     }
 
     /// Runs Save (maybe Keep layers? or the panel) and waits; true once it landed.
-    func save() async -> Bool {
-        guard let files, let send else { return false }
+    static func save(files: PhotoFileSession?, perform: PhotoPerform?) async -> Bool {
+        guard let files, let perform else { return false }
         let before = files.saves
-        send(.save)
+        perform(.save)
         while files.working != nil || files.keepLayers != nil {
             do { try await Task.sleep(for: .milliseconds(50)) } catch { return false }
         }
         return files.saves != before
     }
 
+    /// Save through this window; true once it landed.
+    func save() async -> Bool { await Self.save(files: files, perform: send) }
+
     func discardChanges() { files?.autosave?.discard() }
-}
-
-/// The window's delegate in front of SwiftUI's: asks before a dirty window
-/// closes and passes every other delegate call to the original.
-@MainActor final class PhotoWindowCloseGuard: NSObject, NSWindowDelegate {
-    /// SwiftUI's delegate; AppKit calls `responds(to:)` on the main thread.
-    nonisolated(unsafe) weak var original: (any NSWindowDelegate)?
-    weak var hook: PhotoWindowEditedView?
-    /// The prompt is up, or its answer is closing the window.
-    private var asking = false, confirmed = false
-
-    func windowShouldClose(_ sender: NSWindow) -> Bool {
-        if asking { return false }
-        guard !confirmed, let hook, PhotoUnsavedFlow.asksOnClose(hook) else {
-            return original?.windowShouldClose?(sender) ?? true
-        }
-        asking = true
-        Task {
-            let closes = await PhotoUnsavedFlow.close(hook)
-            asking = false
-            guard closes else { return }
-            confirmed = true
-            sender.performClose(nil)
-            confirmed = false
-        }
-        return false
-    }
-
-    nonisolated override func responds(to aSelector: Selector!) -> Bool {
-        super.responds(to: aSelector) || original?.responds(to: aSelector) == true
-    }
-
-    nonisolated override func forwardingTarget(for aSelector: Selector!) -> Any? {
-        original?.responds(to: aSelector) == true ? original : super.forwardingTarget(for: aSelector)
-    }
 }
 
 extension FocusedValues {

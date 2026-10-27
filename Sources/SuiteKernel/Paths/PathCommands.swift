@@ -2,6 +2,9 @@
 // commands each app adds with `+ PathCommands.specs(<X>Workspace.self)`, and its gestures. Each edit applies one
 // `PenRules` or `AnchorEdit` rule and calls `addPath` or `setPath` exactly once with its title, passing a drag token
 // through so the target's `History` folds a drag into one undo step; a bad ref or a refused rule fails before that call.
+// One coordinate rule: every param and `path.read`'s result is in document space, and an edit maps it into the path's
+// own space through `PathInEdit.toDocument` once, here (a delta through its linear part only), so the UI, the CLI and
+// the MCP server land a point in the same place on a scaled or turned layer. A layer scaled to nothing refuses edits.
 /// One gesture of the Pen or the point editor; the app runs its `command` through its catalog.
 public enum PathIntent: Hashable, Sendable {
     case penAdd(Point, handleOut: Point?), close, finish, cancel
@@ -47,6 +50,7 @@ public enum PathCommands {
     /// Why a run refuses its params: off the path, no handle to drag, too few or non-finite points, a ref past the path.
     static let offPathHelp = "Click on the path to add a point.", noHandleHelp = "That point has no handle there; hold Option to drag one out."
     static let fewHelp = "A path needs at least two points.", finiteHelp = "Every coordinate must be a finite number."
+    static let flatHelp = "This path's layer is scaled to nothing; give it a size to edit its points."
     /// How near the path, in document points, `path.anchor-insert` takes a click.
     static let insertReach = 6.0
     static let n = ParamSchema.number(), opt = ParamSchema.optional(.number()), index = ParamSchema.integer(minimum: 0)
@@ -92,12 +96,17 @@ public enum PathCommands {
               availability: { editable($0) }) { t, p in try select(&t, p) },
          spec("path.anchor-move", "Move Points", .edit, "Moves the selected points and their handles; one drag token is one undo step.", MoveParams.self,
               .object(["dx": n, "dy": n, "drag": drag], required: ["dx", "dy", "drag"]), example: .object(["dx": .number(10), "dy": .number(0)]),
-              availability: { selected($0) }) { t, p in try edit(&t, "Move Points", drag: p.drag) { AnchorEdit.moved($0.path, $1, dx: p.dx, dy: p.dy) } },
+              availability: { selected($0) }) { t, p in
+                  try edit(&t, "Move Points", drag: p.drag) { e, refs in
+                      let back = try local(e, "path.anchor-move"), o = back.apply(Point(x: 0, y: 0)), d = back.apply(Point(x: p.dx, y: p.dy))
+                      return AnchorEdit.moved(e.path, refs, dx: d.x - o.x, dy: d.y - o.y)
+                  }
+              },
          spec("path.handle-move", "Move Handle", .edit, "Moves one handle of a point; a smooth partner follows unless breaking.", HandleParams.self,
               .object(["contour": index, "index": index, "end": .string("in or out.", oneOf: ["in", "out"]), "x": n, "y": n, "breaking": .optional(.boolean),
                        "drag": drag], required: ["contour", "index", "end", "x", "y", "breaking", "drag"]),
               example: .object(["contour": .number(0), "index": .number(1), "end": .string("out"), "x": .number(120), "y": .number(20)]),
-              availability: { editable($0) }) { t, p in try edit(&t, "Move Handle", drag: p.drag) { e, _ in try handled(e.path, p) } },
+              availability: { editable($0) }) { t, p in try edit(&t, "Move Handle", drag: p.drag) { e, _ in try handled(e, p) } },
          spec("path.anchor-insert", "Add Point", .edit, "Adds a point on the path nearest (x, y); off the path it refuses.", PointParams.self,
               .object(["x": n, "y": n], required: ["x", "y"]), example: point, availability: { editable($0) }) { t, p in try insert(&t, p) },
          spec("path.anchor-remove", "Delete Points", .edit, "Deletes the selected points.", Empty.self, availability: { selected($0) }) { t, _ in
@@ -148,9 +157,11 @@ public enum PathCommands {
         try t.setPath(path, name: title, drag: drag)
         return .object([:])
     }
-    /// `path.read`'s result: the path in edit's contours as measured, or the draft's, and the selected refs.
+    /// `path.read`'s result: the path in edit's contours as measured, in document space, or the draft's, and the selected refs.
     static func read<T: PathEditTarget>(_ t: T) throws -> JSONValue {
-        guard let contours = t.pathInEdit?.path.contours ?? t.penDraft.map({ [$0.contour] }) else { throw refused("path.read", noPathHelp) }
+        guard let contours = t.pathInEdit.map({ $0.path.transformed(by: $0.toDocument).contours }) ?? t.penDraft.map({ [$0.contour] }) else {
+            throw refused("path.read", noPathHelp)
+        }
         let json = contours.map { c in JSONValue.object(["closed": .bool(c.closed), "anchors": .array(c.anchors.map { a in
             PathIntent.o(["x": .number(a.point.x), "y": .number(a.point.y), "inX": PathIntent.n(a.handleIn?.x), "inY": PathIntent.n(a.handleIn?.y),
                           "outX": PathIntent.n(a.handleOut?.x), "outY": PathIntent.n(a.handleOut?.y), "kind": .string(a.kind.rawValue)])
@@ -180,15 +191,21 @@ public enum PathCommands {
         t.anchorSelection.replace(p.extend == true ? t.anchorSelection.ordered + picked : picked)
         return .object([:])
     }
-    /// `path` with `p`'s handle moved; a ref past the path, or a missing handle without `breaking`, fails.
-    static func handled(_ path: VectorPath, _ p: HandleParams) throws -> VectorPath {
-        let ref = AnchorRef(contour: p.contour, index: p.index), contours = path.contours
+    /// Document space into `e`'s path space; a layer scaled to nothing refuses `id`.
+    static func local(_ e: PathInEdit, _ id: String) throws -> Matrix {
+        guard let back = try? e.toDocument.inverted() else { throw refused(id, flatHelp) }
+        return back
+    }
+    /// The path in edit with `p`'s handle moved to its document point; a ref past the path, or a missing handle
+    /// without `breaking`, fails.
+    static func handled(_ e: PathInEdit, _ p: HandleParams) throws -> VectorPath {
+        let ref = AnchorRef(contour: p.contour, index: p.index), path = e.path, contours = path.contours
         guard contours.indices.contains(ref.contour), contours[ref.contour].anchors.indices.contains(ref.index) else {
             throw refused("path.handle-move", "The path has no point \(ref.index) in contour \(ref.contour).")
         }
         let a = contours[ref.contour].anchors[ref.index], breaking = p.breaking ?? false
         guard breaking || (p.end == .handleIn ? a.handleIn : a.handleOut) != nil else { throw refused("path.handle-move", noHandleHelp) }
-        return AnchorEdit.movingHandle(path, ref, p.end, to: Point(x: p.x, y: p.y), breaking: breaking)
+        return AnchorEdit.movingHandle(path, ref, p.end, to: try local(e, "path.handle-move").apply(Point(x: p.x, y: p.y)), breaking: breaking)
     }
     /// `path.anchor-insert`: a point where the path in edit passes within `insertReach` of (x, y), in document space,
     /// then selected alone; off the path it refuses.

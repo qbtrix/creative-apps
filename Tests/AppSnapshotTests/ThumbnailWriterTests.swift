@@ -3,7 +3,7 @@
 // the live ThumbnailPublishing over CoreAsset's ThumbnailStore: a published
 // preview reads back, a second publish replaces the first, past the byte budget
 // the oldest preview goes, and `-SuiteSupportDir` puts the store under that
-// folder, never under the real support root. Each test runs in its own temp
+// folder (`ThumbnailWriter.folder`), never under the real support root. Each test runs in its own temp
 // folder. Here rather than in SuiteUITests because only this target links
 // SuiteShell. macOS only.
 #if os(macOS)
@@ -29,7 +29,7 @@ private func ref(_ name: String) -> SuiteDocumentRef {
 private func png(_ fill: UInt8, count: Int = 1_000) -> Data { Data(repeating: fill, count: count) }
 
 @Suite struct ThumbnailWriterTests {
-    @Test(.disabled("waits on ST-5"))
+    @Test
     func publishThenPreviewReturnsTheBytes() async throws {
         let writer = try ThumbnailWriter(folder: scratch() + "/Thumbnails", budgetBytes: 256 * 1024 * 1024)
         let beach = ref("Beach.ora")
@@ -39,7 +39,16 @@ private func png(_ fill: UInt8, count: Int = 1_000) -> Data { Data(repeating: fi
         #expect(await writer.preview(for: ref("Other.ora")) == nil)
     }
 
-    @Test(.disabled("waits on ST-5"))
+    @Test
+    func perDocument() async throws {
+        let writer = try ThumbnailWriter(folder: scratch() + "/Thumbnails", budgetBytes: 256 * 1024 * 1024)
+        _ = try await writer.publish(png: png(1), for: ref("Beach.ora"))
+        _ = try await writer.publish(png: png(2), for: ref("Forest.ora"))
+        #expect(await writer.preview(for: ref("Beach.ora")) == png(1))
+        #expect(await writer.preview(for: ref("Forest.ora")) == png(2))
+    }
+
+    @Test
     func aSecondPublishReplaces() async throws {
         let writer = try ThumbnailWriter(folder: scratch() + "/Thumbnails", budgetBytes: 256 * 1024 * 1024)
         let beach = ref("Beach.ora")
@@ -48,7 +57,7 @@ private func png(_ fill: UInt8, count: Int = 1_000) -> Data { Data(repeating: fi
         #expect(await writer.preview(for: beach) == png(2))
     }
 
-    @Test(.disabled("waits on ST-5"))
+    @Test
     func budget() async throws {
         let writer = try ThumbnailWriter(folder: scratch() + "/Thumbnails", budgetBytes: 3_000)
         let refs = ["A.ora", "B.ora", "C.ora", "D.ora"].map(ref)
@@ -61,10 +70,10 @@ private func png(_ fill: UInt8, count: Int = 1_000) -> Data { Data(repeating: fi
         }
     }
 
-    @Test(.disabled("waits on ST-5"))
+    @Test
     func flagReachesStore() async throws {
         let support = scratch(), home = scratch()
-        let folder = SuiteLocations.appFolder("Thumbnails", arguments: [SuiteLocations.supportDirFlag, support], home: home)
+        let folder = ThumbnailWriter.folder(arguments: [SuiteLocations.supportDirFlag, support], home: home)
         #expect(folder == support + "/Thumbnails")
         let writer = try ThumbnailWriter(folder: folder, budgetBytes: 256 * 1024 * 1024)
         _ = try await writer.publish(png: png(7), for: ref("Beach.ora"))
