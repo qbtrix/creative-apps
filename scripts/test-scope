@@ -10,7 +10,10 @@
 #   scripts/test-scope perf [APP]          the perf and timing tests, all or APP's
 #   scripts/test-scope perf-report LOG     a perf run's swift test log as a markdown report
 #   scripts/test-scope heavy [FILTER]      the CPU-heavy correctness tests, all or those FILTER takes
+#   scripts/test-scope shard K/N           shard K of N of the `swift test list` ids on stdin
 #   scripts/test-scope timing              the tests that assert a wall-clock bound and aren't in the perf list
+#   scripts/test-scope ids TARGET FILE     each @Test in FILE as a perf-list id, Target.Suite/test (nested suites
+#                                          joined by /) or Target.freeTest; the fast lane's quarantine reads these
 #
 # app and changed print two lines (app with a comma list: the union, as the
 # lane's batch macOS gate asks for): the regex for the tests outside
@@ -41,11 +44,15 @@
 # Tests/test_scope fails unless it prints nothing. A test asserts one when an
 # #expect or #require line in its body has an upper bound (a spaced `<` or
 # `<=`) against a Duration literal (`.milliseconds(`, ...), or, in a file that
-# reads a clock (ContinuousClock, `measure(`), an upper bound with a timing name
+# reads a clock (ContinuousClock, Date(), `measure(`), an upper bound with a timing name
 # before it (median, p95, elapsed, percentile, took...) or a lower bound on
 # frames drawn (frames, fps, drawn, redraws), or when it calls an assertion
 # helper (a func anywhere in Tests/ named expect*, require*, assert*, such as
-# expectP95) whose own body asserts one. Line-based on purpose: a count budget
+# expectP95) whose own body asserts one. A test whose own body reads a clock
+# (a nested func counts, a shared helper doesn't: snapshot harnesses read one
+# too) also asserts one with a ratio under RATIO_MARGIN (10x) between two
+# values, `x < y * 3` or `x / y <= 2.5` (not an `abs(...)` tolerance): the
+# 2026-10-26 red was such a ratio failing at 3.1x on a busy runner. Line-based on purpose: a count budget
 # (bodies, copies), a lower bound on anything else or a helper named any other
 # way passes. A `not-timing:` comment in the test's body exempts it.
 #
@@ -55,6 +62,17 @@
 # they never crowd the time-limited suites off the cores in the shared parallel
 # pass. With FILTER (a --changed run's test regex) it keeps only the listed
 # tests FILTER would run.
+#
+# shard reads `swift test list` ids on stdin and prints the two lines of
+# shard K (1-based) of N, in the format of app and changed: the regex for the
+# tests outside AppSnapshotTests, then the one for AppSnapshotTests. The unit is
+# a top-level suite (Target.Suite; a nested suite stays with its parent, since
+# BodyCountSuites' children count body runs a cold process inflates: run
+# 40282193954) or a free test (Target.freeTest); the distinct units are sorted
+# and unit i goes to shard i mod N, so on one commit every shard agrees and a
+# suite lands in one shard.
+# scripts/ci --shard runs the lines like a --changed scope. CI's macOS test
+# shards use it (ci.yml).
 #
 # build-apps reads code paths (the fast lane's BUILD_RE files) and prints the
 # apps whose macOS build-only run covers them, comma-separated (photo,design),
@@ -133,7 +151,7 @@ def path_units(path):
             return [("SuiteKernelTests", None), CLI] + [(x + "ModelTests", None) for x in APPS.values()]
         if top in ("AfterGlowCLI", "AfterGlowCLICore"):
             return [CLI]
-        if top in ("AfterGlowApp", "SuiteShell"):
+        if top in ("AfterGlowApp", "SuiteShell", "SuiteText"):
             return app_units("suite")
         if top == "SuiteUI":
             return [("SuiteUITests", None), (SNAP, SNAPSHOTS["suiteui"])]
@@ -233,6 +251,21 @@ def heavy_regex(within=None):
     return "^(%s)(/|\\()" % "|".join(i.replace(".", r"\.") for i in ids) if ids else ""
 
 
+def shard(ids, k, n):
+    """The two lines shard prints for shard k of n of these `swift test list` ids."""
+    if not 1 <= k <= n:
+        sys.exit(f"test-scope: shard {k}/{n}: want 1 <= K <= N")
+    units = set()
+    for i in ids:
+        u = re.sub(r"\(.*\)$", "", i.strip())  # Target.Suite/test(a:) -> Target.Suite/test
+        if re.fullmatch(r"\w+\.[\w/]+", u):
+            units.add(u.split("/", 1)[0])  # Target.Suite, or Target.freeTest
+    mine = [u for j, u in enumerate(sorted(units)) if j % n == k - 1]
+    def regex(us):
+        return "^(%s)(/|\\()" % "|".join(u.replace(".", r"\.") for u in us) if us else ""
+    return regex([u for u in mine if not u.startswith(SNAP + ".")]) + "\n" + regex([u for u in mine if u.startswith(SNAP + ".")])
+
+
 TESTS_DIR = os.environ.get("TESTS_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests")
 DECL = re.compile(r"\b(struct|enum|class|actor|extension)\s+(\w+)[^{]*\{")
 TEST_FUNC = re.compile(r"\bfunc\s+(\w+)")
@@ -244,7 +277,20 @@ TIMED_NAME = re.compile(r"(?i)(elapsed|median|p50|p95|p99|percentile|latency|too
 # a lower bound on frames drawn (frames, fps, drawn, redraws): how many land in a wall-clock window.
 HELPER = re.compile(r"(expect|require|assert)[A-Z0-9]")  # an assertion helper's name: expectP95, not check
 FRAMES_FLOOR = re.compile(r"(?i)#(expect|require)\(.*\b\w*(frame|fps|drawn|draws|redraw)\w*\s>=?\s")
-CLOCK = re.compile(r"ContinuousClock|SuspendingClock|DispatchTime\.now|CFAbsoluteTimeGetCurrent|\bmeasure\(")
+CLOCK = re.compile(r"ContinuousClock|SuspendingClock|DispatchTime\.now|CFAbsoluteTimeGetCurrent|CACurrentMediaTime"
+                   r"|\bDate\(\)|\bDate\.now|timeIntervalSince|\bmeasure\(")
+# A ratio between two measured values, in a test whose body reads a clock: `x < y * N` or `x / y <= N`
+# with a plain decimal N (a tolerance like `* 1e-12` is not one). Under RATIO_MARGIN it is a timing bound:
+# the runner's speed, not the code, decides a 3x ratio.
+RATIO_MARGIN = 10
+RATIO = re.compile(r"\s<=?\s[^,]*?\*\s*([0-9]+(?:\.[0-9]+)?)(?=\s*[-+,)]|$)"
+                   r"|/\s*[A-Za-z_][\w.]*[^,<]*?\s<=?\s*([0-9]+(?:\.[0-9]+)?)(?=\s*[-+,)]|$)")
+
+
+def tight_ratio(code):
+    """Whether a line of Swift code bounds a ratio by less than RATIO_MARGIN (the header's ratio rule)."""
+    m = RATIO.search(code)
+    return bool(m) and "abs(" not in code and float(m.group(1) or m.group(2)) < RATIO_MARGIN
 
 
 def swift_code(line):
@@ -286,11 +332,17 @@ def swift_tests(path, helpers=False):
     return out
 
 
-def times(code, clock):
-    """Whether a line of Swift code asserts a wall-clock bound (the header's detector)."""
+def times(code, clock, body_clock=False):
+    """Whether a line of Swift code asserts a wall-clock bound (the header's detector). clock: the file
+    reads one; body_clock: the test's own body does, which makes a tight ratio a timing bound."""
     return bool(
-        (UPPER.search(code) and (DURATION.search(code) or (clock and TIMED_NAME.search(code))))
+        (UPPER.search(code) and (DURATION.search(code) or (clock and TIMED_NAME.search(code))
+                                 or (body_clock and tight_ratio(code))))
         or (clock and FRAMES_FLOOR.search(code)))
+
+
+def reads_clock(body):
+    return any(CLOCK.search(swift_code(b)) for b in body)
 
 
 def timing_tests(root=TESTS_DIR):
@@ -305,16 +357,17 @@ def timing_tests(root=TESTS_DIR):
                 with open(path, errors="replace") as f:
                     files.append((target, name, path, bool(CLOCK.search(f.read()))))
     timed = {helper for _, _, path, clock in files for _, helper, _, body in swift_tests(path, helpers=True)
-             if HELPER.match(helper) and any(times(swift_code(b), clock) for b in body)}
+             if HELPER.match(helper) and any(times(swift_code(b), clock, reads_clock(body)) for b in body)}
     call = re.compile(r"(?<!func )\b(%s)\(" % "|".join(sorted(timed))) if timed else None
     found = []
     for target, name, path, clock in files:
         for suites, test, disabled, body in swift_tests(path):
             if disabled or any("not-timing:" in b for b in body):
                 continue
+            body_clock = reads_clock(body)
             for line in body:
                 code = swift_code(line)
-                if times(code, clock) or (call and call.search(code)):
+                if times(code, clock, body_clock) or (call and call.search(code)):
                     found.append((f"{target}.{'/'.join(suites + [test])}", name, line.strip()))
                     break
     return found
@@ -422,13 +475,18 @@ def main(argv):
         print(perf_regex(args[0] if args else None))
     elif cmd == "heavy" and len(args) <= 1:
         print(heavy_regex(args[0] if args else None))
+    elif cmd == "shard" and len(args) == 1 and re.fullmatch(r"\d+/\d+", args[0]):
+        print(shard(sys.stdin.read().splitlines(), *map(int, args[0].split("/"))))
     elif cmd == "perf-report" and len(args) == 1:
         perf_report(args[0])
     elif cmd == "timing" and not args:
         for test, where, bound in unlisted_timing():
             print(f"{test}  ({where}: {bound})")
+    elif cmd == "ids" and len(args) == 2:
+        for suites, name, _, _ in swift_tests(args[1]):
+            print("/".join([args[0] + "." + (suites[0] if suites else name)] + suites[1:] + ([name] if suites else [])))
     else:
-        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | perf-report LOG | timing")
+        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | shard K/N | perf-report LOG | timing | ids TARGET FILE")
 
 
 if __name__ == "__main__":
