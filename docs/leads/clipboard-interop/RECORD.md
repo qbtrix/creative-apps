@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T06:30Z · 06:3xZ: no change. dev-red #5818 is open (revert #5827). #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor.
+Polled: 2026-10-27T06:35Z · Polled: 06:35Z. CB-flare/design/halo restacked on dev ad29aeaf, gates PASS, waiting on lane to drop needs-rebase; dev-red #5818 open (macOS, not ours).
 
 
 
