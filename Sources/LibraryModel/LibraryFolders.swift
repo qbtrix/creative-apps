@@ -2,10 +2,11 @@
 // disk, for the sidebar's FOLDERS section. Each import is a root; a chain of folders that hold no photos of
 // their own until the last one collapses into one row (`a/b/c`). `ownCount` counts a folder's own photos,
 // `totalCount` adds its descendants'. A folder is a child of another only at a `/` boundary, so `/a/bc`
-// never sits under `/a/b`. `allMissing` is true when every photo under it is missing from disk. The tree keeps
-// only folders that hold photos and folders where two such branches meet, so a chain collapses by itself and
-// the photo-less folders above every import fall away, leaving one root per import. The sidebar reads
-// `folderTree`, `showFolderHelp` and each row's `rowID`, `library.folder.` and the path's FNV-1a hash (FO-3).
+// never sits under `/a/b`. `allMissing` is true when every photo under it is missing from disk, and then
+// `missingNote` is what the row's missing badge says. The tree keeps only folders that hold photos and folders
+// where two such branches meet, so a chain collapses by itself and the photo-less folders above every import
+// fall away, leaving one root per import. The sidebar reads `folderTree`, `showFolderHelp` and each row's
+// `rowID`, `library.folder.` and the path's FNV-1a hash (FO-3).
 // Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -26,6 +27,13 @@ public struct FolderNode: Hashable, Sendable, Identifiable {
     public var allMissing: Bool
     /// The subfolders that hold photos, sorted by name.
     public var children: [FolderNode]
+
+    /// What the row's missing badge says: nil unless every photo under the folder is missing from disk.
+    public var missingNote: String? {
+        guard allMissing else { return nil }
+        return totalCount == 1 ? "The photo in this folder is missing from disk."
+            : "All \(totalCount) photos in this folder are missing from disk."
+    }
 
     public init(path: String, name: String, ownCount: Int, totalCount: Int, allMissing: Bool, children: [FolderNode]) {
         (self.path, self.name, self.ownCount, self.totalCount) = (path, name, ownCount, totalCount)

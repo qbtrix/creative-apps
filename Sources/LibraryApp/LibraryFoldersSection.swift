@@ -28,11 +28,11 @@ enum LibraryFoldersSection {
         tree.isEmpty ? nil : SidebarSection(id: "folders", title: "Folders", items: tree.map(row))
     }
 
-    /// A folder's row, dimmed when every photo under it is missing.
+    /// A folder's row, dimmed and badged when every photo under it is missing.
     static func row(_ node: FolderNode) -> SidebarItem {
         SidebarItem(
             id: LibraryFolders.rowID(for: node.path), title: node.name, systemImage: "folder", count: node.totalCount,
-            children: node.children.map(row), isDimmed: node.allMissing)
+            children: node.children.map(row), isDimmed: node.allMissing, warning: node.missingNote)
     }
 
     /// A folder row's context menu: each item disabled with `help` while view.show-folder can't run.

@@ -173,6 +173,16 @@ import Testing
         }
     }
 
+    @Test func anAllMissingFolderSaysSo() throws {
+        let photos = [Self.photo("/m/gone/a.png", missing: true), Self.photo("/m/gone/b.png", missing: true),
+                      Self.photo("/m/half/c.png", missing: true), Self.photo("/m/half/d.png")]
+        let roots = LibraryFolders.tree(photos)
+        #expect(Self.node("/m/gone", in: roots)?.missingNote == "All 2 photos in this folder are missing from disk.")
+        #expect(Self.node("/m/half", in: roots)?.missingNote == nil)
+        let one = LibraryFolders.tree([Self.photo("/m/one/a.png", missing: true)])
+        #expect(one.first?.missingNote == "The photo in this folder is missing from disk.")
+    }
+
     @Test func aSiblingWithASharedPrefixNeverLeaks() {
         let photos = ["/a/b/x.png", "/a/b/deep/z.png", "/a/bc/y.png"].map { Self.photo($0) }
         let names = { (scope: FolderScope) in photos.filter(LibraryFilter(folder: scope).matches).map(\.name) }

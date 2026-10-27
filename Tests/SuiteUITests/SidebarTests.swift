@@ -83,6 +83,14 @@ import Testing
     #expect(parent.secondLevelRows.map(\.isDimmed) == [false, true])
 }
 
+@Test func aWarningShowsOnlyWhereItIsGivenAndKeepsAtTheSecondLevel() {
+    #expect(SidebarItem(id: "a", title: "All", systemImage: "photo").warning == nil)
+    let grandchild = SidebarItem(id: "g", title: "gone", systemImage: "folder", isDimmed: true, warning: "All missing.")
+    let child = SidebarItem(id: "c", title: "trips", systemImage: "folder", children: [grandchild])
+    let parent = SidebarItem(id: "p", title: "Photos", systemImage: "folder", children: [child])
+    #expect(parent.secondLevelRows.map(\.warning) == [nil, "All missing."])
+}
+
 @Test func aToggleReservesOnlyTheSymbolsItIsGiven() {
     let toggle = SidebarToggle(
         id: "l", title: "Lock", onSymbol: "lock.fill", offSymbol: "lock", isOn: false, reserving: ["lock.open"])
