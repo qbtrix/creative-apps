@@ -115,3 +115,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T05:12:13Z OC complete; journeys 40450411543 (full) and 40449642359 (photo) still in Journeys wait; critic panel when done
 - 2026-10-27T05:31:55Z OC complete; photo journeys 40449642359 now running ui-test on macOS (since 05:24); full 40450411543 still in Journeys wait; critic panel when one finishes
 - 2026-10-27T05:51:55Z OC complete; photo journeys 40449642359 still in ui-test (since 05:24); full 40450411543 still in Journeys wait; critic panel when one finishes
+- 2026-10-27T06:21:53Z critic panel pending: journeys 40449642359/40450411543 cancelled, no screens; full journeys 40460270856 at ad29aeaf in Journeys wait (dev macOS compile red, AJ-4 PendingAdjustTarget, not ours)
