@@ -336,3 +336,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 03:43Z wave 3 restack: #5247 AJ-photo gate running; #5248 AJ-library and #5249 AJ-halo cherry-picked onto dev, conflicts resolved, gates next. dev-red #5818 not ours.
 - 03:53Z #5247 AJ-photo: scripts/ci --changed PASS, pushed a07fda892, Head line moved. AJ-library gate running, AJ-halo next. #5250/#5252/#5257/#5258/#5259/#5260 restacked locally on their parents, push after parents land.
 - 04:03Z #5248 AJ-library: gate PASS, pushed a01a609aa, Head line moved. #5249 AJ-halo gate running. main not yet past AJ-k/AJ-u.
+- 04:08Z ship: AJ-halo #5249 restacked on dev, scripts/ci --changed PASS, pushed 04acff930, Head moved. #5247/#5248/#5249 carry fast-lane+beta. Dependents #5250 #5252 #5257-#5260 restacked locally, push after parents land.
