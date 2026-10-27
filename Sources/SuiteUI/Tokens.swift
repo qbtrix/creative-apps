@@ -224,6 +224,8 @@ public enum SuiteFont {
     public static let pill = Font.caption2.weight(.semibold).monospacedDigit()
     /// Timecode and frame readouts.
     public static let timecode = Font.caption.monospaced()
+    /// Plain text read as code or a log, at body size: a problem report, a crash.
+    public static let code = Font.body.monospaced()
     /// A Studio group header (KEYFRAMES, EASING): 10 pt semibold, set in caps
     /// with SuiteSize.capsTracking.
     public static let sectionCaps = Font.caption.weight(.semibold)
@@ -234,9 +236,14 @@ public enum SuiteFont {
 }
 
 /// Hover and state changes fade background, color and border over 0.14 s;
-/// under Reduce Motion they change at once. Nothing else in the chrome moves.
+/// under Reduce Motion they change at once. The one other motion is a refused
+/// rename's field shaking once (#3462), none under Reduce Motion.
 public enum SuiteMotion {
     public static let state = Animation.easeInOut(duration: 0.14)
+    /// How far a refused field swings each way, in points.
+    public static let shakeOffset: CGFloat = 6
+    /// The shortest beat of the shake, in seconds; the whole shake is six.
+    public static let shakeStep: Double = 0.05
 
     /// `state`, or nil (no animation) under Reduce Motion.
     public static func state(reduceMotion: Bool) -> Animation? {

@@ -7,6 +7,7 @@
 // grid's thumbnails of the changed photos drop once, when the drag ends.
 // Paste and sync are each one step over every photo they change, and never
 // touch a crop. Linux-safe.
+import SuiteImaging
 import SuiteModel
 
 extension LibraryCatalog {
@@ -20,11 +21,11 @@ extension LibraryCatalog {
 
     /// Why `slider` can't change on these services: on the live services,
     /// `LiveDevelop.waiting[slider]`; nil on the fakes and once it renders.
-    public func sliderHelp(_ slider: DevelopSlider) -> String? {
+    public func sliderHelp(_ slider: ToneSlider) -> String? {
         services.develop is LiveDevelop ? LiveDevelop.waiting[slider] : nil
     }
     /// The targets' value, "Mixed" when they differ; nil with no targets.
-    public func developValue(_ slider: DevelopSlider) -> MetadataValue<Double>? { developShared { $0.value(slider) } }
+    public func developValue(_ slider: ToneSlider) -> MetadataValue<Double>? { developShared { $0.value(slider) } }
     /// The targets' curve, mixed when they differ; nil with no targets.
     public var developCurve: MetadataValue<ToneCurve>? { developShared(\.curve) }
     /// The targets' levels, mixed when they differ; nil with no targets.
@@ -33,10 +34,10 @@ extension LibraryCatalog {
     /// Every target to `value` (clamped). Edits sharing an open `coalesceKey`
     /// (one drag, "develop-exposure") are one step named after the slider.
     /// No thumbnail work per sample: the grid keeps its picture until release.
-    public mutating func setDevelop(_ slider: DevelopSlider, to value: Double, coalesceKey: String?) {
+    public mutating func setDevelop(_ slider: ToneSlider, to value: Double, coalesceKey: String?) {
         let ids = developTargets
         guard !ids.isEmpty, sliderHelp(slider) == nil else { return }
-        recordEdit(slider.rawValue, coalesceKey: coalesceKey, ids: ids) { $0.develop = $0.develop.setting(slider, to: value) }
+        recordEdit(slider.title, coalesceKey: coalesceKey, ids: ids) { $0.develop = $0.develop.setting(slider, to: value) }
     }
     /// Every target's curve to `points` as the step "Curve"; points that make no curve are ignored.
     public mutating func setCurve(_ points: [DevelopCurvePoint], coalesceKey: String?) {
@@ -61,15 +62,15 @@ extension LibraryCatalog {
 
     /// nil: every adjustment ("Reset Develop"), never the crop; .tone or .color: "Reset Tone", "Reset Color".
     @discardableResult public mutating func resetDevelop(_ group: DevelopGroup?) -> Set<String> {
-        let sliders = group?.sliders ?? DevelopSlider.allCases
+        let sliders = group?.sliders ?? ToneSlider.allCases
         return developStep(group.map { "Reset " + $0.rawValue } ?? "Reset Develop") { settings in
-            let reset = sliders.reduce(settings) { $0.setting($1, to: 0) }
-            return group == nil ? reset.setting(curve: .identity).setting(levels: .neutral) : reset
+            let reset = sliders.reduce(settings) { $0.setting($1, to: $1.neutral) }
+            return group == nil ? reset.setting(curve: .identity).setting(levels: .neutral).setting(kinds: []) : reset
         }
     }
     /// One slider back to 0: "Reset Exposure".
-    @discardableResult public mutating func resetDevelop(_ slider: DevelopSlider) -> Set<String> {
-        developStep("Reset " + slider.rawValue) { $0.setting(slider, to: 0) }
+    @discardableResult public mutating func resetDevelop(_ slider: ToneSlider) -> Set<String> {
+        developStep("Reset " + slider.title) { $0.setting(slider, to: slider.neutral) }
     }
     /// The identity curve: "Reset Curve".
     @discardableResult public mutating func resetCurve() -> Set<String> {
@@ -103,7 +104,7 @@ extension LibraryCatalog {
     /// `change` on `ids` (every target by default) as ONE step `name` of its
     /// own, closed at once (an open drag ends first); drops the changed photos'
     /// thumbnails and returns their ids, none when nothing changed.
-    private mutating func developStep(
+    mutating func developStep(
         _ name: String, ids: Set<String>? = nil, _ change: (DevelopSettings) -> DevelopSettings
     ) -> Set<String> {
         endDevelopDrag()
@@ -124,10 +125,12 @@ extension LibraryCatalog {
     /// "Exposure +1.00, Contrast 13, Curve": the copied settings off neutral, in panel order.
     public var copiedSummary: String? {
         guard let copied = copiedSettings else { return nil }
-        var parts = DevelopSlider.allCases.filter { copied.value($0) != 0 }
-            .map { "\($0.rawValue) " + Self.developText(copied.value($0), $0) }
+        var parts = ToneSlider.develop.filter { copied.value($0) != $0.neutral }
+            .map { "\($0.title) " + Self.developText(copied.value($0), $0) }
         if !copied.curve.isIdentity { parts.append("Curve") }
         if copied.levels != .neutral { parts.append("Levels") }
+        if copied.bw != nil { parts.append("Black & White") }
+        if copied.invert { parts.append("Invert") }
         return parts.isEmpty ? "No adjustments" : parts.joined(separator: ", ")
     }
 
@@ -160,7 +163,7 @@ extension LibraryCatalog {
     public var toneHistogram: ToneHistogram { loupeRender?.tone ?? .empty }
 
     /// Exposure as "+1.00" (signed, two places); the rest as whole numbers.
-    private static func developText(_ value: Double, _ slider: DevelopSlider) -> String {
+    private static func developText(_ value: Double, _ slider: ToneSlider) -> String {
         guard slider == .exposure else { return String(Int(value.rounded())) }
         let hundredths = Int((abs(value) * 100).rounded())
         let fraction = String(hundredths % 100)

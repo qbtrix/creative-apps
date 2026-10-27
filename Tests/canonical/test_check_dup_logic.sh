@@ -31,6 +31,9 @@ expect "matches by name, with inflections and CamelCase boundaries" \
       Sources/LibraryModel/Live/LiveExporter.swift Sources/DesignModel/Live/LiveTransforming.swift \
       Sources/FlareApp/FlareWindow+Layers.swift Sources/HaloModel/HaloSnapGuides.swift \
       Sources/HaloModel/HaloBones.swift Sources/HaloModel/HaloParenting.swift)"
+expect "a fourth PNG/JPEG size reader is Raster size (SuiteImaging.rasterSize(of:) is the one copy)" \
+  "Sources/DesignModel/DesignRasterSize.swift (Raster size),Sources/HaloApp/ImageHeaderReader.swift (Raster size)" \
+  "$(concept_files Sources/DesignModel/DesignRasterSize.swift Sources/HaloApp/ImageHeaderReader.swift Sources/PhotoApp/ImageSizeSheet.swift)"
 expect "no match: Snapshot is not Snap, Layer is not Layers, Undoable is not Undo" "" \
   "$(concept_files Sources/PhotoApp/PhotoSnapshotView.swift Sources/DesignModel/DesignLayer.swift \
       Sources/HaloModel/Undoable.swift Sources/FlareModel/Cropless.swift)"

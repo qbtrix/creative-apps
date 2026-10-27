@@ -126,4 +126,17 @@ import Testing
         workspace.gesture(.move, Self.onTitle, Self.onTitle)
         #expect(workspace.selectedNodeIDs == [card])
     }
+
+    /// On the canvas, Return enters the picked card and Escape steps out of it; with no group entered Escape deselects.
+    @Test func returnEntersThePickedCardAndEscapeStepsOut() throws {
+        var (workspace, card) = try Self.card()
+        #expect(workspace.canvasKeyAction(.escape, modifiers: []) == .deselect)
+        try Self.pick(Self.onTitle, on: &workspace)
+        #expect(workspace.canvasKeyAction(.enter, modifiers: []) == .enterGroup)
+        workspace.enterGroup()
+        #expect(workspace.groupScope == GroupScope(path: [card]))
+        #expect(workspace.canvasKeyAction(.escape, modifiers: []) == .exitGroup)
+        workspace.exitGroup()
+        #expect(workspace.selectedNodeIDs == [card] && workspace.groupScope == .root)
+    }
 }

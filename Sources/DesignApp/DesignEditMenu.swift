@@ -10,7 +10,7 @@ import DesignModel
 import SuiteUI
 import SwiftUI
 
-/// Edit: Duplicate.
+/// Edit: Duplicate, then Enter Group and Exit Group (area-selection AR-14; Return and Escape on the canvas).
 struct DesignEditItems: View {
     let menu: DesignMenu
 
@@ -18,6 +18,8 @@ struct DesignEditItems: View {
         menu.item("edit.duplicate", systemImage: "plus.square.on.square", shortcut: KeyboardShortcut("d")) {
             menu.perform(.command(.duplicate))
         }
+        menu.item("select.enter-group", systemImage: "arrow.down.right.square") { menu.perform(.enterGroup) }
+        menu.item("select.exit-group", systemImage: "arrow.up.left.square") { menu.perform(.exitGroup) }
     }
 }
 

@@ -332,7 +332,8 @@ extension HaloHistoryJourneyTests {
         let bar = halo.element("halo.inspector.row.x")
         XCTAssert(bar.waitForExistence(timeout: 5), "no Position X row (halo.inspector.row.x)")
         bar.click()
-        let field = halo.element("suite.inspector").textFields.firstMatch
+        // The row's own field: the inspector's first is FILL's Color Hex, off screen under a solid (#4559).
+        let field = bar.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking Position X opened no field")
         halo.press(character: "a", .command)
         field.typeText("\(value)")

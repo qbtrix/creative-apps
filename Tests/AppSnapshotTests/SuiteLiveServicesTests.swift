@@ -3,7 +3,8 @@
 // live and writes recents.json there, creating and home are live (HM-2a),
 // preferences is live over preferences.json (onboarding OB-9), onboarding is
 // SuiteOnboarding (OB-12), pasteboard is SuitePasteboardCoding (clipboard-interop CB-4), text is LiveText (shell-text ST-8),
-// media is LiveMedia (shell-media SM-9); each other
+// media is LiveMedia (shell-media SM-9), thumbnails is the shared previews
+// store under <support>/Thumbnails (shared-thumbnails ST-7); each other
 // slotted member is pending with its "<What> isn't available yet."
 // sentence, and each throwing one throws notAvailable with that sentence.
 // `animations` and `updates` are the fakes until `with(animations:updates:)`
@@ -63,13 +64,13 @@ import Testing
         let pending = makeLive().services.pending
         var expected = SuiteServices.slotFeatures.mapValues(SuiteIdentity.notConnected)
         let live = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences", "onboarding",
-                    "pasteboard", "text", "media"]
+                    "pasteboard", "text", "media", "thumbnails"]
         for member in live { expected[member] = nil }
         #expect(pending == expected)
-        #expect(pending.count == 6)
+        #expect(pending.count == 5)
         #expect(pending["text"] == nil)
         #expect(pending["media"] == nil)
-        #expect(pending["thumbnails"] == "Opening recent work isn't available yet.")
+        #expect(pending["thumbnails"] == nil)
         #expect(pending["home"] == nil)
         #expect(pending["creating"] == nil)
         #expect(pending["onboarding"] == nil)
@@ -88,17 +89,29 @@ import Testing
                                     "onboarding", "thumbnails", "home", "media", "text"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
         let live: Set<String> = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences",
-                                  "onboarding", "pasteboard", "text", "media"]
+                                  "onboarding", "pasteboard", "text", "media", "thumbnails"]
         #expect(Set(pending.keys).union(live) == members)
     }
 
     @Test func throwingMembersNotLiveThrowTheirReason() async throws {
         let s = makeLive().services
         let logo = ref("Logo.design")
-        await #expect(throws: reason("thumbnails")) { _ = try await s.thumbnails.publish(png: Data(), for: logo) }
         await #expect(throws: reason("roundTrips")) { try await s.roundTrips.cancel(session: "r1") }
         await #expect(throws: reason("assets")) { _ = try await s.assets.index() }
         await #expect(throws: reason("settings")) { try await s.settings.open(.general, from: .launcher) }
+    }
+
+    @Test func thumbnailsPublishUnderTheSupportFolderAndAnEarlierOpeningSeesThem() async throws {
+        let (s, support) = makeLive()
+        let logo = ref("Logo.design")
+        // Opened and asked before the publish, like the launcher's home while Photo saves.
+        let early = SuiteServices.liveThumbnails(support: support)
+        #expect(await early.preview(for: logo) == nil)
+        let png = Data([0x89, 0x50, 0x4E, 0x47, 9, 8, 7])
+        #expect(try await s.thumbnails.publish(png: png, for: logo) == "thumbnails/\(SuiteDocumentRef.fileKey(logo.fileID)).png")
+        #expect(await s.thumbnails.preview(for: logo) == png)
+        #expect(await early.preview(for: logo) == png, "a store opened earlier missed another's publish")
+        #expect(FileManager.default.fileExists(atPath: support + "/Thumbnails"))
     }
 
     @Test func pureMembersAreTheReferenceFakes() throws {

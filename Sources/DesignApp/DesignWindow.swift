@@ -51,6 +51,7 @@
 import AppKit
 import DesignModel
 import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -78,9 +79,6 @@ struct DesignWindow: View {
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
-    /// Whether this is the key window, which live commands act on (EM-4).
-    @Environment(\.appearsActive) private var appearsActive
-    @State private var liveID = UUID()
     /// Cut, Copy and Paste carry Design's bytes on the general pasteboard.
     private let bridge = DesignPasteboardBridge()
 
@@ -135,10 +133,10 @@ struct DesignWindow: View {
             Text(shown.message)
         }
         .task { start() }
-        .onChange(of: appearsActive, initial: true) {
-            if appearsActive { DesignShell.front = (liveID, { model }, perform) }
-        }
-        .onDisappear { if DesignShell.front?.id == liveID { DesignShell.front = nil } }
+        // The key window is the one live commands act on (EM-4).
+        .suiteLiveWindow(DesignShell.front, read: { DesignHeadless(model) }, write: { perform(.adoptLive($0.workspace)) })
+        // A file handed to Design (Finder, the home's Recent, Open In) opens here while the window is empty (#5200).
+        .suiteOpenQueue(DesignShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
@@ -178,6 +176,8 @@ struct DesignWindow: View {
         case .nudge(let direction, let shift): model.nudge(direction, shift: shift)
         case .deleteSelection: model.deleteSelection()
         case .deselect: model.deselect()
+        case .enterGroup: model.enterGroup()
+        case .exitGroup: model.exitGroup()
         case .select(let id): model.selectItem(id)
         case .toggleSelect(let id): model.toggleSelection(id)
         // The ids below come from the model's own rows, so a refused call can't happen.
@@ -217,7 +217,10 @@ struct DesignWindow: View {
         case .moveLayer(let id, let parent, let index):
             do { try model.moveLayer(id, into: parent, at: index) } catch { note = error.help }
         case .setStyle(let change):
-            do { try model.setStyle(change) } catch { note = error.help }
+            do {
+                try model.setStyle(change)
+                if case .textStyle = change { fitStyledText() }
+            } catch { note = error.help }
         case .renamePage(let id, let name):
             do { try model.renamePage(id, to: name) } catch {
                 // The page ids come from the model's own rows; only the name can be refused.
@@ -245,6 +248,12 @@ struct DesignWindow: View {
             node.id == id ? DesignTextFont.measure(model.textDraft, in: node) : nil
         }
         model.commitTextEdit(extent: extent)
+    }
+
+    /// Fits each selected text box to its text in the style just set, in that style's step (#3339).
+    private func fitStyledText() {
+        let texts = model.selectedNodes.filter { $0.kind == .text }
+        model.fitTextStyle(Dictionary(texts.map { ($0.id, DesignTextFont.measure($0.text, in: $0)) }) { first, _ in first })
     }
 
     /// Lands a live drag or scrub in the workspace as one step; with none live, `otherwise`.

@@ -116,7 +116,9 @@ public struct HexColor: Hashable, Sendable {
 /// The one color row: a filled InspectorRow with the label on the left, then
 /// on the right a swatch capsule (the system color well, which opens the
 /// system color panel) with a 1 pt outline and the color's hex code, which the
-/// user can also type. Takes a Color, or a HexColor through the second init.
+/// user can also type. Takes a Color, a HexColor through the second init, or a
+/// HexColor with its opacity through the third (the panel shows its opacity
+/// slider; a typed hex or an eyedropper pick keeps the opacity).
 /// `onEnd` runs once per gesture: each hex commit, and each run of panel
 /// picks once the panel closes, so a host makes each one undo step.
 public struct InspectorColorRow: View {
@@ -125,7 +127,10 @@ public struct InspectorColorRow: View {
     private let supportsOpacity: Bool
     private let sampleable: Bool
     private let sampleHelp: String?
-    private let onPick: @MainActor (Color.Resolved) -> Void
+    /// What a pick tells the host; internal so ColorAlphaTests can pick.
+    let onPick: @MainActor (Color.Resolved) -> Void
+    /// The opacity a typed hex or an eyedropper pick keeps (the opacity init); nil resolves them opaque.
+    private var keptOpacity: Float?
     private let onEnd: @MainActor () -> Void
     /// The hex field's accessibility identifier, when a host names it (InspectorColorWellRow.hexIdentifier).
     var hexID: String?
@@ -165,6 +170,28 @@ public struct InspectorColorRow: View {
         self.onEnd = onEnd
     }
 
+    /// An 8-bit sRGB color with its opacity, 0...1: the panel shows its opacity slider and `onChange` hears the color
+    /// and opacity whenever either differs. A typed hex or an eyedropper pick keeps `opacity`.
+    public init(
+        _ label: String, hex: HexColor, opacity: Double, sampleable: Bool = true, sampleHelp: String? = nil,
+        onChange: @escaping @MainActor (HexColor, Double) -> Void, onEnd: @escaping @MainActor () -> Void = {}
+    ) {
+        let alpha = Float(opacity.isFinite ? min(max(opacity, 0), 1) : 1)
+        var resolved = hex.resolved
+        resolved.opacity = alpha
+        self.label = label
+        self.color = Color(resolved)
+        self.supportsOpacity = true
+        self.sampleable = sampleable
+        self.keptOpacity = alpha
+        self.sampleHelp = sampleHelp
+        self.onPick = { picked in
+            let next = HexColor(picked)
+            if next != hex || abs(picked.opacity - alpha) > 0.5 / 255 { onChange(next, Double(picked.opacity)) }
+        }
+        self.onEnd = onEnd
+    }
+
     public var body: some View {
         InspectorRow(label) {
             HStack(spacing: SuiteSpacing.s) {
@@ -173,6 +200,7 @@ public struct InspectorColorRow: View {
                     supportsOpacity: supportsOpacity
                 )
                 .labelsHidden()
+                .accessibilityIdentifier("suite.colorwell." + label.lowercased().replacingOccurrences(of: " ", with: "-"))
                 .frame(width: SuiteSize.swatch.width, height: SuiteSize.swatch.height)
                 .clipShape(Capsule())
                 .overlay(Capsule().strokeBorder(SuiteColor.outline, lineWidth: 1))
@@ -213,8 +241,15 @@ public struct InspectorColorRow: View {
     func sample(_ hex: HexColor?, ends: inout HexEnds) {
         guard let hex else { return }
         if ends.isOpen, ends.closed() { onEnd() }
-        onPick(hex.resolved)
+        onPick(kept(hex.resolved))
         onEnd()
+    }
+
+    /// `resolved` at the row's kept opacity (the opacity init), else as it is.
+    func kept(_ resolved: Color.Resolved) -> Color.Resolved {
+        var out = resolved
+        if let keptOpacity { out.opacity = keptOpacity }
+        return out
     }
 
     /// Ends an open run of panel picks, once.
@@ -228,7 +263,7 @@ public struct InspectorColorRow: View {
         draft = nil
         closePicks()
         let result = ends.committed(text, old: HexColor(color.resolve(in: environment)).rgb)
-        if let next = result.color { onPick(HexColor(next).resolved) }
+        if let next = result.color { onPick(kept(HexColor(next).resolved)) }
         if result.ended { onEnd() }
     }
 }
@@ -251,6 +286,15 @@ public struct InspectorColorWellRow: View {
     ) {
         row = InspectorColorRow(
             label, hex: color, sampleable: sampleable, sampleHelp: sampleHelp, onChange: onChange, onEnd: onEnd)
+    }
+
+    /// The opacity row: the panel's opacity slider shows and `onChange` hears the color and opacity, 0...1.
+    public init(
+        _ label: String, color: HexColor, opacity: Double, sampleable: Bool = true, sampleHelp: String? = nil,
+        onChange: @escaping @MainActor (HexColor, Double) -> Void, onEnd: @escaping @MainActor () -> Void = {}
+    ) {
+        row = InspectorColorRow(
+            label, hex: color, opacity: opacity, sampleable: sampleable, sampleHelp: sampleHelp, onChange: onChange, onEnd: onEnd)
     }
 
     public var body: some View { row }

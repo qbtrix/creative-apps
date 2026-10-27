@@ -10,8 +10,11 @@
 # never overwritten; a passing test on a branch run (not dev) stays open. A
 # red test whose open issue a lead relabelled `gap` (found by its title, or by
 # the body's Test: line under a new title) gets a comment, never a second
-# issue or a body rewrite, and a gap issue whose test passes on dev closes. A
-# failed issue list files nothing. Needs bash and jq.
+# issue or a body rewrite, and a gap issue whose test passes on dev closes.
+# Dedup sees every open issue: one carrying the title under `beta80` only gets
+# a comment, one under `p0` closes on a dev pass, and a match at position 550
+# of 600 is found. A failed issue list, or one at the 5000 fetch cap, files
+# nothing. Needs bash and jq.
 #
 # Run: bash Tests/ci_findings/test_ci_findings.sh   (exit 0 = all pass)
 set -uo pipefail
@@ -24,12 +27,19 @@ check() { if eval "$2"; then echo "ok   $1"; else echo "FAIL $1"; fail=1; fi; }
 mkdir "$tmp/bin"
 cat >"$tmp/bin/gh" <<'GH'
 #!/usr/bin/env bash
-# Stub gh: $FX holds list.json (label finding), gap.json (label gap) and
-# body.<n> fixtures; list.fail makes `issue list` fail; writes append to $FX/calls.
+# Stub gh: $FX holds list.json (entries with no labels count as `finding`),
+# gap.json and body.<n> fixtures; `issue list` honours --label and --limit
+# (default 30) like gh does; list.fail makes it fail; writes append to $FX/calls.
 case "$1 $2" in
   "issue list")
     [[ ! -e "$FX/list.fail" ]] || exit 1
-    case "$*" in *"--label gap"*) cat "$FX/gap.json" 2>/dev/null || echo '[]' ;; *) cat "$FX/list.json" ;; esac ;;
+    label="" limit=30; a=("$@")
+    for ((i = 0; i < ${#a[@]}; i++)); do
+      case "${a[i]}" in --label) label=${a[i+1]} ;; --limit) limit=${a[i+1]} ;; esac
+    done
+    jq -s --arg l "$label" --argjson n "$limit" \
+      'add | map(.labels //= [{"name":"finding"}]) | map(select($l == "" or any(.labels[]; .name == $l))) | .[:$n]' \
+      "$FX/list.json" <(cat "$FX/gap.json" 2>/dev/null || echo '[]') ;;
   "issue view") [[ -e "$FX/body.$3" ]] && cat "$FX/body.$3" || exit 1 ;;
   "issue edit") echo "edit $3" >>"$FX/calls"; cp "${5:?}" "$FX/edited.$3" ;;
   "issue create") echo "create $*" >>"$FX/calls" ;;
@@ -118,8 +128,46 @@ check "a gap issue whose test passes on dev is closed" '[[ "$calls" == *"comment
 check "a finding issue is still updated in place" '[[ "$calls" == *"edit 11"* ]]'
 check "each issue is closed once" '[[ $(grep -c "^close 12\$" "$FX/calls") -eq 1 ]]'
 
+# Dedup reads every open issue, any label. #31 carries the "CI finding:"
+# title but only `beta80` (relabelled or filed by an audit): it hears "Still
+# failing", never a rewrite or a second issue. #32 (label p0, found by its
+# Test: line) closes when its test passes on dev.
+rm "$FX/calls"
+cat >"$FX/list.json" <<'JSON'
+[
+ {"number":31,"title":"CI finding: DesignJourneyTests/EditJourney/testEdit","body":"Test: `DesignJourneyTests/EditJourney/testEdit`","labels":[{"name":"beta80"}]},
+ {"number":32,"title":"Design grid snaps","body":"Test: `DesignJourneyTests/GridJourney/testGrid`","labels":[{"name":"p0"}]}
+]
+JSON
+echo '[]' >"$FX/gap.json"
+cat >"$tmp/any.log" <<'LOG'
+Test Case '-[DesignJourneyTests.EditJourney testEdit]' failed (1.0 seconds).
+Test Case '-[DesignJourneyTests.GridJourney testGrid]' passed (1.0 seconds).
+LOG
+"$root/scripts/ci-findings" "$tmp/any.log" >/dev/null 2>&1
+calls=$(cat "$FX/calls" 2>/dev/null)
+check "a red test whose open issue is labelled only beta80 files no second issue" '[[ "$calls" != *"create"* ]]'
+check "and gets a Still failing comment, not a body rewrite" \
+  'grep -q "^comment 31 issue comment 31 --body Still failing on run" "$FX/calls" && ! grep -Eq "^edit 31( |\$)" "$FX/calls"'
+check "an issue under any label whose test passes on dev is closed" '[[ "$calls" == *"close 32"* ]]'
+
+# 600 open findings with the match at position 550: no 500 cap hides it.
+rm -f "$FX/calls"
+jq -n '[range(600) | {number: (1000 + .), title: "CI finding: FlareJourneyTests/BigJourney/test\(.)", labels: [{name: "finding"}]}]' >"$FX/list.json"
+printf 'Old.\n' >"$FX/body.1550"
+echo "Test Case '-[FlareJourneyTests.BigJourney test550]' failed (1.0 seconds)." >"$tmp/big.log"
+"$root/scripts/ci-findings" "$tmp/big.log" >/dev/null 2>&1
+calls=$(cat "$FX/calls" 2>/dev/null)
+check "a finding at position 550 of 600 is matched and updated, not re-filed" '[[ "$calls" != *"create"* && "$calls" == *"edit 1550"* ]]'
+
+# A list that comes back at the fetch limit may be truncated: file nothing.
+rm -f "$FX/calls"
+jq -n '[range(5000) | {number: (10000 + .), title: "CI finding: X/Y/t\(.)"}]' >"$FX/list.json"
+out=$("$root/scripts/ci-findings" "$tmp/big.log" 2>&1)
+check "a list at the fetch limit files nothing" '[[ ! -s "$FX/calls" && "$out" == *"could not list"* ]]'
+
 # A failed issue list must not look like "no open issues": nothing is filed.
-rm "$FX/calls"; touch "$FX/list.fail"; : >"$FX/calls"
+rm -f "$FX/calls"; touch "$FX/list.fail"; : >"$FX/calls"
 out=$("$root/scripts/ci-findings" "$tmp/ui.log" 2>&1); status=$?
 check "a failed issue list files nothing and exits 0" '[[ $status -eq 0 && ! -s "$FX/calls" && "$out" == *"could not list"* ]]'
 rm "$FX/list.fail"

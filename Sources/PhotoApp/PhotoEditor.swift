@@ -17,6 +17,7 @@
 // rule (file-flow PF-2, `suiteFileDrop`): an image on an open one places as a
 // layer in one Place step, centred; with none open it opens; another app's
 // file goes to that app; the mark at the bottom says which before the drop.
+// With the Pen, PhotoPenOverlay puts SuiteUI's PathEditOverlay over the canvas.
 import PhotoModel
 import SuiteShell
 import SuiteUI
@@ -113,7 +114,7 @@ struct PhotoEditor: View {
 
 /// The canvas: the rendered picture (CanvasTiles on SuiteUI's EmbeddedCanvasHost) on the checkerboard with PhotoCanvasOverlay's
 /// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E S J C I G T pick enabled tools, Delete clears the selection
+/// with the canvas focused, V M B E S J C I G T P pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
 /// or deselect). Drops land on the whole editor (PhotoEditor's `suiteFileDrop`), not here. While the
 /// Straighten sheet is open the picture turns by its angle under StraightenMarks.
@@ -157,6 +158,10 @@ struct PhotoCanvas: View {
                     }
                     PhotoTextBoxOverlay(model: model, zoom: zoom, perform: perform)
                         .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
+                    if model.tool == .pen {
+                        PhotoPenOverlay(model: model, zoom: zoom, perform: perform)
+                            .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
+                    }
                 }
             } else {
                 EmptyStateView(
@@ -178,11 +183,40 @@ struct PhotoCanvas: View {
             perform(.dismiss)
         default:
             // A disabled tool's key does nothing, as its palette button does.
-            guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp) else { return .ignored }
+            // Shift cycles the tools that share the letter (Shift-J: Spot Heal, Heal, Remove).
+            let current = press.modifiers.contains(.shift) ? model.tool : nil
+            guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp, cyclingFrom: current)
+            else { return .ignored }
             perform(.tool(tool))
         }
         return .handled
     }
+}
+
+/// The Pen over the canvas (#5072): SuiteUI's PathEditOverlay draws the draft and the path in edit and turns presses
+/// and keys into the kernel's PathIntents, sent as `.path` (PhotoWorkspace.runPath runs each as its catalog command).
+/// While Command is held it edits points (Direct Selection); whether it is held is the view's own state. A press is
+/// held until release (#5145): a point drag moves the overlay's copy, and the window runs once, at mouse-up.
+struct PhotoPenOverlay: View {
+    let model: PhotoWorkspace
+    let zoom: Double
+    var perform: PhotoPerform = { _ in }
+    @State private var editsPoints = false
+    /// Edits points without Command held: the render budget test's way in, since a scripted event can't hold a key.
+    @Environment(\.photoPenEditsPoints) private var alwaysEditsPoints
+
+    var body: some View {
+        PathEditOverlay(draft: model.penDraft, path: model.pathInEdit, selection: model.anchorSelection,
+                        tool: editsPoints || alwaysEditsPoints ? .directSelect : .pen, zoom: zoom) { perform(.path($0)) }
+            .holdsPressesUntilRelease()
+            .onModifierKeysChanged(mask: .command) { _, keys in editsPoints = keys.contains(.command) }
+            .accessibilityIdentifier("photo.canvas.pen")
+    }
+}
+
+extension EnvironmentValues {
+    /// True: the Pen's overlay edits points as if Command were held (RenderBudgetPhotoPenAnchorTests).
+    @Entry var photoPenEditsPoints = false
 }
 
 extension PixelRect {

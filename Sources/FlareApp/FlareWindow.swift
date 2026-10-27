@@ -14,14 +14,18 @@
 // (FlareTimeline, FlareRecording and the four modifiers) are filled by later
 // tasks without touching their call sites here. The
 // window owns presentation state only: zoom, rulers, guides, the inspector
-// tab and what is presented (FlarePresentation, in FlareNewSheet.swift),
+// tab and which setup sheet is up (FlareSetupSheet, in FlareDocumentSheet.swift),
 // plus the export task and the file it last wrote (FlareWindow+Export.swift);
 // the export sheet is FlareExportSheetAdapter's, shown while the Model's run
 // isn't idle.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
-// `help` for every section 3.4 item, the Undo and Redo step names, the recent
-// files, Loop and the selection's Edit reasons.
+// `help` for every section 3.4 item, the Undo and Redo step names, Loop and
+// the selection's Edit reasons, and File > Place…'s reason and action; the
+// window takes SVG drops (FlarePlace.swift). The model's file flow follows the
+// suite's recents (the bridge's list, the only one Open Recent reads; #5126).
 import FlareModel
+import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -34,19 +38,23 @@ struct FlareWindow: View {
     @State var showsRulers = true
     @State var showsGuides = true
     @State var inspectorTab: FlareInspectorTab = .properties
-    /// The new sheet, alerts and the recovery offer.
-    @State var presented: FlarePresentation? = nil
+    /// The New and Document Settings sheet (document-setup DS-14).
+    @State var presented: FlareSetupSheet? = nil
     /// The export under way, so Cancel can stop it.
     @State var exportTask: Task<Void, Never>? = nil
     /// The first file the last export wrote, for Reveal in Finder.
     @State var exportedFile: URL? = nil
-    let launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
+    /// The process's flags; a hosted-window test passes its own, so `-FlareExportTo` reaches the export and no
+    /// folder panel opens.
+    var launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
     /// How many times a window's body ran; RenderBudgetFlareTests counts an interaction's.
     static var bodyRuns = 0
     /// The model the last body ran on, for the hosted-window tests to read back.
     static var shownModel: FlareWorkspace?
+    /// The last body's place (FlarePlace.swift), for RenderBudgetFlarePlaceTests to send the menu's place.
+    @MainActor static var placeProbe: (@MainActor ([(name: String, data: Data)]) -> Void)?
     /// The last body's `perform`, for the hosted-window tests to send intents through (FlareFileFlowLiveTests).
     @MainActor static var shownPerform: ((FlareIntent) -> Void)?
     #endif
@@ -61,6 +69,7 @@ struct FlareWindow: View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
         let _ = Self.shownModel = model
+        let _ = Self.placeProbe = { _ = place($0) }
         let _ = Self.shownPerform = { perform($0) }
         #endif
         SuiteWindow(
@@ -93,20 +102,26 @@ struct FlareWindow: View {
                 shape: shapeOptions)
         }
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
-        .modifier(FlareNewSheet(presented: $presented, perform: perform))
+        .modifier(FlareDocumentSheet(
+            sheet: $presented, setup: model.documentSetup, limits: model.documentLimits, perform: perform,
+            apply: { model.applyDocumentSetup($0, anchor: $1); return model.layerError == nil }))
         .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
-        .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
+        .onChange(of: Self.bridge.recents(for: .flare), initial: true) { model.updateFileFlow(recents: $1) }
+        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: model) }, write: { model.takeLive($0) })
+        .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
                 perform: { menuPerform($0) }, help: { menuHelp($0) },
                 undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
-                recent: model.recent, loops: model.loops, editHelps: model.editHelps,
+                loops: model.loops, editHelps: model.editHelps,
                 selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)],
-                document: model.suiteDocument))
+                placeHelp: model.placeMenuHelp, place: { choosePlace() },
+                document: model.suiteDocument, documentSettings: { presented = .settings },
+                settingsHelp: model.selectedScene == nil ? "Open or create an animation first." : nil))
     }
 
     /// The menu bar's door: File > Open Sample > Keyed Ball opens the keyed

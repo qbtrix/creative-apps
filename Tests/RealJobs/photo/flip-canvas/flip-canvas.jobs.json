@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P70 (suiteui/orientation-crop OC-12): Photo's image.flip mirrors the whole canvas through the kernel's Orientation. On a 48 x 32 gradient with a 16 x 10 patch layer at (6, 4) above it, flips the whole canvas horizontally and exports the PNG. The trap: only the selected layer flips, or the patch keeps its old offset so the composite shifts. The assertion: the PNG equals the original PNG mirrored, pixel for pixel (PhotoOrientationTests.flipCanvasRealJob).",
+  "inputs": ["input/*.ora"],
+  "steps": [
+    {"id": "image.flip", "params": {"axis": "horizontal"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "png", "options": {}},
+  "expect": {
+    "out/two-layers.png": {"pixels": {"tolerance": 0, "reference": "expected/two-layers.png"}}
+  },
+  "platforms": ["linux", "macos"]
+}

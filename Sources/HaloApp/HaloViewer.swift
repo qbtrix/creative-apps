@@ -76,11 +76,7 @@ struct HaloViewer: View {
                 // transport, History and three pills need about 456, so the
                 // zoom pill goes there (#4449).
                 ViewThatFits(in: .horizontal) {
-                    statusRow(comp, artboard: artboard, .wide)
-                    statusRow(comp, artboard: artboard, .noLayers)
-                    statusRow(comp, artboard: artboard, .leading)
-                    statusRow(comp, artboard: artboard, .leadingNoZoom)
-                    statusRow(comp, artboard: artboard, .bare)
+                    ForEach(HaloStatusRow.fallbacks, id: \.self) { statusRow(comp, artboard: artboard, $0) }
                 }
                 Divider()
                 HaloTimelineView(model: model, perform: perform)

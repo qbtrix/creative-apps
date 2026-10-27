@@ -53,6 +53,26 @@ import Testing
         #expect(notes.contains("window.center()"), "the Beta Notes window opens where AppKit drops it")
     }
 
+    /// The sheet's report and notes map to JSON the way the CLI's do, through the catalog's one mapping (#4667).
+    @Test func reportAndNotesMapOnce() throws {
+        let provider = try source("Sources/SuiteShell/ShellHelpProvider.swift")
+        let cli = try source("Sources/AfterGlowCLICore/HelpReports.swift")
+        for text in [provider, cli] {
+            #expect(text.contains("SuiteHelpCatalog.reportAnswer(report, text: report.text(note: note))"))
+            #expect(text.contains("SuiteHelpCatalog.notesAnswer(BetaNotes.current)"))
+            #expect(!text.contains("\"title\": .string("), "the notes are mapped by hand")
+        }
+        #expect(try source(Self.help).contains("value.decode(ProblemReport.self)"), "the presenter parses the report field by field")
+    }
+
+    /// The report body is prose and crash JSON, so it reads in body-size code type, not the caption-size
+    /// timecode face (#4666).
+    @Test func reportTextIsBodySize() throws {
+        let sheet = try source("Sources/SuiteUI/ProblemReportSheet.swift")
+        #expect(!sheet.contains("SuiteFont.timecode"), "the report is set in the timecode font")
+        #expect(sheet.contains("Text(shown).font(SuiteFont.code)"))
+    }
+
     @Test func providerAdaptsSuiteModel() throws {
         let text = try source("Sources/SuiteShell/ShellHelpProvider.swift")
         #expect(text.contains("public struct ShellHelpProvider: HelpProviding"))

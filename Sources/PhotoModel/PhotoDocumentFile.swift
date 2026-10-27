@@ -6,7 +6,7 @@
 // and the round trip: `snapshot()` turns the image into 8-bit straight-alpha
 // sRGB like an opened file, `documentPackage` encodes it through a
 // DocumentArchiving, `openDocument` decodes one and starts the image with
-// every layer, mask, kind and the adjustments, clean and with nothing to undo.
+// every layer, mask, kind, the adjustments and the paths, clean and with nothing to undo.
 // A failed open leaves the workspace as it was. `openDocument(_:name:)`
 // takes a snapshot the window decoded off the main actor, and
 // `PhotoServices.recovering(in:)` keeps autosaves in another folder. Both
@@ -44,9 +44,9 @@ extension PhotoWorkspace {
         return .image(format)
     }
 
-    /// What the image needs to keep: more than one layer, a mask or an adjustment layer.
+    /// What the image needs to keep: more than one layer, a mask, an adjustment layer or a path.
     public var needsDocument: Bool {
-        layers.count > 1 || !masks.isEmpty || layers.contains { $0.hasMask || $0.kind != .pixels }
+        layers.count > 1 || !masks.isEmpty || layers.contains { $0.hasMask || $0.kind != .pixels } || !paths.isEmpty
     }
 
     /// What File > Save does now: write the document, write the flat file, ask
@@ -109,7 +109,7 @@ extension PhotoWorkspace {
         }
         return PhotoDocumentSnapshot(
             canvas: canvas, layers: layers, pixels: try pixels.mapValues(image), masks: try masks.mapValues(image),
-            adjustments: adjustments, selectedLayerID: selectedLayerID)
+            adjustments: adjustments, selectedLayerID: selectedLayerID, paths: paths)
     }
 
     /// The open image's document package, encoded through `archive`.
@@ -151,6 +151,7 @@ extension PhotoWorkspace {
         masks = stack.masks
         selectedLayerID = stack.selectedLayerID
         adjustments = document.adjustments
+        loadPaths(document.paths)
         fileKind = .document
         reserveLayerIDs(after: layers.compactMap { $0.id.hasPrefix("layer-") ? Int($0.id.dropFirst(6)) : nil }.max() ?? 0)
         savedStepID = currentStepID

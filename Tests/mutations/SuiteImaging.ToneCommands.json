@@ -1,0 +1,37 @@
+[
+  {
+    "label": ".dragIsOneStep: drag token not passed to setTone",
+    "file": "Sources/SuiteImaging/Tone/ToneCommands.swift",
+    "find": "try t.setTone(next, name: p.slider.title, drag: p.drag)",
+    "replace": "try t.setTone(next, name: p.slider.title, drag: nil)",
+    "tests": "ToneCommandsTests"
+  },
+  {
+    "label": ".vibranceUnavailable: waiting check skipped",
+    "file": "Sources/SuiteImaging/Tone/ToneCommands.swift",
+    "find": "if let why = ToneRules.waiting[slider] { return why }",
+    "replace": "",
+    "tests": "ToneCommandsTests"
+  },
+  {
+    "label": ".vibranceUnavailable: radius and threshold allowed at Amount 0",
+    "file": "Sources/SuiteImaging/Tone/ToneCommands.swift",
+    "find": "return needsAmount && s.value(.sharpenAmount) == 0 ? sharpenOff : nil",
+    "replace": "return nil",
+    "tests": "ToneCommandsTests"
+  },
+  {
+    "label": ".autoIsOneStep: setTone called twice in tone.auto",
+    "file": "Sources/SuiteImaging/Tone/ToneCommands.swift",
+    "find": "try t.setTone(next, name: \"Auto Tone\", drag: nil)",
+    "replace": "try t.setTone(next, name: \"Auto Tone\", drag: nil); try t.setTone(next, name: \"Auto Tone\", drag: nil)",
+    "tests": "ToneCommandsTests"
+  },
+  {
+    "label": ".intentCommands: a nil drag encoded as null",
+    "file": "Sources/SuiteImaging/Tone/ToneCommands.swift",
+    "find": "if let drag { params[\"drag\"] = .string(drag) }",
+    "replace": "params[\"drag\"] = drag.map(JSONValue.string) ?? .null",
+    "tests": "ToneCommandsTests"
+  }
+]

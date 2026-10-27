@@ -1,0 +1,7 @@
+[
+{"label":"the override ignored","file":"Sources/LibraryModel/LibrarySupport+Suite.swift","find":"        if let directory = LibraryLaunch(arguments: arguments).catalogDir, !directory.isEmpty {\n            return directory\n        }\n","replace":"","tests":"LibraryCatalogLocationTests/catalogDirWins"},
+{"label":"root used without the app segment","file":"Sources/LibraryModel/LibrarySupport+Suite.swift","find":"SuiteLocations.appFolder(\"Library\", arguments: arguments, home: home)","replace":"SuiteLocations.supportFolder(arguments: arguments, home: home)","tests":"LibraryCatalogLocationTests/libraryFolder"},
+{"label":"an override moves the real old catalog","file":"Sources/LibraryModel/LibrarySupport+Suite.swift","find":"        guard folder == catalogFolder(arguments: [], home: home) else { return .nothing }\n","replace":"","tests":"LibraryCatalogLocationTests/storeStepLeavesRealFilesUnderAnOverride"},
+{"label":"the registered default ignored","file":"Sources/LibraryModel/LibrarySupport+Suite.swift","find":"        if let registered, !registered.isEmpty { return registered }\n","replace":"","tests":"LibraryCatalogLocationTests/storeFolderOrder"},
+{"label":"a test process moves the real old catalog","file":"Sources/LibraryModel/LibrarySupport+Suite.swift","find":"(named ?? \"\").isEmpty && (registered ?? \"\").isEmpty","replace":"(named ?? \"\").isEmpty","tests":"LibraryCatalogLocationTests/storeMovesLegacyOnlyOnTheLaunchFolder"}
+]

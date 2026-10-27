@@ -11,8 +11,9 @@
 // leaves the run idle with nothing written. The rasterizer is FakeRasterizer
 // on the fakes and StageRasterizer otherwise. Reveal in Finder selects the
 // first file written. MP4 and GIF (export-pack FV-2) stream the Model's frame
-// plan into one `<scene>.mp4` or `.gif` through `writeVideo` on shell-media's
-// writers (FakeMedia on the fakes), which delete a cancelled partial file.
+// plan into the Model's `exportVideoFileName` through `writeVideo` on shell-media's
+// writers (FakeMedia on the fakes), which refuse a taken name (read back as
+// `alreadyThere` by `videoWriteError`) and delete a cancelled partial file.
 import AppKit
 import FlareModel
 import SuiteModel
@@ -28,7 +29,7 @@ extension FlareWindow {
         case .setStep(let step): model.setExportStep(step)
         case .setScale(let scale): model.setExportScale(scale)
         case .setTransparent(let on): model.setExportTransparent(on)
-        case .setSize(let scale): model.setExportSize(.scale(scale))
+        case .setSize(let size): model.setExportSize(size)
         case .setFrameRate(let fps): model.setExportFrameRate(fps)
         case .setLoop(let on): model.setExportLoop(on)
         case .start: startExport()
@@ -69,14 +70,15 @@ extension FlareWindow {
                 let names: [String]
                 if options.format.writesVideo {
                     let plan = try model.exportVideoPlan()
-                    let name = "\(options.sceneID).\(options.format.rawValue)"
-                    if FileManager.default.fileExists(atPath: folder.appending(path: name).path) {
-                        throw ExportWriteRefusal.alreadyThere(name: name, folder: folder.lastPathComponent)
+                    guard let name = model.exportVideoFileName else { throw CancellationError() }
+                    do {
+                        _ = try await exporter.writeVideo(
+                            document, sceneID: options.sceneID, plan: plan, to: folder.appending(path: name).path,
+                            media: media, rasterizer: rasterizer
+                        ) { sink.yield($0) }
+                    } catch {
+                        throw FlareWorkspace.videoWriteError(error, name: name, folder: folder.lastPathComponent)
                     }
-                    _ = try await exporter.writeVideo(
-                        document, sceneID: options.sceneID, plan: plan, to: folder.appending(path: name).path,
-                        media: media, rasterizer: rasterizer
-                    ) { sink.yield($0) }
                     names = [name]
                 } else {
                     let result = try await exporter.export(document, options: options, rasterizer: rasterizer) { sink.yield($0) }

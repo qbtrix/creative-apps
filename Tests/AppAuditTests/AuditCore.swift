@@ -123,13 +123,20 @@ extension AppAudit {
         func bounds(_ item: Item) -> Rect? { item.layer.isEmpty ? window.intersection(display) : display }
 
         /// The ink of the part of `item` that is on screen; nil without a
-        /// screenshot, behind a modal, or when too little of it shows.
+        /// screenshot, behind a modal, under a popover or menu, or when too
+        /// little of it shows.
         func ink(_ item: Item) -> Double? {
             guard let image, !(modal && item.layer.isEmpty), let bounds = bounds(item),
-                let seen = item.visible?.intersection(bounds)
+                let seen = item.visible?.intersection(bounds), !(item.layer.isEmpty && covered(seen))
             else { return nil }
             let pixels = Rect(x: seen.x * scale, y: seen.y * scale, width: seen.width * scale, height: seen.height * scale)
             return AppAudit.ink(of: image, in: pixels)?.contrast
+        }
+
+        /// Whether a popover, menu or drawer lies over any of `frame`: the
+        /// window's pixels there are the overlay's, not the element's.
+        private func covered(_ frame: Rect) -> Bool {
+            items.contains { AppAudit.layers.subtracting(AppAudit.modals).contains($0.node.type) && $0.node.frame.intersection(frame) != nil }
         }
     }
 

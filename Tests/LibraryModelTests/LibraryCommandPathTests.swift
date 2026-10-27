@@ -5,6 +5,7 @@
 // Grid. Fails when a listed id is missing from the catalog, has no params schema, can't run with no window, or a new
 // spec's reason or params go astray. Linux-safe.
 @testable import LibraryModel
+import SuiteImaging
 import SuiteKernel
 import Testing
 
@@ -28,7 +29,7 @@ import Testing
         ("Metadata > Set Flag > Clear Flag", "metadata.clear-flag"),
         ("Metadata > Set Label > None", "metadata.set-label"), ("Metadata > Set Label > <color>", "metadata.set-label"),
         ("Develop > Show Original", "view.show-original"),
-    ] + sheetControls + DevelopSlider.allCases.map { ("Develop > \($0.rawValue) > Reset \($0.rawValue)", LibraryCatalog.resetSliderID($0)) }
+    ] + sheetControls + ToneSlider.develop.map { ("Develop > \($0.title) > Reset \($0.title)", LibraryCatalog.resetSliderID($0)) }
 
     /// CS-5's export sheet, browser and loupe controls. The sheet's 11 are these 10 and the name alert's Cancel,
     /// which only dismisses the alert (the lint's dismiss rule); the notice's button is one row per action.
@@ -69,7 +70,7 @@ import Testing
     static func state(_ name: String) -> LibraryCatalog { Dictionary(uniqueKeysWithValues: states)[name] ?? LibraryCatalog() }
 
     @Test func everyControlIsListed() {
-        #expect(Self.controls.count == 26 + 16 + DevelopSlider.allCases.count, "CS-3's 26, CS-5's 16 and a reset per slider")
+        #expect(Self.controls.count == 26 + 16 + ToneSlider.develop.count, "CS-3's 26, CS-5's 16 and a reset per slider")
         #expect(Set(Self.controls.map(\.control)).count == Self.controls.count)
     }
 
@@ -163,6 +164,12 @@ import Testing
         let saved = try Self.catalog.run("export.save-preset", params: .object(["name": .string("Mine")]), on: &e).result
         #expect(saved == (try JSONValue(encoding: ExportPreset(name: "Mine", options: ExportOptions(longEdge: 1024, quality: 80, folder: "/web")))))
         #expect(throws: CatalogError.self) { try Self.catalog.run("export.apply-preset", params: .object(["name": .string("Nope")]), on: &e) }
+        // A blank name saves nothing, from the CLI too (#4673).
+        for blank in ["", "   "] {
+            #expect(throws: CatalogError.failed(id: "export.save-preset", message: "Name the preset.")) {
+                try Self.catalog.run("export.save-preset", params: .object(["name": .string(blank)]), on: &e)
+            }
+        }
         var f = Self.state("export failed")
         #expect(try Self.catalog.run("export.retry", params: .object([:]), on: &f).result == .object(["photos": .number(1)]))
         #expect(f.exportState == .running(done: 0, total: 1))

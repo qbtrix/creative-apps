@@ -1,9 +1,10 @@
-// HaloProResTests.swift: MJ-HX (export-pack HX-1, HX-3). The render
+// HaloProResTests.swift: MJ-HX (export-pack HX-1, HX-3, HX-4). The render
 // settings' codec and Transparent background flag on the `keyed` fixture
 // ("Bounce", 1920 × 1080, 24 fps, 48 frames) with the fake services. HX-1's
-// tests run now: the defaults, ProRes 4444 refused with its reason until
-// HX-3, the checkbox's refusal in ExportRules' words, and every plan as it
-// was. HX-3's are written and wait on it. Linux and macOS.
+// tests: the defaults, the checkbox's refusal in ExportRules' words, and every
+// plan as it was. HX-3's: the plan refuses alpha on H.264 and names a ProRes
+// movie .mov. HX-4's: every codec the row offers can be picked, and HEVC with
+// alpha, which it doesn't offer, can't. Linux and macOS.
 import HaloModel
 import SuiteModel
 import Testing
@@ -27,15 +28,20 @@ import Testing
         #expect(HaloRenderSettings.codecs.map(HaloRenderSettings.codecTitle) == ["H.264", "HEVC", "ProRes 4444"])
     }
 
-    @Test func proResIsRefusedWithItsReasonUntilHX3() {
-        #expect(HaloRenderSettings.codecRefusal(.prores4444) == "ProRes 4444 lands with HX-3.")
-        #expect(HaloRenderSettings.codecRefusal(.h264) == nil)
-        #expect(Self.movie.choosing(codec: .prores4444) == Self.movie)
+    @Test func everyOfferedCodecCanBePicked() {
+        for codec in HaloRenderSettings.codecs {
+            #expect(HaloRenderSettings.codecRefusal(codec) == nil, "\(codec) is refused")
+            #expect(Self.movie.choosing(codec: codec).codec == codec)
+        }
+        #expect(HaloRenderSettings.codecRefusal(.hevcAlpha) == HaloRenderSettings.hevcAlphaRefused)
+        #expect(Self.movie.choosing(codec: .hevcAlpha) == Self.movie)
     }
 
-    @Test func hevcIsRefusedWhileTheWriterIsH264Only() {
-        #expect(HaloRenderSettings.codecRefusal(.hevc) == "HEVC lands with HX-4.")
-        #expect(Self.movie.choosing(codec: .hevc) == Self.movie)
+    /// A refusal is a tooltip a person reads, so it never names a build slice ("HX-4").
+    @Test func codecRefusalsNeverNameASlice() {
+        for codec in HaloRenderSettings.codecs + [.hevcAlpha] {
+            #expect(!(HaloRenderSettings.codecRefusal(codec) ?? "").contains("HX-"))
+        }
     }
 
     @Test func h264RefusesTransparencyInExportRulesWords() {
@@ -77,9 +83,9 @@ import Testing
         #expect(project.renderRun == .editing(HaloRenderSettings(format: .pngSequence, halfSize: true, alpha: true)))
     }
 
-    // HX-3: the plan's codec and alpha rules.
+    // HX-3: the plan's codec and alpha rules; HX-4: picking ProRes.
 
-    @Test(.disabled("waits on HX-3")) func proResCanBePickedAndKeepsAlpha() {
+    @Test func proResCanBePickedAndKeepsAlpha() {
         let prores = Self.movie.choosing(codec: .prores4444)
         #expect(prores.codec == .prores4444)
         #expect(prores.alphaRefusal == nil)
@@ -87,7 +93,7 @@ import Testing
         #expect(prores.choosing(alpha: true).choosing(codec: .h264).alpha == false)
     }
 
-    @Test(.disabled("waits on HX-3")) func thePlanRefusesAlphaOnH264InItsSentence() throws {
+    @Test func thePlanRefusesAlphaOnH264InItsSentence() throws {
         var project = try Self.keyed()
         let comp = try #require(project.selectedComposition)
         let refused = HaloRenderSettings(format: .movie, alpha: true)
@@ -101,7 +107,7 @@ import Testing
         #expect(message.contains("H.264 can't keep transparency. Choose ProRes 4444."))
     }
 
-    @Test(.disabled("waits on HX-3")) func proResWithAlphaPlansAMovFile() throws {
+    @Test func proResWithAlphaPlansAMovFile() throws {
         let project = try Self.keyed()
         let comp = try #require(project.selectedComposition)
         let settings = HaloRenderSettings(format: .movie, codec: .prores4444, alpha: true)

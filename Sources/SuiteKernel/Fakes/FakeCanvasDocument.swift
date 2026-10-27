@@ -10,6 +10,8 @@
 // commands, so RJ-X36 runs on the CLI.
 // shape-tools SH-8 gives each rect an optional shape spec and lists `shape.draw` and `tool.shape`, so RJ-X34 runs on
 // the CLI.
+// export-pack XP-9 exports PNG and JPEG at a size read by `SuiteExportOptions(json:)` through ExportRules, so RJ-X42
+// runs on the CLI.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -120,7 +122,9 @@ public struct FakeCanvasDocument: HeadlessDocument {
     /// Rect 1's fill: blue, white and black, left to right across its box.
     static let fixtureFill = Fill.linear(stops: [GradientStop(offset: 0, color: FillColor(r: 0, g: 0, b: 1)), GradientStop(offset: 0.5, color: .white),
                                                  GradientStop(offset: 1, color: .black)], start: Point(x: 0, y: 30), end: Point(x: 100, y: 30))
-    public static let app = "fake", openExtensions = ["fake"], exportFormats = ["json"]
+    public static let app = "fake", openExtensions = ["fake"]
+    /// `json`, then each raster format FakeRaster has a writer for, by ExportFormats id.
+    public static let exportFormats = ["json"] + FakeRaster.writers.map(\.format)
 
     /// The selected rect, nil when nothing is selected.
     public var selected: FakeRect? { rects.first { $0.id == selection } }
@@ -191,9 +195,26 @@ public struct FakeCanvasDocument: HeadlessDocument {
         return doc
     }
     public static func new(_ options: JSONValue) throws -> FakeCanvasDocument { FakeCanvasDocument() }
+    /// `json` is `save()`, options unread, as before sizes; `png` and `jpeg` are a flat grey frame at the size
+    /// `options` asks for (`SuiteExportOptions(json:)`), its pixels from ExportRules, which refuses a bad option.
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
-        guard format == "json" else { throw CatalogError.failed(id: "doc.export-json", message: "The fake exports json, not \(format).") }
-        return [ExportedFile(suggestedName: "canvas.json", format: "json", data: try save())]
+        if format == "json" { return [ExportedFile(suggestedName: "canvas.json", format: "json", data: try save())] }
+        guard let writer = FakeRaster.writers.first(where: { $0.format == format }), let spec = ExportFormats.spec(format) else {
+            throw CatalogError.failed(id: "export", message: "The fake exports \(Self.exportFormats.joined(separator: ", ")), not \(format).")
+        }
+        let source = exportSource, pixels: (width: Int, height: Int)
+        do {
+            let asked = try SuiteExportOptions(json: options, defaults: SuiteExportOptions(format: format))
+            pixels = try ExportRules.pixels(of: source, asked.size, evenSize: spec.needsEvenSize)
+        } catch { throw CatalogError.failed(id: "export", message: String(describing: error)) }
+        return [ExportedFile(suggestedName: "canvas.\(spec.fileExtension)", format: format, data: writer.encode(pixels))]
+    }
+    /// The artwork at 1x: the rects' frames together, whole pixels rounded up; 0 × 0 with no rects.
+    var exportSource: (width: Int, height: Int) {
+        let xs = rects.flatMap { [$0.x, $0.x + $0.w] }, ys = rects.flatMap { [$0.y, $0.y + $0.h] }
+        guard let x0 = xs.min(), let x1 = xs.max(), let y0 = ys.min(), let y1 = ys.max() else { return (0, 0) }
+        let whole = { (d: Double) in d.isFinite ? Int(min(max(d.rounded(.up), 0), Double(ExportRules.maxSide + 1))) : 0 }
+        return (whole(x1 - x0), whole(y1 - y0))
     }
     public func summary() -> JSONValue {
         .object(["rects": .number(Double(rects.count)), "selected": selected.map { .string($0.name) } ?? .null])
@@ -431,6 +452,60 @@ extension FakeCanvasDocument: PlacedImageTarget {
         (rects[index].x, rects[index].y, rects[index].w, rects[index].h) = (box.minX, box.minY, box.width, box.height)
         rects[index].placed = image
     }
+}
+
+/// The fake's raster files: a flat mid-grey frame of the asked size, written as the specs give it, so a reader
+/// decodes exactly that size. The fake paints no rects into it; only its size is the export's.
+enum FakeRaster {
+    /// One raster format the fake writes: its ExportFormats id and its encoder.
+    struct Writer: Sendable {
+        let format: String
+        let encode: @Sendable ((width: Int, height: Int)) -> Data
+    }
+    /// Each writer sits by itself, so the fake's formats are its encoders, not a list of its own (shared-codecs rule 20).
+    static let pngWriter = Writer(format: "png", encode: png)
+    static let jpegWriter = Writer(format: "jpeg", encode: jpeg)
+    /// The fake's raster writers, PNG first.
+    static let writers = [pngWriter, jpegWriter]
+    /// A baseline greyscale JPEG (ITU T.81): every 8 × 8 block is grey 128, so each codes as DC difference 0 and EOB,
+    /// one 1-bit code each from Huffman tables of one code; the scan's spare bits are 1s.
+    static func jpeg(_ size: (width: Int, height: Int)) -> Data {
+        let wide = [UInt8(truncatingIfNeeded: size.width >> 8), UInt8(truncatingIfNeeded: size.width)]
+        let high = [UInt8(truncatingIfNeeded: size.height >> 8), UInt8(truncatingIfNeeded: size.height)]
+        let table = { (cls: UInt8) -> [UInt8] in [0xFF, 0xC4, 0, 20, cls, 1] + [UInt8](repeating: 0, count: 15) + [0] }
+        let bits = (size.width + 7) / 8 * ((size.height + 7) / 8) * 2
+        var scan = [UInt8](repeating: 0, count: bits / 8)
+        if bits % 8 != 0 { scan.append(0xFF >> UInt8(bits % 8)) }
+        let quant: [UInt8] = [0xFF, 0xD8, 0xFF, 0xDB, 0, 67, 0] + [UInt8](repeating: 1, count: 64)
+        let frame: [UInt8] = [0xFF, 0xC0, 0, 11, 8] + high + wide + [1, 1, 0x11, 0]
+        let start: [UInt8] = [0xFF, 0xDA, 0, 8, 1, 1, 0x00, 0, 63, 0]
+        return Data(quant + frame + table(0x00) + table(0x10) + start + scan + [0xFF, 0xD9])
+    }
+    /// A 1-bit indexed PNG (W3C PNG): one grey palette entry, every row filter 0 and index 0, in stored zlib blocks.
+    static func png(_ size: (width: Int, height: Int)) -> Data {
+        let raw = size.height * (1 + (size.width + 7) / 8)
+        var zlib: [UInt8] = [0x78, 0x01]
+        for start in stride(from: 0, to: raw, by: 65_535) {
+            let n = min(65_535, raw - start)
+            zlib += [start + n == raw ? 1 : 0, UInt8(n & 0xFF), UInt8(n >> 8), UInt8(~n & 0xFF), UInt8((~n >> 8) & 0xFF)]
+            zlib += [UInt8](repeating: 0, count: n)
+        }
+        zlib += word(((raw % 65_521) << 16) | 1)  // Adler-32 of `raw` zero bytes
+        let signature: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
+        let header = chunk("IHDR", word(size.width) + word(size.height) + [1, 3, 0, 0, 0])
+        return Data(signature + header + chunk("PLTE", [128, 128, 128]) + chunk("IDAT", zlib) + chunk("IEND", []))
+    }
+    /// One PNG chunk: its length, type, body and CRC-32 over type and body.
+    static func chunk(_ type: String, _ body: [UInt8]) -> [UInt8] {
+        let tagged = Array(type.utf8) + body
+        var crc = UInt32.max
+        for byte in tagged {
+            crc ^= UInt32(byte)
+            for _ in 0..<8 { crc = crc & 1 == 0 ? crc >> 1 : (crc >> 1) ^ 0xEDB8_8320 }
+        }
+        return word(body.count) + tagged + word(Int(~crc))
+    }
+    static func word(_ value: Int) -> [UInt8] { [24, 16, 8, 0].map { UInt8(truncatingIfNeeded: value >> $0) } }
 }
 
 extension CommandCatalog {

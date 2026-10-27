@@ -117,6 +117,7 @@ struct FlareStage: View {
             Text(warning).accessibilityIdentifier("flare.status.masks").statusPill(.warning)
         }
         if let help = pills.pathHelp { Text(help).accessibilityIdentifier("flare.status.pathHelp") }
+        if let note = pills.placeNote { Text(note).accessibilityIdentifier("flare.status.place") }
     }
 
     /// The scene's size for the status bar in whole points ("550 × 400 pt"); a non-finite side reads 0.

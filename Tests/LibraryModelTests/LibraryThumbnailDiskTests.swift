@@ -5,7 +5,7 @@
 // decodes), rebuild the services on the same folder and draw again (zero
 // decodes, every thumbnail from disk), then change one photo's exposure (one
 // decode: the develop token is part of the content key, so the old picture is
-// never read). ST-6 builds `LiveThumbnails` over the adapter in `Services`.
+// never read). `Services` builds `LiveThumbnails` over the adapter.
 import CoreColor
 import CoreRaster
 import Foundation
@@ -37,8 +37,8 @@ private struct Services {
 
     init(folder: String) throws {
         store = try LiveThumbnailStoreAdapter(folder: folder, budgetBytes: 512 * 1024 * 1024)
-        // ST-6: built over `store`, so a miss in memory reads the disk before it decodes.
-        thumbnails = LiveThumbnails(decoder: decoder, develop: LiveDevelop())
+        // Built over `store`, so a miss in memory reads the disk before it decodes.
+        thumbnails = LiveThumbnails(decoder: decoder, develop: LiveDevelop(), disk: store)
     }
 
     /// Draws every photo's grid cell at the 256 bucket.
@@ -60,7 +60,7 @@ private func scratch() -> String {
 }
 
 @Suite struct LibraryThumbnailDiskTests {
-    @Test(.disabled("waits on ST-6"))
+    @Test
     func relaunchDecodesNothing() async throws {
         let folder = scratch(), photos = imported()
         let first = try Services(folder: folder)
@@ -76,7 +76,7 @@ private func scratch() -> String {
         #expect(relaunched.store.stats.fromDisk == 50)
     }
 
-    @Test(.disabled("waits on ST-6"))
+    @Test
     func staleAfterDevelop() async throws {
         let folder = scratch()
         var photos = imported()

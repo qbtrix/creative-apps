@@ -33,5 +33,12 @@
     "find": "try LibraryCatalog.catalog.run(id, params: json, on: &doc.library).result",
     "replace": "try { var copy = doc.library; return try LibraryCatalog.catalog.run(id, params: json, on: &copy).result }()",
     "tests": "LibraryHeadlessTests"
+  },
+  {
+    "label": "openAndCopyOnASmallStackThread: a command on the document also changes an earlier copy (the box is written while shared)",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "if !isKnownUniquelyReferenced(&box) { box = CatalogBox(box.value) }",
+    "replace": "_ = isKnownUniquelyReferenced(&box)",
+    "tests": "LibraryHeadlessStackTests"
   }
 ]
