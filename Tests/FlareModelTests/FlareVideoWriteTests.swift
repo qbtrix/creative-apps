@@ -102,6 +102,8 @@ struct FlareVideoWriteTests {
         let clear = try FakeRasterizer().frame(list, width: 6, height: 4, transparent: true)
         let opaque = try FakeRasterizer().frame(list, width: 6, height: 4, transparent: false)
         #expect(clear.width == 6 && clear.height == 4 && clear.rgba[3] == 0 && opaque.rgba[3] == 255)
+        #expect(opaque.rgba == Array(repeating: 255, count: 6 * 4 * 4))
+        #expect(clear.rgba == Array([[UInt8]](repeating: [255, 255, 255, 0], count: 24).joined()))
     }
 
     @Test(arguments: [(1, 1, true), (3, 5, false), (3, 5, true), (550, 400, false)])
