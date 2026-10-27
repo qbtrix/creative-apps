@@ -291,3 +291,4 @@ utc	stage	event	ref	note
 2026-10-27T08:26Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open
 2026-10-27T08:58Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open
 2026-10-27T09:30Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open
+2026-10-27T10:02Z	check	#3482 quiet; no open Flare file-flow findings; #1829 bot re-fail note (identifier audit 29 vs baseline 12, run 40472673989); gaps #4764, #1829 open
