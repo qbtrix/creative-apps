@@ -118,6 +118,7 @@ whose comment names the new tests. A log that can't be read waits; a red
 with no test to name (a build error, a crash) is never the base's. The
 sharded gate job (`macOS`) only sums its shards, so when its own log names
 no test, mac_tests reads the failed `macOS tests K/N` jobs of its run.
+A test process that dies prints no such line, so mac_tests also reads the tests named in scripts/ci's TEST PROCESS DIED block and places each in the one Tests/ file whose `func <name>(` declares it on dev (a name found in no file or several is left out and logged).
 
 ## A red dev
 
