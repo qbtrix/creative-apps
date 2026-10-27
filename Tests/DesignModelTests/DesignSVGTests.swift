@@ -6,6 +6,7 @@
 // A turned or mirrored layer carries `transform="rotate(d cx cy) …"` about its frame's centre (transform DT-6),
 // and RJ-D15's 60 small turns under one drag token write `rotate(15 60 35)` and undo in one step.
 // A shape writes its kernel path as a <path>, closed only where its contour is (shape-tools DS-6, RJ-D35).
+// A stroke writes StrokeSVG's attributes, its join, cap and dash too (stroke-style DK-7, RJ-D36).
 // Runs on Linux and macOS.
 @testable import DesignModel
 import Foundation
@@ -96,17 +97,65 @@ import Testing
     @Test func defaultsAreOmittedAndOthersWritten() {
         let plain = DesignNode(id: "p", name: "P", kind: .rectangle, frame: rect(0, 0, 10, 10), stroke: .default)
         let plainText = svg(plain)
-        #expect(plainText.contains("<rect x=\"0\" y=\"0\" width=\"10\" height=\"10\" fill=\"#d9d9d9\" stroke=\"#000000\"/>"))
-        for attribute in ["opacity=", "stroke-width=", "rx="] { #expect(!plainText.contains(attribute), "\(attribute) written at its default") }
+        #expect(plainText.contains("<rect x=\"0\" y=\"0\" width=\"10\" height=\"10\" fill=\"#d9d9d9\" stroke=\"#000000\" stroke-miterlimit=\"10\"/>"))
+        for attribute in ["opacity=", "stroke-width=", "rx=", "stroke-linejoin=", "stroke-linecap=", "stroke-dash"] { #expect(!plainText.contains(attribute), "\(attribute) written at its default") }
         let styled = DesignNode(id: "s", name: "S", kind: .rectangle, frame: rect(0, 0, 10, 10), cornerRadius: 3,
                                 opacity: 0.5, stroke: DesignStroke(color: DesignColor(255, 0, 16), width: 2.5))
         #expect(svg(styled).contains(
-            "<rect x=\"0\" y=\"0\" width=\"10\" height=\"10\" rx=\"3\" fill=\"#d9d9d9\" stroke=\"#ff0010\" stroke-width=\"2.5\" opacity=\"0.5\"/>"))
+            "<rect x=\"0\" y=\"0\" width=\"10\" height=\"10\" rx=\"3\" fill=\"#d9d9d9\" stroke=\"#ff0010\" stroke-width=\"2.5\" stroke-miterlimit=\"10\" opacity=\"0.5\"/>"))
         let group = DesignNode(id: "g", name: "G", kind: .group, frame: rect(0, 0, 10, 10), opacity: 0.25)
         #expect(svg(group).contains("<g opacity=\"0.25\">"))
         let noStroke = DesignNode(id: "n", name: "N", kind: .ellipse, frame: rect(0, 0, 10, 10),
                                   stroke: DesignStroke(color: .black, width: 0))
         #expect(!svg(noStroke).contains("stroke"))
+    }
+
+    /// A dashed, round-capped stroke writes StrokeSVG's attributes (stroke-style DK-7, RJ-D36), each left out at its
+    /// SVG default: no miter join and no zero dash offset, but the cap, the dash and a bevel join are written.
+    @Test func dashedStroke() {
+        var stroke = VectorStroke(color: FillColor(r: 0, g: 0, b: 0), width: 2)
+        stroke.cap = .round
+        stroke.dash = [8, 4]
+        let dashed = DesignNode(id: "d", name: "D", kind: .rectangle, frame: rect(0, 0, 10, 10), stroke: stroke)
+        let text = svg(dashed)
+        #expect(text.contains(
+            "fill=\"#d9d9d9\" stroke=\"#000000\" stroke-width=\"2\" stroke-miterlimit=\"10\" stroke-linecap=\"round\" stroke-dasharray=\"8 4\"/>"))
+        #expect(!text.contains("stroke-linejoin=") && !text.contains("stroke-dashoffset="))
+        stroke.join = .bevel
+        stroke.dashPhase = 3
+        let beveled = svg(DesignNode(id: "b", name: "B", kind: .rectangle, frame: rect(0, 0, 10, 10), stroke: stroke))
+        #expect(beveled.contains("stroke-linejoin=\"bevel\" stroke-linecap=\"round\" stroke-dasharray=\"8 4\" stroke-dashoffset=\"3\""))
+        #expect(!beveled.contains("stroke-miterlimit="))
+    }
+
+    /// A miter join writes the canvas's miter limit, SwiftUI StrokeStyle's 10, so a corner sharper than SVG's
+    /// default limit of 4 stays pointed in the export as on the canvas (#4941); a round join has no limit.
+    @Test func miterJoinWritesTheCanvasLimit() {
+        var stroke = VectorStroke(color: FillColor(r: 0, g: 0, b: 0), width: 4)
+        let mitered = svg(DesignNode(id: "m", name: "M", kind: .rectangle, frame: rect(0, 0, 10, 10), stroke: stroke))
+        #expect(mitered.contains("stroke=\"#000000\" stroke-width=\"4\" stroke-miterlimit=\"10\"/>"))
+        #expect(!mitered.contains("stroke-linejoin="))
+        stroke.join = .round
+        let rounded = svg(DesignNode(id: "r", name: "R", kind: .rectangle, frame: rect(0, 0, 10, 10), stroke: stroke))
+        #expect(rounded.contains("stroke-linejoin=\"round\""))
+        #expect(!rounded.contains("stroke-miterlimit="))
+    }
+
+    /// A dashed ellipse writes the kernel's ellipse path, which starts at 12 o'clock and runs clockwise, so its
+    /// dashes start where the canvas starts them; SVG's <ellipse> starts at 3 o'clock (#4940). Undashed, it stays
+    /// an <ellipse>.
+    @Test func dashedEllipseStartsAtTwelveOClock() {
+        var stroke = VectorStroke(color: FillColor(r: 0, g: 0, b: 0), width: 2)
+        stroke.dash = [8, 4]
+        let dashed = svg(DesignNode(id: "e", name: "E", kind: .ellipse, frame: rect(0, 0, 100, 100), stroke: stroke))
+        #expect(dashed.contains("<path d=\"M50 0 C77.6142 0 100 22.3858 100 50 C100 77.6142 77.6142 100 50 100 "
+            + "C22.3858 100 0 77.6142 0 50 C0 22.3858 22.3858 0 50 0 Z\" fill=\"#d9d9d9\" stroke=\"#000000\""))
+        #expect(dashed.contains("stroke-dasharray=\"8 4\""))
+        #expect(!dashed.contains("<ellipse"))
+        stroke.dash = []
+        let solid = svg(DesignNode(id: "s", name: "S", kind: .ellipse, frame: rect(0, 0, 100, 100), stroke: stroke))
+        #expect(solid.contains("<ellipse cx=\"50\" cy=\"50\" rx=\"50\" ry=\"50\" fill=\"#d9d9d9\" stroke=\"#000000\""))
+        #expect(!solid.contains("<path"))
     }
 
     /// Blue to white down the unit box: a 90° line, as `fill.angle` 90 stores it.

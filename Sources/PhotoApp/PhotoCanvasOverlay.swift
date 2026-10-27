@@ -6,7 +6,9 @@
 // (SuiteUI's BrushCursorMark, the brush's size; `photo.canvas.brush-cursor`),
 // the Gradient tool's line while it drags (SuiteUI's PathMarks from the press
 // to the pointer: the window's LiveDragLine while it lasts, else the Model's
-// `gradientDrag`; `photo.canvas.gradient-line`)
+// `gradientDrag`; `photo.canvas.gradient-line`), Remove's outline while it
+// drags (SuiteUI's MotionPathMarks through its points, from the same live copy
+// or `removeStroke`; `photo.canvas.remove-stroke`)
 // and the Eyedropper's loupe (PhotoSampleLoupe, `suite.sample.loupe`), in
 // that order. SuiteUI's marks are hidden from
 // accessibility, so each visible mark also gets one probe (`probe(zoom:)`): a
@@ -49,6 +51,10 @@ struct PhotoCanvasOverlay: View {
                     segments: [PathSegment(from: 0, to: 1)], zoom: zoom)
                 mark.probe(zoom: zoom)
             }
+            if let points = removePath, let mark = removeOutline {
+                MotionPathMarks(points: points.map { CGPoint(x: $0.x, y: $0.y) }, zoom: zoom)
+                mark.probe(zoom: zoom)
+            }
             PhotoSampleLoupe(model: model, zoom: zoom, hover: hover)
         }
     }
@@ -71,6 +77,20 @@ struct PhotoCanvasOverlay: View {
         return .gradientLine(CGRect(x: from.x, y: from.y, width: to.x - from.x, height: to.y - from.y).standardized)
     }
 
+    /// Remove's outline's element: the box round its points, grown by half the
+    /// brush, in document pixels; nil unless a Remove drag has moved.
+    var removeOutline: PhotoCanvasMark? {
+        guard let points = removePath, let first = points.first else { return nil }
+        let half = (model.brushCursorDiameter ?? 0) / 2
+        let box = points.reduce(CGRect(x: first.x, y: first.y, width: 0, height: 0)) {
+            $0.union(CGRect(x: $1.x, y: $1.y, width: 0, height: 0))
+        }
+        return .removeStroke(box.insetBy(dx: -half, dy: -half))
+    }
+
+    /// The outline a Remove drag shows: the live copy's while one is live, else the workspace's.
+    private var removePath: [Mask.Point]? { liveLine?.path ?? model.removeStroke }
+
     /// The line a drag shows: the live copy's while one is live, else the workspace's.
     private var dragLine: (from: Mask.Point, to: Mask.Point)? { liveLine?.line ?? model.gradientDrag }
 
@@ -78,7 +98,7 @@ struct PhotoCanvasOverlay: View {
     var marks: [PhotoCanvasMark] {
         [
             selection, CropOverlay(model: model, zoom: zoom).mark,
-            TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine,
+            TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine, removeOutline,
         ].compactMap { $0 }
     }
 }
@@ -105,6 +125,9 @@ struct PhotoCanvasMark: Equatable {
     }
     static func gradientLine(_ rect: CGRect) -> Self {
         Self(identifier: "photo.canvas.gradient-line", label: "Gradient line", rect: rect)
+    }
+    static func removeStroke(_ rect: CGRect) -> Self {
+        Self(identifier: "photo.canvas.remove-stroke", label: "Area to remove", rect: rect)
     }
 }
 

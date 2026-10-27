@@ -164,7 +164,7 @@
                 "description": "PV-3: typed crop numbers, the aspect lock and the crop drag.",
                 "technology": "Swift 6, Foundation",
                 "paths": [
-                  "Sources/PhotoModel/PhotoCropSize.swift"
+                  "Sources/PhotoModel/PhotoCropTool+Kernel.swift"
                 ],
                 "status": "planned",
                 "authored": true

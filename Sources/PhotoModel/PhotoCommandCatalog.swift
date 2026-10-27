@@ -63,7 +63,7 @@ extension PhotoWorkspace {
     /// The tooltip of the menu item for `id`: what clicking it does, where the catalog's summary describes the agent call.
     public static func menuSummary(_ id: String) -> String { menuSummaries[id] ?? catalog.spec(id)?.summary ?? id }
     static let menuSummaries = [
-        "file.new": "Opens a new white 1920 × 1080 image.", "file.open": "Opens an image file.",
+        "file.new": "Opens a new image at the size, resolution and background you choose.", "file.open": "Opens an image file.",
         "file.save": "Saves the image to its file.", "file.save-as": "Saves the image to a new file.",
         "file.export": "Exports a flattened copy of the image.", "image.resize": "Changes the image's size.",
         "image.canvas-size": "Grows or crops the canvas around an anchor without scaling the image.",
@@ -101,6 +101,8 @@ extension PhotoWorkspace {
         ["name": .optional(.string("The file's name.", maxLength: 255)), "width": .integer(minimum: 1), "height": .integer(minimum: 1),
          "rgba8": .array(of: .integer(minimum: 0, maximum: 255))], required: ["name", "width", "height", "rgba8"])
     static let sizeExample = JSONValue.object(["width": .number(24), "height": .number(18)])
+    static let newExample = JSONValue.object(["width": .number(4), "height": .number(6), "unit": .string("in"),
+                                              "resolution": .number(300), "background": .string("transparent")])
     static let canvasSizeSchema = ParamSchema.object(
         ["width": .integer("Width in pixels.", minimum: 1), "height": .integer("Height in pixels.", minimum: 1),
          "anchor": .string("The point the image keeps its place by.", oneOf: BoxAnchor.allCases.map(\.rawValue))],
@@ -119,8 +121,10 @@ extension PhotoWorkspace {
         + ToneCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
-        .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
-               params: SizeParams.self, schema: sizeSchema, example: sizeExample) { w, p in try w.newCanvas(width: p.width, height: p.height); return JSONValue.object([:]) },
+        .typed("file.new", title: "New Image", summary: "Opens a new image at a size, unit, resolution and background.", kind: .file,
+               params: DocumentSetup.self, schema: DocumentSetupCommands.setupSchema, example: newExample) { w, p in
+            try w.newImage(p); return JSONValue.object([:])
+        },
         .typed("file.open", title: "Open", summary: "Opens an image from straight-alpha RGBA bytes.", kind: .file, params: ImageParams.self,
                schema: imageSchema, example: .object(["name": .string("dot.png"), "width": .number(1), "height": .number(1), "rgba8": .array([0, 0, 0, 255].map(JSONValue.number))]),
                availability: bar(.open)) { w, p in try w.open(rgba8: p.rgba8, width: p.width, height: p.height, name: p.name ?? "Untitled.png"); return JSONValue.object([:]) },

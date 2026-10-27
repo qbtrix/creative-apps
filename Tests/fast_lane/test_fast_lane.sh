@@ -660,6 +660,7 @@ gh() {
     "issue list "*) cat "$sw/issues.json" 2>/dev/null || echo '[]' ;;  # the open finding issues (flake_finding)
     "issue create "*) echo "$a" >>"$sw/calls"; echo "https://github.com/qbtrix/creative-apps/issues/$((699 + $(grep -c '^issue create' "$sw/calls")))" ;;  # #700, #701, ...
     "api search/issues"*) jq -r "${!#}" "$sw/search.json" 2>/dev/null || true ;;
+    "api "*"/actions/runs/"*"/jobs"*) u="${2#*/actions/runs/}"; jq -r "${!#}" "$sw/jobs.${u%%/*}.json" 2>/dev/null || true ;;  # a run's jobs (mac_tests' shards)
     "run view --job "*) cat "$sw/joblog.$4" 2>/dev/null || return 1 ;;  # a job's failed-step log (budget_failure)
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
     "run list "*"--commit "*)
@@ -1741,6 +1742,18 @@ expect "dev red macOS: an unreadable log lands nothing and names nothing" "$(mer
 devred 116; printf 'macOS (photo)\tscripts/ci\t2026-10-23T04:39:07Z TEST PROCESS DIED\n' >"$sw/joblog.201"; mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
 expect "dev red macOS: a crash with no test named is red, never dev's" \
   "$(merges),$(grep -c '^pr edit 117 .*--add-label needs-fix' "$sw/calls"),$(grep -c "own proof" "$sw/calls")" "pr merge 116,1,0"
+# Sharded macOS tests (#5775): the `macOS` gate job only sums its shards, so
+# the failing tests are read from the run's failed `macOS tests i/n` jobs.
+fresh
+printf 'macOS\tUNKNOWN STEP\t2026-10-26T21:58:21Z | macOS tests 1/3 | failure | 26 |\n' >"$sw/joblog.300"
+jq -n '{jobs: [{id: 301, name: "macOS tests 1/3", conclusion: "failure"}, {id: 302, name: "macOS tests 2/3", conclusion: "failure"},
+  {id: 303, name: "macOS compile", conclusion: "success"}, {id: 300, name: "macOS", conclusion: "failure"}]}' >"$sw/jobs.889.json"
+printf 'macOS tests 1/3\tUNKNOWN STEP\t2026-10-26T21:32:14Z \xe2\x9c\x98 Test homeAtEachWidth() recorded an issue at AfterGlowHomeLayoutTests.swift:182:29: Expectation failed\n' >"$sw/joblog.301"
+printf 'macOS tests 2/3\tUNKNOWN STEP\t2026-10-26T21:32:14Z \xe2\x94\x81 Test opens(_:) recorded a known issue with 1 argument c at ImportTests.swift:55:13: x\n' >"$sw/joblog.302"
+SHARD_RED="red|https://github.com/qbtrix/creative-apps/actions/runs/889/job/300|macOS"
+expect "dev red macOS: a sharded run's failing test is read from its shard, a known issue isn't" "$(mac_tests "$SHARD_RED")" "AfterGlowHomeLayoutTests.swift/homeAtEachWidth()"
+rm "$sw/joblog.302"
+expect "dev red macOS: an unreadable shard log fails the read, never a partial list" "$(mac_tests "$SHARD_RED" || echo unread)" "unread"
 # dev red on macOS only (#5183's "Failing jobs: macos"): a batch that would
 # run the macOS gate can't pass on that base, so none forms, and one in flight
 # on the red sha is marked and dropped once dev is green on a fix. A docs batch
