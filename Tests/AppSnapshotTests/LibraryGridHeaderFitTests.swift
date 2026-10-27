@@ -54,10 +54,10 @@ import Testing
         defer { window.orderOut(nil) }
         let column = CGRect(origin: .zero, size: size).insetBy(dx: -0.5, dy: -0.5)
         for id in ids {
-            let frame = try #require(frame(of: id, in: window), "no \(id)")
-            #expect(column.contains(frame), "\(id) at \(frame) leaves the \(Self.column) pt column")
-            #expect(frame.height <= Self.oneLine, "\(id) is \(frame.height) pt tall: its label wraps")
-            #expect(frame.width >= Self.sliver, "\(id) is \(frame.width) pt wide: squeezed")
+            let rect = try #require(frame(of: id, in: window), "no \(id)")
+            #expect(column.contains(rect), "\(id) at \(rect) leaves the \(Self.column) pt column")
+            #expect(rect.height <= Self.oneLine, "\(id) is \(rect.height) pt tall: its label wraps")
+            #expect(rect.width >= Self.sliver, "\(id) is \(rect.width) pt wide: squeezed")
         }
     }
 }
