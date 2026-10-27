@@ -1,0 +1,185 @@
+utc	stage	event	ref	note
+2026-10-21T01:21:08Z	0	stage-start	7277a83ac040f759d8bdefc150a72e7cdf2900d6	base 7277a83a, v3 packet
+2026-10-21T01:21:08Z	0	stage-end	#3713	lead branch and RECORD written
+2026-10-21T01:21:08Z	1	stage-end	adopt-kernel-autosave	packet read: slices and tasks recorded
+2026-10-21T01:21:08Z	3	stage-start	wave 1	AK-a builder
+2026-10-21T02:19Z	3	heartbeat	-	wave 1 PR open; wave 2 starting
+2026-10-21T02:19Z	3	pr-opened	#3835	AK-a app folders and legacy plan
+2026-10-21T02:19Z	3	stage-start	wave 2	AK-3 AK-5 AK-7
+2026-10-21T02:43Z	3	pr-opened	#3841	AK-7 Photo recovery root tests (disabled)
+2026-10-21T02:44Z	3	heartbeat	-	#3835 #3841 open clean; AK-3 AK-5 building; #3835 C4 description fix (#3837 rule) in gate
+2026-10-21T02:56Z	3	fix-pushed	#3835	C4 description kept as on dev; head d48dc817
+2026-10-21T03:02Z	3	pr-opened	#3842	AK-3 Flare recovery tests, stacked on #3835
+2026-10-21T03:02Z	3	pr-opened	#3848	AK-5 Library catalog tests, stacked on #3835
+2026-10-21T03:41Z	3	head-moved	#3841	merged #3835 fix; head 0e4d7dcd
+2026-10-21T03:41Z	3	mac-green	#3835	macOS build 39536987251 success
+2026-10-21T04:08Z	heartbeat	check	-	beat: #3835 AK-a macOS build 39536987251 green; waits on the lane's batch. Child
+2026-10-21T04:36Z	heartbeat	check	-	beat: #3835 AK-a built on macOS and is clean; the lane is batching (lane/batch-2
+2026-10-21T05:04Z	heartbeat	check	-	beat: #3835 still green and clean. Lane batch 20261021043428 (PRs #3466..#3703, 
+2026-10-21T05:30Z	heartbeat	check	-	beat: the lane integrated dev into #3835 (head 6b13c089) and dispatched macOS bu
+2026-10-21T05:40Z	AK-a	head-moved	#3835	gate PASS on 6b13c089
+2026-10-21T06:03Z	heartbeat	check	-	beat: #3835 macOS build 39549571625 green on 6b13c089, clean, Head: matches. Lan
+2026-10-21T06:30Z	heartbeat	check	-	beat: #3835 green and clean on 6b13c089. The lane landed batch 20261021053311 at
+2026-10-21T06:58Z	heartbeat	check	-	#3835 AK-a in lane batch 20261021065242 (Linux check 39558186618 running); children #3841 #3842 #3848 wait on it.
+2026-10-21T07:24Z	heartbeat	check	-	batch 20261021065242 red; bisect shows prefix 2 green and prefix 3 red (culprit #3823, not ours); #3835 rolls into the next batch.
+2026-10-21T07:53Z	heartbeat	check	-	#3835 AK-a MERGED to dev. Children #3841 #3842 #3848: merged dev in (new heads 4a8bfbd5 d3f55929 90df1e9b), retargeted to dev, gating.
+2026-10-21T08:06Z	heartbeat	gate	-	#3841 #3842 #3848 gated CI: PASS on the dev-merged heads, base dev, Head: lines moved; diffs 148/176/102 lines.
+2026-10-21T08:33Z	heartbeat	check	-	AK-a squash 7d5845e7 is in dev CI 39568091135 (733e8ef2, queued); Belt-Slice-Done for AK-a after it is green. Children's macOS builds: #3848 success, #3841 running, #3842 queued.
+2026-10-21T09:01Z	heartbeat	check	-	dev CI 39568091135 still queued; newer dev CI 39573184415 (296186f4) pending, either green run posts AK-a done. #3841 macOS build green, #3842 build queued, #3848 waits batch.
+2026-10-21T09:29Z	heartbeat	check	-	dev red #3856 (Design mutation anchors DY-a in DesignCanvasEditing, not this line); AK-a Belt-Slice-Done waits a green dev run. #3841 and #3842 macOS builds green; #3841/#3842/#3848 wait lane batch.
+2026-10-21T10:02Z	heartbeat	check	-	#3848 AK-library merged. #3841/#3842 macOS green, wait lane batch. Dev still red #3856 (Design anchors), so AK-a Belt-Slice-Done waits.
+2026-10-21T10:36Z	heartbeat	check	-	Belt-Slice-Done AK-a posted on #3713 (run 39568091135, Linux green; macOS red on UnsavedGuardTests is not AK-a's). AK-4 builder started (AH-8 #3629 merged, which is the task's dependency). AK-6 waits on spine feature-done; AK-8 on PH-z.
+2026-10-21T10:54Z	pr	AK-flare	#4010	opened, fast-lane
+2026-10-21T11:00Z	critic	AK-flare	#4010	1 blocking, fix round 1; finding #4015
+2026-10-21T11:03Z	heartbeat	check	-	#4010 (AK-flare) in fix round 1; AK-6/8/9/10 still blocked on spine, PH-z, DA-z/HA-z and AH-10
+2026-10-21T11:10Z	fix	AK-flare	#4010	round 1 pushed e284d05a; gap #4018; critic round 2
+2026-10-21T11:19Z	AK-flare	fix-round-2	#4010 legacy move under ignore-state
+2026-10-21T11:24Z	AK-flare	fix-round-2-pushed	#4010 ba534cf4
+2026-10-21T11:30Z	heartbeat		Heartbeat: #4010 at ba534cf4 waits on the lane's per-PR macOS build (dispatched 11:30Z); fix rounds used up. #4015 the only open AK finding. AK-6/8/9/10 still blocked.
+2026-10-21T11:57Z	heartbeat		Heartbeat: #4010 ba534cf4 macOS build (run 39592399191) still queued; no needs-fix.
+2026-10-21T12:25Z	heartbeat		Heartbeat: #4010 ba534cf4 macOS build (run 39592399191) green; waits on the lane's merge sweep.
+2026-10-21T12:52Z	heartbeat	heartbeat: #4010 AK-flare macOS build green, waits on lane merge sweep; #4015 only open finding; AK-6/8/9/10 blocked
+2026-10-22T13:04Z	relaunch		run act-1a163b2abfe-f182: AH-z merged so AK-10 builds; #4010 merge-dev fixer; #4015 fix
+2026-10-22T14:35Z	wave		wave 5 shipped: #4010 68b3c4e6, AK-10 #4427+#4428, #4015 fix #4430; waiting on the lane
+2026-10-22T14:58Z	heartbeat		#4010 mac green, waits sweep; #4430 mac queued; AK-6/8/9/11 blocked (poll 1)
+2026-10-22T15:20Z	heartbeat		#4010 waits sweep; #4430 mac rebuild queued; AK-6/8/9/11 blocked (poll 2)
+2026-10-22T15:50Z	3	question	-	blocked poll 3 unchanged; supervisor question on #3713
+2026-10-22T16:20Z	3	parked	-	supervisor: park AK; #4010 merged; #4427 retargeted to dev at a1ede4d9
+2026-10-22T16:42Z	3	heartbeat	-	#4427 macOS build queued; #4428 stacked
+2026-10-22T17:04Z	3	heartbeat	-	#4427 macOS build queued
+2026-10-22T17:25Z	3	heartbeat	-	no change
+17:47Z	AK	heartbeat	-	AK-10a build green
+18:10Z	AK	heartbeat	-	no change
+18:40Z	AK	AK-10 retarget	#4428	f9be9a48 base dev
+2026-10-22T19:51Z	3	merged	AK-10	#4428 b653cb7bfd
+2026-10-24T05:34:34Z	resume	run act-1a16c618fe7-h4fd: AK-4, AK-10 merged; wave 1 = AK-6 then AK-9; AK-8 waits SC-f
+2026-10-24T05:37:12Z	wave	wave 1 launched: AK-6 (Wire: library:spine), AK-9 stacked on AK-6 with the Photo step skipped (waits on AK-8)
+2026-10-24T05:38:36Z	slice-done	AK-flare run 40037716897
+2026-10-24T06:59:59Z	3	pr-opened	#5039 AK-6, #5040 AK-9
+2026-10-24T08:06:50Z	3	heartbeat	#5039 lane, #5040 stacked
+2026-10-24T08:27:57Z	3	heartbeat	no change
+2026-10-24T08:51:41Z	3	heartbeat	no change
+2026-10-24T09:14:04Z	3	heartbeat	no change
+2026-10-24T09:37:04Z	3	heartbeat	heartbeat 09:36Z: no merge yet; all PRs open with fast-lane, bodies clean; dev CI 40081823899 running on 9f476af74 (dev-red #5113 open); SC-f and AJ-a still planned
+2026-10-24T09:59:18Z	3	heartbeat	heartbeat 09:59Z: no merge yet; all PRs open with fast-lane, bodies clean, stacks intact; dev CI 40081823899 on 9f476af74: Linux green, macOS running past setup (dev-red #5113 still open); SC-f and AJ-a still planned
+2026-10-24T10:21:34Z	3	heartbeat	heartbeat 10:21Z: no merge; lane stalled since ~08:30 on lane/batch-20261024081307 probe 0 (reported to supervisor on #5113 at 10:04Z); all PRs open with fast-lane, bodies clean, stacks intact; dev CI 40081823899: Linux green, macOS running; SC-f and AJ-a still planned
+2026-10-24T10:43:19Z	3	heartbeat	heartbeat 10:43Z: dev green (CI 40081823899 success on 9f476af74), dev-red #5113 closed; lane moving again (#4616 merged 10:42Z); none of ours merged yet; all PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T11:05:48Z	3	heartbeat	heartbeat 11:06Z: none of ours merged yet; lane fix #5150 (list every open PR, not the newest 100) merged 10:55Z so our older PRs are visible to the lane again; dev CI 40087964618 running on 4f00afb81; all PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T11:28:35Z	3	heartbeat	heartbeat 11:29Z: lane running batch lane/batch-20261024110214 (12 PRs, #5006-#5144; none of ours): Linux green, macOS gate running; ours wait for the next batch; all PRs open with fast-lane, bodies clean, stacks intact; dev CI 40087964618 running; SC-f and AJ-a still planned
+2026-10-24T11:49:55Z	3	heartbeat	heartbeat 11:50Z: batch lane/batch-20261024110214 (none of ours) still on its macOS gate; ours wait for the next batch; all PRs open with fast-lane, bodies clean, stacks intact; dev CI 40087964618 still running; SC-f and AJ-a still planned
+2026-10-24T12:12:19Z	3	heartbeat	heartbeat 12:12Z: batch lane/batch-20261024110214 (none of ours) went red on its macOS gate and the lane is bisecting it (probe -6 running); ours wait for the next batch; dev CI 40087964618 green on 4f00afb81 (no PR of ours in it); all PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T12:34:02Z	3	heartbeat	heartbeat 12:34Z: lane still bisecting red batch lane/batch-20261024110214 (probe -6 macOS gate running; none of ours); ours wait for the next batch; all PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T12:56:31Z	3	heartbeat	heartbeat 12:56Z: lane still bisecting red batch lane/batch-20261024110214 (probe -6 macOS gate running since 12:10Z; none of ours); ours wait for the next batch; all PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T13:18:53Z	3	heartbeat	heartbeat 13:18Z: no new merges since #4911 (12:18Z); lane still on red batch lane/batch-20261024110214 (probe -6 macOS gate running 68 min; none of ours); all 12 PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T13:41:49Z	3	heartbeat	heartbeat 13:41Z: lane bisect moving: probe -6 finished, probe lane/batch-20261024110214-3 Linux + macOS gate running since 13:22Z (none of ours); no merges since #4911; all 12 PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T14:04:45Z	3	heartbeat	heartbeat 14:04Z: lane still bisecting red batch lane/batch-20261024110214: probe -3 Linux green, its macOS gate running since 13:22Z (none of ours); no merges since #4911; all 12 PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T14:27:40Z	3	heartbeat	heartbeat 14:27Z: bisect probe -3 green, so its prefix merged (#5087 #5097 #5138 #5046, none ours); probe lane/batch-20261024110214-4 running since 14:15Z; full CI 40102257393 on dev e79e9afcb running; all 12 PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T14:50:15Z	3	heartbeat	heartbeat 14:50Z: new batch lane/batch-20261024144917 (12 PRs: #4850 #4950 #4951 #3621 #3745 #3797 #3805 #4297 #4432 #4577 #4582 #4838) took none of ours, which are next in the oldest-first order; old batch probe -4 macOS gate still running; dev full CI 40102257393 running; all 12 PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T15:12:29Z	3	heartbeat	heartbeat 15:12Z: batch lane/batch-20261024144917 (none ours) Linux green, macOS gate running; old probe -4 macOS gate running; dev e79e9afcb scoped design/photo/halo green, full CI running; no merges since #5046; all 12 PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T15:34:35Z	3	heartbeat	heartbeat 15:34Z: batch lane/batch-20261024144917 (none ours) macOS gate still running (45 min); old probe -4 macOS gate green; dev full CI 40102257393 still running; no merges since #5046; all 12 PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T15:56:51Z	3	needs-rebase	#5039 AK-6 labelled needs-rebase 15:55Z: conflict with dev #3621 (test-store isolation) in Sources/LibraryApp/Platform/CatalogStore.swift; fixer dispatched to merge origin/dev, keep both the suite-root move and the LibraryCatalogDir lazy default, rerun scripts/ci --changed, push; then merge AK-6 into AK-9 (#5040)
+2026-10-24T16:21:13Z	3	rebase-fixed	#5039 AK-6 merged origin/dev, CatalogStore resolves its folder at use time (named dir, then LibraryCatalogDir default, then suite root), legacy move only on the launch folder; storeFolder/storeMovesLegacy in LibraryModel with 2 tests, mutate 5/5; scripts/ci --changed CI: PASS; head 0faf6d477, Head: line moved. AK-9 #5040 merged AK-6, CI: PASS, head 9bd6a5985, Head: line moved. Waiting for the lane to drop needs-rebase
+2026-10-24T16:43:19Z	3	heartbeat	heartbeat 16:43Z: lane dropped needs-rebase on #5039 (head 0faf6d477); no merges since 15:48Z batch; dev 33cd6e97c scoped suite/photo/library green, halo/suiteui/flare running, full CI 40111414009 queued; all 12 PRs open with fast-lane, bodies clean, stacks intact; SC-f and AJ-a still planned
+2026-10-24T17:06:33Z	3	heartbeat	heartbeat 17:06Z: no merges for export-pack or adopt-kernel-autosave; lane batch 20261024160327 macOS gate running; dev da62659fc CI queued; bodies clean, stacks intact
+2026-10-24T17:28:55Z	3	heartbeat	heartbeat 17:29Z: no merges for this feature since 15:48Z; dev da62659fc Linux green, scoped runs running; c09201386 Linux check running; all PRs open with fast-lane, bodies clean, stacks intact
+2026-10-24T17:52:32Z	3	heartbeat	heartbeat 17:52Z: 11 PRs open, all clean with fast-lane; no new merges since #4871; scoped suiteui 40114493184 on da62659fc still running (TS-a critics wait on it); full CI 40111414009 running
+2026-10-24T18:14:40Z	3	heartbeat	heartbeat 18:14Z: 11 PRs open, all clean with fast-lane; no new merges; scoped suiteui 40114493184 on da62659fc green, its journeys run 40119511745 (ui-screens for the TS-a review) still running; dev-red #5183 on 33cd6e97c (macOS, red-triage says likely flaky; none of this line in range); full CI 40118143413 on c09201386 running
+2026-10-24T18:37:02Z	3	heartbeat	heartbeat 18:37Z: 11 PRs open, all clean with fast-lane; lane batch landed #4878-#4882 at 18:20Z, none of ours; journeys suiteui 40119511745 (TS-a review screens) still running; scoped runs on d13c3ff28 queued
+2026-10-24T18:59:55Z	3	heartbeat	heartbeat 18:59Z: 11 PRs open, clean with fast-lane, no blocking lane comments; lane batch-20261024183708 (macOS gate running) holds none of ours, they queue for the next; journeys suiteui 40119511745 still running
+2026-10-24T19:22:22Z	3	heartbeat	heartbeat 19:22Z: 11 PRs open, clean with fast-lane; journeys suiteui 40119511745 was superseded (cancelled); TS-a review now waits on journeys 40124405113 (after scoped suiteui 40120688017, green, at d13c3ff28, which contains TS-a); lane batch-20261024183708 red on macOS, bisecting (none of ours in it)
+2026-10-24T19:44:40Z	3	heartbeat	heartbeat 19:44Z: 11 PRs open, clean with fast-lane, still queued; journeys suiteui 40124405113 (TS-a review screens) running; lane bisect probe batch-20261024183708-6 macOS running
+2026-10-24T20:07:25Z	3	heartbeat	heartbeat 20:07Z: 11 PRs open, clean with fast-lane, still queued behind the bisecting lane batch (probe -6 macOS running); journeys suiteui 40124405113 (TS-a review screens) still running; dev 6f66ca334 Linux green
+2026-10-24T20:28:49Z	3	heartbeat	heartbeat 20:29Z: 11 PRs open, clean with fast-lane, still queued; lane bisect probes -7 and -9 running (none of ours); journeys suiteui 40124405113 (TS-a review screens) still running; full CI queued on dev ef37711de
+2026-10-24T20:51:12Z	3	heartbeat	heartbeat 20:51Z: 11 PRs open with fast-lane (#5039/#5047 mergeability recomputing after dev moved to 1a98629c0); lane bisect probes -7/-9 red on macOS (none of ours); journeys suiteui 40124405113 still running; full CI on ef37711de running
+2026-10-24T21:13:24Z	3	heartbeat	heartbeat 21:13Z: 11 PRs open, fast-lane, all mergeable clean (incl. #5039/#5047); none merged; journeys suiteui 40124405113 still in progress; full CI on ef37711de running; dev-red #5183 open (not ours)
+2026-10-24T21:52:52Z	3	stage	-	run act-1a16fe1fa73-5x3s starts: base stays dev; #5039 AK-6 queued in lane, #5040 stacked; AK-8 waits SC-f (shared-codecs still planned on dev)
+2026-10-24T22:19:47Z	3	poll	-	poll 22:3xZ: records now mirrored to lead/suiteui-* (this run had pushed only lead/<f>); none merged; dev afef017c; lane still on batch 20261024205137 macOS probe -3; no open findings; #5039 queued, #5040 stacked; SC-f still planned (AK-8 held per supervisor)
+2026-10-24T22:21:10Z	3	poll	-	poll 22:21Z: all six lead branches verified on remote; none of this run's PRs merged; dev afef017c; all clean; no open line:suiteui findings; waiting on lane batch
+2026-10-24T22:28:45Z	3	poll	-	poll 22:28Z: no merges (#4939, #5039, #5044, #5074, #4960/#5043 all open, clean, fast-lane); dev afef017c; SC-f: only SC-14 (#4238) on dev, SC-13/15/16 not opened, AK-8 held; no open findings for this feature
+2026-10-24T23:00:13Z	3	poll	-	poll 22:59Z: no merges; dev afef017c (#5222); lane on batch 20261024205137 probe -1 (Linux + macOS running since 22:42Z), our PRs wait for the next batch; all clean; SC-f: only SC-14 on dev, AK-8 held; no open findings for this feature
+2026-10-24T23:16:41Z	3	poll	-	poll 23:16Z: no merges; dev afef017c; lane batch 20261024205137 probe -1: Linux green, macOS gate still running; all our PRs clean; SC-f unchanged, AK-8 held; new #5227 is a bar-slider journey, not this feature; next poll 23:32Z
+2026-10-24T23:32:39Z	3	poll	-	poll 23:32Z: no merges; dev afef017c; lane batch 20261024205137 probe -1 macOS gate still running (since 22:42Z; dev CI since 22:06Z also on macOS); our PRs clean; SC-f unchanged, AK-8 held; no new findings; next poll 23:48Z
+2026-10-24T23:49:23Z	3	poll	-	poll 23:49Z: no merges; dev afef017c (dev CI from 22:06Z passed); lane batch 20261024205137 probe -1 macOS gate still running; our PRs clean; SC-f unchanged, AK-8 held; no new findings; next poll 00:05Z
+2026-10-25T00:06:48Z	3	poll	-	poll 00:06Z: no merges; dev afef017c; batch 20261024205137 done; new batch 20261024235353 (12 PRs: p0/beta first, then #4236) has none of ours; our Head: markers all match, so ours are ready and queued behind it; SC-f unchanged, AK-8 held; no new findings; next poll 00:22Z
+2026-10-25T00:23:30Z	3	poll	-	poll 00:22Z: no run PR merged; batch 20261024235353 red, lane bisecting (probe -6); our PRs ready and queued; SC-f still open, AK-8 held; no new findings for this feature
+2026-10-25T00:38:40Z	3	poll	-	poll 00:38Z: no run PR merged; batch 20261024235353 probe -6 Linux green, macOS gate running; our PRs ready and queued; SC-f still open, AK-8 held; no new findings
+2026-10-25T00:55:05Z	3	poll	-	poll 00:54Z: no run PR merged; batch 20261024235353 probe -6 macOS gate still running (45 min); our PRs ready and queued; SC-f still open, AK-8 held; no new findings
+2026-10-25T01:11:17Z	3	poll	-	poll 01:10Z: no run PR merged (dev ae3efdb83, #4874); batch 20261024235353 probe -6 macOS gate still running; our PRs ready and queued; SC-f still open, AK-8 held; no new findings
+2026-10-25T01:27:11Z	3	poll	-	poll 01:26Z: no run PR merged (dev ae3efdb83); batch 20261024235353 probe -6 green, probe -9 running; our PRs ready and queued for the next batch; SC-f still open, AK-8 held; no new findings
+2026-10-25T01:42:49Z	3	poll	-	poll 01:42Z: no run PR merged (dev c16bcd16c, #5156 from the bisected batch); probe -9 Linux green, macOS running; our PRs ready and queued; SC-f still open, AK-8 held; no new findings
+2026-10-25T01:58:52Z	3	poll	-	poll 01:58Z: no run PR merged (dev c16bcd16c); probe -9 macOS still running; all our PRs clean and queued; SC-f still open, AK-8 held; no new findings
+2026-10-25T02:15:26Z	3	poll	-	poll 02:14Z: no run PR merged (dev c16bcd16c); probe -9 macOS gate still running (~57 min); all our PRs clean and queued; SC-f still open, AK-8 held; no new findings
+2026-10-25T02:32:29Z	3	poll	-	poll 02:32Z: batch 20261024235353 resolved (dev 3db45eb45, #5238 lane fix); no run PR merged yet; our PRs clean and ready for the next batch; SC-f still open, AK-8 held; no new findings
+2026-10-25T02:49:35Z	3	poll	-	poll 02:49Z: batch 20261025023716 (12 PRs, older ones: #4236..#5174) running; none of ours in it, we are next by age; dev 3db45eb45; our PRs clean and ready; SC-f still open, AK-8 held; no new findings
+2026-10-25T03:06:39Z	3	poll	-	poll 03:06Z: batch 20261025023716 Linux green, macOS gate running; none of ours in it; dev 3db45eb45; lane sweep re-added fast-lane to #4965/#4961/#4982 (Belt-Lead line), they stay over the size cap until #4939 lands and the lane drops it again; SC-f still open, AK-8 held; no new findings
+2026-10-25T03:23:16Z	3	poll	-	03:22Z poll: none merged; dev 3db45eb45; batch 20261025023716 (none ours) red on macOS, bisecting (probe -6); 13 PRs open clean; SC-f not on dev; no findings, no dev-red
+2026-10-25T03:38:42Z	3	poll	-	03:38Z poll: none merged; dev 3db45eb45; batch 20261025023716 (none ours) bisecting, probe -6 red on macOS, probe -3 running; 13 PRs open clean; SC-f not on dev; no findings, no dev-red
+2026-10-25T03:55:07Z	3	poll	-	03:54Z poll: none merged; dev 2e7d52649 (#3935 docs); batch 20261025023716 (none ours) still bisecting, probe -1 running; lane stripped fast-lane from needs-split #4965/#4961/#4982 as expected, they wait on #4939; SC-f not on dev; no findings, no dev-red
+2026-10-25T04:11:20Z	3	poll	-	04:10Z poll: none merged; dev 2e7d52649; batch 20261025023716 (none ours) bisecting, probe -1 running; 10 fast-lane PRs clean, #4965/#4961/#4982 wait on #4939; SC-f not on dev; no findings, no dev-red
+2026-10-25T04:28:33Z	3	poll	-	04:28Z poll: none merged; dev ee8ccd61a (#4877 landed from the bisected batch); probe -1 macOS still running; our PRs open (mergeable recomputing); SC-f not on dev; no findings for our features (#4693 is an older halo journey finding), no dev-red
+2026-10-25T04:45:07Z	3	poll	-	04:44Z poll: none merged; dev ee8ccd61a; batch 20261025023716 resolved, no new batch yet; #4965 now conflicts with dev (resolved in the post-#4939 dev merge); other 12 clean; SC-f not on dev; no findings, no dev-red
+2026-10-25T05:00:53Z	3	poll	-	05:00Z poll: none merged; dev ee8ccd61a; no new lane batch yet (sweep 40163470636 pending a runner); 12 PRs clean, #4965 dirty (resolved after #4939); SC-f not on dev; no findings, no dev-red
+2026-10-25T05:17:17Z	3	poll	-	05:16Z poll: none merged; dev ee8ccd61a; supervisor labelled all 13 beta, 9 of them p0 (next batch takes them first); old batch 20261025023716 still bisecting (probe -2 running); #4965/#4961/#4982 wait on #4939 (#4965 dirty); SC-f not on dev; no findings, no dev-red
+2026-10-25T05:33:05Z	3	poll	-	05:32Z poll: none merged; dev 13fb2f591 (#4888 landed, lane auto-revert); old batch probe -2 red on macOS, still resolving; 9 p0 PRs clean/ready; #4965 and #4961 now dirty, #4982 clean, all three wait on #4939; new line:suiteui finding #5293 (shared problem alert) is not from these features' critics, left to the line; SC-f not on dev; no dev-red
+2026-10-25T05:49:39Z	3	poll	-	05:49Z poll: none merged yet; batch 20261025054232 holds ours #5039, #5044, #5074, #4960 (Linux + macOS gate running); other p0 PRs next; #4965/#4961 dirty, #4982 clean, wait on #4939; SC-f not on dev; no new findings, no dev-red
+2026-10-25T06:07:15Z	3	poll	-	batch 20261025054232 red (Linux+macOS); bisecting, probe -6 holds #4960 (not #5039/#5044/#5074); none of ours merged; no dev-red; SC-f not on dev
+2026-10-25T06:37:57Z	3	poll	-	batch 20261025054232 red on FormatListRatchetTests (XP-9 #5074's fake listed png+jpeg); fixed on lead/export-pack-XP-9 at 59608d3f5, scripts/ci --changed PASS, Head moved; bisect probe -6 Linux green, macOS running; none merged; SC-f not on dev
+2026-10-25T06:38:40Z	3	poll	-	bisect probe 20261025054232-6 macOS gate still running (42m); #5074 waits on fixed head 59608d3f5; none merged; no dev-red; SC-f not on dev
+2026-10-25T06:55:57Z	3	poll	-	06:55Z poll: dev 13fb2f591 unchanged; probe -6 macOS gate 40167308409 still running (59m), Linux green; no merges; #5074 at 59608d3f5 waits for the next batch; no dev-red, no new suiteui findings, SC-f not on dev
+2026-10-25T07:12:33Z	3	poll	-	07:12Z poll: dev 13fb2f591 unchanged; probe -6 macOS red only on RenderBudgetToneRowsTests.sliderDragInThreeBodies (Photo tone rows timing, not ours); lane now probing -3 (runs 40171576048/40171578102); no merges, no needs-fix on ours; #5074 clean; no dev-red, no new findings, SC-f not on dev
+2026-10-25T07:29:19Z	3	poll	-	07:29Z poll: dev 13fb2f591 unchanged; probe -3 Linux green, macOS gate 40171578102 running (22m); no merges, no needs-fix on ours; no dev-red, no new findings, SC-f not on dev
+2026-10-25T07:46:37Z	3	poll	-	07:46Z poll: dev 13fb2f591 unchanged; probe -3 macOS gate 40171578102 running (39m), Linux green; no merges, no needs-fix on ours; no dev-red, no new findings, SC-f not on dev
+2026-10-25T08:03:25Z	3	poll	-	08:03Z poll: dev 13fb2f591 unchanged; probe -3 macOS gate 40171578102 running (56m), Linux green; no merges, no needs-fix on ours; #4965/#4961/#4982 cycle fast-lane on/off (needs-split) while they wait on #4939; no dev-red, no new findings, SC-f not on dev
+2026-10-25T08:18:47Z	3	poll	-	08:18Z poll: dev 7e5bcd82f (#5287 ci-findings dedup, not ours); probe -3 macOS gate 40171578102 running (71m), Linux green; no merges of ours, no needs-fix; no dev-red, no new findings, SC-f not on dev
+2026-10-25T08:35:08Z	3	poll	-	08:35Z poll: dev 7e5bcd82f; probe -3 done, lane now on probe -4 (40176388578/40176391007); no merges of ours, no needs-fix; no dev-red, no new findings, SC-f not on dev
+2026-10-25T08:51:55Z	3	poll	-	08:51Z poll: dev 8d3a12c4b; no merges of ours; no needs-fix on this feature; no dev-red, no new findings, SC-f not on dev
+2026-10-25T09:07:51Z	3	poll	-	09:07Z poll: no merges; batch 20261025090316 running; #4960 needs-fix awaits supervisor; #5308 still open; no dev-red
+2026-10-25T09:24:55Z	3	poll	-	09:24Z poll: no merges; batch 20261025090316 Linux red on HomeModelTests time limits (load), bisecting; evidence added on #4960
+2026-10-25T09:41:25Z	3	poll	-	09:41Z poll: no merges; dev-red #5316 = HomeModel/Onboarding time limits (not ours); probe -6 Linux green, macOS running; noted on #4960
+2026-10-25T09:57:42Z	3	poll	-	09:57Z poll: no merges; dev-red #5316 open (timing, not ours); probe -6 macOS gate running; #4960 needs-fix awaits supervisor
+2026-10-25T10:14:37Z	3	poll	-	10:14Z poll: dev green again at 8d3a12c4b (#5316 closed); no merges; probe -6 macOS gate 55m running; noted green/red same-SHA on #4960
+2026-10-25T10:31:18Z	3	poll	-	10:31Z poll: no merges; dev green; probe -6 macOS 1h12m, probe -9 Linux running; #4960 needs-fix awaits supervisor
+2026-10-25T10:46:58Z	3	poll	-	10:47Z poll: probe -6 green (Linux+macOS), probe -9 Linux green (holds #5039); lane should land the prefix next; no merges yet
+2026-10-25T11:03:15Z	3	poll	-	11:03Z poll: no merges; probe -6 green, waiting on next lane sweep (last ended ~10:41Z); probe -9 macOS gate not yet dispatched
+2026-10-25T11:19:48Z	3	poll	-	11:19Z poll: nothing merged; batch 20261025090316 resolved without landing ours yet, new batch 20261025111803 Linux check running; dev 68bec9fe7, no dev-red; #4960 still needs-fix (timing flake, evidence posted, no supervisor reply)
+2026-10-25T11:35:25Z	3	poll	-	11:35Z poll: nothing merged; batch 20261025111803 Linux check still running (17 min); dev 68bec9fe7 Linux check green, full CI in progress, no dev-red; #4960 still needs-fix awaiting supervisor
+2026-10-25T11:52:13Z	3	poll	-	11:52Z poll: #4886 landed on dev (5270bc4bc), none of ours yet; batch 20261025114830 Linux check running; no dev-red; #4960 still needs-fix awaiting supervisor
+2026-10-25T12:09:16Z	3	poll	-	12:09Z poll: no merges since #4886; batch 20261025114830 (#4943) Linux check running 20 min; no dev-red; #4960 still needs-fix awaiting supervisor; noted other-line PR feat/suite-problem-alert-apps touching autosave recovery, watch for AK conflicts
+2026-10-25T12:24:48Z	3	poll	-	12:24Z poll: #4943 landed (58bb6d4d5), none of ours yet; lane sweep pending; no dev-red; #4960 still needs-fix awaiting supervisor
+2026-10-25T12:41:23Z	3	poll	-	12:41Z poll: no merges of ours; batch 20261025122638 Linux check running; lane re-added fast-lane to needs-split #4965/#4961/#4982 (its sweep, not mine); no dev-red; #4960 still needs-fix awaiting supervisor
+2026-10-25T12:58:54Z	3	poll	-	12:58Z poll: no merges of ours; no dev-red; working export-pack #4960/#5043 restack
+2026-10-25T13:14:17Z	3	poll	-	13:14Z poll: dev 930337d52, no merges of ours, no dev-red; scripts/ci --changed still building for #4960 (lx2) and #5043 (XP-3) restacks, push on PASS
+2026-10-25T13:30:08Z	3	poll	-	13:30Z poll: #5039 and #5040 still queued in lane; dev bbaedba66 green; SC-f not yet on dev
+2026-10-25T13:46:58Z	3	poll	-	13:46Z poll: no merges; lane batch-20261025132815 Linux check running; dev bbaedba66 green; SC-f not on dev
+2026-10-26T02:04:14Z	-	heartbeat	-	run act-1a175ee1051-o29l: AK-library slice done (run 40247461868); AK-9 #5040 open clean; AK-8 blocked on SC-f (SC-15/16 not on dev)
+2026-10-26T03:03:42Z	AK-z	gate-pass	#5040 78f6ac0b
+2026-10-26T03:30:20Z	all	blocked-dev-red	#5321
+2026-10-26T03:48:06Z	all	heartbeat	dev-red #5321 open
+2026-10-26T04:08:24Z	AK-z	merged	#5040 0ce906f7
+2026-10-26T04:27:32Z	all	heartbeat	dev-red #5321 open (linux)
+2026-10-26T04:46:45Z	all	heartbeat	dev-red #5321 open
+2026-10-26T05:07:56Z	all	heartbeat	dev-red #5321 open
+2026-10-26T05:27:48Z	all	heartbeat	dev-red #5321 open
+2026-10-26T05:48:49Z	all	heartbeat	dev-red #5321 open
+2026-10-26T06:19:47Z	all	heartbeat	dev-red #5321 open
+2026-10-26T06:53:46Z	orientation-crop	restack	#5244 merged; #5263 on dev at 79ed59ec, gate PASS
+2026-10-26T07:18:31Z	all	heartbeat	dev-red #5321 open
+2026-10-26T07:38:15Z	all	heartbeat	dev-red #5321 open
+2026-10-26T07:59:44Z	all	heartbeat	dev-red #5321 open
+2026-10-26T08:24:05Z	all	heartbeat	dev-red #5321 open
+2026-10-26T08:43:49Z	all	heartbeat	dev-red #5321 open
+2026-10-26T09:04:17Z	all	heartbeat	dev-red #5321 open
+2026-10-26T09:23:42Z	all	heartbeat	dev-red #5321 open
+2026-10-26T09:43:41Z	all	heartbeat	dev-red #5321 open
+2026-10-26T10:04:38Z	all	heartbeat	dev-red #5321 open
+2026-10-26T10:23:46Z	all	heartbeat	dev-red #5321 open
+2026-10-26T10:44:24Z	all	heartbeat	dev-red #5321 open
+2026-10-26T11:05:20Z	all	heartbeat	dev-red #5321 open
+2026-10-26T11:26:08Z	all	heartbeat	dev-red #5321 open
+2026-10-26T11:45:59Z	all	heartbeat	dev-red #5321 open
+2026-10-26T12:07:48Z	all	heartbeat	dev-red #5321 open
+2026-10-26T12:36:23Z	all	heartbeat	dev-red #5321 open
+2026-10-26T13:01:19Z	all	heartbeat	dev-red #5321 open
+2026-10-26T13:38:58Z	all	heartbeat	dev-red #5321 open
+2026-10-26T14:00:10Z	all	heartbeat	dev-red #5321 open; OC-library-u awaiting run
+2026-10-26T14:40:14Z	all	resume	d3323f6a7dc523e1986e1693b640cf377e362f08	run act-1a178a4b1c2-ibn1 resumed; lead branch rebuilt on main d3323f6a
