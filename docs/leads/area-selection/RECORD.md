@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-27T06:56Z check-in: lane forming batches (6 Linux checks in flight); none of #5096 #4896 #5245 #5247 #5248 #5249 merged yet; dev-red #5818 open, #5862 (goldens fix) open; main fef52e66
+Polled: 2026-10-27T07:17Z · 07:1xZ: no change. dev-red #5818 is open (revert #5827). #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
