@@ -256,3 +256,4 @@ utc	stage	event	ref	note
 2026-10-27T18:23Z	3	blocked	lane	still waiting on local-ci/prescreen
 2026-10-27T18:45Z	3	fix	lane	needs-rebase: merge dev, gate running
 2026-10-27T18:58Z	3	pushed	#5245	dev merged, gate pass, Head 00ac4056
+2026-10-27T19:13Z	3	waiting	lane	poll: no merges; #5245 clean at 00ac4056
