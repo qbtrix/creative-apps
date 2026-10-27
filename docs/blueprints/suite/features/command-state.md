@@ -83,8 +83,8 @@ side by side after CS-a.
 `MJ-CS` on Linux (`ControlStateTests` runs on macOS; `CommandPathTests`,
 `CommandPathLimitTests` and each `<App>CommandPathTests` on Linux), then:
 1. Library: press the Show Original toggle; `suite.controls` reports
-   `library.develop.show-original` `selected: true`; press again, `false`
-   (CS-1, CS-4; `XJ-CS`, `AfterGlowControlStateJourneyTests.testTogglesReportState`).
+   `library.develop.original` `selected: true`; press again, `false`
+   (CS-1, CS-4; `XJ-CS`, `AfterGlowJourneyTests.testTogglesReportState`).
 2. Each app's existing journeys stay green after its slice (`LJ-CS1`,
    `LJ-CS2`, `HJ-CS`, `PJ-CS`, `FJ-CS`, `DJ-CS`: the journeys that already
    drive those menus and sheets, unchanged).
@@ -93,7 +93,7 @@ side by side after CS-a.
 
 | job | closes or adds | run | check | fixture |
 |---|---|---|---|---|
-| RJ-X61 | adds, closes with `suite/command-state` | C | `Tests/RealJobs/library/show-original/`: `view.show-original` on, `view.read` shows it on, again off | the library sample catalog |
+| RJ-X61 | adds, closes with `suite/command-state` | C | `Tests/RealJobs/library/show-original/` and `show-original-off/`: `view.show-original` on, the `json` export with `contents: shown` reads `original: true`; toggled twice in one run, `original: false` | the library sample catalog |
 
 Trap: a toggle an agent can't see or set, so it flips it blind or not at all.
 Assertion: after the first run `view.read` reports `showOriginal: true`, after
@@ -161,7 +161,7 @@ rest the slice's test lists); Halo `render.start`, `composition.new`,
 | CS-12 | – | The controls run their commands (menus through `MenuCommand(spec:)`, sheet confirms through the sheet's command, Cancel and Close under the lint's dismiss rule); their lines leave `Tests/command-path-baseline/flare.txt` and its `# max:` drops to the new count | `Sources/FlareApp/FlareCommands.swift`, `Sources/FlareApp/FlareFilePanels.swift`, `Sources/FlareApp/FlareNewSheet.swift`, `Sources/FlareApp/FlareRecovery.swift`, `Sources/FlareApp/FlareStageContextMenu.swift`, `Sources/FlareApp/FlareTimelineEdit.swift`, `Tests/command-path-baseline/flare.txt` | CS-11 | ~170, 7 |
 | CS-13 | – | **Test first.** `DesignCommandPathTests` lists the ids each control must run (Export, the zoom items and Fit); the missing specs added to Design's catalog and ledger, each with its availability | `Tests/DesignModelTests/DesignCommandPathTests.swift`, `Sources/DesignModel/DesignCommandCatalog.swift`, `Tests/command-ids/design.txt`, `Tests/mutations/DesignModel.DesignCommandCatalog.json` | CS-2 | ~110, 4 |
 | CS-14 | – | The controls run their commands (menus through `MenuCommand(spec:)`, sheet confirms through the sheet's command, Cancel and Close under the lint's dismiss rule); their lines leave `Tests/command-path-baseline/design.txt` and its `# max:` drops to the new count | `Sources/DesignApp/DesignCommands.swift`, `Sources/DesignApp/DesignWindow.swift`, `Tests/command-path-baseline/design.txt` | CS-13 | ~90, 3 |
-| CS-15 | – | RJ-X61's job (toggle Show Original with the CLI, read it back) and its check, enabled; `AfterGlowControlStateJourneyTests` on | `Tests/RealJobs/library/show-original/show-original.jobs.json`, `UITests/AfterGlowJourneyTests+ControlState.swift` | CS-4, CS-6, CS-8, CS-10, CS-12, CS-14, CS-1 | ~90, 2 |
+| CS-15 | – | RJ-X61's job (toggle Show Original with the CLI, read it back) and its check, enabled; `AfterGlowJourneyTests.testTogglesReportState` on | `Tests/RealJobs/library/show-original/show-original.jobs.json`, `UITests/AfterGlowJourneyTests+ControlState.swift` | CS-4, CS-6, CS-8, CS-10, CS-12, CS-14, CS-1 | ~90, 2 |
 | CS-16 | – | `status: built`; `feature-done` | `docs/blueprints/suite/features/command-state.wave.json` | CS-15 | ~10, 1 |
 
 ## Build waves
