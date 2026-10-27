@@ -1,6 +1,8 @@
 // PlaceDrop.swift: the drop target that places images (placed-images PL-3). It takes file URLs and pasteboard PNG,
 // JPEG or SVG data, highlights only while the drag offers an item of `formats` (a Finder file registers its content
-// type beside its URL), and reads the files off the main actor through `PlaceReader`, which the panel shares.
+// type beside its URL), and reads the files off the main actor through `PlaceReader`, which the panel shares. A file
+// it highlighted for but then refused (over `PlaceRules.maxBytes`, or bytes that aren't the format) reports why through
+// `onRefuse`, so no drop vanishes without a word.
 import Foundation
 import SuiteKernel
 import SwiftUI
@@ -38,13 +40,16 @@ enum PlaceReader {
         }
     }
 
-    /// A drop at `point`: `items` read off the main actor, then what it took handed to `onPlace` with the point.
+    /// A drop at `point`: `items` read off the main actor, then what it took handed to `onPlace` with the point, and
+    /// why it refused the rest to `onRefuse`.
     @MainActor static func drop(
         _ items: [PlaceItem], at point: CGPoint, formats: Set<PlacedFormat>,
-        onPlace: @MainActor ([(name: String, data: Data)], CGPoint) -> Bool
+        onPlace: @MainActor ([(name: String, data: Data)], CGPoint) -> Bool,
+        onRefuse: @MainActor (String) -> Void = { _ in }
     ) async -> PlaceRead {
         let read = await read(items, formats: formats)
         if !read.taken.isEmpty { _ = onPlace(read.taken, point) }
+        if let refused = read.refused { onRefuse(refused) }
         return read
     }
 
@@ -105,11 +110,13 @@ enum PlaceReader {
 }
 
 extension View {
-    /// Files and image or SVG data dropped from Finder or another app; `onPlace` gets each with the drop point.
+    /// Files and image or SVG data dropped from Finder or another app; `onPlace` gets each with the drop point, and
+    /// `onRefuse` the reason when a file was too large or not a format it takes (`PlaceRules.sizeHelp`, `formatHelp`).
     public func placeDropTarget(
-        formats: Set<PlacedFormat>, onPlace: @escaping @MainActor ([(name: String, data: Data)], CGPoint) -> Bool
+        formats: Set<PlacedFormat>, onPlace: @escaping @MainActor ([(name: String, data: Data)], CGPoint) -> Bool,
+        onRefuse: @escaping @MainActor (String) -> Void = { _ in }
     ) -> some View {
-        modifier(PlaceDropModifier(formats: formats, onPlace: onPlace))
+        modifier(PlaceDropModifier(formats: formats, onPlace: onPlace, onRefuse: onRefuse))
     }
 }
 
@@ -117,6 +124,7 @@ extension View {
 private struct PlaceDropModifier: ViewModifier {
     let formats: Set<PlacedFormat>
     let onPlace: @MainActor ([(name: String, data: Data)], CGPoint) -> Bool
+    let onRefuse: @MainActor (String) -> Void
     @State private var targeted = false
 
     func body(content: Content) -> some View {
@@ -129,7 +137,7 @@ private struct PlaceDropModifier: ViewModifier {
             }
             .onDrop(
                 of: [.fileURL] + PlaceReader.types(for: formats),
-                delegate: PlaceDropDelegate(formats: formats, targeted: $targeted, onPlace: onPlace))
+                delegate: PlaceDropDelegate(formats: formats, targeted: $targeted, onPlace: onPlace, onRefuse: onRefuse))
     }
 }
 
@@ -137,6 +145,7 @@ private struct PlaceDropDelegate: DropDelegate {
     let formats: Set<PlacedFormat>
     let targeted: Binding<Bool>
     let onPlace: @MainActor ([(name: String, data: Data)], CGPoint) -> Bool
+    let onRefuse: @MainActor (String) -> Void
 
     func validateDrop(info: DropInfo) -> Bool {
         let providers = info.itemProviders(for: [.fileURL] + PlaceReader.types(for: formats))
@@ -150,10 +159,10 @@ private struct PlaceDropDelegate: DropDelegate {
     func performDrop(info: DropInfo) -> Bool {
         targeted.wrappedValue = false
         let providers = info.itemProviders(for: [.fileURL] + PlaceReader.types(for: formats))
-        let (formats, point, onPlace) = (formats, info.location, onPlace)
+        let (formats, point, onPlace, onRefuse) = (formats, info.location, onPlace, onRefuse)
         Task { @MainActor in
             let items = await PlaceReader.items(providers, formats: formats)
-            _ = await PlaceReader.drop(items, at: point, formats: formats, onPlace: onPlace)
+            _ = await PlaceReader.drop(items, at: point, formats: formats, onPlace: onPlace, onRefuse: onRefuse)
         }
         return validateDrop(info: info)
     }

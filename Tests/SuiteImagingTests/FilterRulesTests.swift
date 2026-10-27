@@ -9,7 +9,7 @@ import CoreRaster
 import Testing
 import SuiteImaging
 
-@Suite(.disabled("waits on AJ-5f")) struct FilterRulesTests {
+@Suite struct FilterRulesTests {
     static let black = RGBA(r: 0, g: 0, b: 0, a: 1), white = RGBA(r: 1, g: 1, b: 1, a: 1)
     /// One of each filter, strong enough to change every covered pixel of `checks`.
     static let filters: [ImagingFilter] = [

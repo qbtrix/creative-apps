@@ -1,8 +1,10 @@
 // LibraryCommands.swift: every app item of Library's menu bar (blueprint
 // 6.2), fed by the focused window's LibraryMenu. File: Import Folder… ⇧⌘I,
 // Load Sample Photos, Export… ⇧⌘E (Close is the system's). Edit: Undo ⌘Z and
-// Redo ⇧⌘Z in place of the system pair, Select All ⌘A and Deselect ⇧⌘A in
-// place of the pasteboard group (Library has no text fields). View: Grid,
+// Redo ⇧⌘Z in place of the system pair, Copy ⌘C (the selected photo,
+// developed and location off, as a PNG and a clean copy's file URL), Select
+// All ⌘A and Deselect ⇧⌘A in place of the pasteboard group (Library has no
+// text fields). View: Grid,
 // Loupe, Zoom In ⌘+ and Zoom Out ⌘- (Larger and Smaller Thumbnails in the
 // grid), Zoom to Fit ⌘0, Actual Size ⌘1, Sort By. Photo: Copy Settings ⇧⌘C,
 // Paste Settings ⇧⌘V, Reset Develop, Crop, Reset Crop. Metadata: Set Rating,
@@ -25,8 +27,12 @@
 // command catalog: `MenuCommand(id, on: catalog)` takes the spec's title and
 // availability on the focused window's catalog, and runs the window's action
 // for that command; the collections and filter items follow in their slice.
+// Photo: Rotate Left ⌘[, Rotate Right ⌘], Flip Horizontal and Flip Vertical
+// (orientation-crop OC-9), the catalog's image.rotate-* and image.flip on the
+// selection; the grid's context menu shows the same four (`orientItems`).
 import LibraryModel
 import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -69,6 +75,7 @@ struct LibraryCommands: Commands {
     @FocusedValue(\.libraryFilters) private var focusedFilters
     @FocusedValue(\.libraryCatalog) private var focusedCatalog
     @FocusedValue(\.libraryTrash) private var focusedTrash
+    @FocusedValue(\.libraryFiles) private var focusedFiles
 
     private var menu: LibraryMenu { focused ?? .disabled }
     private var filters: LibraryFiltersMenu { focusedFilters ?? LibraryFiltersMenu() }
@@ -84,6 +91,20 @@ struct LibraryCommands: Commands {
 
     /// Why File > Share… is off: no window, else the window's reason.
     private var shareWhy: String { why(nil, menu.share.help ?? "Share isn't available right now.") }
+
+    /// Edit > Copy: the focused window's photo through export into `Clipboard/` beside the catalog file, then
+    /// onto the pasteboard; nil (disabled) with no window or nothing to copy.
+    private var copy: LibraryMenu.Action? {
+        guard let library = focusedCatalog, library.copyHelp == nil else { return nil }
+        return {
+            Task { @MainActor in
+                let folder = LibraryPasteboardAdapter.folder(support: CatalogStore().folder.path(percentEncoded: false))
+                try? FileManager.default.createDirectory(atPath: folder, withIntermediateDirectories: true)
+                guard let items = try? await LibraryPasteboardAdapter().copy(library, folder: folder) else { return }
+                PasteboardBridge().write(items)
+            }
+        }
+    }
 
     /// `perform` applied to `value`, nil (disabled) while `perform` is nil.
     private func bind<Value>(_ perform: (@MainActor (Value) -> Void)?, _ value: Value) -> LibraryMenu.Action? {
@@ -106,6 +127,23 @@ struct LibraryCommands: Commands {
                 "metadata.set-label", on: catalog, title: label.rawValue, action: bound(cull.setLabel, label),
                 reason: reason, key: cull.key == nil ? nil : key)
         }
+    }
+
+    /// Rotate Left ⌘[, Rotate Right ⌘], Flip Horizontal and Flip Vertical: the catalog's image commands,
+    /// disabled with `reason` while the window's action is nil, else with the spec's why.
+    static func orientItems(_ photo: LibraryMenu.Photo, on catalog: LibraryCatalog?, reason: String) -> [MenuCommand] {
+        [
+            MenuCommand("image.rotate-ccw", on: catalog, title: "Rotate Left", systemImage: "rotate.left",
+                action: photo.rotateLeft, reason: reason, shortcut: KeyboardShortcut("[")),
+            MenuCommand("image.rotate-cw", on: catalog, title: "Rotate Right", systemImage: "rotate.right",
+                action: photo.rotateRight, reason: reason, shortcut: KeyboardShortcut("]")),
+            MenuCommand("image.flip", on: catalog, title: "Flip Horizontal",
+                systemImage: "arrow.left.and.right.righttriangle.left.righttriangle.right",
+                action: photo.flipHorizontal, reason: reason),
+            MenuCommand("image.flip", on: catalog, title: "Flip Vertical",
+                systemImage: "arrow.up.and.down.righttriangle.up.righttriangle.down",
+                action: photo.flipVertical, reason: reason),
+        ]
     }
 
     /// Photo > Delete Rejected Photos… ⌥⌘⌫: the Model's title, disabled with its help (no window says so).
@@ -150,6 +188,9 @@ struct LibraryCommands: Commands {
                 shortcut: KeyboardShortcut("z", modifiers: [.command, .shift]))
         }
         CommandGroup(replacing: .pasteboard) {
+            MenuCommand(
+                "edit.copy", on: catalog, title: "Copy", action: copy,
+                reason: why(nil, catalog.copyHelp ?? "Select a photo to copy it."), shortcut: KeyboardShortcut("c"))
             MenuCommand(
                 "edit.select-all", on: catalog, title: "Select All",
                 action: menu.edit.selectAll, reason: why(nil, "There are no photos to select."),
@@ -227,9 +268,15 @@ struct LibraryCommands: Commands {
             action: photo.toggleCrop, reason: crop, key: "R")
         MenuCommand("photo.reset-crop", on: catalog, title: "Reset Crop", action: photo.resetCrop, reason: crop)
         Divider()
+        let turns = Self.orientItems(photo, on: catalog, reason: develop)
+        ForEach(Array(turns.enumerated()), id: \.offset) { $0.element }
+        Divider()
         collectionPhotoItems
         Divider()
         Self.deleteRejectsItem(focusedTrash)
+        // Remove from Catalog… and Locate…, the grid's context menu (LibraryWindow+Files.swift).
+        LibraryFilesContextMenu(
+            model: catalog, files: focusedFiles ?? LibraryFilesActions(removeWhy: Self.noWindow, locateWhy: Self.noWindow))
     }
 
     @ViewBuilder private var metadataItems: some View {

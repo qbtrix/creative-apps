@@ -1,0 +1,16 @@
+[
+  {
+    "label": "engineRefusalsGiveTheirCause: a command FlareCore hasn't built falls back to the generic refusal",
+    "file": "Sources/FlareModel/FlareMachineMessages.swift",
+    "find": "case .notBuilt: notBuiltSentence",
+    "replace": "case .notBuilt: nil",
+    "tests": "engineRefusalsGiveTheirCause|FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": "everyExampleRunsInOrder: a command FlareCore hasn't built reads as a refused machine edit",
+    "file": "Sources/FlareModel/FlareMachineMessages.swift",
+    "find": "case .notBuilt: notBuiltSentence",
+    "replace": "case .notBuilt: machineRefused",
+    "tests": "engineRefusalsGiveTheirCause|FlareCoreCommandCatalogTests"
+  }
+]

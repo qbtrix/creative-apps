@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-X60, pending AJ-14 (suiteui/adjust-everywhere): look.apply and look.save run in Photo's and Library's catalogs only once AJ-photo (AJ-8) and AJ-library (AJ-10) land, and the harness runs one app per job (RJ-X45 waits on the same), so platforms is [] and the harness skips the job on both. Opens street.png (64 x 48 sRGB: sky, a red and a blue front, a yellow awning, pavement and road) in Photo and in Library, applies the built-in High Contrast B&W look (bw-high-contrast) in each, saves Photo's result as a look named Mine, and exports a PNG from each. The trap: the two apps make black and white differently (one desaturates, one mixes the weights), or Mine is gone after a relaunch. The assertion: the two exports match within 1 level per channel, every pixel of each is grey (red, green and blue within 1 level), and look.list names Mine after a relaunch; the turn-on runs the stages in order, compares out/street-library.png against out/street-photo.png, and sets platforms to linux and macos.",
+  "pending": "AJ-14",
+  "waits_on": "AJ-14",
+  "inputs": ["input/*.png"],
+  "stages": [
+    {"app": "photo", "steps": [
+      {"id": "look.apply", "params": {"id": "bw-high-contrast"}},
+      {"id": "look.save", "params": {"name": "Mine"}}
+    ], "output": {"dir": "out", "name": "{stem}-photo", "format": "png", "options": {}}},
+    {"app": "library", "steps": [
+      {"id": "look.apply", "params": {"id": "bw-high-contrast"}}
+    ], "output": {"dir": "out", "name": "{stem}-library", "format": "png", "options": {}}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/street-library.png": {"pixels": {"size": [64, 48], "tolerance": 1, "reference": "out/street-photo.png"}}
+  },
+  "platforms": []
+}

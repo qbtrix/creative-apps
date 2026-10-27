@@ -29,13 +29,20 @@ import Testing
     }
 
     @Test func proResIsRefusedWithItsReasonUntilHX4() {
-        #expect(HaloRenderSettings.codecRefusal(.prores4444) == "ProRes 4444 lands with HX-4.")
+        #expect(HaloRenderSettings.codecRefusal(.prores4444) == "ProRes 4444 isn't available yet.")
         #expect(HaloRenderSettings.codecRefusal(.h264) == nil)
         #expect(Self.movie.choosing(codec: .prores4444) == Self.movie)
     }
 
+    /// A refusal is a tooltip a person reads, so it never names a build slice ("HX-4").
+    @Test func codecRefusalsNeverNameASlice() {
+        for codec in HaloRenderSettings.codecs {
+            #expect(!(HaloRenderSettings.codecRefusal(codec) ?? "").contains("HX-"))
+        }
+    }
+
     @Test func hevcIsRefusedWhileTheWriterIsH264Only() {
-        #expect(HaloRenderSettings.codecRefusal(.hevc) == "HEVC lands with HX-4.")
+        #expect(HaloRenderSettings.codecRefusal(.hevc) == "HEVC isn't available yet.")
         #expect(Self.movie.choosing(codec: .hevc) == Self.movie)
     }
 

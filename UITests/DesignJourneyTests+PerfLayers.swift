@@ -14,6 +14,10 @@
 // lists under `-SuitePerfProbe` (SuiteUI's FrameProbe), when it lists any.
 // The numbers go to .build/ui-screens/perf-design-layers.json and attach as
 // "perf-design-layers"; the test asserts only that every row was reached.
+// The whole walk has a wall-clock budget (`budgetSeconds`): on the hosted
+// runner each XCUITest query over the expanded tree takes 20 to 50 s, so
+// unbounded the walk ran past an hour and the job's timeout cancelled every
+// suite after it (#4292). Past the budget it fails, naming the step it reached.
 // Frame N's id is node-(50N - 49) and its Text is node-(50N) (DesignFixtures.crowd).
 // The list is found as `suite.sidebar`: Layers is the sidebar's root view, so
 // SuiteWindow's outer identifier replaces its own `design.layers` (#3307), and
@@ -29,15 +33,20 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
     static let bottomRow = "design.layer.node-2"
     /// A scroll round trip over this many milliseconds counts as a stall (about six 60 Hz refreshes).
     static let stallMilliseconds = 100.0
+    /// How long the expand and both scrolls may take together before the walk fails.
+    static let budgetSeconds = 600.0
+    /// When the walk's budget runs out; set as the test starts.
+    private var deadline = Date.distantFuture
 
     /// P3: every frame expanded, scroll Layers to the end and back; report the scroll's timing.
     @MainActor func testLayerListScroll() {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "crowd showed no page (suite.canvas)")
+        deadline = Date().addingTimeInterval(Self.budgetSeconds)
         let layers = design.element("suite.sidebar")
         XCTAssert(layers.waitForExistence(timeout: 10), "no Layers list (suite.sidebar)")
-        expandEveryFrame(design, layers)
+        guard expandEveryFrame(design, layers) else { return }
         design.shot("perf-layers-expanded")
 
         let down = scroll(layers, until: row(design, Self.bottomRow), by: -120)
@@ -49,28 +58,39 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
 
     // MARK: - Steps
 
-    /// Opens all 40 frames' rows, Frame 1 first, from the keyboard.
-    @MainActor private func expandEveryFrame(_ design: Journey, _ layers: XCUIElement) {
+    /// Whether the walk's budget has run out.
+    private var overBudget: Bool { Date() >= deadline }
+
+    /// Opens all 40 frames' rows, Frame 1 first, from the keyboard; false (and a failure) when
+    /// the budget ran out first.
+    @MainActor private func expandEveryFrame(_ design: Journey, _ layers: XCUIElement) -> Bool {
         let first = row(design, Self.frames[0])
         _ = scroll(layers, until: first, by: -120)
         design.clickDesignLayer(Self.frames[0])
         for (index, frame) in Self.frames.enumerated() {
+            if overBudget {
+                XCTFail("\(Int(Self.budgetSeconds)) s opened only \(index) of \(Self.frames.count) frames' rows")
+                return false
+            }
             if index > 0 { design.press(.upArrow) }
             design.press(.rightArrow)
             let text = row(design, "design.layer.node-\(50 * (index + 1))")
             XCTAssert(text.waitForExistence(timeout: 5), "Right Arrow didn't open \(frame): its Text row never showed")
         }
+        return true
     }
 
-    /// Scrolls `list` by `delta` until `target` is hittable, at most 200 times; the round trip of each call.
+    /// Scrolls `list` by `delta` until `target` is hittable, at most 200 times and within the
+    /// walk's budget; the round trip of each call.
     @MainActor private func scroll(_ list: XCUIElement, until target: XCUIElement, by delta: CGFloat) -> [Double] {
         var trips: [Double] = []
-        while !(target.exists && target.isHittable), trips.count < 200 {
+        while !(target.exists && target.isHittable), trips.count < 200, !overBudget {
             let started = Date()
             list.scroll(byDeltaX: 0, deltaY: delta)
             trips.append(Date().timeIntervalSince(started) * 1000)
         }
-        XCTAssert(target.exists && target.isHittable, "\(trips.count) scrolls didn't reach \(target.identifier)")
+        let why = overBudget ? " before the walk's budget ran out" : ""
+        XCTAssert(target.exists && target.isHittable, "\(trips.count) scrolls didn't reach \(target.identifier)\(why)")
         return trips
     }
 

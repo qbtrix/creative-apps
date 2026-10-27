@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".orientBeforeCrop",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "        b = b.oriented(settings.orientation)\n",
+    "replace": "",
+    "tests": "LibraryOrientationTests"
+  },
+  {
+    "label": ".oldCatalogsUnchanged",
+    "file": "Sources/LibraryModel/Contracts/DevelopValues.swift",
+    "find": "if orientation != .up { try c.encode(orientation, forKey: .orientation) }",
+    "replace": "try c.encode(orientation, forKey: .orientation)",
+    "tests": "LibraryOrientationTests"
+  }
+]
