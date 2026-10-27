@@ -377,3 +377,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T15:52Z #5252 (AJ-11) restacked onto dev and gated: CI: PASS, pushed 362dfef1, Head moved; clean, 9 files +296/-7. Dropped the attribution footer from #5252, #5247, #5249 bodies
 - 15:36Z #5248 (AJ-10 library) MERGED as 77666ac30. Dependent #5252 (AJ-11 library UI) already restacked onto dev at 362dfef17 (clean, 296+7 / 9 files, Fast-Check/Head current). #5247/#5249 still wait for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
 - 2026-10-27T15:44Z check-in: no lane merge; dev c628cfe8, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on prescreen and the lane (the 15:52Z entry above was mis-stamped; it was written at about 15:40Z)
+- 15:57Z check-in: #5247/#5249/#5252 clean, unmerged, waiting for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.

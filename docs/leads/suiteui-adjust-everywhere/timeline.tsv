@@ -178,3 +178,4 @@ utc	stage	event	ref	note
 15:52Z	3	gated	#5252	#5252 (AJ-11) restacked onto dev and gated: CI: PASS, pushed 362dfef1, Head moved; clean, 9 files +296/-7. Dropped the attribution footer from #5252, #5247, #5249 bodies
 15:36Z	3	merged	#5248 #5252	#5248 AJ-library merged (77666ac30); #5252 AJ-library-ui restacked on dev 362dfef17, clean 296+7/9, Fast-Check+Head set; #5247/#5249 wait prescreen
 15:44Z	3	waiting	-	check-in: no lane merge; dev c628cfe8, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on prescreen and the lane (the 15:52Z entry above was mis-stamped; it was written at about 15:40Z)
+15:57Z	3	check-in	#5247 #5249 #5252	no merges; all clean; code PRs wait for local-ci/prescreen; dev b2c96e858 main fef52e668
