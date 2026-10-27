@@ -4,12 +4,12 @@
 // reason as help (HaloMenuTarget.item, from the catalog spec). The pasteboard
 // group is Halo's own (clipboard-interop CB-10), so there is one Paste: Cut ⌘X,
 // Copy ⌘C, Copy Frame ⌥⌘C, Paste ⌘V and Select All ⌘A. While a text field has
-// focus, Cut, Copy, Paste and Select All send the system's cut:, copy:, paste:
-// and selectAll: to it, so fields edit as anywhere. Otherwise Cut, Copy and
-// Select All are off with a reason (Halo copies frames, not layers, yet), Copy
-// Frame follows the catalog's `edit.copy-frame`, and Paste the catalog's
-// `edit.paste` and then what is on the pasteboard (HaloPasteboardState),
-// worded "Paste: <why>".
+// focus, Cut, Copy, Paste and Select All give way to it (SuiteUI's
+// givingWay), so fields edit as anywhere. Otherwise every item is built from
+// HaloPasteboardMenuState's specs: Cut, Copy and Select All are off with a
+// reason (Halo copies frames, not layers, yet), Copy Frame follows the
+// catalog's `edit.copy-frame`, and Paste the catalog's `edit.paste` and then
+// what is on the pasteboard (HaloPasteboardState), worded "Paste: <why>".
 import AppKit
 import HaloModel
 import SuiteUI
@@ -35,46 +35,21 @@ struct HaloEditMenu: Commands {
 
 /// Edit's pasteboard group, a view so it re-reads HaloPasteboardState as the pasteboard and focus change.
 struct HaloPasteboardMenu: View {
-    let model: HaloProject?
-    let clipboard: HaloCopyPasteAction?
-    let pasteboard: HaloPasteboardState
-
-    static let textOnly = "works on text in a field; Halo copies frames, not layers, yet."
-
-    private var state: HaloMenuState { HaloMenuState(project: clipboard == nil ? nil : model) }
-
+    let model: HaloProject?; let clipboard: HaloCopyPasteAction?; let pasteboard: HaloPasteboardState
+    private var state: HaloPasteboardMenuState {
+        HaloPasteboardMenuState(menu: HaloMenuState(project: clipboard == nil ? nil : model), pasteRefusal: pasteboard.pasteRefusal)
+    }
     var body: some View {
-        text("Cut", "scissors", "x", #selector(NSText.cut(_:)))
-        text("Copy", "document.on.document", "c", #selector(NSText.copy(_:)))
-        MenuCommand(
-            HaloMenuState.spec("edit.copy-frame"), on: state, title: "Copy Frame", systemImage: "photo",
-            shortcut: KeyboardShortcut("c", modifiers: [.command, .option])
-        ) { clipboard?(.copyFrame) }
-        paste
-        text("Select All", "checkmark.circle", "a", #selector(NSText.selectAll(_:)))
-    }
-
-    /// Paste into the focused field, else the catalog's reason, then the pasteboard's.
-    @ViewBuilder private var paste: some View {
-        let key = KeyboardShortcut("v")
-        if pasteboard.isEditingText {
-            MenuCommand("Paste", systemImage: "document.on.clipboard", shortcut: key, help: "Pastes into the text field.") {
-                _ = NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: nil)
-            }
-        } else if let why = pasteboard.pasteRefusal, state.availability("edit.paste").why == nil {
-            MenuCommand("Paste", systemImage: "document.on.clipboard", shortcut: key, help: "Paste: \(why)", isEnabled: false) {}
-        } else {
-            MenuCommand(HaloMenuState.spec("edit.paste"), on: state, title: "Paste", systemImage: "document.on.clipboard",
-                        shortcut: key) { clipboard?(.paste) }
-        }
-    }
-
-    /// A text-field command: on while a field has focus, else off with the reason.
-    private func text(_ title: String, _ image: String, _ key: KeyEquivalent, _ action: Selector) -> MenuCommand {
-        let on = pasteboard.isEditingText
-        return MenuCommand(
-            title, systemImage: image, shortcut: KeyboardShortcut(key),
-            help: on ? "\(title) in the text field." : "\(title) \(Self.textOnly)", isEnabled: on
-        ) { _ = NSApp.sendAction(action, to: nil, from: nil) }
+        let state = state
+        MenuCommand(HaloPasteboardMenuState.textOnly("edit.cut", title: "Cut"), on: state, systemImage: "scissors",
+            shortcut: KeyboardShortcut("x")) {}.givingWay(to: .cut)
+        MenuCommand(HaloPasteboardMenuState.textOnly("edit.copy", title: "Copy"), on: state, systemImage: "document.on.document",
+            shortcut: KeyboardShortcut("c")) {}.givingWay(to: .copy)
+        MenuCommand(HaloPasteboardMenuState.copyFrame, on: state, systemImage: "photo",
+            shortcut: KeyboardShortcut("c", modifiers: [.command, .option])) { clipboard?(.copyFrame) }
+        MenuCommand(HaloPasteboardMenuState.paste, on: state, systemImage: "document.on.clipboard",
+            shortcut: KeyboardShortcut("v")) { clipboard?(.paste) }.givingWay(to: .paste)
+        MenuCommand(HaloPasteboardMenuState.textOnly("edit.select-all", title: "Select All"), on: state,
+            systemImage: "checkmark.circle", shortcut: KeyboardShortcut("a")) {}.givingWay(to: .selectAll)
     }
 }

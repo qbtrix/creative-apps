@@ -1,0 +1,4 @@
+[
+  {"label": "paste ignores the pasteboard's refusal (.pasteRefusal)", "file": "Sources/HaloModel/HaloPasteboardMenuState.swift", "find": "guard catalog.why == nil, let refusal = state.pasteRefusal else { return catalog }", "replace": "guard catalog.why == nil, let refusal = Optional<String>.none else { return catalog }", "tests": "HaloPasteboardMenuStateTests"},
+  {"label": "the refusal hides the catalog's own reason (.catalogFirst)", "file": "Sources/HaloModel/HaloPasteboardMenuState.swift", "find": "guard catalog.why == nil, let refusal", "replace": "guard true, let refusal", "tests": "HaloPasteboardMenuStateTests"}
+]

@@ -8,7 +8,7 @@
 // writes the frame at the playhead as a full-size PNG through HaloPasteboardAdapter
 // and the PasteboardBridge; Paste places the pasteboard's image or SVG at the
 // playhead, one step. HaloPasteboardState keeps Paste's reason current from the
-// bridge's change watch (notifications, never a timer) and tracks text focus.
+// bridge's change watch (notifications, never a timer).
 import AppKit
 import HaloModel
 import SuiteShell
@@ -24,33 +24,21 @@ extension FocusedValues {
     @Entry var haloCopyPaste: HaloCopyPasteAction?
 }
 
-/// Why Paste can't run now (nil while it can), and whether a text field has focus.
+/// Why Paste can't run now (nil while it can).
 @MainActor @Observable final class HaloPasteboardState {
     static let shared = HaloPasteboardState()
     private(set) var pasteRefusal: String?
-    private(set) var isEditingText = false
     @ObservationIgnored private var watch: PasteboardChangeWatch?
-    @ObservationIgnored private var observer: (any NSObjectProtocol)?
 
     private init() {
         pasteRefusal = Self.readRefusal()
         watch = PasteboardChangeWatch { [weak self] in self?.refresh() }
-        observer = NotificationCenter.default.addObserver(
-            forName: NSWindow.didUpdateNotification, object: nil, queue: .main
-        ) { _ in
-            MainActor.assumeIsolated { HaloPasteboardState.shared.refreshFocus() }
-        }
     }
 
     /// Reads the pasteboard again; called after the app writes to it.
     func refresh() {
         let now = Self.readRefusal()
         if now != pasteRefusal { pasteRefusal = now }
-    }
-
-    private func refreshFocus() {
-        let now = HaloTextFocus.isEditing
-        if now != isEditingText { isEditingText = now }
     }
 
     private static func readRefusal() -> String? {
