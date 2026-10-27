@@ -10,7 +10,7 @@
 // to `transformDrag` (PhotoTransform.swift), which moves, scales or turns the
 // box and records one step on release; otherwise by tool, marquee to
 // `selectionDrag` (PhotoSelectionMask.swift), crop to `cropDrag`
-// (PhotoCropSize.swift), eyedropper to `sampleDrag` (PhotoSample+Kernel.swift),
+// (PhotoCropTool+Kernel.swift), eyedropper to `sampleDrag` (PhotoSample+Kernel.swift),
 // a Pen drag adds a draft point on release (`runPath`, PhotoPaths+Kernel.swift),
 // and the rest paint or move here.
 //
@@ -39,7 +39,7 @@
 //   marquee        the rectangle from the press to the pointer is the
 //                  selection; a click deselects (PhotoSelectionMask.swift).
 //   crop           the same rectangle is the pending crop (Apply Crop commits
-//                  it); a click drops it (PhotoCropSize.swift).
+//                  it); a click drops it (PhotoCropTool+Kernel.swift).
 //   eyedropper     the color under the pointer becomes the brush color, never
 //                  an undo step (PhotoSample+Kernel.swift).
 //   move           shifts every picked image layer by the drag, in whole
@@ -173,7 +173,7 @@ extension PhotoWorkspace {
         case .move:
             if begun { current.layersBefore = layers }
             moveSelectedLayers(current, to: end)
-        case .eyedropper:
+        case .eyedropper, .bucket, .spotHeal, .remove:
             break
         case .gradient, .pen:
             current.end = end
@@ -247,7 +247,7 @@ extension PhotoWorkspace {
         case .clone, .heal:
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
-        case .marquee, .crop, .eyedropper:
+        case .marquee, .crop, .eyedropper, .bucket, .spotHeal, .remove:
             break
         case .gradient:
             guard let end = done.end else { return }

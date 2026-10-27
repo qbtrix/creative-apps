@@ -368,7 +368,7 @@ read it back for paste; Paste is disabled when the pasteboard holds no style.
 | LS-10 | – | `ClipRules` with its tests; the C4 part | `Sources/SuiteKernel/Layers/ClipRules.swift`, `Tests/SuiteKernelTests/ClipRulesTests.swift`, `Tests/mutations/SuiteKernel.ClipRules.json`, `docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json` | – | ~200, 4 |
 | LS-11 | – | `ClipTarget` and `ClipCommands` (`layer.clip`, `layer.unclip`) with tests on a test target | `Sources/SuiteKernel/Layers/ClipCommands.swift`, `Tests/SuiteKernelTests/ClipCommandsTests.swift`, `Tests/mutations/SuiteKernel.ClipCommands.json` | LS-10 | ~180, 3 |
 | LS-12 | – | The gallery page runs each intent through `StyleCommands` on a local target with a `History` and draws its preview through `StyleRoute`; the live test | `Sources/SuiteUI/Gallery/GalleryLayerStyle.swift`, `Tests/SuiteUITests/LayerStylePanelLiveTests.swift` | LS-4, LS-6, LS-9 | ~150, 2 |
-| LS-13 | – | The C4 parts name the commands, the route and the adopters; `status: built`; `feature-done` | `docs/c4/parts/creative-apps/suite-imaging/imaging-style.json`, `docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json`, `docs/blueprints/suiteui/features/layer-styles.wave.json` | LS-12, LS-7, LS-9b, LS-11 | ~30, 3 |
+| LS-13 | – | The C4 parts name the commands, the route and the adopters; deletes `LayerActionBar.effectsPending` and `effects(identifier:)` and `LayerPanelCommandsTests.effectsWaitForLayerStyles`, once Photo's PY-2 has moved its `fx` button onto `style.panel` (hand-off, #5327); `status: built`; `feature-done` | `docs/c4/parts/creative-apps/suite-imaging/imaging-style.json`, `docs/c4/parts/creative-apps/suite-kernel/kernel-clip.json`, `docs/blueprints/suiteui/features/layer-styles.wave.json`, `Sources/SuiteUI/LayerActionBar.swift`, `Tests/SuiteUITests/LayerPanelCommandsTests.swift` | LS-12, LS-7, LS-9b, LS-11 | ~45, 5 |
 
 LS-1 declares every type and spec so LS-5 to LS-8 each fill their own file.
 LS-10 and LS-11 touch no style file and start with the packet.
@@ -404,7 +404,7 @@ LS-13 is the status task.
 | LS-10 | `ClipRulesTests`: in [A, B(clipped), C(clipped)] C's base is A; B's base is A; A's base is nil; a clipped layer at the bottom has no base; a group boundary stops the walk; `clipped(onto: A)` is [B, C] | a base skips a layer, crosses a group, or the bottom layer clips | `SuiteKernel.ClipRules`: walk not stopping at the first unclipped → `.nearestUnclippedBase`; bottom layer given itself → `.bottomHasNoBase` |
 | LS-11 | `ClipCommandsTests`: `layer.clip` on the bottom layer is unavailable with `noBaseHelp`; clip then unclip are one step each; `layer.unclip` on an unclipped layer is unavailable | a command runs with no base, or records two steps | `SuiteKernel.ClipCommands`: availability ignoring `hasBase` → `.clipNeedsBase`; `setClipped` called per layer → `.oneStepPerRun` |
 | LS-12 | `LayerStylePanelLiveTests`: a Distance scrub on the page leaves one undo step and the preview's shadow moves; `testLayerStylePanelEditsAStyle` on live | the page stays on the local log | – (UI) |
-| LS-13 | `scripts/waves render --dry-run`; `scripts/jobs check` | status not built | – |
+| LS-13 | `scripts/waves render --dry-run`; `scripts/jobs check`; `grep -rn effectsPending Sources Tests` finds nothing | status not built, or the fx placeholder is still there | – |
 
 ## Quality tests
 

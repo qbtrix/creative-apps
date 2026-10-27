@@ -128,9 +128,9 @@ public struct HaloRenderSettings: Sendable, Hashable {
     /// The Codec row's choices, in order.
     public static let codecs: [MovieCodec] = [.h264, .hevc, .prores4444]
     /// Why ProRes 4444 can't be picked yet: Halo's own writer is H.264 only until HX-4.
-    public static let proResWaits = "ProRes 4444 lands with HX-4."
+    public static let proResWaits = "ProRes 4444 isn't available yet."
     /// Why HEVC can't be picked yet: Halo's own writer is H.264 only until HX-4.
-    public static let hevcWaits = "HEVC lands with HX-4."
+    public static let hevcWaits = "HEVC isn't available yet."
 
     /// Why `codec` can't be picked yet, or nil.
     public static func codecRefusal(_ codec: MovieCodec) -> String? {
