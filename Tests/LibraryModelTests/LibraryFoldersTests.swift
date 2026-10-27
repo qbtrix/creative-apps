@@ -183,6 +183,36 @@ import Testing
         #expect(one.first?.missingNote == "The photo in this folder is missing from disk.")
     }
 
+    /// A folder row's click at real size: `view.show-folder` on the large fixture's 10,000 photos in their folders,
+    /// one month with and without its subfolders, median within 50 ms debug, 5 ms release (the filter's budget).
+    @Test func showFolderAtTenThousandWithinBudget() throws {
+        var c = Self.catalog(LibraryFixtures.largePhotos(count: 10_000, folder: "/fixture/large"))
+        let month = try #require(c.folderTree.first?.children.first?.path)
+        let cost = Budget.measure("folders show-folder-10000") {
+            c.selectSidebarRow(LibraryFolders.rowID(for: month))
+            c.toggleFolderSubfolders(row: LibraryFolders.rowID(for: month))
+        }
+        #expect(c.activeFilter.folder?.path == month)
+        #expect(!c.shownItems.isEmpty)
+        #if DEBUG
+        #expect(cost.median <= 50, "a folder click at 10,000 photos took a median \(cost.median) ms")
+        #else
+        #expect(cost.median <= 5, "a folder click at 10,000 photos took a median \(cost.median) ms")
+        #endif
+    }
+
+    @Test func theLaunchFixturesSitInFolders() throws {
+        let large = LibraryFolders.tree(LibraryFixtures.photos(named: "large-folders"))
+        #expect(large.map(\.path) == ["/fixture/large"])
+        #expect(large.first?.totalCount == 10_000)
+        #expect(large.first?.children.count == 12, "one folder per month")
+        let small = LibraryFolders.tree(LibraryFixtures.photos(named: "folders"))
+        #expect(small.map(\.name) == ["fixture/Photos"])
+        #expect(small.first?.children.map(\.name) == ["family", "trip", "trips"])
+        #expect(Self.node("/fixture/Photos/trips", in: small)?.totalCount == 4)
+        #expect(Self.node("/fixture/Photos/family", in: small)?.missingNote != nil)
+    }
+
     @Test func aSiblingWithASharedPrefixNeverLeaks() {
         let photos = ["/a/b/x.png", "/a/b/deep/z.png", "/a/bc/y.png"].map { Self.photo($0) }
         let names = { (scope: FolderScope) in photos.filter(LibraryFilter(folder: scope).matches).map(\.name) }

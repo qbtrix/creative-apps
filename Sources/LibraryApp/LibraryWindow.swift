@@ -234,7 +234,7 @@ struct LibraryWindow: View {
             SidebarSection(
                 id: "collections", title: "Collections", items: rows.filter { UserCollection.isUserID($0.id) },
                 addAction: add),
-        ] + [LibraryFoldersSection.section(LibraryFoldersSection.tree(model))].compactMap { $0 }
+        ] + [LibraryFoldersSection.section(model.folderTree)].compactMap { $0 }
     }
 
     static func symbol(for collectionID: String) -> String {
