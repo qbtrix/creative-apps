@@ -9,7 +9,8 @@
 # new red's failed jobs once before it counts; a real Linux red is bisected
 # to its culprit), a batch left in flight resumes (batch_resume: land, bisect
 # by prefix, or drop), with LANE_VERIFY_AFTER=1 revert_sweep reverts a red
-# dev's culprit and quarantine_sweep quarantines the failing tests of a red
+# dev's culprit (a bisect verdict, or the PR a macOS compile log's error
+# files point at) and quarantine_sweep quarantines the failing tests of a red
 # it has no revert for, every open fast-lane PR is evaluated (decide, the pure
 # decision function), and settle_ready lands the ready ones or forms the next
 # `lane/batch-<id>` (BATCH_PREFIX). Invariants a change must keep:
@@ -1840,11 +1841,13 @@ revert_sweep() {
 # found>: red_bisect's verdict on the issue (a certain one: "likely" means a
 # timing budget test on its line), else the only PR commit in
 # main..BASE_RED_SHA. A Linux red the bisect hasn't judged yet waits
-# (non-zero). Anything else prints -|<why none>: red_bisect runs only on
-# Linux, and reverting newest first would hit innocent PRs, each step a full
-# macOS run on dev to read.
+# (non-zero). A macOS red whose run failed its `macOS compile` job goes by
+# the files its Swift errors name (compile_culprit). Anything else prints
+# -|<why none>: red_bisect runs only on Linux, and reverting newest first
+# would hit innocent PRs, each step a full macOS run on dev to read; a macOS
+# test red is never reverted on a guess.
 revert_culprit() {
-  local s c prs np
+  local s c prs np got rc
   s=$(grep -oE '^Bisect: [0-9a-f]{7} ' <<<"$1" | tail -1 | cut -d' ' -f2 || true)
   if [[ -n "$s" ]] && c=$(git -C "$SCRATCH" rev-parse --verify -q "$s^{commit}" 2>/dev/null); then
     echo "$c|the bisect on dev-red #$BASE_RED named it"; return 0
@@ -1855,7 +1858,58 @@ revert_culprit() {
   if [[ "$BASE_RED_JOBS" == *linux* ]] && ! grep -qF -- "$BISECT_MARK " <<<"$1"; then
     log "auto-revert: $np PRs in main..${BASE_RED_SHA:0:7}; waiting for the bisect"; return 1
   fi
+  if [[ "$BASE_RED_JOBS" == *macos* ]]; then
+    rc=0; got=$(compile_culprit "$prs") || rc=$?
+    case $rc in 0) echo "$got"; return 0 ;; 2) return 1 ;; esac
+  fi
   echo "-|$np PRs in main..${BASE_RED_SHA:0:7} and no bisect verdict names one of them (red: ${BASE_RED_JOBS#*: }), so a human picks the culprit"
+}
+
+# compile_paths <failed log>: the repo-relative Sources/ and Tests/ .swift
+# paths a Swift compile log blames: its `error:` lines, and its `note:
+# expanded code originates here` lines (a macro's error sits in a generated
+# buffer outside the repo; that note names the call site). Other notes
+# (`'x' declared here`) point at files that did nothing wrong, so they don't count.
+compile_paths() {
+  LC_ALL=C sed -nE 's@.*/Users/runner/work/[^/]+/[^/]+/((Sources|Tests)/[^:]+\.swift):[0-9]+:[0-9]+: (error: |note: expanded code originates here).*@\1@p' <<<"$1" \
+    | LC_ALL=C sort -u
+}
+
+# compile_culprit <PR commits, "<sha> <subject>" newest first>: the culprit of
+# a red whose run (BASE_RED_RUN) failed its `macOS compile` job, printed as
+# revert_culprit prints it. Each file the job's log blames (compile_paths)
+# goes to the newest PR commit in the range whose own change (c^..c, what a
+# revert undoes) holds it. One such commit is the culprit, <sha>|<how>;
+# none or several print -|<the files and PRs>, for a human. Returns 1 when
+# the run has no failed compile job (a test red, never reverted this way)
+# and 2 when the run's jobs or that job's log can't be read yet (the next sweep looks again).
+compile_culprit() {
+  local id job flog paths left hit c rest n k=0 culprit="" cn="" cfiles="" cands="" range="main..${BASE_RED_SHA:0:7}"
+  id=$(mac_run_id "$BASE_RED_RUN"); [[ -n "$id" ]] || return 1
+  job=$(gh api "repos/$REPO/actions/runs/$id/jobs?per_page=100" \
+    --jq '.jobs[] | select(.name == "macOS compile" and .conclusion == "failure") | .id' 2>/dev/null) \
+    || { log "auto-revert: dev-red #$BASE_RED: run $id's jobs can't be read; the next sweep looks again"; return 2; }
+  job="${job%%$'\n'*}"; [[ -n "$job" ]] || return 1
+  flog=$(failure_log "red|/job/$job")
+  [[ -n "$flog" ]] || { log "auto-revert: dev-red #$BASE_RED: the macOS compile job's log can't be read yet; the next sweep looks again"; return 2; }
+  paths=$(compile_paths "$flog")
+  [[ -n "$paths" ]] || { echo "-|the macOS compile job failed ($BASE_RED_RUN) but its log names no Swift error under Sources/ or Tests/, so a human picks the culprit"; return 0; }
+  left="$paths"
+  while read -r c rest; do
+    [[ -n "$c" && -n "$left" ]] || break
+    hit=$(git -C "$SCRATCH" diff --no-renames --name-only "$c^" "$c" 2>/dev/null | LC_ALL=C grep -xF -f <(printf '%s\n' "$left") || true)
+    [[ -n "$hit" ]] || continue
+    n=$(grep -oE '#[0-9]+\)$' <<<"$rest" | tr -d ')' || true)
+    k=$((k + 1)); culprit="$c"; cn="$n"; cfiles=$(paste -sd, - <<<"$hit" | sed 's/,/, /g')
+    cands+="${cands:+, }$cfiles ($n)"
+    left=$(LC_ALL=C grep -vxF -f <(printf '%s\n' "$hit") <<<"$left" || true)
+  done <<<"$1"
+  left=$(paste -sd, - <<<"$left" | sed 's/,/, /g')
+  case $k in
+    1) echo "$culprit|its macOS compile errors are in $cfiles, last changed in $range by $cn${left:+ (no PR there changed $left)}" ;;
+    0) echo "-|the macOS compile errors are in $left, which no PR in $range changed, so a human picks the culprit" ;;
+    *) echo "-|the macOS compile errors are in files $k PRs in $range changed: $cands${left:+ (no PR there changed $left)}, so a human picks the culprit" ;;
+  esac
 }
 
 # revert_note <sha7|none> <text>: the lane's one revert call on that culprit
