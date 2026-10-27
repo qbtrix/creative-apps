@@ -239,3 +239,4 @@ utc	stage	event	ref	note
 2026-10-27T00:09Z	check	#5817 (PT-u) merged as 5a1094e1; no green photo/full ci.yml run on dev contains it yet (latest 23:18Z runs); #5816 (PT-m) open, clean, unbatched; no supervisor reply
 2026-10-27T00:30Z	check	dev holds 5a1094e1 (PT-u); no photo/full ci.yml run on dev since (only suite/flare/suiteui/Linux on a80e88f4, running); #5816 (PT-m) open, clean, not in batches 0030Z (#5029/#5035/#5064/#5069), no prescreen; no supervisor reply
 2026-10-27T00:53Z	check	dev red: scripts/ci quarantine gate, 5 UITests/quarantine.json entries expired 2026-10-27 (2 Halo, 3 Photo journeys); supervisor-only file, not ours; not caused by #5817. No photo/full green run with 5a1094e1 yet; #5816 (PT-m) open, clean, unbatched; no supervisor reply
+2026-10-27T01:15Z	check	no change: no new ci.yml run on dev since 40428879345 (red, expired quarantine entries, supervisor-only); #5816 (PT-m) open, clean, unbatched; #3468 no new comment since 22:40Z
