@@ -29,8 +29,8 @@ import XCTest
 
 final class PhotoJourneyTests: XCTestCase {
     /// `-PhotoFixture sample` opens the sample picture on the fakes: the status
-    /// line shows "Preview data" and the Eyedropper (enabled by the fake
-    /// sampling service, disabled on `.live`) is on. An unknown name says so.
+    /// line shows "Preview data" and the Eyedropper (it reads the kernel's
+    /// mean, so it is enabled on any services) is on. An unknown name says so.
     @MainActor func testFixtureLaunch() {
         let photo = Journey("Photo", self, arguments: photoArguments(fixture: "sample"))
         XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 30), "no tool palette (suite.tools)")
@@ -143,6 +143,8 @@ final class PhotoJourneyTests: XCTestCase {
         let canvas = photo.element("suite.canvas")
         let before = canvas.screenshot().pngRepresentation
 
+        // The Move tool's options sit above the adjustments, so Curves may start below the fold.
+        photo.reveal(photo.element("photo.curves"))
         photo.drag(on: "photo.curves", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.5, dy: 0.25), step: "curves-dragged")
         XCTAssert(photo.app.buttons["Undo Curves"].waitForExistence(timeout: 5), "the curve drag made no Curves step")
         XCTAssert(Self.waitUntil { canvas.screenshot().pngRepresentation != before }, "the curve didn't change the canvas")
@@ -181,15 +183,16 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.app.buttons["Redo Paint"].waitForExistence(timeout: 5), "Undo didn't undo the stroke")
 
         // The Preset menu (AB-p2) sets every brush setting at once: Soft Round is 60 px.
-        let preset = photo.element("photo.tool.preset")
+        let preset = photo.inspectorMenu("photo.tool.preset", label: "Preset")
         XCTAssert(preset.waitForExistence(timeout: 5), "the brush's Tool Options show no Preset menu")
         preset.click()
-        let soft = photo.app.menuItems["Soft Round"]
-        XCTAssert(soft.waitForExistence(timeout: 5), "the Preset menu doesn't list Soft Round")
-        soft.click()
-        let size = photo.element("photo.tool.size")
-        let sixty = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value CONTAINS '60'"), object: size)
-        XCTAssertEqual(XCTWaiter().wait(for: [sixty], timeout: 5), .completed, "Soft Round didn't set the size to 60 px")
+        XCTAssert(photo.chooseShownMenuItem("Soft Round", timeout: 5), "the Preset menu doesn't list Soft Round")
+        // The row's label text carries photo.tool.size too, so each of its few elements is read; a
+        // value predicate over the whole inspector timed out evaluating the query.
+        let size = photo.app.descendants(matching: .any).matching(identifier: "photo.tool.size")
+        // A slider's value is a number, a field's a string: read both as text.
+        let reads = { size.allElementsBoundByIndex.map { "\($0.label) \($0.value.map { "\($0)" } ?? "")" } }
+        XCTAssert(Self.waitUntil { reads().contains { $0.contains("60") } }, "Soft Round didn't set the size to 60 px (it reads \(reads()))")
         photo.shot("preset-soft-round")
 
         typeValue("1.5", into: "Exposure", photo)
@@ -221,10 +224,10 @@ final class PhotoJourneyTests: XCTestCase {
 
         // JPEG from the keyboard: Shift-Command-E opens Export, Return exports at 90%.
         photo.app.typeKey("e", modifierFlags: [.command, .shift])
-        let jpeg = photo.app.sheets.radioButtons["JPEG"]
+        let jpeg = photo.element("photo.export.format.jpeg")
         XCTAssert(jpeg.waitForExistence(timeout: 5), "Shift-Command-E showed no Export sheet with a JPEG choice")
         jpeg.click()
-        let quality = photo.app.sheets.sliders["photo.export.quality"]
+        let quality = photo.app.sheets.sliders["Quality"]
         XCTAssert(quality.waitForExistence(timeout: 5), "choosing JPEG showed no Quality slider")
         photo.shot("export-jpeg")
         photo.app.typeKey(.return, modifierFlags: [])

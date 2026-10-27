@@ -7,8 +7,11 @@
 // thumbnail as a preview at once, then the screen-size render runs on the
 // loupe service through a RenderQueue (one running, the latest waiting) off
 // the main actor; its result goes back through showLoupeRender or
-// failLoupeRender, which keep only the current token's (latest wins). The
-// neighbours are decoded ahead so stepping is quick. Every state change is a
+// failLoupeRender, which keep only the current token's (latest wins). On the
+// GPU route (suite-imaging IM-11) the result is a GPU frame instead, through
+// showLoupeFrame, and a failed GPU write renders again on the CPU. The
+// neighbours decode ahead behind that render on the same queue, and a newer
+// step drops an older step's pending ones (LG-6). Every state change is a
 // LibraryCatalog method; each menu item runs a `LibraryAction`.
 import AppKit
 import LibraryModel
@@ -17,7 +20,29 @@ import SwiftUI
 /// A finished loupe render (or its failure) under the token it was asked for.
 struct LoupeRenderResult: Sendable {
     let token: Int
-    let result: Result<RenderedPhoto, LibraryError>
+    let result: Result<LoupePicture, LibraryError>
+}
+
+/// What the loupe shows: CPU pixels, or a GPU frame the loupe's view writes.
+enum LoupePicture: Sendable {
+    case render(RenderedPhoto), frame(LoupeGPUFrame)
+
+    /// `request`'s picture at `settings`: the GPU frame when `preferGPU` and the
+    /// steps allow it (suite-imaging IM-11), else the CPU render. `failure` is
+    /// the reason when an error says none.
+    static func make(_ request: LoupeRequest, settings: DevelopSettings, preferGPU: Bool,
+                     service: any LoupeImaging, failure: String) async -> Result<LoupePicture, LibraryError> {
+        do {
+            if let frame = try await service.gpuFrame(
+                request.photo, settings: settings, longSide: request.longSide, preferGPU: preferGPU) {
+                return .success(.frame(frame))
+            }
+            return .success(.render(try await service.render(
+                request.photo, settings: settings, longSide: request.longSide, quality: request.quality)))
+        } catch {
+            return .failure(error as? LibraryError ?? .renderFailed(failure))
+        }
+    }
 }
 
 /// Observable for `fitScale` alone, so the zoom pill and the menu's zoom
@@ -71,8 +96,7 @@ extension LibraryWindow {
     func loupeAreaFocusChanged() {
         guard model.mode == .loupe else { return }
         model.loupeFocusChanged(from: areas.thumbnails.store.cache)
-        loupeAreaRender(.full)
-        loupeAreaPrefetch()
+        loupeAreaRender(.full, prefetching: model.neighboursToPrefetch())
     }
 
     /// The screen's long side in pixels: the size the loupe renders at.
@@ -83,24 +107,25 @@ extension LibraryWindow {
     }
 
     /// Asks the catalog for the render it needs and runs it through the queue
-    /// off the main actor; the result lands under its token.
-    func loupeAreaRender(_ quality: RenderQuality) {
+    /// off the main actor; the result lands under its token. `neighbours`
+    /// replace the queue's pending decodes ahead; nil keeps them.
+    func loupeAreaRender(_ quality: RenderQuality, prefetching neighbours: [PhotoItem]? = nil) {
         guard let request = model.loupeRequest(longSide: loupeLongSide, quality: quality) else { return }
         let state = areas.loupe
         loupeAreaListen(state)
         let service = model.services.loupe
         let deliver = state.deliver
         let queue = state.queue
+        let preferGPU = loupeGPU?.prefersGPU ?? false
+        let longSide = request.longSide
+        let ahead = neighbours.map { photos in
+            RenderQueue.Ahead(photos) { await service.prefetch([$0], longSide: longSide) }
+        }
         Task.detached(priority: .userInitiated) {
-            await queue.submit(token: request.token) {
-                let result: Result<RenderedPhoto, LibraryError>
-                do {
-                    result = .success(try await service.render(
-                        request.photo, settings: request.settings, longSide: request.longSide,
-                        quality: request.quality))
-                } catch {
-                    result = .failure(error as? LibraryError ?? .renderFailed("the photo couldn't be drawn"))
-                }
+            await queue.submit(token: request.token, prefetching: ahead) {
+                let result = await LoupePicture.make(
+                    request, settings: request.settings, preferGPU: preferGPU, service: service,
+                    failure: "the photo couldn't be drawn")
                 deliver.yield(LoupeRenderResult(token: request.token, result: result))
             }
         }
@@ -114,21 +139,11 @@ extension LibraryWindow {
         Task {
             for await finished in results {
                 switch finished.result {
-                case .success(let render): model.showLoupeRender(render, token: finished.token)
+                case .success(.render(let render)): model.showLoupeRender(render, token: finished.token)
+                case .success(.frame(let frame)): model.showLoupeFrame(frame, token: finished.token)
                 case .failure(let error): model.failLoupeRender(error, token: finished.token)
                 }
             }
-        }
-    }
-
-    /// Decodes the photos before and after the loupe's ahead, off the main actor.
-    private func loupeAreaPrefetch() {
-        let neighbours = model.neighboursToPrefetch()
-        guard !neighbours.isEmpty else { return }
-        let service = model.services.loupe
-        let longSide = loupeLongSide
-        Task.detached(priority: .utility) {
-            await service.prefetch(neighbours, longSide: longSide)
         }
     }
 }

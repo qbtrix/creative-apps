@@ -38,7 +38,8 @@ final class HaloShapeJourneyTests: XCTestCase {
         field.typeKey("a", modifierFlags: .command)
         field.typeText("6\r")
         XCTAssert(
-            FirstFive.wait(5) { (points.value as? String) == "6" }, "typing 6 left Points at \(points.value ?? "nothing")")
+            // The row reads its value as a number or as text ("6" either way, #4222).
+            FirstFive.wait(5) { "\(points.value ?? "")" == "6" }, "typing 6 left Points at \(points.value ?? "nothing")")
         halo.shot("shape-1-options")
         halo.press(.escape)
 

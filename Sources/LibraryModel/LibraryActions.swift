@@ -74,7 +74,7 @@ extension LibraryCatalog {
         switch action {
         case .undo: undo()
         case .redo: redo()
-        case .selectAll: select(Set(order))
+        case .selectAll: selectAll()
         case .deselect: select([])
         case .loadSamples: loadSamples()
         case .dismissImportNotice: dismissImportNotice()

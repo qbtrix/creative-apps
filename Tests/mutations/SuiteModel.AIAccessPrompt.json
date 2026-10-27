@@ -4,5 +4,8 @@
 {"label":"a deny reads as allowed","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"case .deny: \"Denied\"","replace":"case .deny: \"Always allowed\"","tests":"AIAccessPromptTests"},
 {"label":"an empty document name is quoted as the scope","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"request.document.flatMap { $0.isEmpty ? nil : $0 }","replace":"request.document","tests":"AIAccessPromptTests"},
 {"label":"the sheet drops the way back","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"until you click \\(stop) in the title bar. Change this later in Window > \\(windowTitle).","replace":"until you stop it.","tests":"AIAccessPromptTests"},
-{"label":"allow once claims to remember","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"\\(allowOnce) lasts until","replace":"\\(allowOnce) remembers until","tests":"AIAccessPromptTests"}
+{"label":"allow once claims to remember","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"\\(allowOnce) lasts until","replace":"\\(allowOnce) remembers until","tests":"AIAccessPromptTests"},
+{"label":"the empty list stops saying a listing can be revoked","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"Your choice is listed here so you can revoke it.","replace":"Your choice shows up here.","tests":"AIAccessPromptTests"},
+{"label":"the empty list never names the deny choice","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"+ \"\\(alwaysAllow) or \\(deny). Your","replace":"+ \"\\(alwaysAllow). Your","tests":"AIAccessPromptTests"},
+{"label":"the AI Access menu item loses its symbol","file":"Sources/SuiteModel/AIAccess/AIAccessPrompt.swift","find":"public static let menuSymbol = \"sparkles\"","replace":"public static let menuSymbol = \"\"","tests":"AIAccessPromptTests"}
 ]

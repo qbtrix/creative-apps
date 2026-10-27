@@ -23,11 +23,18 @@ extension FlareWorkspace {
         return exportState.begin(o)
     }
 
-    /// Editing with no problem to running at 0 of `exportFileCount`; false (and no change) otherwise.
+    /// Editing with no problem to running at 0 of `exportRunTotal`; false (and no change) otherwise.
     @discardableResult
     public mutating func startExport() -> Bool {
         guard exportProblem == nil else { return false }
-        return exportState.start(total: exportFileCount)
+        return exportState.start(total: exportRunTotal)
+    }
+
+    /// What a run counts: an MP4 or GIF run its plan's frames (one file, so the bar moves per frame), any other
+    /// run its files (export-pack FV-5).
+    var exportRunTotal: Int {
+        guard exportingOptions?.format.writesVideo == true, let plan = try? exportVideoPlan() else { return exportFileCount }
+        return plan.frames.count
     }
 
     /// Moves the running run to `fraction` of its total, rounded down; the run clamps and never goes back.

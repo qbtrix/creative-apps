@@ -157,8 +157,10 @@ public struct ScrubField: View {
         let mixed = bar.mixed
         let mark = dragging ? SuiteColor.markerDragging : keyed ? SuiteColor.stateKeyed : SuiteColor.marker
         return HStack(spacing: SuiteSpacing.s) {
-            Text(label).font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.secondaryText).layoutPriority(1)
-                .fixedSize(horizontal: editing, vertical: false)
+            Text(label).font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.secondaryText)
+                // The priority goes outside fixedSize, or the HStack never sees it and splits the room
+                // between the label and the ticks' lane, truncating the label (#3262).
+                .fixedSize(horizontal: editing, vertical: false).layoutPriority(1)
             if editing {
                 Spacer(minLength: 0)
                 valueText(SuiteColor.textPrimary)

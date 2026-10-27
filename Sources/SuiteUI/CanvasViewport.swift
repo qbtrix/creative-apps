@@ -18,10 +18,13 @@
 // one. Whether a drag pans is decided when it starts, so a tool drag always
 // gets its `onDragEnd`. The host owns the zoom (the top bar and status bar
 // show it) and learns the viewport's size from `onSize` to work out a fit.
-// With `onZoom`, the viewport also zooms itself through it, clamped by
-// ZoomMath to 10% to 3200%: pinch, and Command-plus, Command-minus and
-// Command-0 (fit) while it has focus; Command-0 asks for the environment's
-// `canvasFitScale` (EditorDetail's palette-clear fit) when one is set.
+// With `onZoomLevel` (or the older `onZoom`, which takes the level as a
+// scale), the viewport also zooms itself through SuiteKernel's zoom model,
+// clamped to 10% to 3200%: pinch, landing on 100% when it passes near it, and
+// Command-plus, Command-minus, Command-0 (fit) and Command-1 (100%) while it
+// has focus. A host that takes `.fit` keeps the picture fitted as the window
+// resizes (ZoomMath.scale); `onZoom` gets the fit as a scale, from the
+// environment's `canvasFitScale` (EditorDetail's palette-clear fit) when set.
 // `showsRulers: false` drops the rulers and their corner; the canvas keeps
 // an empty band where they were (CanvasLayout's `inset`), so the artboard
 // doesn't jump. A drag that starts on a ruler goes to `onRulerDrag`, never
@@ -45,6 +48,8 @@
 // container registers as the enabled control `suite.canvas` (`.suiteControl`),
 // and under a probe host each tool-drag or Space-pan move reports a sample of
 // series `canvas-drag` (CanvasProbe, SP2).
+import enum SuiteKernel.ZoomKey
+import enum SuiteKernel.ZoomLevel
 import SwiftUI
 
 /// Where the artboard sits in the scrollable canvas, in points.
@@ -165,6 +170,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     var unit: String { rulerUnit }
     private let onSize: @MainActor (CGSize) -> Void
     private let onZoom: (@MainActor (Double) -> Void)?
+    private let onZoomLevel: (@MainActor (ZoomLevel) -> Void)?
     private let onDrag: (@MainActor (CGPoint, CGPoint) -> Void)?
     private let onDragEnd: (@MainActor () -> Void)?
     private let onKey: (@MainActor (KeyPress) -> KeyPress.Result)?
@@ -196,6 +202,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         showsRulers: Bool = true, rulerUnit: String = "px", unit: String? = nil,
         onSize: @escaping @MainActor (CGSize) -> Void = { _ in },
         onZoom: (@MainActor (Double) -> Void)? = nil,
+        onZoomLevel: (@MainActor (ZoomLevel) -> Void)? = nil,
         onDrag: (@MainActor (CGPoint, CGPoint) -> Void)? = nil,
         onDragEnd: (@MainActor () -> Void)? = nil,
         onKey: (@MainActor (KeyPress) -> KeyPress.Result)? = nil,
@@ -211,6 +218,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         self.rulerUnit = unit ?? rulerUnit
         self.onSize = onSize
         self.onZoom = onZoom
+        self.onZoomLevel = onZoomLevel
         self.onDrag = onDrag
         self.onDragEnd = onDragEnd
         self.onKey = onKey
@@ -306,7 +314,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .onContinuousHover { phase in hover(phase, layout) }
             .gesture(drag(layout), isEnabled: onDrag != nil)
             .simultaneousGesture(pan(layout), isEnabled: takesKeys)
-            .simultaneousGesture(pinch(layout), isEnabled: onZoom != nil)
+            .simultaneousGesture(pinch(layout), isEnabled: zooms)
             .pointerStyle(panStart != nil ? .grabActive : spaceHeld ? .grabIdle : pointer)
         }
         // No scroll bars: the rulers show where the view is, and an unnamed bar fails the app audit (SJ21).
@@ -336,8 +344,8 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             return .handled
         }
         guard press.phase == .down else { return .ignored }
-        if let zoomed = zoomKey(press, layout) {
-            onZoom?(zoomed)
+        if let level = zoomKey(press) {
+            zoomTo(level, layout)
             return .handled
         }
         if case .handled? = onKey?(press) { return .handled }
@@ -349,22 +357,28 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     }
 
     /// The canvas takes focus and keys when the host handles keys or zoom.
-    private var takesKeys: Bool { onKey != nil || onZoom != nil }
+    private var takesKeys: Bool { onKey != nil || zooms }
 
-    /// The zoom Command-plus (or Command-equals), Command-minus or Command-0 asks for;
-    /// nil for any other key, or without `onZoom`.
-    private func zoomKey(_ press: KeyPress, _ layout: CanvasLayout) -> Double? {
-        guard onZoom != nil, press.modifiers.contains(.command),
-            press.modifiers.isDisjoint(with: [.option, .control])
+    /// Whether the host takes zooms, as a level or as a scale.
+    private var zooms: Bool { onZoom != nil || onZoomLevel != nil }
+
+    /// The level Command-plus (or Command-equals), Command-minus, Command-0 or Command-1 asks for
+    /// (SuiteKernel's ZoomKey); nil for any other key, or when the host takes no zoom.
+    private func zoomKey(_ press: KeyPress) -> ZoomLevel? {
+        guard zooms,
+            let key = ZoomKey(
+                press.key.character, command: press.modifiers.contains(.command),
+                option: press.modifiers.contains(.option), control: press.modifiers.contains(.control))
         else { return nil }
-        switch press.key {
-        case "=", "+": return ZoomMath.zoomedIn(from: zoom)
-        case "-": return ZoomMath.zoomedOut(from: zoom)
-        case "0":
-            let area = CGSize(width: layout.viewport.width - layout.inset, height: layout.viewport.height - layout.inset)
-            return ZoomMath.fit(document: documentSize, in: area, using: fitScale)
-        default: return nil
-        }
+        return key.level(from: zoom, steps: ZoomMath.steps)
+    }
+
+    /// Hands `level` to the host: as it is through `onZoomLevel`, else as a scale through `onZoom`,
+    /// the fit worked out here over the area inside the rulers.
+    private func zoomTo(_ level: ZoomLevel, _ layout: CanvasLayout) {
+        if let onZoomLevel { return onZoomLevel(level) }
+        let area = CGSize(width: layout.viewport.width - layout.inset, height: layout.viewport.height - layout.inset)
+        onZoom?(ZoomMath.scale(level, document: documentSize, in: area, using: fitScale))
     }
 
     private func hover(_ phase: HoverPhase, _ layout: CanvasLayout) {
@@ -425,10 +439,10 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 let start = pinchStart ?? (zoom, layout, offset,
                     CGPoint(x: value.startLocation.x - offset.x, y: value.startLocation.y - offset.y))
                 pinchStart = start
-                let next = ZoomMath.clamped(start.zoom * value.magnification)
-                // Held at the clamp: no zoom, so no scroll either.
+                let next = ZoomMath.steps.snapped(start.zoom * value.magnification)
+                // Held at the clamp or the 100% snap: no zoom, so no scroll either.
                 guard next != zoom else { return }
-                onZoom?(next)
+                zoomTo(ZoomLevel(scale: next), layout)
                 let target = CanvasLayout(
                     document: documentSize, zoom: next, viewport: start.layout.viewport, inset: start.layout.inset)
                 let point = start.layout.anchoredOffset(to: target, pointer: start.pointer, scrolled: start.scrolled)

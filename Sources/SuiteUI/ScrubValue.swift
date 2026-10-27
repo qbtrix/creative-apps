@@ -1,7 +1,7 @@
 // ScrubValue.swift: the number rules behind ScrubField and the bar slider
 // (drag sideways to change a value, step it from the keyboard, how far the
-// fill reaches) and ViewerStatusBar and the editor's zoom commands (the zoom
-// readout, fit, and the zoom in and out stops), plus ScrubTrack, the
+// fill reaches) and ViewerZoom, the CoreGraphics face of SuiteKernel's zoom
+// model for ViewerStatusBar and the timeline (readout, fit, stops), plus ScrubTrack, the
 // non-linear track a bar slider can move along, and SuiteValueScrubbing, the
 // live UC1 contract over these rules and NumericInput's. No SwiftUI, like
 // NumericInput, so the rules are unit-tested on their own. Invariants: every
@@ -9,6 +9,7 @@
 // or modifier; a step that is zero, negative or not finite means "no
 // snapping", never a trap.
 import Foundation
+import struct SuiteKernel.ZoomSteps
 
 public enum ScrubValue {
     /// The value after dragging `points` sideways from `start`: one `step` per
@@ -226,11 +227,8 @@ public struct SuiteValueScrubbing: ValueScrubbing {
 
 public enum ViewerZoom {
     /// "51%": a zoom scale as a whole percent; "–" when it isn't a positive
-    /// finite number. Past a million percent it reads the cap, never traps.
-    public static func percentText(_ scale: Double) -> String {
-        guard scale.isFinite, scale > 0 else { return "–" }
-        return "\(Int(min(scale * 100, 1_000_000).rounded()))%"
-    }
+    /// finite number (SuiteKernel's ZoomSteps.percentText).
+    public static func percentText(_ scale: Double) -> String { ZoomSteps.percentText(scale) }
 
     /// The scale CanvasSurface draws an artboard at inside a viewer of `size`:
     /// fit inside `inset` on every side, never above 100%, 0 when nothing fits.
@@ -238,26 +236,23 @@ public enum ViewerZoom {
     public static func fitScale(
         artboard: CGSize, in size: CGSize, inset: CGFloat = SuiteSize.canvasInset
     ) -> Double {
-        let room = CGSize(width: size.width - 2 * inset, height: size.height - 2 * inset)
-        guard room.width > 0, room.height > 0, room.width.isFinite, room.height.isFinite else { return 0 }
-        let scale = min(room.width / max(artboard.width, 1), room.height / max(artboard.height, 1), 1)
-        return scale.isFinite ? Double(scale) : 0
+        ZoomSteps.fitScale(
+            width: Double(artboard.width), height: Double(artboard.height),
+            inWidth: Double(size.width), height: Double(size.height), inset: Double(inset))
     }
 
-    /// The stops Zoom In and Zoom Out step through, smallest first.
-    public static let stops: [Double] = [0.05, 0.1, 0.25, 1.0 / 3, 0.5, 2.0 / 3, 1, 1.5, 2, 3, 4, 6, 8, 12, 16, 32]
+    /// The stops Zoom In and Zoom Out step through, smallest first (the suite's).
+    public static var stops: [Double] { ZoomSteps.suite.stops }
+
+    /// The suite's stops over their own span, 5% to 3200%: a timeline steps
+    /// them and applies its own clamp.
+    private static let unclamped = ZoomSteps(stops: ZoomSteps.suite.stops, range: 0.05...32)
 
     /// The next stop above `scale`, or the largest; 100% for a scale that
     /// isn't a positive finite number.
-    public static func zoomedIn(from scale: Double) -> Double {
-        guard scale.isFinite, scale > 0 else { return 1 }
-        return stops.first { $0 > scale * 1.001 } ?? stops[stops.count - 1]
-    }
+    public static func zoomedIn(from scale: Double) -> Double { unclamped.zoomedIn(from: scale) }
 
     /// The next stop below `scale`, or the smallest; 100% for a scale that
     /// isn't a positive finite number.
-    public static func zoomedOut(from scale: Double) -> Double {
-        guard scale.isFinite, scale > 0 else { return 1 }
-        return stops.last { $0 < scale / 1.001 } ?? stops[0]
-    }
+    public static func zoomedOut(from scale: Double) -> Double { unclamped.zoomedOut(from: scale) }
 }

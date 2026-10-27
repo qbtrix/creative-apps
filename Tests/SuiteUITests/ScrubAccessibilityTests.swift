@@ -30,6 +30,8 @@ import Testing
 /// over 0...1: the accessibility slider's work doesn't grow with range / step.
 /// A ratio between two runs on the same machine, not a wall-clock budget, so
 /// it stays in the gate (a stepped Slider made it about 300 times slower).
+/// The 20x margin still catches that, and survives a loaded runner: 3x failed
+/// dev's macOS job at 3.1x with nothing changed.
 @MainActor @Test func aWideRangeRendersAsFastAsANarrowOne() {
     func seconds(_ range: ClosedRange<Double>, step: Double) -> Double {
         let holder = RowsHolder()
@@ -46,7 +48,7 @@ import Testing
     _ = seconds(0...1, step: 0.01)  // warm up
     let narrow = seconds(0...1, step: 0.01)
     let wide = seconds(-100_000...100_000, step: 1)
-    #expect(wide < narrow * 3 + 0.1, "wide \(wide) s, narrow \(narrow) s")
+    #expect(wide < narrow * 20 + 0.5, "wide \(wide) s, narrow \(narrow) s")
 }
 
 @MainActor private final class AdjustLog {

@@ -17,6 +17,14 @@ extension LibraryCatalog {
         adopt(next)
     }
 
+    /// Picks every shown photo in display order: one `replace` of `order`, with no
+    /// set built and filtered first (LG-3, #1650). Hidden photos stay unpicked.
+    public mutating func selectAll() {
+        var next = picks
+        next.replace(order)
+        adopt(next)
+    }
+
     /// One click on photo `id`: replace, toggle, or extend from the anchor
     /// through the display order. Returns false, changing nothing, when the
     /// kernel refuses it (a photo the collection doesn't show) or it changes nothing.

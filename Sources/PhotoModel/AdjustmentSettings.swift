@@ -17,7 +17,10 @@
 // Codable, so a document can store them. Exposure, levels, the curve and
 // hue/saturation live in SuiteImaging's AdjustSettings (`imaging`); Photo's
 // Float values, the stored form and the render's steps are read out of it in
-// PhotoAdjust+Imaging.swift. Linux-safe.
+// PhotoAdjust+Imaging.swift. `tone` is the suite's ToneSettings (white
+// balance, tone, presence, sharpen; tone-controls PT-1), set whole by one
+// `.tone` edit; it has no AdjustmentKind, so it has no switch and no section
+// of its own, and PT-3 renders it. Linux-safe.
 import CoreRaster
 import SuiteImaging
 
@@ -45,6 +48,8 @@ public enum AdjustmentEdit: Sendable, Equatable {
     case setEnabled(AdjustmentKind, Bool)
     /// Puts a section's values back to their defaults; its switch stays.
     case reset(AdjustmentKind)
+    /// The whole tone section, as the tone commands set it: one edit, one step.
+    case tone(ToneSettings)
 }
 
 public struct AdjustmentSettings: Sendable, Hashable {
@@ -72,13 +77,16 @@ public struct AdjustmentSettings: Sendable, Hashable {
     /// Gaussian blur radius in pixels.
     public private(set) var blurSigma: Double = 0
     public private(set) var enabled: Set<AdjustmentKind> = Set(AdjustmentKind.allCases)
+    /// White balance, tone, presence and sharpen; stored under "tone", left
+    /// out when neutral.
+    public private(set) var tone: ToneSettings = .neutral
 
     public init() {}
 
     /// The stored form read back (PhotoAdjust+Imaging.swift), unchecked like
     /// the stored values themselves.
-    init(imaging: AdjustSettings, blurSigma: Double, enabled: Set<AdjustmentKind>) {
-        (self.imaging, self.blurSigma, self.enabled) = (imaging, blurSigma, enabled)
+    init(imaging: AdjustSettings, blurSigma: Double, enabled: Set<AdjustmentKind>, tone: ToneSettings = .neutral) {
+        (self.imaging, self.blurSigma, self.enabled, self.tone) = (imaging, blurSigma, enabled, tone)
     }
 
     public func isEnabled(_ kind: AdjustmentKind) -> Bool { enabled.contains(kind) }
@@ -90,9 +98,9 @@ public struct AdjustmentSettings: Sendable, Hashable {
         return defaults == self
     }
 
-    /// True when no enabled section changes the image.
+    /// True when no enabled section, and no tone slider, changes the image.
     public var isIdentity: Bool {
-        AdjustmentKind.allCases.allSatisfy { !isEnabled($0) || isIdentity($0) }
+        tone.isNeutral(nil) && AdjustmentKind.allCases.allSatisfy { !isEnabled($0) || isIdentity($0) }
     }
 
     public mutating func apply(_ edit: AdjustmentEdit) {
@@ -121,6 +129,8 @@ public struct AdjustmentSettings: Sendable, Hashable {
             if isOn { enabled.insert(kind) } else { enabled.remove(kind) }
         case .reset(let kind):
             reset(kind)
+        case .tone(let settings):
+            tone = settings
         }
     }
 

@@ -62,6 +62,25 @@ extension LibraryCatalog {
         saveError = error.message
     }
 
+    /// The catalog file's backups (catalog-backup BK-5m): the window attaches them at launch, so the backup
+    /// commands list and restore them; nil detaches.
+    public mutating func attachBackups(_ backups: LibraryBackups?) {
+        backup.backups = backups
+    }
+
+    /// The launch found the catalog damaged and `fallback` the newest backup that decodes: its photos open
+    /// unsaved (so the next save writes them as the catalog) and its notice stays until dismissed.
+    public mutating func openBackup(_ fallback: LibraryBackupFallback) {
+        restore(fallback.photos)
+        backup.notice = fallback.message
+        saveRevision += 1
+    }
+
+    /// The window closed the opened-backup notice.
+    public mutating func dismissBackupNotice() {
+        backup.notice = nil
+    }
+
     /// Marks the photos with these ids `.missing` (their files are gone at
     /// launch). Unknown ids are ignored; availability isn't saved, so the
     /// catalog stays as saved as it was.

@@ -4,13 +4,15 @@
 // scaled by `scale`, the canvas filled with the list's background unless `transparent`, then every non-text item in
 // paint order exactly as FlareStage draws it on screen: `StagePath.cgPath` with the item's matrix, the fill (solid or
 // gradient, clipped to the path) and the stroke (its trimmed, dashed `strokePath`) at `width × stretch` with its cap
-// and join, both at the item's opacity. ImageIO encodes the CGImage as PNG. A zero or non-finite size, a context CoreGraphics won't make and a
+// and join, both at the item's opacity. ImageIO encodes the CGImage as PNG; `frame` paints the same way into a
+// straight-alpha MediaFrame of an exact size for MP4 and GIF (export-pack FV-7). A zero or non-finite size, a context CoreGraphics won't make and a
 // PNG it won't finalize each throw a RasterizerError; nothing here force-unwraps or crashes.
 import CoreGraphics
 import FlareCore
 import FlareModel
 import Foundation
 import ImageIO
+import SuiteModel
 
 enum RasterizerError: Error, Equatable {
     /// The list's size times `scale` is zero, negative, not finite or wider than `StageRasterizer.maxSide`.
@@ -34,16 +36,57 @@ struct StageRasterizer: FrameRasterizing {
                   data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: space,
                   bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { throw RasterizerError.contextUnavailable }
-        // CoreGraphics bitmaps are y-up; the list is y-down like the stage. Flip, then scale scene points to pixels.
-        context.translateBy(x: 0, y: CGFloat(height))
-        context.scaleBy(x: CGFloat(scale), y: -CGFloat(scale))
+        Self.paint(list, in: context, scaleX: scale, scaleY: scale, pixelHeight: height, transparent: transparent)
+        guard let image = context.makeImage() else { throw RasterizerError.contextUnavailable }
+        return try Self.encodePNG(image)
+    }
+
+    /// A movie or GIF frame (export-pack FV-7): `list` drawn as `png` draws it, each axis scaled on its own so it
+    /// fills exactly `width` × `height` (MP4's even size), into straight-alpha RGBA, top row first, MediaFrame's order.
+    func frame(_ list: StageDrawList, width: Int, height: Int, transparent: Bool) throws -> MediaFrame {
+        guard width >= 1, height >= 1, width <= Self.maxSide, height <= Self.maxSide,
+              list.width.isFinite, list.height.isFinite, list.width > 0, list.height > 0
+        else { throw RasterizerError.invalidSize }
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB) else { throw RasterizerError.contextUnavailable }
+        // Both sides are at most `maxSide`, so the byte count (1 GiB at most) can't overflow.
+        var rgba = [UInt8](repeating: 0, count: width * height * 4)
+        let drawn = rgba.withUnsafeMutableBytes { raw -> Bool in
+            guard let context = CGContext(
+                data: raw.baseAddress, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
+                space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            else { return false }
+            Self.paint(list, in: context, scaleX: Double(width) / list.width, scaleY: Double(height) / list.height,
+                       pixelHeight: height, transparent: transparent)
+            context.flush()
+            return true
+        }
+        guard drawn else { throw RasterizerError.contextUnavailable }
+        Self.unpremultiply(&rgba)
+        return try MediaFrame(width: width, height: height, rgba: rgba)
+    }
+
+    /// The background unless `transparent`, then every non-text item in paint order. CoreGraphics bitmaps are y-up;
+    /// the list is y-down like the stage, so this flips, then scales scene points to pixels.
+    private static func paint(_ list: StageDrawList, in context: CGContext, scaleX: Double, scaleY: Double,
+                              pixelHeight: Int, transparent: Bool) {
+        context.translateBy(x: 0, y: CGFloat(pixelHeight))
+        context.scaleBy(x: CGFloat(scaleX), y: -CGFloat(scaleY))
         if !transparent {
             context.setFillColor(StagePath.cgColor(list.background))
             context.fill(CGRect(x: 0, y: 0, width: list.width, height: list.height))
         }
-        for item in list.items where !item.isText { Self.draw(item, in: context) }
-        guard let image = context.makeImage() else { throw RasterizerError.contextUnavailable }
-        return try Self.encodePNG(image)
+        for item in list.items where !item.isText { draw(item, in: context) }
+    }
+
+    /// Premultiplied RGBA bytes to straight alpha, rounding to nearest; a clear or opaque pixel stays as it is.
+    private static func unpremultiply(_ rgba: inout [UInt8]) {
+        for alphaIndex in stride(from: 3, to: rgba.count, by: 4) {
+            let alpha = Int(rgba[alphaIndex])
+            guard alpha > 0, alpha < 255 else { continue }
+            for index in (alphaIndex - 3)..<alphaIndex {
+                rgba[index] = UInt8(min(255, (Int(rgba[index]) * 255 + alpha / 2) / alpha))
+            }
+        }
     }
 
     /// `width × scale` by `height × scale`, rounded to whole pixels; throws unless both are finite, at least 1 and

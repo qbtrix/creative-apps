@@ -85,16 +85,6 @@ enum PlacedRaster {
         }
         return vector
     }
-
-    /// A PNG's or JPEG's pixel size from its header; nil when ImageIO can't read one.
-    static func pixelSize(_ data: Data) -> Size? {
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-            let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
-            let width = properties[kCGImagePropertyPixelWidth] as? NSNumber,
-            let height = properties[kCGImagePropertyPixelHeight] as? NSNumber
-        else { return nil }
-        return Size(width: width.doubleValue, height: height.doubleValue)
-    }
 }
 
 /// A placed image as a view the size of its box.

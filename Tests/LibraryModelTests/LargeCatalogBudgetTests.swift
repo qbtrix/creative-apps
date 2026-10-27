@@ -1,8 +1,8 @@
 // LargeCatalogBudgetTests.swift: large-catalog's Model budgets (MJ-LG, packet
 // docs/blueprints/library/features/large-catalog.md, Contract slice) on the
-// 10,000-photo fixture. The fixture's own test runs now; each budget is
-// written here and disabled by name until the slice that fixes it (LG-3 load
-// and selection, LG-4 the export plan and sheet) turns it on.
+// 10,000-photo fixture. The fixture's own test gates; LG-3 and LG-4 met the
+// load, selection, plan and sheet budgets (LargeCatalogModelBudgetTests), which
+// time wall clock and so run from the perf list in perf-nightly.
 import Foundation
 import SuiteKernel
 import Testing
@@ -55,41 +55,49 @@ import Testing
     #else
     static let scale = 1
     #endif
+}
 
-    @Test(.disabled("LG-3: load 10,000 within 400 ms")) func loadWithinBudget() throws {
-        let photos = try Self.catalog(10_000 / Self.scale, "load").items
+/// MJ-LG's Model budgets, which LG-3 and LG-4 (LG-model) meet. They time wall
+/// clock, so the gate never runs them: Tests/perf-suites.txt lists this suite and
+/// it runs in perf-nightly.
+@Suite
+struct LargeCatalogModelBudgetTests {
+    typealias Base = LargeCatalogBudgetTests
+
+    @Test func loadWithinBudget() throws {
+        let photos = try Base.catalog(10_000 / Base.scale, "load").items
         let cost = Budget.measure("large load-10000", runs: 5) {
             var catalog = LibraryCatalog(services: .fake(photos))
             catalog.load(photos)
         }
-        #expect(cost.median <= 400.0 / Double(Self.scale), "load took \(cost.median) ms (median)")
+        #expect(cost.median <= 400.0 / Double(Base.scale), "load took \(cost.median) ms (median)")
     }
 
-    @Test(.disabled("LG-3: select all within 5 ms")) func selectAllWithinBudget() throws {
-        var catalog = try Self.catalog(10_000 / Self.scale, "all")
+    @Test func selectAllWithinBudget() throws {
+        var catalog = try Base.catalog(10_000 / Base.scale, "all")
         let cost = Budget.measure("large select-all-10000", runs: 10) {
             catalog.select([])
             try? catalog.run(.selectAll)
         }
         #expect(catalog.selection.count == catalog.order.count)
-        #expect(cost.median <= 5.0 / Double(Self.scale), "select all took \(cost.median) ms (median)")
+        #expect(cost.median <= 5.0 / Double(Base.scale), "select all took \(cost.median) ms (median)")
     }
 
-    @Test(.disabled("LG-3: shift-range of 5,000 within 10 ms")) func shiftRangeWithinBudget() throws {
-        var catalog = try Self.catalog(10_000 / Self.scale, "range")
-        let order = catalog.order, span = 5_000 / Self.scale
+    @Test func shiftRangeWithinBudget() throws {
+        var catalog = try Base.catalog(10_000 / Base.scale, "range")
+        let order = catalog.order, span = 5_000 / Base.scale
         guard order.count > span else { Issue.record("the fixture is too small"); return }
         let cost = Budget.measure("large shift-range-5000", runs: 10) {
             catalog.pick(order[0], .replace)
             catalog.pick(order[span - 1], .extend)
         }
         #expect(catalog.selection.count == span)
-        #expect(cost.median <= 10.0 / Double(Self.scale), "shift-range took \(cost.median) ms (median)")
+        #expect(cost.median <= 10.0 / Double(Base.scale), "shift-range took \(cost.median) ms (median)")
     }
 
     /// Debug budget, at full size: the plan for 1,000 of the fixture's photos.
-    @Test(.disabled("LG-4: export plan for 1,000 within 50 ms")) func exportPlanWithinBudget() throws {
-        let catalog = try Self.catalog(10_000, "plan")
+    @Test func exportPlanWithinBudget() throws {
+        let catalog = try Base.catalog(10_000, "plan")
         let photos = Array(catalog.items.prefix(1_000))
         let exporter = LiveExporter(decoder: FakeDecoder(photos: []), develop: FakeDevelop())
         let options = ExportOptions(folder: "/out", naming: ExportNaming(template: "{date}-{seq}"))
@@ -102,8 +110,8 @@ import Testing
     }
 
     /// Debug budget, at full size: opening the sheet on 10,000 selected photos.
-    @Test(.disabled("LG-4: beginExport on 10,000 within 10 ms")) func beginExportWithinBudget() throws {
-        var catalog = try Self.catalog(10_000, "begin")
+    @Test func beginExportWithinBudget() throws {
+        var catalog = try Base.catalog(10_000, "begin")
         catalog.select(Set(catalog.order))
         let cost = Budget.measure("large export-begin-10000", runs: 5) {
             catalog.closeExport()

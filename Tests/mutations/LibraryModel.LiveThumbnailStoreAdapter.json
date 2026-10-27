@@ -1,0 +1,23 @@
+[
+  {
+    "label": "staleAfterDevelop: develop token left out of the content key",
+    "file": "Sources/LibraryModel/Live/LiveThumbnailStoreAdapter.swift",
+    "find": "return \"\\(size)-\\(modified)-\\(ThumbnailToken.of(photo.develop, longSide: longSide))\"",
+    "replace": "return \"\\(size)-\\(modified)\"",
+    "tests": "LibraryThumbnailDiskTests"
+  },
+  {
+    "label": "relaunchDecodesNothing: store read skipped",
+    "file": "Sources/LibraryModel/Live/LiveThumbnailStoreAdapter.swift",
+    "find": "guard let data = try? store.read(key(id, content, bucket)) else { return nil }",
+    "replace": "guard let data = Optional<Data>.none else { return nil }",
+    "tests": "LibraryThumbnailDiskTests"
+  },
+  {
+    "label": "staleAfterDevelop: a decode left out of the count",
+    "file": "Sources/LibraryModel/Live/LiveThumbnailStoreAdapter.swift",
+    "find": "counts.value.withLock { $0.decoded += 1 }",
+    "replace": "counts.value.withLock { $0.decoded += 0 }",
+    "tests": "LibraryThumbnailDiskTests"
+  }
+]

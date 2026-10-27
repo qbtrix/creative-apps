@@ -13,12 +13,18 @@
 //
 // Editor menus (EM-4): the delegate is a SuiteAppDelegate and `.suiteEditor`
 // adds Window > Switch To, AI Access… and the suite's Help group over
-// Design's stub hand-off host, and starts DesignShell.live, a live command
-// channel over the key window's file (`afterglow run --live design`). A Dock
-// click with no window open opens one (`.suiteReopenWindow`).
+// DesignShell.host, and starts DesignShell.live, a live command channel over
+// the key window's file (`afterglow run --live design`). A Dock click with no
+// window open opens one (`.suiteReopenWindow`).
+//
+// Hand-offs: a .design opened from Finder, the home's Recent or another app's
+// Open In reaches DesignShell.host (a DesignDocumentHost), which hands each
+// file to DesignShell.openQueue (SuiteUI's SuiteOpenQueue): an empty window
+// opens it in place, else it opens in a new window.
 import DesignModel
 import SuiteModel
 import SuiteShell
+import SuiteUI
 import SwiftUI
 
 /// What a new Design window starts with: a new file, a file to open, or nothing.
@@ -36,17 +42,29 @@ struct DesignLaunch: Codable, Hashable, Sendable {
 
 /// The suite's side of the app: the hand-off host and the live command channel.
 @MainActor enum DesignShell {
-    /// Design's hand-off host, the stub that opens nothing until DF-3.
-    static let host = DesignDocument(pages: [])
+    /// The files waiting for a window: an empty window takes one in place, else a new window opens.
+    static let openQueue = SuiteOpenQueue(windowID: DesignLaunch.windowID)
 
-    /// The key window: its id, its file and where its intents go (DesignWindow keeps it current).
-    static var front: (id: UUID, model: @MainActor () -> DesignWorkspace, perform: DesignPerform)?
+    /// Design's hand-off host: an open hands each file to `openQueue`; every other verb is refused.
+    static let host = host(opening: openQueue)
+
+    /// A host that hands each opened file to `queue` (tests pass their own queue).
+    static func host(opening queue: SuiteOpenQueue) -> DesignDocumentHost {
+        DesignDocumentHost { paths in
+            await MainActor.run {
+                for path in paths { queue.open(URL(fileURLWithPath: path)) }
+            }
+        }
+    }
+
+    /// The key window, which DesignWindow joins with `suiteLiveWindow`: its file, and where a command's result goes.
+    static let front = LiveFront<DesignHeadless>()
 
     /// Live commands on the key window's file; a client runs only on a grant it already holds.
     static let live = LiveCommandChannel(
         app: SuiteApp.design.displayName,
-        document: { () -> DesignHeadless? in front.map { DesignHeadless($0.model()) } },
-        apply: { (result: DesignHeadless) in front?.perform(.adoptLive(result.workspace)) },
+        document: { front.document() },
+        apply: { front.apply($0) },
         ask: { await AIAccessCenter.shared.ask($0) })
 }
 

@@ -71,6 +71,22 @@ extension BodyCountSuites {
             let png = try #require(image.representation(using: .png, properties: [:]))
             try png.write(to: folder.appending(path: "flare-drop-mark.png"))
         }
+
+        @Test func lottieDropMark() throws {
+            // The stage's own plan (FlareStage passes the Lottie extensions as `opens`): a .json Flare opens says so.
+            let workspace = try Self.bounce()
+            let path = "/tmp/FlareFileFlowSnapshots/bounce.json"
+            let actions = DropPlan.plan(
+                [path], into: .flare, registry: .standard, hasDocument: workspace.hasDocument,
+                places: workspace.placesExtensions, opens: FlareStage.opens)
+            #expect(actions == [.open(path: path)], "a dropped Lottie .json is planned as a refusal")
+            #expect(SuiteDropMark.sentence(for: actions, app: .flare) == "Open in Flare")
+            #expect(!SuiteDropMark.refuses(actions), "the mark refuses a file Flare then opens")
+            #expect(FlareWorkspace.lottieDrops(actions).lottie == [path], "the planned open never reaches the Lottie open")
+            let other = DropPlan.plan(
+                ["/tmp/notes.xyz"], into: .flare, registry: .standard, hasDocument: true, places: [], opens: FlareStage.opens)
+            #expect(SuiteDropMark.refuses(other), "a type nothing reads still says why")
+        }
     }
 }
 

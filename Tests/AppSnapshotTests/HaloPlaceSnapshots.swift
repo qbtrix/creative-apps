@@ -3,8 +3,9 @@
 // halo-place-logo: a 480 x 160 logo.svg on a solid centred in a 1920 x 1080 composition (an SVG draws SuiteUI's
 // grey placeholder with its name until PL-8). halo-place-fill: a 1200 x 800 JPEG, red left and blue right, filling
 // a full-frame solid. halo-place-inspector: the layer inspector on `three-layers` with Background holding
-// logo.svg: IMAGE reads "logo.svg · SVG · 480 × 160" with live Replace… and Reset Size over the Fill checkbox, no
-// note (the place commands run since PH-6). Also the pure mappings: the ⌥-drag's focus pan and the drop point.
+// logo.svg: IMAGE reads "logo.svg · SVG · 480 × 160" with live Replace… and Reset Size over the Place row's
+// "Into the selected solid" checkbox, no note (the place commands run since PH-6), and FILL is off with the note
+// that the picture covers the solid's colour. Also the pure mappings: the ⌥-drag's focus pan and the drop point.
 // Light and Dark. macOS only.
 import CoreGraphics
 import HaloModel
@@ -40,6 +41,9 @@ import UniformTypeIdentifiers
         #expect(HaloPlaceInspector.shows(project.selectedLayer?.kind), "a solid shows IMAGE")
         let section = HaloPlaceInspector(model: project)
         #expect(section.asset == Self.logoAsset && section.modelHelp == nil, "IMAGE reads the picture, controls live")
+        let fill = HaloFillInspector(model: project, perform: { _ in }, runFill: { _ in })
+        #expect(fill.help != nil && fill.colorHelp == fill.help, "FILL and its colour row say the picture covers them")
+        #expect(HaloPlaceInspector.fillTitle == "Into the selected solid", "the checkbox names when it applies")
         try Self.both(
             HaloLayerInspector(model: project)
                 .environment(\.haloPlace, { _, _ in })

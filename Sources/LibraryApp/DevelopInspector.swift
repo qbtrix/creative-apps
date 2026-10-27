@@ -8,9 +8,11 @@
 // Reset context menu per row, its `photo.reset-<slider>` spec's MenuCommand
 // (CS-6), the section reset while any row is off 0),
 // CURVE (SuiteUI's ToneCurveEditor over the targets' curve, its engine
-// samples and the loupe histogram, `library.develop.curve`) and LEVELS (a
-// row per field, 0...255 whole numbers, Midtones 0.10...9.99 with two places,
-// `library.develop.levels.<field>`), each with its reset while off neutral (DV-10),
+// samples and the loupe histogram, `library.develop.curve`) and LEVELS
+// (SuiteUI's LevelsHandles: Black Point, Midtones and White Point on the
+// input ramp, Output Black and Output White under it, read 0...255 and
+// Midtones to two places, `library.develop.levels.<field>`), each with its
+// reset while off neutral (DV-10),
 // Show Original (`\`), Sync from the first selected photo, and Paste
 // Settings with the copied settings named under it. Each row and action
 // carries its `library.develop.*` identifier and is off, saying why, while
@@ -44,9 +46,7 @@ struct DevelopInspector: View {
                         }
                     }
                     InspectorSection("Curve", onReset: curveReset) { curve }
-                    InspectorSection("Levels", onReset: levelsReset) {
-                        ForEach(DevelopLevels.Field.allCases, id: \.self) { levelsRow($0) }
-                    }
+                    InspectorSection("Levels", onReset: levelsReset) { levels }
                     actions
                 }
                 .accessibilityElement(children: .contain)
@@ -76,7 +76,7 @@ struct DevelopInspector: View {
         let set = develop.set
         let endEdit = develop.endEdit
         return InspectorSliderRow(
-            slider.rawValue, value: value?.shared ?? 0, in: slider.range, step: slider.step,
+            slider.title, value: value?.shared ?? 0, in: slider.range, step: slider.step,
             unit: slider == .exposure ? "EV" : "", decimals: slider == .exposure ? 2 : 0, mixed: value == .mixed,
             onChange: { set?(slider, $0) }, onEnd: { endEdit?() }
         )
@@ -121,23 +121,23 @@ struct DevelopInspector: View {
             .transformPreference(LibraryControlsKey.self) { $0.append(entry) }
     }
 
-    /// One LEVELS row: the field as 0...255 whole numbers, Midtones as 0.10...9.99 with two places.
-    private func levelsRow(_ field: DevelopLevels.Field) -> some View {
+    /// LEVELS: SuiteUI's handles over the targets' levels (neutral while mixed), each listed in library.controls.
+    private var levels: some View {
         let levels: MetadataValue<DevelopLevels>? = model.developLevels
-        let scale: Double = Self.levelsScale(field)
-        let value: Double = (levels?.shared ?? .neutral).value(field) * scale
+        let shown = levels?.shared ?? .neutral
         let setLevels: (@MainActor (DevelopLevels.Field, Double) -> Void)? = develop.setLevels
         let endEdit: (@MainActor () -> Void)? = develop.endEdit
-        let onChange: @MainActor (Double) -> Void = { (shown: Double) -> Void in setLevels?(field, shown / scale) }
-        let onEnd: @MainActor () -> Void = { () -> Void in endEdit?() }
         let enabled = setLevels != nil
-        let isGamma = field == .gamma
-        return InspectorSliderRow(
-            field.rawValue, value: value, in: Self.levelsRange(field), step: isGamma ? 0.01 : 1,
-            decimals: isGamma ? 2 : 0, mixed: levels == .mixed, onChange: onChange, onEnd: onEnd)
-            .disabled(!enabled)
-            .help(enabled ? "" : Self.unavailable)
-            .libraryControl(id: Self.levelsID(field), enabled: enabled, help: Self.unavailable)
+        let entries = DevelopLevels.Field.allCases.map {
+            ControlEntry(id: Self.levelsID($0), enabled: enabled, reason: enabled ? nil : Self.unavailable)
+        }
+        return LevelsHandles(
+            LevelsValues(inBlack: shown.inBlack, gamma: shown.gamma, inWhite: shown.inWhite,
+                         outBlack: shown.outBlack, outWhite: shown.outWhite),
+            gammaRange: DevelopLevels.gammaRange, mixed: levels == .mixed, enabled: enabled, reason: Self.unavailable,
+            id: { Self.levelsID(Self.field($0)) },
+            onChange: { setLevels?(Self.field($0), $1) }, onEnd: { endEdit?() })
+            .transformPreference(LibraryControlsKey.self) { $0 += entries }
     }
 
     /// Show Original, Sync and Paste Settings, with the copied settings named under Paste.
@@ -175,11 +175,15 @@ struct DevelopInspector: View {
     nonisolated static func levelsID(_ field: DevelopLevels.Field) -> String {
         "library.develop.levels." + String(field.rawValue.lowercased().filter { $0 != " " })
     }
-    /// What a LEVELS row shows per stored unit: 255 for the points (sRGB 0...1 as 0...255), 1 for Midtones.
-    nonisolated static func levelsScale(_ field: DevelopLevels.Field) -> Double { field == .gamma ? 1 : 255 }
-    /// The row's range in shown units.
-    nonisolated static func levelsRange(_ field: DevelopLevels.Field) -> ClosedRange<Double> {
-        field == .gamma ? DevelopLevels.gammaRange : 0...255
+    /// The LEVELS field a handle edits.
+    nonisolated static func field(_ handle: LevelsHandle) -> DevelopLevels.Field {
+        switch handle {
+        case .inBlack: .inBlack
+        case .gamma: .gamma
+        case .inWhite: .inWhite
+        case .outBlack: .outBlack
+        case .outWhite: .outWhite
+        }
     }
     nonisolated static func unit(_ point: DevelopCurvePoint) -> CGPoint { CGPoint(x: point.x, y: point.y) }
     /// `library.develop.exposure`, … `library.develop.saturation`.

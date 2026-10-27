@@ -39,7 +39,12 @@
     "Tests/RealJobs/design/gradient-angle/gradient-angle.jobs.json",
     "Tests/RealJobs/design/gradient-angle/input/background.design",
     "docs/blueprints/design.md",
-    "docs/blueprints/design/features/gradient-fill.wave.json"
+    "docs/blueprints/design/features/gradient-fill.wave.json",
+    "Tests/DesignModelTests/DesignFillAlphaTests.swift",
+    "Tests/mutations/DesignModel.DesignNode.json",
+    "Sources/DesignApp/DesignInspectorStyle.swift",
+    "Tests/DesignModelTests/DesignSVGAlphaTests.swift",
+    "Tests/AppSnapshotTests/DesignFillAlphaSnapshots.swift"
   ],
   "slices": [
     {
@@ -148,6 +153,88 @@
         "UITests/DesignJourneyTests+Gradient.swift",
         "docs/blueprints/design.md",
         "docs/blueprints/design/features/gradient-fill.wave.json"
+      ]
+    },
+    {
+      "id": "DG-c",
+      "behavior": "Design's colour carries alpha and a node's fill can be none, every colour row edits opacity, and the canvas, PNG and SVG keep both (gap audit C3).",
+      "tasks": [
+        "DG-9",
+        "DG-10"
+      ],
+      "journeys": [
+        "MJ-DG"
+      ],
+      "waits": {
+        "DG-u": [
+          "DG-9",
+          "DG-10"
+        ],
+        "DG-m": [
+          "DG-9",
+          "DG-10"
+        ],
+        "transform:DT-a": [
+          "DG-9",
+          "DG-10"
+        ],
+        "shape-tools:DS-a": [
+          "DG-9",
+          "DG-10"
+        ],
+        "stroke-style:DK-a": [
+          "DG-10"
+        ],
+        "design-export:DE-a": [
+          "DG-10"
+        ],
+        "design-export:DE-s": [
+          "DG-10"
+        ],
+        "transform:DT-m": [
+          "DG-10"
+        ],
+        "shape-tools:DS-m": [
+          "DG-10"
+        ],
+        "stroke-style:DK-m": [
+          "DG-10"
+        ],
+        "placed-images:PD-m": [
+          "DG-10"
+        ],
+        "transform:DT-u": [
+          "DG-10"
+        ],
+        "shape-tools:DS-u": [
+          "DG-10"
+        ],
+        "stroke-style:DK-u": [
+          "DG-10"
+        ],
+        "placed-images:PD-u": [
+          "DG-10"
+        ],
+        "pen-paths:DP-a": [
+          "DG-9"
+        ],
+        "pen-paths:DP-m": [
+          "DG-10"
+        ]
+      },
+      "ui": true,
+      "owned": [
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignFill+Kernel.swift",
+        "Tests/DesignModelTests/DesignFillAlphaTests.swift",
+        "Tests/mutations/DesignModel.DesignNode.json",
+        "Sources/DesignApp/DesignInspector.swift",
+        "Sources/DesignApp/DesignInspectorStyle.swift",
+        "Sources/DesignApp/DesignCanvasMarks.swift",
+        "Sources/DesignModel/Live/DesignSVG.swift",
+        "Tests/mutations/DesignModel.DesignSVG.json",
+        "Tests/DesignModelTests/DesignSVGAlphaTests.swift",
+        "Tests/AppSnapshotTests/DesignFillAlphaSnapshots.swift"
       ]
     }
   ]

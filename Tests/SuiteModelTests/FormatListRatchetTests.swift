@@ -20,6 +20,7 @@ enum FormatListScan {
     static let allowed: [String: String] = [
         "Sources/SuiteModel/Values/SuiteImageFormats.swift": "the registry",
         "Sources/SuiteKernel/Export/ExportOptions.swift": "write capabilities; ImageFormatParityTests ties them to the registry",
+        "Sources/SuiteShell/SuiteImageIO.swift": "the adapter's encode choices, the packet's `SuiteImageIO.Format` (SC-2)",
     ]
 
     /// A spelling and the format it names; jpg is jpeg, tif is tiff.
@@ -221,10 +222,11 @@ enum FormatListScan {
         #expect(!FormatListScan.hasList(text), "\(text)")
     }
 
-    /// The registry and ExportFormats.all may list; a listed file with no list never fails.
+    /// The registry, ExportFormats.all and the adapter's Format may list; a listed file with no list never fails.
     @Test func allowedAndListedPass() {
         let files = ["Sources/SuiteModel/Values/SuiteImageFormats.swift": "[.png, .jpeg]",
                      "Sources/SuiteKernel/Export/ExportOptions.swift": #"["png", "jpeg"]"#,
+                     "Sources/SuiteShell/SuiteImageIO.swift": "case png, jpeg(quality: Double)",
                      "Sources/PhotoModel/Gone.swift": "let a = 1"]
         #expect(FormatListScan.problems(files, baseline: "# c\nSources/PhotoModel/Gone.swift\n").isEmpty)
     }

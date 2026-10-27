@@ -19,10 +19,19 @@ extension LibraryCatalog {
         return ids.compactMap { byID[$0] }
     }
 
+    /// Whether `exportTargets` has a photo, without building it for 10,000 (LG-4, #3214):
+    /// the first shown target with an item answers; only an id with no item falls back.
+    var hasExportTarget: Bool {
+        let first = mode == .loupe ? focusedItemID.flatMap { order.contains($0) ? $0 : nil }
+            : order.first(where: selection.contains)
+        guard let first else { return false }
+        return items.contains { $0.id == first } || !exportTargets.isEmpty
+    }
+
     /// Why Export… can't act; nil when it can.
     public var exportHelp: String? {
         if case .running = exportState { return "An export is already running." }
-        if exportTargets.isEmpty { return "Select a photo to export it." }
+        if !hasExportTarget { return "Select a photo to export it." }
         return services.unavailable["exporter"]
     }
 

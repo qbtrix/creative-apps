@@ -34,8 +34,9 @@ final class LibrarySidecarJourneyTests: XCTestCase {
             photos.append(try fingerprint(url))
         }
         try foreignPacket.write(to: photoFolder.appending(path: "IMG_2.xmp"))
-        let arguments = ["-LibraryImportFolder", photoFolder.path, "-LibraryImportOnLaunch", "-LibraryCatalogDir"]
-        library = Journey("Library", self, arguments: arguments + [catalog.path])
+        library = Journey("Library", self, arguments: [
+            "-LibraryImportFolder", photoFolder.path, "-LibraryCatalogDir", catalog.path, "-LibraryImportOnLaunch",
+        ])
         XCTAssert(cell("IMG_2").waitForExistence(timeout: 30), "the JPEGs weren't imported")
     }
     @MainActor private func saved() throws {

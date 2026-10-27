@@ -1,0 +1,4 @@
+[
+{"label":"the Switch To menu loses its symbol","file":"Sources/SuiteModel/Switching/SwitchMenu.swift","find":"public static let menuSymbol = \"square.grid.2x2\"","replace":"public static let menuSymbol = \"\"","tests":"AIAccessPromptTests"},
+{"label":"the Switch To symbol is a title, not a symbol name","file":"Sources/SuiteModel/Switching/SwitchMenu.swift","find":"public static let menuSymbol = \"square.grid.2x2\"","replace":"public static let menuSymbol = \"Switch To\"","tests":"AIAccessPromptTests"}
+]

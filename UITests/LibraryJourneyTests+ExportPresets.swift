@@ -23,8 +23,8 @@ final class LibraryExportPresetsJourneyTests: XCTestCase {
         addTeardownBlock { for url in [folder, catalog, out] { try? FileManager.default.removeItem(at: url) } }
         try LibraryFiles.writeShoot(in: folder)
         let arguments = [
-            "-LibraryImportFolder", folder.path, "-LibraryImportOnLaunch",
-            "-LibraryCatalogDir", catalog.path, "-LibraryExportTo", out.path,
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
+            "-LibraryExportTo", out.path, "-LibraryImportOnLaunch",
         ]
         var library = Journey("Library", self, arguments: arguments)
 

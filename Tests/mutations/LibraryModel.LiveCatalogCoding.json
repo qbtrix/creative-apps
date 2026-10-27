@@ -26,5 +26,19 @@
     "find": "camera = photo.camera.isEmpty ? nil : Camera(photo.camera)",
     "replace": "camera = Camera(photo.camera)",
     "tests": "LibraryMetadataPersistTests"
+  },
+  {
+    "label": "excludedPathsSurviveSave: the excluded paths decode as none, so a re-import brings the trashed rejects back",
+    "file": "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "find": "Set(file.excludedPaths ?? [])",
+    "replace": "Set<String>()",
+    "tests": "LibraryExcludedPathsCodingTests"
+  },
+  {
+    "label": "goldensUnchanged: an empty excluded list is written, so every old catalog's bytes change",
+    "file": "Sources/LibraryModel/Live/LiveCatalogCoding.swift",
+    "find": "excludedPaths.isEmpty ? nil : excludedPaths.sorted()",
+    "replace": "excludedPaths.sorted()",
+    "tests": "LibraryExcludedPathsCodingTests"
   }
 ]

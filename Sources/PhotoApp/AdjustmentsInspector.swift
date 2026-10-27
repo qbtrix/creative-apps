@@ -15,7 +15,12 @@
 // passes adjustSections), and `showsEnable` false drops the enable checkboxes, for
 // an adjustment layer, whose row's eye turns it off. The defaults are the
 // whole image's inspector, unchanged.
+// Under Exposure sit the suite's tone rows (tone-controls PT-2): White
+// Balance, Tone, Presence and Sharpen from `settings.tone`, Exposure hidden
+// since Photo's own section shows it, each change out as a ToneIntent through
+// `onTone` and `toneHelp` saying why the rows are off.
 import PhotoModel
+import SuiteImaging
 import SuiteModel
 import SuiteUI
 import SwiftUI
@@ -27,6 +32,8 @@ struct AdjustmentsInspector: View {
     var onEditEnd: @MainActor () -> Void = {}
     var sections: [AdjustmentKind] = AdjustmentKind.allCases
     var showsEnable = true
+    var toneHelp: String? = nil
+    var onTone: (ToneIntent) -> Void = { _ in }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -34,6 +41,9 @@ struct AdjustmentsInspector: View {
                 slider("Exposure", Double(settings.exposure), Self.doubles(AdjustmentSettings.exposureRange), unit: "EV", decimals: 1) {
                     .exposure(Float($0))
                 }
+            }
+            if sections.contains(.exposure) {
+                ToneRows(settings: settings.tone, help: toneHelp, hidden: [.exposure], onIntent: onTone)
             }
             section(.levels) {
                 HistogramView(histogram, emptyMessage: "No histogram yet.", id: "photo.levels.histogram")

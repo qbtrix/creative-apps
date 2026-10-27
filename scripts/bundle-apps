@@ -8,6 +8,9 @@
 #   .build/apps/AfterGlow.app/Contents/MacOS/AfterGlow           the launcher
 #   .build/apps/AfterGlow.app/Contents/Helpers/<X>.app            each app, its
 #       Info.plist from Bundle/Info/<X>.plist, executable Contents/MacOS/<X>
+#   .build/apps/AfterGlow.app/Contents/Helpers/afterglow          the CLI and
+#       MCP server (BundleLayout.cliPath), swift build -c release of the
+#       `afterglow` product (packet docs/blueprints/suite/features/cli-bundle.md, CB-3)
 #   .build/apps/AfterGlow.app/Contents/Frameworks/<F>.framework   every
 #       @rpath framework the apps link, and those frameworks link, read from
 #       the built binaries with otool -L (linked once, shared; no hand list)
@@ -23,11 +26,13 @@
 # a tarball because actions/upload-artifact drops file modes. To open after
 # download: tar xzf app-builds.tar.gz && open AfterGlow.app
 #
-# Steps: build (xcodegen, xcodebuild -scheme Release), assemble, verify the
-# links (every @rpath framework the outer app or a helper links is in
+# Steps: build (xcodegen, xcodebuild -scheme Release, swift build -c release
+# --product afterglow), assemble, verify the links (every @rpath framework
+# the outer app, a helper or the CLI links is in
 # Contents/Frameworks; otool -l has the helper run path), sign inside out ad
-# hoc (frameworks, helpers, outer), verify (plutil -lint every Info.plist,
-# codesign --verify --deep --strict), register (lsregister -f), then tar. A
+# hoc (frameworks, helpers and the CLI, outer), verify (plutil -lint every
+# Info.plist, codesign --verify --deep --strict, the bundled afterglow
+# --version), register (lsregister -f), then tar. A
 # failure exits 1 naming the step and the path; a linked framework missing
 # from the bundle fails with "<binary> links <F>.framework but the bundle
 # lacks it".
@@ -42,6 +47,7 @@ apps="Flare Design Photo Library Halo"
 out=.build/apps
 bundle="$out/AfterGlow.app"
 derived=.build/xcode-release
+cli="$bundle/Contents/Helpers/afterglow"
 products="$derived/Build/Products/Release"
 lsregister=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 
@@ -115,6 +121,9 @@ xcodegen=$(xcodegen_bin)
 at="$derived (xcodebuild -scheme Release)"
 xcodebuild build -project CreativeApps.xcodeproj -scheme Release -configuration Release \
   -destination platform=macOS -derivedDataPath "$derived" ONLY_ACTIVE_ARCH=YES -quiet
+at="afterglow (swift build -c release --product afterglow)"
+swift build -c release --product afterglow --force-resolved-versions
+cli_built="$(swift build -c release --show-bin-path)/afterglow"
 
 # 2. assemble
 step=assemble
@@ -149,6 +158,9 @@ for x in $apps; do
   ditto "$at" "$bundle/Contents/Helpers/$x.app"
   dress "$bundle/Contents/Helpers/$x.app" "$x" "$x"
 done
+at="$cli_built"
+[[ -x "$at" ]] || die "missing $at"
+ditto "$at" "$cli"
 if [[ -d Bundle/Samples ]]; then
   at=Bundle/Samples
   ditto Bundle/Samples "$bundle/Contents/Resources/Samples"
@@ -163,7 +175,7 @@ for x in $apps; do
   otool -l "$at" | grep -q '@executable_path/../../../../Frameworks' \
     || die "$x has no run path @executable_path/../../../../Frameworks ($at)"
 done
-for at in "$bundle/Contents/MacOS/AfterGlow" $(for x in $apps; do echo "$bundle/Contents/Helpers/$x.app/Contents/MacOS/$x"; done); do
+for at in "$bundle/Contents/MacOS/AfterGlow" "$cli" $(for x in $apps; do echo "$bundle/Contents/Helpers/$x.app/Contents/MacOS/$x"; done); do
   for f in $(rpath_frameworks "$at"); do
     [[ -d "$bundle/Contents/Frameworks/$f.framework" ]] \
       || die "$(basename "$at") links $f.framework but the bundle lacks it ($at)"
@@ -180,6 +192,8 @@ for x in $apps; do
   at="$bundle/Contents/Helpers/$x.app"
   codesign --force -s - "$at"
 done
+at="$cli"
+codesign --force -s - "$at"
 at="$bundle"
 codesign --force -s - "$at"
 
@@ -191,6 +205,9 @@ while IFS= read -r plist; do
 done < <(find "$bundle" -name Info.plist)
 at="$bundle"
 codesign --verify --deep --strict "$at"
+at="$cli"
+codesign --verify --strict "$at"
+"$at" --version >/dev/null || die "$at --version failed"
 
 # The old paths, for the journeys; then tell Launch Services the types.
 for x in $apps; do

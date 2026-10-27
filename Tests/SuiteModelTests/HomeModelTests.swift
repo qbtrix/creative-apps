@@ -10,17 +10,27 @@ import Testing
 /// A sender that holds each send until the test finishes it.
 actor GateSending: HandOffSending {
     private var waiter: CheckedContinuation<Result<SwitchReceipt, SuiteError>, Never>?
+    private var arrivals: [CheckedContinuation<Void, Never>] = []
     private(set) var sent: [HandOff] = []
-    var isWaiting: Bool { waiter != nil }
     func send(_ handOff: HandOff) async throws(SuiteError) -> SwitchReceipt {
         sent.append(handOff)
-        let result = await withCheckedContinuation { waiter = $0 }
+        let result = await withCheckedContinuation {
+            waiter = $0
+            for arrival in arrivals { arrival.resume() }
+            arrivals = []
+        }
         return try result.get()
+    }
+    /// Returns once a send is held: one suspension, where a `Task.yield` poll re-queued behind every
+    /// other test in a parallel pass (#5321).
+    func waitUntilWaiting() async {
+        if waiter != nil { return }
+        await withCheckedContinuation { arrivals.append($0) }
     }
     func finish(_ result: Result<SwitchReceipt, SuiteError>) { waiter?.resume(returning: result); waiter = nil }
 }
 
-@MainActor @Suite(.timeLimit(.minutes(1))) struct HomeModelTests {
+@MainActor @Suite(.timeLimit(.minutes(5))) struct HomeModelTests {
     let now = Date(timeIntervalSince1970: 1_800_000_000)
     let docs = "/tmp/Documents"
     var cardsPath: String { docs + "/Cards.design" }
@@ -155,7 +165,7 @@ actor GateSending: HandOffSending {
         let (m, _) = try await model { $0.sending = gate }
         m.select(logoID)
         let open = Task { await m.openSelection(now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         #expect(m.launching == .design)
         await gate.finish(.success(SwitchReceipt(app: .design, wasRunning: false, requestedAt: 1)))
         await open.value
@@ -167,7 +177,7 @@ actor GateSending: HandOffSending {
         let (m, _) = try await model({ $0.sending = gate }, makeID: { "new-id" })
         let preset = try #require(SuiteCreating.presets[.halo]?.first)
         let new = Task { await m.newDocument(preset, now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         let sent = await gate.sent
         #expect(m.launching == .halo && sent == [SuiteCreating().handOff(for: preset, id: "new-id", at: now)])
         await gate.finish(.failure(.timedOut))

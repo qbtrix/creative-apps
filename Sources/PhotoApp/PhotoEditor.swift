@@ -17,6 +17,7 @@
 // rule (file-flow PF-2, `suiteFileDrop`): an image on an open one places as a
 // layer in one Place step, centred; with none open it opens; another app's
 // file goes to that app; the mark at the bottom says which before the drop.
+// With the Pen, PhotoPenOverlay puts SuiteUI's PathEditOverlay over the canvas.
 import PhotoModel
 import SuiteShell
 import SuiteUI
@@ -113,7 +114,7 @@ struct PhotoEditor: View {
 
 /// The canvas: the rendered picture (CanvasTiles on SuiteUI's EmbeddedCanvasHost) on the checkerboard with PhotoCanvasOverlay's
 /// marks over it (fed the pointer's document point), or the empty state. Drags go to the active tool;
-/// with the canvas focused, V M B E S J C I G T pick enabled tools, Delete clears the selection
+/// with the canvas focused, V M B E S J C I G T P pick enabled tools, Delete clears the selection
 /// (Shift-Delete fills it), Return sends `confirm` (apply a crop) and Escape `dismiss` (cancel it
 /// or deselect). Drops land on the whole editor (PhotoEditor's `suiteFileDrop`), not here. While the
 /// Straighten sheet is open the picture turns by its angle under StraightenMarks.
@@ -157,6 +158,10 @@ struct PhotoCanvas: View {
                     }
                     PhotoTextBoxOverlay(model: model, zoom: zoom, perform: perform)
                         .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
+                    if model.tool == .pen {
+                        PhotoPenOverlay(model: model, zoom: zoom, perform: perform)
+                            .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
+                    }
                 }
             } else {
                 EmptyStateView(
@@ -182,6 +187,23 @@ struct PhotoCanvas: View {
             perform(.tool(tool))
         }
         return .handled
+    }
+}
+
+/// The Pen over the canvas (#5072): SuiteUI's PathEditOverlay draws the draft and the path in edit and turns presses
+/// and keys into the kernel's PathIntents, sent as `.path` (PhotoWorkspace.runPath runs each as its catalog command).
+/// While Command is held it edits points (Direct Selection); whether it is held is the view's own state.
+struct PhotoPenOverlay: View {
+    let model: PhotoWorkspace
+    let zoom: Double
+    var perform: PhotoPerform = { _ in }
+    @State private var editsPoints = false
+
+    var body: some View {
+        PathEditOverlay(draft: model.penDraft, path: model.pathInEdit, selection: model.anchorSelection,
+                        tool: editsPoints ? .directSelect : .pen, zoom: zoom) { perform(.path($0)) }
+            .onModifierKeysChanged(mask: .command) { _, keys in editsPoints = keys.contains(.command) }
+            .accessibilityIdentifier("photo.canvas.pen")
     }
 }
 

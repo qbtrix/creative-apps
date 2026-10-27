@@ -1,9 +1,9 @@
 [
   {
     "label": "the first suffix is 1, not 2",
-    "file": "Sources/SuiteModel/Values/UniqueFileNames.swift",
-    "find": "var number = 2",
-    "replace": "var number = 1",
+    "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
+    "find": "var name = base, number = 2",
+    "replace": "var name = base, number = 1",
     "tests": "LibraryExportContractTests"
   },
   {
@@ -37,8 +37,8 @@
   {
     "label": "{seq} padding ignores the count",
     "file": "Sources/LibraryModel/Contracts/ExportNaming+Kernel.swift",
-    "find": "to: String(max(count, 1)).count)",
-    "replace": "to: 1)",
+    "find": "digits: String(max(count, 1)).count, pieces: pieces)",
+    "replace": "digits: 1, pieces: pieces)",
     "tests": "LibraryExportNamingTests"
   }
 ]

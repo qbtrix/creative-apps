@@ -1,5 +1,5 @@
 // PhotoSampleKernelTests.swift: MJ-EP (suiteui/adopt-kernel-eyedropper-photo,
-// EP-1 writes it disabled, EP-2 turns it on). An Eyedropper click and
+// EP-1 wrote it disabled, EP-2 turned it on). An Eyedropper click and
 // `color.sample` read one sampler, SuiteKernel's `SampleRules.mean`: for each
 // sample size, a click at the centre, at a corner and at the far corner gives
 // the kernel's colour, the same as `color.sample`, and the square skips the
@@ -60,7 +60,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on EP-2"))
+    @Test
     func clickAndCommandReadTheKernelMeanAtTheCentreAndTheCorners() throws {
         for size in SampleSize.allCases {
             for (x, y) in [(8, 8), (0, 0), (Self.side - 1, Self.side - 1)] {
@@ -72,7 +72,7 @@ import Testing
         }
     }
 
-    @Test(.disabled("waits on EP-2"))
+    @Test
     func edgeSkipsOffImage() throws {
         var model = try opened()
         // The corner's 5 x 5 square holds 9 in-image pixels, all red: off-image pixels read as black would darken it.
@@ -81,7 +81,7 @@ import Testing
         #expect(click(&model, 15.5, 0.5, .fiveByFive) == [0, 0, 255], "the top-right cell is blue")
     }
 
-    @Test(.disabled("waits on EP-2"))
+    @Test
     func sizeHonoured() throws {
         var model = try opened()
         // (8, 8) is red; its 5 x 5 square is 13 red and 12 blue, its 3 x 3 square 5 red and 4 blue.
@@ -91,7 +91,7 @@ import Testing
         #expect(model.sampleSize == .threeByThree)
     }
 
-    @Test(.disabled("waits on EP-2"))
+    @Test
     func onePixelPastTheEdgeChangesNothing() throws {
         for size in SampleSize.allCases {
             for (x, y) in [(-1.0, 8.0), (8.0, -1.0), (Double(Self.side), 8.0), (8.0, Double(Self.side))] {
@@ -106,7 +106,7 @@ import Testing
     }
 
     /// RJ-X49: each step answers the job's `samples` entry, the colours exactly, and the export is the input.
-    @Test(.disabled("waits on EP-2"))
+    @Test
     func sampleEdgeJobReadsTheKernelMean() throws {
         struct Job: Decodable { var steps: [CommandEnvelope]; var samples: [JSONValue] }
         let folder = PhotoJob.root.appendingPathComponent("sample-edge")

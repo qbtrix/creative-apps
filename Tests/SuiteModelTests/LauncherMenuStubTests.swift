@@ -96,9 +96,11 @@ private func occurrences(of needle: String, in text: String) -> Int {
                 #expect(found.contains(shortcut), "\(item.title) lacks \(shortcut)")
             }
         }
+        // A submenu may carry a symbol (`Menu("Switch To", systemImage: …)`), so match up to the title's closing quote.
         for (title, file) in menus {
-            let total = texts.values.reduce(0) { $0 + occurrences(of: "Menu(\"\(title)\")", in: $1) }
-            #expect(total == 1 && occurrences(of: "Menu(\"\(title)\")", in: texts[file] ?? "") == 1, "\(title) ▸")
+            let call = "Menu(\"\(title)\""
+            let total = texts.values.reduce(0) { $0 + occurrences(of: call, in: $1) }
+            #expect(total == 1 && occurrences(of: call, in: texts[file] ?? "") == 1, "\(title) ▸")
         }
     }
 

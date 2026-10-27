@@ -98,6 +98,7 @@ private struct ShapeThumbnails: ThumbnailPublishing {
         if png.isEmpty { throw .ioFailed("empty thumbnail") }
         return "thumbnails/" + SuiteDocumentRef.fileKey(ref.fileID) + ".png"
     }
+    func preview(for ref: SuiteDocumentRef) async -> Data? { nil }
 }
 
 private struct ShapeHome: HomeBuilding {

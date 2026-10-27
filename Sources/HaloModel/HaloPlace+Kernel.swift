@@ -8,7 +8,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
-import CoreRaster
+import SuiteImaging
 import SuiteKernel
 
 extension HaloProject: PlacedImageTarget {
@@ -59,9 +59,8 @@ extension HaloProject: PlacedImageTarget {
     /// A PNG's or JPEG's pixel size from its header; the kernel sizes SVG itself.
     public func rasterSize(_ data: Data, format: PlacedFormat) throws -> Size {
         guard format != .svg else { throw CatalogError.unavailable(id: "place.image", why: PlaceRules.formatHelp) }
-        let size = format == .png ? (try? PNG.info(data)).map { ($0.width, $0.height) } : (try? JPEG.info(data)).map { ($0.width, $0.height) }
-        guard let size else { throw CatalogError.unavailable(id: "place.image", why: Self.cantReadImage) }
-        return Size(width: Double(size.0), height: Double(size.1))
+        guard let size = SuiteImaging.rasterSize(of: data) else { throw CatalogError.unavailable(id: "place.image", why: Self.cantReadImage) }
+        return size
     }
 
     /// Adds a solid showing `asset` in `image.box` on top of the selected layer (else on top of all), spanning the
@@ -93,7 +92,7 @@ extension HaloProject: PlacedImageTarget {
     public mutating func setPlaced(_ image: PlacedImage, asset: PlacedAsset?, name: String, drag: String?) throws {
         if let help = placeFillHelp { throw CatalogError.unavailable(id: "place", why: help) }
         let box = placeFillBox
-        let key = drag.flatMap { drag in selectedLayerID.map { "\($0).place.\(drag)" } }
+        let key = drag.flatMap { drag in selectedLayerID.map { CoalesceKey.key("place", on: [$0], drag: drag) } }
         let set = edit(name, control: "halo.place", coalesceKey: key) { doc in
             let (c, l) = try doc.selectedLayerIndices()
             if image.box != box { doc.compositions[c].layers[l].rect = image.box.layerRect }

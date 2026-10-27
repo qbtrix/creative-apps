@@ -13,6 +13,8 @@
 // (`afterglow run --live library`). Closing the window quits (D2), so a Dock
 // click relaunches; `.suiteReopenWindow` opens the window if the app is still
 // running with none.
+// The window's loupe draws develop steps on the GPU (`\.libraryLoupeGPU`, suite-imaging IM-11).
+// Launch empties the last session's share copies (share-sheet SH-5).
 import Foundation
 import LibraryModel
 import SuiteModel
@@ -22,14 +24,16 @@ import SwiftUI
 
 /// The process's documents bridge: the suite's recents and routing, on fakes for a `-LibraryFixture` launch.
 @MainActor enum LibraryShell {
-    static let bridge: SuiteDocumentsBridge = {
+    /// The suite's services: live, or fakes for a `-LibraryFixture` launch. The export writer takes `metadata`.
+    static let services: SuiteServices = {
         let arguments = ProcessInfo.processInfo.arguments
-        let services: SuiteServices = LibraryLaunch(arguments: arguments).fixture == nil
+        return LibraryLaunch(arguments: arguments).fixture == nil
             ? .live(support: SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory()),
                     app: .library, arguments: arguments)
             : .fake()
-        return SuiteDocumentsBridge(app: .library, services: services)
     }()
+
+    static let bridge = SuiteDocumentsBridge(app: .library, services: services)
 
     /// The hand-off host; the catalog's file-flow answers don't depend on its photos until LF-3.
     static let host = LibraryCatalog(services: .fake())
@@ -50,8 +54,14 @@ import SwiftUI
 struct LibraryApp: App {
     @NSApplicationDelegateAdaptor private var delegate: SuiteAppDelegate
 
+    /// Empties the last session's share copies (`Share/` beside the catalog file, share-sheet SH-5); a folder that
+    /// can't be emptied waits for the next launch.
+    init() { try? SharePrep.cleanup(support: CatalogStore().folder.path(percentEncoded: false)) }
+
     var body: some Scene {
-        Window("Library", id: "library") { LibraryWindow().suiteReopenWindow(id: "library") }
+        Window("Library", id: "library") {
+            LibraryWindow().suiteReopenWindow(id: "library").environment(\.libraryLoupeGPU, .shared)
+        }
             .commands {
                 LibraryCommands()
                 LibraryBackupCommands()

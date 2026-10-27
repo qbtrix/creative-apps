@@ -1,13 +1,13 @@
 // ToneRulesTests.swift (tone-controls TC-1 written disabled, TC-5 turns it on):
 // ToneSettings turned into one tone program, the same CPU steps, one unsharp
 // pass and Auto's values. Mutations (TC-5): SuiteImaging.ToneRules
-// (`.neutralIsEmpty`, `.whitesBrighten`,`.unsharpThreshold`, `.vibranceWaits`).
+// (`.neutralIsEmpty`, `.whitesBrighten`, `.brightnessLifts`, `.unsharpThreshold`, `.vibranceWaits`).
 import CoreRaster
 import CoreRender
 import Testing
 import SuiteImaging
 
-@Suite(.disabled("waits on TC-5")) struct ToneRulesTests {
+@Suite struct ToneRulesTests {
     static func set(_ values: [ToneSlider: Double]) -> ToneSettings {
         values.reduce(ToneSettings.neutral) { $0.setting($1.key, to: $1.value) }
     }
@@ -27,12 +27,22 @@ import SuiteImaging
         #expect(cpu.count == 8 && ToneRules.program(s) == cpu.map(ToneProgram.Operation.adjustment))
     }
 
-    /// Whites 100 moves the white point to 0.75 (never more); Brightness 100 is one levels step with gamma 2.
+    /// Whites 100 moves the white point to 0.75 (never more); Blacks 100 lifts the black output to 0.25.
     @Test func whitesBrighten() {
         #expect(ToneRules.adjustments(Self.set([.whites: 100]))
             == [.levels(inBlack: 0, inWhite: 0.75, gamma: 1, outBlack: 0, outWhite: 1, encoding: .sRGB)])
+        #expect(ToneRules.adjustments(Self.set([.whites: -100]))
+            == [.levels(inBlack: 0, inWhite: 1, gamma: 1, outBlack: 0, outWhite: 0.75, encoding: .sRGB)])
+        #expect(ToneRules.adjustments(Self.set([.blacks: 100]))
+            == [.levels(inBlack: 0, inWhite: 1, gamma: 1, outBlack: 0.25, outWhite: 1, encoding: .sRGB)])
+    }
+
+    /// Brightness 100 is one levels step with gamma 2, black 0 and white 1 fixed; −100 is gamma 0.5.
+    @Test func brightnessLifts() {
         #expect(ToneRules.adjustments(Self.set([.brightness: 100]))
             == [.levels(inBlack: 0, inWhite: 1, gamma: 2, outBlack: 0, outWhite: 1, encoding: .sRGB)])
+        #expect(ToneRules.adjustments(Self.set([.brightness: -100]))
+            == [.levels(inBlack: 0, inWhite: 1, gamma: 0.5, outBlack: 0, outWhite: 1, encoding: .sRGB)])
     }
 
     /// Amount 80, Radius 1.5, Threshold 4 give (0.8, 1.5, 4/255); Amount 0 gives none.
@@ -48,6 +58,17 @@ import SuiteImaging
         #expect(ToneRules.auto(AutoTone(inBlack: 0, inWhite: 1, gamma: 1, temperature: 0, tint: 0), keeping: s) == s)
         let out = ToneRules.auto(AutoTone(inBlack: 0, inWhite: 1, gamma: 1, temperature: 12, tint: -4), keeping: s)
         #expect(out.value(.temperature) == 12 && out.value(.tint) == -4 && out.value(.contrast) == 25)
+    }
+
+    /// Auto reads the levels back into Whites, Blacks and Exposure: a white point below 1 brightens, a black
+    /// point above 0 darkens, a gamma over 1 adds exposure; each stays in its slider's range.
+    @Test func autoReadsLevels() {
+        let out = ToneRules.auto(AutoTone(inBlack: 0.01, inWhite: 0.8, gamma: 2, temperature: 0, tint: 0), keeping: .neutral)
+        #expect(out.value(.whites) > 0 && out.value(.whites) <= 100)
+        #expect(out.value(.blacks) < 0 && out.value(.blacks) >= -100)
+        #expect(out.value(.exposure) > 0 && out.value(.exposure) <= 5)
+        let far = ToneRules.auto(AutoTone(inBlack: 0.09, inWhite: 0.1, gamma: 10, temperature: 0, tint: 0), keeping: .neutral)
+        #expect(far.value(.whites) == 100 && far.value(.blacks) == -100)
     }
 
     /// Vibrance waits with its reason and is never in either list while it does.

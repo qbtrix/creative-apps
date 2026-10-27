@@ -5,8 +5,8 @@
 // a fresh `-LibraryCatalogDir`. The grid's Share button is SuiteUI's
 // ShareButton (`suite.share`); File > Share… is found by title.
 //
-// Written before its code (lead.md, contract rule 13, SH-4); SH-5, which makes
-// the share copies reach the sheet, makes it live.
+// Written before its code (lead.md, contract rule 13, SH-4); live since SH-5,
+// which makes the share copies reach the sheet and puts File > Share… on.
 import Foundation
 import XCTest
 
@@ -15,7 +15,6 @@ final class LibraryShareJourneyTests: XCTestCase {
     /// "Share 3 Photos" and opens the system sheet; cancel it; File > Share…
     /// is on for the same selection.
     @MainActor func testShareThreePhotos() throws {
-        try XCTSkipIf(true, "waits on SH-5")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }

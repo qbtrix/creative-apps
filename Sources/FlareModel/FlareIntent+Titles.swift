@@ -206,6 +206,9 @@ extension FlareIntent.Export {
         case .dismiss: "Done"
         case .tryAgain: "Try Again"
         case .reveal: "Reveal in Finder"
+        case .setSize: "Size"
+        case .setFrameRate: "Frame rate"
+        case .setLoop: "Loop forever"
         }
     }
 }

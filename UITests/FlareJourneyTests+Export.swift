@@ -126,9 +126,10 @@ final class FlareExportJourneys: XCTestCase {
 
     /// The sheet reads `text` (a warning or the run's line) within ten seconds.
     @MainActor private func expectLine(_ text: String, _ flare: Journey) {
-        // A SwiftUI Text reaches XCUITest as its value, not its label (as the other journeys match).
+        // A SwiftUI Text reaches XCUITest as its value, not its label (as the other journeys match). A warning is an
+        // InspectorNote, its own element labelled with its text but not a static text (#4109), so match any type.
         let reads = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text)
-        let line = flare.app.sheets.firstMatch.staticTexts.matching(reads).firstMatch
+        let line = flare.app.sheets.firstMatch.descendants(matching: .any).matching(reads).firstMatch
         XCTAssert(line.waitForExistence(timeout: 10), "the sheet never read \"\(text)\"")
     }
 

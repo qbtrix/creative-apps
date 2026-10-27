@@ -243,26 +243,19 @@ final class PhotoLayerOpsJourneyTests: XCTestCase {
 
     /// Clicks the inspector's Blend Mode picker open and returns its menu's item titles.
     @MainActor private func openBlendMenu(_ photo: Journey) -> [String] {
-        let types = [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) }
-        let picker = photo.element("suite.inspector").descendants(matching: .any).matching(
-            NSPredicate(format: "elementType IN %@ AND (identifier == %@ OR label == %@)", types, "photo.layer.blend", "Blend Mode")
-        ).firstMatch
+        let picker = photo.inspectorMenu("photo.layer.blend", label: "Blend Mode")
         XCTAssert(picker.waitForExistence(timeout: 5), "no Blend Mode menu (photo.layer.blend)")
         picker.click()
-        let menu = photo.app.menus.firstMatch
-        XCTAssert(menu.waitForExistence(timeout: 3), "clicking Blend Mode opened no menu")
-        let items = menu.descendants(matching: .menuItem)
-        XCTAssert(items.firstMatch.waitForExistence(timeout: 3), "the Blend Mode menu shows no items")
-        return items.allElementsBoundByIndex.map { $0.title }
+        guard let titles = photo.shownMenuTitles() else {
+            XCTFail("clicking Blend Mode opened no menu")
+            return []
+        }
+        return titles
     }
 
     /// Clicks the open menu's item `title`; the menu closes.
     @MainActor private func chooseOpenItem(_ title: String, _ photo: Journey) {
-        let item = photo.app.menus.firstMatch.descendants(matching: .menuItem)
-            .matching(NSPredicate(format: "title == %@", title)).firstMatch
-        XCTAssert(item.waitForExistence(timeout: 3), "the open menu has no \(title)")
-        item.click()
-        _ = photo.app.menus.firstMatch.waitForNonExistence(timeout: 2)
+        XCTAssert(photo.chooseShownMenuItem(title), "the open menu has no \(title)")
     }
 
     /// Types `value` into the panel number labelled `label`, or identified by it

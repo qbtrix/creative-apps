@@ -76,13 +76,13 @@ extension PhotoWorkspace {
     /// is damaged in this call. Ignored for a pixel layer or an unknown id.
     public mutating func adjustLayer(_ id: PhotoLayer.ID, _ edit: AdjustmentEdit) {
         guard let at = index(of: id), case .adjustment(let settings) = layers[at].kind,
-            settings.isEnabled(edit.kind)
+            edit.kind.map(settings.isEnabled) ?? true
         else { return }
         if case .setEnabled = edit { return }
         var next = settings
         next.apply(edit)
         guard next != settings else { return }
-        recordLayers(named: edit.kind.title, coalescing: "adjust-layer-\(id)-\(edit.kind.rawValue)")
+        recordLayers(named: edit.title, coalescing: "adjust-layer-\(id)-\(edit.section)")
         layers[at].kind = .adjustment(next)
         touch(.all)
     }

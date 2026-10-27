@@ -1,0 +1,10 @@
+{
+  "id": "kernel-zoom",
+  "name": "Zoom",
+  "description": "Zoom/: ViewZoom, the suite's one zoom model (#5070): ZoomSteps (the 10% to 3200% clamp, Zoom In and Zoom Out over the suite's stops or an app's own table, the snap that lands a pinch near 100% on 100%, the fit scale, the anchor that keeps the point under the pointer still, the percent text), ZoomLevel (fit, 100% or a scale; fit follows the viewport) and ZoomKey (Command-plus, minus, 0 and 1). SuiteUI's ZoomMath, ViewerZoom and CanvasViewport wrap it; Flare's stage and Library's loupe step their own tables on it.",
+  "technology": "Swift 6, FlareCore, Linux and macOS",
+  "paths": [
+    "Sources/SuiteKernel/Zoom/"
+  ],
+  "order": 131
+}

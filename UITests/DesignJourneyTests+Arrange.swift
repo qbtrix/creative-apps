@@ -14,6 +14,9 @@
 // two children selected; A plus E1 (inside Pair) leaves Object > Group off.
 // Layers rows are clicked off their names (Journey.clickDesignLayer, #2496),
 // and E1 joins A with a Command-click: a Shift-click on a row adds nothing yet (#2566).
+// A press on a grouped layer picks its outermost group (GroupPick, #4860), so a
+// press on E1 selects Pair and leaves it closed; a journey that needs E1's row
+// opens Pair's disclosure in Layers.
 // Presses on the page go to `suite.canvas.artboard`, the page's rectangle, at
 // page points over the page's 1440 × 1024 size. Menu tooltips (the refusal
 // text) are not readable by XCUI; DesignWindowTests prove those.
@@ -85,9 +88,12 @@ final class DesignArrangeJourneyTests: XCTestCase {
         XCTAssert(Self.waitForLabel(undo, "Undo Paste"), "⌘V made no Paste step (Undo reads \(undo.label))")
         XCTAssert(Self.waitUntil { self.rows(design, "Pair") == 2 }, "⌘V left \(rows(design, "Pair")) Pair rows, not 2")
 
-        // 2. The pasted Pair sits 10, 10 down and right, on top: a press at E1's copy opens it on its two children.
+        // 2. The pasted Pair sits 10, 10 down and right, on top: a press at E1's copy picks it. Both Pairs
+        //    opened in Layers show E1 and E2 twice, so the copy brought its two children.
         click(design, x: 960, y: 460)
-        XCTAssert(Self.waitUntil { self.rows(design, "E1") >= 1 && self.rows(design, "E2") >= 1 }, "the pasted Pair shows no E1 and E2 rows")
+        for pair in layerRows(design, "Pair") { design.expandDesignLayer(pair.identifier) }
+        XCTAssert(Self.waitUntil { self.rows(design, "E1") == 2 && self.rows(design, "E2") == 2 },
+                  "the two Pairs show \(rows(design, "E1")) E1 and \(rows(design, "E2")) E2 rows, not 2 each")
         design.shot("arrange-paste")
 
         // 3. B pressed on the page, ⌘X: one Cut step and B gone.
@@ -157,8 +163,8 @@ final class DesignArrangeJourneyTests: XCTestCase {
         XCTAssert(Self.waitForText(status, "2 Layers"), "Ungroup selected \(Self.text(status)), not its 2 layers")
         design.shot("arrange-ungroup")
 
-        // 4. E1 pressed (opens Pair in Layers), A pressed, E1's row Command-clicked: Group is off.
-        click(design, x: 950, y: 450)
+        // 4. Pair opened in Layers, A pressed, E1's row Command-clicked: Group is off.
+        design.expandDesignLayer(Self.pairRow)
         click(design, x: 150, y: 140)
         design.clickDesignLayer(Self.e1Row, modifiers: .command)
         XCTAssert(Self.waitForText(status, "2 Layers"), "Command-click on E1 selected \(Self.text(status)), not 2 Layers")

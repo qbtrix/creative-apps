@@ -52,10 +52,10 @@ enum HaloKeyRules {
     }
 
     /// The TRANSFORM rows of layer `id` at `f`, in `HaloProperty.allCases`
-    /// order; [] for an unknown id.
+    /// order, then its style rows (layer-styles HY-5); [] for an unknown id.
     static func rows(for id: String, in c: HaloComposition, at f: Int) -> [HaloPropertyRow] {
         guard let layer = layer(id, in: c) else { return [] }
-        return HaloProperty.allCases.map { p in
+        return (HaloProperty.allCases + layer.styleProperties).map { p in
             let v = value(p, of: layer, in: c, at: f)
             return HaloPropertyRow(
                 property: p, value: v, text: p.text(v), keyState: keyState(layer.tracks[p.rawValue] ?? [], at: f))
@@ -129,10 +129,14 @@ enum HaloKeyRules {
         c = copy
     }
 
-    /// The not-animated home of a value: `opacity` on the layer with no
-    /// track, every other property a one-key track at frame 0.
+    /// The not-animated home of a value: `opacity` on the layer and a style
+    /// property in the layer's style, each with no track; every other
+    /// property a one-key track at frame 0.
     private static func setStatic(_ v: Double, _ p: HaloProperty, of layer: inout HaloLayer) {
-        if p == .opacity {
+        if p.styleKind != nil {
+            layer.setStyleValue(v, p)
+            layer.tracks[p.rawValue] = nil
+        } else if p == .opacity {
             layer.opacity = v
             layer.tracks[p.rawValue] = nil
         } else {

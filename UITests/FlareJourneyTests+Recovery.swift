@@ -11,8 +11,10 @@
 // that last edit. A second drag moves Ball 100 points further, and ⌘Q
 // quits well inside the next 30 s, so only the quit's own write can keep it.
 // A relaunch on the same store with no document offers "Restore the
-// autosaved changes to “<name>”?" with "Autosaved <time>." and
-// `suite.recovery.restore` and `suite.recovery.discard`. Restore brings back
+// autosaved changes to “<name>”?" with "Autosaved <time>." and its Restore
+// and Discard buttons, found by `suite.recovery.restore` and
+// `suite.recovery.discard` or, since SwiftUI drops an alert button's
+// identifier, by their titles. Restore brings back
 // the document, edited and untitled, with Ball where the second drag left
 // it: a click there selects Ball's track, a click at the first drag's spot
 // doesn't. One shot per step, `flare-recovery-<step>`.
@@ -92,9 +94,11 @@ final class FlareRecoveryJourneys: XCTestCase {
         XCTAssert(time.waitForExistence(timeout: 5), "the offer doesn't say when the copy was autosaved")
         let when = [time.label, time.value as? String ?? ""].first { $0.hasPrefix("Autosaved ") } ?? time.label
         XCTAssert(when.contains { $0.isNumber }, "the offer's message reads \(when), not one with a time")
-        let restore = flare.app.buttons["suite.recovery.restore"]
+        // SwiftUI drops an alert button's accessibility identifier, so the suite's offer is found by its title
+        // too (Photo's NSAlert offer sets its own; PhotoWindow+File.swift).
+        let restore = offerButton("suite.recovery.restore", "Restore", flare)
         XCTAssert(restore.waitForExistence(timeout: 5), "the offer has no Restore (suite.recovery.restore)")
-        XCTAssert(flare.app.buttons["suite.recovery.discard"].exists, "the offer has no Discard (suite.recovery.discard)")
+        XCTAssert(offerButton("suite.recovery.discard", "Discard", flare).exists, "the offer has no Discard (suite.recovery.discard)")
         flare.shot("recovery-3-offer")
 
         // 4. Restore: edited and untitled, Ball where the second drag left it.
@@ -119,6 +123,11 @@ final class FlareRecoveryJourneys: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// The offer's button called `id`, or titled `title` when SwiftUI dropped the identifier.
+    @MainActor private func offerButton(_ id: String, _ title: String, _ flare: Journey) -> XCUIElement {
+        flare.app.buttons.matching(NSPredicate(format: "identifier == %@ OR label == %@", id, title)).firstMatch
+    }
 
     @MainActor private func launch(_ arguments: [String]) -> Journey {
         let flare = Journey("Flare", self, arguments: arguments)

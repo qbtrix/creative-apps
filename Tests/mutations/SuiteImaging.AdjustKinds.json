@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".greyStaysInRange: weights summed without normalising",
+    "file": "Sources/SuiteImaging/Adjust/AdjustKinds.swift",
+    "find": "return raw / sum",
+    "replace": "return raw",
+    "tests": "AdjustKindsTests"
+  },
+  {
+    "label": ".invertTwiceIsInput: levels not inverted",
+    "file": "Sources/SuiteImaging/Adjust/AdjustKinds.swift",
+    "find": "outBlack: 1, outWhite: 0, encoding: .linear",
+    "replace": "outBlack: 0, outWhite: 1, encoding: .linear",
+    "tests": "AdjustKindsTests"
+  }
+]

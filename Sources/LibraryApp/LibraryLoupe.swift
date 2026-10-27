@@ -6,8 +6,10 @@
 // (docs/design.md allows a fixed dark surround for a media app). It shows the latest
 // render (the grid thumbnail as a preview, then the full render, swapped
 // with no animation), or a placeholder until one arrives: the photo's frame
-// in a card tone with its name and size. Its help says why the file can't be
-// read or the render failed. The name, "12 of 60" position and cull summary sit in a glass
+// in a card tone with its name and size. A GPU frame (suite-imaging IM-11)
+// is drawn by the window's `\.libraryLoupeGPU` into a canvas host: the base
+// through the frame's develop steps, written on the GPU. Its help says
+// why the file can't be read or the render failed. The name, "12 of 60" position and cull summary sit in a glass
 // readout. Left and Right step through the sort; Escape, G or the glass
 // Grid button at the top leading corner (`library.loupe.grid`) go back to
 // the grid. The canvas pans on the other arrows, scroll and Space-drag, and
@@ -18,8 +20,9 @@
 // overlay, a canvas drag moves the handle under its press (or the whole
 // frame), Escape cancels and the arrows nudge the frame 1 px (Shift 10);
 // otherwise the artboard is the photo at its stored crop (`crop.artboard`).
-// The crop controls come from the window through `\.libraryCrop`. Values
-// in, closures out; LibraryCatalog holds the state.
+// The crop controls come from the window through `\.libraryCrop`. The photo
+// carries Photo's Rotate Left and Rotate Right as accessibility actions
+// (orientation-crop OC-9). Values in, closures out; LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -35,6 +38,7 @@ struct LibraryLoupe: View {
     /// The crop handle the drag under way holds; nil between drags.
     @State private var grabbed: CropHandle?
     @Environment(\.libraryCrop) private var crop
+    @Environment(\.libraryLoupeGPU) private var gpu
 
     var body: some View {
         let size = (crop.draft == nil ? nil : crop.canvas) ?? crop.artboard ?? model.loupePhotoSize
@@ -85,7 +89,11 @@ struct LibraryLoupe: View {
     /// either way, carrying `loupeValue` (`preview`, `full`, `loading`, …) and the help.
     private var picture: some View {
         Group {
-            if let render = model.loupeRender {
+            if let render = model.loupeRender, let steps = model.loupeSteps, let gpu {
+                EmbeddedCanvasHost(rendering: gpu.preference) {
+                    gpu.draw(render.image, steps: steps, token: model.loupeShownToken, photoID: model.loupeItem?.id, into: $0)
+                }
+            } else if let render = model.loupeRender {
                 Image(display: render.image).resizable()
             } else {
                 ZStack {
@@ -105,6 +113,8 @@ struct LibraryLoupe: View {
         .accessibilityValue(model.loupeValue ?? "")
         .accessibilityHint(model.loupeHelp ?? "")
         .accessibilityIdentifier("library.loupe.photo")
+        .accessibilityAction(named: "Rotate Left") { menu.photo.rotateLeft?() }
+        .accessibilityAction(named: "Rotate Right") { menu.photo.rotateRight?() }
     }
 
     /// A drag sample while cropping: the handle under the press (held until

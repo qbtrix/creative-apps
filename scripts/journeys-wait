@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# scripts/journeys-wait: journeys.yml's `Journeys wait` job, on a cheap ubuntu
+# runner ahead of the macOS job. It holds the run until it may take one of the
+# few hosted macOS runners, so the report-only journeys never fill the pool the
+# lane's macOS gate and the dev run behind Promote queue on. Every poll (two
+# API calls, every POLL_SECONDS) it decides:
+#  - superseded: a newer journeys run for the same branch and scope (the run
+#    title's "journeys <app|full> at") is alive, so this run cancels itself and
+#    that one runs instead (the newest dev head is what matters, and today's
+#    superseded pending run is cancelled the same way);
+#  - hold: a ci.yml run is queued (a run with no job running is waiting for a
+#    runner; Linux runs on ubuntu, so that is a macOS job: a lane gate, a
+#    build, or a dev run's macOS job), or JOURNEYS_SLOTS (2) or more older
+#    journeys runs are alive (queued or in_progress: waiting here, queued for a
+#    runner, or running; a run `pending` on its concurrency group holds
+#    nothing). Older runs go first, so the alive journeys never hold more than
+#    JOURNEYS_SLOTS runners, and the oldest waits only on CI's queue;
+#  - go: otherwise.
+# After MAX_WAIT_MIN (300) it goes anyway: every app's journeys must run, and
+# a hold that long means CI itself fills the pool. Needs gh and jq, and
+# GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_REF_NAME and SCOPE (the `app` input,
+# or full) in the env. Tests/journeys_wait/test_journeys_wait.sh sources this
+# and runs `decide` on fixtures.
+set -uo pipefail
+
+JOURNEYS_SLOTS="${JOURNEYS_SLOTS:-2}"
+POLL_SECONDS="${POLL_SECONDS:-180}"
+MAX_WAIT_MIN="${MAX_WAIT_MIN:-300}"
+
+# decide <own run id> <branch> <scope> <journeys runs json> <ci.yml queued runs>
+# journeys runs: [{id, status, head_branch, display_title}], every status.
+# Prints go | hold <why> | superseded <run id>.
+decide() {
+  local own=$1 branch=$2 scope=$3 runs=$4 ci_queued=$5 newer older
+  newer=$(jq -r --argjson own "$own" --arg b "$branch" --arg s " journeys $scope at " '
+    [ .[] | select(.id > $own and .head_branch == $b and (.status == "queued" or .status == "in_progress" or .status == "pending")
+                   and ((.display_title // "") | contains($s))) | .id ] | max // empty' <<<"$runs")
+  if [[ -n "$newer" ]]; then echo "superseded $newer"; return; fi
+  if (( ci_queued > 0 )); then echo "hold $ci_queued ci.yml run(s) queued for a macOS runner"; return; fi
+  older=$(jq -r --argjson own "$own" '[ .[] | select(.id < $own and (.status == "queued" or .status == "in_progress")) ] | length' <<<"$runs")
+  if (( older >= JOURNEYS_SLOTS )); then echo "hold $older older journeys run(s) alive (slots: $JOURNEYS_SLOTS)"; return; fi
+  echo go
+}
+
+main() {
+  local repo=${GITHUB_REPOSITORY:?} own=${GITHUB_RUN_ID:?} branch=${GITHUB_REF_NAME:?} scope=${SCOPE:-full}
+  local deadline=$(( $(date +%s) + MAX_WAIT_MIN * 60 )) runs ci_queued verdict
+  while :; do
+    runs=$(gh api "repos/$repo/actions/workflows/journeys.yml/runs?per_page=100" \
+      --jq '[.workflow_runs[] | {id, status, head_branch, display_title}]') || runs=""
+    ci_queued=$(gh api "repos/$repo/actions/workflows/ci.yml/runs?status=queued&per_page=100" --jq '.workflow_runs | length') || ci_queued=""
+    if [[ -z "$runs" || ! "$ci_queued" =~ ^[0-9]+$ ]]; then
+      verdict="hold the runs could not be listed"  # hold rather than take a runner blind
+    else
+      verdict=$(decide "$own" "$branch" "$scope" "$runs" "$ci_queued")
+    fi
+    case "$verdict" in
+      go) echo "go: the macOS job may start"; return 0 ;;
+      superseded*) echo "Superseded by journeys run ${verdict#superseded } (same branch and scope, newer); cancelling this run." | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"
+        gh run cancel "$own" -R "$repo"; sleep 60; return 1 ;;  # the cancel lands within the minute; 1 if it didn't
+    esac
+    if (( $(date +%s) >= deadline )); then
+      echo "Waited $MAX_WAIT_MIN min ($verdict); going anyway so these journeys run." | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"; return 0
+    fi
+    echo "$(date -u +%H:%M:%S) $verdict; polling again in $POLL_SECONDS s"
+    sleep "$POLL_SECONDS"
+  done
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then main "$@"; fi

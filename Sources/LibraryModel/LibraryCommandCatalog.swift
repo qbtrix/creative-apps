@@ -13,6 +13,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteImaging
 import SuiteKernel
 
 /// The catalog's undo history as the kernel reads it.
@@ -34,7 +35,7 @@ extension LibraryCatalog {
     struct RatingParams: Codable, Sendable { var stars: Int }
     struct LabelParams: Codable, Sendable { var label: String? }
     struct SizeParams: Codable, Sendable { var size: Int }
-    /// file.import-folder's folder, the one the window's open panel chose.
+    /// A folder param, such as the one the export sheet writes to.
     struct FolderParams: Codable, Sendable { var folder: String }
 
     /// True while the loupe's photo shows without its adjustments; stepping to another photo or the grid ends it.
@@ -60,7 +61,8 @@ extension LibraryCatalog {
     /// Every Library menu action as a command spec, in menu order.
     public static let commands: [CommandSpec<LibraryCatalog>] = fileAndEditSpecs + viewSpecs + photoSpecs + metadataSpecs
         + FileFlowCommands.specs(LibraryCatalog.self)
-        + folderSpecs + exportSheetSpecs + noticeSpecs + resetSliderSpecs + [sharePrepareSpec]
+        + folderSpecs + exportSheetSpecs + noticeSpecs + resetSliderSpecs + [sharePrepareSpec, copySpec, thumbnailStatsSpec] + backupSpecs
+        + LibraryCropDocument.specs
 
     /// The specs as a catalog whose history is the catalog's own.
     public static let catalog: CommandCatalog<LibraryCatalog> =
@@ -112,10 +114,11 @@ extension LibraryCatalog {
 
     static let fileAndEditSpecs: [CommandSpec<LibraryCatalog>] = [
         .typed("file.import-folder", title: "Import Folder…", summary: "Begins importing the photos in a folder.", kind: .file,
-               params: FolderParams.self, schema: .object(["folder": .string("The folder to import.")], required: ["folder"]),
+               params: ImportOptions.self, schema: importSchema,
                example: .object(["folder": .string("/tmp/Shoot")]), availability: { available($0.importFolderHelp) }
         ) { c, p in
             guard c.beginImport() != nil else { throw CatalogError.unavailable(id: "file.import-folder", why: c.importFolderHelp ?? "") }
+            c.importCopy = p.copy
             return JSONValue.object(["folder": .string(p.folder)])
         },
         plain("file.load-samples", "Load Sample Photos", "Replaces the photos with the 60 sample photos.", .file, .loadSamples),
@@ -317,9 +320,9 @@ extension LibraryCatalog {
     ]
 
     /// Develop's Reset <slider>: that one slider of the targets back to 0, one step each.
-    public static func resetSliderID(_ slider: DevelopSlider) -> String { "photo.reset-" + slider.rawValue.lowercased() }
-    static let resetSliderSpecs: [CommandSpec<LibraryCatalog>] = DevelopSlider.allCases.map { slider in
-        photo(resetSliderID(slider), "Reset " + slider.rawValue, "Sets the targets' \(slider.rawValue.lowercased()) back to 0.", .edit,
+    public static func resetSliderID(_ slider: ToneSlider) -> String { "photo.reset-" + slider.rawValue.lowercased() }
+    static let resetSliderSpecs: [CommandSpec<LibraryCatalog>] = ToneSlider.develop.map { slider in
+        photo(resetSliderID(slider), "Reset " + slider.title, "Sets the targets' \(slider.title.lowercased()) back to 0.", .edit,
               "develop", "Develop isn't connected yet.", on: { $0.canEditDevelop }, run: { $0.resetDevelop(slider) })
     }
 }
@@ -339,6 +342,28 @@ extension ExportState {
     var isRunning: Bool { if case .running = self { true } else { false } }
 }
 
+extension LibraryCatalog {
+    /// The disk tier behind the grid's thumbnails (shared-thumbnails ST-6), nil while they are kept in memory only.
+    var thumbnailDisk: LiveThumbnailStoreAdapter? { (services.thumbnails as? LiveThumbnails)?.disk }
+
+    /// `thumbnails.stats`: thumbnails decoded and served from disk since the disk tier opened, for a relaunch to read.
+    static let thumbnailStatsSpec: CommandSpec<LibraryCatalog> =
+        .typed("thumbnails.stats", title: "Thumbnail Stats",
+               summary: "Counts the grid thumbnails decoded and the ones read from disk since launch.", kind: .query,
+               params: NoParams.self, schema: ParamSchema.none,
+               result: .object(["decoded": .integer("Thumbnails decoded.", minimum: 0),
+                                "fromDisk": .integer("Thumbnails read from disk.", minimum: 0)], required: ["decoded", "fromDisk"]),
+               example: .object([:]),
+               availability: { available($0.thumbnailDisk == nil ? "Thumbnails aren't kept on disk yet." : nil) }
+        ) { c, _ -> JSONValue in
+            guard let disk = c.thumbnailDisk else {
+                throw CatalogError.unavailable(id: "thumbnails.stats", why: "Thumbnails aren't kept on disk yet.")
+            }
+            let stats = disk.stats
+            return .object(["decoded": .number(Double(stats.decoded)), "fromDisk": .number(Double(stats.fromDisk))])
+        }
+}
+
 /// File > Share… as its menu item reads it: why it can't act now, nil when it can.
 public struct LibraryShareMenu: Sendable, Equatable {
     public var help: String?
@@ -346,10 +371,15 @@ public struct LibraryShareMenu: Sendable, Equatable {
 }
 
 extension LibraryCatalog {
-    /// File > Share… (`file.share`): the window opens the system's share menu for the selection, so the spec stays
-    /// out of `commands` (and the ledger) like Import Folder… and Export…; it is available while the menu's help is nil.
+    /// File > Share… (`file.share`): the window opens the system's share sheet for the copies `prepareShare` makes,
+    /// so the spec stays out of `commands` (and the ledger) like Import Folder… and Export…; it is available while the
+    /// menu's help is nil. Run, it sends the caller to `file.share-prepare`, which names the same copies.
     public static let shareMenuSpec: CommandSpec<LibraryShareMenu> =
         .typed("file.share", title: "Share…", summary: "Shares the selected photos, location off.", kind: .file,
                params: NoParams.self, schema: ParamSchema.none, example: .object([:]), availability: { available($0.help) }
-        ) { _, _ -> JSONValue in throw CatalogError.notBuilt(id: "file.share", feature: "SH-5") }
+        ) { _, _ -> JSONValue in throw CatalogError.unavailable(id: "file.share", why: shareInWindow) }
+
+    /// Why `file.share` doesn't run as a command.
+    static let shareInWindow =
+        "File > Share… opens the system's share sheet in the window; file.share-prepare makes the copies."
 }

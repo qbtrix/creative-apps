@@ -1,5 +1,6 @@
-// LibraryImport.swift: the catalog's import state machine (import IM-1).
-// beginImport hands the importer the ids to skip and marks the import
+// LibraryImport.swift: the catalog's import state machine (import IM-1), and `file.import`'s options (catalog-files LC-1).
+// beginImport hands the importer the ids to skip (with the paths Delete
+// Rejects trashed, DR-6) and marks the import
 // running; batches arrive through appendImported, which drops ids already
 // in the catalog; finishImport and failImport set the notice and go idle.
 // ImportNotice.alreadyKnownDetail is the nothing-new notice's count of
@@ -22,13 +23,13 @@ extension LibraryCatalog {
         paths.first { (try? FileManager.default.contentsOfDirectory(atPath: $0)) != nil }
     }
 
-    /// The known ids to skip, and state .running(0 of 0); nil while an import runs
+    /// The known ids and trashed paths to skip, and state .running(0 of 0); nil while an import runs
     /// or while the catalog file is still loading (`catalogState == .loading`).
     public mutating func beginImport() -> Set<String>? {
         guard importState == .idle, catalogState != .loading else { return nil }
         importState = .running(ImportProgress(done: 0, total: 0))
         importNotice = nil
-        return knownIDs()
+        return knownIDs().union(excludedPaths)
     }
 
     /// The catalog's ids, the set sized once up front (QB-L9: no intermediate
@@ -92,4 +93,20 @@ extension ImportNotice {
         guard alreadyKnown > 0 else { return "" }
         return alreadyKnown == 1 ? " 1 is already in your library." : " All \(alreadyKnown) are already in your library."
     }
+}
+
+/// `file.import`'s params (catalog-files LC-1); left out, `copyTo` nil and `byDate` false import in place as before.
+public struct ImportOptions: Hashable, Codable, Sendable {
+    public var folder: String
+    public var copyTo: String?
+    public var byDate: Bool
+    public init(folder: String, copyTo: String? = nil, byDate: Bool = false) {
+        (self.folder, self.copyTo, self.byDate) = (folder, copyTo, byDate)
+    }
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        try self.init(folder: c.decode(String.self, forKey: .folder), copyTo: c.decodeIfPresent(String.self, forKey: .copyTo),
+                      byDate: c.decodeIfPresent(Bool.self, forKey: .byDate) ?? false)
+    }
+    public var copy: ImportCopyOptions { ImportCopyOptions(copyTo: copyTo, byDate: byDate) }
 }

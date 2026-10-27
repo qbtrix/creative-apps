@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+# scripts/roadmap-numbers: rewrites the "Where we are" table in ROADMAP.md
+# from a beta-progress JSON file (per group: features, done, slices,
+# slices_done; plus total and apps.eta). Only the lines between
+# <!-- numbers:start --> and <!-- numbers:end --> change; it exits 1 if a
+# marker is missing. The beta promises live here, one per group, in table
+# order. Tests/roadmap_numbers/test_roadmap_numbers.sh is its fixture test.
+# Stdlib Python 3 only.
+#
+#   scripts/roadmap-numbers progress.json [ROADMAP.md] [YYYY-MM-DD]
+import datetime, json, os, sys
+
+ROWS = [
+    ("flare", "Flare", "Draw shapes, key and ease them, play, save, and export an SVG frame or a PNG sequence."),
+    ("design", "Design", "Draw frames, shapes and text, style, group, align and snap them, save, and export PNG or SVG."),
+    ("photo", "Photo", "Open a photo, crop it, adjust it with layers, retouch, save with layers kept, and export PNG or JPEG."),
+    ("library", "Library", "Import a folder, cull from the keyboard, develop, crop and export JPEGs. The catalog survives a relaunch."),
+    ("halo", "Halo", "Build a composition, key and ease layers, add text, play, save, and render to files."),
+    ("suite", "Suite", "One AfterGlow app: onboarding, a home with recents, switching with state kept, Finder opens the right app."),
+    ("suiteui", "Shared UI", "The editor parts every app shares: canvas, timeline, layers, inspector controls."),
+    ("core", "Engines", "The engines underneath: file codecs, geometry, rendering."),
+]
+START, END = "<!-- numbers:start -->", "<!-- numbers:end -->"
+
+
+def table(d, day):
+    out = [START, "| App | Beta promise | Features done | Slices done |", "|---|---|---|---|"]
+    for key, name, promise in ROWS:
+        g = d["groups"].get(key, {})
+        out.append("| %s | %s | %d / %d | %d / %d |" % (name, promise, g.get("done", 0), g.get("features", 0),
+                                                     g.get("slices_done", 0), g.get("slices", 0)))
+    t = d["total"]
+    out.append("| **All** | | **%d / %d** | **%d / %d** |" % (t["done"], t["features"], t["slices_done"], t["slices"]))
+    out += ["", "Counts measured on %s. At the last three days' pace the remaining slices finish around %s"
+            " (estimated)." % (day, d.get("apps", {}).get("eta") or "an unknown date"), END]
+    return "\n".join(out)
+
+
+def main(argv):
+    if len(argv) < 2:
+        sys.exit("usage: scripts/roadmap-numbers progress.json [ROADMAP.md] [YYYY-MM-DD]")
+    path = argv[2] if len(argv) > 2 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ROADMAP.md")
+    day = argv[3] if len(argv) > 3 else datetime.date.today().isoformat()
+    text = open(path).read()
+    a, b = text.find(START), text.find(END)
+    if a < 0 or b < a:
+        print("roadmap-numbers: %s needs %s and %s, in that order" % (path, START, END), file=sys.stderr)
+        return 1
+    new = text[:a] + table(json.load(open(argv[1])), day) + text[b + len(END):]
+    if new != text:
+        open(path, "w").write(new)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

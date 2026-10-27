@@ -1,0 +1,37 @@
+[
+  {
+    "label": ".wandContiguous: the wand always floods contiguously",
+    "file": "Sources/SuiteImaging/Select/AreaMask.swift",
+    "find": "tolerance: .within(t), contiguous: contiguous)",
+    "replace": "tolerance: .within(t), contiguous: true)",
+    "tests": "AreaMaskTests"
+  },
+  {
+    "label": ".wandAllLayers: All Layers samples the layer and the default the composite",
+    "file": "Sources/SuiteImaging/Select/AreaMask.swift",
+    "find": "let picture = allLayers ? sources.composite : sources.layer",
+    "replace": "let picture = allLayers ? sources.layer : sources.composite",
+    "tests": "AreaMaskTests"
+  },
+  {
+    "label": ".expandRadius: the disk leaves out the pixels exactly radius away",
+    "file": "Sources/SuiteImaging/Select/AreaMask.swift",
+    "find": "(k + 1) * (k + 1) + dy * dy <= r * r",
+    "replace": "(k + 1) * (k + 1) + dy * dy < r * r",
+    "tests": "AreaMaskTests"
+  },
+  {
+    "label": ".subtractMode: subtract adds",
+    "file": "Sources/SuiteImaging/Select/AreaMask.swift",
+    "find": "case .subtract: try area.subtract(next)",
+    "replace": "case .subtract: try area.add(next)",
+    "tests": "AreaMaskTests"
+  },
+  {
+    "label": ".contract: a negative expand grows the area too",
+    "file": "Sources/SuiteImaging/Select/AreaMask.swift",
+    "find": "case .expand(let radius) where radius < 0:",
+    "replace": "case .expand(let radius) where radius < -1000:",
+    "tests": "AreaMaskTests"
+  }
+]

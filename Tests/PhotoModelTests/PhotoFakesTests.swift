@@ -26,9 +26,9 @@ import Testing
     @Test func everyFakeIsAvailable() {
         let fakes: [any PhotoUseCase] = [
             FakeArchive(), FakeRecovery(), FakeClipboard(), FakeMerging(), FakeCrop(), FakeSelection(),
-            FakeMasking(), FakeAdjustmentLayers(), FakeTransform(), FakeExportSizing(), FakeSampling(),
+            FakeMasking(), FakeAdjustmentLayers(), FakeTransform(), FakeExportSizing(),
         ]
-        #expect(fakes.count == 11)
+        #expect(fakes.count == 10)
         for fake in fakes { #expect(fake.unavailableHelp == nil, "\(type(of: fake))") }
     }
 
@@ -60,12 +60,6 @@ import Testing
         #expect(try recovery.leftBehind().map(\.documentName) == ["A"])
         try recovery.discardAll()
         #expect(try recovery.leftBehind().isEmpty)
-    }
-
-    @Test func fakeSamplingGivesSunYellow() throws {
-        let picture = try PixelBuffer(width: 1, height: 1)
-        #expect(FakeSampling().sample(picture, center: (x: 0, y: 0), size: .point)
-            == SampledColor(red: 255, green: 204, blue: 0))
     }
 
     @Test func fakeAdjustmentLayersChangeAGrayPixel() throws {

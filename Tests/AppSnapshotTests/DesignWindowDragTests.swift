@@ -4,7 +4,11 @@
 // the samples go to the live drag box (DesignLiveDrag), which only the canvas
 // reads. The same gestures on DesignEditor hosted without the box, every
 // sample written straight to the workspace, run it about once per sample, so
-// the bound can fail. `dragSamples` drives one gesture and counts the editor;
+// the bound can fail; that control drags with layer snapping off, since a snapped
+// or whole-point sample that leaves the document as it was runs no body. Gestures
+// press in page points mapped onto the artboard (`suite.canvas.artboard`), not
+// the `suite.canvas` container, which also spans the margin before the artboard.
+// `dragSamples` drives one gesture and counts the editor;
 // later drag checks (D0-9d) call it. The window is hosted off screen through
 // the render-budget harness (RenderBudgetHarness.swift); DesignEditor.bodyRuns
 // is a process-global debug counter, so the suite nests in BodyCountSuites.
@@ -58,28 +62,32 @@ extension BodyCountSuites {
 
         static let page = CGSize(width: 1440, height: 1024)
 
-        @Test(.timeLimit(.minutes(3))) func aDragRunsTheEditorAtMostThreeTimes() async throws {
+        /// The control's samples per gesture. Without the box each sample re-lays out all 2,000 layers
+        /// (about 200 ms), so 120 samples took 20+ s a gesture; 12 still shows one run per sample.
+        static let controlSamples = 12
+
+        // One case per gesture, so each drag gets the whole time limit (a hang guard, not a budget).
+        @Test(.timeLimit(.minutes(3)), arguments: Gesture.allCases)
+        func aDragRunsTheEditorAtMostThreeTimes(_ gesture: Gesture) async throws {
             #if DEBUG
-            for gesture in Gesture.allCases {
-                let w = RenderBudgetWindow(DesignWindow(seed: gesture.seed))
-                defer { w.close() }
-                let step = try await Self.dragSamples(gesture, in: w)
-                // The press and the release reach the window; the 120 samples between them don't.
-                #expect((step.bodies ?? 0) >= 1, "the \(gesture) never reached the window: \(step)")
-                expectBodies(step, atMost: 3, target: 3)
-            }
+            let w = RenderBudgetWindow(DesignWindow(seed: gesture.seed))
+            defer { w.close() }
+            let step = try await Self.dragSamples(gesture, in: w)
+            // The press and the release reach the window; the 120 samples between them don't.
+            #expect((step.bodies ?? 0) >= 1, "the \(gesture) never reached the window: \(step)")
+            expectBodies(step, atMost: 3, target: 3)
             #endif
         }
 
-        @Test(.timeLimit(.minutes(3)), .disabled("quarantine #3261 until 2026-10-22")) func withoutTheBoxTheEditorRunsPerSample() async throws {
+        // One case per gesture: all four in one case took ~117 s here and passed 180 s on CI runners.
+        @Test(.timeLimit(.minutes(3)), arguments: Gesture.allCases)
+        func withoutTheBoxTheEditorRunsPerSample(_ gesture: Gesture) async throws {
             #if DEBUG
-            for gesture in Gesture.allCases {
-                let w = RenderBudgetWindow(DesignEditorWithoutBox(model: gesture.seed))
-                defer { w.close() }
-                let step = try await Self.dragSamples(gesture, in: w)
-                // About 120: one run per sample. Over 60 leaves room for a coalesced event.
-                #expect((step.bodies ?? 0) > 60, "without the box the \(gesture) ran the editor too few times: \(step)")
-            }
+            let w = RenderBudgetWindow(DesignEditorWithoutBox(model: gesture.seed))
+            defer { w.close() }
+            let step = try await Self.dragSamples(gesture, in: w, samples: Self.controlSamples)
+            // About `controlSamples`: one run per sample. Over half leaves room for a coalesced event.
+            #expect((step.bodies ?? 0) > Self.controlSamples / 2, "without the box the \(gesture) ran the editor too few times: \(step)")
             #endif
         }
 
@@ -89,7 +97,7 @@ extension BodyCountSuites {
             _ gesture: Gesture, in w: RenderBudgetWindow<V>, samples: Int = 120
         ) async throws -> RenderStep {
             try await w.settle(800)
-            let board = try #require(await w.element("suite.canvas"), "no canvas")
+            let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
             let start = w.point(gesture.from, on: page, in: board)
             let end = w.point(
                 CGPoint(x: gesture.from.x + gesture.by.dx, y: gesture.from.y + gesture.by.dy), on: page, in: board)
@@ -110,7 +118,9 @@ extension BodyCountSuites {
 }
 
 /// DesignEditor without the live drag box: every sample is written straight to the workspace, as
-/// the window did before D0-8a. The control the bound is checked against.
+/// the window did before D0-8a. The control the bound is checked against. Snapping is off (⌘'s
+/// `.noSnap`, which a test's events can't hold) so each sample moves the box: on `crowd` a snapped
+/// move or resize holds still for about half the samples, and an unchanged workspace runs no body.
 private struct DesignEditorWithoutBox: View {
     @State private var model: DesignWorkspace
     @State private var zoom = 1.0
@@ -124,7 +134,7 @@ private struct DesignEditorWithoutBox: View {
     private func perform(_ intent: DesignIntent) {
         switch intent {
         case .drag(let from, let to, let modifiers):
-            model.drag(from: DesignPoint(from), to: DesignPoint(to), modifiers: modifiers)
+            model.drag(from: DesignPoint(from), to: DesignPoint(to), modifiers: modifiers.union(.noSnap))
         case .endDrag: model.endDrag()
         default: break
         }

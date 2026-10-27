@@ -1,0 +1,37 @@
+[
+  {
+    "label": ".removeIsRepeatable: a random seed makes the same remove give different pixels",
+    "file": "Sources/SuiteImaging/Retouch/HealRules.swift",
+    "find": "return try pixels.filledFromSurroundings(grown, seed: seed)",
+    "replace": "return try pixels.filledFromSurroundings(grown, seed: UInt64.random(in: 0...UInt64.max))",
+    "tests": "HealRulesTests/theSameSeedGivesTheSamePixels"
+  },
+  {
+    "label": ".healCopiesFromSource: the offset read backwards samples the wrong side",
+    "file": "Sources/SuiteImaging/Retouch/HealRules.swift",
+    "find": "offset: (dx: sourceOffset.dx, dy: sourceOffset.dy)",
+    "replace": "offset: (dx: -sourceOffset.dx, dy: -sourceOffset.dy)",
+    "tests": "HealRulesTests/healCopiesTextureFromTheSource"
+  },
+  {
+    "label": ".healSkipsOffCanvasSource: heal passes the whole stroke to core, which throws on an off-canvas source",
+    "file": "Sources/SuiteImaging/Retouch/HealRules.swift",
+    "find": "try reachable.intersect(sourceOnCanvas(width: pixels.width, height: pixels.height, offset: sourceOffset))",
+    "replace": "_ = reachable",
+    "tests": "HealRulesTests/healSkipsDabsWhoseSourceIsOffTheCanvas"
+  },
+  {
+    "label": ".healClipsBothAxes: the clip reads the offset's sign backwards on x, keeping the off-canvas columns",
+    "file": "Sources/SuiteImaging/Retouch/HealRules.swift",
+    "find": "let x0 = max(0, -dx), x1 = min(width, width - dx)",
+    "replace": "let x0 = max(0, dx), x1 = min(width, width + dx)",
+    "tests": "HealRulesTests/healSkipsDabsWhoseSourceIsOffTheCanvas"
+  },
+  {
+    "label": ".healClipsBothAxes: the clip ignores the vertical offset",
+    "file": "Sources/SuiteImaging/Retouch/HealRules.swift",
+    "find": "let y0 = max(0, -dy), y1 = min(height, height - dy)",
+    "replace": "let y0 = 0, y1 = height",
+    "tests": "HealRulesTests/healSkipsDabsWhoseSourceIsOffTheCanvas"
+  }
+]

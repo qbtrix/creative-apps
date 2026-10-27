@@ -54,6 +54,26 @@ import Testing
         #expect(workspace.exportRun == .running(jpeg, done: 0, total: 1))
     }
 
+    @Test func aPickChangesTheOpenSheetUntilExport() throws {
+        var workspace = try whiteImage(4, 4)
+        let closed = workspace.editExport(jpeg)
+        #expect(!closed)
+        #expect(workspace.exportRun == .idle && workspace.exportChoice == nil)
+
+        workspace.openExport()
+        let picked = workspace.editExport(jpeg)
+        #expect(picked)
+        #expect(workspace.exportChoice == jpeg)
+        #expect(workspace.exportOptions == ExportOptions())
+        workspace.editExport(ExportOptions(format: .jpeg, quality: 0))
+        #expect(workspace.exportChoice?.quality == 0.1)
+        workspace.editExport(ExportOptions(format: .jpeg, quality: 2))
+        #expect(workspace.exportChoice?.quality == 1)
+        workspace.dismissExport()
+        workspace.openExport()
+        #expect(workspace.exportChoice == ExportOptions())
+    }
+
     @Test func exportWithNoSheetIsRefused() throws {
         var workspace = try whiteImage(4, 4)
         let started = workspace.startExport(jpeg)
