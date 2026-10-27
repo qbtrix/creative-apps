@@ -21,6 +21,7 @@
 #if canImport(AppKit)
 import AppKit
 import DesignModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -138,7 +139,9 @@ extension BodyCountSuites {
         /// Every label and string value under `element`.
         static func texts(in element: Any, depth: Int = 0) -> [String] {
             let node = element as AnyObject
-            let own = [(node.accessibilityLabel?() ?? nil), (node.accessibilityValue?() ?? nil) as? String].compactMap { $0 }
+            let label: String?? = node.accessibilityLabel?()
+            let value: Any?? = node.accessibilityValue?()
+            let own = [label ?? nil, (value ?? nil) as? String].compactMap { $0 }
             guard depth < 60 else { return own }
             return own + ((node.accessibilityChildren?() ?? nil) ?? []).flatMap { texts(in: $0, depth: depth + 1) }
         }

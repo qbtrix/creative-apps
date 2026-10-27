@@ -107,8 +107,8 @@ import Testing
     @Test func jpegFlattensOnTheBackground() throws {
         let shape = DesignNode(id: "r", name: "R", kind: .rectangle, frame: DesignRect(x: 50, y: 25, width: 100, height: 50))
         let page = DesignPage(id: "p", name: "P", frameWidth: 200, frameHeight: 100, nodes: [shape])
-        let item = DesignExportItem(nodeID: "p", fileName: "P.jpg", width: 200, height: 100, pixelWidth: 400, pixelHeight: 200)
-        let jpeg = try DesignRasterizer.jpeg(try page.raster(item), background: .white)
+        let small = DesignExportItem(nodeID: "p", fileName: "P.jpg", width: 200, height: 100, pixelWidth: 400, pixelHeight: 200)
+        let jpeg = try DesignRasterizer.jpeg(try page.raster(small), background: .white)
         #expect(jpeg.starts(with: [0xFF, 0xD8, 0xFF]), "a JPEG signature")
         let read = try #require(readSize(jpeg))
         #expect(read.width == 400 && read.height == 200, "the JPEG is \(read)")
