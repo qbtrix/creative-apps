@@ -103,3 +103,4 @@ ts	kind	note
 2026-10-27T10:15:52Z	3	heartbeat	lane	10:16Z UP-flare, UP-halo, UP-z queued, no needs-*; dev red (Library test compile), no Slice-Done yet
 2026-10-27T10:38:41Z	3	heartbeat	lane	UP-flare/halo/z in lane; dev-red blocks Slice-Done
 2026-10-27T11:01:09Z	3	heartbeat	lane	UP-flare #5089, UP-halo #5091, UP-z #5231 queued in lane; Slice-Done for UP-photo waits on dev-red #5818
+2026-10-27T11:25:23Z	3	heartbeat	lane	UP-flare #5089, UP-halo #5091, UP-z #5231 queued; UP-photo Slice-Done waits on dev-red #5818
