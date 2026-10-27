@@ -82,5 +82,22 @@ import Testing
         #expect(try isRed(image, 145, 400), "the cap past the dash")
         #expect(try !isRed(image, 170, 400), "the gap's middle")
     }
+
+    @Test func aDottedStrokePaintsDots() throws {
+        // 0 on, 20 off with round caps: a dot every 20 pt along the top edge, bare between (#4925).
+        var dotted = try #require(rect.vectorStroke)
+        (dotted.cap, dotted.dash) = (.round, [0, 20])
+        let image = try draw(rect, dotted)
+        #expect(try isRed(image, 120, 100), "a dot")
+        #expect(try !isRed(image, 130, 100), "between dots")
+    }
+
+    @Test func aHalfClearStrokePaintsHalfClear() throws {
+        // A red stroke at alpha 0.5 over the white fill paints pink, as the SVG's stroke-opacity does (#4989).
+        var clear = try #require(rect.vectorStroke)
+        clear.color.a = 0.5
+        let c = try #require(draw(rect, clear).colorAt(x: 300, y: 101)?.usingColorSpace(.sRGB))
+        #expect(c.redComponent > 0.85 && (0.35...0.65).contains(c.greenComponent), "pink, not red")
+    }
 }
 #endif

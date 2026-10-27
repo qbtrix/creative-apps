@@ -25,7 +25,7 @@ import Testing
 /// box for the Type tool and the draft or paths for the Pen.
 private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoWorkspace) -> Bool {
     switch tool {
-    case .brush, .eraser, .clone, .heal, .gradient:
+    case .brush, .eraser, .clone, .heal, .gradient, .bucket, .spotHeal, .remove:
         a.pixels != b.pixels
     case .marquee, .ellipse, .lasso, .polygon, .wand:
         a.selection != b.selection || a.selectionMask != b.selectionMask || a.areaDraft != b.areaDraft
