@@ -169,3 +169,4 @@ utc	stage	event	ref	note
 2026-10-27T04:21Z	check	04:21Z heartbeat (10-27): #4917 needs-fix dropped by the lane on 1895fd75, waits on prescreen/batch; #4942 open clean on d0553017; no slice done; 0 findings
 2026-10-27T04:42Z	check	04:42Z heartbeat (10-27): #4917 open clean on 1895fd75, no local-ci/prescreen status yet; #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings
 2026-10-27T05:05Z	check	05:05Z heartbeat (10-27): #4917 open clean on 1895fd75, still no local-ci/prescreen status; #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings
+2026-10-27T05:27Z	check	05:27Z heartbeat (10-27): #4917 open clean on 1895fd75, still no local-ci/prescreen status (dev unmoved at 870080fb); #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings

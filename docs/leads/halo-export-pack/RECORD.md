@@ -123,3 +123,4 @@ Next: watch the lane; Belt-Slice-Done per slice once a green ci.yml run on dev h
 - 04:21Z heartbeat (10-27): #4917 needs-fix dropped by the lane on 1895fd75, waits on prescreen/batch; #4942 open clean on d0553017; no slice done; 0 findings
 - 04:42Z heartbeat (10-27): #4917 open clean on 1895fd75, no local-ci/prescreen status yet; #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings
 - 05:05Z heartbeat (10-27): #4917 open clean on 1895fd75, still no local-ci/prescreen status; #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings
+- 05:27Z heartbeat (10-27): #4917 open clean on 1895fd75, still no local-ci/prescreen status (dev unmoved at 870080fb); #4942 open clean on d0553017; no needs-fix/needs-rebase; no slice done; 0 findings
