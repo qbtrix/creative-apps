@@ -2,10 +2,10 @@
 
 Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
+Stage: #5103 pushed b5528571 (gate PASS); AR-11-ui drops SelectionOverlay so #5254 fits the 15-file cap; regate
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-27T12:26Z · 12:26Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (still being triaged; newest guess #5334). #5093 awaiting supervisor.
+Polled: 2026-10-27T12:36Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -61,3 +61,4 @@ Polled: 2026-10-27T12:26Z · 12:26Z: no change; #5096 #5125 #5149 ready. Lane he
 Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and a mutating setter; AreaRecipe init() and isEmpty) are already on dev c480d848. Only the packet text is stale; AR-photo-u and AR-z need no change.
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.
+- 2026-10-27T12:36Z SelectionOverlay.swift deletion and its canonical-baseline line move from AR-z (#5254, was 16 files) to AR-11-ui (#5103), where AreaAnts made it dead; each PR is now 14 files
