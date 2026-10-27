@@ -75,7 +75,8 @@ func drawnOpacity(_ opacity: Double) -> Double {
 }
 
 /// The outline `node` fills at `scale` (view points), or nil for a kind with no shape of its own:
-/// rectangles, frames and instances as rounded rectangles at `drawnCornerRadius`, ellipses as
+/// rectangles, frames and instances as rounded rectangles at `drawnCornerRadius` (circular corners, as the kernel
+/// outline a dashed stroke traces and the SVG's `rx` draw them), ellipses as
 /// ellipses, a shape as its spec's path in its frame (its box when the spec draws none). All keep their curves.
 func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     let scale = usable(scale)
@@ -83,7 +84,7 @@ func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     switch node.kind {
     case .frame, .rectangle, .instance, .shape:
         if node.kind == .shape, let path = node.path(in: node.frame) { return artworkPath(path, scale: scale) }
-        return RoundedRectangle(cornerRadius: node.drawnCornerRadius * scale).path(in: box)
+        return RoundedRectangle(cornerRadius: node.drawnCornerRadius * scale, style: .circular).path(in: box)
     case .ellipse:
         return Path(ellipseIn: box)
     case .text, .group:

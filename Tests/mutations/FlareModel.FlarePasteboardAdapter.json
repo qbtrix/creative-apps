@@ -1,0 +1,30 @@
+[
+  {
+    "label": "pngAtPlayhead: the PNG drawn at frame 0, not the playhead",
+    "file": "Sources/FlareModel/FlarePasteboardAdapter.swift",
+    "find": "var list = services.stage.drawList(document, sceneID: sceneID, frame: frame, editing: editing)",
+    "replace": "var list = services.stage.drawList(document, sceneID: sceneID, frame: 0, editing: editing)",
+    "tests": "FlarePasteboardAdapterTests"
+  },
+  {
+    "label": "svgPlacesVectors: the pasted SVG drawn to PNG bytes and placed as a bitmap",
+    "file": "Sources/FlareModel/FlarePasteboardAdapter.swift",
+    "find": "case .vector(let svg, let name): place(name: name + \".svg\", data: Data(svg.utf8), into: &workspace)",
+    "replace": "case .vector(let svg, let name): place(name: name + \".png\", data: Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]) + Data(svg.utf8), into: &workspace)",
+    "tests": "FlarePasteboardAdapterTests"
+  },
+  {
+    "label": "ownLayersFirst: the copy leaves Flare's own layers off",
+    "file": "Sources/FlareModel/FlarePasteboardAdapter.swift",
+    "find": "var items: [SuiteClipItem] = [.appLayers(.flareLayers, own)]",
+    "replace": "var items: [SuiteClipItem] = []",
+    "tests": "FlarePasteboardAdapterTests"
+  },
+  {
+    "label": "pngAtOneX: the PNG drawn at 2x",
+    "file": "Sources/FlareModel/FlarePasteboardAdapter.swift",
+    "find": "try? rasterizer.png(list, scale: 1, transparent: true)",
+    "replace": "try? rasterizer.png(list, scale: 2, transparent: true)",
+    "tests": "FlarePasteboardAdapterTests"
+  }
+]

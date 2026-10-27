@@ -71,12 +71,15 @@ struct PhotoWindow: View {
     @State var canvasSizeDraft: CanvasSizeDraft?
     /// The inspector's tab (PhotoWindow+History.swift, history-panel PH-2).
     @State var inspectorTab = PhotoInspectorTab.adjust
+    /// File > New's sheet: Photo's presets and the clipboard image's size; nil while it is closed (document-setup DS-8).
+    @State var newImageMode: NewDocumentMode?
     /// The app's View > Rendering; nil in tests, which draw on the CPU.
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
     var isPresenting: Bool {
         model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil
+            || newImageMode != nil
     }
 
     /// The launch file opens in the first window only.
@@ -136,6 +139,13 @@ struct PhotoWindow: View {
                         onCancel: { straightenDraft = nil })
                 }
             }
+            .sheet(isPresented: Binding(get: { newImageMode != nil }, set: { if !$0 { newImageMode = nil } })) {
+                if let mode = newImageMode {
+                    NewDocumentSheet(
+                        mode, setup: PhotoWorkspace.newImageSetup, limits: PhotoWorkspace.documentLimits,
+                        onDone: { setup, _ in makeImage(setup) }, onCancel: { newImageMode = nil })
+                }
+            }
             .alert("Rename Layer", isPresented: $isRenaming) {
                 TextField("Name", text: $renameText).accessibilityIdentifier("photo.layer.name")
                 if let spec = PhotoWorkspace.catalog.spec("layer.rename") {
@@ -178,9 +188,8 @@ struct PhotoWindow: View {
         }
         switch intent {
         case .newImage:
-            // 1920 x 1080 is a size CoreRaster always accepts, so this never throws.
-            try? model.newCanvas(width: 1920, height: 1080)
-            documentURL = nil
+            let clipboard = PhotoPasteboard.read().map { (width: $0.image.width, height: $0.image.height) }
+            newImageMode = .new(presets: PhotoWorkspace.newImagePresets, clipboard: clipboard)
         case .open: chooseFile()
         case .openFile(let url): open(url)
         case .save: save()
@@ -319,6 +328,17 @@ struct PhotoWindow: View {
         isResizing = false
         run("image.resize", ["width": .number(Double(width)), "height": .number(Double(height))],
             failing: "The image can't be resized to \(width) × \(height).")
+    }
+
+    /// The New sheet's Create: a new image made to `setup`; a refusal opens the alert and keeps the open image.
+    private func makeImage(_ setup: DocumentSetup) {
+        newImageMode = nil
+        do {
+            try model.newImage(setup)
+            documentURL = nil
+        } catch {
+            problem = PhotoProblem("The image can't be made.", (error as? PhotoRefusal)?.message ?? error.localizedDescription)
+        }
     }
 
     /// Runs catalog command `id` with a sheet's values (command-state CS-10); a refusal opens the alert under `title`.

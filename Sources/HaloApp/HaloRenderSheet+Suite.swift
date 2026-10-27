@@ -2,7 +2,8 @@
 // (export-pack HX-2), in HaloRenderOptionRows under the Size chips. A movie
 // shows the Codec row, a system Picker over `HaloRenderSettings.codecs`
 // (`halo.render.codec`) whose refused codecs are disabled items, their
-// reasons the row's help ("ProRes 4444 isn't available yet."). Every format shows
+// reasons the row's help (none since HX-4: the row offers only codecs the
+// suite's media service writes). Every format shows
 // the Transparent background checkbox (`halo.render.alpha`), disabled with the
 // Model's `alphaRefusal` as its help ("H.264 can't keep transparency. Choose
 // ProRes 4444."); a PNG sequence may always keep it. Each edit goes to the
