@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T20:14Z · 2026-10-27T20:14Z check-in: no PR changes (#5149, #5096 6e1a5700, #5103, #5254, #5256 open, no fix labels). Stripped a footer from #5254's body. dev-red #5818 open; triage still names #3651, not ours. No #5093 answer, no main run newer than 38363734665.
+Polled: 2026-10-27T21:02Z · 2026-10-27T21:02Z check-in: no change. All five PRs open, no fix labels, no footers. dev-red #5818 still open (rerun at 15ff48a red; triage still names #3651, not ours). No #5093 answer, no main run newer than 38363734665.
 
 
 
