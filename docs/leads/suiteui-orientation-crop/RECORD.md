@@ -159,3 +159,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T21:58:40Z critic panel waits: no successful dev journeys run (latest 40584004208 halo, 40581619252 full, both cancelled)
 - 2026-10-27T22:18:21Z critic panel waits: no successful dev journeys run (latest 40584004208 halo, 40581619252 full, both cancelled)
 - 2026-10-27T22:38:32Z critic panel waits: no successful dev journeys run (latest 40584004208 halo cancelled)
+- 2026-10-27T22:58:09Z critic panel waits: no successful dev journeys run (latest 40589859529 full cancelled)
