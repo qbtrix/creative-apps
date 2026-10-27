@@ -106,3 +106,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T02:09:07Z OC-z done; no journeys run dispatched since the 01:38 mass cancel; waiting for a photo/full journeys run containing c2b727ce for critic panel
 - 2026-10-27T02:29:27Z OC-z done; journeys dispatching again (library 40437949932 at 02:21); no photo/full journeys run yet for critic panel
 - 2026-10-27T02:49:29Z OC-z done; waiting on a photo/full journeys run containing c2b727ce for the critic panel (journeys in flight: design 40440166664, library 40437949932)
+- 2026-10-27T03:09:08Z Full CI 40439893721 (queued, head 9c320a9a contains OC-z) will dispatch full journeys; critic panel runs on its ui-screens
