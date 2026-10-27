@@ -325,3 +325,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-27T12:57:28Z UP-photo done; #5089 #5091 #5231 open, not needs-fix
 - 2026-10-27T13:33:23Z UP-photo done; #5089 #5091 #5231 open, not needs-fix
 - 2026-10-27T14:34:20Z UP-flare #5089, UP-halo #5091, UP-z #5231 open, none needs-fix
+- 2026-10-27T14:55:06Z UP-flare #5089, UP-halo #5091, UP-z #5231 open, none needs-fix
