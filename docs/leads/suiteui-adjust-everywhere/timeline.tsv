@@ -183,3 +183,4 @@ utc	stage	event	ref	note
 16:27Z	3	waiting	-	check-in: no lane merge; dev 33429ddf, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on local-ci/prescreen and the lane
 16:40Z	3	check-in	#5247 #5249 #5252	no merges; all clean; wait for local-ci/prescreen; dev c08adcbbd main fef52e668
 16:50Z	3	waiting	-	check-in: no lane merge; dev c08adcbb, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on local-ci/prescreen and the lane
+17:00Z	3	check-in	#5247 #5249 #5252	no merges; all clean; wait for local-ci/prescreen; dev c08adcbbd main fef52e668
