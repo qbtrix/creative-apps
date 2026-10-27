@@ -236,10 +236,11 @@ the lane makes one revert call per culprit on it. The culprit (revert_culprit) i
 red_bisect's verdict on the issue (a certain one: a "likely" verdict from a
 timing budget test is not enough), else the only PR commit (a subject ending
 `(#N)`; generated commits have none) in the issue's range main..<red sha>. A
-Linux red with several PRs waits for the bisect. A macOS-only red with
-several PRs names none, since red_bisect runs Linux probes only and
-reverting newest first would hit innocent PRs, each step a full macOS run on
-dev to read; a human picks. The revert (revert_open) is `git revert` of the
+Linux red with several PRs waits for the bisect. A macOS red with several
+PRs goes by its compile log when its run failed the `macOS compile` job (the
+paragraph below); any other macOS red with several PRs names none, since
+red_bisect runs Linux probes only and reverting newest first would hit
+innocent PRs, each step a full macOS run on dev to read; a human picks. The revert (revert_open) is `git revert` of the
 culprit's squash commit on today's BASE_BRANCH in the scratch clone (merge
 drivers on), pushed as `lane/revert-<n>` (REVERT_PREFIX) and opened as a PR
 labelled `lane-revert` (REVERT_LABEL) and `p0`, never `fast-lane`. Its body
@@ -263,6 +264,20 @@ human, but a second, different red inside the same open issue (an earlier
 `none` note for a macOS-only red, then a Linux bisect that names a culprit)
 gets its own call. A sweep opens at most one revert, and while the lane's
 revert for the issue is open it only lands that one.
+
+A macOS compile red (compile_culprit) needs no bisect: Linux never builds
+the macOS-only targets, so the compile log is the only witness, and it names
+the files. When the dev-red run's `macOS compile` job failed, the lane reads
+that job's failed log and takes the paths of its Swift `error:` lines and of
+their `note: expanded code originates here` lines (a macro's error sits in a
+generated buffer; the note names the call site), under Sources/ or Tests/,
+made relative to the runner's checkout (compile_paths; other notes, such as
+`declared here`, blame no file). Each file goes to the newest PR commit in
+main..<red sha> whose own change holds it. One such PR is the culprit and
+takes the same revert path as a bisect verdict, guards and marks included;
+none, or several for different files, gets one `none` note on the issue
+naming the files and PRs, and a human picks. A compile log not readable yet
+waits for the next sweep. A macOS test red is never reverted this way.
 
 The revert PR (a bot author on a REVERT_PREFIX branch with REVERT_LABEL,
 its body saying `Refs #<the open dev-red issue>.`; one from an older issue is
