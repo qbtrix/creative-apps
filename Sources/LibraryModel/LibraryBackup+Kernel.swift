@@ -3,7 +3,8 @@
 // in "Backups/" beside it; `LibraryBackups` lists them with their date and photo count, opens the newest one that
 // decodes when the catalog can't be read, and restores one (the rotation backs up the current catalog first).
 // `catalog.backups` and `catalog.restore-backup {name}` are the last of the catalog's commands. The rotation's
-// own rules (hourly, ten kept, current backed up before a restore) live in SuiteModel, not here. Linux-safe.
+// own rules (hourly, ten kept, current backed up before a restore) live in SuiteModel, not here. At launch
+// (BK-5) the window attaches `LibraryLaunch.backups`: the live catalog's, or a fixture's seeded ones. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -96,6 +97,33 @@ public struct LibraryBackups: Sendable {
     private func photos(of name: String) -> [PhotoItem]? {
         guard let data = try? rotation.store.readData(Self.folder + name) else { return nil }
         return try? coding.decode(data)
+    }
+}
+
+extension LibraryBackups {
+    /// The backups of "catalog.json" in `folder`, in the catalog file's format.
+    public init(folder: String) { self.init(store: FileStore(folder: folder), coding: LiveCatalogCoding()) }
+
+    /// A fixture's backups: `photos` as the catalog file, kept two days before `now` with every rating 1, a day
+    /// before with every rating 0 and ten minutes before as given, so Restore has a yesterday to bring back.
+    func seed(_ photos: [PhotoItem], now: Date) throws {
+        let rated = { (stars: Int) in photos.map { var p = $0; p.rating = stars; return p } }
+        for (age, set) in [(172_800.0, rated(1)), (86_400, rated(0)), (600, photos)] {
+            try rotation.store.writeData(rotation.file, coding.encode(set))
+            _ = try rotation.backUp(now: now.addingTimeInterval(-age), force: true)
+        }
+    }
+}
+
+extension LibraryLaunch {
+    /// The catalog's backups at launch: beside the live catalog in `catalogFolder`; for a fixture, none unless
+    /// `-LibraryFixtureBackups`, which seeds them in `scratch`; nil without a folder or when seeding fails.
+    public func backups(catalogFolder: String?, scratch: String, now: Date) -> LibraryBackups? {
+        guard fixture != nil || largeFixture != nil else { return catalogFolder.map { LibraryBackups(folder: $0) } }
+        guard fixtureBackups else { return nil }
+        let backups = LibraryBackups(folder: scratch)
+        do { try backups.seed(initialPhotos, now: now) } catch { return nil }
+        return backups
     }
 }
 

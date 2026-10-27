@@ -9,8 +9,10 @@ test passes unchanged. Its rules leave `LiveShapes` for SuiteKernel's
 and, once one is picked, shows its anchors and handles through SuiteUI's
 `PathEditOverlay`: drag an anchor and only it and its handles move (RJ-F27),
 drag a handle, Option to break it, marquee anchors, Delete removes them. Each
-edit is one "Edit Path" step through the existing `setPath` service and a
-kernel path command, so the CLI and an agent edit points too.
+edit is one step under the kernel path command's title ("Move Points",
+"Move Handle", ...) through the existing `setPath` service, one drag token is
+one step, and every param is document space (SuiteKernel `PathCommands`), so
+the CLI and an agent edit points the same way.
 **Line:** `line:flare` · **Wave:** 7 (`waves.md`) · **Lead branch:** `lead/pen-paths`
 **Beta:** captain, 2026-10-20 (the Pen shared from Flare). Labels `beta` and
 `p1` when filed.
@@ -86,7 +88,7 @@ each other (their adapters are separate files).
 2. Choose Direct Select (A), click the path: the item is picked and its four
    anchors show (FP-2).
 3. Drag the smooth anchor 30 pt: it and its handles move, the other three
-   don't (FP-7). Undo: one step, "Undo Edit Path".
+   don't (FP-7). Undo: one step, "Undo Move Points".
 4. Option-drag its out handle: the in handle stays (a corner now).
 5. Marquee two anchors, press Delete: the path keeps two anchors.
 6. Stress (FP-8, `FlareRealPerfJourneyTests.testStressAnchors`): open the
@@ -129,7 +131,7 @@ extension FlareWorkspace: PathEditTarget {
     public var pathInEdit: PathInEdit? { get }               // the one direct-selected shape item, toDocument = its layer at the playhead
     public var anchorSelection: Selection<AnchorRef> { get set }
     public var pathHelp: String? { get }                     // lockedHelp, "Select one shape with Direct Select to edit its points."
-    public mutating func setPath(_ path: VectorPath, name: String, drag: String?) throws  // services.shapes.setPath, "Edit Path"
+    public mutating func setPath(_ path: VectorPath, name: String, drag: String?) throws  // services.shapes.setPath, titled `name`; one drag token folds into one step
     public mutating func runPath(_ intent: PathIntent)       // the intent's command through `catalog`
 }
 // Sources/FlareModel/FlareWorkspace.swift (FP-1): one stored field.

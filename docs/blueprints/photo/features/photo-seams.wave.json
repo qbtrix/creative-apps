@@ -51,7 +51,7 @@
     "Sources/PhotoModel/PhotoFixtures.swift",
     "Tests/PhotoModelTests/PhotoFixturesTests.swift",
     "Sources/PhotoModel/PhotoSelectionMask.swift",
-    "Sources/PhotoModel/PhotoCropSize.swift",
+    "Sources/PhotoModel/PhotoCropTool+Kernel.swift",
     "Sources/PhotoModel/PhotoTransform.swift",
     "Sources/PhotoModel/PhotoEyedropper.swift",
     "Tests/PhotoModelTests/PhotoToolsTests.swift",

@@ -5,7 +5,12 @@
 // file writes. Staleness is computed, never stored: the playhead lives in
 // `HaloComposition`, so a scrub, a tick or any edit makes the frame stale, and
 // scrubbing back or undoing to the same composition makes it fresh again. Not
-// an edit: records no undo step. Linux-safe: no UI imports.
+// an edit: records no undo step. `written(keepingAlpha:)` is what a render
+// writes of a frame (export-pack HX-3): a composition has no background fill,
+// so where nothing draws a frame is clear; with Transparent background off, a
+// movie's frames are flattened over opaque black, as its writer shows them.
+// Linux-safe: no UI imports.
+import CoreRaster
 
 extension HaloProject {
     /// Renders the selected composition at its playhead at a quarter size
@@ -39,5 +44,16 @@ extension HaloProject {
     /// The shown frame's accessibility value: "Rendered frame 12 at 480 × 270".
     public var renderedFrameSummary: String? {
         shownRenderedFrame.map { "Rendered frame \($0.frame) at \($0.pixels.width) × \($0.pixels.height)" }
+    }
+}
+
+extension HaloRenderedFrame {
+    /// This frame as a render writes it: as it is when `keepingAlpha`, else
+    /// composited over opaque black, so nothing in it is transparent.
+    func written(keepingAlpha: Bool) throws -> HaloRenderedFrame {
+        guard !keepingAlpha else { return self }
+        let black = try PixelBuffer(width: pixels.width, height: pixels.height, fill: RGBA(r: 0, g: 0, b: 0, a: 1))
+        let flat = try composite(pixels, onto: black, mode: .normal, opacity: 1)
+        return HaloRenderedFrame(pixels: flat, frame: frame, skippedLayerCount: skippedLayerCount)
     }
 }

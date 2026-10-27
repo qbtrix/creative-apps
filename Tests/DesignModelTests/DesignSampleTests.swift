@@ -93,7 +93,7 @@ import Testing
         #expect(w.treeNode("node-2")?.fill == DesignColor.shape, "the pick is one step")
         w.drag(from: pt(350, 350), to: pt(350, 350), modifiers: .option)
         w.endDrag()
-        #expect(w.treeNode("node-2")?.stroke?.color == DesignColor(255, 0, 0), "Option-click sets the stroke")
+        #expect(w.treeNode("node-2")?.stroke == DesignStroke(color: DesignColor(255, 0, 0), width: 1), "Option-click sets the stroke")
         #expect(w.treeNode("node-2")?.fill == DesignColor.shape, "Option-click leaves the fill")
         #expect(w.selectedNodeID == "node-2")
     }
@@ -124,7 +124,7 @@ import Testing
         w.undo()
         #expect(w.treeNode("node-2")?.fill == DesignColor.shape, "one undo puts the whole pick back")
         try w.applySample(at: Point(x: 350, y: 350), toStroke: true)
-        #expect(w.treeNode("node-2")?.stroke?.color == DesignColor(255, 0, 0))
+        #expect(w.treeNode("node-2")?.stroke == DesignStroke(color: DesignColor(255, 0, 0), width: 1))
         #expect(w.treeNode("node-2")?.fill == DesignColor.shape, "Option-click leaves the fill")
     }
 

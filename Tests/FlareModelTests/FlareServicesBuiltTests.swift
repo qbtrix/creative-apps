@@ -26,8 +26,14 @@ private func reason(_ member: Any) -> String? { (member as? NotBuilt)?.reason }
     for (builtMember, liveMember) in pairs {
         #expect(reason(builtMember) != nil && reason(builtMember) == reason(liveMember))
     }
-    #expect(built.isPreview == live.isPreview)
     #expect(live.shapes is NotBuilt && live.scenes is NotBuilt)
+}
+
+/// The export window picks `FakeRasterizer`/`FakeMedia` while `isPreview` is true, and the stage shows the
+/// "Preview data" pill, so a plain launch must not be preview (#5195).
+@Test func aPlainLaunchIsNotPreview() {
+    #expect(!FlareServices.built.isPreview)
+    #expect(!FlareWorkspace(launch: FlareLaunch(arguments: [])).services.isPreview)
 }
 
 @Test func aPlainLaunchDrawsARectangleThroughLiveShapes() {

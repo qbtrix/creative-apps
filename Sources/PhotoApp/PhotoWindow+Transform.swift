@@ -78,17 +78,21 @@ extension PhotoWindow {
     /// live transform (LiveTransformCopy+Kernel.swift), which the window takes back once.
     private func runTransform(_ edit: SuiteKernel.TransformIntent) {
         let (id, params) = edit.command
-        if Self.isDragSample(edit) {
-            let shown = liveTransform.run(on: model, done: { takeStroke() }) {
-                if (try? PhotoWorkspace.catalog.run(id, params: params, on: &$0)) == nil { NSSound.beep() }
-            }
-            return renderer.show(shown, quietly: true)
-        }
+        if Self.isDragSample(edit) { return runLive(id, params: params) }
         do {
             _ = try PhotoWorkspace.catalog.run(id, params: params, on: &model)
         } catch {
             problem = PhotoProblem("The layer can't be transformed.", error.description)
         }
+    }
+
+    /// Runs one drag sample's catalog command on the live copy, which the window takes back once the
+    /// samples go quiet, and shows it; a refused sample beeps. Tone rows' samples come here too.
+    func runLive(_ id: String, params: JSONValue) {
+        let shown = liveTransform.run(on: model, done: { takeStroke() }) {
+            if (try? PhotoWorkspace.catalog.run(id, params: params, on: &$0)) == nil { NSSound.beep() }
+        }
+        renderer.show(shown, quietly: true)
     }
 
     /// Whether `intent` is one sample of a transform drag, which runs on the live transform.

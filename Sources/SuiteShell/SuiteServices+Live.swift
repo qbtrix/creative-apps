@@ -45,7 +45,7 @@ extension SuiteServices {
             roundTrips: roundTripsSlot(c), pasteboard: pasteboardSlot(c), assets: assetsSlot(c), linking: linkingSlot(c),
             animations: FakeAnimationSource(), preferences: preferencesSlot(c), settings: settingsSlot(c),
             onboarding: onboardingSlot(c), updates: FakeUpdates(), thumbnails: thumbnailsSlot(c), home: homeSlot(c), media: mediaSlot(c),
-            text: textSlot(c), isPreview: false)
+            text: textSlot(c), metadata: metadataSlot(c), isPreview: false)
         s.pending = pendingReasons(liveness: slotLiveness)
         return s
     }

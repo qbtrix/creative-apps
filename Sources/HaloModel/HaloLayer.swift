@@ -3,11 +3,12 @@
 // solid fills, its keyframe tracks, the layer it follows, a text layer's
 // words, a solid's or shape's gradient (gradient-fill HG-1), a shape
 // layer's ShapeSpec (shape-tools HS-1), its stroke (stroke-style HK-1) and a
-// solid's placed picture and focus (placed-images PH-1). Codable; decoding goes through the clamping init. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
+// solid's placed picture and focus (placed-images PH-1) and its layer style (layer-styles HY-1). Codable; decoding goes through the clamping init. Linux-safe: no UI imports. Layers live in `HaloComposition.layers`,
 // top first; HaloProject adds and selects them. `blendMode` is CoreRaster's
 // BlendMode, never a mirror of it.
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
 
 /// What a layer draws: a solid fill, a shape, text, or nothing (a null that
@@ -107,11 +108,14 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         set { storedPlacedFocus = newValue == Self.defaultPlacedFocus ? nil : newValue }
     }
     private var storedPlacedFocus: Point?
+    /// HY-1: the layer's style, SuiteImaging's LayerStyle; nil for none, so an old project opens and re-saves
+    /// unchanged. Coded under "style" only when set.
+    public var style: LayerStyle?
     /// The kernel's default focus in `PlacedImage`, the picture's centre.
     static let defaultPlacedFocus = Point(x: 0.5, y: 0.5)
 
     enum CodingKeys: String, CodingKey {
-        case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text, gradient, shape, stroke, placedAsset
+        case id, name, kind, inFrame, outFrame, color, storedOpacity = "opacity", blendMode, rect, tracks, parentID, text, gradient, shape, stroke, placedAsset, style
         case storedPlacedFocus = "placedFocus"
     }
 
@@ -134,6 +138,7 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         stroke = try c.decodeIfPresent(VectorStroke.self, forKey: .stroke)
         placedAsset = try c.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset)
         placedFocus = try c.decodeIfPresent(Point.self, forKey: .storedPlacedFocus) ?? Self.defaultPlacedFocus
+        style = try c.decodeIfPresent(LayerStyle.self, forKey: .style)
     }
 
     /// Clamps `opacity` to 0...1; a NaN opacity falls back to 1, the default.
@@ -171,6 +176,7 @@ public struct HaloLayer: Identifiable, Codable, Sendable, Hashable {
         copy.stroke = stroke
         copy.placedAsset = placedAsset
         copy.placedFocus = placedFocus
+        copy.style = style
         return copy
     }
 }

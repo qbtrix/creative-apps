@@ -3,7 +3,8 @@
 // document to another app and answers which apps read an extension. It keeps the list it last read and
 // refreshes it after each note, on `refresh()` and on each change `watch()` hears, so a menu reads it without
 // waiting. A refresh drops every file gone from disk from the shared list. Open In's targets and its refusal
-// come from the services' routing slot.
+// come from the services' routing slot. `thumbnails` is the services' shared previews, the one store a
+// process's saves publish to.
 import Foundation
 import Observation
 import SuiteKernel
@@ -17,6 +18,8 @@ import SuiteModel
     /// The shared recents list as last read, newest first.
     public private(set) var items: [RecentItem] = []
     @ObservationIgnored private let services: SuiteServices
+    /// The suite's previews this process publishes saved documents' thumbnails to.
+    public var thumbnails: any ThumbnailPublishing { services.thumbnails }
     @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private let exists: @Sendable (String) -> Bool
 

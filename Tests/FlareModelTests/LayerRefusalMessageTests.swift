@@ -23,6 +23,9 @@ import Testing
     #expect(FlareLayerError.command(.frameOccupied(property: "x", frame: 5)).message
         == "That frame already has a keyframe.")
     #expect(FlareLayerError.command(.symbolInUse("star")).message == "An instance still uses that symbol.")
+    // A command FlareCore hasn't built says so in plain words, without the engine's id (#5283).
+    let notBuilt = FlareLayerError.command(.notBuilt("shapeKey.set is not built yet (animate-properties)")).message
+    #expect(notBuilt == "That isn\u{2019}t built in Flare yet.")
 }
 
 @Test func aFakesSentenceForAPersonPassesThrough() {
