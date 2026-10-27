@@ -216,3 +216,4 @@ ts	kind	note
 2026-10-27T11:13:02Z	waiting	poll	#5088	UP-photo: scoped photo 40487492253 at a5879e2d (contains ef31726a) failed, not ours; #5089 #5091 #5231 open, none needs-fix
 2026-10-27T11:32:52Z	waiting	poll	#5088	UP-photo: no green macOS ci.yml on dev since ef31726a; #5089 #5091 #5231 open, none needs-fix
 2026-10-27T12:00:34Z	waiting	poll	#5088	UP-photo: no green scoped-photo/full macOS run on dev since ef31726a (scoped suiteui 40492777537 green, doesn't count); #5089 #5091 #5231 open, none needs-fix
+2026-10-27T12:30:11Z	waiting	poll	#5089	UP-photo Slice-Done posted (run 40492782438); #5089 #5091 #5231 open, not needs-fix
