@@ -275,3 +275,4 @@ utc	stage	event	ref	note
 2026-10-27T11:36:45Z	check	#5871 open, eligible, no needs-fix/needs-rebase; lane runs cancelled by concurrency, 40495918758 pending; dev at 8a66c983; dev-red #5818 open; no tone-controls findings
 2026-10-27T11:57:07Z	check	#5871 open, eligible in sweep 40490364333 (8 checks green), queued: lane has 12 batches of one in flight; dev 8a66c983 Linux red, #5818 open; no tone-controls findings
 2026-10-27T12:21:09Z	check	#5871 open, eligible again in sweep 40495918758, queued behind lane batches; dev 25aa0ac3 red (Linux, library, suiteui), #5818 open; no tone-controls findings
+2026-10-27T12:46:29Z	check	#5871 open, eligible, queued; dev 66d4c6d8 red: photo-scoped 40504376225 fails macOS compile in DesignModelTests snap tests and SuiteUI PresetGrid (not tone-controls); #5818 open; no tone-controls findings
