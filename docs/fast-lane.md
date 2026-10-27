@@ -115,7 +115,9 @@ passes it. When the tip fails macOS too, it goes by failing test instead
 fail on the base's own gate (BASE_MAC_FAILS), so a batch failing only those
 lands, and one that adds a failing test is bisected to the PR that adds it,
 whose comment names the new tests. A log that can't be read waits; a red
-with no test to name (a build error, a crash) is never the base's.
+with no test to name (a build error, a crash) is never the base's. The
+sharded gate job (`macOS`) only sums its shards, so when its own log names
+no test, mac_tests reads the failed `macOS tests K/N` jobs of its run.
 
 ## A red dev
 

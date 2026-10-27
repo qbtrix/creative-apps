@@ -12,6 +12,7 @@ document.metadata
 document.read-settings
 document.set-settings
 edit.copy
+edit.copy-as
 edit.cut
 edit.delete
 edit.deselect

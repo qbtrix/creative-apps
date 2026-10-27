@@ -6,18 +6,14 @@
 // Highlights −30 and Auto make one "Auto Tone" step; on a Levels adjustment
 // layer Contrast +20 changes the canvas and Sharpen is off with its help;
 // back on the image, Sharpen Amount 80 changes the canvas and Export writes a
-// PNG. Written and skipped until PT-7 turns it on, once the rows have their
-// controls (TC-3) and the tone.* commands run (PT-4). Rows are found by their
+// PNG. Written skipped in PT-6; PT-7 turned it on, with the rows' controls
+// (TC-3) and the tone.* commands (PT-4) live. Rows are found by their
 // `suite.tone.<slider>` ids, Auto by `suite.tone.auto`. Shots: `photo-tone-*`.
 import XCTest
 
 final class PhotoToneJourneyTests: XCTestCase {
-    /// PT-7 sets this false once the rows run on live services.
-    static let waitsOnPT7 = true
-
     /// PJ-T1: white balance, tone and Auto, an adjustment layer's tone, then Sharpen and Export.
     @MainActor func testWarmShadowsAndSharpen() throws {
-        if Self.waitsOnPT7 { throw XCTSkip("waits on PT-7") }
         let folder = FileManager.default.temporaryDirectory.appending(path: "photo-tone-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }

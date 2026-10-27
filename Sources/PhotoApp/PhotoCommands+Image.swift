@@ -30,5 +30,7 @@ struct PhotoImageMenu: View {
         menu.item("image.flip", title: "Flip Canvas Horizontal") { menu.perform(.flipCanvas(.horizontal)) }
         menu.item("image.flip", title: "Flip Canvas Vertical") { menu.perform(.flipCanvas(.vertical)) }
         menu.item("image.straighten") { menu.perform(.straighten) }
+        Divider()
+        PhotoAdjustmentsMenu()
     }
 }

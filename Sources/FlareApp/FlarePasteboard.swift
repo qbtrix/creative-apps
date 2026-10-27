@@ -3,10 +3,12 @@
 // ("org.creativesuite.flare.layers"); no private type. SuiteShell's PasteboardSlot can't carry them: it wraps
 // SuiteModel's FakePasteboard, a pure coder with no system transport that skips the app layer types, so this
 // writes `NSPasteboard.general` directly, the way DesignPasteboardBridge does for `designLayers`.
-// Another app can change the pasteboard and says nothing, so FlarePasteboardWatch polls its change count
-// four times a second (Photo's shape) and publishes it, and the Edit menu re-reads Paste's reason.
+// Another app can change the pasteboard and says nothing, so FlarePasteboardWatch publishes its change count
+// through SuiteShell's PasteboardChangeWatch, which looks when a menu opens or a window becomes key, never on a
+// timer (clipboard-interop CB-8), and the Edit menu re-reads Paste's reason. CB-z deletes this file.
 import AppKit
 import SuiteModel
+import SuiteShell
 import SwiftUI
 
 @MainActor enum FlarePasteboard {
@@ -28,17 +30,16 @@ import SwiftUI
 /// Publishes the pasteboard's change count to the menu bar while the stage shows.
 struct FlarePasteboardWatch: ViewModifier {
     @State private var change = 0
+    @State private var watch: PasteboardChangeWatch?
 
     func body(content: Content) -> some View {
         content
             .focusedSceneValue(\.flarePasteboardChange, change)
-            .task {
-                while !Task.isCancelled {
-                    let count = NSPasteboard.general.changeCount
-                    if count != change { change = count }
-                    do { try await Task.sleep(for: .milliseconds(250)) } catch { return }
-                }
+            .onAppear {
+                change = PasteboardBridge().changeCount
+                watch = PasteboardChangeWatch { change = PasteboardBridge().changeCount }
             }
+            .onDisappear { watch = nil }
     }
 }
 
