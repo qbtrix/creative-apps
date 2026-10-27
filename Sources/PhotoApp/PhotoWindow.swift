@@ -91,7 +91,10 @@ struct PhotoWindow: View {
     }
 
     /// A window on `model`: the launch workspace in the app, a test's own in tests, at `zoom`.
+    /// The workspace reads placed and dropped images through ImageIO from the start, so a drop takes what it offers.
     init(model: PhotoWorkspace = PhotoWindow.launchWorkspace(), zoom: Double = 1) {
+        var model = model
+        model.readImages(with: ImageIOCodec())
         _model = State(initialValue: model)
         _zoom = State(initialValue: zoom)
     }

@@ -54,8 +54,47 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
     @Test func photoNamesItselfAndPlacesImages() {
         let workspace = PhotoWorkspace(services: .fake)
         #expect(workspace.appID == "photo")
-        #expect(workspace.placesExtensions == ["png", "jpg", "jpeg", "heic", "tiff", "psd"])
+        #expect(workspace.placesExtensions == CoreRasterImageCodec().readExtensions)
+        #expect(workspace.placesExtensions.isSuperset(of: ["png", "jpg", "jpeg"]))
         #expect(!workspace.hasDocument)
+    }
+
+    @Test func aDropOnlyTakesWhatTheCodecReads() {
+        var workspace = PhotoWorkspace(services: .fake)
+        workspace.readImages(with: RawCodec())
+        #expect(workspace.placesExtensions == ["png", "jpg", "jpeg"], "a drop took a type the codec can't read")
+    }
+
+    @Test func aPhotoLargerThanTheCanvasIsFittedAndCentred() throws {
+        let big = try redPNG("Big.png", in: tempFolder(), width: 40, height: 20)
+        var workspace = try openedImage()
+        try workspace.perform([.place(path: big)])
+        let layer = try #require(workspace.selectedLayer)
+        #expect(layer.name == "Big")
+        #expect(workspace.pixels[layer.id]?.width == 4 && workspace.pixels[layer.id]?.height == 2, "placed at \(String(describing: workspace.pixels[layer.id]?.width)), not fitted to 4 x 3")
+        #expect(layer.offsetX == 0 && layer.offsetY == 0, "not centred: \(layer.offsetX), \(layer.offsetY)")
+        #expect(workspace.statusMessage == "Placed at 10%.")
+        workspace.undo()
+        #expect(workspace.layers.count == 1)
+    }
+
+    @Test func aSmallPhotoIsNeverUpscaled() throws {
+        let small = try redPNG("Small.png", in: tempFolder(), width: 2, height: 2)
+        var workspace = try openedImage()
+        try workspace.perform([.place(path: small)])
+        #expect(workspace.selectedLayerID.flatMap { workspace.pixels[$0]?.width } == 2)
+        #expect(workspace.statusMessage != "Placed at 100%.")
+    }
+
+    @Test func aHandedOverDropReadsOnlyItsBytes() throws {
+        let folder = try tempFolder()
+        let onDisk = try redPNG("Disk.png", in: folder)
+        let bytes = try Data(contentsOf: URL(fileURLWithPath: try redPNG("Given.png", in: folder)))
+        var workspace = try openedImage()
+        workspace.receiveDropped(["/elsewhere/Given.png": bytes])
+        try workspace.perform([.place(path: "/elsewhere/Given.png")])
+        #expect(workspace.selectedLayer?.name == "Given")
+        #expect(throws: CatalogError.self, "a handed-over drop read the disk") { try workspace.perform([.place(path: onDisk)]) }
     }
 
     @Test func aPNGOnAnOpenImagePlacesOneLayerInOneStep() throws {

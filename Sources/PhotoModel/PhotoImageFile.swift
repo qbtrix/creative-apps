@@ -56,6 +56,13 @@ public protocol PhotoImageCodec: Sendable {
     func decode(_ data: Data, longestSide: Int?) throws -> DecodedImage
     /// `image` as a file in `format`; `quality` (0...1) for JPEG.
     func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data
+    /// The file extensions `decode` reads, lowercased: what Photo takes in a drop.
+    var readExtensions: Set<String> { get }
+}
+
+extension PhotoImageCodec {
+    /// PNG and JPEG, what every codec reads.
+    public var readExtensions: Set<String> { ["png", "jpg", "jpeg"] }
 }
 
 extension PhotoWorkspace {

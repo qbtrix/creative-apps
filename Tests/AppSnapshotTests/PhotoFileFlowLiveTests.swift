@@ -1,8 +1,8 @@
 // PhotoFileFlowLiveTests.swift: file-flow PF-4 (packet photo/features/file-flow.md). The real Photo window,
 // hosted on the render budget harness, notes each open and each save in the suite's shared recents through
 // SuiteDocumentsBridge: opening beach.png and saving it reach the bridge once each, in that order, with the
-// file's path and Photo as the app. PF-3's half, Photo's old Open Recent list imported once and its key
-// removed, is written here and disabled until PF-2 retires the key. Each test gets its own temp folder and a bridge on
+// file's path and Photo as the app. Photo's old Open Recent list is imported once on the first note and its key
+// removed. Each test gets its own temp folder and a bridge on
 // fake services. Nests in BodyCountSuites: hosted windows run one at a time. macOS only.
 #if os(macOS)
 import AppKit
@@ -80,7 +80,7 @@ extension BodyCountSuites {
             #expect(bridge.recents(for: .photo).map(\.path) == [path])
         }
 
-        @Test(.disabled("waits on PF-2: the old key stays until the window switches over"), .timeLimit(.minutes(1)))
+        @Test(.timeLimit(.minutes(1)))
         func theOldListIsImportedOnceAndItsKeyRemoved() async throws {
             let old = try Self.beach().path(percentEncoded: false)
             UserDefaults.standard.set([old], forKey: "PhotoRecentFiles")
