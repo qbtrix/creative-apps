@@ -270,3 +270,4 @@ utc	stage	event	ref	note
 2026-10-27T00:37Z	3	poll	-	lane merged #4903 only; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
 2026-10-27T00:58Z	3	poll	-	lane merged 12 docs/test PRs, none ours; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
 2026-10-27T01:17Z	3	poll	-	dev unchanged; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
+2026-10-27T01:40Z	3	poll	-	dev-red #5818 open (linux red, range main..2c20134c), lane holds PRs on the failing module; not ours to fix; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
