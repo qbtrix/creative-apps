@@ -26,9 +26,10 @@
 // resizes (ZoomMath.scale); `onZoom` gets the fit as a scale, from the
 // environment's `canvasFitScale` (EditorDetail's palette-clear fit) when set.
 // `showsRulers: false` drops the rulers and their corner; the canvas keeps
-// an empty band where they were (CanvasLayout's `inset`), so the artboard
-// doesn't jump. A drag that starts on a ruler goes to `onRulerDrag`, never
-// `onDrag`: a RulerDrag per move and one on release, carrying the ruler's axis
+// their band (CanvasLayout's `inset`) so the artboard doesn't jump, unless
+// `holdsRulerBand` is false: no band, the artboard centred (Library's loupe).
+// A drag that starts on a ruler goes to `onRulerDrag`, never `onDrag`: a
+// RulerDrag per move and one on release, carrying the ruler's axis
 // (.horizontal for the top one), the document coordinate across it and, on
 // release, whether the pointer is back over the ruler (the host removes the
 // guide then). `checkerboard: false` puts the document on the plain artboard color
@@ -84,6 +85,22 @@ public struct CanvasLayout: Equatable, Sendable {
         self.viewport = viewport
         self.inset = inset
         origin = CGPoint(x: (content.width - artboard.width) / 2 + inset, y: (content.height - artboard.height) / 2 + inset)
+    }
+
+    /// The layout a CanvasViewport of `size` draws, and the size it tells its host to fit to. Shown rulers
+    /// take their band; hidden ones leave it as the `inset` while `holdsRulerBand`, so the artboard keeps its
+    /// place as they toggle; without it there is no band and the whole size is the canvas's.
+    public static func inViewport(
+        document: CGSize, zoom: Double, size: CGSize, showsRulers: Bool, holdsRulerBand: Bool
+    ) -> (layout: CanvasLayout, fitSize: CGSize) {
+        let reserved = showsRulers || holdsRulerBand ? SuiteSize.ruler : 0
+        let band = showsRulers ? SuiteSize.ruler : 0
+        let fitSize = CGSize(width: max(size.width - reserved, 0), height: max(size.height - reserved, 0))
+        let layout = CanvasLayout(
+            document: document, zoom: zoom,
+            viewport: CGSize(width: fitSize.width + reserved - band, height: fitSize.height + reserved - band),
+            inset: reserved - band)
+        return (layout, fitSize)
     }
 
     /// The drag out of the `axis` ruler at `point`, in viewport points (the top ruler lies above y 0, the left
@@ -164,6 +181,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     private let pointer: PointerStyle?
     private let checkerboard: Bool
     private let showsRulers: Bool
+    private let holdsRulerBand: Bool
     /// The unit the ruler corner names: "px" unless the app's document is in another one.
     public let rulerUnit: String
     /// The ruler corner's unit under its older name.
@@ -196,10 +214,11 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     /// artboard's size (the document at `zoom`), overlay on top. Only the
     /// content is clipped to the artboard. The checkerboard shows behind it
     /// unless `checkerboard` is false. The ruler corner names `rulerUnit`, or
-    /// `unit` when an app still passes that label; `showsRulers: false` hides them.
+    /// `unit` when an app still passes that label; `showsRulers: false` hides them, and
+    /// `holdsRulerBand: false` (for a canvas that never shows them) gives their band to the canvas.
     public init(
         documentSize: CGSize, zoom: Double, pointer: PointerStyle? = nil, checkerboard: Bool = true,
-        showsRulers: Bool = true, rulerUnit: String = "px", unit: String? = nil,
+        showsRulers: Bool = true, holdsRulerBand: Bool = true, rulerUnit: String = "px", unit: String? = nil,
         onSize: @escaping @MainActor (CGSize) -> Void = { _ in },
         onZoom: (@MainActor (Double) -> Void)? = nil,
         onZoomLevel: (@MainActor (ZoomLevel) -> Void)? = nil,
@@ -215,6 +234,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         self.pointer = pointer
         self.checkerboard = checkerboard
         self.showsRulers = showsRulers
+        self.holdsRulerBand = holdsRulerBand
         self.rulerUnit = unit ?? rulerUnit
         self.onSize = onSize
         self.onZoom = onZoom
@@ -231,14 +251,9 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     public var body: some View {
         GeometryReader { geometry in
             // Hidden rulers leave their band to the canvas, so the size the host fits to stays the same.
-            let band = showsRulers ? SuiteSize.ruler : 0
-            let viewport = CGSize(
-                width: max(geometry.size.width - SuiteSize.ruler, 0),
-                height: max(geometry.size.height - SuiteSize.ruler, 0))
-            let layout = CanvasLayout(
-                document: documentSize, zoom: zoom,
-                viewport: CGSize(width: viewport.width + SuiteSize.ruler - band, height: viewport.height + SuiteSize.ruler - band),
-                inset: SuiteSize.ruler - band)
+            let (layout, viewport) = CanvasLayout.inViewport(
+                document: documentSize, zoom: zoom, size: geometry.size, showsRulers: showsRulers,
+                holdsRulerBand: holdsRulerBand)
             VStack(spacing: 0) {
                 if showsRulers {
                     HStack(spacing: 0) {

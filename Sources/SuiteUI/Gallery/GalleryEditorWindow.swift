@@ -1,6 +1,6 @@
 // GalleryEditorWindow.swift: the gallery's `editor-window` page (editor-in-window, EW-5), driven by
-// SuiteJourneyTests+EditorWindow.swift. A SuiteWindow from the `sidebar:` init (it skips the -SuiteGallery check,
-// so the page never recurses): the save state as subtitle, Pages with a SidebarActionRow and Layers in the sidebar,
+// SuiteJourneyTests+EditorWindow.swift. A SuiteWindow from the internal `galleryPage: nil, sidebar:` init (no
+// -SuiteGallery check, so the page never recurses): the save state as subtitle, Pages with a SidebarActionRow and Layers in the sidebar,
 // New and Open beside the title, Save, Undo, Redo and the zooms trailing, an EditorDetail with a 1600 x 1000 artboard
 // fitted by EditorDetailLayout, and a 304 pt inspector. Add and Delete Page are the edits Undo and Redo step through;
 // a tool's key picks it. Opened from the index, the page sizes its window to the editor's launch size (the
@@ -61,8 +61,8 @@ private struct GalleryEditorWindowPage: View {
 
     private var window: some View {
         SuiteWindow(
-            title: title, subtitle: edited ? "Edited" : "", documentActions: documentActions, actions: actions,
-            inspectorWidth: Self.inspectorWidth
+            galleryPage: nil, title: title, subtitle: edited ? "Edited" : "", documentActions: documentActions,
+            actions: actions, inspectorWidth: Self.inspectorWidth
         ) {
             sidebar
         } content: {

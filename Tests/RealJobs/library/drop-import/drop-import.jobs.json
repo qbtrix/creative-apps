@@ -12,7 +12,7 @@
   "atomic": true,
   "output": {"dir": "out", "name": "drop-import", "format": "json", "options": {"contents": "shown"}},
   "expect": {
-    "out/drop-import.json": {"json": {"shown": ["IMG_0001.jpg", "IMG_0002.jpg", "IMG_0003.jpg"], "selected": 3, "handOffs": [{"path": "input/Intro.halo", "app": "halo"}]}}
+    "out/drop-import.json": {"json": {"original": false, "shown": ["IMG_0001.jpg", "IMG_0002.jpg", "IMG_0003.jpg"], "selected": 3, "handOffs": [{"path": "input/Intro.halo", "app": "halo"}]}}
   },
   "platforms": []
 }

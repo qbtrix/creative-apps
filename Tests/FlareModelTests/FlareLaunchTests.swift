@@ -71,3 +71,13 @@ func missingValuesUnknownFlagsAndNamesGiveNone(arguments: [String]) {
     #expect(workspace.document == FlareFixtures.named("character"))
     #expect(workspace.services.scenes is FakeScenes)
 }
+
+@Test func exportFrameDelayFlagSlowsTheFakesPNGFrames() {
+    let launch = FlareLaunch(arguments: ["-FlareFixture", "bounce", "-FlareExportFrameDelay", "200"])
+    #expect(launch.exportFrameDelay == .milliseconds(200))
+    #expect((FlareWorkspace(launch: launch).services.export as? FakeExport)?.frameDelay == .milliseconds(200))
+    // Without it the fakes keep their 20 ms; a value that isn't a whole number of ms is ignored.
+    let plain = FlareLaunch(arguments: ["-FlareFixture", "bounce", "-FlareExportFrameDelay", "soon"])
+    #expect(plain.exportFrameDelay == nil)
+    #expect((FlareWorkspace(launch: plain).services.export as? FakeExport)?.frameDelay == .milliseconds(20))
+}
