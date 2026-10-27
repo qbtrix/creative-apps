@@ -101,17 +101,21 @@ struct FlareTimelineEdit: View {
         return MenuCommand(FlareWorkspace.menuSpec(for: .timeline(intent)), on: reason, title: title) { perform(.timeline(intent)) }
     }
 
-    /// The label's name: Return or Add Label sets it at the playhead.
+    /// The label's name: Return or Add Label sets it at the playhead. Both read the name as typed when they run, not
+    /// as it was when the popover last drew: a Return typed right behind the letters can arrive before that redraw,
+    /// and would otherwise find an empty name and add nothing (#2495).
     private var labelField: some View {
         let name = labelName.trimmingCharacters(in: .whitespaces)
         let add: @MainActor () -> Void = {
+            let typed = labelName.trimmingCharacters(in: .whitespaces)
+            guard !typed.isEmpty else { return }
             namingLabel = false
-            perform(.timeline(.setLabel(name)))
+            perform(.timeline(.setLabel(typed)))
         }
         return VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             TextField("Label at frame \(model.currentFrame)", text: $labelName)
                 .accessibilityIdentifier("flare.timeline.labelName")
-                .onSubmit { if !name.isEmpty { add() } }
+                .onSubmit { add() }
             MenuCommand(FlareWorkspace.menuSpec(for: .timeline(.setLabel(name))),
                         on: FlareWindow.timelineHelp(.setLabel(name), in: model), title: "Add Label", perform: add)
         }
