@@ -73,7 +73,7 @@ import Testing
     }
 
     @Test func aScriptsLottieOutputIsNamedJSONAndOpensAgain() throws {
-        let script = #"{"version":1,"app":"flare","inputs":["input/*.json"],"steps":[],"output":{"dir":"out","name":"{stem}-copy","format":"lottie"}}"#
+        let script = #"{"version":1,"app":"flare","inputs":["input/*.json"],"steps":[{"id":"shape.set-fill","params":{"sceneID":"scene-1","layerID":"layer-2","index":0,"fill":{"r":1,"g":0.5,"b":0,"a":1}}}],"output":{"dir":"out","name":"{stem}-copy","format":"lottie"}}"#
         let io = FakeIO(files: ["job.jobs.json": Data(script.utf8), "input/bounce.json": try Self.bounce()])
         let code = CLI.run(["run", "job.jobs.json"], io: io)
         #expect(code == 0, "run exited \(code): \(io.stderr) \(io.stdout)")
