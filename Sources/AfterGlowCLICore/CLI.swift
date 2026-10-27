@@ -2,7 +2,7 @@
 // CL-4 fills it: Arguments parses, the router runs the form over the registry
 // through CLIIO, and Output prints one JSON object (plus a stderr line on
 // failure). A refused run writes nothing: every check and the command run
-// before the write. `run` and `mcp` hand off to ScriptRunner and MCPServer.
+// before the write, and `--in-place` refuses on a file the app only imports. `run` and `mcp` hand off to ScriptRunner and MCPServer.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -77,6 +77,9 @@ public enum CLI {
         case .command(let app, let step, let input, let output, let force):
             var session = try open(input, as: app, io: io)
             let target = output ?? input
+            if output == nil, !app.savesNatively(to: input), let native = app.openExtensions.first {
+                throw Refusal.usage("--in-place would write a .\(native) over \(input); pass --out <file>.\(native)")
+            }
             if output != nil { try refuseExisting([target], force: force, io: io) }
             if let why = session.availability(step.id).why { throw CatalogError.unavailable(id: step.id, why: why) }
             let dropped = try DropFiles.attach([step], dir: "", io: io)

@@ -37,6 +37,13 @@ public struct HeadlessApp: Sendable {
         make = { options in HeadlessSession(app: D.app, box: TypedSession(document: try new(options))) }
     }
 
+    /// Whether a save may land on `path`: its extension is the app's native one. A file opened as an import (a
+    /// Lottie .json, a PNG) never gets the native format written over it.
+    public func savesNatively(to path: String) -> Bool {
+        let file = path.split(separator: "/").last.map(String.init) ?? path
+        return file.lastIndex(of: ".").map { file[file.index(after: $0)...].lowercased() } == openExtensions.first
+    }
+
     /// Every command the app runs, by id.
     public func describeAll() -> [CommandDescription] { describe() }
 

@@ -254,8 +254,9 @@ final class PhotoCropJourneyTests: XCTestCase {
         let numbers = (max(0, value - slack)...(value + slack)).map(String.init).joined(separator: "|")
         // The whole number before " px" or " pixel(s)", not the tail of a longer one.
         let pattern = "(?s)(.*[^0-9])?(\(numbers)) (px|pixel).*"
+        // By label alone: the row is a slider, so its value is a number a regex can't match (#4822).
         let field = photo.app.descendants(matching: .any).matching(identifier: id)
-            .matching(NSPredicate(format: "label MATCHES %@ OR value MATCHES %@", pattern, pattern)).firstMatch
+            .matching(NSPredicate(format: "label MATCHES %@", pattern)).firstMatch
         let shown = slack == 0 ? "\(value)" : "\(value) ± \(slack)"
         XCTAssert(field.waitForExistence(timeout: 5), "\(id) doesn't read \(shown) px (it reads \(text(of: id, photo)))")
     }

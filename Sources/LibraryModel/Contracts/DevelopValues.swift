@@ -128,14 +128,30 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
     public private(set) var crop: CropSettings?
     /// How the photo faces before its crop (orientation-crop OC-8); up writes no key.
     public private(set) var orientation: Orientation = .up
+    /// Black & White's weights; nil: in colour. Stored under `bw`.
+    public private(set) var bw: GrayWeights?
+    /// Every colour turned to its opposite. Stored under `invert`.
+    public private(set) var invert = false
 
     public static let neutral = DevelopSettings()
     public init() {}
 
     public var isNeutral: Bool { self == .neutral }
-    /// True when every slider is neutral, the curve is the identity and levels
-    /// are neutral (the crop may still be set).
-    public var isAdjustmentNeutral: Bool { tone.isNeutral(nil) && curve.isIdentity && levels == .neutral }
+    /// True when every slider is neutral, the curve is the identity, levels
+    /// are neutral and no kind is on (the crop may still be set).
+    public var isAdjustmentNeutral: Bool {
+        tone.isNeutral(nil) && curve.isIdentity && levels == .neutral && bw == nil && !invert
+    }
+
+    /// The kinds after the tone passes: Black & White, then Invert.
+    public var kinds: [ImagingKind] { (bw.map { [.blackAndWhite($0)] } ?? []) + (invert ? [.invert] : []) }
+    /// A copy with the kinds `k` holds: its Black & White weights and whether it inverts.
+    public func setting(kinds k: [ImagingKind]) -> DevelopSettings {
+        var copy = self
+        copy.bw = k.lazy.compactMap { if case .blackAndWhite(let w) = $0 { w } else { nil } }.first
+        copy.invert = k.contains(.invert)
+        return copy
+    }
 
     public func value(_ slider: ToneSlider) -> Double { tone.value(slider) }
 
@@ -188,7 +204,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return bytes.reduce(0xcbf2_9ce4_8422_2325 as UInt64) { ($0 ^ UInt64($1)) &* 0x0000_0100_0000_01b3 }
     }
 
-    /// A slider's raw value, or crop, curve, levels or orientation: the develop object's flat keys.
+    /// A slider's raw value, or crop, curve, levels, orientation, bw or invert: the develop object's flat keys.
     private struct Key: CodingKey {
         let stringValue: String
         init(_ name: String) { stringValue = name }
@@ -196,6 +212,7 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         var intValue: Int? { nil }
         init?(intValue: Int) { nil }
         static let crop = Key("crop"), curve = Key("curve"), levels = Key("levels"), orientation = Key("orientation")
+        static let bw = Key("bw"), invert = Key("invert")
         static func slider(_ s: ToneSlider) -> Key { Key(s.rawValue) }
     }
 
@@ -217,6 +234,8 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         curve = decodedCurve.isIdentity ? .identity : decodedCurve
         levels = try c.decodeIfPresent(DevelopLevels.self, forKey: .levels) ?? .neutral
         orientation = try c.decodeIfPresent(Orientation.self, forKey: .orientation) ?? .up
+        bw = try c.decodeIfPresent(GrayWeights.self, forKey: .bw)
+        invert = try c.decodeIfPresent(Bool.self, forKey: .invert) ?? false
     }
 
     /// The six original sliders always and the crop when set (so persist's golden
@@ -230,6 +249,8 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         if !curve.isIdentity { try c.encode(curve, forKey: .curve) }
         if levels != .neutral { try c.encode(levels, forKey: .levels) }
         if orientation != .up { try c.encode(orientation, forKey: .orientation) }
+        if let bw { try c.encode(bw, forKey: .bw) }
+        if invert { try c.encode(true, forKey: .invert) }
     }
 }
 

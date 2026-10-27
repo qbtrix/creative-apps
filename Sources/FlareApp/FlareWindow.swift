@@ -19,10 +19,12 @@
 // the export sheet is FlareExportSheetAdapter's, shown while the Model's run
 // isn't idle.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
-// `help` for every section 3.4 item, the Undo and Redo step names, the recent
-// files, Loop and the selection's Edit reasons, and File > Place…'s reason and
-// action; the window takes SVG drops (FlarePlace.swift).
+// `help` for every section 3.4 item, the Undo and Redo step names, Loop and
+// the selection's Edit reasons, and File > Place…'s reason and action; the
+// window takes SVG drops (FlarePlace.swift). The model's file flow follows the
+// suite's recents (the bridge's list, the only one Open Recent reads; #5126).
 import FlareModel
+import SuiteModel
 import SuiteShell
 import SuiteUI
 import SwiftUI
@@ -107,6 +109,7 @@ struct FlareWindow: View {
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
+        .onChange(of: Self.bridge.recents(for: .flare), initial: true) { model.updateFileFlow(recents: $1) }
         .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: model) }, write: { model.takeLive($0) })
         .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .focusedSceneValue(
@@ -114,7 +117,7 @@ struct FlareWindow: View {
             FlareMenu(
                 perform: { menuPerform($0) }, help: { menuHelp($0) },
                 undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
-                recent: model.recent, loops: model.loops, editHelps: model.editHelps,
+                loops: model.loops, editHelps: model.editHelps,
                 selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)],
                 placeHelp: model.placeMenuHelp, place: { choosePlace() },
                 document: model.suiteDocument, documentSettings: { presented = .settings },

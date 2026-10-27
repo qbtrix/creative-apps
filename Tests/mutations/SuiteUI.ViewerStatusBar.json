@@ -2,5 +2,7 @@
 {"label":"an error pill draws in the warning color","file":"Sources/SuiteUI/ViewerStatusBar.swift","find":"case .error: SuiteColor.stateError","replace":"case .error: SuiteColor.stateWarning","tests":"SuiteStatusSnapshots"},
 {"label":"an error pill takes the warning triangle","file":"Sources/SuiteUI/ViewerStatusBar.swift","find":"case .error: \"exclamationmark.circle.fill\"","replace":"case .error: \"exclamationmark.triangle.fill\"","tests":"SuiteStatusSnapshots"},
 {"label":"an error pill sits on the warning tint","file":"Sources/SuiteUI/ViewerStatusBar.swift","find":"case .error: SuiteColor.errorTint","replace":"case .error: SuiteColor.warningTint","tests":"SuiteStatusSnapshots"},
-{"label":"Library draws a failed save as a warning (#3132)","file":"Sources/LibraryApp/LibraryStatusBar.swift","find":"case .error: .error","replace":"case .error: .warning","tests":"LibraryStatusSnapshots"}
+{"label":"Library draws a failed save as a warning (#3132)","file":"Sources/LibraryApp/LibraryStatusBar.swift","find":"case .error: .error","replace":"case .error: .warning","tests":"LibraryStatusSnapshots"},
+{"label":"the zoom pill draws in primary ink (#3136)","file":"Sources/SuiteUI/ViewerStatusBar.swift","find":"pill(.plain) { Text(zoomText)","replace":"pill(.plain) { Text(zoomText).foregroundStyle(SuiteColor.textPrimary)","tests":"SuiteStatusSnapshots"},
+{"label":"plain pills draw in primary ink","file":"Sources/SuiteUI/ViewerStatusBar.swift","find":"case .plain, .toggle: SuiteColor.textSecondary","replace":"case .plain, .toggle: SuiteColor.textPrimary","tests":"SuiteStatusSnapshots"}
 ]

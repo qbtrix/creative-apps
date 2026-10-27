@@ -8,15 +8,17 @@
 // the turn moves by a whole 15° step from 10. A second launch, with keyboard
 // navigation on, Tabs through every `suite.transform.*` row and both flips.
 // The page's log (`suite.gallery.log`)
-// names each command it ran. The rows read out spoken ("15 degrees"); the
-// knob's turn is the `suite.handles.turn` read-out. Steps 2 to 4 assert what
+// names each command it ran. The rows are sliders, so they read out their
+// number ("15"); the knob's turn is the `suite.handles.turn` read-out ("15 degrees"). Steps 2 to 4 assert what
 // the page does once TT-5's rules and TT-7's live target land.
 import XCTest
 
 final class SuiteTransformJourneyTests: XCTestCase {
-    /// The row's value as the rows read it out (`suite.transform.<row>`).
+    /// The row's number (`suite.transform.<row>`): each row is a slider, so macOS gives its value as a number (#4822).
     @MainActor private static func value(_ gallery: Journey, _ row: String) -> String {
         let element = gallery.element("suite.transform.\(row)")
+        // Whole, as the rows show it: the slider reports the raw Double, which a turned resize can leave at 79.99….
+        if let number = element.value as? NSNumber { return String(Int(number.doubleValue.rounded())) }
         return (element.value as? String) ?? element.label
     }
 
@@ -46,7 +48,7 @@ final class SuiteTransformJourneyTests: XCTestCase {
         for name in ["topLeft", "top", "topRight", "right", "bottomRight", "bottom", "bottomLeft", "left", "rotate"] {
             XCTAssert(gallery.element("suite.handles.\(name)").exists, "no handle \(name)")
         }
-        XCTAssertEqual(["x", "y", "w", "h", "rotation"].map { Self.value(gallery, $0) }, ["100", "80", "200", "120", "0 degrees"])
+        XCTAssertEqual(["x", "y", "w", "h", "rotation"].map { Self.value(gallery, $0) }, ["100", "80", "200", "120", "0"])
         gallery.shot("transform-open")
 
         // 2. A quarter turn clockwise on the knob: 90°, one transform.rotate per sample under one drag token.
@@ -54,7 +56,7 @@ final class SuiteTransformJourneyTests: XCTestCase {
         let centre = box.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         knob.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             .press(forDuration: 0.1, thenDragTo: centre.withOffset(CGVector(dx: 120, dy: 0)))
-        XCTAssertEqual(Self.value(gallery, "rotation"), "90 degrees")
+        XCTAssertEqual(Self.value(gallery, "rotation"), "90")
         let log = gallery.element("suite.gallery.log").label
         XCTAssert(log.contains("transform.rotate") && !log.contains("transform.set"), "the knob drag ran \(log)")
         gallery.shot("transform-turned")
@@ -69,14 +71,14 @@ final class SuiteTransformJourneyTests: XCTestCase {
 
         // 4. Flip Horizontal: the turn reads -90 degrees, the box doesn't move; the log names one transform.flip.
         gallery.element("suite.transform.flip-horizontal").click()
-        XCTAssertEqual(Self.value(gallery, "rotation"), "-90 degrees")
+        XCTAssertEqual(Self.value(gallery, "rotation"), "-90")
         XCTAssertEqual(Self.frame(gallery), ["80", "100", "240", "120"], "Flip Horizontal moved the box")
         XCTAssert(gallery.element("suite.gallery.log").label.contains("transform.flip"), "no transform.flip in the log")
         gallery.shot("transform-flipped")
 
         // Flip Vertical mirrors it back to 90 degrees, again in place.
         gallery.element("suite.transform.flip-vertical").click()
-        XCTAssertEqual(Self.value(gallery, "rotation"), "90 degrees")
+        XCTAssertEqual(Self.value(gallery, "rotation"), "90")
         XCTAssertEqual(Self.frame(gallery), ["80", "100", "240", "120"], "Flip Vertical moved the box")
         XCTAssert(gallery.element("suite.gallery.log").label.contains("transform.flip"), "no transform.flip in the log")
 
@@ -92,18 +94,17 @@ final class SuiteTransformJourneyTests: XCTestCase {
         gallery.press(character: "a", .command)
         typing.typeText("10")
         gallery.press(.return)
-        XCTAssertEqual(Self.value(gallery, "rotation"), "10 degrees")
+        XCTAssertEqual(Self.value(gallery, "rotation"), "10")
         XCUIElement.perform(withKeyModifiers: .shift) {
             knob.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
                 .press(forDuration: 0.1, thenDragTo: centre.withOffset(CGVector(dx: 100, dy: 37)))
         }
-        let spoken = Self.value(gallery, "rotation")
-        let degrees = Double(spoken.replacingOccurrences(of: " degrees", with: "").replacingOccurrences(of: " degree", with: "")) ?? 1
+        let degrees = Double(Self.value(gallery, "rotation")) ?? 1
         XCTAssertNotEqual(degrees, 10, "the Shift-drag didn't turn the box")
         XCTAssertEqual((degrees - 10).truncatingRemainder(dividingBy: 15), 0, "the Shift-drag turned \(degrees - 10)°, not a 15° step")
         let turn = gallery.element("suite.handles.turn")
         XCTAssertEqual(turn.label, "Rotate")
-        XCTAssertEqual(turn.value as? String, spoken)
+        XCTAssertEqual(turn.value as? String, "\(Int(degrees)) degrees")
         gallery.shot("transform-snapped")
     }
 
