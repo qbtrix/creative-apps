@@ -277,3 +277,4 @@ utc	stage	event	ref	note
 2026-10-27T18:27Z	3	check-in	finding-open	H-J12 still red at 04e6a4b4 (#5891); PlayHittable green
 2026-10-27T20:00Z	3	check-in	waiting	halo 40554102602 at 79a9f50c queued; nothing new
 2026-10-27T21:34Z	3	check-in	waiting	halo 40554102602 cancelled at 13 cases; halo 40584004208 at e4f1c950 queued
+2026-10-27T23:07Z	3	check-in	waiting	halo 40590212020 at 6dab26f7 running
