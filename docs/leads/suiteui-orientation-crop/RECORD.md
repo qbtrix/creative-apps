@@ -122,3 +122,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-27T07:43:07Z critic panel pending: no photo/full journeys with screens since compile fix (dev 841d4d88)
 - 2026-10-27T08:04:09Z critic panel: full CI 40470141862 at ef9d2ace running; its journeys should give the Photo screens
 - 2026-10-27T08:24:09Z critic panel: full CI 40470141862 compiled green at ef9d2ace, tests queued; journeys follow
+- 2026-10-27T08:44:36Z critic panel waits on journeys after full CI 40470141862 (tests running)
