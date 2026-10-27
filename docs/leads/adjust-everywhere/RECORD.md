@@ -343,3 +343,5 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 05:04Z check-in: #5247 (needs-rebase dropped), #5248, #5249 clean with fast-lane, awaiting batch. main unchanged (fef52e668), no Belt-Slice-Done yet. dev-red #5818 open (not ours).
 - 05:23Z check-in: #5247/#5248/#5249 clean with fast-lane; lane last ran 04:51Z, holding while dev-red #5818 is open. main unchanged, no Belt-Slice-Done yet.
 - 05:44Z check-in: unchanged. #5247/#5248/#5249 clean with fast-lane; no fast-lane run since 04:51Z; dev-red #5818 open; main fef52e668.
+
+- 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5247 #5248 ready; #5249 (AJ-halo) conflicts in HaloModel (DocumentValues, DrawRules, LiveFrameRendering), fixing next; #5250..#5260 stacked.
