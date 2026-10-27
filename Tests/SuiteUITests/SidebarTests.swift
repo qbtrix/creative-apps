@@ -89,3 +89,13 @@ import Testing
     #expect(toggle.reserved == ["lock.open"])
     #expect(SidebarToggle(id: "l", title: "Lock", onSymbol: "lock", offSymbol: "lock.open", isOn: true).reserved.isEmpty)
 }
+
+@Test func aRowNoticeCarriesItsSymbolAndTitleToTheSecondLevel() {
+    let missing = SidebarNotice(systemImage: "exclamationmark.triangle", title: "Every photo here is missing")
+    let grandchild = SidebarItem(id: "g", title: "family", systemImage: "folder", notice: missing)
+    let child = SidebarItem(id: "c", title: "trips", systemImage: "folder", children: [grandchild])
+    let parent = SidebarItem(id: "p", title: "Photos", systemImage: "folder", children: [child])
+    #expect(parent.secondLevelRows.map(\.notice) == [nil, missing])
+    #expect(SidebarItem(id: "a", title: "All", systemImage: "photo").notice == nil)
+    #expect(missing.identifier(in: "g") == "suite.sidebar.g.notice")
+}

@@ -1,7 +1,8 @@
 // SidebarRow.swift: SidebarItem (id, title, SF Symbol or an app's mark,
-// optional count, row toggles, children, dimmed), SidebarToggle, and the row SuiteWindow draws for an
-// item. A dimmed item (a hidden or locked layer) draws its title and symbol in
-// SuiteColor.textSecondary (SidebarRowLook) and stays selectable; its toggles
+// optional count, row toggles, children, dimmed, a notice), SidebarToggle, SidebarNotice, and the row
+// SuiteWindow draws for an item. A notice (a folder whose files are all missing) is a symbol in
+// SuiteColor.stateWarning after the title, its title as tooltip and accessibility label. A dimmed
+// item (a hidden or locked layer) draws its title and symbol in SuiteColor.textSecondary (SidebarRowLook) and stays selectable; its toggles
 // draw as on any row. Row height follows the system sidebar size setting, so nothing here
 // fixes a height. The row owns only presentation state (the rename field);
 // toggles and renames go out through closures, and a nil closure turns that
@@ -35,13 +36,16 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
     /// Draws the title and symbol in SuiteColor.textSecondary, for a hidden or
     /// locked layer. The row stays selectable and its toggles are unchanged.
     public let isDimmed: Bool
+    /// A warning drawn after the title (every file under a folder missing); nil draws none.
+    public let notice: SidebarNotice?
 
     public init(
         id: String, title: String, systemImage: String, count: Int? = nil,
         toggles: [SidebarToggle] = [], children: [SidebarItem] = [], app: SuiteApp? = nil,
-        isDimmed: Bool = false
+        isDimmed: Bool = false, notice: SidebarNotice? = nil
     ) {
         self.isDimmed = isDimmed
+        self.notice = notice
         self.id = id
         self.title = title
         self.systemImage = systemImage
@@ -63,7 +67,8 @@ public struct SidebarItem: Identifiable, Hashable, Sendable {
         children.flatMap { child in
             [SidebarItem(
                 id: child.id, title: child.title, systemImage: child.systemImage, count: child.count,
-                toggles: child.toggles, app: child.app, isDimmed: child.isDimmed)] + child.secondLevelRows
+                toggles: child.toggles, app: child.app, isDimmed: child.isDimmed, notice: child.notice)]
+                + child.secondLevelRows
         }
     }
 }
@@ -98,6 +103,20 @@ public struct SidebarToggle: Identifiable, Hashable, Sendable {
     public func identifier(in itemID: SidebarItem.ID) -> String {
         "suite.sidebar.\(itemID).\(id)"
     }
+}
+
+/// A warning on a row: `systemImage` drawn in SuiteColor.stateWarning, `title` its tooltip and accessibility label.
+public struct SidebarNotice: Hashable, Sendable {
+    public let systemImage: String
+    public let title: String
+
+    public init(systemImage: String, title: String) {
+        self.systemImage = systemImage
+        self.title = title
+    }
+
+    /// The notice's accessibility identifier in the row of item `itemID`.
+    public func identifier(in itemID: SidebarItem.ID) -> String { "suite.sidebar.\(itemID).notice" }
 }
 
 /// Where a click lands in a row: the title label, the blank space between
@@ -219,6 +238,13 @@ public struct SidebarRow: View {
         HStack(spacing: SuiteSpacing.xs) {
             title
             Spacer(minLength: SuiteSpacing.s)
+            if let notice = item.notice {
+                Image(systemName: notice.systemImage)
+                    .foregroundStyle(SuiteColor.stateWarning)
+                    .help(notice.title)
+                    .accessibilityLabel(notice.title)
+                    .accessibilityIdentifier(notice.identifier(in: item.id))
+            }
             ForEach(item.toggles) { toggle in
                 Toggle(isOn: Binding(get: { toggle.isOn }, set: { _ in onToggle?(toggle.id) })) {
                     Label { Text(toggle.title) } icon: { SidebarToggleIcon(toggle: toggle) }
