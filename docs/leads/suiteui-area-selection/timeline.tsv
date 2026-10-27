@@ -234,3 +234,4 @@ time	task	event	note
 2026-10-27T16:44Z	3	heartbeat	lane	poll 2026-10-27T16:44Z: 16:45Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (macOS red; triage now guesses #5066, a non-Belt SuiteUI sweep PR; not ours). #5093 awaiting supervisor.
 2026-10-27T16:50Z	3	poll	lane	check-in: no lane merge; dev c08adcbb, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on local-ci/prescreen and the lane
 2026-10-27T17:16Z	3	poll	lane	no change; waiting on prescreen and lane
+2026-10-27T17:31Z	3	heartbeat	lane	poll 2026-10-27T17:31Z: 17:31Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (macOS red, re-run at c08adcb pending). #5093 awaiting supervisor.

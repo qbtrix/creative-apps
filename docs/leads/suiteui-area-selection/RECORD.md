@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-27T17:16Z
+Polled: 2026-10-27T17:31Z · 17:31Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (macOS red, re-run at c08adcb pending). #5093 awaiting supervisor.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -61,5 +61,3 @@ Polled: 2026-10-27T17:16Z
 Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and a mutating setter; AreaRecipe init() and isEmpty) are already on dev c480d848. Only the packet text is stale; AR-photo-u and AR-z need no change.
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.
-- 2026-10-27T16:50Z check-in: no lane merge; dev c08adcbb, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on local-ci/prescreen and the lane
-- 2026-10-27T17:16Z 17:16Z: poll; PRs open, clean, fast-lane; main fef52e66, waiting on the lane and the prescreen.
