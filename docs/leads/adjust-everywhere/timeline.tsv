@@ -169,3 +169,4 @@ utc	stage	event	ref	note
 10:28Z	3	waiting-lane	#5247 #5248 #5249	none merged or ejected; dev 9d87b7a01; main fef52e668
 10:48Z	3	fix-conflict	#5249	#5249 dirty vs dev (text-style TS-9 catalog); merged dev locally b42175259, gating
 10:57Z	3	waiting-lane	#5247 #5248 #5249	#5249 dev merge b42175259 passed gate, pushed, Head moved; clean
+2026-10-27T11:00Z	check-in	11:00Z: no change; #5096 #5245 #5247 #5248 clean and ready, lane held by dev-red #5818, main fef52e66. FH-c chain (#5107 #5108 #5129) waits on #5093 (supervisor).
