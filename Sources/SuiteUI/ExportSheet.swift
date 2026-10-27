@@ -1,6 +1,6 @@
 // ExportSheet.swift: SuiteExportSheet (EK-30), drawn over ExportSheetRows, a
 // readout of the kernel's ExportRun: Format chips (one row of equal chips up
-// to four formats, else rows of three: formatColumns), Size (unless the host draws
+// to four formats, else rows of three: formatColumns), Size (a multiplier, "1.00×"; unless the host draws
 // its own scale), (when the format takes one) Quality and (when the host passes
 // a policy) Metadata rows, 8 pt apart, then the host's own options rows (the slot, #1989),
 // a progress bar while running, the finished or failed line after, and the
@@ -54,6 +54,8 @@ public struct ExportSheetRows: Hashable, Sendable {
         /// The kernel's size on an artwork `source` pixels big at 1x (XP-3 placeholder; XP-4 the modes).
         case pixels(SuiteExportSize, source: Int, Int)
         case metadata(ExportMetadata)
+        /// The unit its value reads with: Size is a multiplier ("1.00×"), Quality a plain 0...1.
+        public var unit: String { if case .size = self { "×" } else { "" } }
     }
     public enum Line: Hashable, Sendable { case finished(String), failed(String) }
     /// The modes the Size chips offer, in drawing order.
@@ -288,7 +290,8 @@ public struct SuiteExportSheet<Options: View>: View {
                     .accessibilityLabel("Format")
                     .suiteControl(id: ids.formats, enabled: readout.editable, reason: readout.editable ? nil : "The export is under way or done.")
             }
-        case .size(let scale): StudioScrubRow(label: "Size", value: scale, range: 0.25...4, step: 0.25, onChange: onScale)
+        case .size(let scale):
+            StudioScrubRow(label: "Size", value: scale, range: 0.25...4, step: 0.25, unit: row.unit, onChange: onScale)
         case .quality(let q): StudioScrubRow(label: "Quality", value: q, range: 0...1, step: 0.05, onChange: onQuality)
         case .pixels(let size, let w, let h): sizeRow(size, source: (w, h))
         case .metadata(let policy):
@@ -324,7 +327,7 @@ public struct SuiteExportSheet<Options: View>: View {
                 .suiteControl(id: ids.size, enabled: enabled, reason: reason)
             switch size {
             case .scale(let s):
-                StudioScrubRow(label: "Scale", value: s, range: 0.25...4, step: 0.25, onChange: { send(.scale($0)) })
+                StudioScrubRow(label: "Scale", value: s, range: 0.25...4, step: 0.25, unit: ExportSheetRows.Row.size(s).unit, onChange: { send(.scale($0)) })
                     .suiteControl(id: ids.size(.scale), enabled: enabled, reason: reason)
             case .pixels(let w, let h, let stretch):
                 InspectorRow("Width") {
