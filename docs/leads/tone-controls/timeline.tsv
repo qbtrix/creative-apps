@@ -271,3 +271,4 @@ utc	stage	event	ref	note
 2026-10-27T10:10Z	check	#5871 green, unmerged; dev-red #5818 open (flake re-run of 40480510598 at 09:54Z). dev at 42f18cbd: scoped photo 40484860852 running (no PT-8 in it). No tone-controls findings. Waiting
 2026-10-27T10:31Z	check	#5871 "eligible" in lane run 40483630027 (no code, 8 checks green), not merged yet; many lane runs cancelled by concurrency. dev-red #5818 real per flake check (10:17Z). No tone-controls findings. Waiting
 2026-10-27T10:50:44Z	check	#5871 open, eligible, no new lane comments; dev-red #5818 open; dev at 4a7d926f with CI queued; no tone-controls findings
+2026-10-27T11:15:33Z	check	#5871 open, eligible, no needs-fix/needs-rebase; lane run 40493932825 in progress; dev-red #5818 open; no tone-controls findings
