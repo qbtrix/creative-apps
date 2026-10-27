@@ -262,3 +262,4 @@ utc	stage	event	ref	note
 2026-10-27T06:51Z	check	No change: #5860 open, no lane decision; dev-red #5818 open (updated 06:43Z); scoped runs at c367fbeb red on the SuiteUI compile break (not ours); no photo run. Waiting
 2026-10-27T07:16Z	check	SuiteUI compile fix #5868 landed (dev d771167b; Linux check running). #5860 still open, merges clean with dev, no lane decision; dev-red #5818 open. Waiting
 2026-10-27T07:36Z	check	No change: #5860 open, no lane decision; dev-red #5818 open; dev 841d4d88, Linux green at d771167b, no photo/full run since the compile fix. Waiting
+2026-10-27T07:57Z	check	#5860 open, no lane decision; dev-red #5818 open. Full CI 40470141862 and scoped photo 40470145594 running at ef9d2ace (no PT-z PR in it yet; a green one may close #5818 and free the lane). Waiting
