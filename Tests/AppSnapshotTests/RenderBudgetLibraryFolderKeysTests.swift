@@ -2,9 +2,10 @@
 // photos in their month folders (`large-folders`), the folders packet's keyboard parity row and its key-step
 // budget (docs/render-contract.md rule 3). Focus in the sidebar, the down arrow walks from the selected
 // collection to the folder root, the right arrow opens it, the down arrow walks into its months (each step
-// shows that folder in the grid) and the left arrow closes it again. Each arrow is a key down and up sent
-// straight to the key-capable window and timed with the layout and display it forces: p95 at or under 16 ms
-// (8 ms target) in a release build; a debug build only checks the walk. macOS only.
+// shows that folder in the grid) and the left arrow closes it again; library-folder-key-{open,month,closed}.png
+// record those steps. Each arrow is a key down and up sent straight to the key-capable window and timed with
+// the layout and display it forces: p95 at or under 16 ms (8 ms target) in a release build; a debug build only
+// checks the walk. macOS only.
 #if canImport(AppKit)
 import AppKit
 import LibraryModel
@@ -48,6 +49,7 @@ extension BodyCountSuites {
             try await press(Self.right)
             #expect(outline.numberOfRows > shut, "the right arrow didn't open the folder root")
             #expect(outline.isItemExpanded(outline.item(atRow: root)))
+            try Self.capture(w.host, "library-folder-key-open")
             let cells = { w.identifiers().filter { $0.hasPrefix("library.grid.cell.") } }
             let all = Set(cells())
             try await press(Self.down)
@@ -57,11 +59,13 @@ extension BodyCountSuites {
             try await press(Self.down)
             #expect(outline.selectedRow == root + 2, "the down arrow didn't step to the second month")
             #expect(Set(cells()) != month, "the second month's grid shows the first month's cells")
+            try Self.capture(w.host, "library-folder-key-month")
             for _ in 0..<8 { try await press(Self.down) }
             for _ in 0..<10 { try await press((126, "\u{F700}")) }
             #expect(outline.selectedRow == root, "the up arrow didn't walk back to the folder root")
             try await press(Self.left)
             #expect(outline.numberOfRows == shut, "the left arrow didn't close the folder root")
+            try Self.capture(w.host, "library-folder-key-closed")
 
             let sorted = steps.sorted()
             let p95 = SuiteFrameProbe.nearestRank(sorted, 0.95) ?? 0
@@ -69,6 +73,18 @@ extension BodyCountSuites {
             #if !DEBUG
             #expect(p95 <= 16, "a folder arrow step at 10,000 photos took p95 \(p95) ms (budget 16, target 8)")
             #endif
+        }
+
+        /// The window as it stands after a step, in `.build/snapshots/<name>.png`, outside the timed press.
+        static func capture(_ view: NSView, _ name: String) throws {
+            guard let image = view.bitmapImageRepForCachingDisplay(in: view.bounds) else {
+                throw SnapshotError.render(name)
+            }
+            view.cacheDisplay(in: view.bounds, to: image)
+            guard let png = image.representation(using: .png, properties: [:]) else { throw SnapshotError.encode(name) }
+            let folder = try packageRoot().appending(path: ".build/snapshots")
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try png.write(to: folder.appending(path: "\(name).png"))
         }
 
         /// A key down and up for `characters`, sent straight to `window`.
