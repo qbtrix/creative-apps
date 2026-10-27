@@ -18,6 +18,8 @@ enum PhotoIntent {
     case newImage, open, save, saveAs, imageSize
     case openFile(URL)
     case rotate(QuarterTurn)
+    /// Image > Flip Canvas: mirrors every layer across the canvas through `image.flip`.
+    case flipCanvas(FlipDirection)
     /// Opens the Straighten sheet; `applyStraighten` turns the image by its choices.
     case straighten
     case applyStraighten(degrees: Double, cropToFit: Bool)
@@ -26,6 +28,8 @@ enum PhotoIntent {
     case drag(CGPoint, CGPoint)
     case endDrag
     case toolOption(ToolOptionEdit)
+    /// One change to the Paint Bucket's options (PhotoRetouchOptions).
+    case bucketOption(BucketOptionEdit)
     /// One GradientEditor gesture on the Gradient tool's fill (PhotoFillToolOptions).
     case gradientOption(GradientIntent)
     case adjust(AdjustmentEdit)
@@ -66,9 +70,12 @@ extension PhotoTool: PaletteTool {
         case .brush: "Brush"
         case .eraser: "Eraser"
         case .clone: "Clone"
+        case .spotHeal: "Spot Heal"
         case .heal: "Heal"
+        case .remove: "Remove"
         case .crop: "Crop"
         case .eyedropper: "Eyedropper"
+        case .bucket: "Paint Bucket"
         case .gradient: "Gradient"
         case .text: "Type"
         case .pen: "Pen"
@@ -82,9 +89,12 @@ extension PhotoTool: PaletteTool {
         case .brush: "paintbrush.pointed"
         case .eraser: "eraser"
         case .clone: "square.on.square"
+        case .spotHeal: "bandage.fill"
         case .heal: "bandage"
+        case .remove: "wand.and.stars"
         case .crop: "crop"
         case .eyedropper: "eyedropper"
+        case .bucket: "drop.fill"
         case .gradient: "square.bottomhalf.filled"
         case .text: "textformat"
         case .pen: "pencil.tip"
@@ -98,9 +108,13 @@ extension PhotoTool: PaletteTool {
         case .brush: "b"
         case .eraser: "e"
         case .clone: "s"
+        case .spotHeal: "j"
         case .heal: "j"
+        // Shift-J cycling through Spot Heal, Heal and Remove waits on SuiteUI.
+        case .remove: nil
         case .crop: "c"
         case .eyedropper: "i"
+        case .bucket: "g"
         case .gradient: "g"
         case .text: "t"
         case .pen: "p"

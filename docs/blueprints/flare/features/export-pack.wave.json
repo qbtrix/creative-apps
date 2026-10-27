@@ -2,7 +2,7 @@
   "title": "Export a scene as MP4 or a looping GIF",
   "wave": 6,
   "order": 20,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "flare/export-pack (adopter of S11 and E9); RJ-F07, RJ-F08",

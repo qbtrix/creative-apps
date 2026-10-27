@@ -27,7 +27,21 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone, heal, crop, eyedropper, gradient, text, pen
+    case move, marquee, brush, eraser, clone
+    /// Spot Heal (fill-heal): a click heals a spot from its surroundings. Before
+    /// Heal, so J picks it first once it works.
+    case spotHeal = "spot-heal"
+    case heal
+    /// Remove (fill-heal): paint over an object; its area fills from around it.
+    case remove
+    case crop, eyedropper
+    /// Paint Bucket (fill-heal): a click fills the seed's colour region. Before
+    /// Gradient, so G picks it first once it works.
+    case bucket
+    case gradient, text, pen
+
+    /// The retouch tools' help until their commands reach Photo (fill-heal FH-7, FH-8).
+    public static let retouchHelp = "Fill and heal arrive with fill-heal FH-8."
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
@@ -36,6 +50,7 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     public var unavailableHelp: String? {
         switch self {
         case .eyedropper: "Not built yet (PV-9)."
+        case .bucket, .spotHeal, .remove: Self.retouchHelp
         default: nil
         }
     }
@@ -81,6 +96,9 @@ public struct PhotoWorkspace: Sendable {
     public private(set) var brushOptions = ToolOptions()
     /// The eraser's own size, hardness and opacity; it has no color.
     public private(set) var eraserOptions = ToolOptions()
+    /// The Paint Bucket's Tolerance, Contiguous and All Layers (fill-heal FH-3);
+    /// changed by `setBucketOption` (PhotoBucketOptions.swift).
+    public internal(set) var bucketOptions = BucketOptions()
     public internal(set) var adjustments = AdjustmentSettings()
     /// The marquee selection in canvas pixels; nil for none.
     public internal(set) var selection: PixelRect?
@@ -115,7 +133,7 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
     /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
     public internal(set) var editsMask = false
-    /// The crop's aspect lock (PhotoCropSize.swift).
+    /// The crop's aspect lock (PhotoCropTool+Kernel.swift).
     public internal(set) var cropAspect = CropAspect.free
     /// Free Transform in progress (PhotoTransform.swift).
     public internal(set) var transformDraft: TransformDraft?
@@ -389,7 +407,7 @@ extension PhotoWorkspace: Equatable {
         lhs.revision == rhs.revision && lhs.canvas == rhs.canvas && lhs.documentName == rhs.documentName
             && lhs.layers == rhs.layers && lhs.layerSelection == rhs.layerSelection && lhs.tool == rhs.tool
             && lhs.brushOptions == rhs.brushOptions
-            && lhs.eraserOptions == rhs.eraserOptions && lhs.adjustments == rhs.adjustments
+            && lhs.eraserOptions == rhs.eraserOptions && lhs.bucketOptions == rhs.bucketOptions && lhs.adjustments == rhs.adjustments
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
             && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
             && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask && lhs.area == rhs.area

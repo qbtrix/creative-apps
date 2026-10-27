@@ -35,22 +35,24 @@ struct HaloRenderMovieRows: View {
     var body: some View {
         let busyHelp = editing ? nil : busy
         let alphaHelp = Self.alphaHelp(settings, busy: busyHelp)
-        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             if settings.format == .movie {
-                Text("Codec").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
-                Picker("Codec", selection: Binding(get: { settings.codec }, set: { act(.settings(settings.choosing(codec: $0))) })) {
-                    ForEach(HaloRenderSettings.codecs, id: \.self) { codec in
-                        Text(HaloRenderSettings.codecTitle(codec))
-                            .tag(codec)
-                            .disabled(HaloRenderSettings.codecRefusal(codec) != nil && codec != settings.codec)
+                VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+                    Text("Codec").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
+                    Picker("Codec", selection: Binding(get: { settings.codec }, set: { act(.settings(settings.choosing(codec: $0))) })) {
+                        ForEach(HaloRenderSettings.codecs, id: \.self) { codec in
+                            Text(HaloRenderSettings.codecTitle(codec))
+                                .tag(codec)
+                                .disabled(HaloRenderSettings.codecRefusal(codec) != nil && codec != settings.codec)
+                        }
                     }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .fixedSize()
+                    .disabled(!editing)
+                    .help(Self.codecHelp(busy: busyHelp) ?? "")
+                    .haloControl(id: "halo.render.codec", enabled: editing, help: busyHelp)
                 }
-                .pickerStyle(.menu)
-                .labelsHidden()
-                .fixedSize()
-                .disabled(!editing)
-                .help(Self.codecHelp(busy: busyHelp) ?? "")
-                .haloControl(id: "halo.render.codec", enabled: editing, help: busyHelp)
             }
             Toggle(
                 "Transparent background",

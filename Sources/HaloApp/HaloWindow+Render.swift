@@ -244,25 +244,30 @@ struct HaloRenderOptionRows: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
-            Text("Size").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
-            ChoiceChips(
-                options: [
-                    InspectorOption(id: false, title: "Full", identifier: "halo.render.size.full"),
-                    InspectorOption(id: true, title: "Half", identifier: "halo.render.size.half"),
-                ],
-                selected: settings.halfSize
-            ) { act(.settings(settings.choosing(halfSize: $0))) }
+        // Groups sit SuiteSpacing.s apart, as the sheet's own Format group does; a label sits xs over its control.
+        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+            VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+                Text("Size").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
+                ChoiceChips(
+                    options: [
+                        InspectorOption(id: false, title: "Full", identifier: "halo.render.size.full"),
+                        InspectorOption(id: true, title: "Half", identifier: "halo.render.size.half"),
+                    ],
+                    selected: settings.halfSize
+                ) { act(.settings(settings.choosing(halfSize: $0))) }
+            }
             HaloRenderMovieRows(settings: settings, editing: editing, busy: Self.busy, act: act)
-            Text("Folder").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
-            HStack(spacing: SuiteSpacing.s) {
-                Text(destination?.lastPathComponent ?? "None")
-                    .lineLimit(1).truncationMode(.middle)
-                    // Dimmed with the sheet by colour, not opacity: an opacity dim read 2.41:1 (#4661).
-                    .foregroundStyle(destination == nil || !isEnabled ? SuiteColor.textSecondary : SuiteColor.textPrimary)
-                    .help(destination?.path(percentEncoded: false) ?? Self.noDestination)
-                MenuCommand(HaloMenuState.spec("render.choose-folder"), on: HaloMenuState(project: model)) { act(.choose) }
-                    .haloControl(id: "halo.render.destination", enabled: editing, help: editing ? nil : Self.busy)
+            VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+                Text("Folder").font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
+                HStack(spacing: SuiteSpacing.s) {
+                    Text(destination?.lastPathComponent ?? "None")
+                        .lineLimit(1).truncationMode(.middle)
+                        // Dimmed with the sheet by colour, not opacity: an opacity dim read 2.41:1 (#4661).
+                        .foregroundStyle(destination == nil || !isEnabled ? SuiteColor.textSecondary : SuiteColor.textPrimary)
+                        .help(destination?.path(percentEncoded: false) ?? Self.noDestination)
+                    MenuCommand(HaloMenuState.spec("render.choose-folder"), on: HaloMenuState(project: model)) { act(.choose) }
+                        .haloControl(id: "halo.render.destination", enabled: editing, help: editing ? nil : Self.busy)
+                }
             }
             if let progress = model.renderProgressText {
                 InspectorNote(progress, identifier: "halo.render.frame", column: Self.labelColumn)

@@ -65,6 +65,7 @@ struct AllAppsCatalogTests {
             "viewer.drag-end: stepNamedTitle", "viewer.drag-end: editRecordsOneStep", "viewer.drag-end: undoRestoresBytes"],
         "The kernel's transform.flip and image.flip are titled Flip while their steps name the axis": [
             "transform.flip: stepNamedTitle", "image.flip: stepNamedTitle"],
+        "The kernel's tone.set is titled Tone while its step names the slider": ["tone.set: stepNamedTitle"],
         // PY-5 (layer-styles) fills Photo's style adapter and drops this entry.
         "Photo's style.* runs throw notBuilt until layer-styles PY-5": [
             "style.add: exampleRuns", "style.enable: exampleRuns", "style.fill-opacity: exampleRuns", "style.panel: exampleRuns",

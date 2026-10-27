@@ -24,9 +24,11 @@ last owner of `PhotoCommandCatalog.swift` and `Tests/command-ids/photo.txt`).
 
 **Hand-offs:** PY-7 edits `PhotoRenderRoute.swift`, which suite-imaging's
 IM-photo also lists (cross-line); PY-7 starts after IM-photo's
-`Belt-Slice-Done:`. The Layers panel's `fx` button and row menu are the
-Layers-panel actions crew's (see the shared packet); Photo binds nothing
-there itself.
+`Belt-Slice-Done:`. The Layers panel's action bar and row menu are SuiteUI's (merged), but
+Photo builds its own items in `PhotoLayerList.swift`: PY-2 moves its `fx`
+button off the disabled `LayerActionBar.effects(identifier:)` placeholder onto
+the `style.panel` spec, and SuiteUI's LS-13 then deletes the placeholder
+(#5327).
 
 **Rule 20.** No Photo style type, panel, pasteboard code or renderer.
 `PhotoLayer.style` is SuiteImaging's `LayerStyle`; `PhotoStyle+Kernel.swift` is
@@ -127,7 +129,7 @@ extension PhotoWorkspace: LayerStyleTarget {
 | id | issue | what | owned files | depends on | size |
 |---|---|---|---|---|---|
 | PY-1 | – | `PhotoLayer.style`; the adapter as stubs (`showStylePanel` real); the specs in the catalog and the ids; `PhotoLayerStyleTests` written, disabled | `Sources/PhotoModel/PhotoLayer.swift`, `Sources/PhotoModel/PhotoStyle+Kernel.swift`, `Sources/PhotoModel/PhotoCommandCatalog.swift`, `Tests/command-ids/photo.txt`, `Tests/PhotoModelTests/PhotoLayerStyleTests.swift` | LS-a | ~250, 5 |
-| PY-2 | – | Layer menu items (Layer Style…, Copy, Paste, Clear Layer Style) bound by id; the panel as a sheet while `stylePanel` is set, intents run through the catalog, copy and paste through `LayerStylePasteboard` | `Sources/PhotoApp/PhotoCommands+Layer.swift`, `Sources/PhotoApp/PhotoWindow+Styling.swift`, `Sources/PhotoApp/PhotoWindow.swift` | PY-1 | ~160, 3 |
+| PY-2 | – | Layer menu items (Layer Style…, Copy, Paste, Clear Layer Style) bound by id; the panel as a sheet while `stylePanel` is set, intents run through the catalog, copy and paste through `LayerStylePasteboard`; the Layers bar's `fx` button runs `style.panel` (`PhotoLayerList.bar` builds it from the spec, no longer `LayerActionBar.effects`) | `Sources/PhotoApp/PhotoCommands+Layer.swift`, `Sources/PhotoApp/PhotoWindow+Styling.swift`, `Sources/PhotoApp/PhotoWindow.swift`, `Sources/PhotoApp/PhotoLayerList.swift`, `Tests/AppSnapshotTests/PhotoLayerRowSnapshots.swift` | PY-1 | ~180, 5 |
 | PY-3 | – | Snapshots and the render budget test | `Tests/AppSnapshotTests/PhotoLayerStyleSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetPhotoLayerStyleTests.swift` | PY-2 | ~180, 2 |
 | PY-4 | – | The journey written and skipped (`XCTSkip("waits on PY-8")`) | `UITests/PhotoJourneyTests+LayerStyle.swift` | PY-2 | ~120, 1 |
 | PY-5 | – | The adapter's bodies; turns on `PhotoLayerStyleTests` | `Sources/PhotoModel/PhotoStyle+Kernel.swift`, `Tests/PhotoModelTests/PhotoLayerStyleTests.swift`, `Tests/mutations/PhotoModel.PhotoStyle+Kernel.json` | PY-1, LS-m | ~260, 3 |
@@ -152,7 +154,7 @@ PY-8 is the prose task.
 | id | test | fails when | mutations |
 |---|---|---|---|
 | PY-1 | `PhotoLayerStyleTests` compiles, disabled; the command-id list matches the catalog; `style.panel` sets `stylePanel` | an id is missing | – (stub) |
-| PY-2 | `PhotoLayerStyleSnapshots.panel` (PY-3's, first in the slice PR) | the sheet or a menu item is missing | – (UI) |
+| PY-2 | `PhotoLayerStyleSnapshots.panel` (PY-3's, first in the slice PR); `PhotoLayerRowSnapshots.barMatchesTheLayerMenu`: `fx` matches the Layer Style… menu item and running it sets `stylePanel` | the sheet or a menu item is missing, or `fx` stays disabled | – (UI) |
 | PY-3 | `PhotoLayerStyleSnapshots`; `RenderBudgetPhotoLayerStyleTests.distanceScrubInThreeBodies` | budget over | – (UI) |
 | PY-4 | compiles, skipped | – | – |
 | PY-5 | `PhotoLayerStyleTests`: `style.add` on two selected image layers is one step; an adjustment layer in the selection is skipped, alone it refuses with its help; 120 `style.set` under one token undo in one | a layer is missed, an adjustment layer takes a style, or a drag is many steps | `PhotoModel.PhotoStyle+Kernel`: adjustment layers not skipped → `.adjustmentLayersRefuse`; drag not passed → `.dragIsOneStep` |

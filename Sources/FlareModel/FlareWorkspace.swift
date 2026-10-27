@@ -51,6 +51,9 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     }
     /// The picked anchors of the path in edit (FlareAnchors+Kernel.swift).
     var anchorSelectionStore = Selection<AnchorRef>()
+    /// The last path edit's drag key and the document it left, while the next edit under that key may fold into it
+    /// (FlareAnchors+Kernel.swift); nil when none may.
+    var pathDrag: (key: String, document: Document)?
     /// The marquee under way, in scene points; nil when none is.
     public internal(set) var marquee: Rect?
     /// The shape the drag under way would add, for the live preview; nil

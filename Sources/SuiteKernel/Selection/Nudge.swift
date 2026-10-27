@@ -21,10 +21,10 @@ public enum Nudge {
         }
     }
 
-    /// The history key a run of nudges records under: `base` plus the ids, so
-    /// the same edit on the same selection folds into one step and a new
-    /// edit or selection starts a new one.
+    /// The history key a run of nudges records under: `CoalesceKey`'s key for
+    /// `base` on the ids, so the same edit on the same selection folds into one
+    /// step and a new edit or selection starts a new one.
     public static func runKey(_ base: String, _ ids: [some Hashable & CustomStringConvertible]) -> String {
-        base + ":" + ids.map(\.description).joined(separator: "\u{1F}")
+        CoalesceKey.key(base, on: ids.map(\.description))
     }
 }

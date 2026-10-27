@@ -114,6 +114,7 @@ struct LibraryWindow: View {
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
         .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
         .modifier(trashArea)  // Photo > Delete Rejected Photos… and its confirm (LibraryWindow+Trash.swift)
+        .modifier(filesArea)  // Remove from Catalog… and Locate… (LibraryWindow+Files.swift)
         .task {
             importAreaLaunch()
             persistAreaLaunch()

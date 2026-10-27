@@ -1,7 +1,7 @@
 {
   "id": "kernel-selection",
   "name": "Selection",
-  "description": "Selection<ID>, the one ordered selection: the picked ids in picking order, the primary (the last picked), the anchor, one pick rule (replace, toggle, extend over an order) with canAdd, replace, clear, selectAll, prune and an arrow move in a grid. EK-2 declares it as a stub that keeps its ids; EK-10 fills the bodies and adds Nudge and Marquee here.",
+  "description": "Selection<ID>, the one ordered selection: the picked ids in picking order, the primary (the last picked), the anchor, one pick rule (replace, toggle, extend over an order) with canAdd, replace, clear, selectAll, prune and an arrow move in a grid, plus Nudge and Marquee. Area selection lives here too: AreaShape (rect, ellipse, lasso, polygon, wand), AreaCombine from the held keys, AreaRecipe (the ordered steps with invert, feather and expand) and the ten AreaSelectCommands; GroupPick is the group-aware click with Enter and Exit Group. Design adopts GroupPick (DesignGroupPick+Kernel.swift); Photo adopts the area commands (PhotoArea+Kernel.swift).",
   "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
   "paths": ["Sources/SuiteKernel/Selection/"],
   "order": 30
