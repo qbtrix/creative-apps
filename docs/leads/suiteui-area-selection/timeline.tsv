@@ -245,3 +245,4 @@ time	task	event	note
 2026-10-27T19:38Z	3	waiting	lane	poll: no merges; PRs clean, needs-rebase dropped on #5096
 2026-10-27T20:02Z	3	waiting	lane	poll: no merges; dev unmoved since 19:12
 2026-10-27T20:14Z	3	heartbeat	lane	poll 2026-10-27T20:14Z: 2026-10-27T20:14Z check-in: no PR changes (#5149, #5096 6e1a5700, #5103, #5254, #5256 open, no fix labels). Stripped a footer from #5254's body. dev-red #5818 open; triage still names #3651, not ours. No #5093 answer, no main run newer than 38363734665.
+2026-10-27T20:26Z	3	waiting	lane	poll: no merges; dev unmoved since 19:12
