@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 03:20Z poll: full CI 40439893721 red on shard 3 (AfterGlowHomeLayoutTests.homeAtEachWidth, suite home, not ours); halo-scoped 40439890285 tests running: HF-z line if green; #4936/#5123/#5801 queued, no labels
 - 03:03Z poll: halo-scoped 40439890285 (b971f99b) compile+bundles green, tests queued; full CI 40439893721 on 9c320a9a running; either green gives HF-z its line; #4936/#5123/#5801 queued, no labels
 - 02:49Z poll: supervisor posted Mac-Finish HF-a (gaps #5028); halo-scoped run 40439890285 running on b971f99b (contains 2cf71ce9): HF-z slice-done if green; #4936/#5123/#5801 queued, no labels
 - 02:27Z poll: dev Linux green at 9108a0bc (quarantine cleared), #5818 still open (macOS); no halo-scoped or full green run containing 2cf71ce9 yet; #4936/#5123/#5801 queued, no labels
