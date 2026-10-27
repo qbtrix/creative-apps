@@ -268,7 +268,7 @@ private enum Param {
     static let id = ParamSchema.string("A composition or layer id.", maxLength: 64)
     static let name = ParamSchema.string(maxLength: 255)
     static let unit = ParamSchema.number(minimum: 0, maximum: 1)
-    static let property = ParamSchema.string(oneOf: HaloProperty.allCases.map(\.rawValue))
+    static let property = ParamSchema.string(oneOf: HaloProperty.keyable.map(\.rawValue))
     static let point = HaloProject.obj(["x": .number(), "y": .number()])
 
     struct None: Decodable, Sendable {}; struct Kind: Decodable, Sendable { var kind: HaloLayerKind }
