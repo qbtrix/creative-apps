@@ -72,6 +72,7 @@ struct LibraryCommands: Commands {
     @FocusedValue(\.libraryFilters) private var focusedFilters
     @FocusedValue(\.libraryCatalog) private var focusedCatalog
     @FocusedValue(\.libraryTrash) private var focusedTrash
+    @FocusedValue(\.libraryFiles) private var focusedFiles
 
     private var menu: LibraryMenu { focused ?? .disabled }
     private var filters: LibraryFiltersMenu { focusedFilters ?? LibraryFiltersMenu() }
@@ -253,6 +254,9 @@ struct LibraryCommands: Commands {
         collectionPhotoItems
         Divider()
         Self.deleteRejectsItem(focusedTrash)
+        // Remove from Catalog… and Locate…, the grid's context menu (LibraryWindow+Files.swift).
+        LibraryFilesContextMenu(
+            model: catalog, files: focusedFiles ?? LibraryFilesActions(removeWhy: Self.noWindow, locateWhy: Self.noWindow))
     }
 
     @ViewBuilder private var metadataItems: some View {
