@@ -64,6 +64,7 @@ Next: #5157 (HY-a) ready on fcdeb1b2, in the lane; when it lands merge dev into 
 - 2026-10-24 (revised): the supervisor answered (#3936, 10:55Z) that building HY-7 ahead on the StyleRoute stub with a Wire line is right, superseding the earlier "not built ahead". Open point asked on #3936: the viewer draws items in a SwiftUI Canvas and no app holds a RenderDispatcher yet; feeding StyleRoute a layer RenderSurface per frame means a PixelBuffer upload per step (render-contract rule 3). HY-7 is built once the route shape is answered; until then the viewer draws styled layers unstyled and the journey stays skipped.
 
 ## Open
+- 09:18Z check: #5157 (HY-a) still open, clean, waiting in the lane; #5161/#5218 draft; full CI 40470141862 (contains HY-m) pending; working file-flow #5123 after #4936 landed
 - 2026-10-26T18:40Z: correction to 15:46Z. Code PRs land in batches of one (#5106, #5267, #5263). Fast-lane run 40375597431 calls #5158 and #5174 eligible, queued behind 9 open p0 PRs and about 46 older beta PRs, which is a day or more at the current rate. I asked the supervisor on #3936 (comment 6424372363) about putting p0 on #5174 and #5158.
 - 2026-10-26T15:46Z: root cause of the wait: while dev-red #5321 (macOS) is open the lane forms no code batch (CLAUDE.md, fast lane), so #5158 and #5174 land when #5321 closes or via the supervisor's local Mac gate.
 - 2026-10-26T13:57Z: four identical polls (#5158, #5174 eligible, unbatched); `Question for the supervisor:` on #3936 proposing the local Mac gate for #5174 then #5158.
