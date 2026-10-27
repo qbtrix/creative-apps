@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-27T20:51Z
+Polled: 2026-10-27T21:17Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -406,3 +406,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T20:51Z 2026-10-27T20:51Z poll: dev moved to 7d9c09b0 (#4942, #5925; not ours), main fef52e66, dev-red #5818 open (not ours); all lead PRs still clean with fast-lane, waiting on local-ci/prescreen. #5258 (AJ child on #5249) gained needs-split: split it when restacking after #5249 lands.
 - 20:54Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev 7d9c09b02, main fef52e668.
 - 21:14Z check-in: no change. #5247, #5249, #5252 clean, waiting for local-ci/prescreen. dev e74363e92, main fef52e668.
+- 2026-10-27T21:17Z 2026-10-27T21:17Z poll: dev ddd9b77a (#5927 #5123 #5242 landed, not ours), main fef52e66, dev-red #5818 open (not ours); all lead PRs clean with fast-lane, none red. AJ children wait on #5247/#5249.
