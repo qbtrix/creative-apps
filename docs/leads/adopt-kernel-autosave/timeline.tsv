@@ -187,3 +187,4 @@ utc	stage	event	ref	note
 2026-10-27T06:04:31Z	all	heartbeat	AK-8 still blocked on SC-f
 2026-10-27T06:22:46Z	3	heartbeat	lane	AK-8 still waits on shared-codecs SC-15/16; AK-11 waits on AK-8
 2026-10-27T06:36:01Z	3	heartbeat	lane	AK-8 still blocked on shared-codecs SC-15/16
+2026-10-27T06:58:37Z	3	heartbeat	lane	check-in 07:00Z: lane holds open PRs; dev-red #5818 open; scoped suiteui 40460982303 red (dev-red)
