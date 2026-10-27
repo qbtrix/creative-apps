@@ -229,3 +229,4 @@ utc	stage	event	ref	note
 2026-10-27T01:44:27Z	wait	poll	-	dev red on quarantine at 2cf71ce9
 2026-10-27T02:06:11Z	wait	poll	-	slice PRs queued
 2026-10-27T02:27:33Z	wait	poll	-	dev Linux green; awaiting halo run
+2026-10-27T02:49:06Z	wait	poll	-	halo scoped run on b971f99b running
