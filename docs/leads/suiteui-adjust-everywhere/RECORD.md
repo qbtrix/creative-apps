@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-27T13:20Z
+Polled: 2026-10-27T13:47Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -368,3 +368,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 13:05Z check-in: #5247/#5248/#5249 open+clean, none merged. Lane: #5248 eligible (Fast-Check + local-ci/prescreen); #5247 (fef4bfd91) and #5249 (15ade3a63) wait for supervisor prescreen. main still fef52e668: no Belt-Slice-Done for AJ-k/AJ-u yet. Dependents stay local until parents land.
 - 2026-10-27T13:20Z heartbeat: no merges of ours; dev-red #5818 open (triage blames #5334)
 - 13:36Z check-in: none of #5247/#5248/#5249 merged yet (all clean). Lane 13:20: dev green again, stale batches dropped and re-forming; #5248 eligible, #5247/#5249 still wait for local-ci/prescreen. main unchanged (fef52e668), no Belt-Slice-Done yet.
+- 2026-10-27T13:47Z check-in: no lane merge; dev c6ba84b3, main fef52e66, dev-red #5818 open; all 13 PRs clean, waiting on prescreen and the lane
