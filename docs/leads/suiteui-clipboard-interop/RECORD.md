@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-27T05:09Z · 05:1xZ: no change. The lane holds while dev-red #5818 is open (revert #5827 not landed). Five lead PRs are ready. #5093 still waits on the supervisor.
+Polled: 2026-10-27T05:57Z · 05:5xZ: #5137 (FH-c, fix for #5094) merged into dev as 73be788d in a batch of one. dev-red #5818 is still open. #4896 #5096 #5125 #5149 are ready. #5093 still waits on the supervisor. FH-c is done only once #5093 lands and a main ci.yml run contains both.
 
 
 
@@ -94,3 +94,4 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
   - CB-13 (Photo): shared-codecs SC-photo (no SC-3/SC-4 commits). CB-14: AR-photo-m.
   - CB-15/16: every adopt slice, AR-z.
 - 2026-10-22T21:32Z recheck from sources: frame-rates is built (FR-flare, FR-halo met). CB-6/8/10 still wait placed-images:PL-m (packet planned); CB-12 shared-thumbnails:ST-m (planned); CB-13 shared-codecs:SC-photo (planned); CB-14 area-selection:AR-photo-m (planned). The earlier run's supervisor answer (park) stands: parked until upstream adopt slices land; rechecked each wave.
+- 2026-10-27T05:56:32Z Resume, run act-1a17be7afb7-bht9: CB-library #5116 merged to dev (02:42Z). CB-flare #4902, CB-design #4904, CB-halo #4905 needs-rebase: merged origin/dev (CLI goldens merged by command id; Halo catalog/tests take dev's file-flow specs then CB-10's pair). Gating serially. #5149 (CB-13), #5125 (CB-14) clean, waiting on lane (dev-red #5818).
