@@ -188,3 +188,4 @@ utc	stage	event	ref	note
 2026-10-27T04:30:13Z	done	poll	#3756	OC complete; full journeys 40445248646 in progress, critic panel when done
 2026-10-27T04:49:36Z	done	poll	#3756	OC complete; full journeys 40445248646 cancelled, re-run 40450411543 + photo journeys 40449642359 in progress; critic panel when done
 2026-10-27T05:12:13Z	done	poll	#3756	OC complete; journeys 40450411543 (full) and 40449642359 (photo) still in Journeys wait; critic panel when done
+2026-10-27T05:31:55Z	done	poll	#3756	OC complete; photo journeys 40449642359 now running ui-test on macOS (since 05:24); full 40450411543 still in Journeys wait; critic panel when one finishes
