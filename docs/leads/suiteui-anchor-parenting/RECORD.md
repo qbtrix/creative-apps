@@ -130,3 +130,4 @@ Run act-1a1695ebfeb-d54n, 2026-10-23T15:30Z; supersedes the tables' PR/state col
 - 2026-10-27T02:02Z (act-1a177ff0916-4jm7): poll: dev 9108a0bc; dev-red #5818 still open; lane merged #4899 and #5826, none ours; #5819 AN-u still queued at 9dfc99f3; AN-10 waits on #4902
 - 2026-10-27T02:25Z (act-1a177ff0916-4jm7): poll: dev 7703c60d; dev-red #5818 still open; lane merged #5041 only, not ours; #5819 AN-u still queued at 9dfc99f3; AN-10 waits on #4902
 - 2026-10-27T02:47Z (act-1a177ff0916-4jm7): poll: dev 75533612; dev-red #5818 still open, none of ours merged; #5819 AN-u waiting; AN-10 waits on #4902
+- 2026-10-27T03:10Z (act-1a177ff0916-4jm7): poll: dev 547b958c; dev-red #5818 still open, none of ours merged, no return labels on ours; #5819 AN-u waiting; AN-10 waits on #4902
