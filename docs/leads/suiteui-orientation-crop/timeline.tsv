@@ -201,3 +201,4 @@ utc	stage	event	ref	note
 2026-10-27T09:05:39Z	done	poll	#3756	critic panel waits on journeys after full CI 40470141862 (tests still running)
 2026-10-27T09:25:13Z	done	poll	#3756	critic panel waits on journeys 40478044887/40478272983 (in progress)
 2026-10-27T09:45:46Z	done	poll	#3756	journeys at ef9d2ace cancelled; critic panel waits on journeys full 40480484419 (c21b2834, in progress)
+2026-10-27T10:06:34Z	done	poll	#3756	journeys 40480484419 also cancelled; critic panel waits on the next completed journeys run with photo
