@@ -19,7 +19,7 @@
 // draws through its matrix, and the plain `show` that follows (the window
 // taking the copy back) redraws the whole picture exactly, even at the same
 // revision. A drag sample of a draft that lifts (PhotoTransformLift) draws nothing: the first renders the
-// picture once without the draft's layer and lifts the layer's pixels onto the view (CanvasTiles' lift), every
+// picture once without the draft's layer and lifts the layer's pixels onto the view's live layer (SuiteUI's CanvasLiveLayer), every
 // later one only places them (`moveLift`), and the next plain picture drops the lift as it lands. A lift that
 // fails leaves its drag on the region path.
 // On the GPU route the renderer keeps the layer tiles resident on the backend

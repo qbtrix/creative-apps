@@ -43,7 +43,11 @@ its own render route. Every one was locally reasonable and globally slow:
    CPU pixel work, no full-layer upload and no GPU-to-CPU readback. Upload
    only the tiles that changed (resident tiles). Readback is for export, the
    eyedropper and parity tests; mark an allowed one
-   `// render-contract: allow <reason>`.
+   `// render-contract: allow <reason>`. A drag that moves, resizes or turns
+   pixels renders them once at its start into SuiteUI's `CanvasLiveLayer`
+   (`CanvasHostView.showLiveLayer`, then `moveLiveLayer` per sample and
+   `dropLiveLayer` on commit or cancel), so each sample only sets a CALayer
+   transform; Photo's Free Transform is the first caller.
 
 4. **No canvas-sized SwiftUI offscreen passes.** Over the canvas, never use
    `.drawingGroup()`, `.compositingGroup()`, `ImagePaint`, a `Canvas`, or a

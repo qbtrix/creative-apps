@@ -1,4 +1,4 @@
-// CanvasHostLiftTests.swift: the canvas host's lift (CanvasHostView+Lift.swift). A lifted layer's corners land
+// CanvasLiveLayerTests.swift: the canvas host's live layer (CanvasHostView+LiveLayer.swift). Its corners land
 // where its placement puts them in document pixels (y down), through the host's zoom and turn, on the tile
 // path; a move changes only the transform; a drop removes the layer. macOS only.
 import AppKit
@@ -7,7 +7,7 @@ import Testing
 @testable import SuiteUI
 
 @MainActor
-@Suite struct CanvasHostLiftTests {
+@Suite struct CanvasLiveLayerTests {
     struct Content: CanvasContentProviding {
         var documentSize: CGSize { CGSize(width: 200, height: 100) }
         func tiles(dirtyOnly: Bool) -> [CanvasTile] { [] }
@@ -35,7 +35,7 @@ import Testing
         host.layoutSubtreeIfNeeded()
         let size = CGSize(width: 40, height: 20)
         let placement = CGAffineTransform(translationX: 30, y: 10).rotated(by: .pi / 6).scaledBy(x: 1.5, y: 0.5)
-        host.lift(NSNull(), size: size, opacity: 0.5, placement: placement)
+        host.showLiveLayer(CanvasLiveLayer(contents: NSNull(), size: size, opacity: 0.5), at: placement)
         for corner in [CGPoint.zero, CGPoint(x: 40, y: 0), CGPoint(x: 0, y: 20), CGPoint(x: 40, y: 20)] {
             let (got, want) = (try Self.onScreen(corner, of: host, size: size), try Self.picture(corner.applying(placement), of: host))
             #expect(abs(got.x - want.x) < 1e-6 && abs(got.y - want.y) < 1e-6, "corner \(corner): \(got) not \(want)")
@@ -53,15 +53,15 @@ import Testing
         host.show(Content())
         host.layoutSubtreeIfNeeded()
         let size = CGSize(width: 40, height: 20)
-        host.lift(NSNull(), size: size, opacity: 1, placement: .identity)
+        host.showLiveLayer(CanvasLiveLayer(contents: NSNull(), size: size), at: .identity)
         let layer = try #require(host.lifted)
-        host.moveLift(CGAffineTransform(translationX: 50, y: 25))
+        host.moveLiveLayer(CGAffineTransform(translationX: 50, y: 25))
         #expect(host.lifted === layer, "a move made a new layer")
         let got = host.documentPoint(try Self.onScreen(.zero, of: host, size: size))
         #expect(abs(got.x - 50) < 1e-6 && abs(got.y - 25) < 1e-6, "\(got)")
-        host.dropLift()
-        #expect(!host.isLifted && layer.superlayer == nil)
-        host.moveLift(.identity)  // nothing lifted: nothing happens
-        #expect(!host.isLifted)
+        host.dropLiveLayer()
+        #expect(!host.hasLiveLayer && layer.superlayer == nil)
+        host.moveLiveLayer(.identity)  // nothing lifted: nothing happens
+        #expect(!host.hasLiveLayer)
     }
 }

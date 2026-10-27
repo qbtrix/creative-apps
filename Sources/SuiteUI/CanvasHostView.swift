@@ -9,8 +9,8 @@
 // straighten preview). A pinch zooms about the pointer: the pan moves so the
 // document point under it stays put (ZoomMath.anchoredOrigin); the scroll
 // wheel pans. Tile layers magnify nearest from 2 px per pixel up and minify
-// trilinear. A lifted layer (CanvasHostView+Lift.swift) rides above the
-// picture, in the tiles' document space, until it drops. macOS only.
+// trilinear. The live layer (CanvasHostView+LiveLayer.swift) rides above
+// the picture, in the tiles' document space, while a drag moves it. macOS only.
 import AppKit
 import Combine
 import IOSurface
@@ -54,11 +54,11 @@ public final class CanvasHostView: NSView {
     private var tracking: NSTrackingArea?
     let container = CALayer()
     let overlay = CAShapeLayer()
-    /// The lift's document space: over the picture (tiles or Metal), under the overlay, placed as `container` is.
+    /// The live layer's document space: over the picture (tiles or Metal), under the overlay, placed as `container` is.
     let liftSpace = CALayer()
-    /// The lifted layer in `liftSpace`; nil with nothing lifted.
+    /// The live layer in `liftSpace`; nil with none up.
     var lifted: CALayer?
-    /// A dropped lift the Metal path keeps until the drawable with the exact picture is on screen.
+    /// A dropped live layer the Metal path keeps until the drawable with the exact picture is on screen.
     var droppedLift: CALayer?
 
     override public init(frame: NSRect) {
