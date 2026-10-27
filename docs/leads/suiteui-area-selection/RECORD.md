@@ -2,10 +2,10 @@
 
 Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: stack restacked and gated: #5103 7cc2792d (14 files), #5254 ad802d4b (14 files), #5256 clean on AR-z; all wait local-ci/prescreen
+Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-27T12:56Z
+Polled: 2026-10-27T13:16Z · 13:16Z: no change; #5096 #5125 #5149 ready, #5103 (7cc2792d) updated by its fixer and footer stripped. Lane held by dev-red #5818 (flake re-run of LiveStandInTests in progress; triage guess #5334). #5093 awaiting supervisor.
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -17,7 +17,7 @@ Polled: 2026-10-27T12:56Z
 | AR-photo-m | Photo selection on the kernel recipe | AR-9, AR-10 | MJ-AR-photo | AR-r | false | 0 | done (Belt-Slice-Done 40179648854) | – | – |
 | AR-photo-u | Photo tools, Select menu, SuiteUI ants | AR-11, AR-12 | PJ-AR | AR-photo-m; adopt-suiteui-chrome:AC-colour | true | 0 | building (#5096 on #4877, #5103 on #5096) | – | – |
 | AR-design | group click, enter, exit, deep pick | AR-13, AR-14 | DJ-AR | AR-m, AT-design (met) | true | 0 | done (Belt-Slice-Done posted) | 40129856269 | wanted (Mac-Finish-Wanted posted) |
-| AR-z | Photo copies deleted, C4, RJ-X70/71, built | AR-15, AR-16 | MJ-AR, PJ-AR, DJ-AR | AR-photo-m, AR-photo-u, AR-design; suite-imaging:IM-z | false | 0 | lane (#5254 AR-15 ad802d4b, #5256 AR-16 stacked; C4 #5268 merged) | – | – |
+| AR-z | Photo copies deleted, C4, RJ-X70/71, built | AR-15, AR-16 | MJ-AR, PJ-AR, DJ-AR | AR-photo-m, AR-photo-u, AR-design; suite-imaging:IM-z | false | 0 | startable (contract-first: IM-a merged; Wire IM-z) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -61,5 +61,3 @@ Polled: 2026-10-27T12:56Z
 Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and a mutating setter; AreaRecipe init() and isEmpty) are already on dev c480d848. Only the packet text is stale; AR-photo-u and AR-z need no change.
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.
-- 2026-10-27T12:36Z SelectionOverlay.swift deletion and its canonical-baseline line move from AR-z (#5254, was 16 files) to AR-11-ui (#5103), where AreaAnts made it dead; each PR is now 14 files
-- 2026-10-27T12:56Z #5254 pushed ad802d4b after gate PASS; now 14 files, inside the cap
