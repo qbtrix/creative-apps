@@ -290,17 +290,17 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: file), original, "Save after Save As wrote over the opened tools.PNG")
         photo.shot("saved-copy")
 
-        // suite.canvas is the scrollable area: the viewport, or the image plus a
-        // 32 pt margin each side once that is larger. At 100% the 600 x 800 px
-        // image makes it 864 pt tall, past the runner's viewport.
+        // suite.canvas is the image's own frame (the shell journey's "image"
+        // band), so at 100% the 600 x 800 px image is 600 x 800 pt, taller
+        // than the runner's viewport.
         let canvas = photo.element("suite.canvas")
         let fitted = canvasPixels(photo)
         photo.app.typeKey("-", modifierFlags: .command)
         XCTAssert(canvasChanged(from: fitted, photo), "Command-- didn't zoom out (the canvas looks the same)")
         photo.shot("zoomed-out")
         photo.app.typeKey("1", modifierFlags: .command)
-        let actual = { abs(canvas.frame.height - 864) < 1 }
-        XCTAssert(Self.waitUntil(actual), "Command-1 didn't show the image at 100% (\(canvas.frame.size); 100% is 864 pt tall)")
+        let actual = { abs(canvas.frame.width - 600) < 1 && abs(canvas.frame.height - 800) < 1 }
+        XCTAssert(Self.waitUntil(actual), "Command-1 didn't show the image at 100% (\(canvas.frame.size); 100% is 600 x 800 pt)")
         photo.shot("actual-size")
     }
 

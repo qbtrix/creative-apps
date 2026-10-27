@@ -172,17 +172,22 @@ public struct HaloKeyRef: Hashable, Sendable, Codable {
 /// the words or size last changed (HaloTextEdits sets them through
 /// `services.text`), so the viewer, hit testing, the default anchor and the
 /// rendered pixels all use one box, and a saved file keeps its layout.
-public struct HaloTextContent: Codable, Sendable, Hashable {
+public struct HaloTextContent: Sendable, Hashable {
     public var string: String
     /// In composition pixels.
     public var fontSize: Double
-    /// The measured line box; an estimate (0.6 em a character) until measured.
+    /// The measured box; an estimate (0.6 em a character, line height for each line after the first) until measured.
     public var width: Double
     public var height: Double
-    public init(string: String = "Text", fontSize: Double = 72, width: Double? = nil, height: Double? = nil) {
-        self.string = string; self.fontSize = fontSize
-        self.width = width ?? fontSize * 0.6 * Double(max(string.count, 1))
-        self.height = height ?? fontSize
+    /// The face and paragraph (TS-9); the size is `fontSize` and the colour the layer's. Its file keys are in
+    /// HaloText+Kernel.swift.
+    public var style: TextStyle
+    public init(string: String = "Text", fontSize: Double = 72, width: Double? = nil, height: Double? = nil,
+                style: TextStyle = .standard) {
+        self.string = string; self.fontSize = fontSize; self.style = Self.face(style)
+        let estimate = Self.estimate(string, fontSize: fontSize, style: self.style)
+        self.width = width ?? estimate.width
+        self.height = height ?? estimate.height
     }
 }
 
