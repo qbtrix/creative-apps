@@ -5,7 +5,8 @@
 // the note being typed in, ⌘C copies note plus report and Escape closes (the Tab walk is in +HelpTab, since it
 // needs keyboard navigation on). Beta Notes opens the known-issues window and Close closes it. Every menu
 // click is a mouse click on an item found by title, and only by title: SwiftUI doesn't carry
-// `.accessibilityIdentifier` onto a menu item, so a live item reads AppKit's "menuAction:" (#4647). The menu shot is a screen shot, since an open menu sits outside the window.
+// `.accessibilityIdentifier` onto a menu item, so a live item reads AppKit's "menuAction:" (#4647).
+// The menu shot is a screen shot, since an open menu sits outside the window.
 import AppKit
 import XCTest
 
