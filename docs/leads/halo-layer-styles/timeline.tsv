@@ -173,3 +173,4 @@ utc	stage	event	ref	note
 2026-10-27T06:24:40Z	ship	stage	#5161	HY-u gate PASS, pushed 71fbffb1 (lease), body updated, draft on #5157
 2026-10-27T06:24:40Z	ship	stage	#5218	HY-z gate PASS, pushed 11ebec94 (lease), body updated, draft on LS-9
 2026-10-27T06:48:11Z	check	-	#5157 HY-a fcdeb1b2 not landed; dev c367fbeb0; halo-scoped 40460978266 red on SuiteUI PendingAdjustTarget (dev-red #5818 open), HY-m slice-done waits; no new layer-styles findings
+2026-10-27T07:13:12Z	check	-	#5157 HY-a not landed; dev c367fbeb0 unchanged; dev-red #5818 open (no new green halo run), HY-m slice-done waits; no new layer-styles findings
