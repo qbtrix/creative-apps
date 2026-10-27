@@ -173,3 +173,4 @@ Next: lane merges DS-photo #4901, DS-design #4887, DS-halo #4918, DS-flare #4891
 - 2026-10-27T00:58Z (act-1a177ff0916-4jm7): poll: dev f3ed4b32; lane merged 12 docs/test PRs, none ours; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
 - 2026-10-27T01:17Z (act-1a177ff0916-4jm7): poll: dev f3ed4b32; dev unchanged; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
 - 2026-10-27T01:40Z (act-1a177ff0916-4jm7): poll: dev 2cf71ce9; dev-red #5818 open (linux red, range main..2c20134c), lane holds PRs on the failing module; not ours to fix; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
+- 2026-10-27T02:02Z (act-1a177ff0916-4jm7): poll: dev 9108a0bc; dev-red #5818 still open; lane merged #4899 and #5826, none ours; #4918 DS-halo (f015cd99) and #4901 DS-photo (25847725) still queued, no return label
