@@ -1,0 +1,6 @@
+[
+{"label": "runsKeepOrderAndSplitAtStyledLayers: an empty style goes to the GPU view", "file": "Sources/HaloModel/Live/HaloStyledRuns.swift", "find": "        return style != .none\n", "replace": "        return true\n", "tests": "HaloStyledRunsTests/runsKeepOrderAndSplitAtStyledLayers"},
+{"label": "runsKeepOrderAndSplitAtStyledLayers: a styled text goes to the GPU view", "file": "Sources/HaloModel/Live/HaloStyledRuns.swift", "find": "guard item.kind == .solid || item.kind == .shape, let style", "replace": "guard item.kind != .null, let style", "tests": "HaloStyledRunsTests/runsKeepOrderAndSplitAtStyledLayers"},
+{"label": "contentIgnoresStyleButNotPlacement: the content key keeps the style, so a scrub uploads", "file": "Sources/HaloModel/Live/HaloStyledRuns.swift", "find": "        bare.style = nil\n", "replace": "", "tests": "HaloStyledRunsTests/contentIgnoresStyleButNotPlacement"},
+{"label": "pixelsAreTheUnstyledLayer: the merge drops the fill", "file": "Sources/HaloModel/Live/HaloStyledRuns.swift", "find": "for layer in [fill, stroke] {", "replace": "for layer in [stroke, nil] where fill != nil {", "tests": "HaloStyledRunsTests/pixelsAreTheUnstyledLayer"}
+]

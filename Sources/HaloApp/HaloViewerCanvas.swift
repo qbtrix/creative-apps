@@ -94,19 +94,31 @@ struct HaloLiveLayers: View {
 struct HaloDrawnLayers: View {
     let list: HaloDrawList
     let selectedLayerID: String?
+    @Environment(\.haloStyleRoute) private var route
 
-    var body: some View {
+    /// `items` in one linear Canvas over the fitted frame, bottom first; styled layers: HaloStyledViewer (HY-7).
+    private func canvas(_ items: [HaloDrawItem]) -> some View {
         let list = list
         // The Canvas's own working space must be linear: its default
         // (.nonLinear) mixes each item's opacity in sRGB inside the Canvas,
         // before the linear drawing group ever sees it (HF-1 keyed-6, #1161).
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: false) { context, size in
             let fit = HaloCanvasFit.transform(HaloCanvasFit.layout(list: list, size: size))
-            for item in list.items {
+            for item in items {
                 drawItem(item, in: context, fit: fit)
             }
         }
         .drawingGroup(opaque: false, colorMode: .linear)
+    }
+
+    var body: some View {
+        Group {
+            if let route, list.items.contains(where: HaloDrawList.isStyled), route.isAvailable {
+                HaloStyledViewer(list: list, route: route) { canvas($0) }
+            } else {
+                canvas(list.items)
+            }
+        }
         .allowsHitTesting(false)
         .accessibilityElement()
         .accessibilityLabel("Layers")

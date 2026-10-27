@@ -1,6 +1,7 @@
 // HaloLayerInspector.swift: the selected layer in Halo's inspector: its
-// header (`selectedLayerHeader`), the TRANSFORM group, a refusal's caption,
-// the LAYER group, FILL for a solid or shape (HaloFillInspector, its
+// header (`selectedLayerHeader`), the TRANSFORM group, LAYER STYLE (the
+// style rows `propertyRows` lists while their effect is on, layer-styles
+// HY-3, laid out like TRANSFORM's), a refusal's caption, the LAYER group, FILL for a solid or shape (HaloFillInspector, its
 // gestures to `runFill`), IMAGE for a solid (HaloPlaceInspector, its picture
 // and the Fill checkbox, PH-3), STROKE for a shape (HaloStrokeInspector, its
 // gestures to `runStroke`), then the EASING and TEXT slots. TRANSFORM has one InspectorSliderRow per
@@ -53,10 +54,15 @@ struct HaloLayerInspector: View {
                 InspectorHeader(header.name, details: [header.kind, header.frames, header.parent.map { "Parent: \($0)" } ?? ""])
                     .accessibilityIdentifier("halo.inspector.header")
                 InspectorSection("Transform") {
-                    transformRows
+                    rows(transformRows)
+                }
+                if !styleRows.isEmpty {
+                    InspectorSection("Layer Style") {
+                        rows(styleRows)
+                    }
                 }
                 if let refusal = model.refusal, refusal.control.hasPrefix("halo.inspector"),
-                    !HaloProperty.allCases.contains(where: { rowRefusal($0) != nil }),
+                    !(HaloProperty.allCases + HaloProperty.styles).contains(where: { rowRefusal($0) != nil }),
                     !HaloLayerGroup.owns(refusal), !HaloTextInspector.owns(refusal)
                 {
                     InspectorNote(refusal.message, kind: .error, identifier: "halo.refusal")
@@ -79,10 +85,16 @@ struct HaloLayerInspector: View {
         }
     }
 
-    /// TRANSFORM's rows, each button beside its bar or under it.
-    private var transformRows: some View {
+    /// TRANSFORM's rows: every row but a style's.
+    var transformRows: [HaloPropertyRow] { model.propertyRows.filter { !HaloProperty.styles.contains($0.property) } }
+
+    /// LAYER STYLE's rows: the style properties whose effect is on.
+    var styleRows: [HaloPropertyRow] { model.propertyRows.filter { HaloProperty.styles.contains($0.property) } }
+
+    /// One group's rows, each button beside its bar or under it.
+    private func rows(_ rows: [HaloPropertyRow]) -> some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
-            ForEach(model.propertyRows) { row in
+            ForEach(rows) { row in
                 HaloPropertyRowView(
                     row: row, refusal: rowRefusal(row.property),
                     rowHelp: model.unavailableHelp(for: .setProperty(row.property, row.value)),
@@ -201,10 +213,11 @@ struct HaloPropertyRowView: View, Equatable {
     }
 
     /// The width a row needs to put its keyframe button beside its bar: the
-    /// widest property's `fit`, the gap and the button's two cells. It
-    /// depends on fonts and titles only, so it is measured once.
+    /// widest property's `fit` (style rows included), the gap and the
+    /// button's two cells. It depends on fonts and titles only, so it is
+    /// measured once.
     @MainActor static let besideWidth: CGFloat =
-        (HaloProperty.allCases.map { NSHostingView(rootView: HaloRowFit(property: $0)).fittingSize.width }.max() ?? 0)
+        ((HaloProperty.allCases + HaloProperty.styles).map { NSHostingView(rootView: HaloRowFit(property: $0)).fittingSize.width }.max() ?? 0)
         + SuiteSpacing.xs + 2 * SuiteSize.keyframeButton
 
     /// HaloModel's key state as SuiteUI's, one to one.

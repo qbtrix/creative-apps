@@ -68,6 +68,7 @@ struct HaloApp: App {
     var body: some Scene {
         WindowGroup {
             HaloWindow()
+                .environment(\.haloStyleRoute, .shared)
                 .background {
                     if let size = HaloLaunch.current.windowSize { HaloWindowSizer(size: size).accessibilityHidden(true) }
                 }
