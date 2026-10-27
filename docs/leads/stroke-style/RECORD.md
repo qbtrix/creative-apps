@@ -2,30 +2,30 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a178669406-n4me · Started: 2026-10-23 (this run resumed 2026-10-26T13:30Z)
-Stage: 3 polling: every slice PR is open, clean (#4916 192 lines/10 files) and labelled fast-lane; the lane forms no batch while dev-red #5321 is open (not ours)
+Stage: 3 DK-z open as #5825 (fast-lane, feature-done); #5011 waits on lane integration; dev-red #5818 open (not ours)
 Base: origin/dev; main verified at d3323f6a
-Next: DK-m done (Belt-Slice-Done posted 23:08Z). Wait for the lane to land #5002, #5011 once dev-red #5818 closes, then a green design ci.yml run holding #5011: Belt-Slice-Done for DK-u (gaps #4990 #4991); DK-z starts once open findings are 5 or fewer (6 open, all with Fixes lines in #5002/#5011)
+Next: when #5011 lands and a green design ci.yml run holds it: Belt-Slice-Done DK-u (gaps #4990 #4991). When #5825 lands and a green run holds it: Belt-Slice-Done DK-z, then Belt-Contact-Sheet. Supervisor asked on #3441 to renew 5 quarantine entries that expired 10-27 (they fail scripts/ci on dev)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | DK-a | stroke adapter stubs, vectorStroke, Stroke section is StrokeEditor | DK-1, DK-2 | MJ-DK | SS-a (done) | yes | 2 | done; gaps #3865 #3871 #3873 | 39670298178 | wanted (posted) |
-| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 2 | #4864 merged; #5002 (round 1) and #5011 (round 2, stacked) open; rounds spent; gaps #4990 #4991 | – | – |
+| DK-u | canvas strokes dashes, joins, caps; snapshots, budget | DK-3, DK-4 | J-DK | DK-a, shape-tools:DS-u | yes | 2 | #4864 and #5002 (fa5d340f) merged; #5011 (round 2) dirty, lane integrates; rounds spent; gaps #4990 #4991 | – | – |
 | DK-m | DesignStroke is VectorStroke; commands; SVG | DK-5, DK-6, DK-7 | MJ-DK | DK-a, shape-tools:DS-m; SS-d | no | 2 | #4888 merged (63592c7b); #4916 merged (9810d71b); rounds spent | done: https://github.com/qbtrix/creative-apps/actions/runs/40414010435 | – |
-| DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | held: open findings > 5 (rule 7) | – | – |
+| DK-z | journey on live; built | DK-8, DK-9 | J-DK | DK-u, DK-m | yes | 0 | #5825 open (findings 2 open: #5009 #5010) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | DK-1 | DK-a | 1 | adapter and vectorStroke stubs | Sources/DesignModel/DesignStroke+Kernel.swift, Tests/DesignModelTests/DesignStrokeTests.swift | DesignStrokeTests | #3690 | merged |
 | DK-2 | DK-a | 1 | Stroke section is StrokeEditor | Sources/DesignApp/DesignInspectorStyle.swift, UITests/DesignJourneyTests+Stroke.swift | DesignInspectorSnapshots | #3690 | merged |
-| DK-3 | DK-u | 2 | canvas paints StrokeRules.paintedPath | Sources/DesignApp/DesignCanvas*.swift, Sources/DesignModel/DesignStrokeOutline.swift | DesignStrokeOutlineTests | #4864, #5002, #5011 | merged / open / open |
+| DK-3 | DK-u | 2 | canvas paints StrokeRules.paintedPath | Sources/DesignApp/DesignCanvas*.swift, Sources/DesignModel/DesignStrokeOutline.swift | DesignStrokeOutlineTests | #4864, #5002, #5011 | merged / merged / open |
 | DK-4 | DK-u | 2 | stroke snapshots, render budget | Tests/AppSnapshotTests/DesignStrokeSnapshots.swift | DesignStrokeSnapshots | #4864 | merged |
 | DK-5 | DK-m | 2 | DesignStroke = VectorStroke, migration | Sources/DesignModel/DesignStroke+Kernel.swift, Tests/DesignModelTests/DesignStrokeTests.swift | DesignStrokeTests | #4888 | merged |
 | DK-6 | DK-m | 2 | stroke.* commands | Sources/DesignModel/DesignCommandCatalog.swift, Tests/command-ids/design.txt | DesignCommandTests | #4888 | merged |
 | DK-7 | DK-m | 2 | SVG stroke attributes via StrokeSVG | Sources/DesignModel/Live/DesignSVG.swift, Tests/DesignModelTests/DesignStrokeSVGTests.swift | DesignStrokeSVGTests | #4916 | open |
-| DK-8 | DK-z | 3 | testDashedBorder on live | UITests/DesignJourneyTests+Stroke.swift | testDashedBorder | – | held |
-| DK-9 | DK-z | 3 | wave.json built, feature-done | docs/blueprints/design/features/stroke-style.wave.json | scripts/waves render --dry-run | – | held |
+| DK-8 | DK-z | 3 | testDashedBorder on live | UITests/DesignJourneyTests+Stroke.swift | testDashedBorder | #5825 | open |
+| DK-9 | DK-z | 3 | wave.json built, feature-done | docs/blueprints/design/features/stroke-style.wave.json | scripts/waves render --dry-run | #5825 | open |
 
 ## Critic reviews
 | slice | run | commit | lenses | filed | after round |
