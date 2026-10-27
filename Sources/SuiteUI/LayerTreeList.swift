@@ -389,20 +389,9 @@ struct LayerTreeRow: View, Equatable {
     }
 
     private var content: some View {
-        HStack(spacing: SuiteSpacing.xs) {
-            if options.nests {
-                Color.clear.frame(width: CGFloat(row.depth) * SuiteSpacing.l, height: SuiteSpacing.xxs)
-                disclosure
-            }
-            leading
-            title
-            Spacer(minLength: SuiteSpacing.s)
-            if options.showsEye {
-                toggle(naming.visibility(row)) { onAction(.toggleHidden(row.id)) }
-            }
-            if options.showsLock {
-                toggle(naming.lock(row)) { onAction(.toggleLocked(row.id)) }
-            }
+        VStack(alignment: .leading, spacing: SuiteSpacing.xxs) {
+            line
+            refusal
         }
         // One pointer-sized height, so a caption under the name doesn't make its row jump.
         .frame(minHeight: SuiteSize.studioRow)
@@ -438,6 +427,25 @@ struct LayerTreeRow: View, Equatable {
             if onRename != nil { Button(SidebarRow.renameActionName) { _ = requestRename() } }
         }
         .accessibilityIdentifier(naming.row(row.id))
+    }
+
+    /// The row's one line: indent and disclosure, leading mark, name or rename field, toggles.
+    private var line: some View {
+        HStack(spacing: SuiteSpacing.xs) {
+            if options.nests {
+                Color.clear.frame(width: CGFloat(row.depth) * SuiteSpacing.l, height: SuiteSpacing.xxs)
+                disclosure
+            }
+            leading
+            title
+            Spacer(minLength: SuiteSpacing.s)
+            if options.showsEye {
+                toggle(naming.visibility(row)) { onAction(.toggleHidden(row.id)) }
+            }
+            if options.showsLock {
+                toggle(naming.lock(row)) { onAction(.toggleLocked(row.id)) }
+            }
+        }
     }
 
     private func toggle(_ toggle: SidebarToggle, action: @escaping @MainActor () -> Void) -> some View {

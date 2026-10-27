@@ -74,7 +74,7 @@ extension FocusedValues {
 
 extension LibraryWindow {
     var filtersMenu: LibraryFiltersMenu {
-        let filterOK = model.filterHelp == nil
+        let filterOK = model.libraryFilterHelp == nil
         let collectionsOK = UserCollection.unavailable == nil
         let addItems = model.userCollections.filter { !$0.isSmart }.map { collection in
             let help = model.addToCollectionHelp(collection.id)
@@ -89,7 +89,7 @@ extension LibraryWindow {
             toggleLabel: enabled(filterOK) { (label: PhotoLabel) in model.toggleFilterLabel(label) },
             toggleHideRejected: enabled(filterOK) { model.toggleHideRejected() },
             clearFilter: enabled(model.clearFilterHelp == nil) { model.clearFilter() },
-            filterHelp: model.filterHelp,
+            filterHelp: model.libraryFilterHelp,
             clearFilterHelp: model.clearFilterHelp,
             newCollection: enabled(collectionsOK) { _ = model.newCollection() },
             renameCollection: enabled(collectionsOK) { (id: String, name: String) in model.renameCollection(id, to: name) },
