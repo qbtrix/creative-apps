@@ -317,3 +317,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-27T09:45:50Z no green ci.yml with ef31726a yet: scoped photo 40478386204 at 9d3e5e32 failed at macOS compile (not ours); #5089/#5091/#5231 open, no needs-fix
 - 2026-10-27T10:06:38Z no green macOS ci.yml with ef31726a yet (only Linux checks green); #5089/#5091/#5231 open, no needs-fix
 - 2026-10-27T10:26:59Z UP-photo slice-done waits on a green macOS ci.yml; scoped photo 40484860852 red at compile, not ours
+- 2026-10-27T10:47:49Z UP-photo waits on a green macOS ci.yml; scoped halo 40487486320 red, not ours
