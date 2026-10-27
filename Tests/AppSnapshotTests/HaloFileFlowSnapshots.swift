@@ -5,8 +5,9 @@
 // draw an open NSMenu offscreen, so the image lays out what SuiteFileMenu gives the menu under its titles.
 // `menu` also fails when Halo's own Open Recent menu is still in its File menu beside the suite's, so File
 // shows one Open Recent. halo-drop-mark-{light,dark}: the suite drop mark (SF-3) over the viewer with Spot open,
-// saying what Halo's drop rule makes of a dropped Sunset.png ("Open in Photo": Halo places no images until
-// S20, so Photo, which reads a PNG, gets it), at the viewer's bottom as SuiteFileDropModifier puts it.
+// saying what Halo's drop rule makes of a dropped Sunset.png ("Open in Photo": the window places nothing, the
+// canvas places images through PH-3, so off it Photo, which reads a PNG, gets it), at the viewer's bottom as
+// SuiteFileDropModifier puts it.
 // macOS only.
 #if os(macOS)
 import Foundation

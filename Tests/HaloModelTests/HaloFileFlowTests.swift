@@ -1,8 +1,8 @@
 // HaloFileFlowTests.swift: MHF, Halo's file-flow Model walk (file-flow
 // HF-1 written, HF-3 turns it on). HaloProject as a FileFlowTarget, with
 // HaloDocumentHost as its suite document host: it names itself "halo", opens
-// a dropped .halo through the host, hands a PNG to Photo (image layers are
-// S20), imports its old Open Recent list once, Open Recent reads the suite's
+// a dropped .halo through the host, hands a PNG dropped off the canvas to
+// Photo (the canvas places it through PH-3), imports its old Open Recent list once, Open Recent reads the suite's
 // list and no list of Halo's own (#5080), and a drop that opens or hands off
 // changes no document. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
@@ -28,11 +28,11 @@ private actor Delivered {
 
 /// What the adapter answers on its own: its name, what it places, its readers and Open In.
 @Suite struct HaloFileFlowAnswerTests {
-    @Test func haloNamesItselfAndPlacesNothingYet() {
-        let project = HaloProject(services: .fake)
+    @Test func haloNamesItselfAndLeavesImagesToTheCanvas() throws {
+        let project = try opened()
         #expect(project.appID == "halo")
         #expect(project.placesExtensions.isEmpty)
-        #expect(HaloProject.imageRefusal == "Halo can't place images yet.")
+        #expect(project.placeHelp == nil && project.placeFormats.contains(.png))
     }
 
     @Test func hasDocumentFollowsTheComposition() throws {
