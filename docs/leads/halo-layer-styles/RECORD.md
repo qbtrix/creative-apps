@@ -64,6 +64,7 @@ Next: #5157 (HY-a) ready on fcdeb1b2, in the lane; when it lands merge dev into 
 - 2026-10-24 (revised): the supervisor answered (#3936, 10:55Z) that building HY-7 ahead on the StyleRoute stub with a Wire line is right, superseding the earlier "not built ahead". Open point asked on #3936: the viewer draws items in a SwiftUI Canvas and no app holds a RenderDispatcher yet; feeding StyleRoute a layer RenderSurface per frame means a PixelBuffer upload per step (render-contract rule 3). HY-7 is built once the route shape is answered; until then the viewer draws styled layers unstyled and the journey stays skipped.
 
 ## Open
+- 12:17Z #5157 (HY-a) open, no needs-fix, no commit status on fcdeb1b20 yet (waits on local-ci/prescreen); #5161, #5218 draft. HY-m slice done.
 - 11:51Z HY-m done: Belt-Slice-Done posted on #3936 (halo-scoped 40490171439 green at 4a7d926f3, contains e83dec8c9). #5157 (HY-a) still in the lane; #5161, #5218 draft.
 - 11:27Z #5157 (HY-a) still in the lane, no needs-fix; #5161, #5218 draft. HY-m waits on halo-scoped 40490171439 (in progress) / full 40489065455 (queued) at 4a7d926f3.
 - 11:06Z #5157 (HY-a) still in the lane, no needs-fix; #5161, #5218 draft. HY-m waits on runs 40489065455 / 40490171439 at 4a7d926f3 (in progress).
