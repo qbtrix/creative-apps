@@ -417,3 +417,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 22:35Z check-in: #5250 restacked by the other session to df908bed4 (dev 7b2c4373f, Head line current, clean +54-11 f=12); local worktree reset to it. #5249, #5252 clean. All wait for local-ci/prescreen. main fef52e668.
 - 22:55Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 7b2c4373f, main fef52e668.
 - 2026-10-27T23:01Z poll: every lead head is clean with fast-lane and has no local-ci/prescreen status yet; dev-red #5818 open (the lane's flake rerun is in flight at 6dab26f); main fef52e668, dev 7b2c4373f.
+- 23:14Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev bddf9c033, main fef52e668.
