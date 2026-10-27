@@ -220,3 +220,4 @@ time	task	event	note
 2026-10-27T12:24Z	3	restack	lane	#5103 AR-11-ui merged AR-11, gate running
 2026-10-27T12:26Z	3	heartbeat	lane	poll 2026-10-27T12:26Z: 12:26Z: no change; #5096 #5125 #5149 ready. Lane held by dev-red #5818 (still being triaged; newest guess #5334). #5093 awaiting supervisor.
 2026-10-27T12:36Z	3	restack	lane	#5103 pushed b5528571; SelectionOverlay moved to AR-11-ui, #5254 14 files
+2026-10-27T12:56Z	3	restack	lane	#5254 pushed ad802d4b, 14 files
