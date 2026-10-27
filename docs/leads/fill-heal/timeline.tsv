@@ -236,3 +236,4 @@ utc	stage	event	ref	note
 2026-10-27T07:58Z	check-in	check-in: lane batching one PR at a time (#5096 in lane/batch-20261027074025); #5248 needs-fix cleared on 7900f7c69; none merged yet; dev-red #5818 open, #5862 open; main fef52e66
 2026-10-27T08:06Z	3	heartbeat	lane	poll 2026-10-27T08:06Z: 08:05Z check-in: #4896 (FH-u) merged to dev; FH-u done awaits a main ci run containing it. #5096 #5125 #5149 ready in lane; dev-red #5818 open (revert #5827 not landed). #5093 still awaiting supervisor answer.
 2026-10-27T08:48Z	check-in	M
+2026-10-27T09:10Z	3	heartbeat	lane	poll 2026-10-27T09:10Z: 09:10Z: #5125 and #5096 needs-rebase (photo golden) fixed: dev merged, golden regenerated, gate PASS; heads b55116d5 and 8f97ea1e, Head lines moved. #4896 FH-u merged. dev-red #5818 open. #5093 awaiting supervisor.
