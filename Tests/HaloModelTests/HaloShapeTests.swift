@@ -2,8 +2,10 @@
 // spec saves under its own key and old projects open without one, and with no
 // composition the Shape button says why (HS-1); drawing a star is one undo
 // step at the playhead's span, the picked tool stays, a bad spec is refused,
-// and the renderer draws a layer's spec, not its ellipse (HS-5).
+// and the renderer draws a layer's spec, not its ellipse (HS-5). A drawn layer is named
+// by its kind ("Star"), a line or arrow starts stroked, and an arrow's head fills.
 // Linux and macOS.
+import FlareCore
 import Foundation
 @testable import HaloModel
 import SuiteKernel
@@ -62,14 +64,48 @@ import Testing
     @Test func drawingAddsOneSelectedShapeLayerAsOneStep() throws {
         var project = try Self.project()
         let before = try #require(project.selectedComposition)
-        let id = try project.addShape(Self.star, in: Self.box, name: "Star")
+        let id = try project.addShape(Self.star, in: Self.box, name: "Draw Star")
         let comp = try #require(project.selectedComposition)
         #expect(comp.layers.count == before.layers.count + 1)
         let layer = try #require(project.selectedLayer)
-        #expect(layer.id == id && layer.name == "Star" && layer.kind == .shape)
-        #expect(layer.shape == Self.star)
+        #expect(layer.id == id && layer.name == "Star" && layer.kind == .shape, "the undo step's name is not the layer's")
+        #expect(layer.shape == Self.star && layer.stroke == nil)
         #expect(layer.inFrame == comp.playheadFrame)
-        #expect(project.history.undo.count == 1)
+        #expect(project.history.undo.count == 1 && project.history.undo.last?.name == "Draw Star")
+    }
+
+    /// #5842: a line or arrow has nothing to fill, so it starts with a stroke in the layer's colour.
+    @Test func linesAndArrowsStartStroked() throws {
+        var project = try Self.project()
+        for kind in [ShapeKind.line, .arrow] {
+            _ = try project.addShape(.defaults(kind), in: Self.box, name: "Draw")
+            let layer = try #require(project.selectedLayer)
+            let c = layer.color
+            #expect(layer.stroke == VectorStroke(color: Color(r: c.red, g: c.green, b: c.blue), width: 4), "\(kind)")
+        }
+    }
+
+    /// #5842: an arrow's head is a closed outline, so the layer's colour fills it.
+    @Test func anArrowHeadFills() throws {
+        let bounds = HaloLayerRect(x: 100, y: 100, width: 400, height: 0)
+        let arrow = ShapeSpec(kind: .arrow, head: 40, start: Point(x: 0, y: 0), end: Point(x: 1, y: 0))
+        let item = HaloDrawItem(
+            layerID: "a", kind: .shape, bounds: bounds, matrix: .identity, opacity: 1,
+            color: HaloLayerKind.shape.defaultColor, blendMode: .normal, shape: arrow)
+        guard case .polygon(let points)? = HaloOutlines.outline(of: item) else {
+            Issue.record("an arrow's head fills")
+            return
+        }
+        #expect(points.contains(HaloPoint(x: 500, y: 100)), "the tip")
+        #expect(points.allSatisfy { $0.x >= 460 - 1e-9 }, "only the head fills, not the shaft")
+        do {
+            var line = arrow
+            line.kind = .line
+            let open = HaloDrawItem(
+                layerID: "l", kind: .shape, bounds: bounds, matrix: .identity, opacity: 1,
+                color: HaloLayerKind.shape.defaultColor, blendMode: .normal, shape: line)
+            #expect(HaloOutlines.outline(of: open) == nil, "a line has nothing to fill")
+        }
     }
 
     @Test func aBadSpecIsRefusedAndAddsNothing() throws {
