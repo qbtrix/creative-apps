@@ -12,7 +12,7 @@
 // without it, then proves the posted drag reaches the stage (a plain posted drag draws Rectangle 2, which the
 // toolbar's Undo takes away) before the Escape one adds nothing (#1850). One shot per step, `flare-draw-<step>`.
 // Before the first shot it checks the stage's chrome: the palette clear of the vertical ruler and the status bar's
-// zoom, size and Preview data pills. The timeline's track-name buttons carry no identifier (needs-ui #1789), so
+// zoom and size pills, and no Preview data pill (live services). The timeline's track-name buttons carry no identifier (needs-ui #1789), so
 // each drawn layer still counts once under the audit's `identifier` check (#2485).
 import CoreGraphics
 import XCTest
@@ -109,7 +109,8 @@ final class FlareDrawJourneys: XCTestCase {
     }
 
     /// The stage's chrome on the 550 × 400 fixture: the palette starts right of the vertical ruler (#1857), and a
-    /// status bar under the stage shows the zoom percent, "550 × 400 pt" and "Preview data", all in the window (#1854).
+    /// status bar under the stage shows the zoom percent and "550 × 400 pt", all in the window (#1854), and no
+    /// "Preview data" pill: `-FlareSample` runs on the live services (#5195).
     @MainActor private func expectStageChrome(_ flare: Journey) {
         let pane = flare.element("flare.stagePane")
         XCTAssert(pane.waitForExistence(timeout: 5), "no stage pane (flare.stagePane)")
@@ -122,8 +123,8 @@ final class FlareDrawJourneys: XCTestCase {
         let size = pane.staticTexts["550 × 400 pt"]
         XCTAssert(size.waitForExistence(timeout: 5), "the stage's status bar shows no 550 × 400 pt pill")
         let zoom = zoomPill(before: size, in: pane)
-        let preview = flare.element("flare.status.preview")
-        for (pill, name) in [(zoom, "zoom percent"), (size, "550 × 400 pt"), (preview, "Preview data")] {
+        XCTAssertFalse(flare.element("flare.status.preview").exists, "a live launch shows the Preview data pill")
+        for (pill, name) in [(zoom, "zoom percent"), (size, "550 × 400 pt")] {
             XCTAssert(pill.waitForExistence(timeout: 5), "the stage's status bar shows no \(name) pill")
             XCTAssert(window.contains(pill.frame), "the \(name) pill \(pill.frame) is outside the window \(window)")
             XCTAssertGreaterThanOrEqual(pill.frame.minY, stage(flare).frame.maxY, "the \(name) pill isn't under the stage")

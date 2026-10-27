@@ -14,7 +14,7 @@
 // (FlareTimeline, FlareRecording and the four modifiers) are filled by later
 // tasks without touching their call sites here. The
 // window owns presentation state only: zoom, rulers, guides, the inspector
-// tab and what is presented (FlarePresentation, in FlareNewSheet.swift),
+// tab and which setup sheet is up (FlareSetupSheet, in FlareDocumentSheet.swift),
 // plus the export task and the file it last wrote (FlareWindow+Export.swift);
 // the export sheet is FlareExportSheetAdapter's, shown while the Model's run
 // isn't idle.
@@ -23,6 +23,7 @@
 // files, Loop and the selection's Edit reasons, and File > Place…'s reason and
 // action; the window takes SVG drops (FlarePlace.swift).
 import FlareModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -35,8 +36,8 @@ struct FlareWindow: View {
     @State var showsRulers = true
     @State var showsGuides = true
     @State var inspectorTab: FlareInspectorTab = .properties
-    /// The new sheet, alerts and the recovery offer.
-    @State var presented: FlarePresentation? = nil
+    /// The New and Document Settings sheet (document-setup DS-14).
+    @State var presented: FlareSetupSheet? = nil
     /// The export under way, so Cancel can stop it.
     @State var exportTask: Task<Void, Never>? = nil
     /// The first file the last export wrote, for Reveal in Finder.
@@ -99,12 +100,14 @@ struct FlareWindow: View {
                 shape: shapeOptions)
         }
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
-        .modifier(FlareNewSheet(presented: $presented, perform: perform))
+        .modifier(FlareDocumentSheet(
+            sheet: $presented, setup: model.documentSetup, limits: model.documentLimits, perform: perform,
+            apply: { model.applyDocumentSetup($0, anchor: $1); return model.layerError == nil }))
         .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
-        .modifier(FlareLiveRegistration(read: { model }, write: { model.takeLive($0) }))
+        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: model) }, write: { model.takeLive($0) })
         .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .focusedSceneValue(
             \.flareMenu,
@@ -114,7 +117,8 @@ struct FlareWindow: View {
                 recent: model.recent, loops: model.loops, editHelps: model.editHelps,
                 selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)],
                 placeHelp: model.placeMenuHelp, place: { choosePlace() },
-                document: model.suiteDocument))
+                document: model.suiteDocument, documentSettings: { presented = .settings },
+                settingsHelp: model.selectedScene == nil ? "Open or create an animation first." : nil))
     }
 
     /// The menu bar's door: File > Open Sample > Keyed Ball opens the keyed

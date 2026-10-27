@@ -3,8 +3,9 @@
 // LibraryBackupMenu) opens LibraryBackupSheet. Open runs `catalog.backups` and
 // Restore runs `catalog.restore-backup`, both through the kernel catalog of
 // LibraryCatalog.backupSpecs, so the menu, the sheet and the CLI share one
-// availability: on the stubs the item and Restore are disabled with "Backups
-// arrive with BK-3.". The sheet's state lives in LibraryBackupArea's own
+// availability: with no backups attached the item and Restore are disabled
+// and say why. The window attaches them at launch (LibraryWindow+Persist,
+// BK-5). The sheet's state lives in LibraryBackupArea's own
 // @State, not in LibraryWindow, so opening and closing it re-renders no window
 // body and never the grid (RenderBudgetLibraryBackupTests).
 import LibraryModel

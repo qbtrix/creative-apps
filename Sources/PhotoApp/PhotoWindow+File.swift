@@ -21,6 +21,8 @@
 // their kind. Each successful open and save is noted in Open Recent and,
 // through SuiteDocumentsBridge (file-flow PF-4), in the suite's shared
 // recents: `.opened` or `.saved`, once each, with the file's suite type.
+// A document save that lands first publishes the file's thumbnail, off the
+// main actor, to the previews the bridge holds (shared-thumbnails ST-7).
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
 // <folder>` keeps autosaves there. PhotoFileSession is the file state the
 // window and PhotoFileArea share. PhotoFileArea
@@ -118,6 +120,14 @@ final class PhotoFileSession {
         return SuiteDocumentsBridge(app: .photo, services: .live(support: support, app: .photo, arguments: arguments))
     }()
 
+    /// Publishes the thumbnail of the document saved at `url` to the bridge's previews, off the main actor (ST-7).
+    func publishPreview(of url: URL, archive: any DocumentArchiving) async {
+        let (path, thumbnails) = (url.path(percentEncoded: false), (bridge ?? Self.suiteBridge).thumbnails)
+        _ = await Task.detached(priority: .utility) {
+            await PhotoSavedPreview.publish(documentAt: path, archive: archive, to: thumbnails)
+        }.value
+    }
+
     /// Notes `url` in Open Recent: the system's list, Photo's own (an app with
     /// no declared document types may not get the system's), and the suite's
     /// shared recents as `event`, when the suite knows the file's type.
@@ -152,6 +162,13 @@ final class PhotoFileSession {
 extension PhotoWindow {
     /// The services a window runs on when no fixture is asked for: `.live`,
     /// its autosaves in `-PhotoRecoveryDir`'s folder when one is given.
+    /// Photo's `.live` services with the suite's live text (Core Text), so text layers draw their words.
+    nonisolated static var liveServices: PhotoServices {
+        var services = PhotoServices.live
+        services.text = LiveText()
+        return services
+    }
+
     nonisolated static func fileServices(_ live: PhotoServices) -> PhotoServices {
         guard let folder = UserDefaults.standard.string(forKey: "PhotoRecoveryDir") else { return live }
         return live.recovering(in: URL(fileURLWithPath: folder, isDirectory: true))
@@ -307,6 +324,7 @@ extension PhotoWindow {
             do {
                 let snapshot = try await Task.detached(priority: .userInitiated) { try workspace.snapshot() }.value
                 try await PhotoPackageIO.write(snapshot, to: url, archive: workspace.services.archive, codec: ImageIOCodec())
+                await files.publishPreview(of: url, archive: workspace.services.archive)
                 didSave(url, kind: .document, opened: opened)
             } catch {
                 didFailSave(error)

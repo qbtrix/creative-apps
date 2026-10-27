@@ -51,6 +51,8 @@ struct LibraryMenu {
     /// The catalog file (persist).
     struct Persist {
         var showCatalogInFinder: Action?
+        /// Closes the notice of a damaged catalog opened from a backup (catalog-backup BK-5).
+        var dismissBackupNotice: Action?
     }
 
     /// View (loupe-viewport): modes, zoom, sort, first and last photo.
@@ -99,6 +101,8 @@ struct LibraryMenu {
         var cropTitle: String = "Crop"
         var applyCrop: Action?
         var resetCrop: Action?
+        /// image.rotate-ccw, image.rotate-cw and image.flip on the selection (orientation-crop OC-9).
+        var rotateLeft, rotateRight, flipHorizontal, flipVertical: Action?
     }
 
     /// File > Export… (export).

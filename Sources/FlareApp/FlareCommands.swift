@@ -10,12 +10,15 @@
 // lists Bounce, Character, Button and Keyed Ball, the keyed document the
 // easing journey starts from; Open Recent lists the window's recent files,
 // then Clear Menu. File > Place… (⇧⌘P, svg-place PF-3) is off with
-// `place.image`'s reason until an animation is open. The focused window publishes a FlareMenu as a focused
+// `place.image`'s reason until an animation is open. Document Settings… opens
+// the shared setup sheet on the open scene. The focused window publishes a FlareMenu as a focused
 // scene value (FlareWindow.swift); with none focused every item disables. The
 // value carries the selection's Edit reasons too, so a new selection is a new
 // value and the items re-read their reasons. ⌘A is Select All Keys while the
 // timeline strip has focus (its FocusedValues.timelineSelectAll, key-select-all
-// KS-2), else Edit > Select All on the stage's art.
+// KS-2), else Edit > Select All on the stage's art. While a text field has
+// focus (FILL's hex field, a layer name), Undo, Redo, Cut, Copy, Paste, Delete
+// and Select All give way to it (SuiteUI's MenuCommand.givingWay, #4830).
 import FlareModel
 import SuiteModel
 import SuiteShell
@@ -41,6 +44,10 @@ struct FlareMenu {
     var place: @MainActor () -> Void = {}
     /// The open animation's file, which File > Open In ▸ hands to another app; nil before it has one (file-flow FL-2).
     var document: SuiteDocumentRef?
+    /// File > Document Settings… (document-setup DS-14): shows the shared sheet in settings mode; `settingsHelp` is
+    /// why it can't, nil when a scene is open.
+    var documentSettings: @MainActor () -> Void = {}
+    var settingsHelp: String? = "Open a Flare window first."
 
     /// Open Sample's items: the sample's name for `.openSample(name:)`, and its title.
     static let samples: [(name: String, title: String)] = [
@@ -90,22 +97,26 @@ struct FlareCommands: Commands {
             item(.file(.save), key: KeyboardShortcut("s"))
             item(.file(.saveAs), key: KeyboardShortcut("s", modifiers: [.command, .shift]))
             item(.export(.showSheet), key: KeyboardShortcut("e", modifiers: [.command, .shift]))
+            if let spec = FlareWorkspace.menuSpec("document.set-settings") {
+                MenuCommand(spec, on: menu.settingsHelp, title: "Document Settings…") { menu.documentSettings() }
+            }
             item(.file(.close), key: KeyboardShortcut("w"))
         }
         CommandGroup(replacing: .undoRedo) {
-            item(.edit(.undo), title: menu.undoTitle, key: KeyboardShortcut("z"))
-            item(.edit(.redo), title: menu.redoTitle, key: KeyboardShortcut("z", modifiers: [.command, .shift]))
+            item(.edit(.undo), title: menu.undoTitle, key: KeyboardShortcut("z")).givingWay(to: .undo)
+            item(.edit(.redo), title: menu.redoTitle, key: KeyboardShortcut("z", modifiers: [.command, .shift])).givingWay(to: .redo)
         }
         CommandGroup(replacing: .pasteboard) {
-            item(.edit(.cut), key: KeyboardShortcut("x"))
-            item(.edit(.copy), key: KeyboardShortcut("c"))
-            item(.edit(.paste), key: KeyboardShortcut("v"))
+            item(.edit(.cut), key: KeyboardShortcut("x")).givingWay(to: .cut)
+            item(.edit(.copy), key: KeyboardShortcut("c")).givingWay(to: .copy)
+            item(.edit(.paste), key: KeyboardShortcut("v")).givingWay(to: .paste)
             item(.edit(.duplicate), key: KeyboardShortcut("d"))
-            item(.edit(.delete), key: KeyboardShortcut(.delete, modifiers: []))
+            item(.edit(.delete), key: KeyboardShortcut(.delete, modifiers: [])).givingWay(to: .delete)
             if let keys = timelineSelectAll, let spec = FlareWorkspace.menuSpec("timeline.select-all-keys") {
                 MenuCommand(spec, on: menu.help(.timeline(.selectAllKeys)), shortcut: KeyboardShortcut("a")) { keys.run() }
+                    .givingWay(to: .selectAll)
             } else {
-                item(.edit(.selectAll), key: KeyboardShortcut("a"))
+                item(.edit(.selectAll), key: KeyboardShortcut("a")).givingWay(to: .selectAll)
             }
             item(.edit(.deselect), key: KeyboardShortcut("a", modifiers: [.command, .shift]))
         }
@@ -196,7 +207,7 @@ struct FlareCommands: Commands {
 
     /// One menu item: `intent`'s title (or `title`) on its catalog spec (`FlareWorkspace.menuSpec(for:)`, command-state
     /// CS-12), acting through the focused window and disabled with its reason while it can't act.
-    private func item(_ intent: FlareIntent, title: String? = nil, key: KeyboardShortcut? = nil) -> some View {
+    private func item(_ intent: FlareIntent, title: String? = nil, key: KeyboardShortcut? = nil) -> MenuCommand {
         MenuCommand(FlareWorkspace.menuSpec(for: intent), on: menu.help(intent), title: title ?? intent.title, shortcut: key) {
             menu.perform(intent)
         }

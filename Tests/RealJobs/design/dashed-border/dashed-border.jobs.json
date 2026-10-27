@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "design",
+  "why": "RJ-D36: selects a 100 x 50 rectangle at 10, 10, gives it a stroke, sets the width to 2 pt and the cap to round, dashes it with the dashed preset (scaled by the width), then exports SVG: the rect writes stroke-dasharray=\"8 4\", stroke-linecap=\"round\" and the miter join's stroke-miterlimit=\"10\", and its bytes are checked.",
+  "inputs": ["input/*.design"],
+  "steps": [
+    {"id": "edit.select", "params": {"ids": ["node-2"]}},
+    {"id": "stroke.add", "params": {}},
+    {"id": "stroke.width", "params": {"width": 2}},
+    {"id": "stroke.cap", "params": {"cap": "round"}},
+    {"id": "stroke.dash", "params": {"preset": "dashed"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "svg", "options": {}},
+  "expect": {
+    "out/one-rect.svg": {"sha256": "4cb68b7ac372587cfc4320809f77e5c21c86e5293110e5e9de623546439733ce"}
+  },
+  "platforms": ["linux", "macos"]
+}

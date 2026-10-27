@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# scripts/ci [--changed [BASE]]: the one gate. Runs the no-crash lint, the isa-swizzle lint, the
+# scripts/ci [--changed [BASE] | --build-only | --shard K/N]: the one gate. Runs the no-crash lint, the isa-swizzle lint, the
 # app-state rule, the design lint, the C4 ownership and descriptions checks, the duplicate-code
-# check, the canonical-first check, the SuiteUI-first view check, the render contract, the app-marks check, the CI scripts' fixture tests, the journey quarantine check, the
+# check, the canonical-first check, the SuiteUI-first view check, the render contract, the app-marks check, the CI scripts' fixture tests, the test quarantine check, the
 # real-jobs check, the mutation anchors, swift build of every target with its tests, and swift
 # test, then prints PASS or FAIL and exits with the real status. swift build takes its dependencies only
 # from the committed Package.resolved (--force-resolved-versions): a
@@ -14,6 +14,15 @@
 # the named tests in every pass, for a local gate whose toolchain renders
 # differently. CI runs plain scripts/ci on Linux and macOS. On Linux,
 # Package.swift declares only the Model targets, so build and test cover those; on macOS they cover everything.
+#
+# CI's macOS job is split: one `macOS compile` job runs --build-only (every
+# lint and the build, no tests) and ships .build, then N `macOS tests K/N`
+# jobs each run --shard K/N on it: no lints, no build, `swift test list` on
+# the existing build, scripts/test-scope shard K/N picks this shard's suites
+# (sorted, index mod N) and they run as a --changed scope does (the parallel
+# pass, its heavy tests, its snapshots one at a time). Each shard is its own
+# process on its own runner, so a MainActor-bound suite starved by a hog in
+# one shard's pool can't time out the others (#2971; run 40266495039).
 #
 # --changed is what builders run before a PR: every lint and the same build,
 # then only the tests of the targets the branch touched since its merge base
@@ -75,15 +84,18 @@
 # docs/blueprints/suite/feature-map.json, and each jobs.md renders without
 # being written (the Generated workflow writes them on dev).
 #
-# The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam,
+# The fixture tests: Tests/contact_sheet, audit_lower, test_died, ci_findings, jetsam, roadmap_numbers,
 # sample_surfaces, test_scope and bump_core test the scripts of the same names (some need jq).
 #
-# The journey quarantine check runs Tests/quarantine, then scripts/quarantine
-# check on UITests/quarantine.json: every entry names a journey that exists in
-# UITests/, an owner issue (#<number>, open when gh can tell), a reason, and
-# an expiry no more than 7 days out that hasn't passed. scripts/ui-test skips
-# the live entries, and Tests/ui_test checks it skips the local-key journeys
-# on hosted runners only. Needs jq.
+# The test quarantine check runs Tests/quarantine, then scripts/quarantine
+# check on UITests/quarantine.json: every entry names a journey in UITests/ or
+# a swift test in Tests/, an owner issue (#<number>, open when gh can tell), a
+# reason, and an expiry no more than 7 days out that hasn't passed (a fast-lane
+# entry, with a `lane` block, may be past it: the lane labels its owner a
+# blocker and removes it). scripts/ui-test skips the live journeys, the test
+# passes below skip the live swift tests (`scripts/quarantine skip`), and
+# Tests/ui_test checks the local-key journeys are skipped on hosted runners
+# only. Needs jq.
 #
 # The mutation anchors check runs Tests/mutate, then scripts/mutate --validate:
 # every `find` in Tests/mutations/*.json occurs exactly once in its file, so a
@@ -138,17 +150,21 @@ cd "$(dirname "$0")/.." || exit 1
 
 fail() { echo; echo "CI: FAIL ($1)"; exit 1; }
 
-changed_mode=0
+changed_mode=0 build_only=0 shard=""
 case "${1:-}" in
   "") ;;
   --changed) changed_mode=1 base=${2:-origin/dev} ;;
-  *) echo "usage: scripts/ci [--changed [BASE]]   (BASE defaults to origin/dev)" >&2; exit 2 ;;
+  --build-only) build_only=1 ;;
+  --shard) shard=${2:-}; [[ "$shard" =~ ^[0-9]+/[0-9]+$ ]] || { echo "usage: scripts/ci --shard K/N" >&2; exit 2; } ;;
+  *) echo "usage: scripts/ci [--changed [BASE] | --build-only | --shard K/N]   (BASE defaults to origin/dev)" >&2; exit 2 ;;
 esac
 if (( changed_mode )); then
   fork=$(git merge-base "$base" HEAD 2>/dev/null) || fail "--changed: $base has no merge base with HEAD (git fetch origin first?)"
   changed=$( { git diff --name-only "$fork"; git ls-files --others --exclude-standard; } | sort -u)
 fi
 
+# A shard runs tests only: the compile job ran these lints and the build (not indented: a 270-line block).
+if [[ -z "$shard" ]]; then
 echo "== no-crash lint (Sources/)"
 pattern='try!|as!|fatalError\(|preconditionFailure\(|precondition\(|unowned |\.first!|\.last!'
 if grep -rnE "$pattern" Sources/; then
@@ -402,14 +418,16 @@ echo "== journeys wait (Tests/journeys_wait)"
 bash Tests/journeys_wait/test_journeys_wait.sh || fail "journeys wait: scripts/journeys-wait broke its decision tests"
 echo "== jetsam summary (Tests/jetsam)"
 bash Tests/jetsam/test_jetsam_summary.sh || fail "jetsam summary: scripts/jetsam-summary broke its fixture test"
+echo "== roadmap numbers (Tests/roadmap_numbers)"
+bash Tests/roadmap_numbers/test_roadmap_numbers.sh || fail "roadmap numbers: scripts/roadmap-numbers broke its fixture test"
 echo "== sample surfaces (Tests/sample_surfaces)"
 bash Tests/sample_surfaces/test_sample_surfaces.sh || fail "sample surfaces: scripts/sample-surfaces broke its fixture test"
 echo "== test scope (Tests/test_scope)"
 bash Tests/test_scope/test_test_scope.sh || fail "test scope: scripts/test-scope or Tests/perf-suites.txt broke its tests"
-echo "== journey quarantine (UITests/quarantine.json)"
-bash Tests/quarantine/test_quarantine.sh || fail "journey quarantine: scripts/quarantine broke its fixture test"
+echo "== test quarantine (UITests/quarantine.json)"
+bash Tests/quarantine/test_quarantine.sh || fail "test quarantine: scripts/quarantine broke its fixture test"
 bash Tests/ui_test/test_local_keys.sh || fail "local-key journeys: scripts/ui-test no longer skips them on hosted runners only"
-scripts/quarantine check || fail "journey quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json)"
+scripts/quarantine check || fail "quarantine: fix, renew or remove the entries above (the supervisor edits UITests/quarantine.json; the fast lane adds and removes its own entries)"
 echo "== bump core (Tests/bump_core)"
 bash Tests/bump_core/test_bump_core.sh || fail "bump core: scripts/bump-core broke its tests"
 echo "== merge drivers (Tests/merge_drivers)"
@@ -417,6 +435,7 @@ bash Tests/merge_drivers/test_merge_drivers.sh || fail "merge drivers: scripts/m
 echo "== mutation anchors (Tests/mutations)"
 bash Tests/mutate/test_mutate.sh || fail "mutation anchors: scripts/mutate broke its fixture test"
 python3 scripts/mutate --validate || fail "mutation anchors: repoint each find above at the code as it is now (scripts/mutate)"
+fi
 
 flags=()
 if [[ "$(uname)" == Darwin ]]; then
@@ -427,9 +446,12 @@ if [[ "$(uname)" == Darwin ]]; then
   fi
 fi
 
-echo "== swift build (every target with its tests)"
-swift build --build-tests --force-resolved-versions ${flags[@]+"${flags[@]}"} \
-  || fail "swift build (an out-of-date Package.resolved means the creative-core pin moved by hand: use scripts/bump-core)"
+if [[ -z "$shard" ]]; then
+  echo "== swift build (every target with its tests)"
+  swift build --build-tests --force-resolved-versions ${flags[@]+"${flags[@]}"} \
+    || fail "swift build (an out-of-date Package.resolved means the creative-core pin moved by hand: use scripts/bump-core)"
+fi
+if (( build_only )); then echo; echo "Built only; the tests run in shards (scripts/ci --shard K/N)."; echo "CI: PASS"; exit 0; fi
 
 # run_tests LABEL ARGS...: one `swift test` run on the build above, its wall
 # time, and on a failure its cause: a dead test process (no "Test run with"
@@ -500,6 +522,13 @@ run_tests() {
 # The perf and timing tests run nightly (perf-nightly), never here. An empty
 # regex would skip every test, so the flag goes in only when there is one.
 perf=$(python3 scripts/test-scope perf) || fail "Tests/perf-suites.txt: fix the line above"
+# Quarantined swift tests (UITests/quarantine.json entries in the perf list's
+# form, the supervisor's or the fast lane's) ride the same --skip regex.
+quarantined=$(scripts/quarantine skip) || fail "UITests/quarantine.json: unreadable (scripts/quarantine check)"
+if [[ -n "$quarantined" ]]; then
+  echo "CI: skipping quarantined tests: $quarantined"
+  perf="$perf${perf:+|}$quarantined"
+fi
 # CI_LOCAL_SKIP: an opt-in swift-testing --skip regex for a local gate whose
 # toolchain differs from CI's. It rides with the perf regex into every pass.
 if [[ -n "${CI_LOCAL_SKIP:-}" ]]; then
@@ -515,12 +544,15 @@ skip_perf=()
 # model suites timed out together (#2971).
 heavy=$(python3 scripts/test-scope heavy) || fail "Tests/heavy-suites.txt: fix the line above"
 
-# run_heavy [FILTER]: the heavy tests, all or those FILTER takes; nothing when none.
+# run_heavy [FILTER]: the heavy tests, all or those FILTER takes; nothing when
+# none. Snapshot suites listed heavy run here, beside each other, instead of
+# in the one-at-a-time pass, which skips them.
 run_heavy() {
   local tests
   tests=$(python3 scripts/test-scope heavy ${1:+"$1"}) || fail "Tests/heavy-suites.txt: fix the line above"
   [[ -z "$tests" ]] || run_tests "the heavy tests (Tests/heavy-suites.txt)" --filter "$tests" ${skip_perf[@]+"${skip_perf[@]}"}
 }
+skip_heavy="$perf${perf:+${heavy:+|}}$heavy"
 
 # run_all: every test but the perf ones.
 run_all() {
@@ -533,15 +565,35 @@ run_all() {
     # parallel. Each run prints its wall time.
     run_tests "all but AppSnapshotTests and the heavy tests" --skip "^AppSnapshotTests\.${perf:+|$perf}${heavy:+|$heavy}"
     run_heavy
-    run_tests "AppSnapshotTests, one at a time" --filter '^AppSnapshotTests\.' ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
+    run_tests "AppSnapshotTests, one at a time" --filter '^AppSnapshotTests\.' ${skip_heavy:+--skip "$skip_heavy"} --no-parallel
   else
-    local skip="$perf${perf:+${heavy:+|}}$heavy"
-    run_tests "all but the heavy tests" ${skip:+--skip "$skip"}
+    run_tests "all but the heavy tests" ${skip_heavy:+--skip "$skip_heavy"}
     run_heavy
   fi
 }
 
-if (( ! changed_mode )); then
+# run_scope LABEL TESTS SNAPS: the parallel pass of TESTS without the perf and
+# heavy tests, the heavy tests of TESTS and SNAPS in a pass of their own, then
+# the rest of SNAPS one at a time; nothing for an empty regex (a --changed
+# scope and a shard).
+run_scope() {
+  local both
+  [[ -z "$2" ]] || run_tests "$1" --filter "$2" ${skip_heavy:+--skip "$skip_heavy"}
+  both="$2${2:+${3:+|}}$3"
+  [[ -z "$both" ]] || run_heavy "$both"
+  [[ -z "$3" ]] || run_tests "$1, snapshots one at a time" --filter "$3" ${skip_heavy:+--skip "$skip_heavy"} --no-parallel
+}
+
+if [[ -n "$shard" ]]; then
+  ids=$(NO_COLOR=1 swift test ${flags[@]+"${flags[@]}"} list --skip-build 2>/dev/null) || fail "swift test list: nothing built to shard (swift build --build-tests first)"
+  scope=$(printf '%s\n' "$ids" | python3 scripts/test-scope shard "$shard") || fail "test-scope shard $shard"
+  tests=$(sed -n 1p <<<"$scope") snaps=$(sed -n 2p <<<"$scope")
+  echo "== shard $shard of $(grep -c '^[A-Za-z_]' <<<"$ids") listed tests"
+  echo "== its tests: ${tests:-none}"
+  echo "== its snapshots: ${snaps:-none}"
+  [[ -n "$tests$snaps" ]] || fail "shard $shard: no suite landed here; use fewer shards"
+  run_scope "shard $shard" "$tests" "$snaps"
+elif (( ! changed_mode )); then
   run_all
 else
   echo "== changed since $base (merge base ${fork:0:12}):"
@@ -555,12 +607,8 @@ else
     run_all
   else
     tests=$(sed -n 1p <<<"$scope") snaps=$(sed -n 2p <<<"$scope")
-    if [[ -n "$tests" ]]; then
-      skip="$perf${perf:+${heavy:+|}}$heavy"
-      run_tests "changed: $tests" --filter "$tests" ${skip:+--skip "$skip"}
-      run_heavy "$tests"
-    fi
-    [[ -z "$snaps" ]] || run_tests "changed snapshots, one at a time: $snaps" --filter "$snaps" ${skip_perf[@]+"${skip_perf[@]}"} --no-parallel
+    echo "== changed tests: ${tests:-none}; changed snapshots: ${snaps:-none}"
+    run_scope "changed" "$tests" "$snaps"
     [[ -n "$tests$snaps" ]] || echo "== swift test: no test target covers the changed files; the build above is the check"
   fi
 fi
@@ -568,4 +616,5 @@ fi
 echo
 for log in ${logs[@]+"${logs[@]}"}; do grep -E "Test run with [0-9]+ tests?" "$log"; done
 (( ! changed_mode )) || echo "Scoped to the changes since $base; plain scripts/ci is the full gate."
+[[ -z "$shard" ]] || echo "Shard $shard of the tests; the other shards and the compile job make the full gate."
 echo "CI: PASS"
