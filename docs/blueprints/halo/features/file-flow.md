@@ -48,7 +48,7 @@ Trap: Halo keeps its own list (two Open Recent truths), or an image drop is sile
 
 ## Screens and states
 
-`halo-open-recent` (light and dark), `halo-drop-mark`.
+`halo-open-recent` (light and dark), `halo-drop-mark` (light and dark).
 
 ## Contract slice
 
