@@ -145,3 +145,4 @@ utc	stage	event	ref	note
 05:04Z	3	wait	#5247 #5248 #5249	all clean + fast-lane, awaiting lane batch; main still fef52e668; dev-red #5818 open
 05:23Z	3	wait	#5247 #5248 #5249	clean + fast-lane; lane holding (dev-red #5818 open); main fef52e668
 05:44Z	3	wait	#5247 #5248 #5249	clean + fast-lane; no lane run since 04:51Z; dev-red #5818 open
+06:11Z	3	fix-rebase	#5249	AJ-halo needs-rebase: merged dev (HY-6 layer styles), repointed 2 mutation anchors, gate running

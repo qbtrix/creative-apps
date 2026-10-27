@@ -343,3 +343,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 05:04Z check-in: #5247 (needs-rebase dropped), #5248, #5249 clean with fast-lane, awaiting batch. main unchanged (fef52e668), no Belt-Slice-Done yet. dev-red #5818 open (not ours).
 - 05:23Z check-in: #5247/#5248/#5249 clean with fast-lane; lane last ran 04:51Z, holding while dev-red #5818 is open. main unchanged, no Belt-Slice-Done yet.
 - 05:44Z check-in: unchanged. #5247/#5248/#5249 clean with fast-lane; no fast-lane run since 04:51Z; dev-red #5818 open; main fef52e668.
+- 06:11Z AJ-halo #5249 went needs-rebase; merged origin/dev resolving HaloDocumentValues/HaloDrawRules/LiveFrameRendering against layer-styles HY-6 (filters run before style), repointed 2 stale mutation anchors; scripts/ci --changed running. #5247 AJ-photo and #5248 AJ-library clean in lane. Dependents restacked locally, waiting on parents.
