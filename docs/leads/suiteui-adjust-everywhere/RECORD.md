@@ -341,3 +341,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 04:42Z fix: #5247 needs-rebase. Merged origin/dev; PhotoModel.PhotoLiveTone.json kept our Blur entry + dev's 4 Sharpen entries; mutate --validate OK; scripts/ci --changed running.
 - 04:48Z ship: #5247 dev merged in, scripts/ci --changed PASS, pushed a2241375f, Head line moved; now clean, lane drops needs-rebase on the new head.
 - 05:04Z check-in: #5247 (needs-rebase dropped), #5248, #5249 clean with fast-lane, awaiting batch. main unchanged (fef52e668), no Belt-Slice-Done yet. dev-red #5818 open (not ours).
+- 05:23Z check-in: #5247/#5248/#5249 clean with fast-lane; lane last ran 04:51Z, holding while dev-red #5818 is open. main unchanged, no Belt-Slice-Done yet.
