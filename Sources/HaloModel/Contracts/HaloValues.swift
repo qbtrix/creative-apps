@@ -167,25 +167,6 @@ public struct HaloKeyRef: Hashable, Sendable, Codable {
     }
 }
 
-/// The easing presets the menu, the chips and the timeline diamonds name.
-/// Each is SuiteKernel's `EasePreset` of the same name (`kernel`, in
-/// HaloEasing+Kernel.swift); a curve matching none is custom.
-public enum HaloEasingPreset: String, CaseIterable, Sendable {
-    case linear, easeIn, easeOut, easeInOut, hold
-
-    /// The kernel's title, but "Ease In and Out" for Ease In-Out.
-    public var title: String { self == .easeInOut ? "Ease In and Out" : kernel.title }
-
-    public var easing: HaloEasing { kernel.easing }
-
-    /// The preset `easing` equals; nil for a custom curve or the kernel's
-    /// `ease`, which Halo doesn't show.
-    public init?(_ easing: HaloEasing) {
-        guard let match = EasePreset.allCases.first(where: { $0.easing == easing }) else { return nil }
-        self.init(match)
-    }
-}
-
 /// A text layer's words and size (tier 2, #430). Color is the layer's.
 /// `width` and `height` are the line box `TextRasterizing.measure` gave when
 /// the words or size last changed (HaloTextEdits sets them through

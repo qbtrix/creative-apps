@@ -5,9 +5,9 @@
 // secondary text left and its easing's title right on one line while both
 // fit whole, else the easing under the title, so neither truncates; while
 // picked, the selected well and a 1 pt accent border); a click picks it (`.selectKey`, Shift extends) and Escape picks
-// nothing (`.clearKeySelection`). With a pick: the five presets as
-// PresetGrid chips in `chipRows` (two short ones a row, "Ease In and Out"
-// alone, so no title truncates; the on chip is `model.pickedPreset`, none
+// nothing (`.clearKeySelection`). With a pick: SuiteKernel's six presets as
+// PresetGrid chips in `chipRows` (two a row, so no title truncates at the
+// inspector's minimum width, titled as Flare's are; the on chip is `model.pickedPreset`, none
 // for a custom curve) sending `.setEasing`, SuiteUI's CurveEditor
 // (`halo.easing`, handles `halo.easing.handle1`/`handle2`) sending
 // `.moveEasingHandle` (tooltip `curveTip`), and X1 Y1 X2 Y2 StudioScrubRows (`handleHelp` says
@@ -21,6 +21,7 @@
 // `perform`. Owns presentation state only: the hovered row.
 import AppKit
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -41,13 +42,13 @@ struct HaloEasingInspector: View {
     /// The curve's tooltip while it can act (#1416).
     static let curveTip = "Drag a handle to shape the easing between this key and the next."
 
-    /// The preset chips a row: the short titles two by two, "Ease In and
-    /// Out" alone, so every title fits at the inspector's minimum width.
-    static let chipRows: [[HaloEasingPreset]] = [[.linear, .hold], [.easeIn, .easeOut], [.easeInOut]]
+    /// The preset chips a row, two by two in the kernel's menu order, so every
+    /// title fits at the inspector's minimum width.
+    static let chipRows: [[EasePreset]] = [[.linear, .ease], [.easeIn, .easeOut], [.easeInOut, .hold]]
 
     /// One preset's chip: its title, and `halo.easing.preset.<case>` on its
     /// own button (PresetGrid sets an option's identifier), #4453.
-    nonisolated static func chipOption(_ preset: HaloEasingPreset) -> InspectorOption<HaloEasingPreset> {
+    nonisolated static func chipOption(_ preset: EasePreset) -> InspectorOption<EasePreset> {
         InspectorOption(id: preset, title: preset.title, identifier: "halo.easing.preset.\(preset.rawValue)")
     }
 

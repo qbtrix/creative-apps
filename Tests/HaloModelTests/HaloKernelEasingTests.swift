@@ -10,25 +10,37 @@ import Foundation
 import SuiteKernel
 import Testing
 
-private let curves: [HaloEasing] = EasePreset.allCases.map(\.easing) + [.cubicBezier(x1: 0.3, y1: -0.4, x2: 0.8, y2: 1.6)]
+
+/// Ball's Position X key at frame 0, picked: the segment the EASING section edits.
+private func pickedX0() -> HaloProject {
+    var project = commandProject("keyed", .fake)
+    project.selectLayer("comp-1-layer-2")
+    project.selectKey(HaloKeyRef(layerID: "comp-1-layer-2", property: .x, frame: 0), extending: false)
+    return project
+}
 
 @Test func presetsAreTheKernels() {
-    for preset in HaloEasingPreset.allCases {
-        #expect(preset.kernel.rawValue == preset.rawValue && preset.easing == preset.kernel.easing)
-        #expect(HaloEasingPreset(preset.kernel) == preset && HaloEasingPreset(preset.easing) == preset)
-        #expect(preset.title == (preset == .easeInOut ? "Ease In and Out" : preset.kernel.title))
+    // Halo shows all six of the kernel's presets under the kernel's own titles; no Halo preset type is left.
+    for preset in EasePreset.allCases {
+        var project = pickedX0()
+        project.setEasing(preset)
+        #expect(project.pickedSegment?.easing == preset.easing && project.pickedPreset == preset)
+        #expect(project.pickedSegment?.easingTitle == preset.title)
     }
-    // Halo shows five of the kernel's six: `ease` is no Halo preset, so its curve reads as custom.
-    #expect(HaloEasingPreset(EasePreset.ease) == nil && HaloEasingPreset(EasePreset.ease.easing) == nil)
+    #expect(EasePreset.easeInOut.title == "Ease In-Out" && EasePreset(EasePreset.ease.easing) == .ease)
 }
 
 @Test func handlesAndMovesAreTheKernels() {
     let point = HaloPoint(x: 1.4, y: -0.7)
-    for easing in curves {
-        let halo = easing.handles
-        #expect([halo.first, halo.second] == EaseCurve.handles(of: easing) ?? [HaloPoint(x: 0, y: 0), HaloPoint(x: 1, y: 1)])
-        #expect(easing.movingHandle(.first, to: point) == EaseCurve.moving(0, to: point, in: easing))
-        #expect(easing.movingHandle(.second, to: point) == EaseCurve.moving(1, to: point, in: easing))
+    for preset in EasePreset.allCases {
+        for (handle, index) in [(HaloEasingHandle.first, 0), (.second, 1)] {
+            var project = pickedX0()
+            project.setEasing(preset)
+            let pair = EaseCurve.handlePair(of: preset.easing)
+            #expect(project.easingHandles?.first == pair.first && project.easingHandles?.second == pair.second)
+            project.moveEasingHandle(handle, to: point)
+            #expect(project.pickedSegment?.easing == EaseCurve.moving(index, to: point, in: preset.easing), "\(preset) \(handle)")
+        }
     }
 }
 

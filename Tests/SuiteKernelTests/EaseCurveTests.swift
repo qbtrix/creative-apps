@@ -24,7 +24,21 @@ import SuiteKernel
         #expect(EasePreset.easeInOut.title != EasePreset.easeInOut.rawValue)
     }
 
+    @Test func aPresetIsFoundByItsEasing() {
+        #expect(EasePreset.allCases.allSatisfy { EasePreset($0.easing) == $0 })
+        #expect(EasePreset(.cubicBezier(x1: 0.1, y1: 0.2, x2: 0.3, y2: 0.4)) == nil)
+    }
+
     // MARK: handles
+
+    @Test func handlePairIsTheCubicsOrTheCorners() {
+        let cubic = EaseCurve.handlePair(of: .ease)
+        #expect([cubic.first, cubic.second] == [Point(x: 0.25, y: 0.1), Point(x: 0.25, y: 1)])
+        for easing in [Easing.linear, .hold] {
+            let pair = EaseCurve.handlePair(of: easing)
+            #expect([pair.first, pair.second] == [Point(x: 0, y: 0), Point(x: 1, y: 1)])
+        }
+    }
 
     @Test func cubicHasTwoHandles() {
         #expect(EaseCurve.handles(of: .ease) == [Point(x: 0.25, y: 0.1), Point(x: 0.25, y: 1)])

@@ -1,9 +1,9 @@
 [
   {
-    "label": ".lockedLayerUnavailable: the dry run is skipped, so every command reads available",
+    "label": ".notBuiltAvailable: the dry run's notBuilt is ignored, so a command FlareCore hasn't built reads available",
     "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
-    "find": "        return copy.layerError.map { .unavailable($0.message) } ?? .available\n",
-    "replace": "        return .available\n",
+    "find": "        if let error = copy.layerError, case .command(.notBuilt) = error { return .unavailable(error.message) }\n",
+    "replace": "",
     "tests": "FlareCoreCommandCatalogTests"
   },
   {
@@ -30,8 +30,22 @@
   {
     "label": "notDrawnOnStage is ignored: mask and matte commands read available though the stage can't draw them",
     "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
-    "find": "        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }\n",
+    "find": "        if notDrawnOnStage.contains(C.id) { return .unavailable(masksNotDrawn) }\n",
     "replace": "",
     "tests": "FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": "lastFrameFits: a key moved to the scene's length is taken, one frame past its end",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "guard move.to >= length else { return nil }",
+    "replace": "guard move.to > length else { return nil }",
+    "tests": "FlareCatalogRealParamsTests"
+  },
+  {
+    "label": "moveUnchecked: keyframe.move goes to the engine unchecked, so a key lands past the scene",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "        if let move = command as? MoveKeyframe, let why = outsideOwner(move) { throw .failed(id: id, message: why) }\n",
+    "replace": "",
+    "tests": "FlareCatalogRealParamsTests"
   }
 ]

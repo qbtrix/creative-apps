@@ -12,20 +12,26 @@ private func ball(_ document: Document) -> [String: [Int]] {
 private func tracks() -> [String: [Keyframe]] { bounce.layers(of: scene)?.first { $0.id == "ball" }?.tracks ?? [:] }
 private func key(_ property: String?, _ frame: Int) -> FlareModel.KeyRef { .init(layerID: "ball", property: property, frame: frame) }
 
-@Test func presetsAndCurveAreTheKernels() {
+@Test func presetsAndCurveAreTheKernels() throws {
     #expect(EasingPreset.allCases == EasePreset.allCases && LiveEasing().presets == FakeEasing().presets)
     let point = Point(x: 1.4, y: -0.7)
     for easing in EasePreset.allCases.map(\.easing) + [.cubicBezier(x1: 0.3, y1: -0.4, x2: 0.8, y2: 1.6)] {
-        let flare = EasingCurve.handles(of: easing)
-        #expect([flare.first, flare.second] == EaseCurve.handles(of: easing) ?? [Point(x: 0, y: 0), Point(x: 1, y: 1)])
-        #expect(EasingCurve.moving(easing, .first, to: point) == EaseCurve.moving(0, to: point, in: easing))
-        #expect(EasingCurve.moving(easing, .second, to: point) == EaseCurve.moving(1, to: point, in: easing))
-        #expect(EasingCurve.moving(easing, .second, to: Point(x: .nan, y: 0)) == nil)
-        // Flare's editor draws nothing for fewer than two points, where the kernel gives (0, 0) alone.
-        #expect(EasingCurve.samples(of: easing, count: 1).isEmpty)
+        // AE-f2: no Flare curve type is left; the editor's handles and a drag are the kernel's.
+        var fake = FakeEasingEditing()
+        fake.setEasingPreset(EasePreset(easing) ?? .linear)
+        if EasePreset(easing) != nil {
+            let pair = try #require(fake.currentEasingHandles)
+            #expect([pair.first, pair.second] == EaseCurve.handles(of: easing) ?? [Point(x: 0, y: 0), Point(x: 1, y: 1)])
+            #expect(fake.currentEasingPreset == EasePreset(easing))
+            let before = fake
+            fake.moveEasingHandle(.second, to: point)
+            #expect(fake.currentEasing == EaseCurve.moving(1, to: point, in: easing))
+            fake = before
+            fake.moveEasingHandle(.second, to: Point(x: .nan, y: 0))
+            #expect(fake == before)
+        }
         for count in [-1, 0, 1, 2, 5, 64, Int.max] {
             let kernel = EaseCurve.samples(of: easing, count: count)
-            if count >= 2 { #expect(EasingCurve.samples(of: easing, count: count) == kernel) }
             #expect(LiveEasing().curve(easing, count: count) == kernel && FakeEasing().curve(easing, count: count) == kernel)
         }
     }

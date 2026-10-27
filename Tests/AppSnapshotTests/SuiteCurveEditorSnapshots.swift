@@ -12,6 +12,7 @@
 // Golden/inspector/suite-easing-curve-{light,dark,light-ic,dark-ic}.png.
 import FlareCore
 import FlareModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -42,7 +43,7 @@ import Testing
 
 private struct CurveEditorGallery: View {
     static let overshoot =
-        EasingCurve.moving(.easeOut, .second, to: Point(x: 0.62, y: 1.45)) ?? .easeOut
+        EaseCurve.moving(1, to: Point(x: 0.62, y: 1.45), in: .easeOut)
 
     var body: some View {
         HStack(alignment: .top, spacing: SuiteSpacing.xxl) {
@@ -55,7 +56,7 @@ private struct CurveEditorGallery: View {
     }
 
     private func column(_ easing: Easing, preset: EasingPreset?, focus: EasingHandleIndex?) -> some View {
-        let (h1, h2) = EasingCurve.handles(of: easing)
+        let (h1, h2) = EaseCurve.handlePair(of: easing)
         let values = [("X1", h1.x, 0.0...1.0), ("Y1", h1.y, -1.0...2.0), ("X2", h2.x, 0.0...1.0), ("Y2", h2.y, -1.0...2.0)]
         return VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             Text("Easing")
@@ -78,9 +79,9 @@ private struct CurveEditorGallery: View {
 
     /// One easing's curve well at the column's width, handle `focus` ringed.
     static func well(_ easing: Easing, focus: EasingHandleIndex?) -> some View {
-        let (h1, h2) = EasingCurve.handles(of: easing)
+        let (h1, h2) = EaseCurve.handlePair(of: easing)
         return CurveEditor(
-            samples: EasingCurve.samples(of: easing, count: 129).map { CGPoint(x: $0.x, y: $0.y) },
+            samples: EaseCurve.samples(of: easing, count: 129).map { CGPoint(x: $0.x, y: $0.y) },
             handles: (CGPoint(x: h1.x, y: h1.y), CGPoint(x: h2.x, y: h2.y)),
             dimmedHandles: easing == .hold, focusedHandle: focus, onMove: { _, _ in }, onEnd: {})
             .frame(width: SuiteSize.inspectorWidth.ideal - 2 * SuiteSpacing.m)

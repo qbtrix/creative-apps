@@ -3,10 +3,14 @@
 // with W0's `HaloBudget` helper (the quietest p95 of three rounds of 100
 // runs). An easing chip step, `setEasing(_:)` on two picked keys of the first
 // layer plus reading `keySegments`, stays under 1 ms on a device, ten times
-// that in debug CI. Presets alternate so every run records a real step. Runs
+// that in debug CI. Presets alternate so every run records a real step. A
+// handle drag step, `moveEasingHandle(_:to:)` on one picked key plus the
+// 129-sample curve the editor redraws, has the same budget, and the whole
+// drag stays one undo step. Runs
 // on Linux and macOS. The test is timed, so the suite is on the perf list
 // (Tests/perf-suites.txt): the merge gate skips it and perf-nightly runs it.
 @testable import HaloModel
+import SuiteKernel
 import Testing
 
 private let easingBudgetServices: [String] = ["fake", "live"]
@@ -31,7 +35,7 @@ struct HaloEasingBudgetTests {
         project.selectKey(picked[1], extending: true)
         #expect(project.pickedKeys == Set(picked))
         project.setEasing(.linear)
-        let presets: [HaloEasingPreset] = [.easeIn, .easeOut]
+        let presets: [EasePreset] = [.easeIn, .easeOut]
         let budget = haloBudget(device: 1)
         var run = 0
         var rows: [HaloKeySegment] = []
@@ -50,5 +54,27 @@ struct HaloEasingBudgetTests {
         #expect(rows.filter(\.isPicked).map(\.preset) == [last, last])
         #expect(applied == run)
         #expect(project.history.undoTitle == "Undo Keyframe Easing")
+    }
+
+    @Test(arguments: easingBudgetServices)
+    func easingDrag(services name: String) throws {
+        var project = try reference(name)
+        let key = try #require(project.keySegments.first?.key, "the first layer of reference has no segment")
+        project.selectKey(key, extending: false)
+        project.setEasing(.easeInOut)
+        let steps = project.history.undo.count
+        let budget = haloBudget(device: 1)
+        var run = 0
+        var moved = 0
+        let cost = haloP95("easingDrag-\(name)", budget: budget) {
+            let x = 0.05 + Double(run % 90) / 100
+            project.moveEasingHandle(.first, to: HaloPoint(x: x, y: 0.2))
+            if project.easingCurve(count: 129).count == 129, project.easingHandles?.first == HaloPoint(x: x, y: 0.2) { moved += 1 }
+            run += 1
+        }
+        project.endCoalescing()
+        #expect(cost <= budget)
+        #expect(run == 300 && moved == run)
+        #expect(project.pickedPreset == nil && project.history.undo.count == steps + 1)
     }
 }

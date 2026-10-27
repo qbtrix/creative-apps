@@ -172,7 +172,7 @@ final class HaloJourneyTests: XCTestCase {
         XCTAssertEqual(submenuTitles("New", of: "Layer", in: halo), ["Solid", "Shape", "Text", "Null"])
         XCTAssertEqual(
             submenuTitles("Keyframe Easing", of: "Animation", in: halo),
-            ["Linear", "Ease In", "Ease Out", "Ease In and Out", "Hold"])
+            ["Linear", "Ease", "Ease In", "Ease Out", "Ease In-Out", "Hold"])
     }
 
     /// A-HA-1 (#865): Window > Switch To lists the suite's other apps, then Halo's own window.

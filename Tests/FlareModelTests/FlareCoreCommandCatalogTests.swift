@@ -74,7 +74,7 @@ import Testing
         #expect(try FlareFormat.encode(try #require(workspace.document)) == saved)
     }
 
-    @Test func aLockedLayersCommandIsUnavailableWithTheEnginesMessage() throws {
+    @Test func aLockedLayersCommandRefusesWithTheEnginesMessage() throws {
         var workspace = opened()
         let locked = "The layer is locked. Unlock it to change it."
         for id in ["layer.add", "layer.set-flags"] {
@@ -82,11 +82,12 @@ import Testing
                 : .object(["sceneID": .string("scene-1"), "layerID": .string("layer-1"), "isLocked": .bool(true)])
             _ = try catalog.run(id, params: params, on: &workspace)
         }
-        // A locked layer refuses content edits (a rename or flag change still goes through).
+        // A locked layer refuses content edits (a rename or flag change still goes through). The lock is in the
+        // params' layer, not the command, so the command stays available and the run refuses (#5832).
         let addShape = try #require(catalog.spec("shape.add"))
-        #expect(catalog.availability("shape.add", on: workspace) == .unavailable(locked))
+        #expect(catalog.availability("shape.add", on: workspace) == .available)
         let before = workspace.document
-        #expect(throws: CatalogError.unavailable(id: "shape.add", why: locked)) {
+        #expect(throws: CatalogError.failed(id: "shape.add", message: locked)) {
             try catalog.run("shape.add", params: addShape.example, on: &workspace)
         }
         #expect(workspace.document == before)

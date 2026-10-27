@@ -1,7 +1,7 @@
 # Feature packet: easing
 
 **Feature:** Ease keys. Pick a key from the inspector's EASING rows or the
-timeline, give it Linear, Ease In, Ease Out, Ease In and Out or Hold from
+timeline, give it Linear, Ease, Ease In, Ease Out, Ease In-Out or Hold from
 the Animation menu, the timeline's context menu or the EASING chips, or bend
 its curve by hand. Each change is one "Keyframe Easing" undo step, sampled
 by FlareCore's `Timeline.value(of:at:)` and saved with the project.
@@ -70,8 +70,8 @@ the viewer. One shot per step, named `halo-easing-<step>`.
    curve (`halo.easing`) and X1, Y1, X2, Y2 appear; Linear is the chip that
    is on. The chips are lazy grids, so the journey scrolls them on screen
    before it reads one.
-4. Click the chip "Ease In and Out" (a row of its own, its title whole):
-   the row's value reads "Ease In and Out";
+4. Click the chip "Ease In-Out":
+   the row's value reads "Ease In-Out";
    the Edit menu's first item reads "Undo Keyframe Easing".
 5. Scrub to 12: Position X reads "560.0 px" (the eased midpoint equals the
    linear one for this symmetric curve). Scrub to 6: Position X reads below
@@ -80,7 +80,7 @@ the viewer. One shot per step, named `halo-easing-<step>`.
    the row reads "Custom"; Edit still reads "Undo Keyframe Easing".
 7. Right-click `halo.timeline`, choose Hold: the row reads "Hold"; at frame 6
    Position X reads "160.0 px". (EZ-7's context menu)
-8. ⌘Z three times: the row reads "Custom", then "Ease In and Out", then
+8. ⌘Z three times: the row reads "Custom", then "Ease In-Out", then
    "Linear"; at frame 6 Position X reads "360.0 px". The row stays picked:
    selection is not a step.
 

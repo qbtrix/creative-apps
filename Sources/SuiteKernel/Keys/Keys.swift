@@ -1,6 +1,7 @@
 // Keys.swift (EK-3 stub, EK-15 body): the key and easing words every timeline shares, over
 // FlareCore's `Keyframe` and `Easing`: the six easing presets and the one handle and
-// sample math of a curve editor. Every function is total and never traps.
+// sample math of a curve editor. Apps call these directly, with no forwarders of their
+// own. Every function is total and never traps.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -48,6 +49,12 @@ public struct Segment<Property: Hashable & Codable & Sendable>: Hashable, Sendab
 public enum EasePreset: String, CaseIterable, Sendable {
     case linear, ease, easeIn, easeOut, easeInOut, hold
 
+    /// The preset whose easing is `easing`; nil for a custom curve.
+    public init?(_ easing: Easing) {
+        guard let match = Self.allCases.first(where: { $0.easing == easing }) else { return nil }
+        self = match
+    }
+
     /// The FlareCore easing the preset sets.
     public var easing: Easing {
         switch self {
@@ -84,6 +91,13 @@ public enum EaseCurve {
     public static func handles(of e: Easing) -> [Point]? {
         guard case let .cubicBezier(x1, y1, x2, y2) = e else { return nil }
         return [Point(x: x1, y: y1), Point(x: x2, y: y2)]
+    }
+
+    /// Where an editor draws the two handles: a cubic's control points, or
+    /// (0, 0) and (1, 1) for linear and hold, where a drag starts from.
+    public static func handlePair(of e: Easing) -> (first: Point, second: Point) {
+        guard let points = handles(of: e), points.count == 2 else { return (Point(x: 0, y: 0), Point(x: 1, y: 1)) }
+        return (points[0], points[1])
     }
 
     /// `e` with handle `handle` (0 or 1) moved to `p`, x clamped to 0...1 and

@@ -9,7 +9,8 @@
 //   non-finite point changes nothing
 // - consecutive `moveEasingHandle` calls for the same handle are one undo step
 //   until `endEasingHandleDrag()`; every other edit is its own undo step
-// - `easingCurveSamples` are FlareCore's `Easing.value(at:)`, never a copy of it
+// - handles, moves, samples and presets are SuiteKernel's `EaseCurve` and
+//   `EasePreset`, called directly; Flare keeps no curve math of its own
 import FlareCore
 import SuiteKernel
 
@@ -28,10 +29,10 @@ public struct EasingSegment: Hashable, Sendable, Identifiable {
 
     public var id: Self { self }
 
-    /// The row's span, saying its numbers are frames: "frames 0 → 24".
-    public var frameSpan: String { "frames \(startFrame) → \(endFrame)" }
-    /// The row's whole title, its property then its span: "x frames 0 → 24".
-    public var title: String { "\(property) \(frameSpan)" }
+    /// The row's span, saying its numbers are frames: "frames 0–24".
+    public var frameSpan: String { "frames \(startFrame)\u{2013}\(endFrame)" }
+    /// The row's whole title, its property's inspector name then its span: "X, frames 0–24".
+    public var title: String { "\(FakeProperties.title(property)), \(frameSpan)" }
 }
 
 /// The two control points of a cubic Bezier easing.
@@ -96,7 +97,7 @@ public protocol EasingEditing: Sendable {
 extension EasingEditing {
     /// The preset whose easing equals the current one, for the active chip.
     public var currentEasingPreset: EasingPreset? {
-        EasingPreset.allCases.first { $0.easing == currentEasing }
+        currentEasing.flatMap(EasePreset.init)
     }
 
     /// Whether the KEYFRAMES header shows: only over rows, so a layer with no
@@ -105,32 +106,20 @@ extension EasingEditing {
 
     /// Where the editor draws the two handles; nil with no selection.
     public var currentEasingHandles: (first: Point, second: Point)? {
-        currentEasing.map(EasingCurve.handles(of:))
-    }
-}
-
-/// Flare's names for SuiteKernel's `EaseCurve`, kept for the app and its
-/// tests: thin forwards that hold only Flare's deviations (a non-finite drag
-/// is nil, fewer than 2 samples draw nothing).
-public enum EasingCurve {
-    /// The control points of `easing`; linear and hold sit at (0,0) and (1,1).
-    public static func handles(of easing: Easing) -> (first: Point, second: Point) {
-        guard let points = EaseCurve.handles(of: easing), points.count == 2 else {
-            return (Point(x: 0, y: 0), Point(x: 1, y: 1))
-        }
-        return (points[0], points[1])
+        currentEasing.map(EaseCurve.handlePair(of:))
     }
 
-    /// `easing` with one handle moved to `point`, x clamped to 0...1; nil
-    /// when the point is not finite.
-    public static func moving(_ easing: Easing, _ handle: EasingHandle, to point: Point) -> Easing? {
-        guard point.x.isFinite, point.y.isFinite else { return nil }
+    /// The current easing with `handle` moved to `point` by the kernel; nil
+    /// with no selection or a non-finite point, which changes nothing.
+    func movedEasing(_ handle: EasingHandle, to point: Point) -> Easing? {
+        guard point.x.isFinite, point.y.isFinite, let easing = currentEasing else { return nil }
         return EaseCurve.moving(handle.rawValue - 1, to: point, in: easing)
     }
 
-    /// `count` points of `easing` evenly spaced over 0...1, or none when
-    /// `count` is below 2.
-    public static func samples(of easing: Easing, count: Int) -> [Point] {
-        count >= 2 ? EaseCurve.samples(of: easing, count: count) : []
+    /// The kernel's samples of the selected segment's curve; none with no
+    /// selection or below 2 points, which draw no line.
+    public func easingCurveSamples(count: Int) -> [Point] {
+        guard count >= 2, let easing = currentEasing else { return [] }
+        return EaseCurve.samples(of: easing, count: count)
     }
 }

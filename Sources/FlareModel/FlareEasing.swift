@@ -57,19 +57,13 @@ extension FlareWorkspace: EasingEditing {
     }
 
     public mutating func moveEasingHandle(_ handle: EasingHandle, to point: Point) {
-        guard let segment = selectedEasingSegment, let easing = currentEasing,
-              let moved = EasingCurve.moving(easing, handle, to: point)
-        else { return }
+        guard let segment = selectedEasingSegment, let moved = movedEasing(handle, to: point) else { return }
         let key = "easing/\(selectedLayerID ?? "")/\(segment.property)/\(segment.startFrame)/\(handle.rawValue)/\(easingDragSerial)"
         setEasing(moved, coalesceKey: key)
     }
 
     public mutating func endEasingHandleDrag() {
         easingDragSerial &+= 1
-    }
-
-    public func easingCurveSamples(count: Int) -> [Point] {
-        currentEasing.map { EasingCurve.samples(of: $0, count: count) } ?? []
     }
 
     /// Gives the selected segment's start keyframe `easing` as one undo step,

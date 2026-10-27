@@ -4,6 +4,7 @@
 // a composition, since it selects the layer); an easing service that isn't
 // ready says why. Linux and macOS.
 @testable import HaloModel
+import SuiteKernel
 import Testing
 
 /// Why an easing edit waits: no key picked, from the timeline or a row.
@@ -11,7 +12,7 @@ private let noPick = "Click a key on the timeline or pick a span in the EASING l
 
 /// The commands that change the picked keys' easing.
 private let easingEdits: [HaloCommand] =
-    HaloEasingPreset.allCases.map { HaloCommand.setEasing($0) } + [
+    EasePreset.allCases.map { HaloCommand.setEasing($0) } + [
         .setCustomEasing(.cubicBezier(x1: 0.42, y1: 0, x2: 0.58, y2: 1)), .moveEasingHandle(index: 0, x: 0.2, y: 0.1),
         .endEasingDrag,
     ]

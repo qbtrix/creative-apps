@@ -131,7 +131,9 @@ extension HaloProject {
             let plan = started.plan
             return .object(["frames": .number(Double(plan.frames.count)), "width": .number(Double(plan.width)), "height": .number(Double(plan.height))])
         case .setEasing(let preset): setEasing(preset)
-        case .selectKey(let key, let extending): selectKey(key, extending: extending)
+        case .selectKey(let key, let extending):
+            if let why = keyPickRefusal(key) { throw CatalogError.failed(id: id, message: why) }
+            selectKey(key, extending: extending)
         case .selectLaneKeys(let layer, let frame, let extending): selectLaneKeys(layerID: layer, frame: frame, extending: extending)
         case .clearKeySelection: clearKeySelection()
         case .deleteKeys: deleteKeys()
@@ -199,7 +201,7 @@ extension HaloProject {
         case .saveAs: plain(c, "file.save-as", "Save As…", .file, "Saves the project under a new name.")
         case .open: plain(c, "file.open", "Open…", .file, "Opens a project.")
         case .openRecent: typed(c, "file.open-recent", "Open Recent", .file, "Opens a recent project.", Param.Path.self, obj(["path": .string()]), ["path": .string("/tmp/Bounce.halo")]) { .openRecent($0.path) }
-        case .setEasing: typed(c, "animation.easing", "Keyframe Easing", .edit, "Sets the picked keys' easing to a preset.", Param.Preset.self, obj(["preset": .string(oneOf: HaloEasingPreset.allCases.map(\.rawValue))]), ["preset": .string("easeInOut")]) { try .setEasing(decoded(HaloEasingPreset(rawValue: $0.preset))) }
+        case .setEasing: typed(c, "animation.easing", "Keyframe Easing", .edit, "Sets the picked keys' easing to a preset.", Param.Preset.self, obj(["preset": .string(oneOf: EasePreset.allCases.map(\.rawValue))]), ["preset": .string("easeInOut")]) { try .setEasing(decoded(EasePreset(rawValue: $0.preset))) }
         case .selectKey: typed(c, "easing.select-key", "Select Key", .view, "Picks a key, or adds it to the pick.", Param.Key.self, obj(["layerID": Param.id, "property": Param.property, "frame": .integer(minimum: 0), "extending": .boolean]), ["layerID": .string("comp-1-layer-2"), "property": .string("x"), "frame": .number(0), "extending": .bool(false)]) { .selectKey(HaloKeyRef(layerID: $0.layerID, property: $0.property, frame: $0.frame), extending: $0.extending) }
         case .selectLaneKeys: typed(c, "easing.select-lane-keys", "Select Keys", .view, "Picks a layer's keys at a frame.", Param.Lane.self, obj(["layerID": Param.id, "frame": .integer(minimum: 0), "extending": .boolean]), ["layerID": .string("comp-1-layer-2"), "frame": .number(0), "extending": .bool(false)]) { .selectLaneKeys(layerID: $0.layerID, frame: $0.frame, extending: $0.extending) }
         case .clearKeySelection: plain(c, "easing.clear-selection", "Clear Key Selection", .view, "Unpicks every key.")
