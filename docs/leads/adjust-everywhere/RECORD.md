@@ -1,9 +1,9 @@
 # adjust-everywhere lead record
 
 Issue: #3777 · Packet: docs/blueprints/suiteui/features/adjust-everywhere.md
-Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15cb4e0f5-ipbr, act-1a15c4e2e3b-zh3u) · Session: claude/adjust-everywhere-lead-hyr1cx · Started: 2026-10-24T23:10Z
+Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15cb4e0f5-ipbr, act-1a15c4e2e3b-zh3u) · Session: claude/adjust-everywhere-lead-hyr1cx · Started: 2026-10-24T23:10Z
 Stage: 3 wave 3
-Base: afef017c (origin/dev)
+Base: main fef52e66 (verified) / dev 5e4a0922
 Next: wave 2 in lane: AJ-k #5064 (bfa7700e), AJ-c #5233 (a01fdf51, stacked on #5064), AJ-u #5235 look grid (039167d6) + #5236 filter sheet and menu (6240072f). Wave 3 building AJ-photo, AJ-library, AJ-halo on AJ-6 + both AJ-u branches; their PRs get fast-lane once wave 2 merges and each diff is its own. Then AJ-z.
 
 ## Slices
