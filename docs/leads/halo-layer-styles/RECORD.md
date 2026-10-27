@@ -7,7 +7,7 @@ Wire: suiteui layer-styles:LS-8 (StyleProgram.render: turn on HaloStyleRenderTes
 Wire: suiteui layer-styles:LS-6 (RJ-H43 job folder Tests/RealJobs/halo/keyed-glow/ once LS-6 and LS-8 land)
 Stage: 2 building (06:00Z): #5158 (HY-m) and #5174 (LS-2) merged on dev; HY-2, HY-u and HY-7 rebuilt on dev ad29aeaf by cherry-picking their own commits (the old stacks carried LS-1, LS-2 and HY-1, all landed); gates running
 Base: ad29aeaf (origin/dev; main fef52e66 verified at relaunch)
-Next: HY-a gate on the lane's dev merge fcdeb1b2 (kept, no force-push) → #5157 marker, ready; then HY-u (#5161) on it, then refresh draft #5218 (HY-7 waits on LS-9). HY-m slice-done waits: halo-scoped run 40457994899 on dev ad29aeaf red on SuiteUI compile (PendingAdjustTarget AdjustCommands.notBuilt; dev-red #5818), not Halo
+Next: #5157 (HY-a) ready on fcdeb1b2, in the lane; when it lands merge dev into #5161 (HY-u, 71fbffb1), gate, Head, ready; #5218 (HY-z, 11ebec94) stays draft for LS-9, HY-8 follows. HY-m slice-done waits for a green halo-scoped/full run (dev-red #5818: SuiteUI PendingAdjustTarget compile, not Halo)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
