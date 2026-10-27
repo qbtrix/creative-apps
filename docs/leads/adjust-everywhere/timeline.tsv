@@ -166,3 +166,4 @@ utc	stage	event	ref	note
 2026-10-27T09:50Z	check-in	M
 10:04Z	3	waiting-lane	#5247 #5248 #5249	#5247 fixed at fef4bfd91 (another session pushed the same baseline line; gated, Head moved); #5248 passes LiveStandInTests on dev; #5249 clean
 10:08Z	3	waiting-lane	#5247 #5248 #5249	all clean; #5247 needs-fix dropped on fef4bfd91; dev 42f18cbd4; main fef52e668
+10:28Z	3	waiting-lane	#5247 #5248 #5249	none merged or ejected; dev 9d87b7a01; main fef52e668
