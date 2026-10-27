@@ -217,6 +217,8 @@ struct PhotoWindow: View {
                 if samplePress(moves) { return }
                 // A Gradient drag's later samples move only its line, on LiveDragLine's copy.
                 if dragLine.drags(moves, on: model, zoom: zoom) { return }
+                // Free Transform's canvas drags run on the live transform, as its handles' do.
+                if model.transformDraft != nil { return runLiveDrag(moves) }
                 guard let painted = liveStroke.drags(moves, on: model, zoom: zoom) else {
                     model.drags(moves, zoom: zoom)
                     return renderer.show(model)

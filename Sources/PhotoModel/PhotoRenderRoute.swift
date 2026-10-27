@@ -266,6 +266,7 @@ extension PhotoWorkspace {
         guard let back = m.inverse, scale > 0,
             mapped(back, rect).allSatisfy({ $0.0.isFinite && $0.1.isFinite && abs($0.0) < 1e9 && abs($0.1) < 1e9 })
         else { return try composite(tiled, of: layer, onto: &picture, at: rect, on: dispatcher) }
+        PhotoRenderCount.resample()
         // Bilinear reads one source pixel around each sample, more when the layer shrinks; one more for rounding.
         let reach = (max(1, 1 / scale) + 1).rounded(.up)
         let size = PixelBuffer.tileSize

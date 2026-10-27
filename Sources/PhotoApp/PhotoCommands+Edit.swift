@@ -37,10 +37,10 @@ extension PhotoCommands {
 
 /// The Edit menu's items in order, with the system's symbol for each.
 enum PhotoEditItem: CaseIterable {
-    case undo, redo, cut, copy, paste, selectAll, deleteSelection, fillSelection
+    case undo, redo, cut, copy, paste, pasteAsImage, selectAll, deleteSelection, fillSelection
 
-    /// The replacement pasteboard group, in the standard order.
-    static let pasteboardGroup: [Self] = [.cut, .copy, .paste, .selectAll]
+    /// The replacement pasteboard group, in the standard order, Paste as Image after Paste.
+    static let pasteboardGroup: [Self] = [.cut, .copy, .paste, .pasteAsImage, .selectAll]
 
     var systemImage: String {
         switch self {
@@ -49,6 +49,7 @@ enum PhotoEditItem: CaseIterable {
         case .cut: "scissors"
         case .copy: "document.on.document"
         case .paste: "document.on.clipboard"
+        case .pasteAsImage: "photo.on.rectangle"
         case .selectAll: "checkmark.circle"
         case .deleteSelection: "trash"
         case .fillSelection: "paintbrush"
@@ -91,7 +92,8 @@ struct PhotoUndoMenu: View {
     }
 }
 
-/// Cut, Copy, Paste and Select All, a view so it can read the focused window's pasteboard state.
+/// Cut, Copy, Paste, Paste as Image and Select All, a view so it can read the focused window's pasteboard state.
+/// Paste as Image is off with its catalog reason until Photo's pasteboard adapter (CB-13); its action is Paste's path.
 struct PhotoPasteboardMenu: View {
     let menu: PhotoMenu
     @FocusedValue(\.photoPasteboard) private var pasteboard
@@ -103,6 +105,7 @@ struct PhotoPasteboardMenu: View {
             case .cut: edit("edit.cut", .cut, item, key: "x", state)
             case .copy: edit("edit.copy", .copy, item, key: "c", state)
             case .paste: edit("edit.paste", .paste, item, key: "v", state)
+            case .pasteAsImage: menu.item("edit.paste-as-image", systemImage: item.systemImage, in: state) { menu.edit(.paste) }
             default: menu.item("edit.select-all", systemImage: item.systemImage, in: state) { menu.selectAll() }
             }
         }
