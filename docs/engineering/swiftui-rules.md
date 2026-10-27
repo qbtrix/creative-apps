@@ -173,14 +173,14 @@ The reference look is Flare's easing panel (`StudioScrubRow`, `ChoiceChips`).
 
 ## New APIs: macOS 27 and Swift 6.4
 
-**12. Check new or unfamiliar APIs against Apple's documentation.** Model
-training predates macOS 27 and Swift 6.4, so a remembered signature can be
-wrong or gone. On the Mac, look it up in Xcode's documentation (the xcode
-MCP `DocumentationSearch` tool, which reads the installed SDK) and build. On
-a Linux cloud machine, which can't compile SwiftUI, read the `apple-docs`
-MCP (CLAUDE.md, Rules) and still list each such call under
-`Unverified API:` in the PR body, so the Mac finisher checks it against the
-SDK.
+**12. Official docs first, always.** Captain, 10-27. Every AppKit or SwiftUI
+control, API and look comes from Apple's docs
+(developer.apple.com/documentation/appkit, /swiftui) and the HIG, never memory
+(training predates macOS 27). Controls look stock, as the HIG shows: tabs are a
+plain `NSSegmentedControl` (`.segmented` Picker) or `NSTabView` behind
+SuiteUI's `SegmentedTabs`, with no custom capsule, tint or fill. Check in
+Xcode's docs (xcode MCP `DocumentationSearch`) and build; on Linux use the
+`apple-docs` MCP and list the call under `Unverified API:`.
 
 ```text
 ✗ (PR body says nothing; the macOS build breaks on dev)
@@ -216,5 +216,5 @@ holds the old ones and only shrinks.
 - [ ] Each mode change has a visible control and a journey step that clicks it (8, 9)
 - [ ] Hover, pressed and selected on every new control (10)
 - [ ] SuiteUI searched; shared parts went there (11)
-- [ ] New APIs checked in Xcode docs, or listed as `Unverified API:` (12)
+- [ ] Controls and APIs checked in Apple's docs and HIG; stock look; else `Unverified API:` (12)
 - [ ] Pure statics on a View are `nonisolated` (13)
