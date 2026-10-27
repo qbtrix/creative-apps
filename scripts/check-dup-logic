@@ -10,8 +10,10 @@
 # declares) holds a stem from Tests/canonical-concepts.txt at a CamelCase
 # boundary: the stem, an optional plural s, then the end, an uppercase letter,
 # a digit, + or _ (Snap matches SnapGuides and Snaps, never Snapshot). An
-# adapter onto the shared module is fine: a file whose name ends in +Kernel
-# or Adapter never counts.
+# adapter onto the shared module is fine: a file whose name ends in +Kernel or
+# Adapter is judged by its primary type alone, never its name, so one that only
+# extends app types onto the kernel passes, and one that declares its own
+# concept type (a HaloHistory struct in HaloHistory+Kernel.swift) counts.
 #
 # Tests/canonical-baseline.txt lists today's concept files (grandfathered).
 #   scripts/check-dup-logic                    fail on a concept file the baseline doesn't list,
@@ -57,9 +59,9 @@ def is_adapter(path):
 
 def concept_of(path, table, text=None):
     """The first concept the file's name, or its primary type in `text`, names; None when neither does."""
-    if not SCOPE.match(path) or is_adapter(path):
+    if not SCOPE.match(path):
         return None
-    names = [path.rsplit("/", 1)[-1][: -len(".swift")]]
+    names = [] if is_adapter(path) else [path.rsplit("/", 1)[-1][: -len(".swift")]]
     if text is not None:
         code = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith("//"))
         m = TYPE.search(code)
@@ -149,7 +151,8 @@ def main():
     if new:
         print("Canonical first (docs/factory/lead.md rule 20): use the SuiteModel module for this concept, or\n"
               "extract the existing app copy into SuiteModel first and use it from both apps. An adapter onto\n"
-              "the shared module is fine: name it <X>+Kernel.swift or <X>Adapter.swift. A reviewed exception:\n"
+              "the shared module is fine: name it <X>+Kernel.swift or <X>Adapter.swift and declare no\n"
+              "concept type in it (extend the app's types onto the kernel's). A reviewed exception:\n"
               "scripts/check-dup-logic --update-baseline --allow-increase, and `Allow-Dup: <concept> <reason>`\n"
               "in the PR body.")
     if gone:
