@@ -2,9 +2,9 @@
 
 Issue: #3441 · Packet: docs/blueprints/design/features/stroke-style.md
 Run: act-1a17be7aff8-ivwy · Started: 2026-10-23 (this run resumed 2026-10-27T05:55Z; prior act-1a178669406-n4me)
-Stage: 4 every slice done: Belt-Slice-Done DK-u (gaps #4990 #4991) and DK-z on scoped design run 40494076820 at 4a7d926f (holds #5011 c21b2834 and #5825 3f68fdea); Mac-Finish-Wanted DK-u DK-z posted
+Stage: 5 done: Belt-Contact-Sheet posted on #3441 (2026-10-27T12:21Z, comment 6441749054) for run 40494076820; every slice done; gaps #4990 #4991 open (p2); journey testDashedBorder pending in journeys run 40500688446 (Verified level, not the lead's)
 Base: origin/dev; main verified at fef52e66
-Next: journeys run 40500688446 (after CI run 40494076820) finishes, then Belt-Contact-Sheet on #3441, push final record, stop
+Next: none; this lead run is finished. Mac finisher: DK-a, DK-u, DK-z (Mac-Finish-Wanted posted)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
