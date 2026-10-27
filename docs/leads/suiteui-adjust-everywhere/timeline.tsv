@@ -214,3 +214,4 @@ utc	stage	event	ref	note
 22:08Z	3	pushed	#5250	photo-catalog restacked on dev a04ba7720, clean +54-12 f=12, fast-lane back, needs-split dropped
 22:08	3	building	#5250 #5259 #5260	#5247 merged; restacking its children onto dev, gate running
 22:16Z	3	check-in	#5249 #5252 #5250	#5249/#5252 clean; #5250 unstable only from the running fast-lane job; wait for local-ci/prescreen
+22:35	3	restacked	#5250,#5259,#5260	needs-split cleared by restack on dev; waiting on prescreen

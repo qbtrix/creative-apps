@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-27T22:08:21Z
+Polled: 2026-10-27T22:35Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -413,3 +413,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 22:08Z #5250 (photo-catalog) force-pushed a04ba7720 on dev 014429488: scripts/ci --changed PASS, AfterGlowCLITests|LiveStandInTests|PhotoCommandCatalogTests 179 pass, mutate --validate OK. Head line moved; fast-lane added back, needs-split removed; now clean +54-12 f=12. Waits for local-ci/prescreen. #5259 photo-ui restacks after it lands.
 - 2026-10-27T22:08:21Z #5247 merged as 014429488 (AJ-8). Restacking #5250 #5259 #5260 onto dev as their own commits only (catalog 64, ui 268, journeys 200 lines; the needs-split size was the squashed parent): conflicts resolved as unions (ToneCommands + AdjustCommands, tone + adjust ids, golden 144 commands, newImageMode + filterDraft); gate running. #5249 #5252 wait on prescreen; #5257 #5258 restack after #5249. main fef52e66, dev-red #5818 open (not ours).
 - 22:16Z check-in: #5249, #5252 clean; #5250 unstable only because the fast-lane job is in progress on a04ba7720. All wait for local-ci/prescreen. dev 014429488, main fef52e668.
+- 2026-10-27T22:35Z AJ-photo restacked on dev 7b2c4373f: #5250 (12 files, +54/-11) base dev, #5259 (11 files) on catalog, #5260 (1 file) on ui; each passed scripts/ci --changed; needs-split removed, fast-lane back. #5257/#5258 restack after #5249. All heads wait on prescreen; dev-red #5818 open.
