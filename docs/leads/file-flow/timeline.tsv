@@ -240,3 +240,4 @@ utc	stage	event	ref	note
 2026-10-27T05:23:45Z	wait	poll	-	no change
 2026-10-27T05:44:47Z	wait	poll	-	no change
 2026-10-27T05:58:00Z	relaunch	stage	-	act-1a17bed1e9b-xhpo; lead branches rebased onto main; #4936 waits on prescreen
+2026-10-27T06:15:00Z	wait	lane	#4936	Linux check 40412395828 green on 4f8863ff; waits on local-ci/prescreen; body Belt-Lead moved to act-1a17bed1e9b-xhpo; dev-red #5818 (SuiteUI compile) open
