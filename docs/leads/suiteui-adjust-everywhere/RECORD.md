@@ -375,3 +375,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 14:58Z check-in: #5247/#5248/#5249 clean, unmerged; #5248 queued in lane, #5247/#5249 wait for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
 - 2026-10-27T15:24Z #5248 (AJ-10) landed on dev 77666ac3 at 14:58Z; restacking #5252 (AJ-11) onto dev as one commit (9 files, +296/-7; looks before sidecars in LibraryLaunch.services to match live and keep the baselined line), gate running
 - 2026-10-27T15:52Z #5252 (AJ-11) restacked onto dev and gated: CI: PASS, pushed 362dfef1, Head moved; clean, 9 files +296/-7. Dropped the attribution footer from #5252, #5247, #5249 bodies
+- 15:36Z #5248 (AJ-10 library) MERGED as 77666ac30. Dependent #5252 (AJ-11 library UI) already restacked onto dev at 362dfef17 (clean, 296+7 / 9 files, Fast-Check/Head current). #5247/#5249 still wait for local-ci/prescreen. main fef52e668 unchanged; no Belt-Slice-Done.
