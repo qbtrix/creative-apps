@@ -48,6 +48,7 @@ Next: wait for the lane to land #4894 (HF-m), then #4936 retargets to dev and #5
 - Base dev, not main: CLAUDE.md, the fast lane and every other lead target dev.
 
 ## Open
+- 11:27Z stage HF-m: #5123 and #5801 still in the lane, no needs-fix. Halo-scoped 40490171439 at 4a7d926f3 in progress; full 40489065455 queued.
 - 11:06Z stage HF-m: #5123 and #5801 still in the lane, no needs-fix. Full run 40489065455 and halo-scoped 40490171439 at 4a7d926f3 in progress.
 - 10:41Z stage HF-m: #5123 and #5801 still in the lane, no needs-fix. dev at 4a7d926f3 (#5880 fixed the Library compile); full run 40489065455 and halo-scoped 40490171439 queued there, first runs that can go green with HF-4.
 - 10:18Z stage HF-m: check: #5123 and #5801 still wait in the lane (clean, no needs-fix). Scheduled full CI 40484007992 at 9d3e5e327 in progress; full CI 40487248024 at 42f18cbd4 pending. dev macOS compile still red on Library's #5128 test, not Halo. No new findings.
