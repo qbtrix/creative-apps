@@ -61,9 +61,9 @@ import Testing
     private static func filters(_ model: LibraryCatalog) -> LibraryFiltersMenu {
         var menu = LibraryFiltersMenu()
         menu.activeFilter = model.activeFilter
-        menu.filterHelp = model.filterHelp
+        menu.filterHelp = model.libraryFilterHelp
         menu.clearFilterHelp = model.clearFilterHelp
-        if model.filterHelp == nil {
+        if model.libraryFilterHelp == nil {
             menu.toggleFlag = { (_: PhotoFlag) in }
             menu.setRating = { (_: RatingRule) in }
             menu.toggleLabel = { (_: PhotoLabel) in }
