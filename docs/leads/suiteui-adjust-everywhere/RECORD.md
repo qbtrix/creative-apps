@@ -487,3 +487,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 15:55Z #5260 gate PASS, Head: f538be60e. AJ-z split: C4-only PR (imaging-adjust-kinds names Photo/Library/Halo adopters; a description change must be C4-only) gating on lead/adjust-everywhere-AJ-z-c4; then wave built + RJ-X60 pending #5990 as the feature-done PR after #5260 merges.
 - 16:01Z #5991 (AJ-z C4 refresh) opened, fast-lane+beta, Head ed6c602f9. Feature-done branch lead/adjust-everywhere-AJ-z (c9b3c9d6b: wave built, RJ-X60 pending #5990) gating; opens once #5260 merges.
 - 16:08Z lead/adjust-everywhere-AJ-z c9b3c9d6b: gate PASS, pushed. Opens as feature-done PR once #5260 merges. #5260 and #5991 clean.
+- 16:18Z check-in: #5991 merged (81d606521). #5260 clean, labels ok, no local-ci/prescreen yet (verify-after). 0 open adjust-everywhere findings. dev-red #5983 not ours. AJ-z feature-done PR opens once #5260 merges.
