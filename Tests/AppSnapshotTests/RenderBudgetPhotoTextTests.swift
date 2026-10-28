@@ -3,8 +3,9 @@
 // letters into an open box runs PhotoEditor's body (a debug-only counter) at most 3 times a keystroke; its 16 ms
 // p95 is a disabled wall-clock test until Tests/perf-suites.txt lists it, and misses today (gap #6000). A
 // 120-sample Size scrub on a text layer runs the body at most 3 times in all; a box a canvas click opened
-// takes a space. `inspector` writes photo-text-inspector-light/dark.png: the Text section for a "SALE"
-// layer restyled to 120 pt, centered, on the window's live text (its Weight, Style and Color rows).
+// takes a space and Return adds it as a layer. `inspector` writes photo-text-inspector-light/dark.png: the
+// Text section for a "SALE" layer restyled to 120 pt, centered, on the window's live text (its Weight, Style
+// and Color rows).
 // Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -91,8 +92,8 @@ extension BodyCountSuites {
             expectBodies(step, atMost: 3, target: 0)
         }
 
-        /// PJ-TX (#5951): a Type tool click on the canvas, as the journey makes, then "A B": the space reaches the
-        /// box. The canvas kept focus and took Space for its pan, so SUMMER SALE became SUMMERSALE.
+        /// PJ-TX (#5951): a Type tool click on the canvas, as the journey makes, then "A B" and Return: the space
+        /// reaches the box. The canvas kept focus and took Space for its pan, so SUMMER SALE became SUMMERSALE.
         @Test(.timeLimit(.minutes(2))) func aClickedBoxTakesASpace() async throws {
             var open = try PhotoWorkspace.fixture(.sample)
             open.selectTool(.text)
@@ -111,6 +112,14 @@ extension BodyCountSuites {
             }
             try await w.settle(untilStable: bodies)
             #expect(w.value("photo.text.box") == "A B")
+            // Return adds the layer: the box closes and Undo names the step (PJ-TX's "Undo Add Text").
+            try await w.ticks(1) { _ in
+                BodyCountSuites.RenderBudgetNewDocumentTests.press("\r", keyCode: 36, in: w.window)
+            }
+            try await w.settle(untilStable: bodies)
+            #expect(await w.element("photo.text.box") == nil, "Return left the box open")
+            let undo = w.label("photo.bar.undo")
+            #expect(undo?.contains("Add Text") == true, "Undo reads \(undo ?? "nothing")")
         }
     }
 }
