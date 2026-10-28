@@ -3,10 +3,12 @@
 // (`\.libraryCrop`, crop CR-6). With no photo to develop it is an
 // EmptyStateView saying why (`developHelp`). Otherwise, top to bottom (the
 // histogram sits above both tabs, in LibraryInspector): the render error
-// (`library.develop.error`), the TONE and COLOR
+// (`library.develop.error`), LOOKS (SuiteUI's LookGrid, `suite.looks.*`,
+// AJ-11), the TONE and COLOR
 // sections with one bar row per slider ("Mixed" while the targets differ, a
 // Reset context menu per row, its `photo.reset-<slider>` spec's MenuCommand
-// (CS-6), the section reset while any row is off 0),
+// (CS-6), the section reset while any row is off 0), BLACK & WHITE (a
+// checkbox and six weights, `library.develop.bw.*`, via `\.libraryAdjust`),
 // CURVE (SuiteUI's ToneCurveEditor over the targets' curve, its engine
 // samples and the loupe histogram, `library.develop.curve`) and LEVELS
 // (SuiteUI's LevelsHandles: Black Point, Midtones and White Point on the
@@ -40,11 +42,13 @@ struct DevelopInspector: View {
                     if let error = model.developError {
                         InspectorNote(error, kind: .error, identifier: Self.errorID)
                     }
+                    DevelopLooksSection(model: model)
                     ForEach(DevelopGroup.allCases, id: \.self) { group in
                         InspectorSection(group.rawValue, onReset: sectionReset(group)) {
                             ForEach(group.sliders, id: \.self) { row($0) }
                         }
                     }
+                    DevelopBlackAndWhiteSection(model: model, endEdit: develop.endEdit)
                     InspectorSection("Curve", onReset: curveReset) { curve }
                     InspectorSection("Levels", onReset: levelsReset) { levels }
                     actions

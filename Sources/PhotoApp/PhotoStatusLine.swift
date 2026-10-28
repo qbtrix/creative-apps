@@ -7,18 +7,29 @@
 // a "Preview data" warning pill (warning tint, color and triangle) whose
 // tooltip and accessibility hint say it is built-in sample data. The window
 // clears the message 4 s after it appears (PhotoWindow's `clearStatus` task);
-// with no message only the pills show.
+// with no message only the pills show. In a window it reads the PhotoSession's
+// `status` facet; without one (the snapshots) the workspace it was given.
 import PhotoModel
 import SuiteUI
 import SwiftUI
 
 struct PhotoStatusLine: View {
-    let model: PhotoWorkspace
+    private let given: PhotoWorkspace
     let zoom: Double
     var note: String?
     var renderMilliseconds: Double?
     /// The backend that drew the picture: CoreRender's CPU backend ("cpu") or the GPU's name; nil leaves it out.
     var renderBackend: String?
+    @Environment(PhotoSession.self) private var session: PhotoSession?
+
+    init(model: PhotoWorkspace, zoom: Double, note: String? = nil, renderMilliseconds: Double? = nil,
+         renderBackend: String? = nil) {
+        (given, self.zoom, self.note, self.renderMilliseconds, self.renderBackend) =
+            (model, zoom, note, renderMilliseconds, renderBackend)
+    }
+
+    /// The window's workspace now, read through the `status` facet; the given one outside a window.
+    private var model: PhotoWorkspace { session?.workspace(reading: .status) ?? given }
 
     /// The refusal sentence's type: caption text, not the pill type.
     static let messageFont = SuiteFont.caption
@@ -35,6 +46,7 @@ struct PhotoStatusLine: View {
     }
 
     var body: some View {
+        let model = self.model
         HStack(spacing: 0) {
             if let message = model.statusMessage {
                 Label(message, systemImage: "exclamationmark.circle")

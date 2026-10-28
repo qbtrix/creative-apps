@@ -80,6 +80,9 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     @State private var pendingScrollX: Double?
     /// The strip or a control in it has focus: the zoom shortcuts are live.
     @FocusState private var focused: Bool
+    #if DEBUG
+    @Environment(\.timelineBodyTally) private var tally
+    #endif
 
     #if DEBUG
     /// How many times a strip's body ran, over every ID type; the real-window
@@ -137,6 +140,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     public var body: some View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
+        let _ = tally?.strip += 1
         #endif
         let layout = TimelineStripLayout(trackCount: tracks.count, toolbar: toolbar)
         VStack(alignment: .leading, spacing: 0) {

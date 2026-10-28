@@ -1,0 +1,16 @@
+[
+  {
+    "label": "panelSkipsOptions: the inspector stops reading the toolOptions facet, so a brush-size step leaves its Size row stale",
+    "file": "Sources/PhotoApp/PhotoPanel.swift",
+    "find": "session?.workspace(reading: .tool, .toolOptions, .adjust, .history)",
+    "replace": "session?.workspace(reading: .tool, .adjust, .history)",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  },
+  {
+    "label": "panelReadsGiven: the inspector shows the workspace the editor handed it, never the session's, so a size step the window skips never reaches it",
+    "file": "Sources/PhotoApp/PhotoPanel.swift",
+    "find": "private var model: PhotoWorkspace { session?.workspace(reading: .tool, .toolOptions, .adjust, .history) ?? given }",
+    "replace": "private var model: PhotoWorkspace { given }",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  }
+]

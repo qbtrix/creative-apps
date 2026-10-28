@@ -91,6 +91,23 @@ import Testing
         #expect(c.kinds == [.invert])
     }
 
+    /// A weight drag's samples on 3 photos are one "Black & White" step that keeps Invert; Undo takes it all back.
+    @Test func weightDragIsOneStep() throws {
+        var c = Self.selected(3)
+        _ = try Self.catalog.run("adjust.invert", params: .object([:]), on: &c)
+        let steps = c.history.undo.count
+        for red in [50.0, 90, 120] {
+            var w = Self.warm
+            w.red = red
+            c.setGrayWeights(w, coalesceKey: "develop-bw")
+        }
+        #expect(c.endDevelopDrag().count == 3)
+        #expect(c.history.undo.count == steps + 1 && c.undoTitle == "Undo Black & White")
+        #expect(c.items.allSatisfy { $0.develop.kinds == [.blackAndWhite(Self.warm), .invert] })
+        c.undo()
+        #expect(c.items.allSatisfy { $0.develop.kinds == [.invert] })
+    }
+
     @Test func filtersAreInPhoto() {
         let c = Self.selected(1)
         for id in ImagingFilter.ids {
