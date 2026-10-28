@@ -477,3 +477,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-28T13:03Z all PRs clean, waiting on lane prescreen; full CI 40680351181 still running on dev f89f5255c (contains #5252 #5258); main c73c958a9 held by dev-red #5969
 - 13:20Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. main c73c958a9 (held by #5969, not ours), dev f89f5255c unmoved since 11:44.
 - 2026-10-28T13:39Z main promoted to f89f5255c (CI 40680351181 green, dev-red #5969 closed); AJ-library and AJ-halo done; all open PRs clean, waiting on lane
+- 13:52Z stage: #5969 closed, main = dev = f89f5255c, full CI run 40680351181 green. Posted Belt-Slice-Done for AJ-library and AJ-halo on #3777. Left: AJ-photo (#5259 → #5260, clean, waiting on prescreen), then AJ-15 / AJ-z, then Belt-Contact-Sheet.
