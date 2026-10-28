@@ -285,3 +285,4 @@ utc	stage	event	ref	note
 15:30Z	3	no change: #5259/#5260 clean waiting prescreen; dev-red #5983 not ours
 15:50Z	3	#5259 merged (AJ-photo-ui); lane retargeted #5260 to dev and merged dev in (f538be60e, 1 file); gating it to move Head:
 15:53Z	3	AJ-z prep: harness has no multi-app stages; filed gap #5990 (line:suite); AJ-z = AJ-15 + RJ-X60 pending #5990
+15:55Z	3	#5260 Head: moved to f538be60e (gate PASS); AJ-z C4 refresh ed6c602f9 gating
