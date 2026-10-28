@@ -85,7 +85,7 @@ struct AdjustmentsPanel: View {
     }
 
     /// An adjustment layer's sections have no enable switch: its row's eye turns it off.
-    static func showsEnable(for target: AdjustTarget) -> Bool {
+    static func showsEnable(for target: PhotoAdjustTarget) -> Bool {
         if case .layer = target { false } else { true }
     }
 
