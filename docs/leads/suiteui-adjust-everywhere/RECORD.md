@@ -5,15 +5,15 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-28T03:52Z
+Polled: 2026-10-28T06:05Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | AJ-a | kinds, filters, commands, looks and the preset store as stubs | AJ-1, AJ-2 | – | suite-imaging:IM-a (AJ-1) | false | 0 | done (run 40114493184) | – | – |
-| AJ-u | shared adjust UI on the stubs | AJ-3, AJ-4 | – | AJ-a, OC-photo-u | true | 0 | merged on dev (#5235, #5236); waits for a green main run | – | – |
-| AJ-k | kind and filter bodies | AJ-5, AJ-5f | – | AJ-a, IM-m | false | 0 | merged on dev (#5064); waits for a green main run | – | – |
-| AJ-c | commands and looks live | AJ-6, AJ-7 | – | AJ-k, TC-m, AJ-a | false | 0 | merged on dev (#5233, #4867); waits for a green main run | – | – |
+| AJ-u | shared adjust UI on the stubs | AJ-3, AJ-4 | – | AJ-a, OC-photo-u | true | 0 | done (Belt-Slice-Done run 40630829588) | – | – |
+| AJ-k | kind and filter bodies | AJ-5, AJ-5f | – | AJ-a, IM-m | false | 0 | done (Belt-Slice-Done run 40630829588) | – | – |
+| AJ-c | commands and looks live | AJ-6, AJ-7 | – | AJ-k, TC-m, AJ-a | false | 0 | done (Belt-Slice-Done run 40630829588) | – | – |
 | AJ-photo | Photo adopts | AJ-8, AJ-9 | – | AJ-c, IM-photo, BK-photo, AJ-u | true | 0 | lane (#5247 clean; #5250, #5259, #5260 stacked) | – | – |
 | AJ-library | Library adopts | AJ-10, AJ-11 | – | AJ-c, IM-z, ST-m, OC-library-m, AJ-u | true | 0 | lane (#5248 clean, prescreen success; #5252 stacked) | – | – |
 | AJ-halo | Halo adopts | AJ-12, AJ-13 | – | AJ-c, AN-halo, AJ-u | true | 0 | lane (#5249 clean; #5257, #5258 stacked) | – | – |
@@ -446,3 +446,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 05:14Z Check-in: #5250, #5252, #5257 clean with fast-lane, waiting on local-ci/prescreen; #5258 waits on #5257. dev e4332ed0c, main fef52e668 (no slice on main yet).
 - 05:33Z Check-in: #5250/#5252/#5257 clean, waiting on local-ci/prescreen. Lane dropped fast-lane on #5258 for its stacked size (17 files); re-add after #5257 merges and #5258 is restacked. dev e4332ed0c, main fef52e668.
 - 05:52Z Check-in: #5258's base is now lead/adjust-everywhere-AJ-halo-model (not set by this lead), so it shows +227-4 f=5 with fast-lane and no needs-split. When #5257 merges, check that #5258 is retargeted to dev and restack it. #5250/#5252/#5257 clean, waiting on local-ci/prescreen. dev a17c730c6, main fef52e668.
+- 2026-10-28T06:05Z main 9ece0e0e9 green (full CI run 40630829588); dev c73c958a9; #5818 closed; heads await prescreen
