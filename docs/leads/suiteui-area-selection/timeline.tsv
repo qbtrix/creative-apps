@@ -317,3 +317,4 @@ time	task	event	note
 2026-10-28T21:01Z	3	heartbeat	lane	poll 2026-10-28T21:01Z: CB-z opened as #5999 (stacked on #4904); AR-z merged, awaiting main; #5109 at b08e85dc
 2026-10-28T21:36Z	3	heartbeat	lane	poll 2026-10-28T21:36Z: FH-10 and CB-z: merged dev after #5109/#4904, gates running
 2026-10-28T22:11Z	3	heartbeat	lane	poll 2026-10-28T22:11Z: dev-red #6001 open (macOS time limits, not our range; #6002 closed); full CI on dev keeps restarting, main still 5a28b4a6
+2026-10-28T22:23Z	3	heartbeat	lane	poll 2026-10-28T22:23Z: CB-z #5999 merged; FH-10 #5251 green, awaiting lane; waiting on main-promoting run (dev CI 40776885348 on 09cb3117)

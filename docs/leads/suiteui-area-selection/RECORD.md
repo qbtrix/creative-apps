@@ -4,8 +4,8 @@ Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
-Next: All slices merged (#5254 as 1a2831b8, #5256 as 95b9e001). Belt-Slice-Done AR-photo-u and AR-z once a green ci.yml run at main's head contains 95b9e001, then the contact sheet and the final RECORD.
-Polled: 2026-10-28T22:11Z · dev-red #6001 open (macOS time limits, not our range; #6002 closed); full CI on dev keeps restarting, main still 5a28b4a6
+Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
+Polled: 2026-10-28T22:23Z · CB-z #5999 merged; FH-10 #5251 green, awaiting lane; waiting on main-promoting run (dev CI 40776885348 on 09cb3117)
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -61,4 +61,3 @@ Polled: 2026-10-28T22:11Z · dev-red #6001 open (macOS time limits, not our rang
 Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and a mutating setter; AreaRecipe init() and isEmpty) are already on dev c480d848. Only the packet text is stale; AR-photo-u and AR-z need no change.
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.
-- 2026-10-28T22:11Z heartbeat: dev-red #6001 open (macOS time limits, not our range; #6002 closed); full CI on dev keeps restarting, main still 5a28b4a6
