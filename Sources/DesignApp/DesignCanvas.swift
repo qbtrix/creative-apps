@@ -63,7 +63,7 @@ struct DesignCanvas: View {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
         } overlay: {
             DesignPastEdge(page: page, painted: painted, zoom: zoom, editingTextID: model.editingTextID)
-            DesignFrameLabels(painted: painted, zoom: zoom)
+            DesignFrameLabels(labels: DesignFrameLabel.labels(on: page), zoom: zoom)
             DesignSelectionMarks(model: shown, painted: painted, zoom: zoom)
             if let marquee = shown.marquee { DesignMarqueeMark(rect: marquee, zoom: zoom) }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
