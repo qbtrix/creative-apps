@@ -86,6 +86,10 @@ struct PhotoStroke: Sendable, Equatable {
     var modifiers: DragModifiers = []
     /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
     var end: Mask.Point?
+    /// Area tools: the lasso's path, the last zoom, the Marquee's starting selection (PhotoAreaTool.swift).
+    var points: [Mask.Point] = []
+    var zoom: Double = 1
+    var areaBefore: PhotoAreaBefore?
     /// Free Transform: the draft at the press and the handle the press took (nil off the box).
     var transformFrom: TransformDraft?
     var transformHandle: TransformHandle?
@@ -169,8 +173,8 @@ extension PhotoWorkspace {
                     along: [last ?? start, end], size: brushOptions.size, layer: id, before: &current.before,
                     coverage: &current.coverage, skippingFirst: last != nil)
             }
-        case .marquee:
-            selectionDrag(&current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
+        case .marquee, .ellipse, .lasso, .polygon, .wand:
+            areaDrag(&current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
         case .crop:
             cropDrag(current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
         case .move:
@@ -243,7 +247,8 @@ extension PhotoWorkspace {
         guard var done = stroke else { return }
         stroke = nil
         if let before = done.transformFrom {
-            if transformDraft != before { record(.draft(before), named: "Transform") }
+            // A press on no handle moved nothing itself (the handles' own drag records its steps).
+            if done.transformHandle != nil, transformDraft != before { record(.draft(before), named: "Transform") }
             return
         }
         switch done.tool {
@@ -257,7 +262,9 @@ extension PhotoWorkspace {
         case .heal:
             guard done.layerID != nil else { return }
             healStroke(done)
-        case .marquee, .crop, .eyedropper, .bucket, .spotHeal, .remove:
+        case .marquee, .ellipse, .lasso, .polygon, .wand:
+            endAreaDrag(done)
+        case .crop, .eyedropper, .bucket, .spotHeal, .remove:
             break
         case .gradient:
             guard let end = done.end else { return }

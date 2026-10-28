@@ -35,7 +35,7 @@ extension PhotoWorkspace: TextStyleTarget {
             throw CatalogError.unavailable(id: "text", why: "Select a text layer first.")
         }
         text.style = s
-        try redraw(id, as: text, named: name, coalescing: drag.map { "text-style-\(id)-\($0)" })
+        try redraw(id, as: text, named: name, coalescing: drag.map { CoalesceKey.key("text-style", on: [id], drag: $0) })
     }
 
     /// Adds a text layer of `p`'s words above the selected layer, selected, in one step.
@@ -125,7 +125,8 @@ extension PhotoWorkspace: TextStyleTarget {
             .typed("text.add", title: "Add Text", summary: "Adds a text layer above the selected one, its box's top-left at x, y.",
                    kind: .edit, params: TextAddParams.self,
                    schema: .object(["x": .integer("Canvas pixels from the left."), "y": .integer("Canvas pixels from the top."),
-                                    "words": .string("The words; a newline starts a paragraph.")], required: ["words", "x", "y"]),
+                                    "words": .string("The words; a newline starts a paragraph."),
+                                    "style": .optional(styleSchema)], required: ["words", "x", "y"]),
                    example: .object(["x": .number(40), "y": .number(60), "words": .string("SALE")]),
                    availability: { $0.canvas == nil ? .unavailable("Open an image first.") : .available }
             ) { w, p -> JSONValue in try w.addText(p); return .object([:]) },
@@ -135,6 +136,11 @@ extension PhotoWorkspace: TextStyleTarget {
                    example: .object(["words": .string("SALE NOW")]), availability: { wordsAvailability($0) }
             ) { w, p -> JSONValue in try w.setTextWords(p.words); return .object([:]) },
         ] + TextCommands.specs(PhotoWorkspace.self)
+    }
+
+    /// The kernel's style schema, as `text.read` returns it; text.add's optional `style` takes the same object.
+    private static var styleSchema: ParamSchema {
+        TextCommands.specs(PhotoWorkspace.self).first { $0.id == "text.read" }?.result ?? .none
     }
 
     /// text.set-words needs an open image and a selected text layer.

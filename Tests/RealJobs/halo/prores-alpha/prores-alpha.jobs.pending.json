@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H41 (halo/export-pack), pending #4929: named .jobs.pending.json so the harness skips it, since Halo's CLI exports png only (movies render in the window, through the suite's media service) and the folder has no input yet. It is renamed to prores-alpha.jobs.json once #4929 lets the CLI write a movie on macOS, with input/lower-third.halo (one 1920 x 1080 composition, 24 fps, 48 frames, on its grey background, with a 1920 x 200 bar along the bottom) and platforms macos. The job: render the composition as a movie, ProRes 4444, Transparent background on. The trap: the alpha renders black, or the file says ProRes but carries no alpha. The assertion: a background-only pixel (the top-left corner) has alpha 0 and a bar pixel alpha 255. Until then HaloExportPackJourneyTests.testRenderLowerThirdWithAlpha proves the outcome on macOS in the window, and HaloProResTests and HaloRenderAlphaTests the plan and frame halves on Linux.",
+  "pending": "#4929",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "render.open-sheet", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "mov", "options": {"codec": "prores4444", "alpha": true}},
+  "expect": {
+    "out/lower-third.mov": {"pixels": {"tolerance": 0, "size": [1920, 1080], "at": {"x": 2, "y": 2, "alpha": 0}}}
+  },
+  "platforms": ["macos"]
+}

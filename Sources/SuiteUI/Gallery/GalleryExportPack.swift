@@ -103,17 +103,16 @@ struct GalleryExportBoard {
 }
 
 /// Internal, not private, so XP-5's snapshots and render budget can build it.
-struct GalleryExportPackPage: View {
+struct GalleryExportPackPage: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     @State private var board = GalleryExportBoard()
     @State private var log: [String] = []
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         let text = log.joined(separator: "\n")
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {

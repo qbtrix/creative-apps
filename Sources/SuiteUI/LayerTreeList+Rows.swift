@@ -6,7 +6,8 @@
 // labelled "Hide Layer" / "Lock Layer"). LayerTreeHeader is the optional
 // title and action button above the rows, drawn by SidebarSectionHeader. The
 // row's rename reuses SidebarRow's rules and state: SidebarRenameField holds
-// the draft and the refusal (a refused rename keeps its draft), and
+// the draft and the refusal (a refused rename keeps its draft, shakes once
+// and shows SidebarRenameMessage), and
 // SidebarRow.doubleClickRenames / keyRenames / renameActionName gate the
 // double-click on the title, Return on the focused row and the "Rename"
 // accessibility action. App panels (#3194): `.app` naming, LayerTreeOptions, LayerRowDecoration.
@@ -98,14 +99,22 @@ public struct LayerTreeOptions: Equatable, Sendable {
     /// Whether rows can hold children; a flat list (Photo) leaves out the
     /// indent and the empty disclosure column, so names start near the edge.
     public var nests: Bool
+    /// Whether a locked row's name reads dimmed like a hidden one's (Flare's sidebar, LF-1d).
+    public var dimsLocked: Bool
 
     public init(showsEye: Bool = true, showsLock: Bool = true, reorders: Bool = false, embedded: Bool = false,
-                nests: Bool = true) {
+                nests: Bool = true, dimsLocked: Bool = false) {
         self.showsEye = showsEye
         self.showsLock = showsLock
         self.reorders = reorders
         self.embedded = embedded
         self.nests = nests
+        self.dimsLocked = dimsLocked
+    }
+
+    /// Whether `row`'s name reads dimmed: hidden, or locked when `dimsLocked`, itself or through an ancestor.
+    public func dims(_ row: LayerRow) -> Bool {
+        row.isHidden || row.inheritsHidden || (dimsLocked && (row.isLocked || row.inheritsLocked))
     }
 }
 
@@ -160,25 +169,18 @@ public struct LayerTreeHeader {
 }
 
 extension LayerTreeRow {
-    /// The name, or the rename field while renaming, with the app's refusal under it.
+    /// The name, or the rename field while renaming; the row draws a refusal under itself (`refusal`).
     @ViewBuilder var title: some View {
         if field.isOpen {
-            VStack(alignment: .leading, spacing: SuiteSpacing.xxs) {
-                TextField(row.name, text: Binding(get: { field.draft ?? row.name }, set: { field.type($0) }))
-                    .focused($editing)
-                    .onSubmit { field.commit(original: row.name, rename: onRename) }
-                    .onExitCommand { field.cancel() }
-                    .onChange(of: editing) { _, focused in
-                        if !focused { field.loseFocus(original: row.name, rename: onRename) }
-                    }
-                    .accessibilityIdentifier(naming.renameField(row.id))
-                if let refusal = field.message {
-                    Label(refusal, systemImage: "exclamationmark.triangle.fill")
-                        .font(SuiteFont.caption)
-                        .foregroundStyle(SuiteColor.stateError)
-                        .accessibilityIdentifier(naming.renameMessage(row.id))
+            TextField(row.name, text: Binding(get: { field.draft ?? row.name }, set: { field.type($0) }))
+                .focused($editing)
+                .onSubmit { field.commit(original: row.name, rename: onRename) }
+                .onExitCommand { field.cancel() }
+                .onChange(of: editing) { _, focused in
+                    if !focused { field.loseFocus(original: row.name, rename: onRename) }
                 }
-            }
+                .refusalShake(field.refusals)
+                .accessibilityIdentifier(naming.renameField(row.id))
         } else if let caption = decoration?.caption {
             VStack(alignment: .leading, spacing: 0) {
                 name
@@ -192,10 +194,18 @@ extension LayerTreeRow {
         }
     }
 
+    /// The app's refusal of a rename, under the whole row so its icon stays beside the field (#3462).
+    @ViewBuilder var refusal: some View {
+        if let message = field.message {
+            SidebarRenameMessage(message, identifier: naming.renameMessage(row.id))
+                .padding(.leading, options.nests ? CGFloat(row.depth) * SuiteSpacing.l : 0)
+        }
+    }
+
     private var name: some View {
         Text(row.name)
             .lineLimit(1)
-            .foregroundStyle(row.isHidden || row.inheritsHidden ? SuiteColor.secondaryText : Color.primary)
+            .foregroundStyle(options.dims(row) ? SuiteColor.secondaryText : Color.primary)
             .contentShape(.rect)
             .simultaneousGesture(TapGesture(count: 2).onEnded { openRename(on: .title) })
     }

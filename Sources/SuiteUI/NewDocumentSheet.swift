@@ -256,7 +256,9 @@ public struct NewDocumentSheet: View {
             Text("Background")
             HStack(spacing: SuiteSpacing.s) {
                 Picker("Background", selection: Binding(get: { form.backgroundKind }, set: { form.setBackground($0) })) {
-                    ForEach(NewDocumentForm.BackgroundKind.allCases, id: \.self) { Text($0.rawValue.capitalized).tag($0) }
+                    ForEach(NewDocumentForm.BackgroundKind.allCases, id: \.self) {
+                        Text($0.rawValue.capitalized).tag($0).accessibilityIdentifier("suite.newdoc.background.\($0.rawValue)")
+                    }
                 }
                 .labelsHidden().pickerStyle(.segmented).fixedSize().help(NewDocumentForm.parameter("background", mode))
                 .accessibilityIdentifier("suite.newdoc.background")

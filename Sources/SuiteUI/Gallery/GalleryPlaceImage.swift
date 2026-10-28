@@ -288,8 +288,9 @@ struct GalleryPlaceImagePage: View {
     }
 }
 
-/// The canvas at half size: empty with its prompt, or every placed image through `drawPlaced`.
-private struct GalleryPlaceCanvas: View {
+/// The canvas at half size: empty with its prompt, or every placed image through `drawPlaced`. Static text, so
+/// the selected image's words reach AXValue, what the journey's `.value` reads (#4230, #262).
+struct GalleryPlaceCanvas: View {
     let drawn: [(asset: PlacedAsset, image: PlacedImage)]
     let selected: PlacedAsset?
     let selectedImage: PlacedImage?
@@ -314,6 +315,7 @@ private struct GalleryPlaceCanvas: View {
         .contentShape(.rect)
         .help(selectedImage == nil ? "" : "Drag the right edge to resize the box; ⌥-drag inside to move the picture in it.")
         .accessibilityElement()
+        .accessibilityAddTraits(.isStaticText)
         .accessibilityLabel(selected == nil ? "Empty canvas" : "Image")
         .accessibilityValue(selected.map(PlacedImageText.spoken) ?? "")
         .accessibilityIdentifier("suite.place.canvas")
