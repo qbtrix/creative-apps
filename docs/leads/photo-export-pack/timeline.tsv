@@ -379,3 +379,4 @@ utc	stage	event	ref	note
 2026-10-28T15:14Z	check-in	Quiet: no findings since #5984-#5987 (skipped, not export or text), 45 open. No merges since 14:00. dev-red #5983 open, not ours. #5353 open, PX-9 waits. #5959 clean at 081611b9, waiting on a batch.
 2026-10-28T15:57Z	check-in	#5959 went dirty after dev merged #5245/#5259 (photo golden again). Merged dev in tc (eb6cc46a, golden = union, 153 commands, dev's raw-UTF-8 format); gate running before push. No new Photo findings (45 open). dev-red #5983 real, no culprit PR, not ours. #5353 open, PX-9 waits.
 2026-10-28T16:30Z	check-in	#5959 merged dev at eb6cc46a (gate pass), Head moved; clean, needs-rebase dropped, waits on lane. #5353 open, PX-9 waits. No new export/text findings (45 Photo open). dev-red #5983 not ours.
+2026-10-28T17:04Z	check-in	#5959 text.set-color merged into dev 16:42 (#5951 item 4). #5353 open, PX-9 waits. No new export/text findings (45 Photo open). dev-red #5983 real at c0cd6c2, not ours.
