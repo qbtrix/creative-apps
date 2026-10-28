@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "app": "photo",
+  "new": {"width": 1600, "height": 1067},
+  "inputs": ["seed.ora"],
+  "steps": [
+    {"id": "layer.rename", "params": {"name": "Beach"}},
+    {"id": "image.gradient", "params": {"type": "linear", "from": {"x": 0, "y": 0}, "to": {"x": 0, "y": 1067}, "stops": [
+      {"offset": 0, "r": 0.2, "g": 0.47, "b": 0.82, "a": 1},
+      {"offset": 0.52, "r": 0.72, "g": 0.86, "b": 0.97, "a": 1},
+      {"offset": 0.54, "r": 0.1, "g": 0.42, "b": 0.62, "a": 1},
+      {"offset": 0.7, "r": 0.28, "g": 0.66, "b": 0.74, "a": 1},
+      {"offset": 0.72, "r": 0.95, "g": 0.87, "b": 0.7, "a": 1},
+      {"offset": 1, "r": 0.84, "g": 0.7, "b": 0.5, "a": 1}]}},
+    {"id": "layer.new", "params": {}},
+    {"id": "layer.rename", "params": {"name": "Sun"}},
+    {"id": "select.rect", "params": {"minX": 1060, "minY": 110, "maxX": 1300, "maxY": 350}},
+    {"id": "image.gradient", "params": {"type": "radial", "from": {"x": 1180, "y": 230}, "to": {"x": 1300, "y": 230}, "stops": [
+      {"offset": 0, "r": 1, "g": 0.97, "b": 0.82, "a": 1},
+      {"offset": 0.6, "r": 1, "g": 0.9, "b": 0.55, "a": 1},
+      {"offset": 1, "r": 1, "g": 0.9, "b": 0.55, "a": 0}]}},
+    {"id": "select.deselect", "params": {}},
+    {"id": "layer.new-adjustment", "params": {"kind": "exposure"}}
+  ],
+  "atomic": true,
+  "why": "A 1600 x 1067 beach at midday, the welcome tour's Photo sample: a sky, sea and sand gradient on Beach, a radial sun on Sun, and an Exposure adjustment layer on top to try."
+}

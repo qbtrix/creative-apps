@@ -186,7 +186,8 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
                       "RECENT reads \(AfterGlowJourneyTests.cardNames(launcher)), without \(file)")
         }
         launcher.shot("onboarding-samples-home")
-        if !missing.isEmpty { throw XCTSkip("waits on #4113: \(missing.joined(separator: ", ")) isn't in Bundle/Samples") }
+        // Every sample ships (beach.ora since #5947), so a missing one is a failure, not a skip.
+        XCTAssert(missing.isEmpty, "\(missing.joined(separator: ", ")) isn't in the bundle's Samples")
     }
 
     // MARK: - Helpers
