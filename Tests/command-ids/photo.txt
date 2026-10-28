@@ -79,6 +79,7 @@ style.set
 text.add
 text.read
 text.set-alignment
+text.set-color
 text.set-font
 text.set-italic
 text.set-line-height
