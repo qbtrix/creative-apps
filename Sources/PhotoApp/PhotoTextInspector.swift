@@ -1,6 +1,7 @@
 // PhotoTextInspector.swift (text-layers TX-4): the Text section of a Photo window's inspector, shown while
-// a text layer is selected. Family is a picker over the text services' families, Weight and Style chips
-// over that family's faces, Size, Line height and Tracking scrub fields, Alignment chips. Each change is
+// a text layer is selected. Family is a picker over the text services' families (the layer's family as the
+// service resolves it, so "System" shows as the system family), Weight and Style chips over that family's
+// faces, a Color row (colour and opacity), Size, Line height and Tracking scrub fields, Alignment chips. Each change is
 // one `.text(.style(...))` intent, one step; a scrub field commits once per gesture (onEnd), never per
 // drag sample, so the text is laid out once per gesture (docs/render-contract.md). Values in, intents out.
 import PhotoModel
@@ -14,6 +15,8 @@ import SwiftUI
     var size: Double?
     var lineHeight: Double?
     var tracking: Double?
+    /// The colour row's open gesture's drag token; nil between gestures.
+    var colorDrag: String?
 }
 
 /// The selected text layer's Text section; nothing while no text layer is selected.
@@ -37,22 +40,24 @@ struct PhotoTextInspector: View {
     var body: some View {
         if let style = model.textStyle {
             let help = model.textHelp
-            let faces = model.faces(of: style.family)
+            let family = model.textFamily(style.family)
+            let faces = model.faces(of: family)
             InspectorSection("Text") {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                     InspectorPickerRow(
-                        "Family", options: families(style.family).map { InspectorOption(id: $0, title: $0) },
-                        selection: style.family
+                        "Family", options: families(family).map { InspectorOption(id: $0, title: $0) },
+                        selection: family
                     ) { send(.font(family: $0, weight: nil, italic: nil)) }
                         .control("photo.text.family", help: help)
                     chips("Weight", weights(faces), selected: style.weight, id: "photo.text.weight", help: help) {
-                        send(.font(family: style.family, weight: $0, italic: nil))
+                        send(.font(family: family, weight: $0, italic: nil))
                     }
                     if faces.contains(where: { $0.italic }) {
                         chips("Style", Self.slants, selected: style.italic, id: "photo.text.italic", help: help) {
-                            send(.font(family: style.family, weight: nil, italic: $0))
+                            send(.font(family: family, weight: nil, italic: $0))
                         }
                     }
+                    colorRow(style.rgba, help: help)
                     scrubRow("Size", value: style.size, in: TextStyleRules.range(.size), unit: "pt", id: "photo.text.size",
                              help: help, keep: { scrub.size = $0 }) { scrub.size.map { .size($0, drag: nil) } }
                     chips("Alignment", Self.alignments, selected: style.paragraph.alignment, id: "photo.text.alignment",
@@ -72,6 +77,22 @@ struct PhotoTextInspector: View {
     }
 
     private func send(_ intent: TextIntent) { perform(.text(.style(intent))) }
+
+    /// The words' colour and opacity: a run of panel picks, or one hex commit, is one step.
+    private func colorRow(_ rgba: [UInt8], help: String?) -> some View {
+        let channel = { (i: Int) in rgba.indices.contains(i) ? rgba[i] : 255 }
+        return InspectorColorWellRow(
+            "Color", color: HexColor(channel(0), channel(1), channel(2)), opacity: Double(channel(3)) / 255
+        ) { hex, opacity in
+            let drag = CoalesceKey.token(scrub.colorDrag)
+            scrub.colorDrag = drag
+            let alpha = opacity.isFinite ? UInt8((min(max(opacity, 0), 1) * 255).rounded()) : 255
+            perform(.text(.color([hex.red, hex.green, hex.blue, alpha], drag: drag)))
+        } onEnd: {
+            scrub.colorDrag = nil
+        }
+        .control("photo.text.color", help: help)
+    }
 
     /// The text services' families, with `current` first when they don't list it.
     private func families(_ current: String) -> [String] {

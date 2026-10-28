@@ -20,6 +20,8 @@ enum TypeIntent {
     case key(PhotoTextBoxKey)
     /// Restyles the selected text layer: one text inspector gesture (PhotoTextInspector).
     case style(TextIntent)
+    /// Recolours the selected text layer, red, green, blue and alpha; picks under one `drag` are one step.
+    case color([UInt8], drag: String?)
 }
 
 extension PhotoWindow {
@@ -30,6 +32,7 @@ extension PhotoWindow {
         case .cancel: model.cancelTextBox()
         case .key(let key): model.pressTextKey(key)
         case .style(let intent): model.runText(intent)
+        case .color(let rgba, let drag): model.runTextColor(rgba, drag: drag)
         }
     }
 }

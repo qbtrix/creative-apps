@@ -3,8 +3,8 @@
 // key-capable window on the `sample` fixture with a box clicked open, then types 20 letters into the box's
 // field; each keystroke runs PhotoEditor's body (a debug-only counter) at most 3 times, never the whole
 // window per sample. `inspector` writes photo-text-inspector-light/dark.png: the Text section for a
-// "SALE" layer restyled to 120 pt, centered. Nested in BodyCountSuites, as every suite that reads a body
-// counter is. macOS only.
+// "SALE" layer restyled to 120 pt, centered, on the window's live text (its Weight, Style and Color rows).
+// Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import CoreRaster
@@ -43,7 +43,8 @@ extension BodyCountSuites {
 
 @MainActor @Suite struct PhotoTextInspectorSnapshots {
     @Test func inspector() throws {
-        var model = PhotoWorkspace()
+        // The window's own services: Core Text's families, so the Weight and Style rows show the faces the app has.
+        var model = PhotoWorkspace(services: PhotoWindow.liveServices)
         try model.newCanvas(width: 640, height: 480)
         model.selectTool(.text)
         let at = Mask.Point(x: 80, y: 120)
