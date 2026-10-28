@@ -325,3 +325,4 @@ utc	stage	event	ref	note
 2026-10-28T07:20Z	3	heartbeat	lane	poll 2026-10-28T07:20Z: 07:19Z no change; #5103/#5149 ready; dev-red #5963 is a stale 186be9a red (test fixed by #5956 in green 9ece0e0), not ours
 2026-10-28T08:10Z	3	heartbeat	lane	poll 2026-10-28T08:10Z: 08:10Z main c73c958; #5103/#5149 ready, awaiting lane; dev-red #5966 is the same stale 186be9a red, not ours
 2026-10-28T08:57Z	3	heartbeat	lane	poll 2026-10-28T08:57Z: 08:57Z main c73c958; #5103/#5149 ready, awaiting lane; full run at 9221145 (#5864) red on macOS tests 3/3, not ours
+2026-10-28T09:45Z	3	heartbeat	lane	poll 2026-10-28T09:45Z: 09:45Z main c73c958; #5103/#5149 ready, heads await local-ci/prescreen; dev-red #5966 stale, not ours
