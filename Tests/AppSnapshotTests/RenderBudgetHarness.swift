@@ -287,6 +287,25 @@ private final class KeyCapableWindow: NSWindow {
         return ids
     }
 
+    /// Picks the segmented-control segment called `identifier` the way its click ends: it sets the selected
+    /// segment and sends the control's action; false when there is no such segment. Never press a segment
+    /// through accessibility here: NSSegmentedCell's press spins a nested event loop, and in a test process
+    /// (which never runs NSApplication.run) that later ends the main run loop, so the process exits 0 in
+    /// whichever test runs next, with no summary (#5883).
+    @discardableResult func select(segment identifier: String) -> Bool {
+        func controls(_ view: NSView) -> [NSSegmentedControl] {
+            ((view as? NSSegmentedControl).map { [$0] } ?? []) + view.subviews.flatMap(controls)
+        }
+        guard let segment = Self.node(identifier, in: host), let cell = segment.accessibilityParent?() as AnyObject?,
+              let control = controls(host).first(where: { $0.cell === cell }),
+              let index = (0..<control.segmentCount).first(where: {
+                  control.label(forSegment: $0) == segment.accessibilityLabel?()
+              })
+        else { return false }
+        control.selectedSegment = index
+        return control.sendAction(control.action, to: control.target)
+    }
+
     /// `count` increments of the adjustable element called `identifier` (a slider, a scrub row), one per
     /// real 1/120 s, the way VoiceOver and XCUI adjust it; false when there is no such element.
     @discardableResult func adjust(_ identifier: String, steps count: Int) async throws -> Bool {
