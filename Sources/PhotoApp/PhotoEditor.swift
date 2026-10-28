@@ -18,6 +18,9 @@
 // layer in one Place step, centred; with none open it opens; another app's
 // file goes to that app; the mark at the bottom says which before the drop.
 // With the Pen, PhotoPenOverlay puts SuiteUI's PathEditOverlay over the canvas.
+// In debug builds `bodyRuns` counts every editor's body runs process-wide, and
+// a PhotoEditorBodyTally put in the environment counts only that window's, for
+// a budget test that runs alongside suites drawing their own Photo windows.
 import PhotoModel
 import SuiteShell
 import SuiteUI
@@ -46,11 +49,13 @@ struct PhotoEditor: View {
     #if DEBUG
     /// How many times an editor's body ran; PhotoWindowStrokeTests counts a stroke's.
     static var bodyRuns = 0
+    @Environment(\.photoEditorBodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
+        let _ = bodyTally?.runs += 1
         #endif
         SuiteWindow(
             title: model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"),
@@ -221,4 +226,24 @@ extension EnvironmentValues {
 
 extension PixelRect {
     var cgRect: CGRect { CGRect(x: x, y: y, width: width, height: height) }
+}
+
+/// One window's editor body runs, counted in debug builds only. `PhotoEditor.bodyRuns` is process-wide, so it also
+/// counts the editors other suites draw at the same time; a test that puts a tally in its window's environment
+/// counts only its own.
+@MainActor final class PhotoEditorBodyTally {
+    var runs = 0
+}
+
+extension EnvironmentValues {
+    /// The tally this window's editor counts its body runs into; nil outside a test that asks.
+    var photoEditorBodyTally: PhotoEditorBodyTally? {
+        get { self[PhotoEditorBodyTallyKey.self] }
+        set { self[PhotoEditorBodyTallyKey.self] = newValue }
+    }
+}
+
+/// A plain key rather than `@Entry`, as PhotoSaveStatusKey.
+private struct PhotoEditorBodyTallyKey: EnvironmentKey {
+    static let defaultValue: PhotoEditorBodyTally? = nil
 }
