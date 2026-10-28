@@ -3,7 +3,8 @@
 // It hosts PhotoWindow on the sample picture with the Adjust panel up and steps the Temperature row
 // (`suite.tone.temperature`) 120 times, as VoiceOver adjusts it. Each step is one `tone.set` under the
 // row's drag token, and those samples run on the window's live copy (LiveTransformCopy+Kernel.swift),
-// so the window's editor body (a debug-only counter) runs at most 3 times. The window takes the copy
+// so the window's editor body runs at most 3 times, counted on a PhotoEditorBodyTally in this window's
+// environment (debug only), since the process-wide counter also counts the snapshot suites' editors. The window takes the copy
 // back once the steps go quiet, so the test reads the workspace after waiting, up to 2 s, for
 // Temperature to reach the top of its range (each VoiceOver step is its own gesture and undo step,
 // and reads the row's value off the live copy). The step p95 (budget 16 ms) is
@@ -26,13 +27,15 @@ extension BodyCountSuites {
         @Test(.timeLimit(.minutes(2))) func temperatureDragInThreeBodies() async throws {
             let model = try PhotoWorkspace.fixture(.sample)
             let before = model.adjustments.tone.value(.temperature)
-            let w = RenderBudgetWindow(PhotoWindow(model: model))
+            let tally = PhotoEditorBodyTally()
+            let w = RenderBudgetWindow(PhotoWindow(model: model).environment(\.photoEditorBodyTally, tally))
             defer { w.close() }
+            let bodies = { Self.bodies(tally) }
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
-            try await w.settle(untilStable: Self.bodies)
+            try await w.settle(untilStable: bodies)
             _ = try #require(await w.element("suite.tone.temperature"), "no Temperature row in the Adjust panel")
             var found = false
-            let step = try await w.measure("photo tone temperature drag, 120 steps", bodies: Self.bodies) {
+            let step = try await w.measure("photo tone temperature drag, 120 steps", bodies: bodies) {
                 found = try await w.adjust("suite.tone.temperature", steps: Self.samples)
             }
             print("RENDER-BUDGET photo tone temperature drag p95 \(String(format: "%.2f", step.p95)) ms (budget 16, print-only)")
@@ -48,8 +51,15 @@ extension BodyCountSuites {
             expectBodies(step, atMost: 3, target: 3)
         }
 
-        /// The window's editor body runs (debug only).
-        static func bodies() -> Int? { BodyCountSuites.PhotoWindowStrokeTests.editorBodies() }
+        /// This window's editor body runs (debug only). Not `PhotoEditor.bodyRuns`, which also counts the editors
+        /// that snapshot suites running alongside draw.
+        static func bodies(_ tally: PhotoEditorBodyTally) -> Int? {
+            #if DEBUG
+            return tally.runs
+            #else
+            return nil
+            #endif
+        }
     }
 }
 #endif

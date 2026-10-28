@@ -8,7 +8,8 @@
 // it through CanvasRenderer. The window takes the copy back once (`take()`):
 // before any other intent (a handle drag's release sends `endDrag`), and when
 // the samples go quiet for `quiet` (the end of a row scrub or of a run of
-// VoiceOver steps, each its own gesture). A handle or canvas drag `hold()`s the copy
+// VoiceOver steps, each its own gesture); a sample that runs while that wake
+// waits for a busy main actor still cancels it. A handle or canvas drag `hold()`s the copy
 // with every sample, so a pointer that rests mid-drag gets no quiet hand-back:
 // the copy waits for mouse-up (#4795). So the window's workspace,
 // its edited dot and its undo stack catch up with one SwiftUI pass. The draft's
@@ -65,6 +66,9 @@ import SwiftUI
         if held { return live }
         settle = Task { @MainActor in
             do { try await Task.sleep(for: Self.quiet) } catch { return }
+            // A busy main actor can run the next sample after the sleep ended but before this wake runs; that
+            // sample's cancel comes too late for the sleep to throw, so it is checked here.
+            guard !Task.isCancelled else { return }
             done()
         }
         return live
