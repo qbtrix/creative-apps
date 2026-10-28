@@ -54,14 +54,14 @@ extension BodyCountSuites {
 }
 
 /// The square box and the picture's layer; the page's body is the window body the budget counts.
-private struct PlaceBudgetPage: View {
-    @MainActor static var bodyRuns = 0
+private struct PlaceBudgetPage: View, BodyCounted {
+    @Environment(\.bodyTally) private var bodyTally
     static let box = Rect(minX: 0, minY: 0, maxX: 300, maxY: 300)
     let asset: PlacedAsset
     let focus: PlaceFocus
 
     var body: some View {
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         PlaceFocusLayer(asset: asset, focus: focus)
             .padding(SuiteSpacing.xxl)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

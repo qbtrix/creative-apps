@@ -75,7 +75,7 @@ private func occurrences(of needle: String, in text: String) -> Int {
     @Test func windowKeepsShortcutsCounterAndCloseIsSkip() throws {
         let text = try source("Sources/AfterGlowApp/OnboardingWindow.swift")
         for needle in [
-            "static var bodyRuns", ".keyboardShortcut(.defaultAction)", ".keyboardShortcut(.cancelAction)",
+            "BodyCounted", "bodyTally.ran(Self.self)", ".keyboardShortcut(.defaultAction)", ".keyboardShortcut(.cancelAction)",
             "onDisappear", "model.skip()", "OnboardingControls.continue", "OnboardingControls.skip",
             "OnboardingControls.page", "LauncherServices.shared",
         ] {

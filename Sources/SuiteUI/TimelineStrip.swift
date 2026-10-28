@@ -81,16 +81,13 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     /// The strip or a control in it has focus: the zoom shortcuts are live.
     @FocusState private var focused: Bool
     #if DEBUG
-    @Environment(\.timelineBodyTally) private var tally
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     #if DEBUG
     /// How many times a strip's body ran, over every ID type; the real-window
     /// budget tests count a scrub's.
-    static var bodyRuns: Int {
-        get { timelineStripBodyRuns }
-        set { timelineStripBodyRuns = newValue }
-    }
+    static var bodyRuns: Int { BodyTally.runs(of: TimelineStripBodies.self) }
     #endif
 
     /// `duration` is the last frame and `frameWidth` the points per frame;
@@ -139,8 +136,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
 
     public var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
-        let _ = tally?.strip += 1
+        let _ = bodyTally.ran(TimelineStripBodies.self)
         #endif
         let layout = TimelineStripLayout(trackCount: tracks.count, toolbar: toolbar)
         VStack(alignment: .leading, spacing: 0) {
@@ -490,10 +486,8 @@ struct TimelineNameStyle: ButtonStyle {
     }
 }
 
-#if DEBUG
-/// TimelineStrip.bodyRuns' count: a generic type can't hold a static stored property.
-@MainActor private var timelineStripBodyRuns = 0
-#endif
+/// The key every TimelineStrip<ID> counts its body runs under in BodyTally.
+enum TimelineStripBodies {}
 
 /// Room before frame 0, so its diamond and label aren't clipped.
 let timelineInset = SuiteSpacing.s

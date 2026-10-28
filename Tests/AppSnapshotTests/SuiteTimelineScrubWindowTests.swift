@@ -14,10 +14,10 @@
 // first body-count suite in a CI test shard) the 300 lanes were still being
 // laid out half a second in, and 18,170 lane bodies landed in the count
 // (#5321). PhotoWindowStrokeTests warms its window the same way. The
-// expectations read this window's own counts (TimelineBodyTally, set on the
-// host): the bodyRuns statics count every timeline in the test process, so
-// they are only printed, as process-wide, beside whether the settle finished
-// (#5804). macOS only.
+// expectations read this window's own counts: the host puts the window's
+// BodyTally in its environment (BodyTally.forNewWindow), and
+// the process-wide counts are only printed, beside whether the settle
+// finished (#5804). macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -28,7 +28,7 @@ extension BodyCountSuites {
     @MainActor @Suite struct SuiteTimelineScrubWindowTests {
         @Test(.timeLimit(.minutes(2))) func aScrubRedrawsOnlyThePlayhead() async throws {
             let scrubs = ScrubLog()
-            let tally = TimelineBodyTally()
+            let tally = BodyTally.forNewWindow()
             let host = CountingHostingView(rootView: ScrubHost(log: scrubs, tally: tally))
             let frame = CGRect(x: 0, y: 0, width: 1280, height: 400)
             host.frame = frame
@@ -85,7 +85,7 @@ extension BodyCountSuites {
 
         /// Whether no lane, ruler, playhead or strip body of this window ran for 300 ms (waits 10 s at most):
         /// a cold process lays the 300 lanes out well past the first half second.
-        private func settled(_ tally: TimelineBodyTally) async throws -> Bool {
+        private func settled(_ tally: BodyTally) async throws -> Bool {
             var last = own(tally), idle = 0
             for _ in 0..<100 {
                 try await Task.sleep(for: .milliseconds(100))
@@ -97,12 +97,15 @@ extension BodyCountSuites {
         }
 
         /// This window's lane, ruler, playhead and strip body runs so far; zeros in release, which counts none.
-        private func own(_ tally: TimelineBodyTally) -> [Int] { [tally.lane, tally.ruler, tally.playhead, tally.strip] }
+        private func own(_ tally: BodyTally) -> [Int] {
+            [TimelineLaneBodies.self, TimelineRuler.self, TimelinePlayhead.self, TimelineStripBodies.self].map(tally.runs(of:))
+        }
 
         /// The same over every window in the process; printed, never asserted. Zeros in release.
         private func bodies() -> [Int] {
             #if DEBUG
-            return [TimelineLane<Int>.bodyRuns, TimelineRuler.bodyRuns, TimelinePlayhead.bodyRuns, TimelineStrip<Int>.bodyRuns]
+            return [TimelineLaneBodies.self, TimelineRuler.self, TimelinePlayhead.self, TimelineStripBodies.self]
+                .map(BodyTally.process.runs(of:))
             #else
             return [0, 0, 0, 0]
             #endif
@@ -131,7 +134,7 @@ private struct ScrubHost: View {
             .map { TimelineKey(frame: $0, shape: .linear) })
     }
     let log: ScrubLog
-    let tally: TimelineBodyTally
+    let tally: BodyTally
     @State private var playhead = 0
 
     var body: some View {
@@ -145,6 +148,6 @@ private struct ScrubHost: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         // Every press here activates the window; a hand's press in the active window needs no opt-in.
         .allowsWindowActivationEvents()
-        .environment(\.timelineBodyTally, tally)
+        .environment(\.bodyTally, tally)
     }
 }
