@@ -329,3 +329,4 @@ utc	stage	event	ref	note
 2026-10-28T20:46:03Z	heartbeat	#5109 (FH-8) at b08e85dcd on dev, waiting on prescreen; #5251 (FH-10) stacked on it
 2026-10-28T20:46Z	3	heartbeat	lane	poll 2026-10-28T20:46Z: AR-z #5256 merged (awaiting main run); #5109 fixed b08e85dc; CB-z building stacked on #4904
 2026-10-28T21:01Z	3	heartbeat	lane	poll 2026-10-28T21:01Z: CB-z opened as #5999 (stacked on #4904); AR-z merged, awaiting main; #5109 at b08e85dc
+2026-10-28T21:36Z	3	heartbeat	lane	poll 2026-10-28T21:36Z: FH-10 and CB-z: merged dev after #5109/#4904, gates running
