@@ -60,6 +60,8 @@ extension BodyCountSuites {
         }
 
         @Test(.timeLimit(.minutes(1))) func anOpenAndASaveReachTheBridgeOnceEach() async throws {
+            // A list an earlier run left would be imported as opens first.
+            UserDefaults.standard.removeObject(forKey: "PhotoRecentFiles")
             let (bridge, recording) = Self.bridge()
             let url = try Self.beach()
             let w = RenderBudgetWindow(PhotoWindow(model: PhotoWorkspace(services: .fake)))
