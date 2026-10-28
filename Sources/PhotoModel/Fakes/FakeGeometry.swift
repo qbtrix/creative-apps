@@ -82,7 +82,7 @@ public struct FakeMasking: LayerMasking {
 /// An adjustment layer brightens by one stop, whatever its settings.
 public struct FakeAdjustmentLayers: AdjustmentLayering {
     public var unavailableHelp: String? { nil }
-    public var kinds: [AdjustmentKind] { [.exposure, .levels, .curves, .hueSaturation] }
+    public var kinds: [AdjustmentKind] { [.exposure, .levels, .curves, .hueSaturation, .blackAndWhite, .invert] }
     public init() {}
     public func applying(_ settings: AdjustmentSettings, to below: PixelBuffer, opacity: Double,
                          blendMode: BlendMode, mask: PixelBuffer?) throws -> PixelBuffer {
