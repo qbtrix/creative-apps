@@ -1,12 +1,13 @@
 // RenderBudgetAdjustTests.swift (adjust-everywhere AJ-4): a 120-sample
 // pointer hover across Photo's Looks grid (PhotoLooks: the six built-ins and
-// one saved look on a fake store) runs the counted window's body at most twice
+// one saved look in an open workspace's fake store) runs the counted window's body at most twice
 // (target 0: only the hovered buttons redraw). Beside it, the screens
 // photo-adjust-looks-{light,dark}.png: the grid with one saved look. Nested
 // in BodyCountSuites: it reads a global body counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import Foundation
+import PhotoModel
 import SuiteImaging
 import SuiteModel
 import SwiftUI
@@ -42,12 +43,16 @@ extension BodyCountSuites {
     }
 }
 
-/// The stub target with one saved look, "Evening", in its store.
-@MainActor private func lookTarget() throws -> PendingAdjustTarget {
+/// An open 1 px image whose look store holds one saved look, "Evening".
+@MainActor private func lookTarget() throws -> PhotoWorkspace {
     let evening = LookPreset(id: "evening", name: "Evening", kinds: [.invert])
     let record = PresetRecord(id: evening.id, name: evening.name, kind: LookPreset.recordKind,
                               payload: try JSONEncoder().encode(evening))
-    return PendingAdjustTarget(looks: FakePresetStore([record]))
+    var services = PhotoServices.fake
+    services.looks = FakePresetStore([record])
+    var ws = PhotoWorkspace(services: services)
+    try ws.open(rgba8: [128, 128, 128, 255], width: 1, height: 1, name: "grey.png")
+    return ws
 }
 
 /// The counted window: Photo's Looks section at the inspector's width, in a panel.
@@ -55,13 +60,13 @@ private struct LooksBudgetWindow: View, BodyCounted {
     #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
     #endif
-    let target: PendingAdjustTarget
+    let target: PhotoWorkspace
 
     var body: some View {
         #if DEBUG
         let _ = bodyTally.ran(Self.self)
         #endif
-        PhotoLooks(target: target)
+        PhotoLooks(model: target, perform: { _ in })
             .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)
             .background(SuiteColor.panel)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

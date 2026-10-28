@@ -125,6 +125,7 @@ extension PhotoWorkspace {
         }
         + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands + pathCommands
         + ToneCommands.specs(PhotoWorkspace.self)
+        + RetouchCommands.specs(PhotoWorkspace.self)
         + AdjustCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [

@@ -1,15 +1,107 @@
 [
-  {"label": "pasteHelpReadsPasteboard: Paste's availability reads editHelp without the pasteboard", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "$0.editHelp(.paste, pasteboard: anyPasteboard)", "replace": "$0.editHelp(.paste)", "tests": "FlareCommandCatalogTests"},
-  {"label": "availabilityMatchesHelp: Go to Start takes Go to End's transport help", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "{ $0.transportHelp(back: true, step: false) }", "replace": "{ $0.transportHelp(back: false, step: false) }", "tests": "FlareCommandCatalogTests"},
-  {"label": "conformance: Duplicate is declared a view command", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "\"Duplicates the selected layers.\", .edit,", "replace": "\"Duplicates the selected layers.\", .view,", "tests": "FlareCommandCatalogTests"},
-  {"label": "reasonWhenUnavailable: Delete Keyframe forgets it needs a selected key", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "{ $0.timelineHelp() ?? ($0.selectedKeys.isEmpty ? selectKeyFirst : nil) }", "replace": "{ $0.timelineHelp() }", "tests": "FlareCommandPathTests"},
-  {"label": "reasonWhenUnavailable: Restore and Discard are always available", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "var recoveryHelp: String? { isDirty ? Self.recoveryKeepsEdits : nil }", "replace": "var recoveryHelp: String? { nil }", "tests": "FlareCommandPathTests"},
-  {"label": "paramsReachRun: the New sheet's Create ignores its frame rate", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "spec.fps = p.fps.map { FrameRate(whole: $0) } ?? spec.fps", "replace": "_ = p.fps.map { FrameRate(whole: $0) } ?? spec.fps", "tests": "FlareCommandPathTests"},
-  {"label": "paramsReachRun: Insert Frame ignores its count", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "$0.insertFrames(p.count ?? 1)", "replace": "$0.insertFrames(1)", "tests": "FlareCommandPathTests"},
-  {"label": "hiddenIsUnavailable: a hidden command reads available, so its menu item would look live", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "{ _ in laterReason(command.id) }) { _ in }", "replace": "{ _ in nil }) { _ in }", "tests": "FlareMenuVisibilityTests"},
-  {"label": "allBetaTwoHidden: Assist drops out of the hidden set, so its stub comes back to the Animate menu", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "(\"window.assist\", \"Animate with Assist\", \"Assist\"),", "replace": "", "tests": "FlareMenuVisibilityTests"},
-  {"label": "laterReason: the reason loses its command's name, so every hidden item says the same thing", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "\"\\(betaTwo.first { $0.id == id }?.name ?? \"This\") comes in a later beta.\"", "replace": "\"This comes in a later beta.\"", "tests": "FlareMenuVisibilityTests"},
-  {"label": "pathSpecsRegistered: the path specs are left out of the catalog", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "+ PathCommands.specs(FlareWorkspace.self)", "replace": "+ PathCommands.specs(FlareWorkspace.self).filter { _ in false }", "tests": "FlarePathCommandTests"},
-  {"label": "drawAddsPathOneInOneStep: path.draw is dropped from the catalog", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "+ PathCommands.specs(FlareWorkspace.self)", "replace": "+ PathCommands.specs(FlareWorkspace.self).filter { $0.id != \"path.draw\" }", "tests": "FlarePathCommandTests"},
-  {"label": "readReadsTheDrawnPathBack: path.read is dropped from the catalog", "file": "Sources/FlareModel/FlareCommandCatalog.swift", "find": "+ PathCommands.specs(FlareWorkspace.self)", "replace": "+ PathCommands.specs(FlareWorkspace.self).filter { $0.id != \"path.read\" }", "tests": "FlarePathCommandTests"}
+  {
+    "label": "pasteHelpReadsPasteboard: Paste's availability reads editHelp without the pasteboard",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "$0.editHelp(.paste, pasteboard: anyPasteboard)",
+    "replace": "$0.editHelp(.paste)",
+    "tests": "FlareCommandCatalogTests"
+  },
+  {
+    "label": "availabilityMatchesHelp: Go to Start takes Go to End's transport help",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "{ $0.transportHelp(back: true, step: false) }",
+    "replace": "{ $0.transportHelp(back: false, step: false) }",
+    "tests": "FlareCommandCatalogTests"
+  },
+  {
+    "label": "conformance: Duplicate is declared a view command",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "\"Duplicates the selected layers.\", .edit,",
+    "replace": "\"Duplicates the selected layers.\", .view,",
+    "tests": "FlareCommandCatalogTests"
+  },
+  {
+    "label": "reasonWhenUnavailable: Delete Keyframe forgets it needs a selected key",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "{ $0.timelineHelp() ?? ($0.selectedKeys.isEmpty ? selectKeyFirst : nil) }",
+    "replace": "{ $0.timelineHelp() }",
+    "tests": "FlareCommandPathTests"
+  },
+  {
+    "label": "reasonWhenUnavailable: Restore and Discard are always available",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "var recoveryHelp: String? { isDirty ? Self.recoveryKeepsEdits : nil }",
+    "replace": "var recoveryHelp: String? { nil }",
+    "tests": "FlareCommandPathTests"
+  },
+  {
+    "label": "paramsReachRun: the New sheet's Create ignores its frame rate",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "spec.fps = p.fps.map { FrameRate(whole: $0) } ?? spec.fps",
+    "replace": "_ = p.fps.map { FrameRate(whole: $0) } ?? spec.fps",
+    "tests": "FlareCommandPathTests"
+  },
+  {
+    "label": "paramsReachRun: Insert Frame ignores its count",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "$0.insertFrames(p.count ?? 1)",
+    "replace": "$0.insertFrames(1)",
+    "tests": "FlareCommandPathTests"
+  },
+  {
+    "label": "hiddenIsUnavailable: a hidden command reads available, so its menu item would look live",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "{ _ in laterReason(command.id) }) { _ in }",
+    "replace": "{ _ in nil }) { _ in }",
+    "tests": "FlareMenuVisibilityTests"
+  },
+  {
+    "label": "allBetaTwoHidden: Assist drops out of the hidden set, so its stub comes back to the Animate menu",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "(\"window.assist\", \"Animate with Assist\", \"Assist\"),",
+    "replace": "",
+    "tests": "FlareMenuVisibilityTests"
+  },
+  {
+    "label": "laterReason: the reason loses its command's name, so every hidden item says the same thing",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "\"\\(betaTwo.first { $0.id == id }?.name ?? \"This\") comes in a later beta.\"",
+    "replace": "\"This comes in a later beta.\"",
+    "tests": "FlareMenuVisibilityTests"
+  },
+  {
+    "label": "pathSpecsRegistered: the path specs are left out of the catalog",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "+ PathCommands.specs(FlareWorkspace.self)",
+    "replace": "+ PathCommands.specs(FlareWorkspace.self).filter { _ in false }",
+    "tests": "FlarePathCommandTests"
+  },
+  {
+    "label": "drawAddsPathOneInOneStep: path.draw is dropped from the catalog",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "+ PathCommands.specs(FlareWorkspace.self)",
+    "replace": "+ PathCommands.specs(FlareWorkspace.self).filter { $0.id != \"path.draw\" }",
+    "tests": "FlarePathCommandTests"
+  },
+  {
+    "label": "readReadsTheDrawnPathBack: path.read is dropped from the catalog",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "+ PathCommands.specs(FlareWorkspace.self)",
+    "replace": "+ PathCommands.specs(FlareWorkspace.self).filter { $0.id != \"path.read\" }",
+    "tests": "FlarePathCommandTests"
+  },
+  {
+    "label": "newSizeIgnored: new keeps the preset's width",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "        spec.width = p.width ?? spec.width\n",
+    "replace": "        spec.width = spec.width\n",
+    "tests": "FlareHeadlessTests|FlareCommandPathTests|FlareLayersFilesGateTests"
+  },
+  {
+    "label": "presetIgnored: new never finds the preset it is given (#5841)",
+    "file": "Sources/FlareModel/FlareCommandCatalog.swift",
+    "find": "        let named = CanvasPreset.all.first { $0.name == p.preset }\n",
+    "replace": "        let named = CanvasPreset?.none\n",
+    "tests": "FlareLayersFilesGateTests|FlareDocumentSetupTests"
+  }
 ]

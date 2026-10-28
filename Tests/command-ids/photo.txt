@@ -136,6 +136,10 @@ tone.read
 tone.set
 tone.reset
 tone.auto
+fill.bucket
+retouch.spot-heal
+retouch.heal
+retouch.remove
 adjust.black-and-white
 adjust.invert
 filter.gaussian-blur

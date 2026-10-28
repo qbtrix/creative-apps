@@ -23,7 +23,7 @@
 // PhotoWindow+Export.swift.
 //
 // Each v2 area's intents go to its PhotoWindow+<Area>.swift (file, edit,
-// crop, history, select, adjustment layer, transform, export, sample), and
+// crop, history, select, adjustment layer, transform, export, sample, filter), and
 // each area's identity modifier (Photo<Area>Area) is applied here, so a
 // feature keeps its own state, alerts, dialogs and timers in its area file.
 // The window's state is internal so those files can reach it. Return
@@ -79,6 +79,8 @@ struct PhotoWindow: View {
     @State var inspectorTab = PhotoInspectorTab.adjust
     /// File > New's sheet: Photo's presets and the clipboard image's size; nil while it is closed (document-setup DS-8).
     @State var newImageMode: NewDocumentMode?
+    /// The Filter sheet's choices while it is open (PhotoWindow+Filter.swift, AJ-9).
+    @State var filterDraft: FilterSheetDraft?
     /// The app's View > Rendering; nil in tests, which draw on the CPU.
     @Environment(\.photoRendering) private var rendering
 
@@ -86,6 +88,7 @@ struct PhotoWindow: View {
     var isPresenting: Bool {
         model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil
             || areaPrompt != nil || newImageMode != nil
+            || filterDraft != nil
     }
 
     /// The launch file opens in the first window only.
@@ -199,6 +202,7 @@ struct PhotoWindow: View {
             .modifier(PhotoTransformArea(model: model, perform: perform, canvasSize: canvasSizeDraft))
             .modifier(PhotoExportArea(model: model, perform: perform))
             .modifier(PhotoSampleArea(model: model, perform: perform))
+            .modifier(PhotoFilterArea(model: model, draft: filterDraft, perform: perform))
     }
 
     func perform(_ intent: PhotoIntent) {
@@ -287,6 +291,7 @@ struct PhotoWindow: View {
         case .transform(let intent): performTransform(intent)
         case .export(let intent): performExport(intent)
         case .sample(let intent): performSample(intent)
+        case .filter(let intent): performFilter(intent)
         case .place(let intent): performPlace(intent)
         case .text(let intent): performType(intent)
         case .tone(let intent): performTone(intent)
