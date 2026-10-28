@@ -6,9 +6,9 @@
 // `ExportRules.dropped(policy).properties`, and an unreadable original copies
 // nothing. The file tests read the exported JPEG and HEIC back through the
 // live carrier's `properties(of:)`: no GPS, serial or maker note under the
-// default policy, model, capture date and copyright kept. They wait on XP-7
-// (the live `StillMetadata` in the media slot and the sample
-// `Tests/RealJobs/fixtures/gps-phone.jpg`; Wire: export-pack:XP-7). macOS only.
+// default policy, model, capture date and copyright kept, on the live
+// `StillMetadata` in the media slot and the sample
+// `Tests/RealJobs/fixtures/gps-phone.jpg`. macOS only.
 #if os(macOS)
 import Foundation
 import LibraryModel
@@ -90,19 +90,19 @@ import Testing
         #expect(paths.contains("{TIFF}.Copyright"))
     }
 
-    @Test(.disabled("waits on XP-7 (StillMetadata, input/gps-phone.jpg)"))
+    @Test
     func theSampleHasWhatTheExportDrops() throws {
         let paths = try live(FileManager.default.temporaryDirectory).properties(of: try Data(contentsOf: sample))
         #expect(paths.contains { $0.hasPrefix("{GPS}") })
         #expect(paths.contains("{TIFF}.Model"))
     }
 
-    @Test(.disabled("waits on XP-7 (StillMetadata, input/gps-phone.jpg)"))
+    @Test
     func theJPEGKeepsAllButLocation() async throws {
         expectNoLocation(try await exported("IMG_0001.jpg", policy: .noLocation))
     }
 
-    @Test(.disabled("waits on XP-7 (StillMetadata, input/gps-phone.jpg)"))
+    @Test
     func theHEICKeepsAllButLocation() async throws {
         guard JPEGWriter.writableFormats().contains(.heic) else { return }
         expectNoLocation(try await exported("IMG_0001.heic", policy: .noLocation))
