@@ -75,5 +75,16 @@
     "owner": "#5994",
     "reason": "Exceeds its 120 s limit on the CI macOS runner (run 40703460275, dev-red #5983); passes in 2.5 s locally at the same commit. #5994 owns it. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
     "expires": "2026-10-31"
+  },
+  {
+    "test": "AppSnapshotTests.PhotoHistogramCountTests/aSupersededCountStops",
+    "owner": "#6002",
+    "reason": "Quarantined by the fast lane: fails on dev at 1a2831b (dev-red #6001) with no culprit to revert; #6002 owns the fix",
+    "expires": "2026-10-29",
+    "lane": {
+      "red": "#6001",
+      "range": "main..1a2831b",
+      "until": "2026-10-29T21:34:00Z"
+    }
   }
 ]
