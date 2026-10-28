@@ -55,8 +55,7 @@ import Testing
         }
     }
 
-    // Case 2, the Heal tool's stroke, joins once its release runs retouch.heal (FH-7, part 2).
-    @Test(arguments: [0, 1, 3])
+    @Test(arguments: 0..<4)
     func editsSelectedLayer(_ index: Int) throws {
         var workspace = try dotted()
         let layerID = try #require(workspace.selectedLayerID)
