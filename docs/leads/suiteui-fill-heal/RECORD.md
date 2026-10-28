@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-28T13:07Z · 13:07Z check-in: no change; #5103/#5149 await prescreen; dev-red #5969 not ours
+Polled: 2026-10-28T13:39Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -63,3 +63,4 @@ Polled: 2026-10-28T13:07Z · 13:07Z check-in: no change; #5103/#5149 await presc
 
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
+- 2026-10-28T13:39Z main promoted to f89f5255c (CI 40680351181 green, dev-red #5969 closed); AJ-library and AJ-halo done; all open PRs clean, waiting on lane
