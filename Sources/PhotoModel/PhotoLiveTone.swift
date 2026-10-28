@@ -23,18 +23,19 @@
 // layers. Linux-safe.
 import CoreRaster
 import CoreRender
+import SuiteImaging
 import Synchronization
 
 extension AdjustmentSettings {
     /// The enabled tone steps that change the image: ImagingProgram's steps as `applied(to:)` runs them, with
-    /// Hue/Saturation as Photo's own matrix (`runImaging`); nil while Blur would run.
+    /// Hue/Saturation as Photo's own matrix (`runImaging`), then the kinds' GPU steps (AJ-8); nil while Blur would run.
     var toneOperations: [ToneProgram.Operation]? {
         guard blurMargin == 0 else { return nil }
-        return imagingSteps.map { step in
+        return imagingSteps(Set(AdjustmentKind.sections)).map { step in
             guard case .hueSaturation = step else { return .adjustment(step) }
             return .matrix(rows: PixelBuffer.colorMatrix(hue: hue, saturation: saturation),
                            lightness: Float(min(max(lightness, -100), 100) / 100))
-        }
+        } + AdjustKinds.program(kinds)
     }
 }
 

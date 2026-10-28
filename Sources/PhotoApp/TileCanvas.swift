@@ -34,6 +34,10 @@ import SwiftUI
     /// Bytes of the images the last update handed to the view.
     private(set) var handedBytes = 0
     private weak var view: CanvasHostView?
+    #if DEBUG
+    /// Tile surfaces this canvas has handed its view (the budget tests count one window's work with it).
+    private(set) var surfacesHanded = 0
+    #endif
 
     /// Keeps `update`'s tiles, dropping every older one when it is complete
     /// or the canvas changed size, and shows them in the attached view.
@@ -51,6 +55,9 @@ import SwiftUI
             handedBytes += tile.image.bytesPerRow * tile.image.height
         }
         images.merge(changed) { $1 }
+        #if DEBUG
+        surfacesHanded += made.values.filter { $0.surface != nil }.count
+        #endif
         view?.show(Shown(width: width, height: height, images: changed, surfaces: surfaces))
     }
 
@@ -92,10 +99,14 @@ import SwiftUI
     }
 
     /// Free Transform's lifted layer (PhotoTransformLift) above the picture in the attached view (its live layer), at `placement`.
-    func lift(_ surface: IOSurface, width: Int, height: Int, opacity: Double, placement: AffineMatrix) {
+    /// `hidingPicture`: the layer is all the picture has, so the picture hides while it is lifted.
+    func lift(_ surface: IOSurface, width: Int, height: Int, opacity: Double, placement: AffineMatrix, hidingPicture: Bool = false) {
         view?.showLiveLayer(CanvasLiveLayer(contents: surface, size: CGSize(width: width, height: height), opacity: Float(opacity)),
-                            at: Self.affine(placement))
+                            at: Self.affine(placement), hidingPicture: hidingPicture)
     }
+
+    /// The view the tiles show in; nil before `attach`.
+    var attachedView: CanvasHostView? { view }
 
     /// Moves the lifted layer to `placement`: a transaction on one CALayer, no pixels.
     func moveLift(_ placement: AffineMatrix) { view?.moveLiveLayer(Self.affine(placement)) }
