@@ -206,21 +206,12 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
         #expect(try blacker.pixel(x: 0, y: 0).g < dark.pixel(x: 0, y: 0).g)
     }
 
-    /// DV-6 compares the message with `LiveDevelop.waiting[slider]`; Saturation
-    /// renders since suite-imaging IM-10b; DV-12 turns this into "every control set".
-    @Test func vibranceThrowsItsWaitingReason() throws {
-        let gradient = try developGradient()
-        for slider in [DevelopSlider.vibrance] {
-            let error = #expect(throws: LibraryError.self) {
-                try live.render(gradient, settings: DevelopSettings.neutral.setting(slider, to: 20))
-            }
-            guard case .renderFailed(let why)? = error else {
-                Issue.record("\(slider) didn't fail with renderFailed")
-                continue
-            }
-            #expect(why.contains("creative-core"))
-            #expect(why == LiveDevelop.waiting[slider])
-        }
+    /// DV-12: every control set renders, Vibrance and Saturation included, and nothing waits.
+    @Test func everyControlSetRenders() throws {
+        let all = everyControlButColor().setting(.vibrance, to: 20).setting(.saturation, to: -10)
+        let rendered = try live.render(try developGradient(), settings: all)
+        #expect(try rendered.rgba8() != (try live.render(try developGradient(), settings: everyControlButColor())).rgba8())
+        #expect(LiveDevelop.waiting.isEmpty)
     }
 
     @Test func histogramIsCoreRasterOfTheRenderedBuffer() throws {

@@ -1,10 +1,10 @@
 // LibraryDevelopColorTests.swift: Vibrance and Saturation through the live
-// develop renderer (develop packet DV-11, slice DV-e; DV-12 enables them once
-// CoreRaster's vibrance and saturation reach `dev`). A grey stays the same
+// develop renderer (develop packet DV-11, slice DV-e; DV-12 enabled them on
+// CoreRaster's vibrance and hue/saturation). A grey stays the same
 // grey at either control's ends; Saturation -100 turns a colour into the grey
 // of its Rec. 709 luminance and +50 spreads its channels; Vibrance +50 lifts
-// a muted colour's chroma more than a saturated one's; the `.color` pass sits
-// after whites and blacks and before the curve; MJ4 walks all of it on the
+// a muted colour's chroma more than a saturated one's; Vibrance sits after
+// whites and blacks and before the curve, Saturation after the curve; MJ4 walks all of it on the
 // live services. Every check goes through `LiveDevelop`, never CoreRaster's
 // calls by hand. Runs on Linux and macOS.
 @testable import LibraryModel
@@ -36,7 +36,7 @@ private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
 }
 
 @Suite struct LibraryDevelopColorTests {
-    @Test(.disabled("waits on DV-12")) func greyStaysTheSameGrey() throws {
+    @Test func greyStaysTheSameGrey() throws {
         for level: UInt8 in [26, 128, 230] {
             let grey = try colorPatch(level, level, level)
             let before = try grey.pixel(x: 0, y: 0)
@@ -48,7 +48,7 @@ private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
         }
     }
 
-    @Test(.disabled("waits on DV-12")) func saturationMinus100IsTheGreyOfItsLuminance() throws {
+    @Test func saturationMinus100IsTheGreyOfItsLuminance() throws {
         let red = try colorPatch(200, 40, 40)
         let y = luminance(try red.pixel(x: 0, y: 0))
         let p = try rendered(red, .saturation, -100)
@@ -56,7 +56,7 @@ private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
         #expect(abs(p.a - 1) < 1e-4)
     }
 
-    @Test(.disabled("waits on DV-12")) func saturationUpSpreadsTheChannels() throws {
+    @Test func saturationUpSpreadsTheChannels() throws {
         let red = try colorPatch(180, 90, 80)
         let before = try red.pixel(x: 0, y: 0)
         let up = try rendered(red, .saturation, 50)
@@ -66,7 +66,7 @@ private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
         #expect(up.r > before.r && up.b < before.b)     // red moves away from its luminance
     }
 
-    @Test(.disabled("waits on DV-12")) func vibranceLiftsMutedColoursMore() throws {
+    @Test func vibranceLiftsMutedColoursMore() throws {
         let muted = try colorPatch(140, 120, 110)
         let strong = try colorPatch(220, 40, 30)
         let mutedGain = chroma(try rendered(muted, .vibrance, 50)) - chroma(try muted.pixel(x: 0, y: 0))
@@ -75,23 +75,23 @@ private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
         #expect(mutedGain > strongGain)
     }
 
-    @Test(.disabled("waits on DV-12")) func colorPassSitsAfterWhitesBlacksBeforeTheCurve() throws {
+    @Test func vibranceSitsAfterWhitesBlacksBeforeTheCurve() throws {
         let curve = try #require(ToneCurve(points: [DevelopCurvePoint(x: 0, y: 0), DevelopCurvePoint(x: 0.5, y: 0.6),
                                                     DevelopCurvePoint(x: 1, y: 1)]))
         let settings = DevelopSettings.neutral.setting(.whites, to: 20).setting(.vibrance, to: 30)
             .setting(.saturation, to: -20).setting(curve: curve)
         let passes = LiveDevelop.passes(for: settings)
-        let colorAt = passes.firstIndex(of: .color(vibrance: 30, saturation: -20))
         let whitesAt = passes.firstIndex { if case .shared(.levels) = $0 { true } else { false } }
         let curveAt = passes.firstIndex { if case .shared(.curves) = $0 { true } else { false } }
-        #expect(passes.count == 3)
-        #expect(whitesAt == 0 && colorAt == 1 && curveAt == 2)
-        #expect(!LiveDevelop.passes(for: .neutral).contains { if case .color = $0 { true } else { false } })
+        #expect(passes.count == 4)
+        #expect(whitesAt == 0 && passes.firstIndex(of: .shared(.vibrance(30))) == 1 && curveAt == 2)
+        #expect(passes.firstIndex { if case .shared(.hueSaturation) = $0 { true } else { false } } == 3)
+        #expect(!LiveDevelop.passes(for: .neutral).contains { if case .shared(.vibrance) = $0 { true } else { false } })
     }
 
     /// MJ4: a grey survives both controls at their ends, Saturation -100 greys
     /// a red patch to its luminance, and nothing waits on the live services.
-    @Test(.disabled("waits on DV-12")) func testVibranceSaturationWalk() throws {
+    @Test func testVibranceSaturationWalk() throws {
         let grey = try colorPatch(128, 128, 128)
         let before = try grey.pixel(x: 0, y: 0)
         for (vibrance, saturation) in [(100.0, 100.0), (-100, -100), (100, -100), (-100, 100)] {
