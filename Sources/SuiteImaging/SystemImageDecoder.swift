@@ -11,11 +11,16 @@ import Foundation
 #if canImport(CoreImage)
 import CoreImage
 #endif
+import SuiteModel
 
 public enum SystemImageDecoder {
     /// The extensions `decode` reads on this platform; empty on Linux.
     #if canImport(CoreImage)
-    public static let extensions: Set<String> = ["heic", "heif", "tif", "tiff", "psd"]
+    public static let extensions = Set(
+        SuiteImageFormat.heic.extensions
+            + SuiteImageFormat.heif.extensions
+            + SuiteImageFormat.tiff.extensions
+            + ["psd"])
     #else
     public static let extensions: Set<String> = []
     #endif

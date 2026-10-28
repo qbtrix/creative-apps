@@ -12,12 +12,17 @@ import Foundation
 #endif
 import CoreRaster
 import SuiteImaging
+import SuiteModel
 
 /// PNG and JPEG through CoreRaster; HEIC, TIFF and PSD through the system on macOS.
 public struct CoreRasterImageCodec: PhotoImageCodec {
     public init() {}
 
-    public var readExtensions: Set<String> { Set(["png", "jpg", "jpeg"]).union(SystemImageDecoder.extensions) }
+    /// The files CoreRaster reads itself.
+    static let rasterExtensions = SuiteImageFormat.png.extensions
+        + SuiteImageFormat.jpeg.extensions
+
+    public var readExtensions: Set<String> { Set(Self.rasterExtensions).union(SystemImageDecoder.extensions) }
 
     public func decode(_ data: Data, longestSide: Int?) throws -> DecodedImage {
         if !data.starts(with: Self.signature), !data.starts(with: [0xFF, 0xD8, 0xFF]),
