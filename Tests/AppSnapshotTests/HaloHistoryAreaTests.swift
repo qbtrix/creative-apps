@@ -9,7 +9,7 @@
 // panel follows the undo: the undone step reads "not applied" and the
 // selection moves to the step before it, with no jump sent. Presses go
 // through the accessibility tree, as VoiceOver's do. Nested in
-// BodyCountSuites: it reads a process-global debug counter. macOS only.
+// BodyCountSuites: it reads a debug counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import HaloModel

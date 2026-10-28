@@ -17,7 +17,7 @@ import SuiteModel
 import SuiteUI
 import SwiftUI
 
-struct HomeGrid: View {
+struct HomeGrid: View, BodyCounted {
     let model: HomeModel
     /// Loaded thumbnails by `RecentItem.thumbnail`.
     let images: [String: Image]
@@ -29,13 +29,12 @@ struct HomeGrid: View {
     private var previews: HomePreviews<Image> { loaded ?? own }
 
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             header

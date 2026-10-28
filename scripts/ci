@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/ci [--changed [BASE] | --build-only | --shard K/N]: the one gate. Runs the no-crash lint, the isa-swizzle lint, the
 # app-state rule, the design lint, the C4 ownership and descriptions checks, the duplicate-code
-# check, the canonical-first check, the SuiteUI-first view check, the render contract, the app-marks check, the CI scripts' fixture tests, the test quarantine check, the
+# check, the canonical-first check, the SuiteUI-first view check, the body-counts check, the render contract, the app-marks check, the CI scripts' fixture tests, the test quarantine check, the
 # real-jobs check, the mutation anchors, swift build of every target with its tests, and swift
 # test, then prints PASS or FAIL and exits with the real status. swift build takes its dependencies only
 # from the committed Package.resolved (--force-resolved-versions): a
@@ -126,6 +126,12 @@
 # @MainActor, so a worker-thread @Test that calls it traps on macOS while Linux
 # stays green. It must be `nonisolated` (or opt out with `// view-static:
 # main-actor`) unless Tests/view-statics-baseline.txt lists it; that only shrinks.
+#
+# The body-counts check runs Tests/canonical/test_check_body_counts.sh, then
+# scripts/check-body-counts (factory lesson 345): no stored `bodyRuns` counter (count
+# through SuiteUI's BodyTally), no `bodyRuns` read outside BodyCountSuites and no
+# test read of a Sources static Int counter, unless Tests/body-counts-baseline.txt
+# lists it; that only shrinks.
 #
 # The app-local-surfaces check runs Tests/canonical/test_check_app_local_surfaces.sh, then
 # scripts/check-app-local-surfaces (docs/engineering/swiftui-rules.md rules 5 and 12): no
@@ -403,6 +409,10 @@ python3 scripts/check-dup-views || fail "SuiteUI first: use the SuiteUI componen
 echo "== statics on Views (Tests/view-statics-baseline.txt)"
 bash Tests/canonical/test_check_view_statics.sh || fail "statics on Views: scripts/check-view-statics broke its tests"
 python3 scripts/check-view-statics || fail "statics on Views: mark the pure helper nonisolated (docs/engineering/swiftui-rules.md rule 13)"
+
+echo "== body counts (Tests/body-counts-baseline.txt)"
+bash Tests/canonical/test_check_body_counts.sh || fail "body counts: scripts/check-body-counts broke its tests"
+python3 scripts/check-body-counts || fail "body counts: count the window under test through BodyTally, not a process-wide static (factory lesson 345)"
 
 echo "== app-local surfaces (Tests/app-local-surfaces-baseline.txt)"
 bash Tests/canonical/test_check_app_local_surfaces.sh || fail "app-local surfaces: scripts/check-app-local-surfaces broke its tests"

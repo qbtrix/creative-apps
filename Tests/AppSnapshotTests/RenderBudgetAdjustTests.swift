@@ -56,16 +56,15 @@ extension BodyCountSuites {
 }
 
 /// The counted window: Photo's Looks section at the inspector's width, in a panel.
-private struct LooksBudgetWindow: View {
+private struct LooksBudgetWindow: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     let target: PhotoWorkspace
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         PhotoLooks(model: target, perform: { _ in })
             .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)

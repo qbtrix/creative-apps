@@ -50,10 +50,9 @@ enum GalleryEditorKernel {
 }
 
 /// Internal, not private, so RenderBudgetEditorKernelTests hosts it and reads `bodyRuns`.
-struct GalleryEditorKernelPage: View {
+struct GalleryEditorKernelPage: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     @State private var tree = KernelFixtures.tree200
     @State private var open = GalleryEditorKernel.allOpen(KernelFixtures.tree200)
@@ -64,7 +63,7 @@ struct GalleryEditorKernelPage: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         HStack(alignment: .top, spacing: SuiteSpacing.m) {
             VStack(alignment: .leading, spacing: SuiteSpacing.s) {
