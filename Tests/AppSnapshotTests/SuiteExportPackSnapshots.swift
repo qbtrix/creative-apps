@@ -2,8 +2,10 @@
 // Metadata rows on the gallery page's 1000 × 1250 artwork, in Light and Dark,
 // once per way the Size row reads: Scale 2x, Pixels locked at 1080 × 1350,
 // Pixels unlocked and stretched to 1080 × 1351, a locked 1080 × 1351 the rules
-// refuse (the readout in the error color), Long edge 2048, and SVG (Scale only,
-// no Metadata row). Each writes suiteui-export-pack-<state>-<light|dark>.png.
+// refuse (the readout in the error color, Export disabled with that reason), Long
+// edge 2048, and SVG (Scale only, no Metadata row). Each writes
+// suiteui-export-pack-<state>-<light|dark>.png and checks the golden
+// Golden/inspector/export-pack-<state>-<light|dark>.png (CI records a missing one).
 // The render budget is RenderBudgetExportPackTests. macOS only.
 #if canImport(AppKit)
 import SuiteKernel
@@ -40,6 +42,7 @@ import Testing
         for state in Self.states {
             for scheme in [ColorScheme.light, .dark] {
                 try snapshot(Self.sheet(state.pick), name: "suiteui-export-pack-\(state.name)-\(scheme.name)", scheme: scheme)
+                assertGolden(Self.sheet(state.pick), name: "export-pack-\(state.name)", area: "inspector", scheme: scheme)
             }
         }
     }
@@ -56,6 +59,7 @@ import Testing
             #expect(rows.rows.contains { if case .metadata = $0 { true } else { false } } == !vector, "\(state.name)")
         }
         #expect(ExportSheetRows.readout(.pixels(width: 1080, height: 1351), source: GalleryExportPack.source).refused)
+        for state in Self.states { #expect((Self.rows(state.pick).startBlock != nil) == (state.name == "refused"), "\(state.name)") }
     }
 }
 #endif

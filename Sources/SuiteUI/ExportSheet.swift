@@ -75,6 +75,16 @@ public struct ExportSheetRows: Hashable, Sendable {
         return shown + [line == nil ? .cancel : .dismiss, .start]
     }
 
+    /// Why Export can't start, or nil when it can: the run is past editing, or the Size row's readout is a refusal.
+    public var startBlock: String? {
+        guard editable else { return "The export is already under way or done." }
+        for case .pixels(let size, let w, let h) in rows {
+            let shown = Self.readout(size, source: (w, h))
+            if shown.refused { return shown.text }
+        }
+        return nil
+    }
+
     /// Columns for the Format chips: up to four formats fill one row (no empty column, no orphan chip), more wrap by three.
     public static func formatColumns(_ count: Int) -> Int { count <= 4 ? max(count, 1) : 3 }
 
@@ -264,7 +274,7 @@ public struct SuiteExportSheet<Options: View>: View {
             Button(action == .cancel ? "Cancel" : "Done", action: onClose)
                 .keyboardShortcut(.cancelAction).suiteControl(id: ids.id(action), enabled: true, reason: nil)
         case .start:
-            let help = readout.editable ? nil : "The export is already under way or done."
+            let help = readout.startBlock
             Button("Export", action: onExport)
                 .keyboardShortcut(.defaultAction).disabled(help != nil).help(help ?? "Export with these settings")
                 .suiteControl(id: ids.start, enabled: help == nil, reason: help, role: "primary")

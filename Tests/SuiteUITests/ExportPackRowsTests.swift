@@ -38,6 +38,17 @@ import Testing
         #expect(readout.text == "1080 × 1351 doesn't keep the artwork's 4:5 shape. Unlock the ratio to stretch.")
     }
 
+    @Test func aRefusedSizeBlocksExportAndSaysWhy() {
+        let refused = ExportPick(format: "jpeg", size: .pixels(width: 1080, height: 1351))
+        let rows = ExportSheetRows(.editing(refused), formats: GalleryExportPack.formats, source: source) { $0 }
+        #expect(rows.startBlock == "1080 × 1351 doesn't keep the artwork's 4:5 shape. Unlock the ratio to stretch.")
+        var fine = refused
+        fine.size = .pixels(width: 1080, height: 1350)
+        #expect(ExportSheetRows(.editing(fine), formats: GalleryExportPack.formats, source: source) { $0 }.startBlock == nil)
+        let running = ExportSheetRows(.running(fine, done: 0, total: 1), formats: GalleryExportPack.formats, source: source) { $0 }
+        #expect(running.startBlock == "The export is already under way or done.")
+    }
+
     @Test func longEdge2048Reads1638By2048() {
         #expect(ExportSheetRows.readout(.longEdge(2048), source: source).text == "1638 × 2048 px")
         #expect(ExportSheetRows.readout(.scale(2), source: source).text == "2000 × 2500 px")
