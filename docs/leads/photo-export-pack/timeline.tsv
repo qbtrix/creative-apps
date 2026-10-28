@@ -368,3 +368,4 @@ utc	stage	event	ref	note
 2026-10-28T08:38Z	check-in	no change: 5353 open; 5957/5959 clean awaiting batch; dev-red 5966 open (not ours); 41 findings, none new
 2026-10-28T09:12Z	check-in	5353 open; 5957/5959 clean awaiting batch; dev-red 5966 confirmed real on rerun (PhotoEditMenuTests selectAll, not export/text, not ours); 41 findings, none new
 2026-10-28T09:43Z	check-in	5353 open; 5957/5959 clean awaiting batch; dev-red 5966 left for a human (no auto-revert/quarantine; not ours); 41 findings, none new
+2026-10-28T10:15Z	check-in	5353 open; 5957/5959 clean awaiting batch; 5966 closed as stale; new dev-red 5969 (Halo drag, Photo rapid-rotate, Suite scrub timing; range 5257/5864/5962/5964, none ours), flake rerun pending; 41 findings, none new
