@@ -296,3 +296,4 @@ utc	stage	event	ref	note
 2026-10-28T01:00Z	3	heartbeat	lane	poll 2026-10-28T01:00Z: 01:00Z check-in: no change; #5818 still open (0c204c3 macOS rerun pending); PRs ready, footers clean; no #5093 answer; no new main run
 2026-10-28T01:48Z	3	heartbeat	lane	poll 2026-10-28T01:48Z: 01:48Z check-in: no change; #5818 still red (0c204c3 rerun red); PRs ready, footers clean; no #5093 answer; no new main run
 2026-10-28T02:35Z	3	heartbeat	lane	poll 2026-10-28T02:35Z: 02:35Z check-in: no change; #5818 still red; PRs ready, footers clean; no #5093 answer; no new main run
+2026-10-28T03:22Z	3	heartbeat	lane	poll 2026-10-28T03:22Z: 03:22Z: #5096 (AR-photo-u model) merged 02:40Z; #5103 retargeted to dev at 49ef9442, footer stripped; #5818 still red (8e567a5 rerun pending); no #5093 answer; no new main run

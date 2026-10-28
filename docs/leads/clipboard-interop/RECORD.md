@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-28T02:35Z · 02:35Z check-in: no change; #5818 still red; PRs ready, footers clean; no #5093 answer; no new main run
+Polled: 2026-10-28T03:22Z · 03:22Z: #5096 (AR-photo-u model) merged 02:40Z; #5103 retargeted to dev at 49ef9442, footer stripped; #5818 still red (8e567a5 rerun pending); no #5093 answer; no new main run
 
 
 
