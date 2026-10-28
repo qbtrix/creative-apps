@@ -271,3 +271,4 @@ utc	stage	event	ref	note
 11:04Z	3	AJ-photo restacked: #5259 5f7de8b4b on dev, #5260 5e0e27327 on #5259; both gated, Head moved
 11:04Z	3	AJ-halo #5258 merged to dev (621020fcb); halo and library wait for main
 11:24Z	3	main held by dev-red #5969 (macos: RenderBudgetPhotoRapidRotate, SuiteTimelineScrubWindow; not ours); #5259/#5260 clean waiting on prescreen
+11:44Z	3	dev-red #5969 confirmed real; its failing tests are quarantined under #5807/#5924/#5971 (not ours); main still c73c958a9; #5259/#5260 clean
