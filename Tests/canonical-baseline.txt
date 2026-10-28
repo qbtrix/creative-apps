@@ -111,7 +111,6 @@ Sources/PhotoModel/AdjustmentSettings.swift
 Sources/PhotoModel/Contracts/CropContracts.swift
 Sources/PhotoModel/Contracts/EditContracts.swift
 Sources/PhotoModel/Contracts/OutputContracts.swift
-Sources/PhotoModel/Contracts/SelectionContracts.swift
 Sources/PhotoModel/CoreRasterImageCodec.swift
 Sources/PhotoModel/Fakes/FakeEdit.swift
 Sources/PhotoModel/Fakes/FakeGeometry.swift

@@ -107,7 +107,7 @@ import Testing
         let below = try TiledPixels(width: 300, height: 280, fill: RGBA(r: 0.2, g: 0.5, b: 0.7, a: 1))
         let result = try PhotoLayerComposite.composite(
             LayerContent(layer: layer, pixels: nil), onto: below, origin: (x: 0, y: 0),
-            adjusting: LiveAdjustmentLayers.make(), masking: LiveSelection.masking())
+            adjusting: LiveAdjustmentLayers.make(), masking: LiveEdit.masking())
         #expect(result == below)
     }
 

@@ -44,6 +44,9 @@
 //                  an undo step (PhotoSample+Kernel.swift).
 //   move           shifts every picked image layer by the drag, in whole
 //                  pixels, as one step ("Move Layer", "Move Layers" for several).
+//   bucket, spot heal, remove
+//                  nothing until the release runs one command, one undo step
+//                  (PhotoRetouchRelease.swift).
 //
 // Brush, eraser, clone and heal write through `paintTarget()`: the selected
 // layer's pixels, or on an adjustment layer nothing, with the refusal in
@@ -93,7 +96,8 @@ struct PhotoStroke: Sendable, Equatable {
     /// Free Transform: the draft at the press and the handle the press took (nil off the box).
     var transformFrom: TransformDraft?
     var transformHandle: TransformHandle?
-    /// Heal and Remove: the points the stroke passed, from `start`, a quarter of the brush apart.
+    /// Heal: the stroke's points so far, for `retouch.heal` on release.
+    /// Remove: the points the stroke passed, from `start`, a quarter of the brush apart.
     var path: [Mask.Point] = []
 }
 
@@ -264,7 +268,9 @@ extension PhotoWorkspace {
             healStroke(done)
         case .marquee, .ellipse, .lasso, .polygon, .wand:
             endAreaDrag(done)
-        case .crop, .eyedropper, .bucket, .spotHeal, .remove:
+        case .bucket, .spotHeal, .remove:
+            retouchRelease(done)
+        case .crop, .eyedropper:
             break
         case .gradient:
             guard let end = done.end else { return }
