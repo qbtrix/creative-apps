@@ -317,3 +317,4 @@ utc	stage	event	ref	note
 2026-10-28T15:43Z	3	heartbeat	lane	poll 2026-10-28T15:43Z: 15:45Z check-in: #5149 merged; fixing #5103 pre-screen (maskOutline facet)
 2026-10-28T16:34Z	restack	#5107 restacked on dev after #5245 merged (add/add conflicts take FH-7's Heal side); 170 lines, gate pass, pushed 300e835c1, fast-lane back
 2026-10-28T16:36Z	3	heartbeat	lane	poll 2026-10-28T16:36Z: 16:37Z check-in: #5103 at 51813ef6 (conflict resolved), awaiting prescreen
+2026-10-28T16:58Z	poll	#5107 prescreen success at 300e835c1; #5251 chain clean, awaiting prescreen
