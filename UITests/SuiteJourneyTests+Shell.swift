@@ -9,9 +9,11 @@ extension SuiteJourneyTests {
     static let shellLaunch = ["-SuiteGallery", "shell", "-SuiteWindowSize", "1024x768", "-SuitePerfProbe"]
     static let shellParts = ["suite.sidebar", "suite.canvas", "suite.inspector", "suite.sidebarToggle", "suite.inspectorToggle"]
 
-    /// Light: every part by identifier, then each toggle hides and shows its panel.
+    /// Light (forced through NSRequiresAquaSystemAppearance, so a dark Mac shoots it light too): every part by
+    /// identifier, then each toggle hides and shows its panel.
     @MainActor func testShellPagePartsAndToggles() {
-        let gallery = Journey("Library", self, name: "suiteui", arguments: Self.shellLaunch)
+        let light = ["-NSRequiresAquaSystemAppearance", "YES"] + Self.shellLaunch
+        let gallery = Journey("Library", self, name: "suiteui", arguments: light)
         XCTAssert(gallery.element("suite.gallery.shell").waitForExistence(timeout: 30), "no shell page")
         for id in Self.shellParts {
             XCTAssert(gallery.element(id).waitForExistence(timeout: 10), "the journey helper finds no \(id)")
@@ -31,12 +33,13 @@ extension SuiteJourneyTests {
         XCTAssert(shellWait { !self.shellHidden(gallery.element("suite.sidebar")) }, "the sidebar didn't come back")
     }
 
-    /// Dark: the launch shot. The appearance pair goes first (SuiteJourneyTests+EditorWindow.swift).
+    /// Dark: the launch shot. The appearance pair goes first (SuiteJourneyTests+EditorWindow.swift). The
+    /// Light test audits the window; this one only shoots it, so the audit's baseline read happens once per run.
     @MainActor func testShellPageDark() {
         let gallery = Journey("Library", self, name: "suiteui", arguments: ["-AppleInterfaceStyle", "Dark"] + Self.shellLaunch)
         XCTAssert(gallery.element("suite.gallery.shell").waitForExistence(timeout: 30), "no shell page")
         XCTAssert(gallery.element("suite.sidebar").waitForExistence(timeout: 10), "no sidebar (suite.sidebar)")
-        gallery.shot("shell-launch-dark")
+        gallery.shot("shell-launch-dark", element: gallery.app.windows.firstMatch, audit: false)
     }
 
     /// A collapsed split item's view is hidden: its element is gone or has no width.
