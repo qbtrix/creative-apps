@@ -8,7 +8,8 @@
 // the layer (`dropLiveLayer`) in the turn it arrives; on the Metal path it stays until that picture's
 // drawable is presented, so the release never flashes the picture without it. A transform maps the layer's
 // pixels (x right, y down from their top-left) to document pixels (y down); the host turns that into the
-// container's unflipped space, so it zooms, pans and turns with the picture. Nothing here knows the app or
+// container's unflipped space, so it zooms, pans and turns with the picture. A live layer that is all the
+// picture shows can hide the picture until its drop (`hidingPicture`), so nothing renders an empty one. Nothing here knows the app or
 // the gesture: a move, resize or rotate is just a transform. Photo's Free Transform is the first caller.
 // macOS only.
 import AppKit
@@ -28,10 +29,17 @@ public struct CanvasLiveLayer {
 
 extension CanvasHostView {
     /// Shows `live` above the picture at `transform` (its pixels to document pixels); one already up is replaced.
-    public func showLiveLayer(_ live: CanvasLiveLayer, at transform: CGAffineTransform) {
+    /// `hidingPicture` when `live` is everything the picture shows: the picture hides until the drop, so the
+    /// app needs no render of an empty picture under it.
+    public func showLiveLayer(_ live: CanvasLiveLayer, at transform: CGAffineTransform, hidingPicture: Bool = false) {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         defer { CATransaction.commit() }
+        if hidingPicture {
+            container.isHidden = true
+            metalLayer?.isHidden = true
+            pictureHidden = true
+        }
         let layer = lifted ?? CALayer()
         layer.anchorPoint = .zero
         layer.position = .zero
@@ -73,7 +81,7 @@ extension CanvasHostView {
     /// Whether a live layer is up.
     public var hasLiveLayer: Bool { lifted != nil }
 
-    /// Takes the dropped live layer off the screen; nothing with none.
+    /// Takes the dropped live layer off the screen, showing a picture it hid; nothing with none.
     func removeDroppedLift() {
         guard let gone = droppedLift else { return }
         droppedLift = nil
@@ -81,6 +89,11 @@ extension CanvasHostView {
         CATransaction.setDisableActions(true)
         gone.removeFromSuperlayer()
         gone.contents = nil
+        if pictureHidden {
+            container.isHidden = metalLayer != nil
+            metalLayer?.isHidden = false
+            pictureHidden = false
+        }
         CATransaction.commit()
     }
 

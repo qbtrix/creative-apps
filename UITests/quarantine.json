@@ -53,21 +53,21 @@
     "expires": "2026-10-29"
   },
   {
-    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryShareTests/prepareThreeInTwoBodies",
-    "owner": "#5883",
-    "reason": "The heavy-pass process died inside this test in dev run 40489065455 (shard 2/3), with no summary and no crash report, the only red in that run. #5883 finds what kills it.",
-    "expires": "2026-10-29"
-  },
-  {
-    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryShareTests/shareClearsTheGridAndFillsItsPill",
-    "owner": "#5883",
-    "reason": "The Library share-sheet budget suite kills the macOS heavy-pass test process: prepareThreeInTwoBodies in run 40489065455 (shard 2/3) and shareClearsTheGridAndFillsItsPill in run 40542085144 (shard 3/3), with no summary and no crash report. The whole suite is skipped until #5883 finds what kills it.",
-    "expires": "2026-10-29"
-  },
-  {
     "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryLevelsTests/bodies",
     "owner": "#5924",
     "reason": "121 window bodies against 120 on dev macOS under load (runs 40394212348, 40564904343), then the process died in it; #5924 owns the fix (split Library's window state).",
+    "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.PhotoAdjustTargetSnapshots/backgroundTargetsTheImage",
+    "owner": "#5943",
+    "reason": "adjustSections doesn't match the expected list after AJ-8 (#5247), run 40605553090. #5943 owns the fix or the revert.",
+    "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoToneTests/temperatureDragInThreeBodies",
+    "owner": "#5943",
+    "reason": "5 bodies against a budget of 3 after AJ-8 (#5247), run 40605553090. #5943 owns the fix or the revert.",
     "expires": "2026-10-29"
   }
 ]

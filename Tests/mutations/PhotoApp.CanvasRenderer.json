@@ -12,5 +12,19 @@
     "find": "        prepareSprite(for: workspace)\n",
     "replace": "",
     "tests": "BodyCountSuites/RenderBudgetPhotoRapidRotateTests"
+  },
+  {
+    "label": "emptyBaseDrawn: on the tile path a layer with nothing under it still draws an empty picture each drag, a picture's tile surfaces more per drag",
+    "file": "Sources/PhotoApp/CanvasRenderer.swift",
+    "find": "let alone = target == nil && workspace.liftsAlone",
+    "replace": "let alone = false",
+    "tests": "BodyCountSuites/RenderBudgetPhotoRapidRotateTests"
+  },
+  {
+    "label": "gpuTilesDrawEmptyBase: the GPU route with no presenter texture still draws an empty picture under a lone layer each drag",
+    "file": "Sources/PhotoApp/CanvasRenderer.swift",
+    "find": "let alone = target == nil && workspace.liftsAlone",
+    "replace": "let alone = !route.isGPU && workspace.liftsAlone",
+    "tests": "BodyCountSuites/RenderBudgetPhotoRapidRotateTests"
   }
 ]

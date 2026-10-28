@@ -7,7 +7,6 @@ import CoreGraphics
 import Foundation
 import IOSurface
 import SwiftUI
-import Synchronization
 
 /// A whole-pixel rect in document space. Named apart from PhotoModel's `PixelRect`, which apps import too.
 public struct CanvasTileRect: Equatable, Hashable, Sendable {
@@ -32,20 +31,10 @@ public struct CanvasTile: Equatable, @unchecked Sendable {
         self.rect = rect; self.image = image; self.surface = surface
     }
 
-    #if DEBUG
-    /// Debug only: every surface `surface(premultipliedRGBA:width:height:)` has made in the process (the budget
-    /// tests count the canvas's surface allocations with it).
-    public static let surfaces = Mutex(0)
-    public static var surfacesMade: Int { surfaces.withLock { $0 } }
-    #endif
-
     /// `width` x `height` premultiplied sRGB RGBA bytes (row-major, `width * 4` a row) as a new BGRA IOSurface
     /// tagged sRGB, for a tile layer's contents; nil when the bytes are short or the surface won't allocate.
     /// Safe off the main thread: build tiles' surfaces where their bytes are made.
     public static func surface(premultipliedRGBA bytes: [UInt8], width: Int, height: Int) -> IOSurface? {
-        #if DEBUG
-        surfaces.withLock { $0 += 1 }
-        #endif
         guard width > 0, height > 0, bytes.count >= width * height * 4,
             let surface = IOSurface(properties: [
                 .width: width, .height: height, .bytesPerElement: 4, .pixelFormat: 0x4247_5241,  // 'BGRA'

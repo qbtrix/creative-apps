@@ -1,12 +1,13 @@
-// RenderBudgetPhotoRapidRotateTests.swift: many Free Transform rotations in a row on the real Photo window on
-// Metal (the app's route), then Return. 30 knob drags, each turning the other way from the last and held until
+// RenderBudgetPhotoRapidRotateTests.swift: many Free Transform rotations in a row on the real Photo window, on
+// the CPU's tiles, on Metal, and on the GPU route drawing tiles (no Metal presenter), then Return. 30 knob drags, each turning the other way from the last and held until
 // the layer rides the canvas's live layer, either waiting for the release's exact picture or pressing again at
 // once (so the next drag starts before the last drop's picture is presented). Return must apply (a 10 s hang
-// guard; the time is printed), the layer must be exactly one commit of the final transform (the same draft committed on a fresh copy),
-// and the gesture's memory must stay flat: one live-layer surface for the whole Free Transform, made when its
-// draft first shows (its pixels never change while the draft is up) and none by the drags, at most one lift per drag, and no growth in GPU-resident bytes or the process
-// footprint that scales with the number of drags. Nested in
-// BodyCountSuites: it reads process-wide counters. macOS only.
+// guard; the time is printed) and lay exactly one commit of the final transform (the same draft committed on a
+// fresh copy). The window's own work must stay flat: one set of live-layer pixels for the whole Free Transform,
+// made when its draft first shows (its pixels never change while the draft is up) and none by the drags, at most
+// one lift per drag, and wherever pictures come back as tiles one picture's tiles per drag at most. A second Photo window drawing
+// alongside (as CI's parallel suites do) must not count: every count is the window's renderer's, and the process's
+// footprint and GPU-resident bytes are only printed. Nested in BodyCountSuites. macOS only.
 #if canImport(AppKit)
 import AppKit
 import CoreRenderMetal
@@ -23,16 +24,29 @@ extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetPhotoRapidRotateTests {
         static let drags = 30
 
-        @Test(.timeLimit(.minutes(6)), arguments: [false, true])
-        func rapidRotationsThenReturnApplyOneCommit(backToBack: Bool) async throws {
+        /// Where the window draws: the CPU's tiles; the GPU into the Metal presenter's texture (the app on a Mac);
+        /// or the GPU route with the view on its tile layers, so each render reads its tiles back (a runner whose
+        /// Metal presenter isn't up, as CI's was in run 40605553090).
+        enum Route: String, CaseIterable, CustomTestStringConvertible, Sendable {
+            case tiles, metal, gpuTiles
+            var choice: RenderingChoice { self == .tiles ? .cpu : .gpu }
+            var testDescription: String { rawValue }
+        }
+
+        @Test(.timeLimit(.minutes(6)), arguments: Route.allCases, [false, true])
+        func rapidRotationsThenReturnApplyOneCommit(_ route: Route, backToBack: Bool) async throws {
+            let choice = route.choice
             var model = try PhotoWorkspace.fixture(ProcessInfo.processInfo.environment["RAPID_LARGE"] == nil ? .sample : .large)
             model.selectTool(.move)
             try model.beginTransform()
             let fixture = model
-            let opened = CanvasTile.surfacesMade
+            // Another Photo window drawing alongside, as the suites running in parallel on CI do: none of its work
+            // may count as this window's.
+            let neighbor = RenderBudgetWindow(PhotoWindow(model: try PhotoWorkspace.fixture(.layered)))
+            defer { neighbor.close() }
             // One GPU backend, the window's and the one whose resident bytes the readings take.
             let gpu = try #require(ImagingGPU.systemBackend(), "no GPU")
-            let rendering = PhotoRendering(preference: FakeRenderingPreference(choice: .gpu), makeGPU: { gpu.renderBackend })
+            let rendering = PhotoRendering(preference: FakeRenderingPreference(choice: choice), makeGPU: { gpu.renderBackend })
             let w = RenderBudgetWindow(AnyView(PhotoWindow(model: model).allowsWindowActivationEvents()
                 .environment(\.photoRendering, rendering)))
             defer { w.close() }
@@ -41,21 +55,26 @@ extension BodyCountSuites {
                 w.window.setFrameOrigin(NSPoint(x: screen.visibleFrame.minX + 40, y: screen.visibleFrame.minY + 40))
             }
             let edited = try await RenderBudgetPhotoTransformTests.settle(w)
+            let renderer = try await Self.renderer(of: w)
+            if route == .gpuTiles {
+                // The view leaves Metal for its tile layers while the renderer stays on the GPU: no presenter texture.
+                let host = try #require(RenderBudgetPhotoLiveTransformTests.canvas(in: w.host))
+                host.useRendering(.cpu, device: nil, presenter: ClearingMetalPresenter())
+            }
             try await RenderBudgetPhotoLiveTransformTests.idle(w)
             let send = try #require(edited.send)
-            // The draft's first show makes the live layer's pixels (on Metal no tile makes a surface).
-            for _ in 0..<500 where CanvasTile.surfacesMade == opened { try await Task.sleep(for: .milliseconds(20)) }
-            #expect(CanvasTile.surfacesMade - opened == 1, "Free Transform's first show made \(CanvasTile.surfacesMade - opened) live-layer surfaces")
-            let start = Self.reading(gpu)
-            #expect(start.resident > 0, "the picture never went resident: the window isn't on the app's GPU route")
+            // The draft's first show makes the live layer's pixels, once.
+            for _ in 0..<500 where renderer.spritesMade == 0 { try await Task.sleep(for: .milliseconds(20)) }
+            #expect(renderer.spritesMade == 1, "\(route): Free Transform's first show made \(renderer.spritesMade) live-layer pixel sets")
+            let start = Self.reading(gpu, renderer)
             var readings: [Reading] = []
             for drag in 0..<Self.drags {
                 try await Self.turn(w, degrees: drag.isMultiple(of: 2) ? 30 : -25)
                 if !backToBack { try await RenderBudgetPhotoLiveTransformTests.idle(w) }
-                readings.append(Self.reading(gpu))
+                readings.append(Self.reading(gpu, renderer))
             }
             try await RenderBudgetPhotoLiveTransformTests.idle(w)
-            let end = Self.reading(gpu)
+            let end = Self.reading(gpu, renderer)
             for (i, r) in readings.enumerated() where i % 5 == 4 { print("RENDER-BUDGET photo rapid rotate \(backToBack ? "back to back" : "settled"), drag \(i + 1): \(r.since(start))") }
             // The last release hands the copy back: that draft is what Return lays.
             let final = try #require(await RenderBudgetPhotoTransformTests.landed(edited) { _ in false }?.transformSelection)
@@ -74,12 +93,14 @@ extension BodyCountSuites {
             let grew = end.since(start)
             #expect(grew.lifts <= Self.drags, "\(grew.lifts) lifts for \(Self.drags) drags")
             // The lifted pixels are the untransformed layer in the draft's box, the same for every drag of one
-            // draft: one surface for the whole Free Transform, not one per drag.
-            #expect(grew.surfaces == 0, "\(grew.surfaces) live-layer surfaces for \(grew.lifts) lifts")
-            // Memory that grows with the drags: compare the last ten drags with the ten before them.
-            let (a, b) = (readings[Self.drags - 11].since(start), readings[Self.drags - 1].since(start))
-            #expect(b.resident - a.resident <= 8_000_000, "GPU-resident bytes grew \(b.resident - a.resident) over the last 10 drags")
-            #expect(b.footprint - a.footprint <= 64_000_000, "the footprint grew \(b.footprint - a.footprint) over the last 10 drags")
+            // draft: one set for the whole Free Transform, on every route.
+            #expect(grew.sprites == 0, "\(route): the drags made \(grew.sprites) live-layer pixel sets")
+            // On the tile path a drag draws one picture, its release's exact one: a layer with nothing under it
+            // hides the picture rather than drawing an empty one. (Metal draws into its texture: no tile surfaces.)
+            let canvas = try #require(fixture.canvas)
+            let tilesPerPicture = ((canvas.width + 255) / 256) * ((canvas.height + 255) / 256)
+            #expect(grew.surfaces <= Self.drags * tilesPerPicture,
+                    "\(route): \(grew.surfaces) tile surfaces over \(Self.drags) drags, more than one picture (\(tilesPerPicture) tiles) a drag")
             var reference = fixture
             try reference.setTransform(final, name: "Rotate", drag: nil)
             try reference.commitTransform()
@@ -101,25 +122,38 @@ extension BodyCountSuites {
             for _ in 0..<100 where RenderBudgetPhotoLiveTransformTests.canvas(in: w.host)?.hasLiveLayer != true {
                 try await Task.sleep(for: .milliseconds(20))
             }
+            #expect(RenderBudgetPhotoLiveTransformTests.canvas(in: w.host)?.hasLiveLayer == true, "a drag never showed the live layer")
             w.send(.leftMouseUp, at: drag.point(12))
         }
 
-        /// What the drags have cost so far.
+        /// The window's own renderer (other windows' work never counts here).
+        static func renderer<V: View>(of w: RenderBudgetWindow<V>) async throws -> CanvasRenderer {
+            for _ in 0..<100 {
+                if let host = RenderBudgetPhotoLiveTransformTests.canvas(in: w.host), let found = CanvasRenderer.rendering(into: host) {
+                    return found
+                }
+                try await Task.sleep(for: .milliseconds(20))
+            }
+            throw RenderBudgetPhotoLiveTransformTests.NoRenderer()
+        }
+
+        /// What the drags have cost the window so far; the footprint and GPU-resident bytes are the process's and
+        /// only printed (suites running alongside move them).
         struct Reading: CustomStringConvertible {
-            var footprint = 0, resident = 0, surfaces = 0, lifts = 0, pictures = 0
+            var footprint = 0, resident = 0, sprites = 0, surfaces = 0, lifts = 0
             func since(_ s: Reading) -> Reading {
-                Reading(footprint: footprint - s.footprint, resident: resident - s.resident, surfaces: surfaces - s.surfaces,
-                        lifts: lifts - s.lifts, pictures: pictures - s.pictures)
+                Reading(footprint: footprint - s.footprint, resident: resident - s.resident, sprites: sprites - s.sprites,
+                        surfaces: surfaces - s.surfaces, lifts: lifts - s.lifts)
             }
             var description: String {
-                "footprint \(footprint / 1_000_000) MB, GPU resident \(resident / 1_000_000) MB, \(surfaces) surfaces, \(lifts) lifts, \(pictures) pictures"
+                "footprint \(footprint / 1_000_000) MB, GPU resident \(resident / 1_000_000) MB, \(sprites) live-layer pixel sets, \(surfaces) tile surfaces, \(lifts) lifts"
             }
         }
 
-        static func reading(_ gpu: ImagingGPU.Backend) -> Reading {
+        static func reading(_ gpu: ImagingGPU.Backend, _ renderer: CanvasRenderer) -> Reading {
             let metal = gpu.renderBackend as? MetalBackend
-            return Reading(footprint: footprint(), resident: metal?.residentBytes ?? 0, surfaces: CanvasTile.surfacesMade,
-                           lifts: CanvasRenderer.lifts, pictures: CanvasRenderer.pictures)
+            return Reading(footprint: footprint(), resident: metal?.residentBytes ?? 0, sprites: renderer.spritesMade,
+                           surfaces: renderer.tiles.surfacesHanded, lifts: renderer.liftsRun)
         }
 
         /// The process's physical footprint in bytes.
