@@ -283,3 +283,4 @@ time	task	event	note
 2026-10-28T07:55Z	3	waiting	lane	await prescreen
 2026-10-28T08:10Z	3	heartbeat	lane	poll 2026-10-28T08:10Z: 08:10Z main c73c958; #5103/#5149 ready, awaiting lane; dev-red #5966 is the same stale 186be9a red, not ours
 2026-10-28T08:46Z	3	waiting	lane	awaiting prescreen
+2026-10-28T08:57Z	3	heartbeat	lane	poll 2026-10-28T08:57Z: 08:57Z main c73c958; #5103/#5149 ready, awaiting lane; full run at 9221145 (#5864) red on macOS tests 3/3, not ours

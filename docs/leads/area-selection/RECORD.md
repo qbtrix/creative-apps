@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-28T08:10Z · 08:10Z main c73c958; #5103/#5149 ready, awaiting lane; dev-red #5966 is the same stale 186be9a red, not ours
+Polled: 2026-10-28T08:57Z · 08:57Z main c73c958; #5103/#5149 ready, awaiting lane; full run at 9221145 (#5864) red on macOS tests 3/3, not ours
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
