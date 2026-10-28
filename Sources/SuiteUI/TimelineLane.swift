@@ -11,9 +11,9 @@
 // and holding no closure, so the strip's `.equatable()` skips a lane whose
 // track and mapping didn't change, and a hover change redraws only its own
 // lane. Accessibility is in TimelineLaneAccess; the geometry is
-// TimelineLaneGeometry, with no view. TimelineBodyTally, here too, is where a
-// host's lanes, ruler marks, playhead and strip count their body runs in debug
-// builds, so a budget test counts one window, not the whole process.
+// TimelineLaneGeometry, with no view. In debug builds every lane counts its
+// body runs through BodyTally under one key (TimelineLaneBodies) whatever its
+// ID type, so a budget test counts its own window's lanes.
 import SwiftUI
 
 struct TimelineLane<ID: Hashable & Sendable>: View {
@@ -21,22 +21,18 @@ struct TimelineLane<ID: Hashable & Sendable>: View {
     let mapping: FrameMapping
     @Environment(\.timelineLaneHover) private var hover
     #if DEBUG
-    @Environment(\.timelineBodyTally) private var tally
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     #if DEBUG
     /// How many times a lane's body ran, over every ID type; the real-window
     /// budget tests count a scrub's.
-    static var bodyRuns: Int {
-        get { timelineLaneBodyRuns }
-        set { timelineLaneBodyRuns = newValue }
-    }
+    static var bodyRuns: Int { BodyTally.runs(of: TimelineLaneBodies.self) }
     #endif
 
     var body: some View {
         #if DEBUG
-        Self.bodyRuns += 1
-        tally?.lane += 1
+        bodyTally.ran(TimelineLaneBodies.self)
         #endif
         return TimelineLanes(lanes: [TimelineLaneDrawing(track, mapping: mapping, hover: hover)])
             .frame(height: SuiteSize.timelineLane)
@@ -96,26 +92,5 @@ extension TimelineLane: Equatable {
     }
 }
 
-#if DEBUG
-/// TimelineLane.bodyRuns' count: a generic type can't hold a static stored property.
-@MainActor private var timelineLaneBodyRuns = 0
-#endif
-
-/// One strip's body runs. The statics count every window in the process, so a budget test that
-/// sets this on its own host counts only its own lanes, ruler marks, playhead and strip. Only debug
-/// builds count; in release it stays at zero.
-@MainActor final class TimelineBodyTally {
-    var lane = 0, ruler = 0, playhead = 0, strip = 0
-}
-
-private struct TimelineBodyTallyKey: EnvironmentKey {
-    static var defaultValue: TimelineBodyTally? { nil }
-}
-
-extension EnvironmentValues {
-    /// Where the timeline views under it also count their body runs; nil counts only the statics.
-    var timelineBodyTally: TimelineBodyTally? {
-        get { self[TimelineBodyTallyKey.self] }
-        set { self[TimelineBodyTallyKey.self] = newValue }
-    }
-}
+/// The key every TimelineLane<ID> counts its body runs under in BodyTally.
+enum TimelineLaneBodies {}

@@ -35,7 +35,7 @@ extension PhotoWorkspace: TextStyleTarget {
             throw CatalogError.unavailable(id: "text", why: "Select a text layer first.")
         }
         text.style = s
-        try redraw(id, as: text, named: name, coalescing: drag.map { "text-style-\(id)-\($0)" })
+        try redraw(id, as: text, named: name, coalescing: drag.map { CoalesceKey.key("text-style", on: [id], drag: $0) })
     }
 
     /// Adds a text layer of `p`'s words above the selected layer, selected, in one step.

@@ -91,7 +91,11 @@ window bodies with the debug body counter (`HaloWindow.bodyRuns`,
 `PhotoEditor.bodyRuns`) in a render budget test, and profile the shipped app
 with `sample <pid> 20 1` while you drag. Body counts are deterministic and
 gate. Milliseconds are reported, not gated (`Tests/perf-suites.txt`), and
-the Mac finisher checks them on a release build.
+the Mac finisher checks them on a release build. A counter goes through
+SuiteUI's `BodyTally` (the view conforms to `BodyCounted`, and its body runs
+`let _ = bodyTally.ran(Self.self)`), so a test inside
+`BodyCountSuites` reads only the window it opened; `scripts/check-body-counts`
+fails a stored counter or a process-wide count read in a test.
 
 ```swift
 ✗ #expect(model.dragLatencyP95 < 8)                          // Model only, no window

@@ -59,19 +59,18 @@ struct HaloViewerCanvas: View {
 /// The drawn layers over the artboard: the live drag's project while one
 /// lasts (HaloLiveEdit), else the playing frame, else the window's. Only this view reads the live
 /// project, so a drag sample re-runs it and nothing around it.
-struct HaloLiveLayers: View {
+struct HaloLiveLayers: View, BodyCounted {
     let model: HaloProject
     let artboard: CGSize
     @Environment(\.haloLiveEdit) private var live
 
     #if DEBUG
-    /// How many times the drawn layers' body ran; HaloWindowLiveDragTests counts a drag's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         let shown = live?.shown(model) ?? model
         if let list = shown.viewerDrawList {

@@ -70,7 +70,7 @@ extension PhotoWorkspace: TransformTarget {
             scaleX: b.width / Double(box.width), scaleY: b.height / Double(box.height),
             degrees: t.degrees, dx: b.minX - Double(box.x), dy: b.minY - Double(box.y))
         guard draft != previous else { return }
-        record(.draft(previous), named: name, coalescing: drag)
+        record(.draft(previous), named: name, coalescing: drag.map { CoalesceKey.key("transform", on: [id], drag: $0) })
         transformDraft = draft
         touch(.all)
     }

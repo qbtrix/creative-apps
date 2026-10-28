@@ -10,7 +10,7 @@
 // Paint" step. Layout passes and step times are reported, not judged here;
 // RenderBudgetPhotoTests' timing test judges them.
 // PHOTO_WINDOW_STROKE_SECONDS=20 first strokes for that long, for `sample`.
-// The suite nests in BodyCountSuites: it reads a process-global body counter.
+// The suite nests in BodyCountSuites: it reads a debug body counter.
 import AppKit
 import ObjectiveC
 import PhotoModel
