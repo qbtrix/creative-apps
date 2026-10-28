@@ -6,7 +6,8 @@
 // release), one step. The render rows are release only and report-only in
 // debug (decision D8): a 512 px preview with every control but Vibrance and
 // Saturation within 8 ms, the 2048 px full render within 120 ms, its
-// histogram within 10 ms; a miss files the fused-pass core issue (Q3), never
+// histogram within 10 ms, a 6000x4000 photo developed for a 2,000 px
+// export within 600 ms p95 (quality gate #5953); a miss files the fused-pass core issue (Q3), never
 // a looser budget. Each prints a `LIBRARY-BUDGET develop …` line.
 //
 // The edit rows drive the catalog through `recordEdit` with the packet's
@@ -14,7 +15,9 @@
 // when this was written; once DV-3 and DV-4 land, the enabling PR calls
 // those methods instead. Runs on Linux and macOS.
 @testable import LibraryModel
+import CoreColor
 import CoreRaster
+import Foundation
 import Testing
 
 #if DEBUG
@@ -90,6 +93,21 @@ private let judgesRenders = true
             _ = try? live.render(buffer, settings: settings)
         }
         #expect(!judgesRenders || cost.median <= 120)
+    }
+
+    /// Quality gate #5953: a developed 6000x4000 photo (every control, Vibrance and Saturation included) exported
+    /// at a 2,000 px long side shrinks before develop, so it costs about a 2,000 px render, not a 24 MP one.
+    @Test func realSizeExportAtTwoThousand() throws {
+        let buffer = try developGradient(width: 6000, height: 4000)
+        let settings = everyControlButColor().setting(.vibrance, to: 40).setting(.saturation, to: 20)
+        let shot = PhotoItem(name: "real", captureDate: Date(timeIntervalSince1970: 0), color: Color3(0.5, 0.5, 0.5),
+                             path: "/shoot/real.png", pixelSize: PixelSize(width: 6000, height: 4000), develop: settings)
+        var out: PixelBuffer?
+        let cost = Budget.measure("develop export-24mp-at-2000", runs: judgesRenders ? 5 : 1) {
+            out = try? LiveExporter.developed(buffer, photo: shot, longSide: 2000, develop: LiveDevelop())
+        }
+        #expect(out?.width == 2000 && out?.height == 1333)
+        #expect(!judgesRenders || cost.p95 <= 600, "export of 24 MP at 2,000 px took \(cost.p95) ms (p95), over 600 ms")
     }
 
     @Test func histogram() throws {
