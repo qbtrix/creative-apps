@@ -69,5 +69,11 @@
     "owner": "#5979",
     "reason": "A draw is skipped on the CI runner (run 40661826310), not counter bleed; #5979 owns it.",
     "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoLiveTransformTests/canvasBodyDragResamplesOnlyAtTheRelease",
+    "owner": "#5994",
+    "reason": "Exceeds its 120 s limit on the CI macOS runner (run 40703460275, dev-red #5983); passes in 2.5 s locally at the same commit. #5994 owns it.",
+    "expires": "2026-10-29"
   }
 ]
