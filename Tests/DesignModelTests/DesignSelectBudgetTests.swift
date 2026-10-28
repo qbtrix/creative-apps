@@ -10,7 +10,8 @@
 // Each is ≤ 1 ms / ≤ 10 ms, median and p95. Two bulk rows (#5838) run edit.select
 // with 1,500 ids (≤ 25 ms / ≤ 250 ms) and edit.duplicate of those 1,500 layers
 // (≤ 50 ms / ≤ 500 ms), each of which once walked the tree per layer and took
-// seconds. Each also checks the timed steps did their work, so
+// seconds. One row times the inspector's lock and hide reads for one layer, which run
+// on every drag step (≤ 0.4 ms / ≤ 4 ms, half the 8 ms step). Each also checks the timed steps did their work, so
 // a body that short-circuits can't pass. All the tests are timed, so the suite
 // is on the perf list (Tests/perf-suites.txt): the merge gate skips it and
 // perf-nightly runs it.
@@ -186,5 +187,21 @@ import Testing
         #expect(workspace.selectedNodeIDs.count == 1500)
         #expect(Set(workspace.selectedNodeIDs).isDisjoint(with: Self.bulkIDs))
         #expect(workspace.undoActionName == "Undo Duplicate")
+    }
+
+    /// The inspector re-reads the selection's lock and the layer row toggles on every drag step
+    /// (it watches the live copy), so each read on crowd must walk the page once, not rebuild it.
+    @Test func lockAndHideReadsPerStep() {
+        var workspace = DesignFixtures.crowd
+        workspace.selectItem("node-2000")
+        let gate = DesignBudget.linuxDebugGate(device: .microseconds(400))
+        var reads = 0
+        let report = DesignBudget.expect("inspector lock and hide reads on crowd", runs: 200, gate: gate) {
+            if workspace.transformHelp == nil, !workspace.isHiddenInTree("node-2000"),
+               workspace.layerToggles("node-2000").count == 2 { reads += 1 }
+        }
+        #expect(reads == 200, "the timed reads saw a lock, a hidden layer or no toggles")
+        #expect(report.median <= gate, "lock and hide reads: \(report), median over the gate \(gate)")
+        #expect(report.p95 <= gate, "lock and hide reads: \(report), p95 over the gate \(gate)")
     }
 }

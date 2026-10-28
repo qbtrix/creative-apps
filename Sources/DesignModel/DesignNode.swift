@@ -472,6 +472,16 @@ extension [DesignNode] {
         return nil
     }
 
+    /// Whether `id` or a node enclosing it passes `test`, in one walk that copies nothing; nil when
+    /// `id` is not in the tree. The lock and hide cascades read it on every drag step.
+    func onPath(to id: String, where test: (DesignNode) -> Bool) -> Bool? {
+        for node in self {
+            if node.id == id { return test(node) }
+            if let found = node.children.onPath(to: id, where: test) { return found || test(node) }
+        }
+        return nil
+    }
+
     /// The ids of the nodes enclosing `id`, outermost first; nil when `id` is not in the tree.
     func ancestors(of id: String) -> [String]? {
         for node in self {
