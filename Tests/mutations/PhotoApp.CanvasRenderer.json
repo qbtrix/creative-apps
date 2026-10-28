@@ -12,5 +12,12 @@
     "find": "        prepareSprite(for: workspace)\n",
     "replace": "",
     "tests": "BodyCountSuites/RenderBudgetPhotoRapidRotateTests"
+  },
+  {
+    "label": "emptyBaseDrawn: on the tile path a layer with nothing under it still draws an empty picture each drag, a picture's tile surfaces more per drag",
+    "file": "Sources/PhotoApp/CanvasRenderer.swift",
+    "find": "let alone = !route.isGPU && workspace.liftsAlone",
+    "replace": "let alone = false",
+    "tests": "BodyCountSuites/RenderBudgetPhotoRapidRotateTests"
   }
 ]
