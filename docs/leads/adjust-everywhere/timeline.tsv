@@ -251,3 +251,4 @@ utc	stage	event	ref	note
 11:44Z	3	dev-red #5969 confirmed real; its failing tests are quarantined under #5807/#5924/#5971 (not ours); main still c73c958a9; #5259/#5260 clean
 12:20Z	3	no change: #5259/#5260 clean waiting prescreen; main c73c958a9 held by #5969; dev f89f5255c
 12:44Z	3	no change: #5259/#5260 clean waiting prescreen; main c73c958a9 held by #5969; dev f89f5255c
+13:20Z	3	no change: #5259/#5260 clean waiting prescreen; main c73c958a9 held by #5969; dev f89f5255c (unmoved since 11:44)

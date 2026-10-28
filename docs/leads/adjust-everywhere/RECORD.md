@@ -442,3 +442,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 11:44Z check-in: dev-red #5969 is real (flake rerun failed). Its tests are quarantined, owned by #5807, #5924 (both before #5252) and #5971 (shared bodyRuns counter); not ours. main still c73c958a9, dev f89f5255c. #5259 (5f7de8b4b) → #5260 (5e0e27327) clean, labelled, waiting on prescreen.
 - 12:20Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. main c73c958a9 (held by #5969, not ours), dev f89f5255c. 0 open findings.
 - 12:44Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. main c73c958a9 (held by #5969, not ours), dev f89f5255c.
+- 13:20Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. main c73c958a9 (held by #5969, not ours), dev f89f5255c unmoved since 11:44.
