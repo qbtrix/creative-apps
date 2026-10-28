@@ -375,3 +375,4 @@ utc	stage	event	ref	note
 2026-10-28T12:40Z	check-in	No new Photo findings (41 open). #5353 open, PX-9 waits. #5959 clean at 081611b9, waiting on a batch. #5969 dev-red: lane rerunning macOS at 82b1bf3 (budget tests incl. Photo live-transform), not ours.
 2026-10-28T13:15Z	check-in	Quiet: no new Photo findings (41 open), no merges. #5353 open, PX-9 waits. #5959 clean at 081611b9, waiting on a batch. #5969 dev-red still open, not ours.
 2026-10-28T14:05Z	check-in	dev green again at f89f5255 (#5969 closed 13:27). No new Photo findings (41 open). #5353 open, PX-9 waits. #5959 clean at 081611b9, waiting on a batch.
+2026-10-28T14:38Z	check-in	4 new Photo journey findings #5984-#5987 (pan, place logo, shell geometry x2) from journeys at 82b1bf3: not export or text, skipped. 45 open. New dev-red #5983 (macos at 82b1bf3), not ours. #5353 open, PX-9 waits. #5959 clean at 081611b9.
