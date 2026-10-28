@@ -8,10 +8,9 @@ import SuiteModel
 import SwiftUI
 
 /// The Connect an AI Assistant sheet over `panel`.
-public struct AssistantConnectSheet: View {
+public struct AssistantConnectSheet: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     /// The controls, each with its `identifier(_:)`.
     nonisolated static let controls = ["command", "copyCommand", "config", "copyConfig", "install", "aiAccess", "close"]
@@ -34,7 +33,7 @@ public struct AssistantConnectSheet: View {
 
     public var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {

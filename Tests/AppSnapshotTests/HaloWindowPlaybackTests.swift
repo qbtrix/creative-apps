@@ -15,7 +15,7 @@
 // timing test judges them. HALO_WINDOW_PLAYBACK_SECONDS=20 first plays that
 // long at 120 Hz, for `sample`; HALO_WINDOW_PLAYBACK_SAMPLE plays another
 // sample (`reference`, 50 layers) in its place. The suite nests in BodyCountSuites: it reads
-// process-global body counters. macOS only.
+// debug body counters. macOS only.
 #if canImport(AppKit)
 import AppKit
 import HaloModel

@@ -106,7 +106,7 @@ struct HaloLayerInspector: View {
 /// values (the Model's help strings come from the parent; `perform` is the
 /// window's, which always acts on the window's current project, so it is
 /// left out of `==`), so a frame that leaves the row as it was skips its body.
-struct HaloPropertyRowView: View, Equatable {
+struct HaloPropertyRowView: View, BodyCounted, Equatable {
     let row: HaloPropertyRow
     let refusal: HaloRefusal?
     /// Why the bar can't act, and why the keyframe button can't; nil while it can.
@@ -121,8 +121,7 @@ struct HaloPropertyRowView: View, Equatable {
     @State private var scrubLink: HaloInspectorScrubLink?
 
     #if DEBUG
-    /// How many times a row's body ran; HaloWindowPlaybackTests counts playback's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     nonisolated static func == (a: Self, b: Self) -> Bool {
@@ -132,7 +131,7 @@ struct HaloPropertyRowView: View, Equatable {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: 0) {
             HaloBarAndKeyLayout(besideWidth: Self.besideWidth, spacing: SuiteSpacing.xs) {
