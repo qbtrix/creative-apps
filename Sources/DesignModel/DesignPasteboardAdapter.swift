@@ -28,6 +28,13 @@ public struct DesignPasteboardAdapter {
 
     public init(png render: @escaping Renderer = DesignPasteboardAdapter.clearPNG) { self.render = render }
 
+    /// The pictures Design pastes, best first: the coder's Design row kept to SVG and the registry's image
+    /// formats (SuiteImageFormats), never its own layers, an envelope, text or a file URL. Paste as Image
+    /// takes only these, and the window's Paste command accepts them beside Design's own type.
+    public static let pictureTypes: [SuiteTypeID] = SuitePasteboardCoding.accepts[.design, default: []].filter { type in
+        type == .svg || SuiteImageFormats.all.contains { $0.typeID == type }
+    }
+
     /// The selection as own layers, SVG and PNG, in that order.
     public func copy(_ workspace: DesignWorkspace) throws(DesignRefusal) -> [TypedData] {
         let own = try workspace.copySelection()

@@ -276,7 +276,7 @@ struct DesignWindow: View, BodyCounted {
     }
 
     /// The types Paste as Image takes: an image or an SVG, never Design's own layers.
-    private static let pictureTypes: Set<SuiteTypeID> = [.png, .jpeg, .heic, .svg]
+    private static let pictureTypes = Set(DesignPasteboardAdapter.pictureTypes)
 
     /// Pastes the best of `offered`; with nothing Design takes, the coder's sentence.
     private func paste(_ offered: [TypedData]) {

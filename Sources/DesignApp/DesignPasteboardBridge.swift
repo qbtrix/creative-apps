@@ -68,7 +68,7 @@ extension View {
     /// `.paste` and `.deleteSelection`.
     func designPasteboardCommands(_ model: DesignWorkspace, _ perform: @escaping DesignPerform) -> some View {
         let type = model.pasteboardType
-        let pastes = [UTType(importedAs: type), .svg, .png, .tiff, .jpeg]
+        let pastes = [UTType(importedAs: type)] + DesignPasteboardAdapter.pictureTypes.compactMap { UTType($0.rawValue) }
         let canCopy = model.copyHelp() == nil
         let canDelete = DesignMenu.deletesLayer(model)
         // Each runs the intent, then reads back what the window wrote, on the main actor.

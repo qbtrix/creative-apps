@@ -40,6 +40,11 @@ private let png300x200 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
     + [0, 0, 0x01, 0x2C, 0, 0, 0, 0xC8, 8, 6, 0, 0, 0] + [0, 0, 0, 0])
 
 @Suite struct DesignPasteboardAdapterTests {
+
+    /// Paste as Image takes SVG and every image the coder gives Design, best first, never layers or text.
+    @Test func pictureTypesAreTheCodersPictures() {
+        #expect(DesignPasteboardAdapter.pictureTypes == [.svg, .png, .tiff, .jpeg, .heic])
+    }
     /// The copy offers Design's own layers, then an SVG, then a PNG, and nothing else.
     @Test func copyOffersOwnLayersSvgAndPng() throws {
         let workspace = try redFile()
