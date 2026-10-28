@@ -292,3 +292,4 @@ utc	stage	event	ref	note
 2026-10-28T16:34Z	restack	#5259 merged; #5260 clean, awaiting prescreen
 16:38Z	3	#5260 merged f437fabab (AJ-photo complete); AJ-z feature-done PR #5993 opened; slice-done lines wait on main (held by dev-red #5983)
 2026-10-28T16:58Z	poll	#5260 merged: AJ-photo all on dev; Belt-Slice-Done waits for main to move past f89f5255c (dev-red #5983 not ours)
+16:59Z	3	wait-main	#5993 merged db12af089; all slice PRs in dev; main held at f89f5255c by dev-red #5983 (not ours)
