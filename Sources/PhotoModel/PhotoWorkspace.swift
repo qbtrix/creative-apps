@@ -29,19 +29,16 @@ import SuiteKernel
 public enum PhotoTool: String, CaseIterable, Sendable {
     case move, marquee, ellipse, lasso, polygon, wand, brush, eraser, clone
     /// Spot Heal (fill-heal): a click heals a spot from its surroundings. Before
-    /// Heal, so J picks it first once it works.
+    /// Heal, so J picks it first.
     case spotHeal = "spot-heal"
     case heal
     /// Remove (fill-heal): paint over an object; its area fills from around it.
     case remove
     case crop, eyedropper
     /// Paint Bucket (fill-heal): a click fills the seed's colour region. Before
-    /// Gradient, so G picks it first once it works.
+    /// Gradient, so G picks it first.
     case bucket
     case gradient, text, pen
-
-    /// The retouch tools' help until their commands reach Photo (fill-heal FH-7, FH-8).
-    public static let retouchHelp = "Fill and heal arrive with fill-heal FH-8."
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
@@ -50,7 +47,6 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     public var unavailableHelp: String? {
         switch self {
         case .eyedropper: "Not built yet (PV-9)."
-        case .bucket, .spotHeal, .remove: Self.retouchHelp
         default: nil
         }
     }

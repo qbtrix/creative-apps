@@ -1,0 +1,5 @@
+[
+  {"label": "aGestureIsOneUndoStep: a bucket click runs no command, so the click fills nothing", "file": "Sources/PhotoModel/PhotoRetouchRelease.swift", "find": "        case .bucket:\n", "replace": "        case .text:\n", "tests": "PhotoRetouchReleaseTests"},
+  {"label": "aRemoveStrokeFillsAllItPassedOver: Remove fills only the press, not the path it traced", "file": "Sources/PhotoModel/PhotoRetouchRelease.swift", "find": "let path = done.path.isEmpty ? [done.start] : done.path", "replace": "let path = [done.start]", "tests": "PhotoRetouchReleaseTests"},
+  {"label": "aToolThatCantActSaysWhyAndRecordsNothing: a refused release says nothing", "file": "Sources/PhotoModel/PhotoRetouchRelease.swift", "find": "if case .unavailable(_, let why) = error { statusMessage = why }", "replace": "if case .unavailable(_, let why) = error { _ = why }", "tests": "PhotoRetouchReleaseTests"}
+]
