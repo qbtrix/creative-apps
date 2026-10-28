@@ -364,3 +364,4 @@ utc	stage	event	ref	note
 2026-10-28T06:29Z	check-in	quiet; new dev-red #5963 (macOS PhotoEditMenuTests.selectAllFollowsPasteInThePasteboardGroup, lane flake re-run pending, no culprit PR); #5957/#5959 clean; PX-9 waits on #5353; 42 findings
 2026-10-28T07:01Z	check-in	quiet; dev-red #5963 still open (no verdict yet, not ours); #5957/#5959 clean; PX-9 waits on #5353; 41 findings
 2026-10-28T07:33Z	check-in	quiet; dev green again (#5963 closed); #5957/#5959 clean, waiting on a lane batch; PX-9 waits on #5353; 41 findings
+2026-10-28T08:06Z	check-in	5353 open; 5957/5959 clean awaiting batch; dev-red 5966 (PhotoEditMenuTests selectAll flake re-run, not export/text); 41 findings, none new
