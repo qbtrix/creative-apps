@@ -134,12 +134,12 @@ import Testing
     @Test func eachControlSaysWhyUntilItCanAct() {
         var empty = LibraryCatalog()
         let help = "Import or load photos to filter them."
-        #expect(empty.filterHelp == help && empty.clearFilterHelp == help)
+        #expect(empty.libraryFilterHelp == help && empty.clearFilterHelp == help)
         empty.toggleHideRejected()
         #expect(empty.collectionsRevision == 0 && !empty.activeFilter.isActive)
 
         var catalog = culled()
-        #expect(catalog.filterHelp == nil)
+        #expect(catalog.libraryFilterHelp == nil)
         #expect(catalog.clearFilterHelp == "No filter is on.")
         catalog.toggleHideRejected()
         #expect(catalog.clearFilterHelp == nil)

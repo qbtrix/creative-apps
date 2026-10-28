@@ -3,6 +3,8 @@
 // flags are ignored; a value flag with no value after it stays unset.
 // `-LibraryLargeFixture <count>` (large-catalog LG-2) wins over `-LibraryFixture`.
 
+import SuiteModel
+
 /// `-LibraryWindowSize <w>x<h>`: the window's initial content size.
 public struct LibraryWindowSize: Sendable, Equatable {
     public let width: Int
@@ -85,9 +87,10 @@ public struct LibraryLaunch: Sendable, Equatable {
     /// Fakes over the fixture's photos when there is a fixture, else the live
     /// services over the app's platform adapters (sidecars off until passed).
     public func services(decoder: any PhotoDecoding, writer: any JPEGWriting, store: any CatalogStoring,
+                         looks: any PresetStoring = FakePresetStore(),
                          sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {
         if largeFixture != nil { return .fake(initialPhotos, mode: fakeMode) }
-        guard let fixture else { return .live(decoder: decoder, writer: writer, store: store, sidecars: sidecars) }
+        guard let fixture else { return .live(decoder: decoder, writer: writer, store: store, looks: looks, sidecars: sidecars) }
         return .fake(LibraryFixtures.photos(named: fixture), mode: fakeMode)
     }
 

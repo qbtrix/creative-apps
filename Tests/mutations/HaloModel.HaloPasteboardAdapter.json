@@ -1,0 +1,4 @@
+[
+  {"label": "paste lands at the playhead: the in point set to 0 (.pasteAtPlayhead)", "file": "Sources/HaloModel/HaloPasteboardAdapter.swift", "find": "layers[l].inFrame = playhead", "replace": "layers[l].inFrame = 0", "tests": "HaloPasteboardAdapterTests"},
+  {"label": "copy frame is full size: the frame drawn at half size (.frameFullSize)", "file": "Sources/HaloModel/HaloPasteboardAdapter.swift", "find": "scale: 1, text: project.services.text", "replace": "scale: 2, text: project.services.text", "tests": "HaloPasteboardAdapterTests"}
+]

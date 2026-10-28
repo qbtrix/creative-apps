@@ -19,7 +19,11 @@ public struct PlacedImageRows: View {
         InspectorRow("File") {
             Text(PlacedImageText.summary(asset)).lineLimit(1).truncationMode(.middle)
         }
-        .accessibilityElement(children: .combine)
+        // One static text read "File" with the summary as its AXValue, which a journey's `.value` reads (#4230).
+        .accessibilityElement(children: .ignore)
+        .accessibilityAddTraits(.isStaticText)
+        .accessibilityLabel("File")
+        .accessibilityValue(PlacedImageText.summary(asset))
         .accessibilityIdentifier("suite.place.file")
         InspectorRow("") {
             HStack(spacing: SuiteSpacing.s) {

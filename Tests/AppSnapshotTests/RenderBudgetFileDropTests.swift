@@ -8,6 +8,7 @@
 import AppKit
 import SuiteKernel
 import SuiteModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -55,12 +56,12 @@ extension BodyCountSuites {
 }
 
 /// A home-sized window with the drop modifier on it, counting its own bodies.
-private struct DropStage: View {
-    nonisolated(unsafe) static var bodyRuns = 0
+private struct DropStage: View, BodyCounted {
+    @Environment(\.bodyTally) private var bodyTally
     let hover: SuiteDropHover
 
     var body: some View {
-        Self.bodyRuns += 1
+        bodyTally.ran(Self.self)
         return Color.clear
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .modifier(SuiteFileDropModifier(app: .launcher, documentName: nil, plan: { _ in [] }, perform: { _ in },

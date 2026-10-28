@@ -81,8 +81,8 @@ private final class TextSpy: NSTextView {
         #expect(PhotoEditItem.redo.systemImage == "arrow.uturn.forward")
     }
 
-    @Test func selectAllFollowsPasteInThePasteboardGroup() {
-        #expect(PhotoEditItem.pasteboardGroup == [.cut, .copy, .paste, .selectAll])
+    @Test func selectAllEndsThePasteboardGroup() {
+        #expect(PhotoEditItem.pasteboardGroup == [.cut, .copy, .paste, .pasteAsImage, .selectAll])
     }
 
     @Test func mergeDownIsNotASaveSymbol() {

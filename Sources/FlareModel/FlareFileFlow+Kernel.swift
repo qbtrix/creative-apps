@@ -5,8 +5,9 @@
 // It accepts open and new hand-offs, refuses an SVG place with "Flare can't
 // import SVG yet." until SVG import (E11), offers the readers the suite's
 // routing names for Open In, leaves what only the window can do as
-// `FlareFileRequest`s, and hands its old in-memory recents to the suite's
-// list once. Linux-safe.
+// `FlareFileRequest`s. Open Recent and Clear Menu read the suite's list as
+// the window last gave it (`updateFileFlow`); Flare keeps no list of its
+// own and never stored one, so there is nothing to import. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -25,8 +26,8 @@ public enum FlareFileRequest: Hashable, Sendable {
 public struct FlareFileFlowState: Sendable {
     /// Flare's recent files, newest first, as the window last read them.
     public internal(set) var recents: [RecentFileEntry] = []
-    /// The window's requests (oldest first), who reads each type, and whether the old list went to the suite.
-    var requests: [FlareFileRequest] = [], registry = SuiteTypeRegistry.standard, importedOld = false
+    /// The window's requests (oldest first), and who reads each type.
+    var requests: [FlareFileRequest] = [], registry = SuiteTypeRegistry.standard
     public init() {}
 }
 
@@ -130,13 +131,5 @@ extension FlareWorkspace: FileFlowTarget {
         guard name.lowercased().hasSuffix(".flare") else { return nil }
         return SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .flare,
                                 type: .flareAnimation, displayName: name)
-    }
-
-    /// Flare's old Open Recent list as suite refs, oldest first so noting them in order keeps the newest on top;
-    /// a file that isn't a .flare is dropped. Only the first call returns any.
-    public mutating func takeOldRecents() -> [SuiteDocumentRef] {
-        guard !fileFlow.importedOld else { return [] }
-        fileFlow.importedOld = true
-        return recent.reversed().compactMap(Self.suiteRef)
     }
 }

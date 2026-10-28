@@ -49,15 +49,14 @@ extension BodyCountSuites {
 }
 
 /// The counted window: a header over the page, which owns the style.
-private struct TextStyleBudgetWindow: View {
+private struct TextStyleBudgetWindow: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Inspector").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText)
@@ -164,11 +163,15 @@ private struct TextStyleBudgetPage: View {
 
     @Test func haloTextShowsTheRows() throws {
         let project = try hello()
-        #expect(HaloTextInspector.textStylesHelp == Self.help)
         let text = try #require(project.selectedText)
-        #expect(HaloTextInspector.kernelStyle(text).size == 96)
-        let view = HaloTextInspector(model: project)
-        expectRows(try textControls(view))
+        #expect(HaloTextInspector.kernelStyle(text).size == 96 && project.textStyle?.size == 96)
+        let unwired = try textControls(HaloTextInspector(model: project))
+        #expect(!unwired.isEmpty && unwired.allSatisfy { !$0.enabled && $0.reason == HaloTextInspector.textStylesHelp })
+        // TS-10: in a window the rows run as Halo's text commands.
+        let view = HaloTextInspector(model: project).environment(\.haloText, { _ in })
+        let controls = try textControls(view)
+        for id in TextStyleRows.controlIDs { #expect(controls.contains { $0.id == id }, "no \(id)") }
+        for control in controls { #expect(control.enabled, "\(control.id): \(control.reason ?? "nil")") }
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 view.padding(.vertical, SuiteSpacing.m)

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "sectionsAlwaysEqual: the adjustment sections compare equal whatever changed, so a layer pick leaves the Layer section showing the old layer",
+    "file": "Sources/PhotoApp/PhotoAdjustTab.swift",
+    "find": "&& lhs.model.facets.equal(to: rhs.model.facets, except: .toolOptions)",
+    "replace": "&& true",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  },
+  {
+    "label": "sectionsIgnoreDocument: the adjustment sections compare equal across a document change, so a layer pick leaves the Layer section on the old layer",
+    "file": "Sources/PhotoApp/PhotoAdjustTab.swift",
+    "find": "rhs.model.facets, except: .toolOptions)",
+    "replace": "rhs.model.facets, except: .document)",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H50: blurs a title layer by 6 px, then changes the blur to 2 px and saves; the project holds one radius-2 blur on the layer, not a second blur.",
+  "inputs": ["input/*.halo"],
+  "steps": [
+    {"id": "layer.select", "params": {"id": "comp-1-layer-1"}},
+    {"id": "filter.gaussian-blur", "params": {"radius": 6}},
+    {"id": "filter.gaussian-blur", "params": {"radius": 2}}
+  ],
+  "atomic": true,
+  "expect": {
+    "out/title.halo": {"json": {"format": "halo", "version": 1, "project": {
+      "compositions": [{"id": "comp-1", "name": "Title", "width": 64, "height": 36, "framesPerSecond": 24, "durationFrames": 24, "playheadFrame": 0,
+        "layers": [
+          {"id": "comp-1-layer-1", "name": "Title", "kind": "solid", "inFrame": 0, "outFrame": 24, "opacity": 1, "blendMode": "normal",
+           "color": {"red": 0.9, "green": 0.9, "blue": 0.9}, "rect": {"x": 12, "y": 14, "width": 40, "height": 8}, "tracks": {},
+           "filters": [{"hidden": false, "step": {"filter": {"_0": {"gaussianBlur": {"radius": 2}}}}}]}
+        ]}],
+      "selectedCompositionID": "comp-1", "selectedLayerID": "comp-1-layer-1",
+      "nextCompositionNumber": 2, "nextLayerNumber": 2
+    }}}
+  },
+  "platforms": ["linux", "macos"]
+}
