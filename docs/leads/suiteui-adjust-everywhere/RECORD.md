@@ -459,3 +459,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-28T08:22Z Waiting on lane: #5103 #5245 #5250 #5252 #5257 clean on dev, awaiting local-ci/prescreen; children stacked; dev-red #5966 not ours
 - 08:23Z check-in: no change; 6 PRs clean [fast-lane,beta], dev 8ea49c081, main c73c958a9.
 - 08:43Z check-in: no change; 6 PRs clean [fast-lane,beta], dev 8ea49c081, main c73c958a9.
+- 09:03Z #5257 (AJ-halo model) merged as 83d413f29. #5258 base PATCHed to dev, rebased onto dev cleanly (ae708a9b2, +227-4 f=5), gate running.
