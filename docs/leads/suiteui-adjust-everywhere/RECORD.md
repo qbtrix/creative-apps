@@ -440,3 +440,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 04:15Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 9ece0e0e9, main fef52e668.
 - 04:34Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 9ece0e0e9, main fef52e668.
 - 04:54Z #5249 AJ-halo MERGED as 417c58ed3. Restacked #5257 halo-model (RJ-H50 + AJ-13, 5 commits) onto dev 417c58ed3: conflicts in HaloCommandCatalogTests, HaloFilters+Kernel, HaloCommandCatalog comment (kept dev's TS-9/CB-10 lines + filter.move) and the halo golden (union, dev wins). Now +226-12 f=12 (was dirty +1647 f=38, needs-split). Gate running. #5252, #5250 clean, waiting for local-ci/prescreen.
+- 05:05Z #5257 (AJ-halo model) restacked onto dev after #5249 merged: +226-12 f=12, gate PASS (ci, golden tests, mutate), head 203e4d0e5, needs-split removed, fast-lane added. Next: restack #5258 on it.
