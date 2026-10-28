@@ -16,6 +16,7 @@
 #if canImport(AppKit)
 import AppKit
 import HaloModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -152,8 +153,10 @@ extension BodyCountSuites {
         // The test can't make its app active over whatever the person at the
         // Mac is using, so every press here is an activation click; the
         // viewer takes those too, as it does in a key window.
+        // The test's window: its views report their body runs to the test's BodyTally.
         host = CountingHostingView(rootView: AnyView(
-            HaloWindow(model: project).environment(\.haloViewerTakesActivationClicks, true)))
+            HaloWindow(model: project).environment(\.haloViewerTakesActivationClicks, true)
+                .environment(\.bodyTally, BodyTally.forNewWindow())))
         let frame = CGRect(origin: .zero, size: size)
         host.frame = frame
         window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
