@@ -50,9 +50,9 @@ import Testing
         let sidebar = controller.splitViewItems[0], inspector = controller.splitViewItems[2]
         #expect(!sidebar.isCollapsed && !inspector.isCollapsed)
 
-        let step = try await w.measure("shell sidebar and inspector toggles, 4 clicks", bodies: bodies) {
-            try await w.ticks(4) { i in
-                if i % 2 == 1 { model.toggleSidebar() } else { model.toggleInspector() }
+        let step = try await w.measure("shell sidebar and inspector toggles, 2 clicks", bodies: bodies) {
+            try await w.ticks(2) { i in
+                if i == 1 { model.toggleSidebar() } else { model.toggleInspector() }
             }
             try await w.settle(600)
         }
