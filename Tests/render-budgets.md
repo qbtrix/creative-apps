@@ -13,12 +13,15 @@ lower its budget in the same PR. Never raise one. The target is where the row
 has to end up.
 
 - **Window bodies** come from a debug-only `bodyRuns` counter in the app's window
-  file. The count is deterministic, so `RenderBudget<App>Tests/bodies` runs in
-  the merge gate. Every suite that reads one of these process-global counters
-  nests in `BodyCountSuites`, which is `.serialized`, so two of them never run
-  at once and count each other's renders. A new counter-reading suite nests
-  there too, and its `perf-suites.txt` line reads
-  `AppSnapshotTests.BodyCountSuites/<Suite>`.
+  file, which reports through SuiteUI's `BodyTally`. The count is deterministic,
+  so `RenderBudget<App>Tests/bodies` runs in the merge gate. Every suite that
+  reads one nests in `BodyCountSuites`: its trait gives each test case its own
+  tally, every window the harness (`RenderBudgetWindow`) opens in that test
+  reports to it, and `bodyRuns` counts those windows only, so suites running
+  alongside never move it (factory lesson 345). `.serialized` still
+  keeps those suites' timings apart. A new counter-reading suite nests there
+  too (`scripts/check-body-counts` fails one that doesn't), and its
+  `perf-suites.txt` line reads `AppSnapshotTests.BodyCountSuites/<Suite>`.
 - **Step p95** is wall time, so `RenderBudget<App>Tests/timing` is listed in
   `Tests/perf-suites.txt`. It runs nightly on the captain's Mac (perf-nightly), one test at a
   time. The numbers below come from a debug build on an M2 Pro (max of

@@ -20,15 +20,15 @@ import Testing
 @testable import SuiteUI
 
 /// The window's root, counting its bodies; the box and its edits live in the panel under it, as on the gallery page.
-private struct TransformBudgetPage: View {
+private struct TransformBudgetPage: View, BodyCounted {
     #if DEBUG
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     let item: TransformBox
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         TransformBudgetPanel(item: item)
     }

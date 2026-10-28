@@ -25,7 +25,7 @@ import DesignModel
 import SuiteUI
 import SwiftUI
 
-struct DesignEditor: View {
+struct DesignEditor: View, BodyCounted {
     let model: DesignWorkspace
     var documentName: String?
     var note: String?
@@ -41,13 +41,12 @@ struct DesignEditor: View {
     private static let trailingItems: [DesignToolbarItem] = [.undo, .redo, .history, .zoomOut, .fit, .zoomIn]
 
     #if DEBUG
-    /// How many times an editor's body ran; DesignWindowDragTests counts a drag's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         SuiteWindow(
             title: documentName ?? (model.isOpen ? "Untitled" : "Design"),
