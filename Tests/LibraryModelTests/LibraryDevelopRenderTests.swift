@@ -91,14 +91,13 @@ enum HandPass: CaseIterable {
 }
 
 extension LiveDevelop.Pass {
-    /// The hand list's name for this pass; nil for `.color` (DV-12) and the shared hue/saturation step.
+    /// The hand list's name for this pass; nil for vibrance (DV-12) and the shared hue/saturation step.
     /// A levels step with gamma 1 moving only the white or only the black point is Whites or Blacks.
     var hand: HandPass? {
         switch self {
         case .shared(.whiteBalance): .whiteBalance
         case .shared(.contrast): .contrast
         case .shared(.highlightsShadows): .highlightsShadows
-        case .color: nil
         case .shared(.exposure): .exposure
         case .shared(.levels(let inBlack, let inWhite, let gamma, let outBlack, let outWhite, _)):
             gamma != 1 ? .levels : inBlack == 0 && outBlack == 0 ? .whites : inWhite == 1 && outWhite == 1 ? .blacks : .levels
