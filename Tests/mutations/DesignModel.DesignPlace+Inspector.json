@@ -1,0 +1,10 @@
+[
+  {"label": "Fill fills with nothing fillable selected", "file": "Sources/DesignModel/DesignPlace+Inspector.swift", "find": "guard fill, let node = selectedNode, node.kind.holdsPicture else { return false }", "replace": "guard fill else { return false }\n        guard let node = selectedNode else { return true }", "tests": "DesignPlaceInspectorTests"},
+  {"label": "Fill fills a locked frame", "file": "Sources/DesignModel/DesignPlace+Inspector.swift", "find": "        return lockHelp(node.id) == nil\n    }\n\n    /// The place steps", "replace": "        return node.kind.holdsPicture\n    }\n\n    /// The place steps", "tests": "DesignPlaceInspectorTests"},
+  {"label": "every file fills the one frame", "file": "Sources/DesignModel/DesignPlace+Inspector.swift", "find": "let filling = fills && index == 0", "replace": "let filling = fills", "tests": "DesignPlaceInspectorTests"},
+  {"label": "Reset Size stays on at the picture's own shape", "file": "Sources/DesignModel/DesignPlace+Inspector.swift", "find": "            return Self.naturalShape\n", "replace": "", "tests": "DesignPlaceInspectorTests"},
+  {"label": "the note drops the rows' own reasons", "file": "Sources/DesignModel/DesignPlace+Inspector.swift", "find": "if let help, help != place { notes.append(", "replace": "if let help, help == place { notes.append(", "tests": "DesignPlaceInspectorTests"},
+  {"label": "a pan lands without its refusal", "file": "Sources/DesignModel/DesignLiveEdit.swift", "find": "            if let help { return .notYet(help) }\n", "replace": "", "tests": "DesignPlaceInspectorTests"},
+  {"label": "placeIDLeak: a place item says Design has no such command", "file": "Sources/DesignModel/DesignMenuState.swift", "find": "        if id.hasPrefix(\"place.\"), specs[id] == nil { return placeSpec(id) }\n", "replace": "", "tests": "DesignPlaceInspectorTests"},
+  {"label": "placeAlwaysOn: a place item turns on before its command runs", "file": "Sources/DesignModel/DesignMenuState.swift", "find": "availability: { DesignWorkspace.reason($0.workspace.placeActionHelp(id)) }", "replace": "availability: { _ in .available }", "tests": "DesignPlaceInspectorTests"}
+]

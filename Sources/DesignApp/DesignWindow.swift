@@ -46,6 +46,10 @@
 // run, replays the last one into the workspace as one step (`live.land(into:)`),
 // written before the copy is cleared.
 //
+// Pictures (placed-images PD-u): File > Place… (⇧⌘P), a drop and Place in Frame… send each file as `.place`; the
+// first fills an unlocked selected frame or rectangle when asked (`placeFills`, `placeSteps`). A Move-tool ⌥-drag in
+// an overflowing selected picture pans it on the live copy, landing one step. A refusal goes to the status line.
+//
 // `.suiteProbes()` sits on the root (D0-7a), so the window's `suite.controls`
 // lists every control the editor registers with its DesignControlID.
 import AppKit
@@ -72,6 +76,8 @@ struct DesignWindow: View, BodyCounted {
     @State private var fitting = false
     /// The status line's message ("Saved sample.design"); it goes at the next edit.
     @State private var note: String?
+    /// The ⌥-drag panning the selected picture; nil when the drag isn't one.
+    @State private var pan: DesignPicturePan?
     @State private var problem: DesignFileProblem?
     @State private var started = false
     /// Bumped by File > Export…; DesignExportArea opens its sheet on each change.
@@ -165,13 +171,22 @@ struct DesignWindow: View, BodyCounted {
         case .tool(let tool): model.selectTool(tool)
         case .drag(let from, let to, let modifiers):
             let start = DesignPoint(from)
+            // A Move-tool ⌥-drag inside the selected picture pans it on the live copy; mouse-up lands one step.
+            if !live.isLive, pan == nil { pan = model.beginPicturePan(at: start, option: modifiers.contains(.option)) }
+            if let pan {
+                guard let step = model.panIntent(pan, to: DesignPoint(to)) else { return }
+                if !live.isLive { live.begin(from: model) }
+                live.preview(step)
+                return
+            }
             if !live.isLive {
                 // The press goes to the workspace, so the selection shows at once.
                 model.drag(from: start, to: start, modifiers: modifiers)
                 live.begin(from: model)
             }
             live.sample(from: start, to: DesignPoint(to), modifiers: modifiers)
-        case .endDrag: endLive { model.endDrag() }
+        case .endDrag:
+            if pan != nil { pan = nil; endLive { model.endEditRun() } } else { endLive { model.endDrag() } }
         case .nudge(let direction, let shift): model.nudge(direction, shift: shift)
         case .deleteSelection: model.deleteSelection()
         case .deselect: model.deselect()
@@ -235,6 +250,8 @@ struct DesignWindow: View, BodyCounted {
         case .sampleSize(let size): model.setSampleSize(size)
         case .sampleTarget(let toStroke): model.setSampleTarget(toStroke: toStroke)
         case .adoptLive(let result): model.adoptLiveCommand(result)
+        case .placeFile(let fill): placeFile(fill: fill)
+        case .place(let intent, let fill): if let help = model.runPlace(intent, fill: fill) { note = help }
         }
     }
 
@@ -261,6 +278,16 @@ struct DesignWindow: View, BodyCounted {
         let refusal = live.land(into: &model)
         live.clearAfterLanding()
         if let refusal { note = refusal.help }
+    }
+
+    /// Place…: `fill`, else the checkbox, decides whether the first file fills the selection (refusals: #4985).
+    private func placeFile(fill: Bool?) {
+        let formats = model.placeFormats
+        let fills = model.placeFills(fill: fill ?? UserDefaults.standard.bool(forKey: DesignPlace.fillKey))
+        Task { @MainActor in
+            let files = await PlacePanel.choose(formats: formats)
+            for step in DesignWorkspace.placeSteps(files, fills: fills, at: nil) { perform(.place(step.intent, fill: step.fill)) }
+        }
     }
 
     /// Pastes Design's bytes from the pasteboard; with none (or another type), the Model's reason.

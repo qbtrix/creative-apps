@@ -25,9 +25,11 @@ public struct DesignMenuState: Sendable {
     /// The id of an Arrange, Align or Distribute item: its menu title slugged under "object.".
     public static func objectID(_ title: String) -> String { "object." + DesignWorkspace.slug(title) }
 
-    /// The catalog's spec for `id` over the menu state; an id the catalog lacks is never available.
+    /// The catalog's spec for `id` over the menu state; a place command the catalog lacks reads the workspace's
+    /// `placeActionHelp`, and any other id the catalog lacks is never available.
     public static func spec(_ id: String) -> CommandSpec<DesignMenuState> {
-        specs[id] ?? windowSpecs[id] ?? .typed(id, title: id, summary: "Design has no \(id) command.", kind: .view, params: JSONValue.self,
+        if id.hasPrefix("place."), specs[id] == nil { return placeSpec(id) }
+        return specs[id] ?? windowSpecs[id] ?? .typed(id, title: id, summary: "Design has no \(id) command.", kind: .view, params: JSONValue.self,
                             example: .object([:]), availability: { _ in .unavailable("Design has no \(id) command.") }) { _, _ in JSONValue.object([:]) }
     }
 
@@ -47,6 +49,13 @@ public struct DesignMenuState: Sendable {
                                availability: { $0.hasWindow ? .available : .unavailable("Open a Design window to see its history.") }
         ) { _, _ in JSONValue.object([:]) },
     ]
+
+    /// A place command before the catalog registers it (PD-5): off with the workspace's plain reason, never its id.
+    static func placeSpec(_ id: String) -> CommandSpec<DesignMenuState> {
+        .typed(id, title: "Place…", summary: "Places a PNG, JPEG or SVG file up to 32 MB as a picture.", kind: .edit,
+               params: JSONValue.self, example: .object([:]),
+               availability: { DesignWorkspace.reason($0.workspace.placeActionHelp(id)) }) { _, _ in JSONValue.object([:]) }
+    }
 
     /// Whether the menu item for `id` can run, and why not.
     public func availability(_ id: String) -> Availability {

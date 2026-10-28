@@ -62,6 +62,10 @@ enum DesignIntent {
     case sampleSize(SampleSize), sampleTarget(toStroke: Bool)
     /// A live command ran on a copy of the file (EM-4): the window becomes it.
     case adoptLive(DesignWorkspace)
+    /// Place…: the panel, then each file as `.place`; `fill` true is Place in Frame…, nil follows the checkbox.
+    case placeFile(fill: Bool?)
+    /// A picture command, a place with `fill` into the selected frame; a refusal's help goes to the status line.
+    case place(PlaceIntent, fill: Bool)
 }
 
 /// Where a view sends its intents.

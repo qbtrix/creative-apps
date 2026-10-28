@@ -20,6 +20,7 @@
 // canvas without running the window (D0-8a); keys and text editing read `model`.
 // The canvas lists itself in `suite.controls` as `design.canvas.page`
 // (DesignControlID.canvas) without replacing CanvasViewport's identifier.
+// Pictures dropped on the artwork are placed on the page (designPlaceDrop, DesignPlace.swift).
 // Content, not chrome: flat, no glass.
 import DesignModel
 import SuiteUI
@@ -61,6 +62,7 @@ struct DesignCanvas: View {
             onKey: model.editingTextID == nil ? { key($0) } : nil, onPointer: feedback.onPointer
         ) {
             DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
+                .designPlaceDrop(model, zoom: zoom, perform: perform)
         } overlay: {
             DesignPastEdge(page: page, painted: painted, zoom: zoom, editingTextID: model.editingTextID)
             DesignFrameLabels(painted: painted, zoom: zoom)

@@ -1,5 +1,6 @@
 // DesignCommands.swift: Design's menu bar. File: New File, Open…, Close, Save, Save As…,
-// Export… ⇧⌘E (the export sheet, DesignExportArea);
+// Export… ⇧⌘E (the export sheet, DesignExportArea), Place… ⇧⌘P (SuiteUI's PlacePanel; each file it reads
+// becomes a picture, placed-images PD-u);
 // Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
@@ -163,7 +164,7 @@ struct DesignCommands: Commands {
     }
 }
 
-/// File: New File and Open…, then Close, Save, Save As… and Export….
+/// File: New File and Open…, then Close, Save, Save As…, Export… and Place….
 struct DesignFileMenu: View {
     let menu: DesignMenu
 
@@ -185,6 +186,9 @@ struct DesignFileMenu: View {
         }
         menu.item("file.export", systemImage: "square.and.arrow.up", shortcut: KeyboardShortcut("e", modifiers: [.command, .shift])) {
             menu.perform(.export)
+        }
+        menu.item("place.image", title: "Place…", systemImage: "photo.badge.plus", shortcut: KeyboardShortcut("p", modifiers: [.command, .shift])) {
+            menu.perform(.placeFile(fill: nil))
         }
     }
 }

@@ -3,7 +3,7 @@
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
 // fields), Transform (Rotation and the flips, DesignInspectorTransform, on one layer or several) and Fill (the type switch, then the color well, or the gradient editor in its place on a gradient layer; a text layer's is its text color, a group
-// has none), then Text (DesignInspectorText, disabled on a layer that isn't text). A
+// has none), then Picture on a frame or rectangle (DesignInspectorImage: the picture's rows, Place in Frame… and Place into selected frame), then Text (DesignInspectorText, disabled on a layer that isn't text). A
 // locked layer, or one inside a locked group, can't be edited, so Frame and
 // Fill are disabled and a line says why. With only a page selected it shows
 // DesignInspectorPage. With several layers selected (D0-5c) it shows "<n> Layers",
@@ -172,6 +172,7 @@ private struct DesignNodeProperties: View {
                     }
                 }
             }
+            if node.kind.holdsPicture { DesignInspectorImage(model: model, node: node, perform: perform) }
             DesignInspectorStyle(model: model, perform: perform)
         }
         .coordinateSpace(.named(Self.hintSpace))
