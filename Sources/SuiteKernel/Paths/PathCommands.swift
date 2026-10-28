@@ -49,6 +49,8 @@ public enum PathCommands {
     static let noDraftHelp = "Click with the Pen to start a path.", closeHelp = "Click a third point to close the path.", pointHelp = "Select a point first."
     /// Why a run refuses its params: off the path, no handle to drag, too few or non-finite points, a ref past the path.
     static let offPathHelp = "Click on the path to add a point.", noHandleHelp = "That point has no handle there; hold Option to drag one out."
+    /// Why an open contour's first in or last out handle can't move: no segment holds it, so the path would drop it.
+    static let openEndHelp = "An open path's end point has no segment on that side, so it can't keep a handle there."
     static let fewHelp = "A path needs at least two points.", finiteHelp = "Every coordinate must be a finite number."
     static let flatHelp = "This path's layer is scaled to nothing; give it a size to edit its points."
     /// How near the path, in document points, `path.anchor-insert` takes a click.
@@ -105,7 +107,7 @@ public enum PathCommands {
          spec("path.handle-move", "Move Handle", .edit, "Moves one handle of a point; a smooth partner follows unless breaking.", HandleParams.self,
               .object(["contour": index, "index": index, "end": .string("in or out.", oneOf: ["in", "out"]), "x": n, "y": n, "breaking": .optional(.boolean),
                        "drag": drag], required: ["contour", "index", "end", "x", "y", "breaking", "drag"]),
-              example: .object(["contour": .number(0), "index": .number(1), "end": .string("out"), "x": .number(120), "y": .number(20)]),
+              example: .object(["contour": .number(0), "index": .number(1), "end": .string("in"), "x": .number(80), "y": .number(20), "breaking": .bool(true)]),
               availability: { editable($0) }) { t, p in try edit(&t, "Move Handle", drag: p.drag) { e, _ in try handled(e, p) } },
          spec("path.anchor-insert", "Add Point", .edit, "Adds a point on the path nearest (x, y); off the path it refuses.", PointParams.self,
               .object(["x": n, "y": n], required: ["x", "y"]), example: point, availability: { editable($0) }) { t, p in try insert(&t, p) },
@@ -202,6 +204,10 @@ public enum PathCommands {
         let ref = AnchorRef(contour: p.contour, index: p.index), path = e.path, contours = path.contours
         guard contours.indices.contains(ref.contour), contours[ref.contour].anchors.indices.contains(ref.index) else {
             throw refused("path.handle-move", "The path has no point \(ref.index) in contour \(ref.contour).")
+        }
+        let contour = contours[ref.contour]
+        guard contour.closed || (p.end == .handleIn ? ref.index > 0 : ref.index < contour.anchors.count - 1) else {
+            throw refused("path.handle-move", openEndHelp)
         }
         let a = contours[ref.contour].anchors[ref.index], breaking = p.breaking ?? false
         guard breaking || (p.end == .handleIn ? a.handleIn : a.handleOut) != nil else { throw refused("path.handle-move", noHandleHelp) }

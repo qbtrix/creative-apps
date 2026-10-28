@@ -6,8 +6,11 @@
 // fixes a height. The row owns only presentation state (the rename field);
 // toggles and renames go out through closures, and a nil closure turns that
 // gesture off. A rename the app refuses (its `onRename` returns a message)
-// keeps the field open with the draft as typed and the message under it in
-// SuiteColor.stateError (SidebarRenameField, LL-6); the Void form still renames.
+// keeps the field open with the draft as typed: the row's icon stays beside the
+// field, the field shakes once (none under Reduce Motion) and the reason shows
+// under it on one line in SuiteColor.stateError, whole in its tooltip
+// (SidebarRenameField, SidebarRenameMessage; LL-6, #3462). LayerTreeList's
+// rows draw a refusal the same way. The Void form still renames.
 // Return on the focused row and the "Rename" accessibility action open the
 // same field as the double-click, and only on a row with `onRename` (LL-7). Each toggle icon lays out both of its symbols and draws one,
 // so it is as wide in every state and the toggles form a column (#53). The
@@ -128,6 +131,9 @@ public struct SidebarRenameField: Equatable, Sendable {
     public private(set) var draft: String?
     /// Why the app refused the last commit; nil when it didn't.
     public private(set) var message: String?
+    /// How many commits the app has refused. The field shakes when it goes up;
+    /// it never goes down, since any change would shake.
+    public private(set) var refusals = 0
 
     public init() {}
 
@@ -157,6 +163,7 @@ public struct SidebarRenameField: Equatable, Sendable {
         case let .refused(message, kept):
             self.draft = kept
             self.message = message
+            refusals += 1
         case .renamed, .unchanged, .cancelled:
             cancel()
         }
@@ -173,6 +180,8 @@ public struct SidebarRow: View {
     private let item: SidebarItem
     private let onToggle: (@MainActor (SidebarToggle.ID) -> Void)?
     private let onRename: (@MainActor (String) -> String?)?
+    /// Bumped by the row's context menu Rename; each change opens the field.
+    private let renameAsk: Int
     @State private var field = SidebarRenameField()
     @FocusState private var editing: Bool
 
@@ -198,11 +207,13 @@ public struct SidebarRow: View {
     /// snapshot shows a refused rename.
     init(
         _ item: SidebarItem, onToggle: (@MainActor (SidebarToggle.ID) -> Void)?,
-        refusableRename: (@MainActor (String) -> String?)?, field: SidebarRenameField = SidebarRenameField()
+        refusableRename: (@MainActor (String) -> String?)?, field: SidebarRenameField = SidebarRenameField(),
+        renameAsk: Int = 0
     ) {
         self.item = item
         self.onToggle = onToggle
         self.onRename = refusableRename
+        self.renameAsk = renameAsk
         _field = State(initialValue: field)
     }
 
@@ -236,6 +247,7 @@ public struct SidebarRow: View {
         .badge(item.count ?? 0)
         .selectionDisabled(!SidebarRowLook(item).isSelectable)
         .onKeyPress(.return) { requestRename() }
+        .onChange(of: renameAsk) { _ = requestRename() }
         .accessibilityActions {
             if onRename != nil { Button(Self.renameActionName) { _ = requestRename() } }
         }
@@ -247,23 +259,22 @@ public struct SidebarRow: View {
     /// flip it twice, and one on blank space selects the row and nothing more.
     @ViewBuilder private var title: some View {
         if field.isOpen {
-            // The field takes the title text's place; the icon stays, so the name doesn't jump.
-            Label {
-                VStack(alignment: .leading, spacing: SuiteSpacing.xxs) {
+            // The field takes the title text's place and the icon stays beside it, so the name
+            // doesn't jump; a refusal's reason goes under both (#3462).
+            VStack(alignment: .leading, spacing: SuiteSpacing.xxs) {
+                Label {
                     TextField(item.title, text: Binding(get: { field.draft ?? item.title }, set: { field.type($0) }))
                         .focused($editing)
                         .onSubmit(commitRename)
                         .onExitCommand { field.cancel() }
                         .onChange(of: editing) { _, focused in if !focused { loseFocus() } }
+                        .refusalShake(field.refusals)
                         .accessibilityIdentifier("suite.sidebar.\(item.id).rename")
-                    if let message = field.message {
-                        Label(message, systemImage: "exclamationmark.triangle.fill")
-                            .font(SuiteFont.caption)
-                            .foregroundStyle(SuiteColor.stateError)
-                            .accessibilityIdentifier("suite.sidebar.\(item.id).renameMessage")
-                    }
+                } icon: { SidebarRowIcon(item: item) }
+                if let message = field.message {
+                    SidebarRenameMessage(message, identifier: "suite.sidebar.\(item.id).renameMessage")
                 }
-            } icon: { SidebarRowIcon(item: item) }
+            }
         } else {
             Label { Text(item.title) } icon: { SidebarRowIcon(item: item) }
                 .modifier(SidebarRowDimming(color: SidebarRowLook(item).title))
@@ -309,6 +320,55 @@ public struct SidebarRow: View {
         guard Self.keyRenames(renamable: onRename != nil, renaming: field.isOpen) else { return .ignored }
         beginRename(on: .title)
         return .handled
+    }
+}
+
+/// Why a rename was refused, under the field: one line in the error color with a triangle,
+/// the whole message in its tooltip and accessibility label (#3462).
+struct SidebarRenameMessage: View {
+    private let message: String
+    private let identifier: String
+
+    init(_ message: String, identifier: String) {
+        self.message = message
+        self.identifier = identifier
+    }
+
+    var body: some View {
+        Label(message, systemImage: "exclamationmark.triangle.fill")
+            .font(SuiteFont.caption)
+            .foregroundStyle(SuiteColor.stateError)
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .help(message)
+            .accessibilityLabel(message)
+            .accessibilityIdentifier(identifier)
+    }
+}
+
+extension View {
+    /// Shakes the view once, side to side, each time `refusals` goes up; none under Reduce Motion.
+    func refusalShake(_ refusals: Int) -> some View {
+        modifier(RefusalShake(refusals: refusals))
+    }
+}
+
+private struct RefusalShake: ViewModifier {
+    let refusals: Int
+    @Environment(\.suiteReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        let (offset, step) = (SuiteMotion.shakeOffset, SuiteMotion.shakeStep)
+        content.keyframeAnimator(initialValue: CGFloat.zero, trigger: refusals) { view, x in
+            view.offset(x: reduceMotion ? 0 : x)
+        } keyframes: { _ in
+            KeyframeTrack(\.self) {
+                LinearKeyframe(-offset, duration: step)
+                LinearKeyframe(offset, duration: step * 2)
+                LinearKeyframe(-offset / 2, duration: step * 2)
+                LinearKeyframe(0, duration: step)
+            }
+        }
     }
 }
 

@@ -31,7 +31,7 @@ extension FocusedValues {
     @Entry var haloPerform: (@MainActor (HaloCommand) -> Void)?
 }
 
-struct HaloWindow: View {
+struct HaloWindow: View, BodyCounted {
     @State var model = HaloLaunch.project
     @State var showsNewComposition = false
     /// The dialog an area's route asked for; its area's hook shows it and sets it back to nil.
@@ -48,15 +48,14 @@ struct HaloWindow: View {
     static let inspectorWidth = SuiteSize.inspectorWidth.ideal
 
     #if DEBUG
-    /// How many times a window's body ran; HaloWindowPlaybackTests counts playback's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     /// The project the last body ran on, for the hosted-window tests to read back.
     static var shownProject: HaloProject?
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         let _ = Self.shownProject = model
         #endif
         let newComposition = ToolbarAction("New Composition…", systemImage: "plus", identifier: "halo.composition.new") {
@@ -142,7 +141,7 @@ struct HaloWindow: View {
 
     /// Every area's hook over `content`, in a fixed order.
     private func scenes(_ content: some View) -> some View {
-        historyScene(textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content))))))))))
+        stylingScene(historyScene(textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content)))))))))))
     }
 }
 

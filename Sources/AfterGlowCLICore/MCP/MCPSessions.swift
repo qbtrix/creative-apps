@@ -3,7 +3,8 @@
 // the roots. `<app>.open` and `<app>.new` give a handle (a UUID) and the
 // summary; `<app>.<id>` runs one command through the app's catalog and
 // returns `{result, undoStep?}`; `afterglow.save` and `afterglow.export`
-// write `{path}` and never replace a file without `force`; `afterglow.close`
+// write `{path}` and never replace a file without `force` (a file opened as an
+// import opens untitled, so a save names its path); `afterglow.close`
 // drops a handle. Every refusal is a tool error the model can act on: a
 // why-not, each schema issue as "/path: message", a path outside the roots,
 // the open cap, a dead handle. A path is placed against the first root,
@@ -77,7 +78,8 @@ public struct MCPSessions: Sendable {
     mutating func open(_ name: String, _ args: [String: JSONValue], now: Double) throws(Refused) -> MCPToolResult {
         let app = try app(name), path = try place(try string(args, "path"))
         try roomForOne()
-        do { return keep(try app.session(reading: path, io: io), path: path, now: now) }
+        // An imported file opens untitled, so a save with no path never writes the native format over it.
+        do { return keep(try app.session(reading: path, io: io), path: app.savesNatively(to: path) ? path : nil, now: now) }
         catch CLIIOError.missing(_) { throw Refused("there is no file at \(path)") }
         catch { throw Refused("\(path) could not be opened as a \(name) document: \(error)") }
     }

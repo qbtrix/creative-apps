@@ -48,7 +48,7 @@ enum PhotoIntent {
     // One case per v2 area; each area's enum lives in its PhotoWindow+<Area>.swift.
     case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
     case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
-    case place(PhotoPlaceIntent), text(TypeIntent)
+    case place(PhotoPlaceIntent), text(TypeIntent), filter(FilterIntent)
     /// A tone row's change, run as its tone.* command (PhotoWindow+Tone).
     case tone(ToneIntent)
     /// One Pen or point-editor gesture from PhotoPenOverlay, run through the catalog.
@@ -67,6 +67,10 @@ extension PhotoTool: PaletteTool {
         switch self {
         case .move: "Move"
         case .marquee: "Marquee"
+        case .ellipse: "Ellipse"
+        case .lasso: "Lasso"
+        case .polygon: "Polygon Lasso"
+        case .wand: "Magic Wand"
         case .brush: "Brush"
         case .eraser: "Eraser"
         case .clone: "Clone"
@@ -86,6 +90,10 @@ extension PhotoTool: PaletteTool {
         switch self {
         case .move: "arrow.up.and.down.and.arrow.left.and.right"
         case .marquee: "rectangle.dashed"
+        case .ellipse: "circle.dashed"
+        case .lasso: "lasso"
+        case .polygon: "hexagon"
+        case .wand: "wand.and.stars"
         case .brush: "paintbrush.pointed"
         case .eraser: "eraser"
         case .clone: "square.on.square"
@@ -105,13 +113,15 @@ extension PhotoTool: PaletteTool {
         switch self {
         case .move: "v"
         case .marquee: "m"
+        case .ellipse, .polygon: nil
+        case .lasso: "l"
+        case .wand: "w"
         case .brush: "b"
         case .eraser: "e"
         case .clone: "s"
         case .spotHeal: "j"
         case .heal: "j"
-        // Shift-J cycling through Spot Heal, Heal and Remove waits on SuiteUI.
-        case .remove: nil
+        case .remove: "j"
         case .crop: "c"
         case .eyedropper: "i"
         case .bucket: "g"

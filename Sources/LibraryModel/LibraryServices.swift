@@ -3,6 +3,8 @@
 // takes the platform adapters from LibraryApp and builds the `Live…`
 // conformances. Until a feature lands, its `Live…` type is the spine's stub,
 // whose `unavailable` reason disables the controls that need it.
+import SuiteModel
+
 public struct LibraryServices: Sendable {
     public var decoder: any PhotoDecoding
     public var importer: any PhotoImporting
@@ -21,6 +23,8 @@ public struct LibraryServices: Sendable {
     public var leveler: (any CropLeveling)?
     /// Delete Rejects' Trash (Contracts/TrashContracts.swift).
     public var trash: any PhotoTrashing
+    /// The suite's saved looks (adjust-everywhere AJ-10); in memory unless the window passes the suite's store.
+    public var looks: any PresetStoring
     /// Why a member can't act yet, by member name; empty once all are live.
     public var unavailable: [String: String]
     /// True for `.fake` (fixture data on screen); drives the "Preview data" pill.
@@ -31,13 +35,14 @@ public struct LibraryServices: Sendable {
                 loupe: any LoupeImaging, develop: any DevelopRendering, crop: any CropGeometry,
                 exporter: any PhotoExporting, trash: any PhotoTrashing = LiveTrash(), writer: any JPEGWriting,
                 sidecars: any SidecarWriting = UnconnectedSidecars(), leveler: (any CropLeveling)? = nil,
-                unavailable: [String: String] = [:], isPreview: Bool) {
+                looks: any PresetStoring = FakePresetStore(), unavailable: [String: String] = [:], isPreview: Bool) {
         self.decoder = decoder; self.importer = importer; self.thumbnails = thumbnails
         self.culling = culling; self.coding = coding; self.store = store; self.loupe = loupe
         self.develop = develop; self.crop = crop; self.exporter = exporter; self.writer = writer
         self.sidecars = sidecars
         self.leveler = leveler
         self.trash = trash
+        self.looks = looks
         self.unavailable = unavailable; self.isPreview = isPreview
     }
 
@@ -58,6 +63,7 @@ public struct LibraryServices: Sendable {
     /// file and sets that type's `unavailable` to nil, so nobody edits this.
     /// Sidecars stay off, with their reason, until the window passes a writer.
     public static func live(decoder: any PhotoDecoding, writer: any JPEGWriting, store: any CatalogStoring,
+                            looks: any PresetStoring = FakePresetStore(),
                             sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {
         let develop = LiveDevelop()
         let reasons: [(String, String?)] = [
@@ -69,11 +75,13 @@ public struct LibraryServices: Sendable {
         ]
         var unavailable: [String: String] = [:]
         for (member, reason) in reasons { if let reason { unavailable[member] = reason } }
-        return LibraryServices(
+        var services = LibraryServices(
             decoder: decoder, importer: LiveImporter(decoder: decoder),
             thumbnails: LiveThumbnails(decoder: decoder, develop: develop), culling: LiveCulling(),
             coding: LiveCatalogCoding(), store: store, loupe: LiveLoupeImaging(decoder: decoder, develop: develop),
             develop: develop, crop: LiveCrop(), exporter: LiveExporter(decoder: decoder, develop: develop), trash: LiveTrash(),
             writer: writer, sidecars: sidecars, unavailable: unavailable, isPreview: false)
+        services.looks = looks
+        return services
     }
 }

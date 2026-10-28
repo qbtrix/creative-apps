@@ -41,7 +41,7 @@ final class LibraryAreas {
     let filters = FiltersAreaState()
 }
 
-struct LibraryWindow: View {
+struct LibraryWindow: View, BodyCounted {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
     /// The loupe's GPU route (suite-imaging IM-11); nil in a test window.
@@ -53,7 +53,8 @@ struct LibraryWindow: View {
         // The live grid keeps its thumbnails in <support>/Library/Thumbnails (ST-7); fixtures stay on fakes.
         let services = launch.services(
             decoder: ImageIODecoder(), writer: JPEGWriter(metadata: LibraryShell.services.metadata),
-            store: CatalogStore(), sidecars: XMPSidecarWriter())
+            store: CatalogStore(), looks: PresetStore(folder: SuiteLocations.processSupportFolder),
+            sidecars: XMPSidecarWriter())
             .withThumbnailDisk(folder: LibraryServices.thumbnailFolder(arguments: arguments, home: NSHomeDirectory()))
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
@@ -62,13 +63,12 @@ struct LibraryWindow: View {
     nonisolated static let dropTarget = "Library"
 
     #if DEBUG
-    /// How many times a window's body ran; RenderBudgetLibraryTests counts an interaction's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         let filters = filtersMenu
         SuiteWindow(
@@ -114,6 +114,8 @@ struct LibraryWindow: View {
                        perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
+        // The Develop tab's LOOKS and BLACK & WHITE run their commands through this (AJ-11).
+        .environment(\.libraryAdjust, adjustControls)
         .libraryControlsProbe()
         .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
         // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.

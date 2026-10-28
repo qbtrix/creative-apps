@@ -46,10 +46,9 @@ enum GalleryCommandCatalog {
 }
 
 /// Internal, not private, so the snapshots seed its document and RenderBudgetCommandCatalogTests reads `bodyRuns`.
-struct GalleryCommandCatalogPage: View {
+struct GalleryCommandCatalogPage: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     @State private var doc: FakeCanvasDocument
     @State private var log: [String] = []
@@ -60,7 +59,7 @@ struct GalleryCommandCatalogPage: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         HStack(alignment: .top, spacing: SuiteSpacing.m) {
             VStack(alignment: .leading, spacing: SuiteSpacing.s) {

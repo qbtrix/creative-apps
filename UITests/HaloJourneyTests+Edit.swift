@@ -9,8 +9,8 @@ import AppKit
 import XCTest
 
 final class HaloEditJourneyTests: XCTestCase {
-    /// The slice this journey waits on; CB-10 sets it to nil.
-    private static let waitsOn: String? = "CB-10"
+    /// The slice this journey waits on; nil since CB-10 turned it on.
+    private static let waitsOn: String? = nil
     static let arguments = ["-HaloSample", "three-layers", "-HaloWindowSize", "1000x640"]
     /// The row Halo gives the first layer added to Intro after its four.
     private static let pastedRow = "halo.layer.row.comp-1-layer-5"

@@ -3,8 +3,10 @@
 // `commitTextEdit(extent:)` fits the box in the commit's own step: auto width
 // takes both sides, fixed width only the height, rounded up. `setTextStyle`
 // refits by the size's ratio in the "Change Text Style" step and keeps each
-// layer's own `fixedWidth`. On `cards` with the live services. Runs on Linux
-// and macOS.
+// layer's own `fixedWidth`. `fitTextStyle` fits each selected box to the
+// extent the app measured in its new style inside that same step, so a font or
+// weight change can't clip the text (#3339). On `cards` with the live services.
+// Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -130,5 +132,42 @@ private let title = "node-5"
         forced.selectItem(title)
         try forced.setStyle(.textStyle(DesignTextStyle(family: "System", size: 16, weight: 700, alignment: .leading, fixedWidth: true)))
         #expect(forced.treeNode(title)?.textStyle.fixedWidth == nil)
+    }
+
+    @Test func aWeightChangeFitsTheMeasuredTextInTheStyleStep() throws {
+        var workspace = DesignFixtures.cards
+        workspace.selectItem(title)
+        var style = try #require(workspace.treeNode(title)?.textStyle)
+        style.weight = 900
+        try workspace.setStyle(.textStyle(style))
+        workspace.fitTextStyle([title: DesignTextExtent(width: 231.4, height: 30.2)])
+        #expect(frame(workspace, title) == rc(100, 40, 232, 31))
+        #expect(steps(workspace) == ["Change Text Style"])
+        workspace.undo()
+        #expect(frame(workspace, title) == rc(100, 40, 200, 32))
+        #expect(workspace.treeNode(title)?.textStyle.weight == 400)
+        #expect(!workspace.canUndo)
+    }
+
+    @Test func aFixedWidthBoxFitsOnlyItsHeightToTheNewStyle() throws {
+        var (workspace, id) = try place(pt(200, 300), pt(500, 310))
+        workspace.commitTextEdit()
+        var style = try #require(workspace.treeNode(id)?.textStyle)
+        style.family = "Serif"
+        try workspace.setStyle(.textStyle(style))
+        workspace.fitTextStyle([id: DesignTextExtent(width: 420, height: 47.5)])
+        #expect(frame(workspace, id) == rc(200, 300, 300, 48))
+        #expect(steps(workspace) == ["Add Text", "Change Text Style"])
+    }
+
+    @Test func onlySelectedTextTakesAFitAndAFitThatChangesNothingRecordsNothing() throws {
+        var workspace = DesignFixtures.cards
+        workspace.selectItem("node-2")
+        workspace.fitTextStyle(["node-2": DesignTextExtent(width: 5, height: 5), title: DesignTextExtent(width: 5, height: 5)])
+        #expect(frame(workspace, "node-2") == DesignFixtures.cards.treeNode("node-2")?.frame)
+        #expect(frame(workspace, title) == rc(100, 40, 200, 32))
+        workspace.selectItem(title)
+        workspace.fitTextStyle([title: DesignTextExtent(width: 199.5, height: 31.2)])
+        #expect(!workspace.canUndo)
     }
 }

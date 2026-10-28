@@ -30,7 +30,8 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         chooseBlend("Multiply", photo)
         typeValue("50", into: "photo.layer.opacity", photo)
         expectRow("Layer 1", meta: "Multiply 50%", photo)
-        expectStatus("Edited", photo)
+        // The autosave, 5 s after the last edit, may already read "Edited, autosaved": still edited.
+        expectStatus("Edited", photo, prefix: true)
         let edited = steadyCanvas(photo)
         photo.shot("documents-1-edited")
 
@@ -129,8 +130,9 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
             ("NotZip.ora", Data("not a zip".utf8), "It isn't a Photo Document or an image Photo can open."),
             ("Newer.ora", edited(#""format":1,"#, #""format":2,"#), "It was saved by a newer version of Photo. Update Photo to open it."),
             ("Missing.ora", Self.storedZip(entries.filter { $0.name != "data/layer-2.png" }), "It is damaged and can't be read."),
-            ("Large.ora", edited(#""canvas":{"height":600,"width":800}"#, #""canvas":{"height":4000,"width":5000}"#),
-             "It is larger than Photo can open: up to 16 megapixels."),
+            // 48 MP, past PhotoWorkspace.maxOpenPixels (40 MP since #2969).
+            ("Large.ora", edited(#""canvas":{"height":600,"width":800}"#, #""canvas":{"height":6000,"width":8000}"#),
+             "It is larger than Photo can open: up to 40 megapixels."),
         ]
         for (index, item) in cases.enumerated() {
             let url = folder.appending(path: item.file)
@@ -153,7 +155,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let original = try Data(contentsOf: beach)
         var photo = launch(photoArguments(open: beach), window: "beach.png")
         paint(photo)
-        expectStatus("Edited", photo)
+        expectStatus("Edited", photo, prefix: true)
         photo.shot("documents-2-painted")
 
         // 2. Command-W asks; Cancel keeps the window, still Edited.
