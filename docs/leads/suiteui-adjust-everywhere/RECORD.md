@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-28T16:34Z
+Polled: 2026-10-28T16:58Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -490,3 +490,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 16:18Z check-in: #5991 merged (81d606521). #5260 clean, labels ok, no local-ci/prescreen yet (verify-after). 0 open adjust-everywhere findings. dev-red #5983 not ours. AJ-z feature-done PR opens once #5260 merges.
 - 2026-10-28T16:34Z #5259 merged; #5260 clean, awaiting prescreen
 - 16:38Z #5260 merged (f437fabab): AJ-photo's PRs all in. Opened #5993 (AJ-z, feature-done: wave built, RJ-X60 pending #5990), Head c9b3c9d6b. Belt-Slice-Done AJ-photo and AJ-z (gaps: #5990) once main contains them and ci.yml on that sha is green; main held at f89f5255c by dev-red #5983 (not ours).
+- 2026-10-28T16:58Z #5260 merged: AJ-photo all on dev; Belt-Slice-Done waits for main to move past f89f5255c (dev-red #5983 not ours)
