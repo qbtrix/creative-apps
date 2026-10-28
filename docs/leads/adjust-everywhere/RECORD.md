@@ -417,3 +417,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 05:05Z #5257 (AJ-halo model) restacked onto dev after #5249 merged: +226-12 f=12, gate PASS (ci, golden tests, mutate), head 203e4d0e5, needs-split removed, fast-lane added. Next: restack #5258 on it.
 - 05:05Z #5258 (AJ-halo UI) restacked onto new #5257 head as 357361888; HaloCommands.swift conflict resolved by keeping dev's Layer Style items and adding Add Filter after a divider. Gate running; stays needs-split until #5257 merges.
 - 05:13Z #5258 gate PASS (ci --changed, mutate --validate); pushed 357361888 with lease and moved its Head line. It keeps needs-split until #5257 lands, then its diff is 5 files +227-4.
+- 05:14Z Check-in: #5250, #5252, #5257 clean with fast-lane, waiting on local-ci/prescreen; #5258 waits on #5257. dev e4332ed0c, main fef52e668 (no slice on main yet).
