@@ -409,3 +409,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 02:55Z check-in: #5250 went needs-rebase; merged dev 2e97c4498 into it (photo golden union by id, dev wins), gating before push. #5249, #5252 clean, waiting for local-ci/prescreen. main fef52e668.
 - 03:03Z #5250: dev merged (golden union), scripts/ci --changed PASS + AfterGlowCLI/LiveStandIn/PhotoCommandCatalog tests + mutate --validate, pushed 085b6f600, Head: moved. Note: the session's GitHub proxy re-appends an attribution footer to PR bodies on every edit; can't remove it from here, lane strips it on squash.
 - 03:16Z check-in: #5250 clean at 085b6f600, needs-rebase dropped. #5249, #5252, #5250 waiting for local-ci/prescreen. dev 2e97c4498, main fef52e668.
+- 03:36Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 186be9acf, main fef52e668.
