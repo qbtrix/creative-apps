@@ -82,5 +82,19 @@
     "find": "in the window; file.share-prepare makes the copies.\"",
     "replace": "in the window.\"",
     "tests": "LibraryShareMenuSpecTests"
+  },
+  {
+    "label": "Set Develop takes any tone slider, Brightness included",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "guard ToneSlider.develop.contains(p.slider) else {",
+    "replace": "guard true else {",
+    "tests": "LibraryCommandCatalogTests"
+  },
+  {
+    "label": "Set Develop drops the drag token: every sample is its own undo step",
+    "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "find": "c.setDevelop(p.slider, to: p.value, coalesceKey: p.drag)",
+    "replace": "c.setDevelop(p.slider, to: p.value, coalesceKey: nil)",
+    "tests": "LibraryCommandCatalogTests"
   }
 ]

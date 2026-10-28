@@ -57,6 +57,7 @@ photo.reset-temperature
 photo.reset-tint
 photo.reset-vibrance
 photo.reset-saturation
+photo.set-develop
 file.share-prepare
 thumbnails.stats
 image.rotate-cw

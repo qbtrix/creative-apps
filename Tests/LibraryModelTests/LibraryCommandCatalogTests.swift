@@ -103,7 +103,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "catalog.restore-backup": .some(c.importState != .idle ? LibraryBackups.importing
                                              : c.backup.backups == nil ? LibraryBackups.noBackups : nil)
         case "thumbnails.stats": .some(c.thumbnailDisk == nil ? "Thumbnails aren't kept on disk yet." : nil)
-        case "adjust.black-and-white", "adjust.invert", "look.apply": .some(c.services.unavailable["develop"] ?? c.developHelp)
+        case "adjust.black-and-white", "adjust.invert", "look.apply", "photo.set-develop": .some(c.services.unavailable["develop"] ?? c.developHelp)
         case let id where id.hasPrefix("filter."): .some(c.services.unavailable["develop"] ?? c.developHelp ?? LibraryCatalog.filtersInPhoto)
         case "look.list", "look.save", "look.delete": .some(nil)
         case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
@@ -121,6 +121,27 @@ struct LibraryCatalogDoc: HeadlessDocument {
             for (state, c) in Self.states + [("services off", off)] {
                 #expect(Self.catalog.availability(id, on: c).why == Self.oldHelp(id, c) ?? nil, "\(id) on \(state)")
             }
+        }
+    }
+
+    /// Quality gate #5953: a script sets a develop slider. One drag token is one undo step; Library's missing sliders refuse.
+    @Test func setDevelopSetsTheTargetsSlider() throws {
+        var c = Dictionary(uniqueKeysWithValues: Self.states)["two selected"] ?? LibraryCatalog()
+        let steps = c.history.undo.count
+        func set(_ slider: String, _ value: Double, drag: String? = nil) throws -> JSONValue {
+            try Self.catalog.run("photo.set-develop", params: .object(["slider": .string(slider), "value": .number(value),
+                                                                       "drag": drag.map(JSONValue.string) ?? .null]), on: &c)
+        }
+        #expect(try set("vibrance", 50) == .object(["vibrance": .number(50)]))
+        #expect(c.items.filter { c.selection.contains($0.id) }.map(\.develop.vibrance) == [50, 50])
+        #expect(c.history.undo.count == steps + 1)
+        _ = try set("saturation", -20, drag: "d1"); _ = try set("saturation", -40, drag: "d1")
+        #expect(c.history.undo.count == steps + 2, "one drag is one step")
+        #expect(try set("exposure", 99) == .object(["exposure": .number(5)]), "clamped to the range")
+        #expect(throws: CatalogError.unavailable(id: "photo.set-develop", why: "Develop has no Brightness slider.")) { try set("brightness", 10) }
+        var none = LibraryCatalog(services: .fake())
+        #expect(throws: CatalogError.self) {
+            try Self.catalog.run("photo.set-develop", params: .object(["slider": .string("tint"), "value": .number(1)]), on: &none)
         }
     }
 
