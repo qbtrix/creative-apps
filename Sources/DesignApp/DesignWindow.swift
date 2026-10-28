@@ -30,10 +30,13 @@
 // History panel (View > Show History) and the autosave hooks; a jump and a restore come
 // back here as workspace methods.
 //
-// Cut, Copy and Paste: the Model makes and reads the bytes and the window moves
-// them through DesignPasteboardBridge under the Model's `pasteboardType`; a
-// refusal (nothing selected, nothing of Design's to paste) goes to the status
-// line.
+// Cut, Copy and Paste (clipboard-interop CB-6): DesignPasteboardAdapter makes the
+// representations (own layers, SVG, a PNG at 2x drawn by DesignRasterizer) and
+// takes the best one offered; SuiteShell's PasteboardBridge carries them. A plain
+// image or SVG lands as a picture centred on the page (the window has no visible
+// rect to centre on yet). A refusal (nothing selected, nothing Design can paste)
+// goes to the status line. Copy As writes one representation; Paste as Image
+// takes only an image or SVG.
 //
 // Unsaved changes: SuiteUI's `.unsavedChangesGuard` sits on the root with Design's hooks
 // (`unsavedHooks`, buttons `design.close.*`): a close of an edited window, and File > New File
@@ -51,6 +54,7 @@
 import AppKit
 import DesignModel
 import SuiteKernel
+import SuiteModel
 import SuiteShell
 import SuiteUI
 import SwiftUI
@@ -79,8 +83,10 @@ struct DesignWindow: View, BodyCounted {
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
-    /// Cut, Copy and Paste carry Design's bytes on the general pasteboard.
-    private let bridge = DesignPasteboardBridge()
+    /// Cut, Copy and Paste through the suite's coder; the PNG is drawn here, on the main actor.
+    private let pasteboard = DesignPasteboardAdapter(png: { raster in
+        try MainActor.assumeIsolated { try DesignRasterizer.png(raster) }
+    })
 
     /// The launch file opens in the first window only.
     @MainActor private static var launchFileOpened = false
@@ -205,12 +211,18 @@ struct DesignWindow: View, BodyCounted {
             fit()
         case .command(let command):
             do { try model.run(command) } catch { note = error.help }
-        // The Model makes and reads the bytes; the bridge carries them. A refusal goes to the status line.
+        // The adapter makes and reads the representations; the bridge carries them. A refusal goes to the status line.
         case .copy:
-            do { bridge.write(try model.copySelection(), type: model.pasteboardType) } catch { note = error.help }
+            do { PasteboardBridge().write(try pasteboard.copy(model)) } catch { note = error.help }
         case .cut:
-            do { bridge.write(try model.cutSelection(), type: model.pasteboardType) } catch { note = error.help }
-        case .paste: paste()
+            do {
+                let offered = try pasteboard.copy(model)
+                _ = try model.cutSelection()
+                PasteboardBridge().write(offered)
+            } catch { note = error.help }
+        case .paste: paste(PasteboardBridge().offered())
+        case .copyAs(let format): copyAs(format)
+        case .pasteAsImage: paste(PasteboardBridge().offered().filter { Self.pictureTypes.contains($0.type) })
         case .selectAll: model.selectAll()
         case .zoomToSelection: zoomToSelection()
         case .moveLayer(let id, let parent, let index):
@@ -263,14 +275,22 @@ struct DesignWindow: View, BodyCounted {
         if let refusal { note = refusal.help }
     }
 
-    /// Pastes Design's bytes from the pasteboard; with none (or another type), the Model's reason.
-    private func paste() {
-        let data = bridge.read(type: model.pasteboardType)
-        if let help = model.pasteHelp(data) {
-            note = help
-        } else if let data {
-            do { try model.paste(data) } catch { note = error.help }
+    /// The types Paste as Image takes: an image or an SVG, never Design's own layers.
+    private static let pictureTypes = Set(DesignPasteboardAdapter.pictureTypes)
+
+    /// Pastes the best of `offered`; with nothing Design takes, the coder's sentence.
+    private func paste(_ offered: [TypedData]) {
+        do { try pasteboard.paste(offered, into: &model, centredOn: nil) } catch { note = error.help }
+    }
+
+    /// Copy As: only `format`'s representation of the selection goes on the pasteboard.
+    private func copyAs(_ format: CopyAsFormat) {
+        let type: SuiteTypeID = switch format {
+        case .png: .png
+        case .svg: .svg
+        case .own: .designLayers
         }
+        do { PasteboardBridge().write(try pasteboard.copy(model).filter { $0.type == type }) } catch { note = error.help }
     }
 
     // MARK: Zoom

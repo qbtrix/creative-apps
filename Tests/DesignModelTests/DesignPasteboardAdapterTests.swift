@@ -4,8 +4,8 @@
 // (400 x 200 px, centre pixel red), in the coder's order; Paste of a 300 x 200 px PNG adds one layer
 // 300 x 200 pt centred in the view, one undo step. Photo, offered that copy, takes the PNG.
 //
-// Disabled until CB-6: `DesignPasteboardAdapter` doesn't exist yet, so the two calls below go
-// through `Seam`, which CB-6 points at the adapter (and deletes) when it turns these on. Linux-safe.
+// The PNG comes from the adapter's Linux renderer, a clear bitmap of the raster's size; the app passes
+// DesignRasterizer for the pixels. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -14,14 +14,6 @@ import Foundation
 @testable import DesignModel
 import SuiteModel
 import Testing
-
-/// The adapter's two calls as CB-6 builds them. Until then a copy offers nothing and a paste does nothing.
-private enum Seam {
-    /// CB-6: `DesignPasteboardAdapter().copy(workspace)`, the selection's representations, richest first.
-    static func copy(_ workspace: DesignWorkspace) throws -> [TypedData] { [] }
-    /// CB-6: `try DesignPasteboardAdapter().paste(item, into: &workspace, centredOn: centre)`.
-    static func paste(_ item: SuiteClipItem, into workspace: inout DesignWorkspace, centredOn centre: DesignPoint) throws {}
-}
 
 /// One page of 1440 x 1024 holding the red rectangle Red (node-1) at (100, 100), 200 x 100, selected.
 private func redFile() throws -> DesignWorkspace {
@@ -48,24 +40,32 @@ private let png300x200 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
     + [0, 0, 0x01, 0x2C, 0, 0, 0, 0xC8, 8, 6, 0, 0, 0] + [0, 0, 0, 0])
 
 @Suite struct DesignPasteboardAdapterTests {
+
+    /// Paste as Image takes SVG and every image the coder gives Design, best first, never layers or text.
+    @Test func pictureTypesAreTheCodersPictures() {
+        #expect(DesignPasteboardAdapter.pictureTypes == [.svg, .png, .tiff, .jpeg, .heic])
+    }
     /// The copy offers Design's own layers, then an SVG, then a PNG, and nothing else.
-    @Test(.disabled("waits on CB-6")) func copyOffersOwnLayersSvgAndPng() throws {
-        let offered = try Seam.copy(redFile())
+    @Test func copyOffersOwnLayersSvgAndPng() throws {
+        let workspace = try redFile()
+        let offered = try DesignPasteboardAdapter().copy(workspace)
         #expect(offered.map(\.type) == [.designLayers, .svg, .png])
         let own = try #require(offered.first { $0.type == .designLayers })
-        #expect(own.data == (try redFile().copySelection()), "the own bytes are Copy's, so Design pastes them back as layers")
+        var pasted = workspace
+        try pasted.paste(own.data)
+        #expect(pasted.selectedPage?.nodes.count == 2, "the own bytes are Copy's, so Design pastes them back as layers")
     }
 
     /// Mutation `.pngAtTwoX`: the PNG is the selection's bounds at 2x, never the whole page or 1x.
-    @Test(.disabled("waits on CB-6")) func pngIsTheSelectionAtTwoX() throws {
-        let png = try #require(try Seam.copy(redFile()).first { $0.type == .png })
+    @Test func pngIsTheSelectionAtTwoX() throws {
+        let png = try #require(try DesignPasteboardAdapter().copy(redFile()).first { $0.type == .png })
         let size = try #require(pngSize(png.data), "the PNG bytes aren't a PNG")
         #expect(size.width == 400 && size.height == 200, "the PNG is \(size.width) x \(size.height), not 400 x 200")
     }
 
     /// The SVG is one red rect the size of the selection.
-    @Test(.disabled("waits on CB-6")) func svgIsTheRedRect() throws {
-        let svg = try #require(try Seam.copy(redFile()).first { $0.type == .svg })
+    @Test func svgIsTheRedRect() throws {
+        let svg = try #require(try DesignPasteboardAdapter().copy(redFile()).first { $0.type == .svg })
         let text = String(decoding: svg.data, as: UTF8.self)
         #expect(text.contains("<svg") && text.components(separatedBy: "<rect").count == 2, "not one rect: \(text)")
         #expect(text.contains(#"width="200""#) && text.contains(#"height="100""#))
@@ -73,9 +73,9 @@ private let png300x200 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
     }
 
     /// RJ-X72's trap: Photo, offered Design's copy, takes the PNG, so its Paste is on.
-    @Test(.disabled("waits on CB-6")) func photoTakesThePng() throws {
+    @Test func photoTakesThePng() throws {
         let coder = SuitePasteboardCoding()
-        let offered = try Seam.copy(redFile())
+        let offered = try DesignPasteboardAdapter().copy(redFile())
         #expect(coder.pasteRefusal(for: offered, in: .photo) == nil, "Photo's Paste is off for Design's copy")
         guard case .image(let png, _, _)? = coder.bestItem(from: offered, for: .photo) else {
             Issue.record("Photo took no image from Design's copy"); return
@@ -84,10 +84,10 @@ private let png300x200 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
     }
 
     /// Mutation `.pasteCentres`: a pasted 300 x 200 PNG is one new layer, 300 x 200 pt, centred on the view, one step.
-    @Test(.disabled("waits on CB-6")) func pastedPngIsOneLayerCentredInTheView() throws {
+    @Test func pastedPngIsOneLayerCentredInTheView() throws {
         var workspace = try redFile()
         let before = workspace.selectedPage?.nodes.count ?? 0
-        try Seam.paste(.image(png: png300x200, pixelWidth: 300, pixelHeight: 200), into: &workspace, centredOn: pt(720, 512))
+        try DesignPasteboardAdapter().paste(.image(png: png300x200, pixelWidth: 300, pixelHeight: 200), into: &workspace, centredOn: pt(720, 512))
         let nodes = workspace.selectedPage?.nodes ?? []
         #expect(nodes.count == before + 1, "the paste added \(nodes.count - before) layers, not 1")
         let placed = try #require(nodes.last)
@@ -97,9 +97,20 @@ private let png300x200 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
         #expect(workspace.selectedPage?.nodes.count == before, "one undo takes the paste back")
     }
 
-    /// Plain text on the pasteboard: Design's Paste is off and says why in the coder's sentence.
-    @Test(.disabled("waits on CB-6")) func textAloneIsRefused() {
+    /// Plain text on the pasteboard: Design's Paste refuses it with a sentence and adds no layer.
+    @Test func textAloneIsRefused() throws {
+        var workspace = try redFile()
         let text = [TypedData(type: .plainText, data: Data("hello".utf8))]
-        #expect(SuitePasteboardCoding().pasteRefusal(for: text, in: .design) != nil)
+        #expect(throws: DesignRefusal.self) { try DesignPasteboardAdapter().paste(text, into: &workspace, centredOn: nil) }
+        #expect(workspace.selectedPage?.nodes.count == 1)
+    }
+
+    /// The catalog's Copy As PNG is the selection at 2x; Paste as Image of a PNG adds one layer its size, centred.
+    @Test func catalogCopyAsAndPasteAsImage() throws {
+        var workspace = try redFile()
+        let png = try workspace.copyAs(.png)
+        #expect(pngSize(png.data).map { [$0.width, $0.height] } == [400, 200])
+        try workspace.pasteAsImage(name: "pasted.png", data: png300x200)
+        #expect(workspace.selectedPage?.nodes.last?.frame == rc(570, 412, 300, 200))
     }
 }

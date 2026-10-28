@@ -2,7 +2,7 @@
 // through SuiteUI's ToolKeys over its PhotoPaletteTool faces, keeping Photo's bindings: V M B E S J C I G in either
 // case; never a tool the workspace's help disables; nothing for an unknown letter or more than one character. A
 // shared letter picks its first enabled tool (fill-heal FH-3: J Spot Heal, G Paint Bucket), Heal and Gradient while
-// the retouch tools wait, and Shift cycles the letter's enabled tools. macOS only.
+// the workspace disables the retouch tools, and Shift cycles the letter's enabled tools. macOS only.
 import PhotoModel
 import SuiteUI
 import Testing
@@ -27,7 +27,7 @@ import Testing
     }
 
     @Test func sharedLetterPicksHealAndGradientWhileRetouchWaits() {
-        let retouchWaits: (PhotoTool) -> String? = { $0.unavailableHelp == PhotoTool.retouchHelp ? $0.unavailableHelp : nil }
+        let retouchWaits: (PhotoTool) -> String? = { [PhotoTool.spotHeal, .remove, .bucket].contains($0) ? "Open an image first." : nil }
         #expect(PhotoTool.picked(byTyped: "j", help: retouchWaits) == .heal)
         #expect(PhotoTool.picked(byTyped: "J", help: retouchWaits) == .heal)
         #expect(PhotoTool.picked(byTyped: "g", help: retouchWaits) == .gradient)
