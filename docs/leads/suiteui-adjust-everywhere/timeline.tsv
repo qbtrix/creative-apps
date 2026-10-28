@@ -287,3 +287,4 @@ utc	stage	event	ref	note
 15:53Z	3	AJ-z prep: harness has no multi-app stages; filed gap #5990 (line:suite); AJ-z = AJ-15 + RJ-X60 pending #5990
 15:55Z	3	#5260 Head: moved to f538be60e (gate PASS); AJ-z C4 refresh ed6c602f9 gating
 16:01Z	3	AJ-z C4 PR #5991 opened (gate PASS); feature-done branch c9b3c9d6b gating, PR after #5260 merges
+16:08Z	3	AJ-z feature-done branch c9b3c9d6b gate PASS (RealJobs, AllAppsCatalog green), pushed; PR waits on #5260 merge
