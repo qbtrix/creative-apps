@@ -243,3 +243,4 @@ utc	stage	event	ref	note
 04:54Z	3	restack	#5249 merged → #5257	AJ-halo landed 417c58ed3; #5257 halo-model restacked onto dev (+226-12 f=12), gating
 05:05Z	3	AJ-halo	#5257 restacked on dev 417c58ed3, gate PASS, pushed 203e4d0e5, needs-split->fast-lane
 05:05Z	3	AJ-halo	#5258 restacked onto #5257 203e4d0e5 (5 own files +227-4), gate running
+05:13Z	3	AJ-halo	#5258 gate PASS, pushed 357361888, Head moved; needs-split until #5257 merges
