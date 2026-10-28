@@ -446,3 +446,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 13:52Z stage: #5969 closed, main = dev = f89f5255c, full CI run 40680351181 green. Posted Belt-Slice-Done for AJ-library and AJ-halo on #3777. Left: AJ-photo (#5259 → #5260, clean, waiting on prescreen), then AJ-15 / AJ-z, then Belt-Contact-Sheet.
 - 14:24Z check-in: #5259/#5260 clean, labelled, waiting on prescreen. dev 56ca32ecb, main f89f5255c. New dev-red #5983 (macOS, SuiteTimelineScrubWindowTests; flake rerun pending) has no PRs of ours in its range: not ours.
 - 14:45Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. dev 56ca32ecb, main f89f5255c; #5983 (not ours) is still open.
+- 15:05Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. dev 56ca32ecb, main f89f5255c; #5983 (not ours) is still open.
