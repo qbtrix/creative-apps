@@ -1,0 +1,30 @@
+# Tests/live-standins-baseline.txt: stand-ins left on a live path (LiveStandInTests), one
+# `<file>: <trimmed line>  ## <what retires it>` each: the issue or feature that wires the live type, or
+# `kept: <why>` for a stand-in that stays. An unlisted stand-in fails, and so does a line naming none: this
+# file only shrinks. The PR that wires a slot deletes its line.
+Sources/DesignModel/DesignServices.swift: pen: NotBuilt("The Pen tool"), components: NotBuilt("Components"), variables: NotBuilt("Variables"))  ## pen-paths (Design) #3517; components and variables: D2-2
+Sources/FlareModel/FlareServices.swift: onion: NotBuilt(reason: "Not connected yet (IN-3)."),  ## Flare IN-3 #386
+Sources/FlareModel/FlareServices.swift: library: NotBuilt(reason: "Not connected yet (IN-5)."),  ## Flare IN-5 #387
+Sources/FlareModel/FlareServices.swift: machines: NotBuilt(reason: "Not connected yet (IN-6)."),  ## Flare IN-6 state machines
+Sources/FlareModel/FlareServices.swift: preview: NotBuilt(reason: "Not connected yet (IN-6)."),  ## Flare IN-6 state machines
+Sources/FlareModel/FlareServices.swift: assist: NotBuilt(reason: "Assist needs the suite's model provider."),  ## Flare IN-8 #389
+Sources/HaloModel/HaloServices.swift: text: (any TextRasterizing)? = nil  ## #5280 (Halo headless runs .live with no text)
+Sources/LibraryApp/LibraryApp.swift: static let host = LibraryCatalog(services: .fake())  ## file-flow (Library) #3479
+Sources/LibraryModel/LibraryHeadless.swift: var services = LibraryServices.fake()  ## kept: the headless catalog decodes its own file's images (PNG.read); live culling and coding replace the fakes
+Sources/LibraryModel/LibraryLaunch.swift: looks: any PresetStoring = FakePresetStore(),  ## adjust-everywhere #3777 (LibraryWindow passes the suite's PresetStore; the default stays for headless runs)
+Sources/LibraryModel/LibraryLaunch.swift: sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {  ## metadata-more #1555 (LibraryWindow passes XMPSidecarWriter; the default stays off)
+Sources/LibraryModel/LibraryServices.swift: sidecars: any SidecarWriting = UnconnectedSidecars(), leveler: (any CropLeveling)? = nil,  ## Auto-straighten #3618 (leveler); sidecars: metadata-more #1555
+Sources/LibraryModel/LibraryServices.swift: sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {  ## metadata-more #1555 (LibraryWindow passes XMPSidecarWriter; the default stays off)
+Sources/LibraryModel/Live/LiveCulling.swift: try FakeCulling(mode: .ok).apply(change, to: ids, in: items)  ## cull-finish #3458
+Sources/LibraryModel/Live/LiveDevelop.swift: case .color: throw LibraryError.renderFailed(waiting[.vibrance] ?? "Vibrance isn't built yet")  ## Vibrance and Saturation DV-12 #3425
+Sources/PhotoModel/Live/LiveExportSizing.swift: enum LiveExportSizing { static func make() -> any ExportSizing { NotBuiltExportSizing() } }  ## export-pack (Photo) #3470, PV-8
+Sources/PhotoModel/PhotoServices.swift: public var text: any TextServices = FakeText()  ## #5193 (Photo headless gets FakeText)
+Sources/PhotoModel/PhotoServices.swift: public var looks: any PresetStoring = FakePresetStore()  ## adjust-everywhere AJ-photo-ui #5259 (PhotoWindow hands it the suite's PresetStore)
+Sources/SuiteShell/Live/AssetsSlot.swift: FakeAssets(unavailable: SuiteServices.notConnected("assets"))  ## shared-assets feature
+Sources/SuiteShell/Live/LinkingSlot.swift: FakeLinking()  ## kept: pure reference conformance (linked-assets); its refusal is the answer
+Sources/SuiteShell/Live/RoundTripSlot.swift: FakeRoundTrips(unavailable: SuiteServices.notConnected("roundTrips"))  ## photo-round-trip feature
+Sources/SuiteShell/Live/RoutingSlot.swift: FakeRouting()  ## kept: pure reference conformance (recents-open-in); routing off the type registry
+Sources/SuiteShell/Live/SettingsSlot.swift: FakeSettingsRoute(unavailable: SuiteServices.notConnected("settings"))  ## settings feature (the Settings scene shows SettingsView directly)
+Sources/SuiteShell/Live/ThumbnailsSlot.swift: return FakeThumbnails(unavailable: "Previews can't be kept: \(error.localizedDescription)")  ## kept: fallback when the Thumbnails store can't open; says why
+Sources/SuiteShell/SuiteServices+Live.swift: animations: FakeAnimationSource(), preferences: preferencesSlot(c), settings: settingsSlot(c),  ## kept: no process swaps animations in (with(animations:)), and nothing reads it
+Sources/SuiteShell/SuiteServices+Live.swift: onboarding: onboardingSlot(c), updates: FakeUpdates(), thumbnails: thumbnailsSlot(c), home: homeSlot(c), media: mediaSlot(c),  ## updater: UpdateService.checker() returns nil until the updater ships

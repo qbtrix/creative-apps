@@ -1,0 +1,19 @@
+{
+  "id": "suite-text",
+  "name": "SuiteText",
+  "description": "The live text service on Core Text: LiveText, SuiteModel's TextServices made real (measure spans, list the Mac's font families, draw placed glyphs). Its own module so a headless tool can draw text without SuiteShell's UI glue; SuiteShell re-exports it for the apps. Imports SuiteModel only.",
+  "technology": "Swift 6, Core Text and AppKit, macOS 26",
+  "tags": [
+    "internal",
+    "macos-only"
+  ],
+  "order": 129,
+  "relationships": [
+    {
+      "source": "suite-text",
+      "target": "suite-model",
+      "description": "implements SuiteModel's text contract (TextServices)",
+      "style": "sync"
+    }
+  ]
+}

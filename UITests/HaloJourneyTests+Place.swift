@@ -1,12 +1,14 @@
 // HaloJourneyTests+Place.swift (placed-images PH-u written; PH-7 turned it on): HJ-P1, placing a logo in Halo
 // as a person does (docs/blueprints/halo/features/placed-images.md, Journey steps):
 // 1. New Composition…, 1920 × 1080.
-// 2. File > Place… (Shift-Command-P), choose `logo.svg` (480 × 160) in the panel: a solid `logo` centred, and
-//    IMAGE in the inspector reads "logo.svg · SVG · 480 × 160".
-// 3. Key Scale 0 → 100% (frames 0 → 30) and Opacity 0 → 100.
-// 4. Render Frame (⌘R) at frame 30.
-// 5. Layer > New > Solid (full frame) selected, Fill on, Place… `photo-1200x800.jpg`: the photo fills it;
-//    ⌥-drag on the viewer pans its focus, and one Undo puts the focus back in one step.
+// 2. File > Place…, choose `logo.svg` (480 × 160, red left half, blue right) in the panel: a solid `logo` centred,
+//    and IMAGE in the inspector reads "logo.svg · SVG · 480 × 160".
+// 3. Key Scale 0 → 100% (frames 0 → 30) and Opacity 0 → 100; frame 15 differs from frames 0 and 30.
+// 4. File > Render Frame at frame 30: the rendered frame is red left of centre and blue right of it.
+// 5. Layer > New > Solid (full frame) selected, Fill on, Place… `photo-1200x800.jpg`: the photo fills it by cover,
+//    which crops its yellow top band; ⌥-drag down on the viewer pans its focus to the top (the band shows), and
+//    Edit > Undo puts the focus back in one step. The band is the only part a vertical pan changes (#5003).
+// Menus prove each mode change; the playhead still moves by → from the focused lane.
 // On live services since PH-7 (no fixture: HaloLaunch picks `.live`): the place commands are PH-6's catalog
 // bodies through the window's `haloPlace`. The panel is the system's open panel, driven as
 // PhotoPlaceJourneyTests drives it. One shot per step, "place-".
@@ -42,16 +44,31 @@ final class HaloPlaceJourneyTests: XCTestCase {
             set(property, to: "0", halo)
             halo.element("halo.inspector.key.\(property)").click()
         }
+        let canvas = halo.element("halo.viewer.canvas")
+        let atStart = canvas.screenshot().pngRepresentation
         steps.focusLane("logo")
         for _ in 0..<30 { halo.press(.rightArrow) }
         for property in ["scaleX", "scaleY", "opacity"] { set(property, to: "100", halo) }
         steps.expectKeyState("Opacity", "Keyed at this frame")
         halo.shot("place-keyed")
+        let atEnd = canvas.screenshot().pngRepresentation
+        steps.focusLane("logo")
+        for _ in 0..<15 { halo.press(.leftArrow) }
+        let animates = waitFor {
+            let middle = canvas.screenshot().pngRepresentation
+            return middle != atStart && middle != atEnd
+        }
+        XCTAssert(animates, "frame 15 looks like frame 0 or 30: the keys don't animate")
+        halo.shot("place-scrubbed")
+        for _ in 0..<15 { halo.press(.rightArrow) }
 
-        halo.press(character: "r", .command) // 4.
-        let rendered = halo.element("halo.viewer.summary")
-        XCTAssert(halo.element("halo.viewer.rendered").waitForExistence(timeout: 10), "Render Frame showed no frame")
-        XCTAssert(rendered.label.hasPrefix("Frame 30:"), "the artboard reads \(rendered.label), not frame 30")
+        halo.choose(menu: ["File", "Render Frame"]) // 4.
+        let summary = halo.element("halo.viewer.summary"), rendered = halo.element("halo.viewer.rendered")
+        XCTAssert(rendered.waitForExistence(timeout: 10), "Render Frame showed no frame")
+        XCTAssert(summary.label.hasPrefix("Frame 30:"), "the artboard reads \(summary.label), not frame 30")
+        let (left, right) = (rgb(rendered, x: 0.44), rgb(rendered, x: 0.56))
+        XCTAssert(left.map { $0[0] > $0[2] + 100 } == true, "the render left of centre isn't red: \(left ?? [])")
+        XCTAssert(right.map { $0[2] > $0[0] + 100 } == true, "the render right of centre isn't blue: \(right ?? [])")
         halo.shot("place-rendered")
 
         halo.choose(menu: ["Layer", "New", "Solid"]) // 5.
@@ -60,7 +77,6 @@ final class HaloPlaceJourneyTests: XCTestCase {
         if (fill.value as? Int) != 1 { fill.click() }
         place(photo, halo)
         expectFile("photo-1200x800.jpg · JPEG · 1200 × 800 px", halo)
-        let canvas = halo.element("halo.viewer.canvas")
         let before = canvas.screenshot().pngRepresentation
         XCUIElement.perform(withKeyModifiers: .option) {
             canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
@@ -68,17 +84,22 @@ final class HaloPlaceJourneyTests: XCTestCase {
         }
         XCTAssertNotEqual(canvas.screenshot().pngRepresentation, before, "the ⌥-drag didn't pan the photo")
         halo.shot("place-panned")
-        halo.press(character: "z", .command)
+        let edit = halo.app.menuBars.firstMatch.menuBarItems["Edit"]
+        edit.click()
+        let undo = edit.menus.firstMatch.children(matching: .menuItem)
+            .matching(NSPredicate(format: "title BEGINSWITH 'Undo'")).firstMatch
+        XCTAssert(undo.waitForExistence(timeout: 3) && undo.isEnabled, "Edit has no Undo after the pan")
+        undo.click()
         XCTAssert(waitFor { canvas.screenshot().pngRepresentation == before }, "one Undo didn't restore the pan")
         halo.shot("place-undone")
     }
 
-    /// A 480 × 160 SVG: a dark rounded bar with a light circle.
-    private static let logoSVG = ##"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160"><rect width="480" height="160" rx="24" fill="#202840"/><circle cx="80" cy="80" r="48" fill="#F0C040"/></svg>"##
+    /// A 480 × 160 SVG: red on the left half, blue on the right (the render check in step 4).
+    private static let logoSVG = ##"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160"><rect width="240" height="160" fill="#FF0000"/><rect x="240" width="240" height="160" fill="#0000FF"/></svg>"##
 
     /// File > Place…, then the file at `url` chosen in the panel by its path.
     @MainActor private func place(_ url: URL, _ halo: Journey) {
-        halo.press(character: "p", [.command, .shift])
+        halo.choose(menu: ["File", "Place…"])
         let panel = halo.app.sheets.firstMatch.exists ? halo.app.sheets.firstMatch : halo.app.dialogs.firstMatch
         XCTAssert(panel.waitForExistence(timeout: 10), "Place… opened no panel")
         halo.press(character: "g", [.command, .shift])
@@ -113,13 +134,23 @@ final class HaloPlaceJourneyTests: XCTestCase {
                   "the File row reads \(row.label), not \(summary)")
     }
 
+    /// The sRGB of `element`'s shot at `x` (a fraction of its width) on its middle row; nil if it doesn't decode.
+    @MainActor private func rgb(_ element: XCUIElement, x: Double) -> [Int]? {
+        guard let shot = NSBitmapImageRep(data: element.screenshot().pngRepresentation),
+            let colour = shot.colorAt(x: Int(Double(shot.pixelsWide) * x), y: shot.pixelsHigh / 2)?
+                .usingColorSpace(.sRGB)
+        else { return nil }
+        return [colour.redComponent, colour.greenComponent, colour.blueComponent].map { Int($0 * 255) }
+    }
+
     /// Polls `condition` for up to five seconds.
     @MainActor private func waitFor(_ condition: () -> Bool) -> Bool {
         for _ in 0..<25 where !condition() { Thread.sleep(forTimeInterval: 0.2) }
         return condition()
     }
 
-    /// A `width` × `height` JPEG, red on the left half and blue on the right.
+    /// A `width` × `height` JPEG, red on the left half and blue on the right, with a yellow band over its top 40 rows.
+    /// Cover into 1920 × 1080 crops 62.5 rows off the top, so the band shows only once the focus moves up.
     private func writeImage(to url: URL, width: Int, height: Int) throws {
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
             let context = CGContext(
@@ -130,6 +161,8 @@ final class HaloPlaceJourneyTests: XCTestCase {
         context.fill(CGRect(x: 0, y: 0, width: width / 2, height: height))
         context.setFillColor(CGColor(srgbRed: 0, green: 0, blue: 1, alpha: 1))
         context.fill(CGRect(x: width / 2, y: 0, width: width - width / 2, height: height))
+        context.setFillColor(CGColor(srgbRed: 1, green: 1, blue: 0, alpha: 1))
+        context.fill(CGRect(x: 0, y: height - 40, width: width, height: 40))
         guard let image = context.makeImage(),
             let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.jpeg.identifier as CFString, 1, nil)
         else { throw CocoaError(.fileWriteUnknown) }

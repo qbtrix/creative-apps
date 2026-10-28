@@ -46,7 +46,7 @@ public struct FakeMasking: LayerMasking {
 /// An adjustment layer brightens by one stop, whatever its settings.
 public struct FakeAdjustmentLayers: AdjustmentLayering {
     public var unavailableHelp: String? { nil }
-    public var kinds: [AdjustmentKind] { [.exposure, .levels, .curves, .hueSaturation] }
+    public var kinds: [AdjustmentKind] { [.exposure, .levels, .curves, .hueSaturation, .blackAndWhite, .invert] }
     public init() {}
     public func applying(_ settings: AdjustmentSettings, to below: PixelBuffer, opacity: Double,
                          blendMode: BlendMode, mask: PixelBuffer?) throws -> PixelBuffer {
@@ -81,4 +81,10 @@ public struct FakeTransform: LayerTransforming {
                             y: content.y + Int(t.dy.rounded()))
     }
     public func flipped(_ content: PlacedPixels, _ axis: FlipAxis) throws -> PlacedPixels { content }
+    /// The move `applied` makes, as a matrix.
+    public func matrix(_ draft: TransformDraft, origin: (x: Int, y: Int)) throws -> AffineMatrix {
+        let t = draft.transform
+        let (dx, dy) = t.dx.isFinite && t.dy.isFinite && abs(t.dx) < 1e6 && abs(t.dy) < 1e6 ? (t.dx.rounded(), t.dy.rounded()) : (0, 0)
+        return AffineMatrix(a: 1, b: 0, c: 0, d: 1, tx: Double(origin.x) + dx, ty: Double(origin.y) + dy)
+    }
 }

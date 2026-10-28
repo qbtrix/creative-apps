@@ -56,7 +56,7 @@ import Testing
         #expect(empty.layers.isEmpty)
         var workspace = try image()
         #expect(workspace.addAdjustmentLayerHelp == nil)
-        #expect(workspace.adjustmentLayerKinds == [.exposure, .levels, .curves, .hueSaturation])
+        #expect(workspace.adjustmentLayerKinds == [.exposure, .levels, .curves, .hueSaturation, .blackAndWhite, .invert])
         for kind in workspace.adjustmentLayerKinds {
             let count = workspace.layers.count
             workspace.addAdjustmentLayer(kind)

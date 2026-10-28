@@ -16,7 +16,12 @@
 # variables (Settings, Variables): LANE_MAC_PER_PR=1 restores the per-PR
 # macOS build and Linux-only batches; LANE_MAC_SLOTS, LANE_BATCH_MAX and
 # LANE_BATCH_WAIT_MIN tune batching (empty: the defaults in
-# scripts/fast-lane.sh). While a `dev-red` issue is open the sweep
+# scripts/fast-lane.sh); LANE_KILN=1 holds a batch's mac_only run up to
+# LANE_KILN_WAIT_MIN (20) minutes for a local Mac check that posts
+# local-ci/macos; LANE_VERIFY_AFTER=1 turns on verify after merge
+# (docs/fast-lane.md: a code PR lands alone on its Linux proof plus the
+# local-ci/prescreen status, and a red dev's culprit is reverted in a
+# lane-revert PR the lane opens and lands). While a `dev-red` issue is open the sweep
 # also bisects dev's culprit range with `ci/bisect-<sha>-<i>` branches, one
 # Linux-only run each. The sweep waits up to 7 minutes for such a run, so the
 # job's timeout leaves room for it. workflow_run and schedule fire from the copy of this file on the default
@@ -95,4 +100,7 @@ jobs:
           LANE_MAC_SLOTS: ${{ vars.LANE_MAC_SLOTS }}
           LANE_BATCH_MAX: ${{ vars.LANE_BATCH_MAX }}
           LANE_BATCH_WAIT_MIN: ${{ vars.LANE_BATCH_WAIT_MIN }}
+          LANE_VERIFY_AFTER: ${{ vars.LANE_VERIFY_AFTER }}
+          LANE_KILN: ${{ vars.LANE_KILN }}
+          LANE_KILN_WAIT_MIN: ${{ vars.LANE_KILN_WAIT_MIN }}
         run: bash scripts/fast-lane.sh ${PR_INPUT:+"$PR_INPUT"}

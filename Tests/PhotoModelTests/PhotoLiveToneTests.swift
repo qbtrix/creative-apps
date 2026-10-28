@@ -3,11 +3,14 @@
 // CoreRaster reference within 2 display levels and composites nothing after the first picture; an adjustment
 // layer at the top, one under a pixel layer, and one at 50 % Multiply all take the live route (layer tiles stay
 // resident, nothing read back) and give the reference, and a step on the top or middle layer composites
-// nothing either; Blur sends a region back to the dispatcher route. The "GPU" is CoreRender's CPU backend under
-// another name (it runs tone programs through ToneProgram.map), so it all runs on Linux.
+// nothing either; Blur sends a region back to the dispatcher route; a Free Transform drag frame keeps its base
+// under the draft's layer and draws that layer through its matrix, the same bytes as the dispatcher route's frame.
+// The "GPU" is CoreRender's CPU backend under another name (it runs tone programs through ToneProgram.map), so
+// it all runs on Linux.
 import CoreRaster
 import CoreRender
 import Foundation
+import SuiteKernel
 import Testing
 
 @testable import PhotoModel
@@ -48,6 +51,37 @@ private final class TonedSink: @unchecked Sendable {
 }
 
 @Suite struct PhotoLiveToneTests {
+    /// A Free Transform drag frame on the top (screened) layer under a hue slider: the live route's base ends
+    /// under the draft's layer, so the frame changes the picture and equals the dispatcher route's drag frame,
+    /// and a later frame composites nothing under it.
+    @Test func aTransformDragFrameTakesTheLiveRouteUnderTheDraft() async throws {
+        var workspace = try Self.document()
+        workspace.adjust(.hue(-30))
+        workspace.selectLayer(try #require(workspace.layers.first?.id))
+        workspace.selectTool(.move)
+        try workspace.beginTransform()
+        let canvas = try #require(workspace.canvas)
+        let (route, _, gpu) = Self.route()
+        let sink = TonedSink(backend: gpu, width: canvas.width, height: canvas.height)
+        let opened = try await PhotoRenderer.update(workspace, since: nil, route: route, target: sink.target)
+        let before = sink.bytes
+        let box = try #require(workspace.transformSelection)
+        try workspace.setTransform(SuiteKernel.TransformRules.rotated(box, by: 10), name: "Rotate", drag: "turn")
+        let first = try await PhotoRenderer.update(workspace, since: opened.revision, route: route, target: sink.target, live: true)
+        #expect(first.liveDraft)
+        #expect(sink.bytes != before, "the drag frame left the picture as it was")
+        // The dispatcher route's drag frame of the same workspace, byte for byte: one matrix, one composite.
+        let plain = PhotoRenderRoute(preferred: CPUBackend(name: "plain"))
+        let frame = try await PhotoRenderer.update(workspace, since: nil, route: plain, live: true)
+        let laid = PhotoRenderRouteTests.laid(frame)
+        let worst = zip(sink.bytes, laid).map { abs(Int($0) - Int($1)) }.max() ?? 0
+        #expect(worst <= 2, "the live route's drag frame differs from the dispatcher route's by \(worst) levels")
+        let made = route.composites.made
+        try workspace.setTransform(SuiteKernel.TransformRules.rotated(box, by: 20), name: "Rotate", drag: "turn")
+        _ = try await PhotoRenderer.update(workspace, since: first.revision, route: route, target: sink.target, live: true)
+        #expect(route.composites.made == made, "a later drag frame composited the layers under the draft again")
+    }
+
     /// 600 x 400 (six tiles): a white Background with a red block, and a blue block screened at 60 % on top.
     static func document() throws -> PhotoWorkspace {
         var workspace = PhotoWorkspace()

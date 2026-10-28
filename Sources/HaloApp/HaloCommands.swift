@@ -6,7 +6,8 @@
 // The plain keys (Space, arrows, Home, End, I, O, Delete) act only while the
 // viewer or timeline has focus, so items don't take them as key equivalents:
 // typing in a field never plays, moves or deletes. Layer: New ▸ (Solid,
-// Shape, Text, Null), Duplicate, Rename…, Delete, Bring Forward, Send Backward.
+// Shape, Text, Null), Duplicate, Rename…, Delete, Bring Forward, Send Backward,
+// Add Filter ▸ (HaloAddFilterMenu, through the focused `haloFilter`, AJ-13).
 import HaloModel
 import SuiteUI
 import SwiftUI
@@ -39,10 +40,13 @@ struct HaloMenuTarget {
 }
 
 /// Layer: New ▸ (Solid, Shape, Text, Null), Duplicate ⇧⌘D, Rename…, Delete
-/// (⌫ in the viewer or timeline), Bring Forward ⌘], Send Backward ⌘[.
+/// (⌫ in the viewer or timeline), Bring Forward ⌘], Send Backward ⌘[; then Layer Style…,
+/// Copy, Paste and Clear Layer Style (HaloStyleMenuItems, HaloWindow+Styling.swift); then Add Filter ▸.
 struct HaloCommands: Commands {
     @FocusedValue(\.haloProject) private var model
     @FocusedValue(\.haloPerform) private var perform
+    @FocusedValue(\.haloRunStyleMenu) private var runStyleMenu
+    @FocusedValue(\.haloFilter) private var filter
 
     private var target: HaloMenuTarget { HaloMenuTarget(model: model, perform: perform) }
 
@@ -61,6 +65,10 @@ struct HaloCommands: Commands {
             Divider()
             target.item(.bringLayerForward, shortcut: KeyboardShortcut("]"))
             target.item(.sendLayerBackward, shortcut: KeyboardShortcut("["))
+            Divider()
+            HaloStyleMenuItems(model: model, run: runStyleMenu)
+            Divider()
+            HaloAddFilterMenu(model: model, run: filter)
         }
     }
 }

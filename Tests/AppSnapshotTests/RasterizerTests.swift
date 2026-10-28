@@ -10,6 +10,7 @@ import FlareCore
 import FlareModel
 import Foundation
 import ImageIO
+import SuiteModel
 import SuiteUI
 import Testing
 
@@ -100,6 +101,23 @@ import Testing
         #expect(pixel(image, x: 90, y: 50) == [255, 0, 0, 255], "right side, kept")
         #expect(pixel(image, x: 50, y: 90) == [255, 255, 255, 255], "bottom side, trimmed off")
         #expect(pixel(image, x: 10, y: 50) == [255, 255, 255, 255], "left side, trimmed off")
+    }
+
+    /// FV-7: a movie frame fills exactly the asked size, here MP4's even half of bounce (274 × 200, so x and y scale
+    /// apart), in straight alpha: the ball (center 80, 100 at frame 0) lands at (40, 50) in its fill, and without the
+    /// Background a transparent frame's corner is clear. A zero size throws instead of drawing.
+    @Test func aMovieFrameFillsItsExactSizeInStraightAlpha() throws {
+        var list = Self.bounce
+        list.items.removeAll { $0.address.layerID == "background" }
+        let frame = try StageRasterizer().frame(list, width: 274, height: 200, transparent: true)
+        try #require(frame.width == 274 && frame.height == 200 && frame.rgba.count == 274 * 200 * 4)
+        #expect(Array(frame.rgba[0..<4]) == [0, 0, 0, 0])
+        let at = (50 * 274 + 40) * 4
+        let ball = Array(frame.rgba[at..<at + 4])
+        for (got, want) in zip(ball, [242, 92, 51, 255] as [Int]) {
+            #expect(abs(Int(got) - want) <= 2, "ball center \(ball) should be its fill (0.95, 0.36, 0.2)")
+        }
+        #expect(throws: RasterizerError.self) { try StageRasterizer().frame(list, width: 0, height: 200, transparent: true) }
     }
 }
 #endif

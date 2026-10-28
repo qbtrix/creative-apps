@@ -1,6 +1,7 @@
 // FlareAnchorEditTests.swift (pen-paths FP-1, FP-7): Direct Select's PathEditTarget. The reads (`pathInEdit`, its help,
-// the anchor selection clearing on a new item selection, the box drawn without handles) and the edits: an anchor or
-// handle drag as one "Edit Path", the anchor marquee, a locked layer, and a scaled layer's space. Runs on Linux and macOS.
+// the anchor selection clearing on a new item selection, the box drawn without handles) and the edits, all through the
+// shared path commands: an anchor drag as one "Move Points" and a handle drag as one "Move Handle", one drag token as
+// one step, the anchor marquee, a locked layer, and a scaled layer's space. Runs on Linux and macOS.
 import FlareCore
 @testable import FlareModel
 import SuiteKernel
@@ -65,14 +66,14 @@ import Testing
         workspace.runPath(.select(anchors: [AnchorRef(contour: 0, index: 1)], rect: nil, extend: false))
         workspace.runPath(.move(dx: 30, dy: 0, drag: nil))
         let after = Self.anchors(workspace)
-        #expect(after.count == before.count && workspace.undoActionName == "Undo Edit Path")
+        #expect(after.count == before.count && workspace.undoActionName == "Undo Move Points")
         for (index, (old, new)) in zip(before, after).enumerated() {
             let moved = index == 1 ? Point(x: old.point.x + 30, y: old.point.y) : old.point
             #expect(new.point == moved, "anchor \(index)")
         }
     }
 
-    @Test func anAnchorDragWinsOverTheItemAndIsOneEditPathStep() throws {
+    @Test func anAnchorDragWinsOverTheItemAndIsOneMovePointsStep() throws {
         var workspace = Self.picked()
         let before = Self.anchors(workspace), selection = workspace.selection
         let corner = Self.scene(workspace, try #require(before.dropFirst().first).point)
@@ -83,7 +84,7 @@ import Testing
         let after = Self.anchors(workspace)
         #expect(after.map(\.point) == before.enumerated().map { i, a in i == 1 ? Point(x: a.point.x + 30, y: a.point.y) : a.point })
         #expect(workspace.selection == selection && workspace.anchorSelection.ordered == [AnchorRef(contour: 0, index: 1)])
-        #expect(workspace.undoActionName == "Undo Edit Path" && workspace.dragPreview == nil)
+        #expect(workspace.undoActionName == "Undo Move Points" && workspace.dragPreview == nil)
         workspace.undo()
         #expect(Self.anchors(workspace) == before && workspace.selection == selection)
     }
@@ -104,10 +105,41 @@ import Testing
         let handle = Self.scene(workspace, Point(x: 39, y: 22))  // 15 from the anchor, along (0.6, 0.8)
         workspace.drag(from: Self.scene(workspace, Point(x: 45, y: 10)), to: handle, modifiers: breaking ? [.option] : [])
         let anchor = try #require(Self.anchors(workspace).dropFirst().first)
-        #expect(Self.near(anchor.handleOut, Point(x: 39, y: 22)) && workspace.undoActionName == "Undo Edit Path")
+        #expect(Self.near(anchor.handleOut, Point(x: 39, y: 22)) && workspace.undoActionName == "Undo Move Handle")
         // Smooth: the partner keeps its length, 10, and turns opposite. Broken: it stays and the anchor is a corner.
         #expect(Self.near(anchor.handleIn, breaking ? Point(x: 20, y: 10) : Point(x: 24, y: 2)), "\(anchor)")
         #expect((anchor.kind == .corner) == breaking)
+    }
+
+    @Test func oneDragTokenIsOneStepUntilTheDocumentChanges() throws {
+        var workspace = Self.picked()
+        let before = Self.anchors(workspace)
+        workspace.runPath(.select(anchors: [AnchorRef(contour: 0, index: 1)], rect: nil, extend: false))
+        for _ in 0..<10 { workspace.runPath(.move(dx: 3, dy: 0, drag: "d1")) }
+        let afterD1 = Self.anchors(workspace)
+        #expect(afterD1.dropFirst().first?.point.x == before.dropFirst().first.map { $0.point.x + 30 } && workspace.undoActionName == "Undo Move Points")
+        workspace.undo()
+        #expect(Self.anchors(workspace) == before, "one undo takes the whole drag back")
+        workspace.redo()
+        workspace.runPath(.move(dx: 0, dy: 4, drag: "d2"))
+        workspace.undo()
+        // d2's step is gone, so its next edit is a step of its own and never folds into d1's.
+        workspace.runPath(.move(dx: 0, dy: 4, drag: "d2"))
+        workspace.undo()
+        #expect(Self.anchors(workspace) == afterD1)
+        workspace.undo()
+        #expect(Self.anchors(workspace) == before)
+    }
+
+    @Test func aSaveEndsTheDragTokensStep() throws {
+        var workspace = Self.picked()
+        workspace.runPath(.select(anchors: [AnchorRef(contour: 0, index: 1)], rect: nil, extend: false))
+        workspace.runPath(.move(dx: 3, dy: 0, drag: "d1"))
+        let saved = Self.anchors(workspace)
+        workspace.sessionDidSave()
+        workspace.runPath(.move(dx: 3, dy: 0, drag: "d1"))
+        workspace.undo()
+        #expect(Self.anchors(workspace) == saved, "the saved step stays the saved one")
     }
 
     @Test func shiftAddsAnchorsToTheSelection() throws {

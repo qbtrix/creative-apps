@@ -1,7 +1,8 @@
 // PhotoRendering.swift: View > Rendering for Photo (render-backend adoption
 // R1). One per app process: the suite's live RenderingPreference (one key
 // every suite app shares, so the choice survives a relaunch) and the Metal
-// backend on the system GPU, made on the first route that wants it, its
+// backend on the system GPU (SuiteImaging's ImagingGPU), made on the first
+// route that wants it, its
 // pipelines compiling in the background (until a family lands the dispatcher
 // draws it on the CPU). `route` turns the choice into a PhotoRenderRoute: CPU
 // draws on the CPU; Automatic and GPU prefer Metal while a device exists and
@@ -9,9 +10,8 @@
 // environment, so a window follows it and a test's window (no environment)
 // stays on the CPU. macOS only.
 import CoreRender
-import CoreRenderMetal
-import Metal
 import PhotoModel
+import SuiteImaging
 import SuiteUI
 import SwiftUI
 
@@ -45,8 +45,7 @@ import SwiftUI
 
     /// The Metal backend on the system GPU, compiling in the background; nil without a GPU.
     static func systemGPU() -> (any RenderBackend)? {
-        guard let device = MetalBackend.defaultDevice else { return nil }
-        return try? MetalBackend.startingInBackground(device: device, cacheURL: nil)
+        ImagingGPU.systemBackend()?.renderBackend
     }
 }
 

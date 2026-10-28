@@ -12,9 +12,14 @@
 // It drives scripted steps, each paced at 120 Hz and timed on its own clock as
 // the event's work plus the layout and display it forced: a mouse drag of N
 // samples, clicks, a split-divider drag, a scroll, N increments of an
-// adjustable element and N ticks of any closure (a fake refresh link).
+// adjustable element, a segmented-control segment pick and N ticks of any
+// closure (a fake refresh link). A segment is picked by setting it and
+// sending the control's action, never by an accessibility press, which
+// ends the test process in a later test (#5883).
 // `measure` turns one interaction into a RenderStep: the window body's runs
-// (a debug-only `bodyRuns` counter the caller reads), the root hosting view's
+// (a debug-only `bodyRuns` counter the caller reads; each window puts its own
+// BodyTally in its environment and reports to the running test's, so the
+// counter reads this test's windows, never a parallel suite's), the root hosting view's
 // layout passes and time, and the per-step p50 / p95 (FrameProbe's nearest
 // rank). `expectBodies` gates a body count; `expectP95` judges time and
 // belongs only in tests Tests/perf-suites.txt lists.
@@ -68,15 +73,27 @@ private final class KeyCapableWindow: NSWindow {
 
 /// An app's real window hosted off screen, driven by scripted events.
 @MainActor final class RenderBudgetWindow<Content: View> {
-    let host: CountingHostingView<Content>
+    let host: CountingHostingView<BodyTallied<Content>>
     let window: NSWindow
+    /// This window's own body runs (SuiteUI's BodyTally, in its environment). Unless it was opened with
+    /// `underTest: false` they count in the test's `bodyRuns` too.
+    let tally: BodyTally
+    /// The view the window hosts; set it to show another.
+    var rootView: Content {
+        get { host.rootView.content }
+        set { host.rootView.content = newValue }
+    }
     /// Wall milliseconds of each step in the interaction being measured.
     private var stepTimes: [Double] = []
 
     /// `keyCapable` builds a window that may become key, for a test that sends keys. Never isa-swizzle the window
     /// instead: it is KVO-observed from the start, and a swapped class makes its dealloc throw (NSRangeException
-    /// on "_windowLayerContext") in whichever test is running when it is freed.
-    init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820), keyCapable: Bool = false) {
+    /// on "_windowLayerContext") in whichever test is running when it is freed. `underTest: false` opens a
+    /// neighbour whose bodies never count in the test's `bodyRuns`.
+    init(
+        _ view: Content, size: CGSize = CGSize(width: 1280, height: 820), keyCapable: Bool = false,
+        underTest: Bool = true
+    ) {
         _ = DragSessions.faked
         _ = TestDefaults.registered
         // The accessibility tree, which `element` and `label` read, is built only for a client that asks;
@@ -84,7 +101,8 @@ private final class KeyCapableWindow: NSWindow {
         for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
             NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
         }
-        host = CountingHostingView(rootView: view)
+        tally = BodyTally.forNewWindow(underTest: underTest)
+        host = CountingHostingView(rootView: BodyTallied(content: view, tally: tally))
         let frame = CGRect(origin: .zero, size: size)
         host.frame = frame
         let kind = keyCapable ? KeyCapableWindow.self : NSWindow.self
@@ -266,6 +284,16 @@ private final class KeyCapableWindow: NSWindow {
         Self.node(identifier, in: host)?.accessibilityLabel?() ?? nil
     }
 
+    /// The accessibility value of the element called `identifier` as text (a slider row's "42 px"); nil when
+    /// there is no such element or it has no value.
+    func value(_ identifier: String) -> String? {
+        // The value is `Any?` (a slider's is a number); an AnyObject call would bridge it as a String and trap.
+        guard let node = Self.node(identifier, in: host) as? NSObject,
+              node.responds(to: Selector(("accessibilityValue")))
+        else { return nil }
+        return node.value(forKey: "accessibilityValue").map { "\($0)" }
+    }
+
     /// The window point of `point` on an artboard `size` big drawn in `box` (window coordinates, so y up),
     /// `point` measured from the artboard's top left in its own units.
     func point(_ point: CGPoint, on size: CGSize, in box: CGRect) -> CGPoint {
@@ -285,6 +313,25 @@ private final class KeyCapableWindow: NSWindow {
         }
         walk(host, 0)
         return ids
+    }
+
+    /// Picks the segmented-control segment called `identifier` the way its click ends: it sets the selected
+    /// segment and sends the control's action; false when there is no such segment. Never press a segment
+    /// through accessibility here: NSSegmentedCell's press spins a nested event loop, and in a test process
+    /// (which never runs NSApplication.run) that later ends the main run loop, so the process exits 0 in
+    /// whichever test runs next, with no summary (#5883).
+    @discardableResult func select(segment identifier: String) -> Bool {
+        func controls(_ view: NSView) -> [NSSegmentedControl] {
+            ((view as? NSSegmentedControl).map { [$0] } ?? []) + view.subviews.flatMap(controls)
+        }
+        guard let segment = Self.node(identifier, in: host), let cell = segment.accessibilityParent?() as AnyObject?,
+              let control = controls(host).first(where: { $0.cell === cell }),
+              let index = (0..<control.segmentCount).first(where: {
+                  control.label(forSegment: $0) == segment.accessibilityLabel?()
+              })
+        else { return false }
+        control.selectedSegment = index
+        return control.sendAction(control.action, to: control.target)
     }
 
     /// `count` increments of the adjustable element called `identifier` (a slider, a scrub row), one per
@@ -385,6 +432,15 @@ func expectP95(
 }
 
 /// An NSHostingView that counts its layout passes: one per SwiftUI update of the window.
+/// A harness window's root: its view with the window's BodyTally in the environment, so the view's body
+/// counters report to this window.
+struct BodyTallied<Content: View>: View {
+    var content: Content
+    let tally: BodyTally
+
+    var body: some View { content.environment(\.bodyTally, tally) }
+}
+
 final class CountingHostingView<Content: View>: NSHostingView<Content> {
     private(set) var layouts = 0
     /// Milliseconds spent in all the layout passes.

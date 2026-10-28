@@ -14,6 +14,8 @@ private let allowed = [
     "Sources/LibraryApp/Platform/CatalogStore.swift",
     "Sources/LibraryApp/Platform/CollectionsStore.swift",
     "Sources/LibraryModel/LibraryShare+Kernel.swift",
+    // A copying import clears only its own `.partial` file when a copy fails (catalog-files LC-5).
+    "Sources/LibraryModel/Live/LiveImporter.swift",
 ]
 
 @Test func librarySourcesNeverDeleteAFile() throws {

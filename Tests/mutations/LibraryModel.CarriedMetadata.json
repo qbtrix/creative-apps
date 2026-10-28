@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the policy is not passed: the carrier drops nothing",
+    "file": "Sources/LibraryModel/CarriedMetadata.swift",
+    "find": "return try carrier.carrying(still, from: original, dropping: dropping)",
+    "replace": "return try carrier.carrying(still, from: original, dropping: [])",
+    "tests": "LibraryCarriedMetadataTests"
+  },
+  {
+    "label": "the encoded still is handed over as the source: the original's metadata is never read",
+    "file": "Sources/LibraryModel/CarriedMetadata.swift",
+    "find": "return try carrier.carrying(still, from: original, dropping: dropping)",
+    "replace": "return try carrier.carrying(still, from: still, dropping: dropping)",
+    "tests": "LibraryCarriedMetadataTests"
+  },
+  {
+    "label": "an empty original still goes to the carrier",
+    "file": "Sources/LibraryModel/CarriedMetadata.swift",
+    "find": "let original = read(source), !original.isEmpty else",
+    "replace": "let original = read(source) else",
+    "tests": "LibraryCarriedMetadataTests"
+  }
+]

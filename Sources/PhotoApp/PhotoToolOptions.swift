@@ -65,7 +65,8 @@ struct ToolOptionsSection: View {
                 CropOptions(model: model, perform: perform)
             case .move:
                 hint(model.moveHint)
-                TransformOptions(model: model, perform: perform)
+                // An adjustment layer can't move: its rows would only sit there disabled.
+                if model.canMoveSelection { TransformOptions(model: model, perform: perform) }
             case .eyedropper:
                 hint(Self.eyedropperHint)
                 SampleOptions(model: model, perform: perform)
@@ -76,6 +77,8 @@ struct ToolOptionsSection: View {
                 PhotoFillToolOptions(model: model, perform: perform)
             case .text:
                 hint(Self.typeHint)
+            case .bucket, .spotHeal, .remove:
+                PhotoRetouchOptions(model: model, perform: perform)
             case .pen:
                 hint(Self.penHint)
             }

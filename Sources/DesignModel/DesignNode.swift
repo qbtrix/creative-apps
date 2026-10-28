@@ -240,8 +240,12 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     public var cornerRadius: Double
     /// How opaque the layer draws, 0...1; 1 is fully opaque.
     public var opacity: Double
-    /// The outline drawn centered on the shape's edge; nil draws none.
-    public var stroke: DesignStroke?
+    /// The outline drawn centered on the shape's edge; nil draws none. Boxed with the extras: the kernel's
+    /// stroke (join, cap, dash) is too big to keep inline (DesignNodeStackTests).
+    public var stroke: DesignStroke? {
+        get { extras.value.stroke }
+        set { extras.value.stroke = newValue }
+    }
     /// How a text node's text is set; every other kind keeps `.default`.
     public var textStyle: DesignTextStyle
     /// The kernel's gradient fill, its points in the node's unit box (0...1 across its frame), so a
@@ -272,7 +276,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         get { extras.value.shape }
         set { extras.value.shape = newValue }
     }
-    /// The gradient, shape spec and picture, on the heap so a node stays small on a thread's stack (DesignNodeExtras).
+    /// The stroke, gradient, shape spec and picture, on the heap so a node stays small on a thread's stack (DesignNodeExtras).
     private var extras = DesignNodeExtrasBox()
 
     /// The focus a new picture starts with, and the one a file without the key opens with.
@@ -288,8 +292,8 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         (self.id, self.name, self.kind, self.frame) = (id, name, kind, frame)
         (self.children, self.isHidden, self.isLocked) = (children, isHidden, isLocked)
         (self.fill, self.text, self.cornerRadius) = (fill ?? kind.defaultFill, text, cornerRadius)
-        (self.opacity, self.stroke, self.textStyle) = (opacity, stroke, textStyle)
-        // a plain node keeps the shared empty box
+        (self.opacity, self.textStyle) = (opacity, textStyle)
+        if stroke != nil { self.stroke = stroke }  // a plain node keeps the shared empty box
         if gradient != nil { self.gradient = gradient }
         if kind.holdsPicture, placedAsset != nil { self.placedAsset = placedAsset }
         if let placedFocus, placedFocus != Self.centreFocus { self.placedFocus = placedFocus }
@@ -319,7 +323,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
             fill: container.decode(DesignColor.self, forKey: .fill), text: container.decode(String.self, forKey: .text),
             cornerRadius: container.decodeIfPresent(Double.self, forKey: .cornerRadius) ?? 0,
             opacity: container.decodeIfPresent(Double.self, forKey: .opacity) ?? 1,
-            stroke: container.decodeIfPresent(DesignStroke.self, forKey: .stroke),
+            stroke: Self.stroke(in: container),
             textStyle: container.decodeIfPresent(DesignTextStyle.self, forKey: .textStyle) ?? .default,
             gradient: container.decodeIfPresent(Fill.self, forKey: .gradient),
             placedAsset: container.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset),
@@ -329,6 +333,16 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
         if let shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape) { self.shape = shape }
     }
+
+    /// The stroke as saved now (the kernel's), else as a file written before stroke-style saved it: a colour in
+    /// 0...255 bytes and a width, with the default join and cap; nil when there is none.
+    private static func stroke(in container: KeyedDecodingContainer<CodingKeys>) throws -> DesignStroke? {
+        if let stroke = try? container.decodeIfPresent(DesignStroke.self, forKey: .stroke) { return stroke }
+        return try container.decodeIfPresent(OldStroke.self, forKey: .stroke).map { DesignStroke(color: $0.color, width: $0.width) }
+    }
+
+    /// A stroke as files before stroke-style held it.
+    private struct OldStroke: Decodable { var color: DesignColor; var width: Double }
 
     /// The file's keys, one per stored field.
     enum CodingKeys: String, CodingKey {

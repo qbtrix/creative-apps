@@ -1,0 +1,30 @@
+[
+  {
+    "label": "brushNotCarried: the toolOptions facet carries a default brush, so a brush-size step moves no facet",
+    "file": "Sources/PhotoModel/PhotoFacets.swift",
+    "find": "brush: brushOptions, eraser: eraserOptions",
+    "replace": "brush: PhotoModel.ToolOptions(), eraser: eraserOptions",
+    "tests": "PhotoFacetsTests"
+  },
+  {
+    "label": "pickNotCarried: the document facet drops the layer selection, so a layer pick moves no facet",
+    "file": "Sources/PhotoModel/PhotoFacets.swift",
+    "find": "layerSelection: layerSelection, nextLayerNumber",
+    "replace": "layerSelection: Selection<PhotoLayer.ID>(), nextLayerNumber",
+    "tests": "PhotoFacetsTests"
+  },
+  {
+    "label": "fieldUnplaced: a workspace field is in no facet's list",
+    "file": "Sources/PhotoModel/PhotoFacets.swift",
+    "find": "\"nextLayerNumber\", \"editsMask\"]",
+    "replace": "\"nextLayerNumber\"]",
+    "tests": "PhotoFacetsTests"
+  },
+  {
+    "label": "toolNotCarried: the tool facet always says Move, so a tool switch never reaches the window",
+    "file": "Sources/PhotoModel/PhotoFacets.swift",
+    "find": "tool: .init(tool: tool, cropAspect: cropAspect)",
+    "replace": "tool: .init(tool: .move, cropAspect: cropAspect)",
+    "tests": "PhotoFacetsTests"
+  }
+]

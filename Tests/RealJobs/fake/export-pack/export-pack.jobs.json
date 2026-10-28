@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "app": "fake",
+  "why": "RJ-X42: exports the 500 by 625 (4:5) artwork as JPEG with {\"size\":{\"pixels\":[1080,1350]}} by commands alone. The trap: a 2x scale applied on top (2160 by 2700), off-by-one rounding (1080 by 1349) or a squashed image. The assertion: the file is the fake's flat 1080 by 1350 JPEG, pinned by sha256; FakeCanvasExportTests decodes it at exactly 1080 by 1350, refuses {\"size\":{\"pixels\":[1080,1351]}} without stretch with \"1080 × 1351 doesn't keep the artwork's 4:5 shape. Unlock the ratio to stretch.\", and reads {\"size\":{\"longEdge\":2048}} as 1638 by 2048.",
+  "inputs": ["input/*.fake"],
+  "steps": [
+    {"id": "rect.select", "params": {"id": 1}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "jpeg", "options": {"size": {"pixels": [1080, 1350]}}},
+  "expect": {
+    "out/one.jpeg": {"sha256": "f7a6216d777c3f797f9c4da9faddfe7b7fe5692b30cffc4e8cdc4795e660b708"}
+  },
+  "platforms": ["linux", "macos"]
+}
