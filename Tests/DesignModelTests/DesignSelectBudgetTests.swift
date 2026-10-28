@@ -7,9 +7,11 @@
 // frame with 50 children (rewind, translate); QD-S2, a rectangle draw step;
 // QD-S3, a resize step of one layer and of 20 through the selection's box;
 // QD-S4, a marquee step in Frame 40, whose lookup walks the frames before it.
-// Each is ≤ 1 ms / ≤ 10 ms; QD-S4's gate is a known issue until gap #2695.
-// Each also checks the timed steps did their work, so
-// a body that short-circuits can't pass. All four tests are timed, so the suite
+// Each is ≤ 1 ms / ≤ 10 ms, median and p95. Two bulk rows (#5838) run edit.select
+// with 1,500 ids (≤ 25 ms / ≤ 250 ms) and edit.duplicate of those 1,500 layers
+// (≤ 50 ms / ≤ 500 ms), each of which once walked the tree per layer and took
+// seconds. Each also checks the timed steps did their work, so
+// a body that short-circuits can't pass. All the tests are timed, so the suite
 // is on the perf list (Tests/perf-suites.txt): the merge gate skips it and
 // perf-nightly runs it.
 #if canImport(FoundationEssentials)
@@ -18,6 +20,7 @@ import FoundationEssentials
 import Foundation
 #endif
 @testable import DesignModel
+import SuiteKernel
 import Testing
 
 @Suite struct DesignSelectBudgetTests {
@@ -134,14 +137,10 @@ import Testing
         // (1255, 830) is Frame 40's background (node-1951, 1235 810 160 150), the last frame, so
         // finding its children walks the 39 frames before it and their 1,911 layers.
         #expect(workspace.hitTest(pt(1255, 830)) == "node-1951")
-        // Each step expands the ancestors of every picked layer with a walk from the page's front,
-        // so this step is over its gate until #2695; the work checks below still hold.
-        var steps = 0
-        withKnownIssue("a marquee step walks the tree once per picked layer (gap #2695)", isIntermittent: true) {
-            steps = Self.timeSteps(
-                "QD-S4 marquee step on crowd", on: &workspace, from: pt(1255, 830),
-                ends: [pt(1395, 960), pt(1300, 900)]).steps
-        }
+        // Each step expands the ancestors of every picked layer in one walk of the page (#2695).
+        let steps = Self.timeSteps(
+            "QD-S4 marquee step on crowd", on: &workspace, from: pt(1255, 830),
+            ends: [pt(1395, 960), pt(1300, 900)]).steps
         #expect(steps == 200, "the timed marquees ran \(steps) steps, not 200")
         #expect(workspace.gesture?.route == .marquee("node-1951"))
         let rect = rc(1255, 830, 45, 70)
@@ -152,5 +151,40 @@ import Testing
         #expect(workspace.selectedNodeIDs == expected)
         workspace.endDrag()
         #expect(workspace.history.undo.isEmpty)
+    }
+
+    /// The first 1,500 of `crowd`'s non-frame layers (a frame is every 50th id from node-1), back to front.
+    private static let bulkIDs = (1...2000).filter { ($0 - 1) % 50 != 0 }.prefix(1500).map { "node-\($0)" }
+
+    @Test func selectFifteenHundred() throws {
+        let crowd = DesignFixtures.crowd
+        var workspace = crowd
+        let gate = DesignBudget.linuxDebugGate(device: .milliseconds(25))
+        let params = JSONValue.object(["ids": .array(Self.bulkIDs.map(JSONValue.string))])
+        var runs = 0
+        let report = DesignBudget.expect("edit.select of 1,500 ids on crowd", runs: 5, gate: gate) {
+            workspace = crowd
+            _ = try? DesignWorkspace.catalog.run("edit.select", params: params, on: &workspace)
+            runs += 1
+        }
+        #expect(report.median <= gate, "edit.select of 1,500 ids: \(report), median over the gate \(gate)")
+        #expect(runs == 5)
+        #expect(workspace.selectedNodeIDs == Self.bulkIDs)
+        #expect(workspace.isExpanded("node-1") && workspace.isExpanded("node-1501"))
+    }
+
+    @Test func duplicateFifteenHundred() throws {
+        var selected = DesignFixtures.crowd
+        try selected.select(Self.bulkIDs)
+        var workspace = selected
+        let gate = DesignBudget.linuxDebugGate(device: .milliseconds(50))
+        let report = DesignBudget.expect("edit.duplicate of 1,500 layers on crowd", runs: 5, gate: gate) {
+            workspace = selected
+            _ = try? DesignWorkspace.catalog.run("edit.duplicate", params: .object([:]), on: &workspace)
+        }
+        #expect(report.median <= gate, "edit.duplicate of 1,500 layers: \(report), median over the gate \(gate)")
+        #expect(workspace.selectedNodeIDs.count == 1500)
+        #expect(Set(workspace.selectedNodeIDs).isDisjoint(with: Self.bulkIDs))
+        #expect(workspace.undoActionName == "Undo Duplicate")
     }
 }

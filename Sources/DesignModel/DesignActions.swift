@@ -132,7 +132,7 @@ extension DesignWorkspace {
         guard !next.ordered.isEmpty else { return }
         commitTextEdit()
         adopt(next)
-        for id in next.ordered { expandAncestors(of: id, in: page.nodes) }
+        expandAncestors(of: next.ordered, in: page.nodes)
     }
 
     /// A mint over the file's ids, for a use case that adds nodes.
@@ -152,7 +152,7 @@ extension DesignWorkspace {
         }
         pages[index].nodes = edit.nodes
         selectedNodeIDs = edit.selection
-        for id in edit.selection { expandAncestors(of: id, in: edit.nodes) }
+        expandAncestors(of: edit.selection, in: edit.nodes)
         if let mint { nodeCount = Swift.max(nodeCount, mint.counter) }
         record(edit.name, before: before, coalescing: edit.coalescingKey)
     }
