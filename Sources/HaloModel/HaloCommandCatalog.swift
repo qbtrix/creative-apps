@@ -14,15 +14,16 @@ extension HaloProject {
     /// selected layer (transform HT-6), `frameRateSpecs` (frame-rates FR-8b), the five `place.*`
     /// commands (placed-images PH-6), the eleven `style.*` commands (layer-styles HY-1), `textStyleSpecs`
     /// (text-style TS-9), the suite's five `file.*` recents, Open In and drop commands (file-flow HF-3, whose
-    /// `file.open-recent` takes a recent file's id in place of the path `.openRecent` names), `edit.copy-frame`
-    /// and `edit.paste` (clipboard-interop CB-10), then `windowSpecs`.
+    /// `file.open-recent` takes a recent file's id in place of the path `.openRecent` names), the selected
+    /// layer's kind and filter commands and its list's `filter.set-hidden` and `filter.remove`
+    /// (adjust-everywhere AJ-12), `edit.copy-frame` and `edit.paste` (clipboard-interop CB-10), then `windowSpecs`.
     public static let commandSpecs: [CommandSpec<HaloProject>] =
         HaloCommand.allCases.map(spec(for:)).filter { $0.id != "file.open-recent" } + ShapeCommands.specs(HaloProject.self)
         + GradientCommands.specs(HaloProject.self) + StrokeCommands.specs(HaloProject.self)
         + HistoryCommands.specs(HaloProject.self) + TransformCommands.specs(HaloProject.self) + frameRateSpecs
         + PlaceCommands.specs(HaloProject.self) + StyleCommands.specs(HaloProject.self) + textStyleSpecs
-        + FileFlowCommands.specs(HaloProject.self) + CopyAsCommands.frameSpecs(HaloProject.self) + pasteSpecs
-        + windowSpecs
+        + FileFlowCommands.specs(HaloProject.self) + filterSpecs + CopyAsCommands.frameSpecs(HaloProject.self)
+        + pasteSpecs + windowSpecs
 
     /// The kernel's text commands but `text.set-size`: Halo's own (`HaloCommand.setFontSize`, which the
     /// inspector's size row runs) keeps that id, so the catalog holds it once.
