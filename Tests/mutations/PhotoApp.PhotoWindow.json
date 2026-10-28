@@ -1,0 +1,9 @@
+[
+  {
+    "label": "windowReadsOptions: the window's body also reads the toolOptions facet, so every brush-size step re-runs the window and its editor",
+    "file": "Sources/PhotoApp/PhotoWindow.swift",
+    "find": "session.workspace(reading: .document, .tool, .adjust, .history, .status, .canvas, .file)",
+    "replace": "session.workspace(reading: .document, .tool, .toolOptions, .adjust, .history, .status, .canvas, .file)",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  }
+]

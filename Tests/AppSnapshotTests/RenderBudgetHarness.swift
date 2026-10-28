@@ -272,7 +272,11 @@ private final class KeyCapableWindow: NSWindow {
     /// The accessibility value of the element called `identifier` as text (a slider row's "42 px"); nil when
     /// there is no such element or it has no value.
     func value(_ identifier: String) -> String? {
-        (Self.node(identifier, in: host)?.accessibilityValue?() ?? nil).map { "\($0)" }
+        // The value is `Any?` (a slider's is a number); an AnyObject call would bridge it as a String and trap.
+        guard let node = Self.node(identifier, in: host) as? NSObject,
+              node.responds(to: Selector(("accessibilityValue")))
+        else { return nil }
+        return node.value(forKey: "accessibilityValue").map { "\($0)" }
     }
 
     /// The window point of `point` on an artboard `size` big drawn in `box` (window coordinates, so y up),

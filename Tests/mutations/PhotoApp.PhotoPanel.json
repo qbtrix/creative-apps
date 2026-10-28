@@ -1,0 +1,9 @@
+[
+  {
+    "label": "panelSkipsOptions: the inspector stops reading the toolOptions facet, so a brush-size step leaves its Size row stale",
+    "file": "Sources/PhotoApp/PhotoPanel.swift",
+    "find": "session?.workspace(reading: .tool, .toolOptions, .adjust, .history)",
+    "replace": "session?.workspace(reading: .tool, .adjust, .history)",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  }
+]
