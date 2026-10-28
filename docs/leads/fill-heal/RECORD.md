@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-27T23:24Z · 23:24Z check-in: no change; #5818 still red (6dab26f rerun red); PRs ready, footers clean; no #5093 answer; no new main run
+Polled: 2026-10-28T00:12Z · 00:12Z check-in: no change; #5818 still red (7b2c437 rerun red); PRs ready, footers clean; no #5093 answer; no new main run
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
