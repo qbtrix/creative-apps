@@ -433,3 +433,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 02:34Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 8e567a5a5, main fef52e668.
 - 02:55Z check-in: #5250 went needs-rebase; merged dev 2e97c4498 into it (photo golden union by id, dev wins), gating before push. #5249, #5252 clean, waiting for local-ci/prescreen. main fef52e668.
 - 03:03Z #5250: dev merged (golden union), scripts/ci --changed PASS + AfterGlowCLI/LiveStandIn/PhotoCommandCatalog tests + mutate --validate, pushed 085b6f600, Head: moved. Note: the session's GitHub proxy re-appends an attribution footer to PR bodies on every edit; can't remove it from here, lane strips it on squash.
+- 03:16Z check-in: #5250 clean at 085b6f600, needs-rebase dropped. #5249, #5252, #5250 waiting for local-ci/prescreen. dev 2e97c4498, main fef52e668.
