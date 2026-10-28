@@ -288,3 +288,4 @@ utc	stage	event	ref	note
 2026-10-28T13:04Z	3	check-in	same	H-J12 same fail at 621020fc (partial); halo 40679453979 running
 2026-10-28T14:40Z	3	check-in	H-J12 same; PlayHittable pass	halo 40679453979 done 92 cases; new non-core failures testBlurTitleLayer, testPlaybackHoldsRate recorded
 2026-10-28T16:43Z	3	check-in	no new Halo cases	halo 40711987595 running; full runs cancelled
+2026-10-28T18:16Z	3	check-in	H-J12 same; PlayHittable pass	halo 40711987595 done 92 cases; failure set unchanged
