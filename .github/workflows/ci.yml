@@ -233,7 +233,7 @@ jobs:
           fi
           scripts/lottie-oracle/build
       - run: scripts/ci --build-only
-        timeout-minutes: 40  # under the job's 45: an overrun fails the step, so the gate goes red (a job timeout is only cancelled)
+        timeout-minutes: 40  # under the job's 45: an overrun fails the step, so the gate goes red (a job timeout can read as cancelled)
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Pack the build
@@ -457,8 +457,9 @@ jobs:
   # must make it red, not skipped), except when one of them was cancelled and
   # none failed (the concurrency group, or no runner took it): then the gate
   # is skipped, neither green nor red, so Promote and Dev red skip too and the
-  # run says nothing about dev. A job that hits its own timeout is cancelled
-  # too, so each long step has a timeout under its job's, and an overrun fails.
+  # run says nothing about dev. A job that hits its own timeout can be
+  # reported cancelled too, so each long step has a timeout under its job's,
+  # and an overrun fails.
   # Its summary lists each macOS job's minutes. When red it deletes
   # `app-builds`, so a red run ships no bundles.
   macos:

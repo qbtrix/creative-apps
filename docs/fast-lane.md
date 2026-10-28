@@ -33,7 +33,7 @@ CI's `macOS` gate job is red when the compile job, a test job or the bundles
 failed. When one of them was cancelled and none failed (the concurrency group
 replaced it, or no runner took it, as in run 40716958063) the gate is skipped,
 neither green nor red: Promote and Dev red skip with it, so that run opens no
-dev-red issue and moves no main. A job that hits its `timeout-minutes` is
+dev-red issue and moves no main. A job that hits its `timeout-minutes` can be
 reported as cancelled too, so the long steps (`scripts/ci --build-only`,
 `scripts/bundle-apps`, the test steps) each carry a step timeout 5 minutes
 under their job's, and an overrun fails the step and turns the gate red.
