@@ -126,7 +126,11 @@ public struct PhotoWorkspace: Sendable {
     /// The use cases (PhotoServices); `.live` in the app, `.fake` under -PhotoFixture.
     public internal(set) var services: PhotoServices = .live
     /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
-    public internal(set) var selectionMask: Mask?
+    public internal(set) var selectionMask: Mask? {
+        didSet { if selectionMask != oldValue { maskOutline = Self.outline(selectionMask) } }
+    }
+    /// `selectionMask`'s outline, traced once per change for the ants (PhotoSelectionMask.swift).
+    var maskOutline: [[Point]] = []
     /// The selection's kernel recipe and Reselect's (PhotoArea+Kernel.swift).
     var area = PhotoArea()
     /// The area tools' mode, feather and wand options (PhotoAreaTool.swift).
