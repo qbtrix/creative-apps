@@ -334,3 +334,4 @@ utc	stage	event	ref	note
 2026-10-28T14:48Z	3	heartbeat	lane	poll 2026-10-28T14:48Z: 14:48Z check-in: no change; #5103/#5149 await prescreen; dev-red #5983 (stale rerun) not ours
 2026-10-28T15:43Z	3	heartbeat	lane	poll 2026-10-28T15:43Z: 15:45Z check-in: #5149 merged; fixing #5103 pre-screen (maskOutline facet)
 2026-10-28T16:36Z	3	heartbeat	lane	poll 2026-10-28T16:36Z: 16:37Z check-in: #5103 at 51813ef6 (conflict resolved), awaiting prescreen
+2026-10-28T17:25Z	3	heartbeat	lane	poll 2026-10-28T17:25Z: 17:25Z: #5103 prescreen green, awaiting lane batch; full CI 40729575340 queued
