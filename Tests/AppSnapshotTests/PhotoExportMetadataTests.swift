@@ -8,6 +8,7 @@
 #if os(macOS)
 import Foundation
 import PhotoModel
+import SuiteModel
 import SuiteShell
 import Testing
 
@@ -36,6 +37,14 @@ import Testing
         let kept = try carrier.properties(of: PhotoWindow.carryingMetadata(still, from: sample))
         #expect(wanted.isSubset(of: kept), "missing \(wanted.subtracting(kept).sorted())")
         #expect(!kept.contains("Orientation") && !kept.contains("{TIFF}.Orientation"))
+    }
+
+    @Test func theCarrierGetsTheSourceAndDropsOnlyTheOrientation() async throws {
+        let still = try await exported()
+        let carrier = FakeMetadata()
+        _ = PhotoWindow.carryingMetadata(still, from: sample, carrier: carrier)
+        #expect(carrier.carried.map(\.source) == [try Data(contentsOf: sample)])
+        #expect(carrier.carried.map(\.dropping) == [["Orientation", "{TIFF}.Orientation"]])
     }
 
     @Test func noSourceOrAnUnreadableOneLeavesTheStillAsEncoded() async throws {
