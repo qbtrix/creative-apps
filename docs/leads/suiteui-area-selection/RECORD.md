@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: done (all slices Belt-Slice-Done; Belt-Contact-Sheet posted)
 Base: main b661530c (verified, full CI 40771139414 green)
 Next: none
-Polled: 2026-10-28T23:20Z · main b661530c contains #5254 and #5256; Belt-Slice-Done AR-z and Belt-Contact-Sheet posted on #3752
+Polled: 2026-10-28T22:59Z · main b661530c contains #5254 and #5256; Belt-Slice-Done AR-z and Belt-Contact-Sheet posted on #3752
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -33,7 +33,7 @@ Polled: 2026-10-28T23:20Z · main b661530c contains #5254 and #5256; Belt-Slice-
 |---|---|---|---|---|---|
 
 ## Decisions
-- 2026-10-28T23:20Z: main promoted to b661530c by green full run 40771139414, which contains #5254 and #5256. Posted Belt-Slice-Done AR-z and the Belt-Contact-Sheet on #3752 (journeys 40781788708 running; #5986 noted, not filed against this feature). Feature done.
+- 2026-10-28T22:59Z: main promoted to b661530c by green full run 40771139414, which contains #5254 and #5256. Posted Belt-Slice-Done AR-z and the Belt-Contact-Sheet on #3752 (journeys 40781788708 running; #5986 noted, not filed against this feature). Feature done.
 - 2026-10-26T02:14Z: Run act-1a175f7cb67-l7rh resumed. #5096 got needs-rebase (photo.list-commands.json conflict); fixing by merging origin/dev and regenerating the golden from `afterglow photo list-commands`.
 - 2026-10-25T05:20Z: #5096 lost fast-lane at 578 lines after #4877 squash-merged; merged origin/dev (PhotoStroke/PhotoWorkspace both-sides fields, setArea kept, golden union by id), scripts/ci --changed PASS, pushed 7c7f27654, body Head moved and footer stripped, fast-lane re-added.
 - 2026-10-25T04:45Z: #4877 merged; retargeted #5096 to dev (REST PATCH base=dev).
