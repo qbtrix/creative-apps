@@ -47,7 +47,7 @@ import Testing
 
     @Test func isBuiltWithTheFourLayerKinds() {
         #expect(layering.unavailableHelp == nil)
-        #expect(layering.kinds == [.exposure, .levels, .curves, .hueSaturation])
+        #expect(layering.kinds == [.exposure, .levels, .curves, .hueSaturation, .blackAndWhite, .invert])
         #expect(LiveAdjustmentLayers.make().unavailableHelp == nil)
     }
 

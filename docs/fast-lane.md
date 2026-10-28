@@ -75,7 +75,16 @@ changed picks, golden PNGs and fixtures included, anything shared meaning
 every app). Its macOS pass is
 that run's `macOS` job or a LOCAL_MAC_CONTEXT commit status (the local Mac
 gate) on the batch head, unless the other one is red there: a red outranks a
-green on the same head. When both are green every PR lands in order
+green on the same head. With the repo variable LANE_KILN=1 (off by default,
+and then nothing below changes) a local Mac check that posts LOCAL_MAC_CONTEXT
+answers first: mac_hold keeps the batch commit's `mac_only` dispatch back
+while that commit is under LANE_KILN_WAIT_MIN minutes old (default 20), and
+each sweep looks again. A pending status reads as running, a success is the
+pass, a failure is red and starts the bisect as usual, and an `error` (the
+local check's own infra failure, never a test result) counts as no answer, so
+once the wait runs out with no answer the `mac_only` run goes out as before.
+The lane reads the status's state and context, never its description. When
+both are green every PR lands in order
 (squash, head matched). A lone ready PR without code lands at once, as does
 any lone PR with LANE_MAC_PER_PR=1; a lone code PR is a batch of one. No
 proof is trusted once it is stale (proof_stale, lesson 244): dev changed a

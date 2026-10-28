@@ -1,0 +1,5 @@
+[
+  {"label": "lettersIgnored: a printable key doesn't reach the box, so the canvas picks tools with it", "file": "Sources/PhotoModel/PhotoTextBoxKeys.swift", "find": "            return .type(draft + characters)", "replace": "            return nil", "tests": "PhotoTextBoxKeyTests"},
+  {"label": "returnIgnored: Return doesn't commit the box", "file": "Sources/PhotoModel/PhotoTextBoxKeys.swift", "find": "case \"\\r\", \"\\n\", \"\\r\\n\", \"\\u{3}\": return .commit", "replace": "case \"\\n\", \"\\r\\n\", \"\\u{3}\": return .commit", "tests": "PhotoTextBoxKeyTests"},
+  {"label": "arrowsTyped: an arrow key's private-use code lands in the draft", "file": "Sources/PhotoModel/PhotoTextBoxKeys.swift", "find": "scalar.value != 0x7F && !(0xF700...0xF8FF).contains(scalar.value)", "replace": "scalar.value != 0x7F", "tests": "PhotoTextBoxKeyTests"}
+]
