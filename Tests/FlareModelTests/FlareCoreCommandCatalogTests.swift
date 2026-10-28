@@ -48,12 +48,13 @@ import Testing
     @Test func everyExampleRunsInOrderAndUndoRestoresTheSavedBytes() throws {
         var workspace = opened()
         let saved = try FlareFormat.encode(try #require(workspace.document))
-        // FlareCore has not built shape keyframes yet (TrackCommands.notBuilt), so the dry run says so.
+        // FlareCore has not built shape keyframes yet (TrackCommands.notBuilt), so the dry run says that, not a
+        // generic refusal a caller can't tell from a bad param (#5283).
         let notBuilt: Set = ["shape-key.set", "shape-key.remove"]
         let coreIDs = Dictionary(uniqueKeysWithValues: CommandRegistry.builtIn.ids.map { (FlareWorkspace.catalogID($0), $0) })
         for spec in FlareWorkspace.coreCommands {
             guard !notBuilt.contains(spec.id) else {
-                #expect(catalog.availability(spec.id, on: workspace) == .unavailable("That change could not be made."))
+                #expect(catalog.availability(spec.id, on: workspace) == .unavailable("That isn\u{2019}t built in Flare yet."))
                 continue
             }
             if let coreID = coreIDs[spec.id], FlareWorkspace.notDrawnOnStage.contains(coreID) {
@@ -73,7 +74,9 @@ import Testing
         #expect(try FlareFormat.encode(try #require(workspace.document)) == saved)
     }
 
-    @Test func aLockedLayersCommandIsUnavailableWithTheEnginesMessage() throws {
+    /// A locked layer-1 says nothing about another layer the params could name, so the id stays available and the run
+    /// refuses with the engine's message (#5841).
+    @Test func aLockedLayersCommandIsRefusedWithTheEnginesMessage() throws {
         var workspace = opened()
         let locked = "The layer is locked. Unlock it to change it."
         for id in ["layer.add", "layer.set-flags"] {
@@ -83,9 +86,9 @@ import Testing
         }
         // A locked layer refuses content edits (a rename or flag change still goes through).
         let addShape = try #require(catalog.spec("shape.add"))
-        #expect(catalog.availability("shape.add", on: workspace) == .unavailable(locked))
+        #expect(catalog.availability("shape.add", on: workspace) == .available)
         let before = workspace.document
-        #expect(throws: CatalogError.unavailable(id: "shape.add", why: locked)) {
+        #expect(throws: CatalogError.failed(id: "shape.add", message: locked)) {
             try catalog.run("shape.add", params: addShape.example, on: &workspace)
         }
         #expect(workspace.document == before)

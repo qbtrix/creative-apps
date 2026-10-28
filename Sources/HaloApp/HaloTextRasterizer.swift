@@ -9,7 +9,12 @@
 // viewer-playback's pinned baseline rule), in the layer's sRGB color matched
 // to linear by Core Graphics, then copies it top row first into a PixelBuffer
 // (linear light, premultiplied, (0, 0) the box's top left). A context Core
-// Graphics won't make throws; nothing here force-unwraps or crashes.
+// Graphics won't make throws; nothing here force-unwraps or crashes. A layer
+// off the standard face, or of two lines, is set instead by the kernel's
+// layout (`HaloTextContent.laidOut`, text-style TS-10): its family, weight
+// and italic make the font, each grapheme's advance in it feeds the layout,
+// and each line draws as its own CTLine, tracked by kCTKernAttributeName, at
+// its lead x and baseline.
 import CoreGraphics
 import CoreRaster
 import CoreText
@@ -54,8 +59,14 @@ struct HaloTextRasterizer: TextRasterizing {
             context.setShouldSmoothFonts(false)
             context.textMatrix = .identity
             // Core Graphics bitmaps are y-up: the baseline sits `descent` above the bottom row.
-            context.textPosition = CGPoint(x: 0, y: layout.descent)
-            CTLineDraw(line, context)
+            if layout.placed.isEmpty {
+                context.textPosition = CGPoint(x: 0, y: layout.descent)
+                CTLineDraw(line, context)
+            }
+            for placed in layout.placed {
+                context.textPosition = placed.origin
+                CTLineDraw(placed.line, context)
+            }
             context.flush()
             return true
         }
@@ -75,17 +86,27 @@ struct HaloTextRasterizer: TextRasterizing {
     static let bitmapInfo = CGBitmapInfo(alpha: .premultipliedLast, component: .float, byteOrder: .order32Host)
 
     /// One laid-out line: the CTLine (nil when Core Foundation made no
-    /// attributed string), the whole-pixel box and the line's descent.
+    /// attributed string), the whole-pixel box and the line's descent; and,
+    /// for a layer set by the kernel's layout, each line and its y-up origin.
     struct Layout {
         var line: CTLine?
         var width: Double
         var height: Double
         var descent: CGFloat
+        var placed: [Placed] = []
+    }
+
+    /// One line of a laid-out layer and where its baseline starts, y up.
+    struct Placed {
+        var line: CTLine
+        var origin: CGPoint
     }
 
     /// `text` as one CTLine in the system UI font, with `color` as its
-    /// foreground when given, and its typographic box rounded up.
+    /// foreground when given, and its typographic box rounded up; a layer
+    /// that draws through the layout is set line by line instead.
     static func layout(_ text: HaloTextContent, color: CGColor?) -> Layout {
+        if text.drawsThroughLayout { return styled(text, color: color) }
         guard let line = line(text, color: color) else { return Layout(line: nil, width: 1, height: 1, descent: 0) }
         var ascent: CGFloat = 0, descent: CGFloat = 0, leading: CGFloat = 0
         let advance = CTLineGetTypographicBounds(line, &ascent, &descent, &leading)

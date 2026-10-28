@@ -9,9 +9,23 @@
   {
     "label": "a copy drops the stroke",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "opacity: node.opacity, stroke: node.stroke, textStyle: node.textStyle)",
-    "replace": "opacity: node.opacity, stroke: nil, textStyle: node.textStyle)",
+    "find": "        extras = node.extras\n",
+    "replace": "        extras = node.extras\n        extras.value.stroke = nil\n",
     "tests": "DesignStyleSchemaTests.swift"
+  },
+  {
+    "label": "aCopyKeepsItsOwnStroke: a new node drops the stroke it is given",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if stroke != nil { self.stroke = stroke }",
+    "replace": "",
+    "tests": "DesignStrokeBoxTests"
+  },
+  {
+    "label": "aCopyKeepsItsOwnStroke: the boxed stroke always reads nil",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "get { extras.value.stroke }",
+    "replace": "get { nil }",
+    "tests": "DesignStrokeBoxTests"
   },
   {
     "label": "the text style is not decoded",
@@ -65,9 +79,37 @@
   {
     "label": "the gradient is not decoded",
     "file": "Sources/DesignModel/DesignNode.swift",
-    "find": "gradient: container.decodeIfPresent(Fill.self, forKey: .gradient))",
-    "replace": "gradient: nil)",
+    "find": "gradient: container.decodeIfPresent(Fill.self, forKey: .gradient),",
+    "replace": "gradient: nil,",
     "tests": "DesignGradientTests.swift"
+  },
+  {
+    "label": "a copy drops the picture",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "        extras = node.extras",
+    "replace": "        extras = node.extras; placedAsset = nil",
+    "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "the picture is not decoded",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "placedAsset: container.decodeIfPresent(PlacedAsset.self, forKey: .placedAsset),",
+    "replace": "placedAsset: nil,",
+    "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "a centred focus is written, so an old file saves with a new key",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if placedFocus != Self.centreFocus { try container.encode(placedFocus, forKey: .placedFocus) }",
+    "replace": "try container.encode(placedFocus, forKey: .placedFocus)",
+    "tests": "DesignPlaceTests.swift"
+  },
+  {
+    "label": "an ellipse or text keeps a picture",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if kind.holdsPicture, placedAsset != nil { self.placedAsset = placedAsset }",
+    "replace": "if placedAsset != nil { self.placedAsset = placedAsset }",
+    "tests": "DesignPlaceTests.swift"
   },
   {
     "label": "the turn is not decoded",
@@ -96,5 +138,19 @@
     "find": "if flipY { try container.encode(flipY, forKey: .flipY) }",
     "replace": "if flipY { try container.encode(flipY, forKey: .flipX) }",
     "tests": "DesignTransformTests.swift"
+  },
+  {
+    "label": "oldStrokeDecodes: a file's old {color, width} stroke is not read",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "return try container.decodeIfPresent(OldStroke.self, forKey: .stroke).map { DesignStroke(color: $0.color, width: $0.width) }",
+    "replace": "return nil",
+    "tests": "DesignStrokeMigrationTests"
+  },
+  {
+    "label": "newStrokeDecodes: a saved kernel stroke decodes as nil",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "forKey: .stroke) { return stroke }",
+    "replace": "forKey: .stroke) { _ = stroke; return nil }",
+    "tests": "DesignStrokeMigrationTests"
   }
 ]

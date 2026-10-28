@@ -7,6 +7,9 @@
 // per request, the shape the grid journey passed with: a pass gathered in one
 // task group left every cell loading (#2749). The images live in a store the
 // window's body never reads (#2709), so an answer reruns only the grid.
+// A scroll asks two screens either side too and cancels the requests it left
+// behind, so a fast scroll through 10,000 photos never queues a decode it no
+// longer needs (large-catalog LG-5, #3108).
 import LibraryModel
 import SwiftUI
 
@@ -26,6 +29,19 @@ import SwiftUI
         let requests = cache.requestThumbnails(visible: visible, in: catalog)
         publish()
         return requests
+    }
+
+    /// A scroll's pass: the visible cells, then two screens either side; the
+    /// pending requests it left behind come back cancelled.
+    func pass(visible: [String], in catalog: LibraryCatalog) -> ThumbnailPass {
+        let pass = cache.thumbnailPass(visible: visible, in: catalog)
+        publish()
+        return pass
+    }
+
+    /// The photo with `id`, through the cache's position map.
+    func photo(_ id: String, in catalog: LibraryCatalog) -> PhotoItem? {
+        cache.photo(id, in: catalog)
     }
 
     /// A pass's answers; returns the failed photos' new availability for the catalog.
@@ -61,6 +77,8 @@ final class ThumbnailsAreaState {
     var cell: (size: Int, scale: Int)?
     /// The held images and requests, apart from the catalog.
     let store = LibraryThumbnailStore()
+    /// The decode running for each request, cancelled when a scroll leaves it.
+    var tasks: [ThumbnailRequest: Task<Void, Never>] = [:]
 }
 
 extension LibraryWindow {
@@ -73,7 +91,7 @@ extension LibraryWindow {
     /// The cells on screen: requests for those without a current image.
     private func thumbnailsVisibleChanged(_ ids: [String]) {
         areas.thumbnails.visible = ids
-        runThumbnailRequests(areas.thumbnails.store.request(visible: ids, in: model))
+        runThumbnailPass(visible: ids)
     }
 
     /// After a develop edit ends (develop DV-8): drops the held images of
@@ -83,7 +101,7 @@ extension LibraryWindow {
         let state = areas.thumbnails
         state.store.invalidate(ids)
         guard !state.visible.isEmpty else { return }
-        runThumbnailRequests(state.store.request(visible: state.visible, in: model))
+        runThumbnailPass(visible: state.visible)
     }
 
     /// A new cell size or display scale: the bucket, then the visible cells again.
@@ -93,27 +111,36 @@ extension LibraryWindow {
         state.cell = (size, scale)
         state.store.cellSizeChanged(size, scale: scale)
         guard !state.visible.isEmpty else { return }
-        runThumbnailRequests(state.store.request(visible: state.visible, in: model))
+        runThumbnailPass(visible: state.visible)
+    }
+
+    /// A pass over `visible`: cancels the decodes it left behind, then runs its requests.
+    private func runThumbnailPass(visible: [String]) {
+        let state = areas.thumbnails
+        let pass = state.store.pass(visible: visible, in: model)
+        for request in pass.cancelled { state.tasks.removeValue(forKey: request)?.cancel() }
+        runThumbnailRequests(pass.requests)
     }
 
     /// Each request on the thumbnails service off the main actor; its answer
     /// lands in the store when it arrives, and the catalog changes only when
-    /// a file failed.
+    /// a file failed. Cancelling a request's task cancels its decode.
     private func runThumbnailRequests(_ requests: [ThumbnailRequest]) {
-        guard !requests.isEmpty else { return }
         let service = model.services.thumbnails
-        var photos: [String: PhotoItem] = [:]
-        for photo in model.items { photos[photo.id] = photo }
+        let state = areas.thumbnails
         for request in requests {
-            guard let photo = photos[request.id] else { continue }
-            Task {
-                let result = await Task.detached(priority: .userInitiated) { () -> Result<DisplayImage, LibraryError> in
+            guard let photo = state.store.photo(request.id, in: model) else { continue }
+            state.tasks[request] = Task {
+                let decode = Task.detached(priority: .userInitiated) { () -> Result<DisplayImage, LibraryError> in
                     do {
                         return .success(try await service.thumbnail(for: photo, longSide: request.longSide))
                     } catch {
                         return .failure(error as? LibraryError ?? .renderFailed("the thumbnail couldn't be drawn"))
                     }
-                }.value
+                }
+                let result = await withTaskCancellationHandler { await decode.value } onCancel: { decode.cancel() }
+                guard !Task.isCancelled else { return }  // the scroll already dropped it
+                areas.thumbnails.tasks[request] = nil
                 let failures = areas.thumbnails.store.apply([(request, result)], in: model)
                 if !failures.isEmpty { model.applyThumbnailFailures(failures) }
             }

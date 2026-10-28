@@ -2,7 +2,7 @@
 // the component that owns the tool (S-7a). Shift reaches the marquee's
 // selectionDrag; today's `sampling:` wrappers are drags with Option; the
 // eyedropper sets the brush color without a history step; a transform in
-// progress takes every drag. Runs on Linux and macOS.
+// progress takes every drag and moves its box. Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
 import SuiteKernel
@@ -73,9 +73,12 @@ import Testing
         model.selectTool(.brush)
         let id = try #require(model.selectedLayerID)
         model.transformDraft = TransformDraft(layerID: id, box: PixelRect(x: 0, y: 0, width: 800, height: 600))
-        let before = model
+        let pixels = model.pixels
         model.drag(from: Self.a, to: Self.b)
         model.endDrag()
-        #expect(model == before)
+        #expect(model.pixels == pixels, "the brush doesn't paint")
+        #expect(model.stroke == nil)
+        let moved = try #require(model.transformDraft?.transform)
+        #expect(moved.dx == 80 && moved.dy == 80, "the drag moves the transform box")
     }
 }

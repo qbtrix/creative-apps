@@ -1,5 +1,6 @@
 [
   {"label": "moveOneStep: each drag call takes a fresh before, so the moves compound", "file": "Sources/PhotoModel/PhotoStroke.swift", "find": "if begun { current.layersBefore = layers }", "replace": "current.layersBefore = layers", "tests": "PhotoSeveralLayersTests"},
   {"label": "moveMovesEvery: a drag of several layers is named as one", "file": "Sources/PhotoModel/PhotoStroke.swift", "find": "named: moved.count > 1 ? \"Move Layers\"", "replace": "named: moved.count > 99 ? \"Move Layers\"", "tests": "PhotoSeveralLayersTests"},
-  {"label": "aGestureIsOneUndoStep: a Remove stroke runs its command at every sample, so one stroke makes several undo steps", "file": "Sources/PhotoModel/PhotoStroke.swift", "find": "            trace(&current, to: end)\n", "replace": "            trace(&current, to: end)\n            retouchRelease(current)\n", "tests": "PhotoRetouchReleaseTests"}
+  {"label": "aGestureIsOneUndoStep: a Remove stroke runs its command at every sample, so one stroke makes several undo steps", "file": "Sources/PhotoModel/PhotoStroke.swift", "find": "            trace(&current, to: end)\n", "replace": "            trace(&current, to: end)\n            retouchRelease(current)\n", "tests": "PhotoRetouchReleaseTests"},
+  {"label": "canMoveSelection: the Move tool shows its transform rows on an adjustment layer", "file": "Sources/PhotoModel/PhotoStroke.swift", "find": "public var canMoveSelection: Bool { !movableSelectedLayers.isEmpty }", "replace": "public var canMoveSelection: Bool { true }", "tests": "PhotoToolsTests.swift"}
 ]

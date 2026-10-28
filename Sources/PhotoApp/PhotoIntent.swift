@@ -9,6 +9,7 @@
 // PhotoTool's palette look (title, symbol, one-key shortcut) lives here too.
 import CoreRaster
 import PhotoModel
+import SuiteImaging
 import SuiteKernel
 import SuiteUI
 import SwiftUI
@@ -17,6 +18,8 @@ enum PhotoIntent {
     case newImage, open, save, saveAs, imageSize
     case openFile(URL)
     case rotate(QuarterTurn)
+    /// Image > Flip Canvas: mirrors every layer across the canvas through `image.flip`.
+    case flipCanvas(FlipDirection)
     /// Opens the Straighten sheet; `applyStraighten` turns the image by its choices.
     case straighten
     case applyStraighten(degrees: Double, cropToFit: Bool)
@@ -45,7 +48,9 @@ enum PhotoIntent {
     // One case per v2 area; each area's enum lives in its PhotoWindow+<Area>.swift.
     case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
     case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
-    case place(PhotoPlaceIntent), text(TypeIntent)
+    case place(PhotoPlaceIntent), text(TypeIntent), filter(FilterIntent)
+    /// A tone row's change, run as its tone.* command (PhotoWindow+Tone).
+    case tone(ToneIntent)
     /// One Pen or point-editor gesture from PhotoPenOverlay, run through the catalog.
     case path(PathIntent)
     /// Return: commits a free transform, else applies a pending crop.
@@ -62,6 +67,10 @@ extension PhotoTool: PaletteTool {
         switch self {
         case .move: "Move"
         case .marquee: "Marquee"
+        case .ellipse: "Ellipse"
+        case .lasso: "Lasso"
+        case .polygon: "Polygon Lasso"
+        case .wand: "Magic Wand"
         case .brush: "Brush"
         case .eraser: "Eraser"
         case .clone: "Clone"
@@ -81,6 +90,10 @@ extension PhotoTool: PaletteTool {
         switch self {
         case .move: "arrow.up.and.down.and.arrow.left.and.right"
         case .marquee: "rectangle.dashed"
+        case .ellipse: "circle.dashed"
+        case .lasso: "lasso"
+        case .polygon: "hexagon"
+        case .wand: "wand.and.stars"
         case .brush: "paintbrush.pointed"
         case .eraser: "eraser"
         case .clone: "square.on.square"
@@ -100,13 +113,15 @@ extension PhotoTool: PaletteTool {
         switch self {
         case .move: "v"
         case .marquee: "m"
+        case .ellipse, .polygon: nil
+        case .lasso: "l"
+        case .wand: "w"
         case .brush: "b"
         case .eraser: "e"
         case .clone: "s"
         case .spotHeal: "j"
         case .heal: "j"
-        // Shift-J cycling through Spot Heal, Heal and Remove waits on SuiteUI.
-        case .remove: nil
+        case .remove: "j"
         case .crop: "c"
         case .eyedropper: "i"
         case .bucket: "g"

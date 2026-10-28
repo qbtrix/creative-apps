@@ -236,7 +236,8 @@
     "sources": [
       "https://www.nobledesktop.com/classes/figma-bootcamp/syllabus"
     ],
-    "waits_on": "PD-6"
+    "waits_on": "PD-6",
+    "test": "Tests/RealJobs/design/place-in-frame/place-in-frame.jobs.json"
   },
   "RJ-D13": {
     "id": "RJ-D13",

@@ -9,7 +9,8 @@ import Foundation
 #endif
 import SuiteKernel
 
-/// Photo's headless document: one `PhotoWorkspace` on the live services.
+/// Photo's headless document: one `PhotoWorkspace` on the live services, or on the caller's (`open(_:name:services:)`,
+/// `new(_:services:)`): PhotoModel can't reach the suite's live text, so a host that can passes it in.
 public struct PhotoHeadless: HeadlessDocument {
     public static let app = "photo", openExtensions = ["ora", "png", "jpg", "jpeg"], exportFormats = ["png", "jpeg"]
     /// Why the window's file commands refuse here: the CLI opens, saves and exports instead.
@@ -30,7 +31,12 @@ public struct PhotoHeadless: HeadlessDocument {
     /// The file `data`, named `name`, by its extension: a Photo document (.ora) with its layers, or a flat PNG or
     /// JPEG. Throws `ArchiveError` for a bad document, `CodecError` for an image core can't read yet.
     public static func open(_ data: Data, name: String) throws -> PhotoHeadless {
-        var workspace = PhotoWorkspace(services: .live)
+        try open(data, name: name, services: .live)
+    }
+
+    /// `open(_:name:)` on `services`.
+    public static func open(_ data: Data, name: String, services: PhotoServices) throws -> PhotoHeadless {
+        var workspace = PhotoWorkspace(services: services)
         switch name.split(separator: ".").last.map({ $0.lowercased() }) ?? "" {
         case "ora": try workspace.openDocument(workspace.services.archive.package(fromContainer: data), name: name, codec: codec)
         case "png", "jpg", "jpeg": try workspace.openImage(data, name: name, codec: codec)
@@ -41,8 +47,13 @@ public struct PhotoHeadless: HeadlessDocument {
 
     /// A white image `width` x `height` (1024 x 768 when absent), its one layer "Background".
     public static func new(_ options: JSONValue) throws -> PhotoHeadless {
+        try new(options, services: .live)
+    }
+
+    /// `new(_:)` on `services`.
+    public static func new(_ options: JSONValue, services: PhotoServices) throws -> PhotoHeadless {
         let o = try options.decode(NewOptions.self)
-        var workspace = PhotoWorkspace(services: .live)
+        var workspace = PhotoWorkspace(services: services)
         do { try workspace.newCanvas(width: o.width ?? 1024, height: o.height ?? 768) } catch {
             throw CatalogError.failed(id: "new", message: "\(error)")
         }

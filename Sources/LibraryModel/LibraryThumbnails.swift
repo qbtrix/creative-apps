@@ -72,6 +72,17 @@ extension LibraryCatalog {
     }
 }
 
+/// A scroll's thumbnail work: the requests to run, visible cells first, and
+/// the pending ones it cancelled, whose decodes should stop.
+public struct ThumbnailPass: Sendable, Equatable {
+    public var requests: [ThumbnailRequest]
+    public var cancelled: [ThumbnailRequest]
+
+    public init(requests: [ThumbnailRequest], cancelled: [ThumbnailRequest]) {
+        self.requests = requests; self.cancelled = cancelled
+    }
+}
+
 /// The grid's thumbnail state: the held images, the pending requests and the
 /// bucket's long side, plus the position cache (left out of ==). Each method
 /// reads the catalog it is handed and never changes it; a failure comes back
@@ -112,11 +123,68 @@ public struct LibraryThumbnailCache: Sendable, Equatable {
     /// (never a visible one; an empty `visible`, as when the loupe opens, evicts nothing),
     /// farthest first, until `thumbnails` holds ≤ heldThumbnailBytes.
     public mutating func requestThumbnails(visible: [String], in catalog: LibraryCatalog) -> [ThumbnailRequest] {
-        let side = thumbnailLongSide
-        var out: [ThumbnailRequest] = []
         var asked = Set<String>()
         var rebuilt = false
-        for id in visible where asked.insert(id).inserted {
+        let out = request(visible, asked: &asked, in: catalog, rebuilt: &rebuilt)
+        if !visible.isEmpty { evictThumbnails(around: asked, in: catalog) }
+        return out
+    }
+
+    /// A scroll's pass (large-catalog LG-5): requests for the visible ids, then
+    /// for two screens either side of their span in `order`, nearest first;
+    /// pending requests outside that window come back cancelled (and are no
+    /// longer pending, so a late answer is dropped). Evicts as requestThumbnails
+    /// does. An empty `visible` (the loupe open) asks and cancels nothing.
+    public mutating func thumbnailPass(visible: [String], in catalog: LibraryCatalog) -> ThumbnailPass {
+        guard !visible.isEmpty else { return ThumbnailPass(requests: [], cancelled: []) }
+        var asked = Set<String>()
+        var rebuilt = false
+        var requests = request(visible, asked: &asked, in: catalog, rebuilt: &rebuilt)
+        let shown = asked
+        var cancelled: [ThumbnailRequest] = []
+        if let window = window(around: shown, in: catalog) {
+            requests += request(window.ahead, asked: &asked, in: catalog, rebuilt: &rebuilt)
+            for (id, pending) in pendingThumbnails where !shown.contains(id) && !window.ids.contains(id) {
+                pendingThumbnails[id] = nil
+                cancelled.append(pending)
+            }
+        }
+        evictThumbnails(around: shown, in: catalog)
+        return ThumbnailPass(requests: requests, cancelled: cancelled.sorted { $0.id < $1.id })
+    }
+
+    /// The photo with `id`, found through the position cache, not a scan.
+    public mutating func photo(_ id: String, in catalog: LibraryCatalog) -> PhotoItem? {
+        var rebuilt = false
+        guard let index = itemIndex(of: id, in: catalog, rebuilt: &rebuilt) else { return nil }
+        return catalog.items[index]
+    }
+
+    /// Two screens either side of `shown`'s span in `order`: every id in it,
+    /// and the ones outside the span nearest first; nil when none is shown.
+    private mutating func window(around shown: Set<String>, in catalog: LibraryCatalog) -> (ids: Set<String>, ahead: [String])? {
+        var rebuilt = false
+        guard let span = span(of: shown, in: catalog, rebuilt: &rebuilt) else { return nil }
+        let (low, high) = span
+        let order = catalog.order
+        let margin = 2 * shown.count
+        var ahead: [String] = []
+        for distance in 1...max(margin, 1) {
+            if high + distance < order.count { ahead.append(order[high + distance]) }
+            if low - distance >= 0 { ahead.append(order[low - distance]) }
+        }
+        let ids = Set(order[max(low - margin, 0)...min(high + margin, order.count - 1)])
+        return (ids, ahead)
+    }
+
+    /// Requests for `ids` not yet in `asked` that have no current image and no
+    /// pending request, adding each to `asked`.
+    private mutating func request(
+        _ ids: [String], asked: inout Set<String>, in catalog: LibraryCatalog, rebuilt: inout Bool
+    ) -> [ThumbnailRequest] {
+        let side = thumbnailLongSide
+        var out: [ThumbnailRequest] = []
+        for id in ids where asked.insert(id).inserted {
             guard let index = itemIndex(of: id, in: catalog, rebuilt: &rebuilt) else { continue }
             let photo = catalog.items[index]
             guard photo.availability == .available else { continue }
@@ -129,20 +197,25 @@ public struct LibraryThumbnailCache: Sendable, Equatable {
             pendingThumbnails[id] = request
             out.append(request)
         }
-        if !visible.isEmpty { evictThumbnails(around: asked, in: catalog) }
         return out
+    }
+
+    /// The lowest and highest index in `order` of `ids`; nil when none is shown.
+    private mutating func span(of ids: Set<String>, in catalog: LibraryCatalog, rebuilt: inout Bool) -> (low: Int, high: Int)? {
+        var low = Int.max, high = Int.min
+        for id in ids {
+            guard let index = orderIndex(of: id, in: catalog, rebuilt: &rebuilt) else { continue }
+            low = min(low, index); high = max(high, index)
+        }
+        return low <= high ? (low, high) : nil
     }
 
     /// Drops held images outside `visible`'s span in `order` ± two screens,
     /// then the farthest from that span until the cap holds. A visible image stays.
     private mutating func evictThumbnails(around visible: Set<String>, in catalog: LibraryCatalog) {
-        var low = Int.max, high = Int.min
         var rebuilt = false
-        for id in visible {
-            guard let index = orderIndex(of: id, in: catalog, rebuilt: &rebuilt) else { continue }
-            low = min(low, index); high = max(high, index)
-        }
-        guard low <= high else { return }
+        guard let span = span(of: visible, in: catalog, rebuilt: &rebuilt) else { return }
+        let (low, high) = span
         let margin = 2 * visible.count
         var candidates: [(id: String, distance: Int)] = []
         for id in thumbnails.keys where !visible.contains(id) {

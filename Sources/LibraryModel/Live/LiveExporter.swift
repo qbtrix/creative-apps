@@ -70,11 +70,12 @@ public struct LiveExporter: PhotoExporting {
         return try await decoder.decode(path: path, maxLongSide: nil)
     }
 
-    /// The size the crop leaves (EX-14 proves it), else the photo's own.
+    /// The size the crop leaves of the oriented photo (EX-14 proves it), else the oriented photo's own.
     static func croppedSize(_ photo: PhotoItem) -> PixelSize {
+        let faced = photo.orientedSize
         guard let crop = photo.develop.crop,
-              let frame = try? LiveCrop().frame(crop, photo: photo.pixelSize),
-              frame.width >= 1, frame.height >= 1 else { return photo.pixelSize }
+              let frame = try? LiveCrop().frame(crop, photo: faced),
+              frame.width >= 1, frame.height >= 1 else { return faced }
         return PixelSize(width: frame.width, height: frame.height)
     }
 }

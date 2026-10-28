@@ -6,7 +6,9 @@
 // after another. `bodies` gates the window-body counts; `timing`
 // (Tests/perf-suites.txt, report-only) judges the step times. The loupe's step
 // isn't driven: the loupe takes its arrow keys through SwiftUI focus, which
-// needs a key window, and a test process can't have one. Nested in
+// needs a key window, and a test process can't have one. `rotateInLoupe`
+// (orientation-crop OC-10) opens the `shoot` fixture's first 24 MP photo and
+// turns it once through the loupe photo's Rotate Right action. Nested in
 // BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -31,6 +33,37 @@ extension BodyCountSuites {
             // Targets: a scroll step fits one 120 Hz frame; a selection two 60 Hz frames.
             expectP95(scroll, atMost: 10, target: 8.3)  // dev: 6.6 ms
             expectP95(select, atMost: 120, target: 33)  // dev: 80 ms
+        }
+
+        /// orientation-crop OC-10: Photo > Rotate Right on the loupe's 24 MP photo is one edit, so at most
+        /// two window bodies (the edit, then its render landing); its p95 is reported, not gated.
+        /// The loupe photo's "Rotate Right" accessibility action runs Photo > Rotate Right.
+        @Test(.timeLimit(.minutes(2))) func rotateInLoupe() async throws {
+            let w = RenderBudgetWindow(LibraryWindow(arguments: ["Library", "-LibraryFixture", "shoot"]))
+            defer { w.close() }
+            try await w.settle(800)
+            let bodies = { () -> Int? in
+                #if DEBUG
+                return LibraryWindow.bodyRuns
+                #else
+                return nil
+                #endif
+            }
+            try await w.settle(untilStable: bodies, turns: 8)
+            let cells = w.identifiers().filter { $0.hasPrefix(LibraryGrid.cellIdentifierPrefix) }
+            let first = try #require(cells.first, "no grid cells")
+            #expect(w.perform("Open", on: first), "the grid cell has no Open action")
+            #expect(await w.element("library.loupe.photo") != nil, "Open showed no loupe photo")
+            try await w.settle(untilStable: bodies, turns: 8)
+            var turned = false
+            let rotate = try await w.measure("library loupe rotate right, 24 MP", bodies: bodies) {
+                try await w.ticks(1) { _ in turned = w.perform("Rotate Right", on: "library.loupe.photo") }
+                try await w.settle(untilStable: bodies, turns: 8)
+            }
+            #expect(turned, "the loupe photo has no Rotate Right action")
+            #expect((rotate.bodies ?? 1) >= 1, "Rotate Right changed nothing: \(rotate)")
+            // The edit, then its render landing. Target: 2. The p95 (target 30 ms) is printed, not gated.
+            expectBodies(rotate, atMost: 2, target: 2)
         }
 
         static func run() async throws -> (scroll: RenderStep, select: RenderStep) {

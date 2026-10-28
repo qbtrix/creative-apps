@@ -126,7 +126,8 @@ final class LibraryJourneyTests: XCTestCase {
     /// Library's items in each menu (blueprint 6.2), top level, each by the
     /// title prefixes it may show: Undo and Redo carry a step name, Zoom In
     /// and Zoom Out read Larger and Smaller Thumbnails in the grid, and Crop
-    /// reads Done Cropping while cropping. Close is the system's. The
+    /// reads Done Cropping while cropping. Delete Rejected Photos… reads
+    /// Delete 3 Rejected Photos… with three rejects. Close is the system's. The
     /// filters-collections items (FC-5) are disabled with their reasons.
     private static let menus: [(String, [[String]])] = [
         ("File", [
@@ -141,7 +142,7 @@ final class LibraryJourneyTests: XCTestCase {
         ]),
         ("Photo", [
             ["Copy Settings"], ["Paste Settings"], ["Reset Develop"], ["Crop", "Done Cropping"], ["Reset Crop"],
-            ["Add to Collection"], ["Remove from Collection"],
+            ["Add to Collection"], ["Remove from Collection"], ["Delete"],
         ]),
         ("Metadata", [["Set Rating"], ["Set Flag"], ["Set Label"], ["Auto Advance"]]),
     ]

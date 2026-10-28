@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "app": "halo",
+  "why": "RJ-H42 (file-flow HF-3): saves intro.halo, reads Open Recent, then drops promo.halo and sunset.png on Halo: Open Recent is the suite's list filtered to Halo, promo.halo opens in its own window and sunset.png goes to Photo until image layers (S20). Pending #3741: the CLI keeps file commands window-only, as it does for Flare's drop; HaloFileFlowTests runs these steps on Linux.",
+  "pending": "#3741",
+  "inputs": ["input/intro.halo"],
+  "steps": [
+    {"id": "file.save", "params": {}},
+    {"id": "file.recent", "params": {}},
+    {"id": "file.drop", "params": {"paths": ["input/promo.halo", "input/sunset.png"]}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}", "format": "halo"},
+  "expect": {
+    "out/intro.halo": {"json": {"format": "halo", "version": 1}}
+  },
+  "platforms": []
+}

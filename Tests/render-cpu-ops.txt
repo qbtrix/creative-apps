@@ -5,5 +5,5 @@
 # tests), and the entry goes when that lands. Line: `<id>  <what runs on the CPU>  <issue>`.
 live-blur                 Blur (it reads neighbours), or adjustment layers that aren't the live ones, run on CoreRaster  #3144
 layer-opacity-range       a layer opacity outside 0...1 composites on CoreRaster  #3144
-masked-adjustment-layer   an adjustment layer with an enabled mask runs on CoreRaster  #3144
+masked-layer              a layer with an enabled mask runs on CoreRaster  #3144
 tone-program-op           an adjustment ToneProgram can't express runs on CoreRaster  #3144

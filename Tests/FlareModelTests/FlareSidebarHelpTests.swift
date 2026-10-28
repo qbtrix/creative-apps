@@ -42,3 +42,28 @@ private func bounce() -> FlareWorkspace {
     #expect(!w.layerRowIsDimmed("background"))
     #expect(!w.layerRowIsDimmed("no-such-layer"))
 }
+
+@Test func aLayerRowMenuHidesLocksDuplicatesAndDeletesThatLayer() {
+    var w = bounce()
+    let menu = w.layerRowMenu("shadow")
+    #expect(menu.map(\.title) == ["Hide Layer", "Lock Layer", "Duplicate Layer", "Delete Layer"])
+    #expect(menu.allSatisfy { $0.help == nil })
+    #expect(w.layerRowMenu("background").map(\.title).prefix(2) == ["Hide Layer", "Unlock Layer"])
+    #expect(w.layerRowMenu("no-such-layer").isEmpty)
+
+    let before = w.layers.count
+    w.duplicateLayer("shadow")
+    #expect(w.layerError == nil && w.layers.count == before + 1 && w.undoActionName == "Undo Duplicate")
+    w.undo()
+    #expect(w.layers.count == before)
+}
+
+@Test func aSceneRowMenuDeletesItUnlessItIsTheLastScene() {
+    var w = bounce()
+    #expect(w.sceneRowMenu("scene-1") == [FlareRowCommand(title: "Delete Scene", systemImage: "trash",
+                                                          intent: .remove(id: "scene-1"),
+                                                          help: "An animation needs at least one scene.")])
+    w.addScene()
+    #expect(w.sceneRowMenu("scene-1").first?.help == nil)
+    #expect(w.sceneRowMenu("ball").isEmpty)
+}

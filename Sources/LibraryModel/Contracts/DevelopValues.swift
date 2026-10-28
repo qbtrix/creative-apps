@@ -1,49 +1,46 @@
-// Contracts/DevelopValues.swift: a photo's develop settings (ten sliders, a
-// tone curve, levels), its crop, and the histogram the develop panel draws.
-// Settings are edit instructions, never pixels; neutral settings render the
-// photo unchanged. Coded by hand so a catalog written before a field existed
-// opens with it neutral, and a neutral new field adds no key.
+// Contracts/DevelopValues.swift: a photo's develop settings (SuiteImaging's
+// tone settings, a tone curve, levels), its crop, and the histogram the
+// develop panel draws. Levels and curve points are SuiteImaging's types;
+// ToneCurve stays Library's own (its ends pinned to 0 and 1, a 0.01 gap) with
+// AdjustCurve conversions. Settings are edit instructions, never pixels;
+// neutral settings render the photo unchanged. Coded by hand so a catalog
+// written before a field existed opens with it neutral, and a neutral new
+// field adds no key. The tone is flattened (tone-controls LT-1): each slider
+// is its own key in the develop object, as before, never a nested "tone".
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
+import SuiteKernel
 import SuiteModel
 
-/// One develop slider. The raw value is the row's label.
-public enum DevelopSlider: String, CaseIterable, Sendable, Codable {
-    // The panel's order: TONE, then COLOR.
-    case exposure = "Exposure", contrast = "Contrast", highlights = "Highlights", shadows = "Shadows"
-    case whites = "Whites", blacks = "Blacks"
-    case temperature = "Temperature", tint = "Tint"
-    case vibrance = "Vibrance", saturation = "Saturation"
+/// The develop slider is the suite's tone slider. LT-2 drops this name with the
+/// develop rows, once LibraryApp's callers say `ToneSlider`.
+public typealias DevelopSlider = ToneSlider
 
-    /// The inspector section the row sits in; a section's Reset resets its group.
-    public var group: DevelopGroup {
-        switch self {
-        case .exposure, .contrast, .highlights, .shadows, .whites, .blacks: .tone
-        case .temperature, .tint, .vibrance, .saturation: .color
-        }
-    }
-
-    /// Exposure in stops, -5...5; the rest -100...100 (CoreRaster's slider range).
-    public var range: ClosedRange<Double> { self == .exposure ? -5...5 : -100...100 }
-    /// One arrow-key step; Shift is ten, Option a tenth (docs/design.md, Scrub fields).
-    public var step: Double { self == .exposure ? 0.01 : 1 }
+extension ToneSlider {
+    /// Develop's ten rows, TONE then COLOR: the sliders the panel shows today.
+    public static let develop: [ToneSlider] = DevelopGroup.allCases.flatMap(\.sliders)
 }
 
 /// A develop section. The raw value is its header.
 public enum DevelopGroup: String, CaseIterable, Sendable {
     case tone = "Tone", color = "Color"
-    public var sliders: [DevelopSlider] { DevelopSlider.allCases.filter { $0.group == self } }
+    /// The section's rows, in panel order; a section's Reset resets them.
+    public var sliders: [ToneSlider] {
+        switch self {
+        case .tone: [.exposure, .contrast, .highlights, .shadows, .whites, .blacks]
+        case .color: [.temperature, .tint, .vibrance, .saturation]
+        }
+    }
 }
 
-/// One point of the tone curve, both coordinates sRGB values in 0...1.
-public struct DevelopCurvePoint: Hashable, Sendable, Codable {
-    public var x: Double, y: Double
-    public init(x: Double, y: Double) { self.x = x; self.y = y }
-}
+/// One point of the tone curve, both coordinates sRGB values in 0...1:
+/// SuiteImaging's point, with the catalog's `x` and `y` keys.
+public typealias DevelopCurvePoint = AdjustCurvePoint
 
 /// The develop tone curve: a monotone cubic through its points (CoreRaster
 /// `curves`), applied to sRGB values. Always valid: built only through `init?`.
@@ -106,115 +103,63 @@ public struct ToneCurve: Hashable, Sendable, Codable {
     }
 }
 
-/// The develop levels, CoreRaster `levels` on sRGB values.
-public struct DevelopLevels: Hashable, Sendable, Codable {
-    /// The raw value is the row's label.
-    public enum Field: String, CaseIterable, Sendable {
-        case inBlack = "Black Point", gamma = "Midtones", inWhite = "White Point"
-        case outBlack = "Output Black", outWhite = "Output White"
-    }
-    public static let neutral = DevelopLevels()
-    public static let gammaRange: ClosedRange<Double> = 0.1...9.99
-    /// The least gap between the black and white points: one byte level.
-    public static let pointGap = 1.0 / 255
-    /// sRGB values in 0...1 (the rows show them as 0...255); gamma over 1 brightens.
-    public private(set) var inBlack = 0.0, inWhite = 1.0, gamma = 1.0, outBlack = 0.0, outWhite = 1.0
-    public init() {}
-
-    /// A decoded file goes through `setting`, so damaged levels can't reach the renderer.
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        var levels = DevelopLevels.neutral
-        for (field, key) in [(Field.outBlack, CodingKeys.outBlack), (.outWhite, .outWhite), (.gamma, .gamma),
-                             (.inWhite, .inWhite), (.inBlack, .inBlack)] {
-            if let value = try container.decodeIfPresent(Double.self, forKey: key) {
-                levels = levels.setting(field, to: value)
-            }
-        }
-        self = levels
-    }
-
-    public func value(_ field: Field) -> Double {
-        switch field {
-        case .inBlack: inBlack
-        case .gamma: gamma
-        case .inWhite: inWhite
-        case .outBlack: outBlack
-        case .outWhite: outWhite
-        }
-    }
-
-    /// Clamped to the field's range; NaN or infinity gives the neutral value. The
-    /// black and white points stay at least `pointGap` apart: the one being moved stops there.
-    public func setting(_ field: Field, to value: Double) -> DevelopLevels {
-        let wanted = value.isFinite ? value : Self.neutral.value(field)
-        var copy = self
-        switch field {
-        case .inBlack: copy.inBlack = min(max(wanted, 0), inWhite - Self.pointGap)
-        case .gamma: copy.gamma = min(max(wanted, Self.gammaRange.lowerBound), Self.gammaRange.upperBound)
-        case .inWhite: copy.inWhite = min(max(wanted, inBlack + Self.pointGap), 1)
-        case .outBlack: copy.outBlack = min(max(wanted, 0), 1)
-        case .outWhite: copy.outWhite = min(max(wanted, 0), 1)
-        }
-        return copy
-    }
-}
+/// The develop levels, CoreRaster `levels` on sRGB values: SuiteImaging's
+/// levels, which read and write the catalog's keys (`inBlack` ... `outWhite`,
+/// 0...1). The rows, `Field` and the setters are LibraryDevelop+Imaging.swift.
+public typealias DevelopLevels = AdjustLevels
 
 public struct DevelopSettings: Hashable, Sendable, Codable {
-    public private(set) var exposure: Double = 0
-    public private(set) var temperature: Double = 0
-    public private(set) var tint: Double = 0
-    public private(set) var contrast: Double = 0
-    public private(set) var highlights: Double = 0
-    public private(set) var shadows: Double = 0
-    public private(set) var whites = 0.0, blacks = 0.0, vibrance = 0.0, saturation = 0.0
+    /// Every slider, as SuiteImaging stores it: a neutral slider is never stored.
+    public private(set) var tone = ToneSettings.neutral
+    public var exposure: Double { tone.value(.exposure) }
+    public var temperature: Double { tone.value(.temperature) }
+    public var tint: Double { tone.value(.tint) }
+    public var contrast: Double { tone.value(.contrast) }
+    public var highlights: Double { tone.value(.highlights) }
+    public var shadows: Double { tone.value(.shadows) }
+    public var whites: Double { tone.value(.whites) }
+    public var blacks: Double { tone.value(.blacks) }
+    public var vibrance: Double { tone.value(.vibrance) }
+    public var saturation: Double { tone.value(.saturation) }
     /// Never an identity curve other than `ToneCurve.identity`, so equal pictures compare equal.
     public private(set) var curve = ToneCurve.identity
     public private(set) var levels = DevelopLevels.neutral
     /// Nil: the whole photo, upright.
     public private(set) var crop: CropSettings?
+    /// How the photo faces before its crop (orientation-crop OC-8); up writes no key.
+    public private(set) var orientation: Orientation = .up
+    /// Black & White's weights; nil: in colour. Stored under `bw`.
+    public private(set) var bw: GrayWeights?
+    /// Every colour turned to its opposite. Stored under `invert`.
+    public private(set) var invert = false
 
     public static let neutral = DevelopSettings()
     public init() {}
 
     public var isNeutral: Bool { self == .neutral }
-    /// True when no slider is off zero, the curve is the identity and levels are
-    /// neutral (the crop may still be set).
+    /// True when every slider is neutral, the curve is the identity, levels
+    /// are neutral and no kind is on (the crop may still be set).
     public var isAdjustmentNeutral: Bool {
-        DevelopSlider.allCases.allSatisfy { value($0) == 0 } && curve.isIdentity && levels == .neutral
+        tone.isNeutral(nil) && curve.isIdentity && levels == .neutral && bw == nil && !invert
     }
 
-    public func value(_ slider: DevelopSlider) -> Double {
-        switch slider {
-        case .exposure: exposure
-        case .temperature: temperature
-        case .tint: tint
-        case .contrast: contrast
-        case .highlights: highlights
-        case .shadows: shadows
-        case .whites: whites
-        case .blacks: blacks
-        case .vibrance: vibrance
-        case .saturation: saturation
-        }
-    }
-
-    /// A copy with `slider` at `value`, clamped to its range; NaN and infinity give 0.
-    public func setting(_ slider: DevelopSlider, to value: Double) -> DevelopSettings {
-        let clamped = value.isFinite ? min(max(value, slider.range.lowerBound), slider.range.upperBound) : 0
+    /// The kinds after the tone passes: Black & White, then Invert.
+    public var kinds: [ImagingKind] { (bw.map { [.blackAndWhite($0)] } ?? []) + (invert ? [.invert] : []) }
+    /// A copy with the kinds `k` holds: its Black & White weights and whether it inverts.
+    public func setting(kinds k: [ImagingKind]) -> DevelopSettings {
         var copy = self
-        switch slider {
-        case .exposure: copy.exposure = clamped
-        case .temperature: copy.temperature = clamped
-        case .tint: copy.tint = clamped
-        case .contrast: copy.contrast = clamped
-        case .highlights: copy.highlights = clamped
-        case .shadows: copy.shadows = clamped
-        case .whites: copy.whites = clamped
-        case .blacks: copy.blacks = clamped
-        case .vibrance: copy.vibrance = clamped
-        case .saturation: copy.saturation = clamped
-        }
+        copy.bw = k.lazy.compactMap { if case .blackAndWhite(let w) = $0 { w } else { nil } }.first
+        copy.invert = k.contains(.invert)
+        return copy
+    }
+
+    public func value(_ slider: ToneSlider) -> Double { tone.value(slider) }
+
+    /// A copy with `slider` at `value`, clamped to its range; NaN and infinity give its neutral.
+    public func setting(_ slider: ToneSlider, to value: Double) -> DevelopSettings {
+        let r = slider.range
+        var copy = self
+        copy.tone = tone.setting(slider, to: value.isFinite ? min(max(value, r.lowerBound), r.upperBound) : slider.neutral)
         return copy
     }
 
@@ -236,10 +181,17 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return copy
     }
 
-    /// Every adjustment of `other` with this crop: Paste Settings never pastes a crop.
+    public func setting(orientation: Orientation) -> DevelopSettings {
+        var copy = self
+        copy.orientation = orientation
+        return copy
+    }
+
+    /// Every adjustment of `other` with this crop and orientation: Paste Settings never pastes either.
     public func pastingAdjustments(from other: DevelopSettings) -> DevelopSettings {
         var copy = other
         copy.crop = crop
+        copy.orientation = orientation
         return copy
     }
 
@@ -252,48 +204,53 @@ public struct DevelopSettings: Hashable, Sendable, Codable {
         return bytes.reduce(0xcbf2_9ce4_8422_2325 as UInt64) { ($0 ^ UInt64($1)) &* 0x0000_0100_0000_01b3 }
     }
 
-    private enum CodingKeys: String, CodingKey {
-        case exposure, contrast, highlights, shadows, temperature, tint, crop
-        case whites, blacks, vibrance, saturation, curve, levels
+    /// A slider's raw value, or crop, curve, levels, orientation, bw or invert: the develop object's flat keys.
+    private struct Key: CodingKey {
+        let stringValue: String
+        init(_ name: String) { stringValue = name }
+        init?(stringValue: String) { self.stringValue = stringValue }
+        var intValue: Int? { nil }
+        init?(intValue: Int) { nil }
+        static let crop = Key("crop"), curve = Key("curve"), levels = Key("levels"), orientation = Key("orientation")
+        static let bw = Key("bw"), invert = Key("invert")
+        static func slider(_ s: ToneSlider) -> Key { Key(s.rawValue) }
     }
+
+    /// The six sliders the first catalog wrote: always written, required on read.
+    private static let required: Set<ToneSlider> = [.exposure, .contrast, .highlights, .shadows, .temperature, .tint]
 
     /// The six original sliders are required, as the synthesized coding had them;
     /// every newer key decodes as its default when missing, so an older catalog opens.
     public init(from decoder: any Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        exposure = try c.decode(Double.self, forKey: .exposure)
-        contrast = try c.decode(Double.self, forKey: .contrast)
-        highlights = try c.decode(Double.self, forKey: .highlights)
-        shadows = try c.decode(Double.self, forKey: .shadows)
-        temperature = try c.decode(Double.self, forKey: .temperature)
-        tint = try c.decode(Double.self, forKey: .tint)
+        let c = try decoder.container(keyedBy: Key.self)
+        for slider in ToneSlider.allCases {
+            let key = Key.slider(slider)
+            let value = Self.required.contains(slider)
+                ? try c.decode(Double.self, forKey: key) : try c.decodeIfPresent(Double.self, forKey: key)
+            if let value { tone = tone.setting(slider, to: value) }
+        }
         crop = try c.decodeIfPresent(CropSettings.self, forKey: .crop)
-        whites = try c.decodeIfPresent(Double.self, forKey: .whites) ?? 0
-        blacks = try c.decodeIfPresent(Double.self, forKey: .blacks) ?? 0
-        vibrance = try c.decodeIfPresent(Double.self, forKey: .vibrance) ?? 0
-        saturation = try c.decodeIfPresent(Double.self, forKey: .saturation) ?? 0
         let decodedCurve = try c.decodeIfPresent(ToneCurve.self, forKey: .curve) ?? .identity
         curve = decodedCurve.isIdentity ? .identity : decodedCurve
         levels = try c.decodeIfPresent(DevelopLevels.self, forKey: .levels) ?? .neutral
+        orientation = try c.decodeIfPresent(Orientation.self, forKey: .orientation) ?? .up
+        bw = try c.decodeIfPresent(GrayWeights.self, forKey: .bw)
+        invert = try c.decodeIfPresent(Bool.self, forKey: .invert) ?? false
     }
 
     /// The six original sliders always and the crop when set (so persist's golden
-    /// stays byte-equal); every newer field only when off its default.
+    /// stays byte-equal); every other slider and field only when off its default.
     public func encode(to encoder: any Encoder) throws {
-        var c = encoder.container(keyedBy: CodingKeys.self)
-        try c.encode(exposure, forKey: .exposure)
-        try c.encode(contrast, forKey: .contrast)
-        try c.encode(highlights, forKey: .highlights)
-        try c.encode(shadows, forKey: .shadows)
-        try c.encode(temperature, forKey: .temperature)
-        try c.encode(tint, forKey: .tint)
+        var c = encoder.container(keyedBy: Key.self)
+        for slider in ToneSlider.allCases where Self.required.contains(slider) || tone.value(slider) != slider.neutral {
+            try c.encode(tone.value(slider), forKey: .slider(slider))
+        }
         try c.encodeIfPresent(crop, forKey: .crop)
-        if whites != 0 { try c.encode(whites, forKey: .whites) }
-        if blacks != 0 { try c.encode(blacks, forKey: .blacks) }
-        if vibrance != 0 { try c.encode(vibrance, forKey: .vibrance) }
-        if saturation != 0 { try c.encode(saturation, forKey: .saturation) }
         if !curve.isIdentity { try c.encode(curve, forKey: .curve) }
         if levels != .neutral { try c.encode(levels, forKey: .levels) }
+        if orientation != .up { try c.encode(orientation, forKey: .orientation) }
+        if let bw { try c.encode(bw, forKey: .bw) }
+        if invert { try c.encode(true, forKey: .invert) }
     }
 }
 
@@ -306,24 +263,20 @@ public struct UnitRect: Hashable, Sendable, Codable {
     }
 }
 
-/// The crop's aspect. The raw value is the chip's title.
-public enum CropAspect: String, CaseIterable, Sendable, Codable {
-    case original = "Original", free = "Free", square = "1:1"
-    case fourFive = "4:5", threeTwo = "3:2", sixteenNine = "16:9"
+/// The crop's aspect: the kernel's (orientation-crop OC-8), whose raw values are the stored keys.
+public typealias CropAspect = SuiteKernel.CropAspect
+
+extension SuiteKernel.CropAspect {
+    public static let square = CropAspect.ratio(width: 1, height: 1)
+    public static let fourFive = CropAspect.ratio(width: 4, height: 5)
+    public static let threeTwo = CropAspect.ratio(width: 3, height: 2)
+    public static let sixteenNine = CropAspect.ratio(width: 16, height: 9)
+    /// Library's chips, in order.
+    public static let allCases: [CropAspect] = [.original, .free, .square, .fourFive, .threeTwo, .sixteenNine]
 
     /// Width over height for a photo of `size` (a 3:2 on a portrait photo is 2:3); nil for Free.
     public func ratio(for size: PixelSize) -> Double? {
-        let portrait = size.height > size.width
-        let base: Double? = switch self {
-        case .free: nil
-        case .original: size.height > 0 ? Double(size.width) / Double(size.height) : nil
-        case .square: 1
-        case .fourFive: 4.0 / 5.0
-        case .threeTwo: 3.0 / 2.0
-        case .sixteenNine: 16.0 / 9.0
-        }
-        guard let base, self != .original, self != .square else { return base }
-        return portrait == (base > 1) ? 1 / base : base
+        ratio(for: (Double(size.width), Double(size.height)), orientation: nil)
     }
 }
 

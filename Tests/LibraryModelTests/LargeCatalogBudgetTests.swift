@@ -2,7 +2,7 @@
 // docs/blueprints/library/features/large-catalog.md, Contract slice) on the
 // 10,000-photo fixture. The fixture's own test gates; LG-3 and LG-4 met the
 // load, selection, plan and sheet budgets (LargeCatalogModelBudgetTests), which
-// time wall clock and so wait for the perf list (LG-7).
+// time wall clock and so run from the perf list in perf-nightly.
 import Foundation
 import SuiteKernel
 import Testing
@@ -58,10 +58,9 @@ import Testing
 }
 
 /// MJ-LG's Model budgets, which LG-3 and LG-4 (LG-model) meet. They time wall
-/// clock, so the gate never runs them: LG-7 lists this suite in
-/// Tests/perf-suites.txt (supervisor-only) and drops this `.disabled`, and it then
-/// runs in perf-nightly. Until then, delete the trait locally to measure.
-@Suite(.disabled("LG-7: listed in Tests/perf-suites.txt, then runs in perf-nightly"))
+/// clock, so the gate never runs them: Tests/perf-suites.txt lists this suite and
+/// it runs in perf-nightly.
+@Suite
 struct LargeCatalogModelBudgetTests {
     typealias Base = LargeCatalogBudgetTests
 

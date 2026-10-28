@@ -156,8 +156,9 @@ public struct ExportSheetRows { public enum Row { ...; case pixels(ExportSize, s
 
 - **pixels.** `scale(s)`: `round(w·s)`, `round(h·s)`. `longEdge(n)`: the long
   side n, the short `round(short·n/long)`. `pixels(w, h)`: exact; without
-  `stretch`, refused unless `|w/h − sw/sh| ≤ 1/min(w, h)` (one pixel of
-  rounding). Then even sizes round down to even for codecs that need them,
+  `stretch`, refused unless `|w·sh − h·sw| ≤ max(sw, sh)/2` (one side is the
+  other's proportional length rounded; `ExportRules.keepsShape`): for a
+  500 × 625 source 1080 × 1350 passes and 1080 × 1351 is refused (#5326). Then even sizes round down to even for codecs that need them,
   each side clamped to 1...`maxSide` (past it: refused, not clamped). Never
   enlarge only where an app says so (Library), as its own refusal.
 - **dropped.** `.all`: nothing. `.noLocation`: `{GPS}`, the IPTC location

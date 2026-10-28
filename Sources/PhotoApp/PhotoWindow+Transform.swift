@@ -4,7 +4,8 @@
 // Cancel call the workspace's Free Transform methods; every edit a handle,
 // row or flip asks for is SuiteKernel's TransformIntent, run as its
 // `transform.*` command through Photo's catalog, so the canvas edits the way
-// the CLI and an agent do. A refusal from a drag sample beeps (the drag goes
+// the CLI and an agent do. Drag samples, the handles' and the canvas's
+// (`runLiveDrag`), run on the live transform held to mouse-up. A refusal from a drag sample beeps (the drag goes
 // on); one from Begin, Commit, a row, a flip or Reset shows the window's
 // alert with the reason. On PT-1's stubs Begin and Cancel work and every edit
 // refuses until PT-5. Image > Canvas Size… (PT-3) opens CanvasSizeSheet from
@@ -78,17 +79,29 @@ extension PhotoWindow {
     /// live transform (LiveTransformCopy+Kernel.swift), which the window takes back once.
     private func runTransform(_ edit: SuiteKernel.TransformIntent) {
         let (id, params) = edit.command
-        if Self.isDragSample(edit) {
-            let shown = liveTransform.run(on: model, done: { takeStroke() }) {
-                if (try? PhotoWorkspace.catalog.run(id, params: params, on: &$0)) == nil { NSSound.beep() }
-            }
-            return renderer.show(shown, quietly: true)
-        }
+        if Self.isDragSample(edit) { return runLive(id, params: params) }
         do {
             _ = try PhotoWorkspace.catalog.run(id, params: params, on: &model)
         } catch {
             problem = PhotoProblem("The layer can't be transformed.", error.description)
         }
+    }
+
+    /// Runs one drag sample's catalog command on the live copy, which the window takes back once the
+    /// samples go quiet, and shows it; a refused sample beeps. Tone rows' samples come here too.
+    func runLive(_ id: String, params: JSONValue) {
+        let shown = liveTransform.run(on: model, done: { takeStroke() }) {
+            if (try? PhotoWorkspace.catalog.run(id, params: params, on: &$0)) == nil { NSSound.beep() }
+        }
+        renderer.show(shown, quietly: true)
+    }
+
+    /// Canvas drag samples while Free Transform is up, on the live copy held to mouse-up (the release's
+    /// `endDrag` takes it back): a body move or a handle the canvas grabbed moves the draft there.
+    func runLiveDrag(_ moves: [PhotoStrokeMove]) {
+        liveTransform.hold()
+        let shown = liveTransform.run(on: model, done: {}) { $0.drags(moves, zoom: zoom) }
+        renderer.show(shown, quietly: true)
     }
 
     /// Whether `intent` is one sample of a transform drag, which runs on the live transform.

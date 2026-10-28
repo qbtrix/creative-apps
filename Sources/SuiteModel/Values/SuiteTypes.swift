@@ -15,6 +15,8 @@ public struct SuiteTypeID: RawRepresentable, Hashable, Codable, Sendable {
     public static let assetEnvelope = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".suite.asset")
     public static let designLayers = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".design.layers")
     public static let flareLayers = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".flare.layers")
+    /// A copied layer style, as `style.copy` returns it; pasted only by `style.paste`, never as a layer.
+    public static let layerStyle = SuiteTypeID(rawValue: SuiteIdentity.prefix + ".suite.layer-style")
     public static let png = SuiteTypeID(rawValue: "public.png")
     public static let jpeg = SuiteTypeID(rawValue: "public.jpeg")
     public static let heic = SuiteTypeID(rawValue: "public.heic")

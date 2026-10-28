@@ -1,9 +1,14 @@
 # CI: the Linux job runs scripts/ci (lints, every Model target built and
-# tested; Package.swift declares the UI targets on macOS only). The macOS job
-# runs scripts/ci on macOS 26: everything built, every test including the
-# snapshots (`snapshots` artifact), then the five release apps bundled
-# (`app-builds`, a tarball so the executables keep their +x bit) and the size
-# report. Linux and macOS are the gate: both must pass for `promote`, and a
+# tested; Package.swift declares the UI targets on macOS only). The macOS
+# side is three jobs on macOS 26: `macOS compile` (scripts/ci --build-only:
+# the lints and every target built with its tests, the build shipped to the
+# test jobs as the `swift-build` tarball), `macOS tests K/N` (N shards, each
+# its own `swift test` process on that build: scripts/ci --shard K/N; the
+# snapshots as `snapshots-K`), `macOS bundles` (beside them: the five release
+# apps bundled, `app-builds`, a tarball so the executables keep their +x bit,
+# and the size report) and `macOS`, the gate job on ubuntu that is green once
+# all of them are. Linux
+# and macOS are the gate: both must pass for `promote`, and a
 # red one opens `dev-red`. The report-only UI journeys (`macOS journeys`,
 # `ui-screens`, Findings, Audit lower) are not here: on dev, the last job,
 # `Journeys dispatch`, starts a journeys.yml run for this run's commit and
@@ -30,23 +35,25 @@
 # (perf-nightly).
 #
 # Scoped run (workflow_dispatch with `app`: flare, design, photo, library,
-# halo, suite or suiteui): the macOS job builds every target but runs only
-# that app's Model and snapshot tests (suite: SuiteModel, SuiteKernel and the
-# CLI's tests). On dev, `Journeys dispatch` then starts that app's journeys
+# halo, suite or suiteui): the compile job builds every target, one test job
+# (`macOS tests 1/1`) runs only that app's Model and snapshot tests (suite:
+# SuiteModel, SuiteKernel and the CLI's tests), and the gate job is
+# `macOS (<app>)`. On dev, `Journeys dispatch` then starts that app's journeys
 # in journeys.yml. The Linux job is skipped; a scoped run never
 # promotes, opens dev-red or lowers the audit baseline. verify-dispatch.sh
 # starts one per app after its merges.
 #
 # macOS gate run (workflow_dispatch with `mac_only`, the lane's batch check):
-# only the macOS job, scripts/ci in full, or with `app` (a comma list) the
-# scoped step over the union of those apps' tests. No Linux job (the lane
+# only the macOS compile and test jobs, scripts/ci in full (sharded), or with
+# `app` (a comma list) the scoped step over the union of those apps' tests. No Linux job (the lane
 # dispatches its own Linux-only run), no bundles or size report, no journeys;
 # it never promotes, opens dev-red or lowers the audit baseline.
 #
 # The fast lane reads the job names "Linux", "macOS" (also "macOS (<apps>)")
 # and "macOS build" and the run titles "macOS build" and "macOS gate*", and
 # ignores "macOS journeys" (with or without " (<app>)", journeys.yml's job), so
-# keep them stable.
+# keep them stable. "macOS compile", "macOS tests K/N" and "macOS bundles" fit none of those
+# (the sentinel counts every job starting with "macOS" as a macOS run).
 name: CI
 # A build-only run (the fast lane's compile check for code PRs), a Linux-only
 # run (the lane's check on a head it integrated or a batch), a macOS gate run
@@ -91,8 +98,8 @@ permissions:
 # one plus the newest pending one and cancels a superseded pending one, so
 # dispatches that pile up collapse into one run (macOS runners are a small
 # shared pool). A running full run is not cancelled because dev is dispatched
-# every 15 to 45 minutes and its macOS job takes 50 to 90: cancelling would
-# starve promote. PR runs group by PR number, so a
+# every 15 to 45 minutes and its macOS jobs took 50 to 90: cancelling would
+# starve promote (so were its macOS jobs; the shards are shorter). PR runs group by PR number, so a
 # hotfix PR from a branch named dev can't cancel a dev run. Each scoped app
 # gets its own group, so a Design run never displaces a pending Photo or full
 # run. A branch's build-only runs share one group whatever their `app`, so a
@@ -188,22 +195,22 @@ jobs:
           for x in $NAMES; do targets+=(-target "${x}JourneyTests"); done
           xcodebuild build -project CreativeApps.xcodeproj "${targets[@]}" -arch "$(uname -m)"
 
-  macos:
-    name: ${{ inputs.app && format('macOS ({0})', inputs.app) || 'macOS' }}
+  # The macOS gate's compile half, for a full or scoped run: every lint and
+  # `swift build --build-tests` (scripts/ci --build-only) on macOS 26, then
+  # .build goes up as the `swift-build` tarball (tar keeps the +x bits
+  # upload-artifact drops; zstd, 860 MB, 13 s each way; one day) for the test
+  # jobs. Nothing else: `needs` waits for the whole job, so a step after the
+  # upload would hold every shard (the bundles, 10 min, did in run
+  # 40275255506). Its name starts with "macOS" so the sentinel counts its
+  # queue wait, and is not "macOS build", the build-only job the lane reads.
+  mac-compile:
+    name: macOS compile
     if: ${{ !inputs.build_only && !inputs.linux_only }}
     runs-on: macos-26
-    # scripts/ci takes about 30 min under load (the one-at-a-time snapshot
-    # pass is about 20 of it). The UI journeys run in journeys.yml, so they
-    # never eat this job's time.
-    timeout-minutes: 90
-    # A gate: Promote and Dev red need this job and Linux. The journeys are
-    # report-only in journeys.yml.
+    timeout-minutes: 45
     permissions:
       contents: read
       issues: write  # scripts/quarantine checks each quarantined journey's owner issue (the Linux container has no gh)
-    env:
-      APP: ${{ inputs.app }}
-      JOURNEYS_NOTE: ${{ inputs.mac_only && 'none (a lane batch gate runs no journeys)' || format('the `macOS journeys ({0})` job of the journeys.yml run this run starts on dev', inputs.app) }}
     steps:
       - uses: actions/checkout@v4
       # Pin Xcode: the image's default moves. 26.6 ships the macOS 26.5 SDK.
@@ -212,7 +219,7 @@ jobs:
       # The reference Lottie player LottiePlayerParityTests compares against
       # (scripts/lottie-oracle). The suite skips without it. build is a no-op
       # while VERSION and render.c match its stamp, so a cache hit needs no
-      # meson or ninja.
+      # meson or ninja. It lives in .build, so the tarball carries it to the tests.
       - name: Cache the Lottie oracle
         id: lottie-oracle
         uses: actions/cache@v4
@@ -225,11 +232,104 @@ jobs:
             brew install meson ninja
           fi
           scripts/lottie-oracle/build
-      # scripts/ci with a memory sample every 20 s into memory.log: the time,
-      # vm_stat's page counts, the system-wide free percentage and the five
-      # largest processes by resident memory. The Crash reports step prints
-      # it on failure, since a step killed for memory leaves no output of its own.
-      - name: scripts/ci (memory sampled)
+      - run: scripts/ci --build-only
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Pack the build
+        run: |
+          command -v zstd >/dev/null || brew install zstd
+          du -sh .build/*/debug/*.build 2>/dev/null | sort -h | tail -5
+          du -sh .build
+          time tar -cf - .build | zstd -T0 -3 -q -o "$RUNNER_TEMP/swift-build.tar.zst"
+          ls -lh "$RUNNER_TEMP/swift-build.tar.zst"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: swift-build
+          path: ${{ runner.temp }}/swift-build.tar.zst
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
+
+  # The release builds wrapped in signed .app bundles, for "Open on this Mac"
+  # (`app-builds`), and the size baseline (blueprint 7.5): bytes per
+  # executable, bundle and tarball, and SuiteUI symbols per executable, as
+  # `size-report` and a table in the job summary; report only, it fails on a
+  # script error or a missing bundle, never on a size. Its own job beside the
+  # compile job, so it holds no shard; it is done before they start. A red
+  # test job makes `macOS` delete `app-builds`, so a red run still ships no
+  # bundles. A macOS gate run (mac_only) skips it: a pass/fail check on a
+  # batch branch.
+  mac-bundle:
+    name: macOS bundles
+    if: ${{ !inputs.build_only && !inputs.linux_only && !inputs.mac_only }}
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      - run: scripts/bundle-apps
+      - name: Upload app builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-builds
+          path: .build/app-builds.tar.gz
+          retention-days: 7
+          if-no-files-found: error
+      - name: Size report
+        run: |
+          bash Tests/size_report/test_size_report.sh
+          scripts/size-report | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Upload size report
+        uses: actions/upload-artifact@v4
+        with:
+          name: size-report
+          path: .build/size-report.json
+          if-no-files-found: error
+
+  # The macOS gate's test half, on the compile job's build. A full run: N
+  # shards (the matrix below is N), each its own runner and `swift test`
+  # process (scripts/ci --shard K/N: the K-th of the sorted suites, run as a
+  # --changed scope is). Three, not more: the hosted macOS pool is 5 slots
+  # shared with the lane's gates and the journeys, so with the compile and
+  # bundles jobs a run peaks at 3 of them, and the long pole is the shard
+  # holding the serialized BodyCountSuites (16 min) at any N.
+  # Separate processes, so a MainActor hog in one shard
+  # can't time out the suites in another (run 40266495039: every
+  # HomeModelTests test hit its 60 s limit inside the one 8,500-test
+  # process). fail-fast off: a red shard never cancels the others, so one run
+  # names every failing test. A scoped run (`app`): one job running only
+  # APP's tests (the step below; minutes, not worth a shard). Memory is
+  # sampled every 20 s into memory.log; the Crash reports step prints it on
+  # failure. Names start with "macOS" (the sentinel counts them) and never
+  # fit "macOS (<apps>)", the gate job's.
+  mac-test:
+    name: macOS tests ${{ matrix.shard }}/${{ strategy.job-total }}
+    needs: mac-compile
+    if: ${{ !inputs.build_only && !inputs.linux_only }}
+    runs-on: macos-26
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ${{ fromJSON(inputs.app && '[1]' || '[1, 2, 3]') }}
+    env:
+      APP: ${{ inputs.app }}
+      JOURNEYS_NOTE: ${{ inputs.mac_only && 'none (a lane batch gate runs no journeys)' || format('the `macOS journeys ({0})` job of the journeys.yml run this run starts on dev', inputs.app) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo xcode-select -s /Applications/Xcode_26.6.app
+      - uses: actions/download-artifact@v4
+        with:
+          name: swift-build
+          path: ${{ runner.temp }}
+      - name: Unpack the build
+        run: |
+          command -v zstd >/dev/null || brew install zstd
+          time zstd -dc "$RUNNER_TEMP/swift-build.tar.zst" | tar -xf -
+          rm "$RUNNER_TEMP/swift-build.tar.zst"
+      - name: scripts/ci --shard (memory sampled)
         if: ${{ !inputs.app }}
         run: |
           mem="$RUNNER_TEMP/crash-reports/memory.log"
@@ -248,18 +348,15 @@ jobs:
           ) >/dev/null 2>&1 &
           sampler=$!
           trap 'kill $sampler 2>/dev/null' EXIT
-          scripts/ci
-        env:
-          GH_TOKEN: ${{ github.token }}
-      # A scoped run instead: build every target with its tests, then run only
-      # APP's Model tests and its snapshot tests (a macOS gate run's APP is a
-      # comma list: the union of those apps' tests) (one at a time, as scripts/ci
-      # does). The filters come from scripts/test-scope, the table scripts/ci
-      # --changed maps changed files with; a snapshot test whose name fits no
-      # app runs in full runs only. Perf tests are skipped (perf-nightly runs
-      # them). A filter that matches no test fails the step. The job
-      # summary lists what ran.
-      - name: Scoped build and tests
+          scripts/ci --shard "${{ matrix.shard }}/${{ strategy.job-total }}"
+      # A scoped run instead: only APP's Model tests and its snapshot tests (a
+      # macOS gate run's APP is a comma list: the union of those apps' tests)
+      # (one at a time, as scripts/ci does). The filters come from
+      # scripts/test-scope, the table scripts/ci --changed maps changed files
+      # with; a snapshot test whose name fits no app runs in full runs only.
+      # Perf tests are skipped (perf-nightly runs them). A filter that matches
+      # no test fails the step. The job summary lists what ran.
+      - name: Scoped tests
         if: inputs.app
         run: |
           scope=$(scripts/test-scope app "$APP")
@@ -268,7 +365,7 @@ jobs:
           {
             echo "## scoped: $APP"
             echo
-            echo "Built every target with its tests and the five app bundles. Ran only:"
+            echo "Built every target with its tests and the five app bundles (the compile job). Ran only:"
             echo
             echo "- Model tests: \`swift test --filter '$model'\`"
             if [[ -n "$snap" ]]; then echo "- Snapshot tests: \`swift test --filter '$snap' --no-parallel\`"; else echo "- Snapshot tests: none"; fi
@@ -278,7 +375,6 @@ jobs:
             echo "Skipped: the Linux job (lints and every Model's tests), other apps' tests and journeys, and Promote and Dev red (a scoped run never moves main, and its journeys never lower the audit baseline)."
             echo
           } >>"$GITHUB_STEP_SUMMARY"
-          swift build --build-tests
           # run LABEL ARGS...: one swift test run without the perf tests; its result line goes in the summary.
           run() {
             local label=$1 log="$RUNNER_TEMP/scoped-$RANDOM.log" status
@@ -299,43 +395,13 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: snapshots
+          name: snapshots-${{ matrix.shard }}
           path: .build/snapshots
           if-no-files-found: warn
-      # Release builds wrapped in signed .app bundles, for "Open on this Mac".
-      # Runs only after scripts/ci passed, so a red build never ships bundles.
-      # A macOS gate run (mac_only) skips them and the size report: it is a
-      # pass/fail check on a batch branch.
-      - run: scripts/bundle-apps
-        if: ${{ !inputs.mac_only }}
-      - name: Upload app builds
-        if: ${{ !inputs.mac_only }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-builds
-          path: .build/app-builds.tar.gz
-          retention-days: 7
-          if-no-files-found: error
-      # The size baseline (blueprint 7.5): bytes per executable, bundle and
-      # tarball, and SuiteUI symbols per executable, as `size-report` and a
-      # table in the job summary. Report only: it fails on a script error or a
-      # missing bundle, never on a size.
-      - name: Size report
-        if: ${{ !inputs.mac_only }}
-        run: |
-          bash Tests/size_report/test_size_report.sh
-          scripts/size-report | tee -a "$GITHUB_STEP_SUMMARY"
-      - name: Upload size report
-        if: ${{ !inputs.mac_only }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: size-report
-          path: .build/size-report.json
-          if-no-files-found: error
       # On any failure, the crash reports macOS wrote for this job: a test
       # process that died (scripts/ci prints TEST PROCESS DIED) leaves an .ips
       # naming the crashed thread. The newest one's head goes in the log; all
-      # of them go up as `crash-reports`.
+      # of them go up as `crash-reports-K`.
       # It also prints the last 15 memory samples (all are uploaded), and the
       # newest JetsamEvent report's summary (scripts/jetsam-summary): macOS
       # writes one to /Library/Logs/DiagnosticReports when it kills processes
@@ -375,10 +441,48 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: crash-reports
+          name: crash-reports-${{ matrix.shard }}
           path: ${{ runner.temp }}/crash-reports
           if-no-files-found: ignore
           retention-days: 7
+
+  # The gate job Promote, Dev red and the fast lane read ("macOS", or "macOS
+  # (<apps>)" for a scoped or scoped gate run: MAC_JOB and MAC_GATE_RE in
+  # scripts/fast-lane.sh): green once the compile job, every test job and the
+  # bundles (when they run) passed. On ubuntu, after them, always (a red shard
+  # must make it red, not skipped). Its summary lists each macOS job's
+  # minutes. When red it deletes `app-builds`, so a red run ships no bundles.
+  macos:
+    name: ${{ inputs.app && format('macOS ({0})', inputs.app) || 'macOS' }}
+    needs: [mac-compile, mac-test, mac-bundle]
+    if: ${{ always() && !inputs.build_only && !inputs.linux_only }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write  # delete app-builds on red
+      contents: read
+    env:
+      BUILD: ${{ needs.mac-compile.result }}
+      TESTS: ${{ needs.mac-test.result }}
+      BUNDLES: ${{ needs.mac-bundle.result }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Gate on the compile job, every test job and the bundles
+        run: |
+          run="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          {
+            echo "## macOS: compile $BUILD, tests $TESTS, bundles $BUNDLES"
+            echo
+            echo "| job | result | minutes |"
+            echo "|---|---|---|"
+            gh api "$run/jobs?per_page=100" --jq '.jobs[] | select((.name | startswith("macOS ")) and .conclusion != "skipped") | "| \(.name) | \(.conclusion // .status) | \(if .completed_at and .started_at then (((.completed_at | fromdate) - (.started_at | fromdate)) / 60 | floor) else "-" end) |"'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          [[ "$BUILD" == success && "$TESTS" == success && "$BUNDLES" =~ ^(success|skipped)$ ]] && exit 0
+          for id in $(gh api "$run/artifacts" --jq '.artifacts[] | select(.name == "app-builds") | .id'); do
+            gh api -X DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$id" && echo "Deleted app-builds: a red run ships no bundles."
+          done
+          echo "::error::macOS: compile $BUILD, tests $TESTS, bundles $BUNDLES"
+          exit 1
 
   # Fast-forward main to this dev SHA once the Linux and macOS jobs passed; the
   # journeys (journeys.yml) are report-only. The only job here that writes
@@ -418,7 +522,8 @@ jobs:
 
   # Open, or update, the single "dev is red" issue when the Linux or macOS job
   # fails (journey reds go to Findings). main is the last green dev SHA, so main..SHA
-  # holds the culprit.
+  # holds the culprit. A run whose SHA main already contains (it finished after
+  # a newer green run promoted past it) is stale: it logs the skip and touches no issue.
   dev-red:
     name: Dev red
     needs: [linux, macos]
@@ -438,6 +543,10 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           git fetch origin main
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::notice::Skipped as stale: main ($(git rev-parse --short origin/main)) already contains $GITHUB_SHA, so a newer green run promoted past it. No dev-red issue opened or updated."
+            exit 0
+          fi
           range="main..$GITHUB_SHA"
           failed=$(jq -r '[to_entries[] | select(.value.result == "failure") | .key] | join(", ")' <<<"$NEEDS")
           # Lane and squash merges end their subject with (#N).

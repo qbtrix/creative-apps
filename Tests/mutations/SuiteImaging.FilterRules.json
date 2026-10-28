@@ -1,0 +1,23 @@
+[
+  {
+    "label": ".outsideUnchanged: coverage ignored, every pixel takes the filter",
+    "file": "Sources/SuiteImaging/Adjust/FilterRules.swift",
+    "find": "let cover = coverage",
+    "replace": "let cover: Mask? = nil",
+    "tests": "FilterRulesTests"
+  },
+  {
+    "label": ".noiseIsSeeded: seed left out of the hash",
+    "file": "Sources/SuiteImaging/Adjust/FilterRules.swift",
+    "find": "var z = seed &+",
+    "replace": "var z = 0 &+",
+    "tests": "FilterRulesTests"
+  },
+  {
+    "label": ".blurReachesPastBounds: no padding past the covered rectangle",
+    "file": "Sources/SuiteImaging/Adjust/FilterRules.swift",
+    "find": "let m = reach(f, pixels)",
+    "replace": "let m = 0",
+    "tests": "FilterRulesTests"
+  }
+]

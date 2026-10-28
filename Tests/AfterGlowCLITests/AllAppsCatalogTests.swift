@@ -37,7 +37,7 @@ struct AllAppsCatalogTests {
         let named = listed.compactMap { app -> String? in
             if case .object(let f) = app, case .string(let name)? = f["name"] { name } else { nil }
         }
-        #expect(named == Self.names + ["suite", "fake"], "list-apps lists the five in registry order, the suite, then the fake")
+        #expect(named == Self.names + ["suite", "fake", "fake-tone"], "list-apps lists the five in registry order, the suite, then the fakes")
     }
 
     @Test(arguments: names)
@@ -59,14 +59,43 @@ struct AllAppsCatalogTests {
             "easing.select-lane-keys: queryOrViewChangesNoBytes", "timeline.pick-keys: queryOrViewChangesNoBytes",
             "layer.select: queryOrViewChangesNoBytes",
             "timeline.scrub: queryOrViewChangesNoBytes", "viewer.drag-begin: queryOrViewChangesNoBytes"],
+        // #5841: a Flare command stays available on any file and refuses at run time in the engine's words.
+        "Flare's examples name scene-1, layer-1 and other ids ball.flare doesn't hold": [
+            "color-key.move: exampleRuns", "color-key.remove: exampleRuns", "guide.move: exampleRuns",
+            "guide.remove: exampleRuns", "instance.add: exampleRuns", "instance.remove: exampleRuns",
+            "instance.set-playback: exampleRuns", "instance.set-transform: exampleRuns",
+            "keyframe.remove: exampleRuns", "keyframe.set-easing: exampleRuns", "label.remove: exampleRuns",
+            "layer.add: exampleRuns", "layer.set-parent: exampleRuns", "machine.add-input: exampleRuns",
+            "machine.add-state: exampleRuns", "machine.add-transition: exampleRuns", "machine.remove: exampleRuns",
+            "machine.remove-input: exampleRuns", "machine.remove-state: exampleRuns",
+            "machine.remove-transition: exampleRuns", "machine.rename: exampleRuns",
+            "machine.set-initial: exampleRuns", "machine.update-input: exampleRuns",
+            "machine.update-state: exampleRuns", "machine.update-transition: exampleRuns", "mask.move: exampleRuns",
+            "mask.remove: exampleRuns", "scene.remove: exampleRuns", "scene.rename: exampleRuns",
+            "scene.reorder: exampleRuns", "scene.set-canvas: exampleRuns", "scene.timing: exampleRuns",
+            "swatch.remove: exampleRuns", "swatch.rename: exampleRuns", "swatch.set-color: exampleRuns",
+            "symbol.convert: exampleRuns", "symbol.remove: exampleRuns", "symbol.rename: exampleRuns",
+            "text.apply-style: exampleRuns", "text.clear-style: exampleRuns", "text.edit-string: exampleRuns",
+            "text.remove: exampleRuns", "text.set-font: exampleRuns", "text.set-on-path: exampleRuns",
+            "text.set-paragraph: exampleRuns", "text.set-string: exampleRuns"],
         "The kernel's place.image example is an SVG, which Photo doesn't place": ["place.image: exampleRuns"],
         "The kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "Halo's drag end with no drag is a no-op edit that stays enabled": [
             "viewer.drag-end: stepNamedTitle", "viewer.drag-end: editRecordsOneStep", "viewer.drag-end: undoRestoresBytes"],
-        "The kernel's transform.flip is titled Flip while its step names the axis": ["transform.flip: stepNamedTitle"],
+        "The kernel's transform.flip and image.flip are titled Flip while their steps name the axis": [
+            "transform.flip: stepNamedTitle", "image.flip: stepNamedTitle"],
+        "The kernel's tone.set is titled Tone while its step names the slider": ["tone.set: stepNamedTitle"],
+        // PY-5 (layer-styles) fills Photo's style adapter and drops this entry.
+        "Photo's style.* runs throw notBuilt until layer-styles PY-5": [
+            "style.add: exampleRuns", "style.enable: exampleRuns", "style.fill-opacity: exampleRuns", "style.panel: exampleRuns",
+            "style.paste: exampleRuns", "style.preset: exampleRuns", "style.read: exampleRuns", "style.remove: exampleRuns",
+            "style.set: exampleRuns"],
         "Photo's square.png is flat where the heal examples act, so they change no pixel and record no step": [
             "retouch.spot-heal: stepNamedTitle", "retouch.spot-heal: editRecordsOneStep", "retouch.spot-heal: undoRestoresBytes",
             "retouch.remove: stepNamedTitle", "retouch.remove: editRecordsOneStep", "retouch.remove: undoRestoresBytes"],
+        "The suite's Black & White example removes a B&W the file doesn't have": [
+            "adjust.black-and-white: stepNamedTitle", "adjust.black-and-white: editRecordsOneStep",
+            "adjust.black-and-white: undoRestoresBytes"],
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its

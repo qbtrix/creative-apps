@@ -3,6 +3,7 @@
 // are `notBuilt` until `HaloHeadless` (AC-h2) runs them; Render starts the open sheet's run with the sheet's
 // settings (command-state CS-7). `windowSpecs` are the window's own steps a bare control runs. Linux-safe: no UI imports.
 import CoreRaster
+import SuiteImaging
 import SuiteKernel
 
 extension HaloProject {
@@ -11,12 +12,22 @@ extension HaloProject {
     /// (gradient-fill HG-7), its nine `stroke.*` commands (stroke-style HK-6), the History panel's
     /// `history.read` and `history.jump` (autosave-history HA-6), the six `transform.*` commands on the
     /// selected layer (transform HT-6), `frameRateSpecs` (frame-rates FR-8b), the five `place.*`
-    /// commands (placed-images PH-6), then `windowSpecs`.
+    /// commands (placed-images PH-6), the eleven `style.*` commands (layer-styles HY-1), `textStyleSpecs`
+    /// (text-style TS-9), the suite's five `file.*` recents, Open In and drop commands (file-flow HF-3, whose
+    /// `file.open-recent` takes a recent file's id in place of the path `.openRecent` names), the selected
+    /// layer's kind and filter commands and its list's `filter.set-hidden`, `filter.remove` and `filter.move`
+    /// (adjust-everywhere AJ-12, AJ-13), `edit.copy-frame` and `edit.paste` (clipboard-interop CB-10), then `windowSpecs`.
     public static let commandSpecs: [CommandSpec<HaloProject>] =
-        HaloCommand.allCases.map(spec(for:)) + ShapeCommands.specs(HaloProject.self)
+        HaloCommand.allCases.map(spec(for:)).filter { $0.id != "file.open-recent" } + ShapeCommands.specs(HaloProject.self)
         + GradientCommands.specs(HaloProject.self) + StrokeCommands.specs(HaloProject.self)
         + HistoryCommands.specs(HaloProject.self) + TransformCommands.specs(HaloProject.self) + frameRateSpecs
-        + PlaceCommands.specs(HaloProject.self) + windowSpecs
+        + PlaceCommands.specs(HaloProject.self) + StyleCommands.specs(HaloProject.self) + textStyleSpecs
+        + FileFlowCommands.specs(HaloProject.self) + filterSpecs + CopyAsCommands.frameSpecs(HaloProject.self)
+        + pasteSpecs + windowSpecs
+
+    /// The kernel's text commands but `text.set-size`: Halo's own (`HaloCommand.setFontSize`, which the
+    /// inspector's size row runs) keeps that id, so the catalog holds it once.
+    static let textStyleSpecs = TextCommands.specs(HaloProject.self).filter { $0.id != "text.set-size" }
 
     /// The render sheet's Choose… and the unsaved alert's Save and Don't Save (CS-7): headless they check
     /// availability and change nothing, since the panel and the held command are the window's.
@@ -264,7 +275,7 @@ private enum Param {
     static let id = ParamSchema.string("A composition or layer id.", maxLength: 64)
     static let name = ParamSchema.string(maxLength: 255)
     static let unit = ParamSchema.number(minimum: 0, maximum: 1)
-    static let property = ParamSchema.string(oneOf: HaloProperty.allCases.map(\.rawValue))
+    static let property = ParamSchema.string(oneOf: HaloProperty.keyable.map(\.rawValue))
     static let point = HaloProject.obj(["x": .number(), "y": .number()])
 
     struct None: Decodable, Sendable {}; struct Kind: Decodable, Sendable { var kind: HaloLayerKind }

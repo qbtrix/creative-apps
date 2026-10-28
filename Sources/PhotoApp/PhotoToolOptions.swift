@@ -47,7 +47,7 @@ struct ToolOptionsSection: View {
                     "Opacity", value: options.opacityPercent, in: ToolOptions.opacityRange, unit: "%", decimals: 0
                 ) { perform(.toolOption(.opacity(percent: $0))) }
                 .accessibilityIdentifier("photo.tool.opacity")
-            case .marquee:
+            case .marquee, .ellipse, .lasso, .polygon, .wand:
                 hint("Drag over the image to select. Delete clears the selection; Fill paints it.")
                 colorRow(options)
                 HStack(spacing: SuiteSpacing.xs) {
@@ -65,7 +65,8 @@ struct ToolOptionsSection: View {
                 CropOptions(model: model, perform: perform)
             case .move:
                 hint(model.moveHint)
-                TransformOptions(model: model, perform: perform)
+                // An adjustment layer can't move: its rows would only sit there disabled.
+                if model.canMoveSelection { TransformOptions(model: model, perform: perform) }
             case .eyedropper:
                 hint(Self.eyedropperHint)
                 SampleOptions(model: model, perform: perform)

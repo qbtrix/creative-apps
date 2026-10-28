@@ -1,0 +1,58 @@
+[
+  {
+    "label": "nearestUnclippedBase: the walk does not stop at the first unclipped layer",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "return below.last { !isClipped($0.payload) }?.id",
+    "replace": "return below.first { !isClipped($0.payload) }?.id",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "bottomHasNoBase: the bottom layer is given itself",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "let below = siblings[..<index]",
+    "replace": "let below = siblings[...index]",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "skipsClipped: a clipped layer below counts as a base",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "return below.last { !isClipped($0.payload) }?.id",
+    "replace": "return below.last?.id",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "clippedRunStops: clipped(onto:) keeps going past an unclipped layer",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "return above.prefix { isClipped($0.payload) }.map(\\.id)",
+    "replace": "return above.filter { isClipped($0.payload) }.map(\\.id)",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "clippedBaseRefused: a clipped layer is taken as a base",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "!isClipped(siblings[index].payload) else { return [] }",
+    "replace": "true else { return [] }",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "groupBaseSkipped: a group sibling is passed over as a base",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "return below.last { !isClipped($0.payload) }?.id",
+    "replace": "return below.last { !isClipped($0.payload) && $0.children.isEmpty }?.id",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "groupRefusesClips: a group is no base in clipped(onto:)",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "!isClipped(siblings[index].payload) else { return [] }",
+    "replace": "!isClipped(siblings[index].payload), siblings[index].children.isEmpty else { return [] }",
+    "tests": "ClipRulesTests"
+  },
+  {
+    "label": "notClippedHelpText: the unclip help says something else",
+    "file": "Sources/SuiteKernel/Layers/ClipRules.swift",
+    "find": "public static let notClippedHelp = \"This layer isn't clipped.\"",
+    "replace": "public static let notClippedHelp = \"\"",
+    "tests": "ClipRulesTests"
+  }
+]

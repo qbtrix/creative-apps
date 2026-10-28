@@ -56,7 +56,7 @@ import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct DesignWindow: View {
+struct DesignWindow: View, BodyCounted {
     /// What the window starts with; nil starts empty.
     var launch: DesignLaunch?
 
@@ -92,8 +92,7 @@ struct DesignWindow: View {
     private static let fileType = UTType(filenameExtension: "design") ?? .data
 
     #if DEBUG
-    /// How many times a window's body ran; RenderBudgetDesignTests counts an interaction's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     /// The workspace after the last intent; DesignLiveDragTests reads it.
     static var lastWorkspace: DesignWorkspace?
     /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
@@ -111,7 +110,7 @@ struct DesignWindow: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         DesignEditor(
             model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom,
@@ -135,6 +134,8 @@ struct DesignWindow: View {
         .task { start() }
         // The key window is the one live commands act on (EM-4).
         .suiteLiveWindow(DesignShell.front, read: { DesignHeadless(model) }, write: { perform(.adoptLive($0.workspace)) })
+        // A file handed to Design (Finder, the home's Recent, Open In) opens here while the window is empty (#5200).
+        .suiteOpenQueue(DesignShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
@@ -215,7 +216,10 @@ struct DesignWindow: View {
         case .moveLayer(let id, let parent, let index):
             do { try model.moveLayer(id, into: parent, at: index) } catch { note = error.help }
         case .setStyle(let change):
-            do { try model.setStyle(change) } catch { note = error.help }
+            do {
+                try model.setStyle(change)
+                if case .textStyle = change { fitStyledText() }
+            } catch { note = error.help }
         case .renamePage(let id, let name):
             do { try model.renamePage(id, to: name) } catch {
                 // The page ids come from the model's own rows; only the name can be refused.
@@ -243,6 +247,12 @@ struct DesignWindow: View {
             node.id == id ? DesignTextFont.measure(model.textDraft, in: node) : nil
         }
         model.commitTextEdit(extent: extent)
+    }
+
+    /// Fits each selected text box to its text in the style just set, in that style's step (#3339).
+    private func fitStyledText() {
+        let texts = model.selectedNodes.filter { $0.kind == .text }
+        model.fitTextStyle(Dictionary(texts.map { ($0.id, DesignTextFont.measure($0.text, in: $0)) }) { first, _ in first })
     }
 
     /// Lands a live drag or scrub in the workspace as one step; with none live, `otherwise`.
