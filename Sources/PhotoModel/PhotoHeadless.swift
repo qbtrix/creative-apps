@@ -13,7 +13,7 @@ import SuiteKernel
 
 /// Photo's headless document: one `PhotoWorkspace` on the live services, or on the caller's (`open(_:name:services:)`,
 /// `new(_:services:)`): PhotoModel can't reach the suite's live text, so a host that can passes it in.
-public struct PhotoHeadless: HeadlessDropReceiver {
+public struct PhotoHeadless: HeadlessDocument {
     public static let app = "photo", exportFormats = ["png", "jpeg"]
     /// Photo's own .ora, then every image the codec reads here.
     public static let openExtensions = ["ora", "png", "jpg", "jpeg"] + codec.readExtensions.subtracting(["png", "jpg", "jpeg"]).sorted()
@@ -37,8 +37,6 @@ public struct PhotoHeadless: HeadlessDropReceiver {
         self.workspace.receiveDropped([:])
     }
 
-    /// Hands `file.drop` the dropped files' bytes by path.
-    public mutating func receiveDropped(_ files: [String: Data]) { workspace.receiveDropped(files) }
 
     /// The file `data`, named `name`, by its extension: a Photo document (.ora) with its layers, or a flat PNG or
     /// image. Throws `ArchiveError` for a bad document, `CodecError` for an image the codec can't read.
@@ -141,4 +139,9 @@ public struct PhotoHeadless: HeadlessDropReceiver {
 
     struct NewOptions: Decodable { var width, height: Int? }
     struct ExportOptions: Decodable { var longSide: Int?; var quality: Double? }
+}
+
+extension PhotoHeadless: HeadlessDropReceiver {
+    /// Hands `file.drop` the dropped files' bytes by path.
+    public mutating func receiveDropped(_ files: [String: Data]) { workspace.receiveDropped(files) }
 }
