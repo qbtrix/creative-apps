@@ -315,3 +315,4 @@ utc	stage	event	ref	note
 2026-10-28T16:36Z	3	heartbeat	lane	poll 2026-10-28T16:36Z: 16:37Z check-in: #5103 at 51813ef6 (conflict resolved), awaiting prescreen
 2026-10-28T17:25Z	3	heartbeat	lane	poll 2026-10-28T17:25Z: 17:25Z: #5103 prescreen green, awaiting lane batch; full CI 40729575340 queued
 2026-10-28T18:13Z	3	heartbeat	lane	poll 2026-10-28T18:13Z: 18:14Z: #5103 merged 17:51Z; #5254 on dev awaiting lane; full CI 40740800666 running
+2026-10-28T19:02Z	3	heartbeat	lane	poll 2026-10-28T19:02Z: 19:03Z: #5254 conflict resolved (a4988a0a), prescreen green, awaiting lane; full CI 40740800666 running
