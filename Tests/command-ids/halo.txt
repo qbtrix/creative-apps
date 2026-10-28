@@ -48,6 +48,7 @@ fill.type
 filter.add-noise
 filter.gaussian-blur
 filter.motion-blur
+filter.move
 filter.reduce-noise
 filter.remove
 filter.set-hidden
