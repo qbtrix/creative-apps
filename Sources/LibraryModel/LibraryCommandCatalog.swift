@@ -342,7 +342,7 @@ extension LibraryCatalog {
         }
         if let why = c.sliderHelp(p.slider) { throw CatalogError.unavailable(id: "photo.set-develop", why: why) }
         c.setDevelop(p.slider, to: p.value, coalesceKey: p.drag)
-        return c.developValue(p.slider)?.shared.map { .object([p.slider.rawValue: .number($0)]) } ?? .object([:])
+        return c.developValue(p.slider)?.shared.map { JSONValue.object([p.slider.rawValue: .number($0)]) } ?? .object([:])
     }
 }
 
