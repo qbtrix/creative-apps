@@ -53,7 +53,8 @@ struct LibraryWindow: View {
         // The live grid keeps its thumbnails in <support>/Library/Thumbnails (ST-7); fixtures stay on fakes.
         let services = launch.services(
             decoder: ImageIODecoder(), writer: JPEGWriter(metadata: LibraryShell.services.metadata),
-            store: CatalogStore(), sidecars: XMPSidecarWriter())
+            store: CatalogStore(), looks: PresetStore(folder: SuiteLocations.processSupportFolder),
+            sidecars: XMPSidecarWriter())
             .withThumbnailDisk(folder: LibraryServices.thumbnailFolder(arguments: arguments, home: NSHomeDirectory()))
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
@@ -114,6 +115,8 @@ struct LibraryWindow: View {
                        perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
+        // The Develop tab's LOOKS and BLACK & WHITE run their commands through this (AJ-11).
+        .environment(\.libraryAdjust, adjustControls)
         .libraryControlsProbe()
         .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
         // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.

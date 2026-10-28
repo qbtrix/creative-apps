@@ -81,13 +81,13 @@ extension LibraryWindow {
     }
 
     /// A drag's sample: Show Original off, a quick preview in the loupe.
-    private func developPreview() {
+    func developPreview() {
         if areas.develop.originalPhotoID != nil { areas.develop.originalPhotoID = nil }
         developRender(.preview, original: false)
     }
 
     /// An edit that ended: the full render, then the changed photos' thumbnails redrawn.
-    private func developFinish(_ ids: Set<String>) {
+    func developFinish(_ ids: Set<String>) {
         if areas.develop.originalPhotoID != nil { areas.develop.originalPhotoID = nil }
         developRender(.full, original: false)
         guard !ids.isEmpty else { return }

@@ -102,8 +102,9 @@ struct HaloDrawnLayers: View {
         // before the linear drawing group ever sees it (HF-1 keyed-6, #1161).
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: false) { context, size in
             let fit = HaloCanvasFit.transform(HaloCanvasFit.layout(list: list, size: size))
+            var ascents: [CGFloat: CGFloat] = [:]
             for item in list.items {
-                drawItem(item, in: context, fit: fit)
+                drawItem(item, in: context, fit: fit, ascents: &ascents)
             }
         }
         .drawingGroup(opaque: false, colorMode: .linear)
@@ -124,8 +125,9 @@ struct HaloDrawnLayers: View {
     }
 }
 
-/// Draws one item bottom first into its own copy of `context`.
-private func drawItem(_ item: HaloDrawItem, in context: GraphicsContext, fit: CGAffineTransform) {
+/// Draws one item bottom first into its own copy of `context`; `ascents` keeps
+/// each font size's ascent for the frame, so Core Text makes one font per size.
+private func drawItem(_ item: HaloDrawItem, in context: GraphicsContext, fit: CGAffineTransform, ascents: inout [CGFloat: CGFloat]) {
     var g = context
     let m = item.matrix
     g.concatenate(CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty).concatenating(fit))
@@ -147,7 +149,8 @@ private func drawItem(_ item: HaloDrawItem, in context: GraphicsContext, fit: CG
         let size = CGFloat(content.fontSize)
         let resolved = g.resolve(Text(content.string).font(.system(size: size)).foregroundStyle(color))
         let box = CGSize(width: max(rect.width, 1), height: max(rect.height, 1))
-        let ascent = HaloCanvasFit.ascent(fontSize: size)
+        let ascent = ascents[size] ?? HaloCanvasFit.ascent(fontSize: size)
+        ascents[size] = ascent
         let at = CGPoint(x: rect.minX, y: rect.minY + ascent - resolved.firstBaseline(in: box))
         g.draw(resolved, at: at, anchor: .topLeading)
     case .null: break
