@@ -67,8 +67,8 @@ private func required(_ schema: JSONValue) -> [String]? {
     @Test func listsTheTextCommands() throws {
         let catalog = try #require(catalog)
         let text = catalog.ids.filter { $0.hasPrefix("text.") }
-        #expect(text == ["text.add", "text.read", "text.set-alignment", "text.set-font", "text.set-italic",
-                         "text.set-line-height", "text.set-size", "text.set-tracking", "text.set-words"])
+        #expect(text == ["text.add", "text.read", "text.set-alignment", "text.set-color", "text.set-font",
+                         "text.set-italic", "text.set-line-height", "text.set-size", "text.set-tracking", "text.set-words"])
         let add = try #require(catalog.describe("text.add"))
         #expect(add.title == "Add Text")
         #expect(add.undoable)
