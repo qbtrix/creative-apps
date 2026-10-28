@@ -429,3 +429,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 08:03Z check-in: #5250 #5259 #5260 #5252 #5257 #5258 all clean [fast-lane,beta]; lane dropped needs-fix on #5252 head 3bfbf2072. dev 8ea49c081, main c73c958a9. Nothing merged.
 - 08:23Z check-in: no change; 6 PRs clean [fast-lane,beta], dev 8ea49c081, main c73c958a9.
 - 08:43Z check-in: no change; 6 PRs clean [fast-lane,beta], dev 8ea49c081, main c73c958a9.
+- 09:03Z #5257 (AJ-halo model) merged as 83d413f29. #5258 base PATCHed to dev, rebased onto dev cleanly (ae708a9b2, +227-4 f=5), gate running.
