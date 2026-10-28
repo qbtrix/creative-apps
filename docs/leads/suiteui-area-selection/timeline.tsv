@@ -305,3 +305,4 @@ time	task	event	note
 2026-10-28T16:36Z	3	heartbeat	lane	poll 2026-10-28T16:36Z: 16:37Z check-in: #5103 at 51813ef6 (conflict resolved), awaiting prescreen
 2026-10-28T16:58Z	poll	#5103 prescreen success at 51813ef63; #5254 #5256 clean, awaiting prescreen
 2026-10-28T17:25Z	3	heartbeat	lane	poll 2026-10-28T17:25Z: 17:25Z: #5103 prescreen green, awaiting lane batch; full CI 40729575340 queued
+2026-10-28T17:55Z	restack	#5103 prescreen success, awaiting lane; #5254 #5256 clean
