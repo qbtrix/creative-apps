@@ -254,3 +254,4 @@ utc	stage	event	ref	note
 2026-10-28T04:09Z	3	heartbeat	lane	poll 2026-10-28T04:09Z: 04:09Z check-in: no change; #5103 on dev ready; #5818 still red (f46358b rerun pending); no #5093 answer; no new main run
 2026-10-28T04:56Z	3	heartbeat	lane	poll 2026-10-28T04:56Z: 04:56Z check-in: no change; #5818 still red (f46358b rerun red); #5103/#5149 ready; no #5093 answer; no new main run
 2026-10-28T05:43Z	3	heartbeat	lane	poll 2026-10-28T05:43Z: 05:43Z check-in: no change; #5818 still open (186be9a rerun pending); #5103/#5149 ready; no #5093 answer; no new main run
+2026-10-28T06:31Z	3	heartbeat	lane	poll 2026-10-28T06:31Z: 06:30Z dev green at 9ece0e0 (#5818 closed); FH-u, FH-c, CB-photo slice-done; #5103/#5149 ready
