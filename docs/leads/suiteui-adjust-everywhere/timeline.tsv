@@ -267,3 +267,4 @@ utc	stage	event	ref	note
 09:59	3	merged	#5252	AJ-library merged; awaiting green main for done
 10:03Z	3	AJ-library #5252 merged to dev (6ef2d459b); waiting for main; photo/halo PRs clean, waiting on prescreen
 10:22Z	3	check-in: AJ-library on dev 6ef2d459b, not on main yet; photo/halo PRs clean, waiting on prescreen
+10:50Z	3	AJ-photo #5250 merged to dev (575a0bdd9); restacking #5259 onto dev (PhotoAdjustTab conflict with dev's PhotoAdjustSections resolved), gate running
