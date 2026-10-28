@@ -4,7 +4,8 @@
 // which `selectedNodeID` and `selectedNodes` read, so single-selection callers
 // keep working. A plain click (selectItem) replaces the list, Shift-click
 // (toggleSelection) is the kernel's `.toggle` pick, and deselect (Escape, a
-// click on empty canvas) clears it. Every change goes through `adopt`, which
+// click on empty canvas) clears it; `select` (edit.select) takes a whole list,
+// checked in one walk of the page. Every change goes through `adopt`, which
 // ends the edit run (DesignHistory), so nudging A, then selecting B and nudging
 // it, is two undo steps; a pick the kernel refuses changes nothing.
 //
@@ -63,6 +64,38 @@ extension DesignWorkspace {
         guard next.pick(id, .toggle, canAdd: canAddToSelection) else { return }
         adopt(next)
         if next.contains(id), let page = selectedPage { expandAncestors(of: id, in: page.nodes) }
+    }
+
+    /// Selects `ids` in order, the last one primary, as one change (edit.select): the first may be
+    /// any layer in the file, as a click picks it, and switches to its page; each later one must be
+    /// one Shift-click could add there (`canAddToSelection`). One walk of the page however many
+    /// ids. A bad id refuses, naming it, and changes nothing.
+    public mutating func select(_ ids: [String]) throws(DesignRefusal) {
+        guard let first = ids.first else { throw .nothingSelected }
+        guard let page = pages.first(where: { $0.nodes.node(first) != nil }) else { throw .unknownID(first) }
+        var flags: [String: (name: String, locked: Bool, hidden: Bool)] = [:]
+        func walk(_ nodes: [DesignNode], locked: Bool, hidden: Bool) {
+            for node in nodes {
+                let (lock, hide) = (locked || node.isLocked, hidden || node.isHidden)
+                flags[node.id] = (node.name, lock, hide)
+                walk(node.children, locked: lock, hidden: hide)
+            }
+        }
+        walk(page.nodes, locked: false, hidden: false)
+        var seen: Set<String> = []
+        for (index, id) in ids.enumerated() {
+            guard let flag = flags[id] else { throw .unknownID(id) }
+            guard seen.insert(id).inserted else { throw .notYet("\(id) is listed twice.") }
+            guard index > 0 else { continue }
+            if flag.locked { throw .locked(flag.name) }
+            if flag.hidden { throw .hidden(flag.name) }
+        }
+        commitTextEdit()
+        selectedPageID = page.id
+        var next = Selection<String>()
+        next.replace(ids)
+        adopt(next)
+        expandAncestors(of: ids, in: page.nodes)
     }
 
     /// Makes `next` the selection and ends the edit run: a run never spans two selections.
