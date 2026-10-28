@@ -54,9 +54,17 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
     @Test func photoNamesItselfAndPlacesImages() {
         let workspace = PhotoWorkspace(services: .fake)
         #expect(workspace.appID == "photo")
-        #expect(workspace.placesExtensions == CoreRasterImageCodec().readExtensions)
+        #expect(workspace.placesExtensions.isSubset(of: CoreRasterImageCodec().readExtensions))
         #expect(workspace.placesExtensions.isSuperset(of: ["png", "jpg", "jpeg"]))
         #expect(!workspace.hasDocument)
+    }
+
+    @Test func everyTypePhotoPlacesIsPlacedByTheDropRule() throws {
+        var workspace = try openedImage()
+        workspace.readImages(with: AllReadingCodec())
+        let actions = DropPlan.plan(workspace.placesExtensions.sorted().map { "/in/f.\($0)" }, into: "photo", hasDocument: true,
+                                    places: workspace.placesExtensions, readers: { workspace.readers(ofExtension: $0) })
+        for action in actions { if case .place = action {} else { Issue.record("advertised but not placed: \(action)") } }
     }
 
     @Test func aDropOnlyTakesWhatTheCodecReads() {
@@ -252,3 +260,12 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
 
 /// The parts of drop-layer.jobs.json the walk runs.
 private struct DropJob: Decodable { var steps: [CommandEnvelope] }
+
+/// A codec that claims every image extension, so the drop rule decides what Photo can place.
+private struct AllReadingCodec: PhotoImageCodec {
+    var readExtensions: Set<String> { ["png", "jpg", "jpeg", "heic", "heif", "tif", "tiff", "psd"] }
+    func decode(_ data: Data, longestSide: Int?) throws -> DecodedImage { try CoreRasterImageCodec().decode(data, longestSide: longestSide) }
+    func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data {
+        try CoreRasterImageCodec().encode(image, as: format, quality: quality)
+    }
+}
