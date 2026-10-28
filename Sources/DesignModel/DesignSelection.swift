@@ -40,12 +40,20 @@ extension DesignWorkspace {
     }
 
     /// The box around every selected layer the canvas shows (none hidden, itself or by a group), or nil.
+    /// One walk of the page that skips hidden subtrees, however many layers are selected: the canvas
+    /// reads it several times per drag sample.
     public var selectionBounds: DesignRect? {
-        let frames = selectedNodes.filter { !isHiddenInTree($0.id) }.map(\.frame)
-        guard let first = frames.first else { return nil }
-        let (minX, minY) = (frames.map(\.x).min() ?? first.x, frames.map(\.y).min() ?? first.y)
-        let (maxX, maxY) = (frames.map(\.maxX).max() ?? first.maxX, frames.map(\.maxY).max() ?? first.maxY)
-        return DesignRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+        guard let page = selectedPage, !selectedNodeIDs.isEmpty else { return nil }
+        let wanted = Set(selectedNodeIDs)
+        var frames: [DesignRect] = []
+        func walk(_ nodes: [DesignNode]) {
+            for node in nodes where !node.isHidden {
+                if wanted.contains(node.id) { frames.append(node.frame) }
+                walk(node.children)
+            }
+        }
+        walk(page.nodes)
+        return DesignRect.union(frames)
     }
 
     /// Whether Shift-click can add node `id`: it is on the selected page and neither it nor a
