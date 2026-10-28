@@ -269,6 +269,12 @@ private final class KeyCapableWindow: NSWindow {
         Self.node(identifier, in: host)?.accessibilityLabel?() ?? nil
     }
 
+    /// The accessibility value of the element called `identifier` as text (a slider row's "42 px"); nil when
+    /// there is no such element or it has no value.
+    func value(_ identifier: String) -> String? {
+        (Self.node(identifier, in: host)?.accessibilityValue?() ?? nil).map { "\($0)" }
+    }
+
     /// The window point of `point` on an artboard `size` big drawn in `box` (window coordinates, so y up),
     /// `point` measured from the artboard's top left in its own units.
     func point(_ point: CGPoint, on size: CGSize, in box: CGRect) -> CGPoint {
