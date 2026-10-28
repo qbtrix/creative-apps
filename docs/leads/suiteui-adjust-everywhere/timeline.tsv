@@ -296,3 +296,4 @@ utc	stage	event	ref	note
 17:19Z	3	wait-main	main still f89f5255c (dev-red #5983 open, not ours); 0 open findings
 17:39Z	3	wait-main	main still f89f5255c (dev-red #5983 open, not ours); 0 open findings
 2026-10-28T17:55Z	restack	AJ-photo all on dev; Belt-Slice-Done waits for main past f89f5255c (dev-red #5983 not ours)
+17:58Z	3	wait-main	main still f89f5255c (dev-red #5983 open, not ours); 0 open findings
