@@ -265,3 +265,4 @@ time	task	event	note
 2026-10-28T13:07Z	3	heartbeat	lane	poll 2026-10-28T13:07Z: 13:07Z check-in: no change; #5103/#5149 await prescreen; dev-red #5969 not ours
 2026-10-28T14:00Z	3	heartbeat	lane	poll 2026-10-28T14:00Z: 14:00Z check-in: dev green, main f89f525; #5103/#5149 await prescreen
 2026-10-28T14:48Z	3	heartbeat	lane	poll 2026-10-28T14:48Z: 14:48Z check-in: no change; #5103/#5149 await prescreen; dev-red #5983 (stale rerun) not ours
+2026-10-28T15:43Z	3	heartbeat	lane	poll 2026-10-28T15:43Z: 15:45Z check-in: #5149 merged; fixing #5103 pre-screen (maskOutline facet)
