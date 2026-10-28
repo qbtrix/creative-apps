@@ -10,7 +10,6 @@ Sources/LibraryModel/Contracts/ExportFormats.swift
 Sources/LibraryModel/Contracts/LibraryValues.swift
 Sources/LibraryModel/LibraryFileFlow+Kernel.swift
 Sources/PhotoApp/ImageIOCodec.swift
-Sources/PhotoApp/PhotoPasteboard.swift
 Sources/PhotoApp/PhotoWindow+Export.swift
 Sources/PhotoApp/PhotoWindow+File.swift
 Sources/PhotoModel/PhotoCommandCatalog.swift
