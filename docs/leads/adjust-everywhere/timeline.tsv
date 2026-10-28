@@ -233,3 +233,4 @@ utc	stage	event	ref	note
 06:41Z	3	check-in	no change; 6 PRs clean, wait prescreen
 07:02Z	3	check-in	no change; 6 PRs clean, wait prescreen
 07:22Z	3	check-in	no change; 6 PRs clean, wait prescreen
+07:43Z	3	fix #5252 needs-fix (live stand-in baseline: Library looks default); gating
