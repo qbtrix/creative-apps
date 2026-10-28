@@ -128,9 +128,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
     @Test func setDevelopSetsTheTargetsSlider() throws {
         var c = Dictionary(uniqueKeysWithValues: Self.states)["two selected"] ?? LibraryCatalog()
         let steps = c.history.undo.count
-        func set(_ slider: String, _ value: Double, drag: String? = nil) throws -> JSONValue {
+        func set(_ slider: String, _ value: Double, drag: String? = nil) throws -> JSONValue? {
             try Self.catalog.run("photo.set-develop", params: .object(["slider": .string(slider), "value": .number(value),
-                                                                       "drag": drag.map(JSONValue.string) ?? .null]), on: &c)
+                                                                       "drag": drag.map(JSONValue.string) ?? .null]), on: &c).result
         }
         #expect(try set("vibrance", 50) == .object(["vibrance": .number(50)]))
         #expect(c.items.filter { c.selection.contains($0.id) }.map(\.develop.vibrance) == [50, 50])
