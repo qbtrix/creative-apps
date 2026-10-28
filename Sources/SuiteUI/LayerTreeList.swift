@@ -184,7 +184,8 @@ public struct LayerTreeList: View {
 
     /// Row `id`'s context menu: nil when the app gives it no actions.
     func contextMenu(for id: String) -> [SidebarMenuItem]? {
-        let rename: (@MainActor () -> Void)? = onRename == nil ? nil : { renameAsk = (id, renameAsk.count + 1) }
+        var rename: (@MainActor () -> Void)?
+        if onRename != nil { rename = { renameAsk = (id, renameAsk.count + 1) } }
         return contextActions.flatMap { SidebarContextMenu.items(for: $0(id), rename: rename) }
     }
 
