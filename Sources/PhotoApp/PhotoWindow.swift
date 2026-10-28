@@ -59,6 +59,8 @@ struct PhotoWindow: View {
     /// The Straighten sheet's choices; nil while it is closed.
     @State var straightenDraft: StraightenDraft?
     @State var isRenaming = false
+    /// Feather…, Expand… or Contract…'s radius alert while it is open (PhotoWindow+Select.swift, AR-11).
+    @State var areaPrompt: AreaRadiusPrompt?
     @State var renameText = ""
     // v2 presentation flags (PV-0); each belongs to the area file named.
     /// A recovered document waiting for Restore or Discard (PhotoWindow+File.swift, PV-1).
@@ -85,7 +87,7 @@ struct PhotoWindow: View {
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
     var isPresenting: Bool {
         model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil
-            || newImageMode != nil
+            || areaPrompt != nil || newImageMode != nil
             || filterDraft != nil
     }
 
@@ -195,7 +197,7 @@ struct PhotoWindow: View {
             .modifier(PhotoEditArea(model: model, perform: perform))
             .modifier(PhotoCropArea(model: model, perform: perform))
             .modifier(PhotoHistoryArea(model: model, perform: perform, tab: inspectorTab))
-            .modifier(PhotoSelectArea(model: model, perform: perform))
+            .modifier(PhotoSelectArea(model: model, perform: perform, prompt: areaPrompt))
             .modifier(PhotoAdjustmentLayerArea(model: model, perform: perform))
             .modifier(PhotoTransformArea(model: model, perform: perform, canvasSize: canvasSizeDraft))
             .modifier(PhotoExportArea(model: model, perform: perform))
