@@ -33,6 +33,7 @@ import AppKit
 import CoreRaster
 import PhotoModel
 import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -213,7 +214,9 @@ struct PhotoWindow: View {
         }
         switch intent {
         case .newImage:
-            let clipboard = PhotoPasteboard.read().map { (width: $0.image.width, height: $0.image.height) }
+            // The clipboard's picture through the bridge, as Paste reads it; nil when Paste would refuse it.
+            let picture = try? photoPasteboardAdapter.paste(PasteboardBridge().offered(), canvas: nil)
+            let clipboard = picture.map { (width: $0.image.width, height: $0.image.height) }
             newImageMode = .new(presets: PhotoWorkspace.newImagePresets, clipboard: clipboard)
         case .open: chooseFile()
         case .openFile(let url): open(url)
