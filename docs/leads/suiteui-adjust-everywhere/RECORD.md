@@ -482,3 +482,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 14:45Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. dev 56ca32ecb, main f89f5255c; #5983 (not ours) is still open.
 - 15:05Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. dev 56ca32ecb, main f89f5255c; #5983 (not ours) is still open.
 - 15:30Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. dev c0cd6c25e, main f89f5255c; #5983 (not ours) is still open.
+- 15:50Z stage: #5259 merged. The lane retargeted #5260 to dev and merged dev into it (head f538be60e, 1 file, +191/-9). Gating that head to move Head:. #5983 (not ours) still open.

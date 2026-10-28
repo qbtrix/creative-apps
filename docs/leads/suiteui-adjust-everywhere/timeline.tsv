@@ -283,3 +283,4 @@ utc	stage	event	ref	note
 14:45Z	3	no change: #5259/#5260 clean waiting prescreen; dev-red #5983 not ours
 15:05Z	3	no change: #5259/#5260 clean waiting prescreen; dev-red #5983 not ours
 15:30Z	3	no change: #5259/#5260 clean waiting prescreen; dev-red #5983 not ours
+15:50Z	3	#5259 merged (AJ-photo-ui); lane retargeted #5260 to dev and merged dev in (f538be60e, 1 file); gating it to move Head:
