@@ -18,8 +18,6 @@ enum PhotoIntent {
     case newImage, open, save, saveAs, imageSize
     case openFile(URL)
     case rotate(QuarterTurn)
-    /// Image > Flip Canvas: mirrors every layer across the canvas through `image.flip`.
-    case flipCanvas(FlipDirection)
     /// Opens the Straighten sheet; `applyStraighten` turns the image by its choices.
     case straighten
     case applyStraighten(degrees: Double, cropToFit: Bool)

@@ -152,9 +152,7 @@ struct PhotoCommandCatalogTests {
                 row("Cut", image, ws.cutHelp), row("Copy", image, ws.copyHelp), row("Paste", true, ws.pasteHelp(true)), row("Paste as Image", false),
                 row("Select All", ws.canSelectAll), row("Delete Selection", ws.canEditSelection), row("Fill Selection", ws.canEditSelection),
                 row("All", image), row("Deselect", ws.canDeselect)]
-            + [row("Image Size…", image), row("Canvas Size…", image && ws.flipHelp == nil)] + ["Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°"].map { row($0, image) }
-            // Flip Canvas Horizontal and Vertical (orientation-crop OC-13): two items on one id, one row titled by its spec.
-            + [row("Flip", image && ws.flipHelp == nil), row("Straighten…", image)]
+            + [row("Image Size…", image), row("Canvas Size…", image && ws.flipHelp == nil)] + ["Rotate 90° Clockwise", "Rotate 90° Counterclockwise", "Rotate 180°", "Straighten…"].map { row($0, image) }
             + [row("New Layer", image),
                "New Adjustment Layer|\(!ws.adjustmentLayerKinds.isEmpty && adjust == nil)|\(adjust ?? "New Adjustment Layer")",
                row("Delete Layer", ws.canDeleteSelectedLayer), row("Duplicate Layer", ws.duplicateLayerHelp == nil, ws.duplicateLayerHelp),
@@ -165,11 +163,11 @@ struct PhotoCommandCatalogTests {
             + ["Zoom In", "Zoom Out", "Actual Size", "Fit on Screen"].map { row($0, image) }
     }
 
-    /// Commands with no menu item: the catalog's only (gradient-fill PG-3; image.flip has Image > Flip Canvas since OC-13); the Layers list's pick, All Layers
+    /// Commands with no menu item: the catalog's only (gradient-fill PG-3); the Layers list's pick, All Layers
     /// (Select menu, PM-3) and opacity (multi-layer-select PM-5); the eyedropper's sample query (PE-6), a tool's.
     /// The area commands (area-selection AR-10) get their Select menu items in AR-photo-u.
     static let noMenu: Set = ["select.rect", "select.ellipse", "select.lasso", "select.polygon", "select.wand", "select.invert",
-                              "select.feather", "select.expand", "select.contract", "select.reselect", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
+                              "select.feather", "select.expand", "select.contract", "select.reselect", "image.gradient", "image.flip", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
                               "color.sample"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones, the place ones and Free Transform's
     /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5) and text layers' (the Type tool and inspector run them), in menu order (the catalog lists them as the menus do).

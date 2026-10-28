@@ -44,6 +44,7 @@ Sources/LibraryApp/LibraryWindow.swift::LibraryWindow.libraryKey
 Sources/LibraryApp/LibraryWindow.swift::LibraryWindow.symbol
 Sources/LibraryApp/MetadataInspector.swift::MetadataInspector.mixedID
 Sources/PhotoApp/AdjustmentsInspector.swift::AdjustmentsInspector.doubles
+Sources/PhotoApp/CropOptions.swift::CropOptions.preset
 Sources/PhotoApp/CurvesSection.swift::AdjustmentsPanel.showsEnable
 Sources/PhotoApp/CurvesSection.swift::CurvesEditor.unit
 Sources/PhotoApp/PhotoCommands+Layer.swift::PhotoLayerMenu.shortcut
