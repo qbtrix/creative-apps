@@ -16,7 +16,7 @@
   {
     "label": "duplicate takes the kernel's empty result as success",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
-    "find": "guard !copies.isEmpty else { throw .nothingSelected }",
+    "find": "guard !selection.isEmpty else { throw .nothingSelected }",
     "replace": "",
     "tests": "DesignDuplicateTests|DesignContractLawTests"
   },
