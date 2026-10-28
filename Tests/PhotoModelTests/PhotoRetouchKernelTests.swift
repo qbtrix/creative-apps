@@ -133,7 +133,7 @@ import Testing
         #expect(abs(paint.r - 1) < 1e-4 && paint.g == 0 && paint.b == 0 && paint.a == 1)
     }
 
-    @Test(arguments: ["bucket-background"])
+    @Test(arguments: ["bucket-background", "dust-spots"])
     func realJobPasses(job: String) throws {
         #expect(try PhotoJob.check(job) == [], "\(job)")
     }
