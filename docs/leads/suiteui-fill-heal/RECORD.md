@@ -2,10 +2,10 @@
 
 Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: FH-photo in lane
+Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
-Next: restack #5251 onto dev once #5109 merges
-Polled: 2026-10-28T20:46:03Z
+Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
+Polled: 2026-10-28T20:46Z · AR-z #5256 merged (awaiting main run); #5109 fixed b08e85dc; CB-z building stacked on #4904
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -63,4 +63,3 @@ Polled: 2026-10-28T20:46:03Z
 
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
-- 2026-10-28T20:46:03Z #5109 (FH-8) at b08e85dcd on dev, waiting on prescreen; #5251 (FH-10) stacked on it
