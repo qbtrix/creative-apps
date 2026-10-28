@@ -51,11 +51,16 @@ public struct DesignHeadless: HeadlessDocument {
     }
 
     /// `svg`: one file per visible top-level frame of every page, in page order, each named after its frame and unique
-    /// across the file. A file with no frame to export throws `failed`; `png` is not built on Linux yet. No options.
+    /// across the file. A file with no frame to export throws `failed`; `png` is not built on Linux yet. `options` are the
+    /// suite's (`SuiteExportOptions(json:)`); SVG writes each frame at its own size, so any size but 1x is refused.
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         guard format == "svg" else {
             if format == "png" { throw CatalogError.notBuilt(id: "export.png", feature: "a Linux PNG writer for Design's raster path") }
             throw CatalogError.failed(id: "export", message: "Design exports \(Self.exportFormats.joined(separator: ", ")), not \(format).")
+        }
+        let asked = try SuiteExportOptions(json: options, defaults: SuiteExportOptions(format: format))
+        guard asked.size == .scale(1) else {
+            throw ExportOptionRefusal.invalid("SVG writes each frame at its own size, so it takes no size. Leave size out.")
         }
         var files: [ExportedFile] = [], taken = Set<String>()
         for page in workspace.pages {

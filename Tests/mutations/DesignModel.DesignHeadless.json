@@ -19,5 +19,19 @@
     "find": "nodes.reduce(nodes.count)",
     "replace": "nodes.reduce(0)",
     "tests": "DesignHeadlessTests"
+  },
+  {
+    "label": "svgSizeIgnored: a sized SVG export writes 1x without a word (#5834)",
+    "file": "Sources/DesignModel/DesignHeadless.swift",
+    "find": "guard asked.size == .scale(1) else {",
+    "replace": "guard asked.size == asked.size else {",
+    "tests": "DesignHeadlessExportOptionsTests"
+  },
+  {
+    "label": "svgOptionsUnread: SVG export skips the options schema, so a stray key is let through (#5834)",
+    "file": "Sources/DesignModel/DesignHeadless.swift",
+    "find": "let asked = try SuiteExportOptions(json: options, defaults: SuiteExportOptions(format: format))",
+    "replace": "let asked = (try? SuiteExportOptions(json: options, defaults: SuiteExportOptions(format: format))) ?? SuiteExportOptions(format: format)",
+    "tests": "DesignHeadlessExportOptionsTests"
   }
 ]
