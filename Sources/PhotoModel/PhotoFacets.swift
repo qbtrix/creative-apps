@@ -145,9 +145,9 @@ extension PhotoWorkspace {
         .history: ["history", "savedStepID"],
         .status: ["statusMessage", "progress"],
         .canvas: [
-            "revision", "contentRevision", "damageLog", "pixels", "masks", "selection", "selectionMask", "area",
-            "areaCorners", "pendingCrop", "cloneSource", "stroke", "transformDraft", "liveDraft", "textBox", "pathState",
-            "geometryChangeCount", "lastGeometryChange",
+            "revision", "contentRevision", "damageLog", "pixels", "masks", "selection", "selectionMask", "maskOutline",
+            "area", "areaCorners", "pendingCrop", "cloneSource", "stroke", "transformDraft", "liveDraft", "textBox",
+            "pathState", "geometryChangeCount", "lastGeometryChange",
         ],
         .file: ["services", "fileKind", "fileFlow", "exportOptions", "exportRun"],
     ]
