@@ -12,7 +12,10 @@
 // It drives scripted steps, each paced at 120 Hz and timed on its own clock as
 // the event's work plus the layout and display it forced: a mouse drag of N
 // samples, clicks, a split-divider drag, a scroll, N increments of an
-// adjustable element and N ticks of any closure (a fake refresh link).
+// adjustable element, a segmented-control segment pick and N ticks of any
+// closure (a fake refresh link). A segment is picked by setting it and
+// sending the control's action, never by an accessibility press, which
+// ends the test process in a later test (#5883).
 // `measure` turns one interaction into a RenderStep: the window body's runs
 // (a debug-only `bodyRuns` counter the caller reads), the root hosting view's
 // layout passes and time, and the per-step p50 / p95 (FrameProbe's nearest
