@@ -174,6 +174,11 @@ struct PhotoCanvas: View {
 
     private func key(_ press: KeyPress) -> KeyPress.Result {
         guard press.modifiers.subtracting(.shift).isEmpty else { return .ignored }
+        // While a Type tool box is open its keys type into it, not pick tools (#4798).
+        if let typed = model.textBox?.key(press.characters) {
+            perform(.text(.key(typed)))
+            return .handled
+        }
         switch press.key {
         case .delete, .deleteForward:
             perform(press.modifiers.contains(.shift) ? .fillSelection : .deleteSelection)
