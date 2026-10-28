@@ -53,6 +53,19 @@ import Testing
         #expect(log.ran == ["Duplicate"])
     }
 
+    /// `SidebarRow.renameMenuItem` runs the row's own inline rename (LF-2): it is
+    /// kept, enabled, and runs the rename closure; a row that can't rename drops it.
+    @Test func theRenameItemOpensTheRowsRename() throws {
+        let log = Log()
+        let actions = [SidebarRow.renameMenuItem, ToolbarAction("Delete", systemImage: "trash")]
+        let menu = try #require(SidebarContextMenu.items(for: actions, rename: { log.ran.append("rename") }))
+        #expect(menu.map(\.title) == ["Rename", "Delete"])
+        menu.first?.perform()
+        #expect(log.ran == ["rename"])
+        #expect(SidebarContextMenu.items(for: actions)?.map(\.title) == ["Delete"])
+        #expect(SidebarContextMenu.items(for: [SidebarRow.renameMenuItem]) == nil)
+    }
+
     /// The old forms build without `contextActions`, and the new parameter
     /// fits both rename forms.
     @Test func existingWindowInitializersCompileUnchanged() {

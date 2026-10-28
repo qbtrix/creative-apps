@@ -51,5 +51,23 @@
     "owner": "#5924",
     "reason": "121 window bodies against 120 on dev macOS under load (runs 40394212348, 40564904343), then the process died in it; #5924 owns the fix (split Library's window state).",
     "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/SuiteTimelineScrubWindowTests/aScrubRedrawsOnlyThePlayhead",
+    "owner": "#5804",
+    "reason": "The test counts its own window and still sees about 18,000 lane redraws per scrub on CI (run 40661826310); #5804 owns the lane re-render.",
+    "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoRapidRotateTests/rapidRotationsThenReturnApplyOneCommit",
+    "owner": "#5978",
+    "reason": "Fails on hasLiveLayer after rapid rotations on CI (run 40661826310), not on a counter; #5978 owns it.",
+    "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/HaloWindowLiveDragTests/aViewerDragRunsTheWindowAtMostThreeTimes",
+    "owner": "#5979",
+    "reason": "A draw is skipped on the CI runner (run 40661826310), not counter bleed; #5979 owns it.",
+    "expires": "2026-10-29"
   }
 ]

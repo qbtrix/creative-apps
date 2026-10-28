@@ -99,14 +99,22 @@ public struct LayerTreeOptions: Equatable, Sendable {
     /// Whether rows can hold children; a flat list (Photo) leaves out the
     /// indent and the empty disclosure column, so names start near the edge.
     public var nests: Bool
+    /// Whether a locked row's name reads dimmed like a hidden one's (Flare's sidebar, LF-1d).
+    public var dimsLocked: Bool
 
     public init(showsEye: Bool = true, showsLock: Bool = true, reorders: Bool = false, embedded: Bool = false,
-                nests: Bool = true) {
+                nests: Bool = true, dimsLocked: Bool = false) {
         self.showsEye = showsEye
         self.showsLock = showsLock
         self.reorders = reorders
         self.embedded = embedded
         self.nests = nests
+        self.dimsLocked = dimsLocked
+    }
+
+    /// Whether `row`'s name reads dimmed: hidden, or locked when `dimsLocked`, itself or through an ancestor.
+    public func dims(_ row: LayerRow) -> Bool {
+        row.isHidden || row.inheritsHidden || (dimsLocked && (row.isLocked || row.inheritsLocked))
     }
 }
 
@@ -197,7 +205,7 @@ extension LayerTreeRow {
     private var name: some View {
         Text(row.name)
             .lineLimit(1)
-            .foregroundStyle(row.isHidden || row.inheritsHidden ? SuiteColor.secondaryText : Color.primary)
+            .foregroundStyle(options.dims(row) ? SuiteColor.secondaryText : Color.primary)
             .contentShape(.rect)
             .simultaneousGesture(TapGesture(count: 2).onEnded { openRename(on: .title) })
     }

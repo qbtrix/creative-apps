@@ -74,7 +74,7 @@ extension DesignWorkspace: StrokeTarget {
         let before = snapshot
         for id in ids { _ = pages.update(id) { $0.stroke = stroke } }
         guard snapshot != before else { if drag != nil { return }; throw DesignRefusal.unchanged }
-        record(name, before: before, coalescing: drag.map { DesignEdit.runKey("stroke-" + $0, ids) })
+        record(name, before: before, coalescing: drag.map { CoalesceKey.key("stroke", on: ids, drag: $0) })
     }
 
     /// The editor's `intent` as the inspector's style change on the selection, and whether it is a scrub's sample

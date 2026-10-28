@@ -17,15 +17,14 @@ import AppKit
 import SuiteModel
 import SwiftUI
 
-public struct FontPicker: View {
+public struct FontPicker: View, BodyCounted {
     let families: [FontFamily]
     let pick: FontPick
     let onPick: (FontPick) -> Void
     @State private var query: String
 
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     public init(families: [FontFamily], pick: FontPick, onPick: @escaping (FontPick) -> Void) {
@@ -42,7 +41,7 @@ public struct FontPicker: View {
 
     public var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         let family = families.first { $0.name == pick.family }
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {

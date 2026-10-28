@@ -522,7 +522,8 @@ jobs:
 
   # Open, or update, the single "dev is red" issue when the Linux or macOS job
   # fails (journey reds go to Findings). main is the last green dev SHA, so main..SHA
-  # holds the culprit.
+  # holds the culprit. A run whose SHA main already contains (it finished after
+  # a newer green run promoted past it) is stale: it logs the skip and touches no issue.
   dev-red:
     name: Dev red
     needs: [linux, macos]
@@ -542,6 +543,10 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           git fetch origin main
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::notice::Skipped as stale: main ($(git rev-parse --short origin/main)) already contains $GITHUB_SHA, so a newer green run promoted past it. No dev-red issue opened or updated."
+            exit 0
+          fi
           range="main..$GITHUB_SHA"
           failed=$(jq -r '[to_entries[] | select(.value.result == "failure") | .key] | join(", ")' <<<"$NEEDS")
           # Lane and squash merges end their subject with (#N).
