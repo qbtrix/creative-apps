@@ -47,6 +47,7 @@ private func threeInAFrame() throws -> DesignWorkspace {
 
 @Test func aFrameLiftsWithItsChildren() throws {
     var workspace = try threeInAFrame()
+    workspace.selectItem("node-1")  // a press on a frame that isn't selected marquees inside it
     workspace.drag(from: pt(20, 20), to: pt(30, 20))
     let lift = try #require(workspace.moveLift)
     #expect((lift.firstID, lift.lastID) == ("node-1", "node-4"))

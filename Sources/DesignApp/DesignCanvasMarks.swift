@@ -234,7 +234,7 @@ struct DesignLiftPart: View, Equatable {
     }
 
     /// `part` of `painted`, the run being `first` through `last`; the run's own ids missing, all of it under.
-    static func slice(_ painted: [DesignPainted], _ part: Part, from first: String, to last: String) -> [DesignPainted] {
+    nonisolated static func slice(_ painted: [DesignPainted], _ part: Part, from first: String, to last: String) -> [DesignPainted] {
         guard let i = painted.firstIndex(where: { $0.id == first }),
               let j = painted[i...].firstIndex(where: { $0.id == last })
         else { return part == .under ? painted : [] }

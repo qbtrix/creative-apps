@@ -17,7 +17,7 @@
     "label": "the copy keeps the lock",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
     "find": "copy.isLocked = false",
-    "replace": "copy.isLocked = copy.isLocked",
+    "replace": "copy.isLocked = original.isLocked",
     "tests": "DesignDuplicateTests"
   },
   {
