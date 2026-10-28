@@ -361,3 +361,4 @@ utc	stage	event	ref	note
 2026-10-28T04:41Z	check-in	#5951 item 4: PR #5959 text.set-color (3/3 mutants). #5957 open clean. #5353 open, so PX-9 waits. 42 findings open, so no new wave. Items 2-3 need Package.swift (Mac finisher).
 2026-10-28T05:25Z	check-in	RJ-P02 sale-title job as PR #5961 (pending #5951, platforms []); #5957/#5959 open; PX-9 waits on #5353; 42 findings, no wave
 2026-10-28T05:57Z	check-in	#5961 (RJ-P02) merged; Esc matches packet (cancel), noted on #5951; #5957/#5959 open clean; PX-9 waits on #5353; 42 findings
+2026-10-28T06:29Z	check-in	quiet; new dev-red #5963 (macOS PhotoEditMenuTests.selectAllFollowsPasteInThePasteboardGroup, lane flake re-run pending, no culprit PR); #5957/#5959 clean; PX-9 waits on #5353; 42 findings
