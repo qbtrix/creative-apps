@@ -454,3 +454,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 16:01Z #5991 (AJ-z C4 refresh) opened, fast-lane+beta, Head ed6c602f9. Feature-done branch lead/adjust-everywhere-AJ-z (c9b3c9d6b: wave built, RJ-X60 pending #5990) gating; opens once #5260 merges.
 - 16:08Z lead/adjust-everywhere-AJ-z c9b3c9d6b: gate PASS, pushed. Opens as feature-done PR once #5260 merges. #5260 and #5991 clean.
 - 16:18Z check-in: #5991 merged (81d606521). #5260 clean, labels ok, no local-ci/prescreen yet (verify-after). 0 open adjust-everywhere findings. dev-red #5983 not ours. AJ-z feature-done PR opens once #5260 merges.
+- 16:38Z #5260 merged (f437fabab): AJ-photo's PRs all in. Opened #5993 (AJ-z, feature-done: wave built, RJ-X60 pending #5990), Head c9b3c9d6b. Belt-Slice-Done AJ-photo and AJ-z (gaps: #5990) once main contains them and ci.yml on that sha is green; main held at f89f5255c by dev-red #5983 (not ours).
