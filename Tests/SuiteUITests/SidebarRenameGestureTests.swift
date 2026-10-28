@@ -112,14 +112,15 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     // `onKeyPress` and `accessibilityActions` (LL-7) start a rename from Return
     // on the focused row or the "Rename" action through `requestRename`, the
     // `Button` being the action itself and `nil` its `if onRename != nil`: no
-    // pointer, so no toggle or blank space.
+    // pointer, so no toggle or blank space. `SidebarRowWarning` draws a
+    // row's warning symbol with a tooltip and no gesture (`warningHasNoGesture`).
     let modifiers: Set = [
         "toggleStyle", "buttonStyle", "labelStyle", "foregroundStyle", "disabled", "help", "accessibilityLabel",
         "accessibilityIdentifier", "identifier", "badge", "selectionDisabled", "onKeyPress", "accessibilityActions",
     ]
     let calls: Set = [
         "View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label", "Text", "SidebarToggleIcon",
-        "SidebarRowLook", "requestRename", "Button", "nil",
+        "SidebarRowLook", "requestRename", "Button", "nil", "SidebarRowWarning",
     ]
     #expect(names.modifiers.subtracting(modifiers).isEmpty, "new modifier in body: can it rename from a toggle? (#54)")
     #expect(names.calls.subtracting(calls).isEmpty, "new view or call in body: can it rename from a toggle? (#54)")
@@ -161,6 +162,18 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
         names.modifiers.subtracting(modifiers).isEmpty,
         "new modifier on the title: does it grow the rename hit area over the toggles or blank space? (#308)")
     #expect(names.calls.subtracting(calls).isEmpty, "new view or call in the title: can it rename elsewhere? (#308)")
+}
+
+/// The warning badge only draws a symbol, its color, tooltip and name: no
+/// gesture, so it can't start a rename (#54).
+@Test func warningHasNoGesture() throws {
+    let source = try sidebarRowSource()
+    let warning = try #require(
+        region(of: source, from: "private struct SidebarRowWarning", to: "private struct SidebarToggleIcon"))
+    let names = callNames(in: warning)
+    let modifiers: Set = ["warning", "foregroundStyle", "help", "accessibilityLabel", "accessibilityIdentifier"]
+    #expect(names.modifiers.subtracting(modifiers).isEmpty, "the warning does more than draw a symbol")
+    #expect(names.calls.subtracting(["View", "if", "Image"]).isEmpty, "the warning calls something new")
 }
 
 /// The title's dimming modifier sets a color and nothing else, so it can't

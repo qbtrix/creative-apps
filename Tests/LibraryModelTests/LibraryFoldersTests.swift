@@ -162,6 +162,65 @@ import Testing
         }
     }
 
+    @Test func showFolderTakesATrailingSlash() throws {
+        #expect(try Self.shown("/p/trips/", subfolders: false) == ["coast.png"])
+        #expect(try Self.shown("/p/trips//", subfolders: true) == ["coast.png", "kyoto.png", "lisbon.png", "porto.png"])
+        var c = Self.catalog(Self.trips)
+        try c.showFolder("/p/trips/2025/", subfolders: true)
+        #expect(c.activeFilter.folder?.path == "/p/trips/2025", "the rule keeps the tree's path, so the row selects")
+        #expect(throws: CatalogError.unavailable(id: "view.show-folder", why: "There is no folder /p/nowhere/.")) {
+            try c.showFolder("/p/nowhere/", subfolders: true)
+        }
+    }
+
+    @Test func anAllMissingFolderSaysSo() throws {
+        let photos = [Self.photo("/m/gone/a.png", missing: true), Self.photo("/m/gone/b.png", missing: true),
+                      Self.photo("/m/half/c.png", missing: true), Self.photo("/m/half/d.png")]
+        let roots = LibraryFolders.tree(photos)
+        #expect(Self.node("/m/gone", in: roots)?.missingNote == "All 2 photos in this folder are missing from disk.")
+        #expect(Self.node("/m/half", in: roots)?.missingNote == nil)
+        let one = LibraryFolders.tree([Self.photo("/m/one/a.png", missing: true)])
+        #expect(one.first?.missingNote == "The photo in this folder is missing from disk.")
+    }
+
+    /// A folder row's click at real size: on the large fixture's 10,000 photos in their folders, a click on one
+    /// month and Include Subfolders on it are each timed, median within 50 ms debug, 5 ms release (the filter's
+    /// budget). Each builds the tree once. Runs only with LIBRARY_FOLDERS_PERF=1 until Tests/perf-suites.txt lists it.
+    @Test(.disabled(
+        if: ProcessInfo.processInfo.environment["LIBRARY_FOLDERS_PERF"] != "1", "waits on its Tests/perf-suites.txt line"))
+    func showFolderAtTenThousandWithinBudget() throws {
+        var c = Self.catalog(LibraryFixtures.largePhotos(count: 10_000, folder: "/fixture/large"))
+        let month = try #require(c.folderTree.first?.children.first?.path)
+        let row = LibraryFolders.rowID(for: month), other = LibraryFolders.rowID(for: "/fixture/large")
+        var flip = false
+        let click = Budget.measure("folders click-10000") {
+            flip.toggle()
+            c.selectSidebarRow(flip ? row : other)
+        }
+        let include = Budget.measure("folders include-subfolders-10000") { c.toggleFolderSubfolders(row: row) }
+        #expect(c.activeFilter.folder?.path == month)
+        #expect(!c.shownItems.isEmpty)
+        #if DEBUG
+        let limit = 50.0
+        #else
+        let limit = 5.0
+        #endif
+        #expect(click.median <= limit, "a folder click at 10,000 photos took a median \(click.median) ms")
+        #expect(include.median <= limit, "Include Subfolders at 10,000 photos took a median \(include.median) ms")
+    }
+
+    @Test func theLaunchFixturesSitInFolders() throws {
+        let large = LibraryFolders.tree(LibraryFixtures.photos(named: "large-folders"))
+        #expect(large.map(\.path) == ["/fixture/large"])
+        #expect(large.first?.totalCount == 10_000)
+        #expect(large.first?.children.count == 12, "one folder per month")
+        let small = LibraryFolders.tree(LibraryFixtures.photos(named: "folders"))
+        #expect(small.map(\.name) == ["fixture/Photos"])
+        #expect(small.first?.children.map(\.name) == ["family", "trip", "trips"])
+        #expect(Self.node("/fixture/Photos/trips", in: small)?.totalCount == 4)
+        #expect(Self.node("/fixture/Photos/family", in: small)?.missingNote != nil)
+    }
+
     @Test func aSiblingWithASharedPrefixNeverLeaks() {
         let photos = ["/a/b/x.png", "/a/b/deep/z.png", "/a/bc/y.png"].map { Self.photo($0) }
         let names = { (scope: FolderScope) in photos.filter(LibraryFilter(folder: scope).matches).map(\.name) }

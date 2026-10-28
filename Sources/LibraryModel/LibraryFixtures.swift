@@ -10,7 +10,9 @@ import CoreColor
 public enum LibraryFixtures {
     /// The photos of fixture `name`; an unknown name or nil gives none.
     /// `shoot-unimported` and `cameras-unimported` give their fixture (its
-    /// fakes "find" those files).
+    /// fakes "find" those files). `large-folders` is the large catalog's
+    /// 10,000 photos in their month folders, with no files on disk; `folders`
+    /// is the FOLDERS section's small tree.
     public static func photos(named name: String?) -> [PhotoItem] {
         switch name {
         case "samples": LibrarySample.items()
@@ -18,6 +20,8 @@ public enum LibraryFixtures {
         case "cameras", "cameras-unimported": cameras()
         case "large": large()
         case "large-missing": largeMissing()
+        case "large-folders": largePhotos(count: 10_000, folder: "/fixture/large")
+        case "folders": folders()
         default: []
         }
     }
@@ -96,6 +100,19 @@ public enum LibraryFixtures {
             var photo = photo
             if index % 20 == 19 { photo.availability = .missing }
             return photo
+        }
+    }
+
+    /// The shoot's first nine photos in five folders under `/fixture/Photos`: one in `trips`, two in
+    /// `trips/2025`, one in `trips/2026`, one in `trip` (a name prefix of trips) and four in `family`, whose
+    /// files are all missing.
+    static func folders() -> [PhotoItem] {
+        let places = ["trips", "trips/2025", "trips/2025", "trips/2026", "trip", "family", "family", "family", "family"]
+        return zip(shoot(), places).map { photo, place in
+            let path = "/fixture/Photos/\(place)/\(photo.name).jpg"
+            return PhotoItem(
+                id: path, name: photo.name, captureDate: photo.captureDate, color: photo.color, path: path,
+                pixelSize: photo.pixelSize, availability: place == "family" ? .missing : .available)
         }
     }
 
