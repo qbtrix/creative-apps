@@ -356,3 +356,4 @@ utc	stage	event	ref	note
 2026-10-28T01:27Z	check-in	#5353 still open (clean a92b4651); no merges or new findings since 00:52Z; 40 Photo findings open; dev-red #5818 not ours; PX-9 waits
 2026-10-28T01:58Z	check-in	#5353 still open (clean a92b4651); no merges or new findings since 01:24Z; 40 Photo findings open; dev-red #5818 not ours; PX-9 waits
 2026-10-28T02:29Z	check-in	#5353 still open (clean a92b4651); #5944 quarantined 3 Photo reds (rotation tiles, AdjustTarget; not export); no new export/text findings; 40 open; PX-9 waits
+2026-10-28T03:00Z	check-in	#5353 still open (clean a92b4651); new finding #5946 (Tier1Layers journey, not export/text) skipped; 41 Photo findings open; PX-9 waits
