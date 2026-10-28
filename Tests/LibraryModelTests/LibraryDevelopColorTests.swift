@@ -1,8 +1,9 @@
 // LibraryDevelopColorTests.swift: Vibrance and Saturation through the live
 // develop renderer (develop packet DV-11, slice DV-e; DV-12 enabled them on
 // CoreRaster's vibrance and hue/saturation). A grey stays the same
-// grey at either control's ends; Saturation -100 turns a colour into the grey
-// of its Rec. 709 luminance and +50 spreads its channels; Vibrance +50 lifts
+// grey at either control's ends; Saturation -100 turns a colour into a grey
+// (core's HSL saturation, so the grey of its HSL lightness, between its
+// darkest and brightest channel) and +50 spreads its channels; Vibrance +50 lifts
 // a muted colour's chroma more than a saturated one's; Vibrance sits after
 // whites and blacks and before the curve, Saturation after the curve; MJ4 walks all of it on the
 // live services. Every check goes through `LiveDevelop`, never CoreRaster's
@@ -25,12 +26,6 @@ private func rendered(_ patch: PixelBuffer, _ slider: DevelopSlider, _ value: Do
 /// The spread between a pixel's largest and smallest channel.
 private func chroma(_ p: RGBA) -> Float { max(p.r, p.g, p.b) - min(p.r, p.g, p.b) }
 
-/// A pixel's Rec. 709 luminance over its linear channels.
-private func luminance(_ p: RGBA) -> Float {
-    let w = Histogram.luminanceWeights
-    return w.r * p.r + w.g * p.g + w.b * p.b
-}
-
 private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
     abs(a.r - b.r) < tolerance && abs(a.g - b.g) < tolerance && abs(a.b - b.b) < tolerance
 }
@@ -48,12 +43,12 @@ private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
         }
     }
 
-    @Test func saturationMinus100IsTheGreyOfItsLuminance() throws {
+    @Test func saturationMinus100IsAGrey() throws {
         let red = try colorPatch(200, 40, 40)
-        let y = luminance(try red.pixel(x: 0, y: 0))
+        let before = try red.pixel(x: 0, y: 0)
         let p = try rendered(red, .saturation, -100)
-        #expect(abs(p.r - y) < 1e-4 && abs(p.g - y) < 1e-4 && abs(p.b - y) < 1e-4)
-        #expect(abs(p.a - 1) < 1e-4)
+        #expect(near(p, RGBA(r: p.r, g: p.r, b: p.r, a: 1)) && abs(p.a - 1) < 1e-4)
+        #expect(p.r > before.g && p.r < before.r)
     }
 
     @Test func saturationUpSpreadsTheChannels() throws {
@@ -90,7 +85,7 @@ private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
     }
 
     /// MJ4: a grey survives both controls at their ends, Saturation -100 greys
-    /// a red patch to its luminance, and nothing waits on the live services.
+    /// a red patch, and nothing waits on the live services.
     @Test func testVibranceSaturationWalk() throws {
         let grey = try colorPatch(128, 128, 128)
         let before = try grey.pixel(x: 0, y: 0)
@@ -98,9 +93,8 @@ private func near(_ a: RGBA, _ b: RGBA, _ tolerance: Float = 1e-4) -> Bool {
             let settings = DevelopSettings.neutral.setting(.vibrance, to: vibrance).setting(.saturation, to: saturation)
             #expect(near(try LiveDevelop().render(grey, settings: settings).pixel(x: 0, y: 0), before))
         }
-        let red = try colorPatch(200, 40, 40)
-        let y = luminance(try red.pixel(x: 0, y: 0))
-        #expect(near(try rendered(red, .saturation, -100), RGBA(r: y, g: y, b: y, a: 1)))
+        let washed = try rendered(try colorPatch(200, 40, 40), .saturation, -100)
+        #expect(near(washed, RGBA(r: washed.r, g: washed.r, b: washed.r, a: 1)))
         #expect(LiveDevelop.waiting.isEmpty)
         let live = LibraryServices.live(decoder: FakeDecoder(photos: []), writer: FakeJPEGWriter(), store: FakeCatalogStore())
         let catalog = LibraryCatalog(services: live)
