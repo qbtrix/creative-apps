@@ -275,3 +275,4 @@ utc	stage	event	ref	note
 12:20Z	3	no change: #5259/#5260 clean waiting prescreen; main c73c958a9 held by #5969; dev f89f5255c
 12:38	3	waiting	#5259 #5260	full CI on dev f89f5255c running; AJ-library/AJ-halo done if it promotes main
 12:44Z	3	no change: #5259/#5260 clean waiting prescreen; main c73c958a9 held by #5969; dev f89f5255c
+13:03	3	waiting	#5259 #5260	full CI on dev f89f5255c still running
