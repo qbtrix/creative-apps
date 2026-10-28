@@ -133,8 +133,6 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var areaOptions = PhotoAreaOptions()
     /// The Polygon Lasso's corners so far, before it closes (PhotoAreaTool.swift).
     var areaCorners: [Mask.Point] = []
-    /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
-    public internal(set) var selectionOptions = SelectionOptions()
     /// Each masked layer's mask, its own size, coverage as gray, alpha 1 (PhotoMask.swift).
     public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
     /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
@@ -424,7 +422,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
             && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask && lhs.area == rhs.area
             && lhs.areaOptions == rhs.areaOptions && lhs.areaCorners == rhs.areaCorners
-            && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
+            && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
             && lhs.exportRun == rhs.exportRun && lhs.stylePanel == rhs.stylePanel

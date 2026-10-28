@@ -1,15 +1,10 @@
-// Live/LiveSelection.swift: the live selection shapes (a NotBuilt stand-in
-// until PV-5) and the live layer masks. A mask is the size of its layer's
-// pixels, opaque gray (r = g = b = coverage 0...1); masking multiplies every
+// Live/LiveSelection.swift: the live layer masks, `LiveEdit.masking()` (the
+// selection itself is the kernel recipe, PhotoArea+Kernel.swift). A mask is
+// the size of its layer's pixels, opaque gray (r = g = b = coverage 0...1); masking multiplies every
 // premultiplied channel of a layer pixel by the gray under it, so black hides
 // and white leaves the pixel bit for bit. A pixel the mask doesn't reach is
 // left as it is. Linux-safe.
 import CoreRaster
-
-enum LiveSelection {
-    static func selection() -> any SelectionShaping { NotBuiltSelection() }
-    static func masking() -> any LayerMasking { LiveMasking() }
-}
 
 struct LiveMasking: LayerMasking {
     var unavailableHelp: String? { nil }

@@ -52,7 +52,6 @@ public struct PhotoFacets: Equatable, Sendable {
         public let eraser: PhotoModel.ToolOptions
         public let bucket: BucketOptions
         public let area: PhotoAreaOptions
-        public let selection: SelectionOptions
         public let sampleSize: SampleSize
     }
 
@@ -140,7 +139,7 @@ extension PhotoWorkspace {
     public static let facetFields: [PhotoFacet: [String]] = [
         .document: ["canvas", "resolution", "documentName", "layers", "layerSelection", "nextLayerNumber", "editsMask"],
         .tool: ["tool", "cropAspect"],
-        .toolOptions: ["brushOptions", "eraserOptions", "bucketOptions", "areaOptions", "selectionOptions", "sampleSize"],
+        .toolOptions: ["brushOptions", "eraserOptions", "bucketOptions", "areaOptions", "sampleSize"],
         .adjust: ["adjustments", "stylePanel"],
         .history: ["history", "savedStepID"],
         .status: ["statusMessage", "progress"],
@@ -161,7 +160,7 @@ extension PhotoWorkspace {
             tool: .init(tool: tool, cropAspect: cropAspect),
             toolOptions: .init(
                 brush: brushOptions, eraser: eraserOptions, bucket: bucketOptions, area: areaOptions,
-                selection: selectionOptions, sampleSize: sampleSize),
+                sampleSize: sampleSize),
             adjust: .init(adjustments: adjustments, stylePanel: stylePanel),
             history: .init(
                 steps: historySteps, index: historyIndex, currentStepID: currentStepID, runKey: history.runKey,
