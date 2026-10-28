@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-28T08:22Z
+Polled: 2026-10-28T09:59Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -463,3 +463,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 09:05Z #5258: CI: PASS on restack, pushed ae708a9b2 with lease, Head: moved.
 - 09:23Z check-in: #5250 #5259 #5260 #5252 #5258 clean [fast-lane,beta]; dev 746ee995b, main c73c958a9. Nothing new merged.
 - 09:43Z check-in: #5250 #5259 #5260 #5252 #5258 all clean, no needs-fix/needs-rebase; waiting on the lane's prescreen. dev 746ee995b, main c73c958a9. No open findings.
+- 2026-10-28T09:59Z #5252 AJ-library merged 09:48Z (dev 6ef2d459b); main c73c958a9 held by dev-red #5966 (macOS, not ours); #5250 prescreened; #5258 #5103 #5245 awaiting prescreen
