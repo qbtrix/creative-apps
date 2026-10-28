@@ -3,6 +3,8 @@
 // flags are ignored; a value flag with no value after it stays unset.
 // `-LibraryLargeFixture <count>` (large-catalog LG-2) wins over `-LibraryFixture`.
 
+import SuiteModel
+
 /// `-LibraryWindowSize <w>x<h>`: the window's initial content size.
 public struct LibraryWindowSize: Sendable, Equatable {
     public let width: Int
@@ -44,6 +46,8 @@ public struct LibraryLaunch: Sendable, Equatable {
     public let windowSize: LibraryWindowSize?
     /// `-LibraryLargeFixture <count>`: fakes over the large fixture's `count` photos; nil unless at least 1.
     public let largeFixture: Int?
+    /// `-LibraryFixtureBackups <n>` with n at least 1: the fixture's catalog gets backups (`backups(catalogFolder:)`).
+    public let fixtureBackups: Bool
 
     public init(arguments: [String]) {
         let switches: Set<String> = [
@@ -51,7 +55,7 @@ public struct LibraryLaunch: Sendable, Equatable {
         ]
         let valued: Set<String> = [
             "-LibraryFixture", "-LibraryCatalogDir", "-LibraryImportFolder", "-LibraryExportTo",
-            "-LibraryFakeMode", "-LibraryWindowSize", "-LibraryLargeFixture",
+            "-LibraryFakeMode", "-LibraryWindowSize", "-LibraryLargeFixture", "-LibraryFixtureBackups",
         ]
         var values: [String: String] = [:]
         var present: Set<String> = []
@@ -77,14 +81,16 @@ public struct LibraryLaunch: Sendable, Equatable {
         reduceMotion = present.contains("-LibraryReduceMotion")
         windowSize = values["-LibraryWindowSize"].flatMap(LibraryWindowSize.init(parsing:))
         largeFixture = values["-LibraryLargeFixture"].flatMap { Int($0) }.flatMap { $0 >= 1 ? $0 : nil }
+        fixtureBackups = values["-LibraryFixtureBackups"].flatMap { Int($0) }.map { $0 >= 1 } ?? false
     }
 
     /// Fakes over the fixture's photos when there is a fixture, else the live
     /// services over the app's platform adapters (sidecars off until passed).
     public func services(decoder: any PhotoDecoding, writer: any JPEGWriting, store: any CatalogStoring,
+                         looks: any PresetStoring = FakePresetStore(),
                          sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {
         if largeFixture != nil { return .fake(initialPhotos, mode: fakeMode) }
-        guard let fixture else { return .live(decoder: decoder, writer: writer, store: store, sidecars: sidecars) }
+        guard let fixture else { return .live(decoder: decoder, writer: writer, store: store, looks: looks, sidecars: sidecars) }
         return .fake(LibraryFixtures.photos(named: fixture), mode: fakeMode)
     }
 

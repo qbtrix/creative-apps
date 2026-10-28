@@ -20,15 +20,15 @@ import SuiteKernel
 import Testing
 
 /// Whether `tool` visibly changed from `a` to `b`: the pixels for the
-/// painting tools, the selection for marquee, the pending crop for crop, the
+/// painting tools, the selection or the drawn outline for the area tools, the pending crop for crop, the
 /// layers' offsets for move, the brush color for the eyedropper, the open
 /// box for the Type tool and the draft or paths for the Pen.
 private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoWorkspace) -> Bool {
     switch tool {
-    case .brush, .eraser, .clone, .heal, .gradient:
+    case .brush, .eraser, .clone, .heal, .gradient, .bucket, .spotHeal, .remove:
         a.pixels != b.pixels
-    case .marquee:
-        a.selection != b.selection || a.selectionMask != b.selectionMask
+    case .marquee, .ellipse, .lasso, .polygon, .wand:
+        a.selection != b.selection || a.selectionMask != b.selectionMask || a.areaDraft != b.areaDraft
     case .crop:
         a.pendingCrop != b.pendingCrop
     case .move:
@@ -51,8 +51,10 @@ private func ready(_ workspace: inout PhotoWorkspace, _ tool: PhotoTool, source:
     workspace.endDrag()
 }
 
-/// One whole drag: press at `start`, move to `end`, lift.
+/// One whole drag: press at `start`, move to `end`, lift. The lasso bends
+/// through (`end.x`, `start.y`) on the way, so its path has an area.
 private func stroke(_ workspace: inout PhotoWorkspace, from start: Mask.Point, to end: Mask.Point) {
+    if workspace.tool == .lasso { workspace.drag(from: start, to: Mask.Point(x: end.x, y: start.y), modifiers: []) }
     workspace.drag(from: start, to: end, modifiers: [])
     workspace.endDrag()
 }
@@ -123,6 +125,24 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     if case .radial(_, _, let radius) = radial { #expect(radius == 0.5) } else { Issue.record("setGradient didn't take the radial fill") }
     #expect(radial.stops == ToolOptions.defaultGradient.stops)
     #expect(options.settings == ToolOptions().settings && options.red == 0)
+}
+
+/// The Move tool's transform rows show only while a picked layer can move:
+/// on an adjustment layer they would sit disabled under the refusal, their
+/// labels too faint to read (#2593). A picked image layer beside it still moves.
+@Test func moveOptionsShowOnlyForAMovableSelection() throws {
+    var workspace = try PhotoWorkspace.fixture(.layered)
+    workspace.selectTool(.move)
+    let background = try #require(workspace.layers.first { $0.name == "Background" })
+    let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
+    workspace.selectLayer(background.id)
+    #expect(workspace.canMoveSelection)
+    workspace.selectLayer(curves.id)
+    #expect(!workspace.canMoveSelection)
+    #expect(workspace.moveHint == "Select an image layer in the sidebar to move it.")
+    workspace.pickLayer(background.id, .toggle)
+    #expect(workspace.canMoveSelection)
+    #expect(workspace.moveHint == "Drag over the image to move the selected layer.")
 }
 
 /// Move refuses an adjustment layer, which has no origin on the canvas, and

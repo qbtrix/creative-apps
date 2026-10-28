@@ -14,7 +14,7 @@
 import SuiteKernel
 import SwiftUI
 
-struct TimelineRuler: View {
+struct TimelineRuler: View, BodyCounted {
     let mapping: FrameMapping
     /// The stretch of the lanes the scroll view shows, in mapping x; nil until
     /// it first reports.
@@ -27,11 +27,6 @@ struct TimelineRuler: View {
     let onScrub: @MainActor (Int) -> Void
     @Environment(\.suiteSnapshotRendering) private var snapshot
     @State private var sender = TimelineScrubSender()
-
-    #if DEBUG
-    /// How many times the ruler's marks were drawn; the real-window budget tests count a scrub's.
-    static var bodyRuns = 0
-    #endif
 
     var body: some View {
         // The content x at the ruler's leading edge.
@@ -72,10 +67,13 @@ struct TimelineRulerMarks: View {
     let unit: TimeUnit
     let fps: Int
     var rate: FrameRate? = nil
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
 
     var body: some View {
         #if DEBUG
-        TimelineRuler.bodyRuns += 1
+        bodyTally.ran(TimelineRuler.self)
         #endif
         let mapping = mapping
         let visibleX = visibleX

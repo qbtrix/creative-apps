@@ -1,0 +1,30 @@
+[
+  {
+    "label": ".writesPngAndTiff: TIFF dropped from the copy",
+    "file": "Sources/PhotoModel/PhotoPasteboardAdapter.swift",
+    "find": "        return [png] + (tiffItem(image.image).map { [$0] } ?? [])\n",
+    "replace": "        return [png]\n",
+    "tests": "PhotoPasteboardAdapterTests.swift"
+  },
+  {
+    "label": ".svgFitsCanvas: SVG pasted at its own size",
+    "file": "Sources/PhotoModel/PhotoPasteboardAdapter.swift",
+    "find": "        guard let canvas, canvas.width > 0, canvas.height > 0 else {\n",
+    "replace": "        guard let canvas, canvas.width < 0, canvas.height > 0 else {\n",
+    "tests": "PhotoPasteboardAdapterTests.swift"
+  },
+  {
+    "label": "the SVG's viewBox is ignored",
+    "file": "Sources/PhotoModel/PhotoPasteboardAdapter.swift",
+    "find": "        return box.count == 4 ? (box[2], box[3]) : nil\n",
+    "replace": "        return nil\n",
+    "tests": "PhotoPasteboardAdapterTests.swift"
+  },
+  {
+    "label": "the pasted image keeps a source rect",
+    "file": "Sources/PhotoModel/PhotoPasteboardAdapter.swift",
+    "find": "        return ClipboardImage(image: image, source: nil)\n",
+    "replace": "        return ClipboardImage(image: image, source: PixelRect(x: 0, y: 0, width: image.width, height: image.height))\n",
+    "tests": "PhotoPasteboardAdapterTests.swift"
+  }
+]

@@ -24,8 +24,11 @@ extension FlareWorkspace {
     }
     typealias Help = @Sendable (FlareWorkspace) -> String?
 
-    /// The FlareCore commands, then the app's; empty only if an id broke the id rule.
-    public static let commands = coreCommands + appCommands
+    /// The FlareCore commands, then the app's, then Copy As (clipboard-interop CB-8); empty only if an id broke the
+    /// id rule. Paste as Image stays out: Flare places no pictures, and Edit > Paste places SVG through `place.image`.
+    public static let commands = coreCommands + appCommands + clipboardCommands
+    /// SuiteModel's Copy As, Flare's only clipboard command in the catalog.
+    public static let clipboardCommands = CopyAsCommands.specs(FlareWorkspace.self).filter { $0.id == "edit.copy-as" }
     public static let catalog = (try? CommandCatalog<FlareWorkspace>(app: "flare", commands, history: FlareCoreHistory.init)) ?? .empty(app: "flare")
     static let noFile: Help = { $0.document == nil ? "Open or create an animation first." : nil }
     static let noScene: Help = { $0.document == nil ? FlareLayerError.noDocument.message : nil }
@@ -176,6 +179,7 @@ extension FlareWorkspace {
         + hiddenCommands  // the beta.2 items the menus hide (no-placeholders NP-3)
         + PathCommands.specs(FlareWorkspace.self)  // the twelve path.* commands, the Pen and Direct Select's points (pen-paths FP-6)
         + [importReportCommand]  // the last Lottie open's skipped parts (lottie-open LO-5, FlareLottieNote.swift)
+        + documentSetupCommands  // document.read-settings, document.set-settings (document-setup DS-14)
 }
 
 extension FlareWorkspace {
@@ -216,19 +220,31 @@ extension FlareWorkspace {
             newDocument()
             return .object([:])
         }
+        let spec = try Self.newSpec(p, base: .hd1080, id: "file.new")
+        try attempt("file.new") { $0.newDocument(spec) }
+        return .object([:])
+    }
+
+    /// The spec `p` asks for: the named preset's values (`base`'s, as Custom, with none), then any size, rate, length
+    /// and background `p` gives. A preset name no preset has, or a background that isn't "#RRGGBB", is refused under
+    /// `id` rather than silently replaced (#5841).
+    static func newSpec(_ p: NewParams, base: CanvasPreset, id: String) throws(CatalogError) -> NewDocumentSpec {
         let named = CanvasPreset.all.first { $0.name == p.preset }
-        var spec = NewDocumentSpec(preset: named ?? .hd1080)
+        if let name = p.preset, named == nil {
+            throw .failed(id: id, message: "No canvas preset is called \u{201C}\(name)\u{201D}. Pick one of: "
+                + CanvasPreset.all.map(\.name).joined(separator: ", ") + ".")
+        }
+        var spec = NewDocumentSpec(preset: named ?? base)
         spec.preset = named
         spec.width = p.width ?? spec.width
         spec.height = p.height ?? spec.height
         spec.fps = p.fps.map { FrameRate(whole: $0) } ?? spec.fps
         spec.durationFrames = p.durationFrames ?? spec.durationFrames
         guard let background = NewDocumentSpec.color(hex: p.background ?? "#FFFFFF") else {
-            throw CatalogError.failed(id: "file.new", message: "Pick a valid background color.")
+            throw .failed(id: id, message: "Pick a valid background color.")
         }
         spec.background = background
-        try attempt("file.new") { $0.newDocument(spec) }
-        return .object([:])
+        return spec
     }
 
     /// Add Label (a name) or Remove Label (none), refused as the timeline's menu disables them.

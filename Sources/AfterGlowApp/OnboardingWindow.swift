@@ -15,7 +15,7 @@ import SuiteModel
 import SuiteUI
 import SwiftUI
 
-struct OnboardingWindow: View {
+struct OnboardingWindow: View, BodyCounted {
     @State private var model: OnboardingModel
     @Environment(\.dismissWindow) private var dismissWindow
 
@@ -26,9 +26,7 @@ struct OnboardingWindow: View {
         flow: LauncherServices.shared.onboarding) ? .presented : .suppressed
 
     #if DEBUG
-    /// How many times the window's body ran; RenderBudgetAfterGlowOnboardingTests counts an interaction's.
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     init(services: SuiteServices = LauncherServices.shared, support: String = LauncherServices.support) {
@@ -46,7 +44,7 @@ struct OnboardingWindow: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.l) {
             OnboardingPageView(model: model)

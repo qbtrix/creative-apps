@@ -143,6 +143,8 @@ final class PhotoJourneyTests: XCTestCase {
         let canvas = photo.element("suite.canvas")
         let before = canvas.screenshot().pngRepresentation
 
+        // The Move tool's options sit above the adjustments, so Curves may start below the fold.
+        photo.reveal(photo.element("photo.curves"))
         photo.drag(on: "photo.curves", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.5, dy: 0.25), step: "curves-dragged")
         XCTAssert(photo.app.buttons["Undo Curves"].waitForExistence(timeout: 5), "the curve drag made no Curves step")
         XCTAssert(Self.waitUntil { canvas.screenshot().pngRepresentation != before }, "the curve didn't change the canvas")
@@ -181,15 +183,16 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.app.buttons["Redo Paint"].waitForExistence(timeout: 5), "Undo didn't undo the stroke")
 
         // The Preset menu (AB-p2) sets every brush setting at once: Soft Round is 60 px.
-        let preset = photo.element("photo.tool.preset")
+        let preset = photo.inspectorMenu("photo.tool.preset", label: "Preset")
         XCTAssert(preset.waitForExistence(timeout: 5), "the brush's Tool Options show no Preset menu")
         preset.click()
-        let soft = photo.app.menuItems["Soft Round"]
-        XCTAssert(soft.waitForExistence(timeout: 5), "the Preset menu doesn't list Soft Round")
-        soft.click()
-        let size = photo.element("photo.tool.size")
-        let sixty = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value CONTAINS '60'"), object: size)
-        XCTAssertEqual(XCTWaiter().wait(for: [sixty], timeout: 5), .completed, "Soft Round didn't set the size to 60 px")
+        XCTAssert(photo.chooseShownMenuItem("Soft Round", timeout: 5), "the Preset menu doesn't list Soft Round")
+        // The row's label text carries photo.tool.size too, so each of its few elements is read; a
+        // value predicate over the whole inspector timed out evaluating the query.
+        let size = photo.app.descendants(matching: .any).matching(identifier: "photo.tool.size")
+        // A slider's value is a number, a field's a string: read both as text.
+        let reads = { size.allElementsBoundByIndex.map { "\($0.label) \($0.value.map { "\($0)" } ?? "")" } }
+        XCTAssert(Self.waitUntil { reads().contains { $0.contains("60") } }, "Soft Round didn't set the size to 60 px (it reads \(reads()))")
         photo.shot("preset-soft-round")
 
         typeValue("1.5", into: "Exposure", photo)
@@ -287,17 +290,17 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: file), original, "Save after Save As wrote over the opened tools.PNG")
         photo.shot("saved-copy")
 
-        // suite.canvas is the scrollable area: the viewport, or the image plus a
-        // 32 pt margin each side once that is larger. At 100% the 600 x 800 px
-        // image makes it 864 pt tall, past the runner's viewport.
+        // suite.canvas is the image's own frame (the shell journey's "image"
+        // band), so at 100% the 600 x 800 px image is 600 x 800 pt, taller
+        // than the runner's viewport.
         let canvas = photo.element("suite.canvas")
         let fitted = canvasPixels(photo)
         photo.app.typeKey("-", modifierFlags: .command)
         XCTAssert(canvasChanged(from: fitted, photo), "Command-- didn't zoom out (the canvas looks the same)")
         photo.shot("zoomed-out")
         photo.app.typeKey("1", modifierFlags: .command)
-        let actual = { abs(canvas.frame.height - 864) < 1 }
-        XCTAssert(Self.waitUntil(actual), "Command-1 didn't show the image at 100% (\(canvas.frame.size); 100% is 864 pt tall)")
+        let actual = { abs(canvas.frame.width - 600) < 1 && abs(canvas.frame.height - 800) < 1 }
+        XCTAssert(Self.waitUntil(actual), "Command-1 didn't show the image at 100% (\(canvas.frame.size); 100% is 600 x 800 pt)")
         photo.shot("actual-size")
     }
 

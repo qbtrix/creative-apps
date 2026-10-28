@@ -22,7 +22,7 @@ struct TransformOptions: View {
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             TransformRows(
-                selection: (live?.shown ?? model).transformSelection, help: model.transformHelp, flipHelp: model.flipHelp
+                selection: (live?.rowsShown ?? model).transformSelection, help: model.transformHelp, flipHelp: model.flipHelp
             ) {
                 perform(.transform(.kernel($0)))
             }

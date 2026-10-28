@@ -2,7 +2,7 @@
 // (all disabled) beside an image with one hidden layer selected (Delete and
 // the order and selection moves disabled, "Show Layer"), and two layers with
 // the top one selected (all but Bring Forward and Select Layer Above), in
-// Light and Dark. New Adjustment Layer holds the four kinds (never Blur),
+// Light and Dark. New Adjustment Layer holds the six kinds (never Blur),
 // the submenu and its items disabled with "Open an image first." with no
 // image, and enabled with one;
 // the menu bar doesn't render here, so the items are drawn in
@@ -29,7 +29,7 @@ import Testing
         #expect(menus[2].visibilityTitle == "Hide Layer" && menus[2].canDeleteLayer)
         #expect(menus[2].undoTitle == "Undo New Layer" && !menus[0].hasImage)
         for menu in menus {
-            #expect(menu.adjustmentLayerKinds == [.exposure, .levels, .curves, .hueSaturation])
+            #expect(menu.adjustmentLayerKinds == [.exposure, .levels, .curves, .hueSaturation, .blackAndWhite, .invert])
         }
         #expect(menus[0].addAdjustmentLayerHelp == "Open an image first.")
         #expect(menus[1].addAdjustmentLayerHelp == nil && menus[2].addAdjustmentLayerHelp == nil)

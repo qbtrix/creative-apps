@@ -1,17 +1,19 @@
 // Live/LiveDevelop.swift: the live develop renderer (develop packet DV-6).
-// A photo's settings become the CoreRaster calls they need, in one fixed
-// order: white balance, exposure, contrast, highlights and shadows, whites
-// and blacks, levels, the tone curve, saturation. Exposure, levels, the curve
-// and saturation are SuiteImaging's shared list (`ImagingProgram.adjustments`,
-// the steps Photo runs, on CoreRender's CPU backend; suite-imaging IM-10b),
-// with Library's own tone passes after its exposure step. A control at its
-// neutral value runs no pass, so neutral settings return the input untouched.
+// A photo's settings become the CoreRender steps they need, in one fixed
+// order: white balance, exposure, contrast, highlights and shadows, whites,
+// blacks, levels, the tone curve, saturation. Every step is SuiteImaging's
+// (suite-imaging IM-13): the sliders are `ToneRules`' list, levels, the curve
+// and saturation `ImagingProgram`'s after it, run on CoreRender's CPU backend
+// as Photo runs them. A control at its neutral value runs no step, so neutral
+// settings return the input untouched.
 // The histogram is CoreRaster's, 256 bins over the sRGB values of the buffer
 // it is given (the rendered one). Vibrance waits on creative-core (`waiting`):
 // a render that needs it throws `.renderFailed` with that reason. After
 // the tone, a crop (crop CR-4) turns the buffer by its angle and cuts
 // `LiveCrop`'s frame for the buffer's own size out of the turned pixels.
-// The photo's orientation (orientation-crop OC-8) faces the pixels first, so
+// Between them the kinds (adjust-everywhere AJ-11): Black & White, then
+// Invert, SuiteImaging's CPU steps, so the grid, loupe and export all show them.
+// The photo's orientation (orientation-crop OC-8) then faces the pixels, so
 // the crop's rect is in the oriented photo.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -30,38 +32,34 @@ public struct LiveDevelop: DevelopRendering {
         .vibrance: "Vibrance waits on creative-core (CoreRaster vibrance)",
     ]
 
-    /// The CoreRaster calls `settings` needs, in render order; empty when neutral.
+    /// The steps `settings` needs, in render order; empty when neutral.
     public enum Pass: Equatable, Sendable {
-        case whiteBalance(temperature: Float, tint: Float), contrast(Float)
-        case highlightsShadows(highlights: Float, shadows: Float)
-        case whitesBlacks(inBlack: Float, inWhite: Float, outBlack: Float, outWhite: Float)
         case color(vibrance: Float, saturation: Float)                  // DV-12
-        /// One step of `ImagingProgram.adjustments`: exposure, levels, the curve or saturation.
+        /// One of SuiteImaging's steps.
         case shared(ToneAdjustment)
     }
 
     public init() {}
 
+    /// `ToneRules`' slider steps (Saturation left to the shared list, so it
+    /// runs after the curve), then `ImagingProgram`'s levels, curve and saturation.
     public static func passes(for s: DevelopSettings) -> [Pass] {
-        let shared = ImagingProgram.adjustments(s.adjustSettings).map(Pass.shared)
-        let exposure = shared.prefix { if case .shared(.exposure) = $0 { true } else { false } }
-        var p: [Pass] = []
-        if s.temperature != 0 || s.tint != 0 { p.append(.whiteBalance(temperature: Float(s.temperature), tint: Float(s.tint))) }
-        p += exposure
-        if s.contrast != 0 { p.append(.contrast(Float(s.contrast))) }
-        if s.highlights != 0 || s.shadows != 0 {
-            p.append(.highlightsShadows(highlights: Float(s.highlights), shadows: Float(s.shadows)))
+        var adjust = s.adjustSettings
+        adjust.exposure = 0
+        return ImagingProgram.adjustments(adjust, tone: ToneRules.adjustments(s.tone.setting(.saturation, to: 0))).map(Pass.shared)
+    }
+
+    /// `passes(for:)` as the steps the loupe's GPU route writes, in the same
+    /// order (suite-imaging IM-11); nil while a pass has no step (Vibrance).
+    public static func steps(for s: DevelopSettings) -> [ToneAdjustment]? {
+        var steps: [ToneAdjustment] = []
+        for pass in passes(for: s) {
+            switch pass {
+            case .color: return nil
+            case .shared(let step): steps.append(step)
+            }
         }
-        if s.whites != 0 || s.blacks != 0 {
-            // sRGB values, at most a quarter of the range: inBlack <= 0.25 < 0.75 <= inWhite, so levels never throws.
-            let inWhite = s.whites > 0 ? 1 - 0.25 * s.whites / 100 : 1
-            let outWhite = s.whites < 0 ? 1 + 0.25 * s.whites / 100 : 1
-            let inBlack = s.blacks < 0 ? 0.25 * -s.blacks / 100 : 0
-            let outBlack = s.blacks > 0 ? 0.25 * s.blacks / 100 : 0
-            p.append(.whitesBlacks(inBlack: Float(inBlack), inWhite: Float(inWhite),
-                                   outBlack: Float(outBlack), outWhite: Float(outWhite)))
-        }
-        return p + shared.dropFirst(exposure.count)
+        return steps
     }
 
     public func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer {
@@ -77,6 +75,7 @@ public struct LiveDevelop: DevelopRendering {
                 throw LibraryError.renderFailed("\(error)")
             }
         }
+        b = try Self.kinds(settings.kinds, on: b)
         b = b.oriented(settings.orientation)
         guard let crop = settings.crop else { return b }
         do {
@@ -88,30 +87,35 @@ public struct LiveDevelop: DevelopRendering {
         }
     }
 
+    /// `kinds` on `b` through CoreRender's CPU backend; none returns `b` untouched.
+    static func kinds(_ kinds: [ImagingKind], on b: PixelBuffer) throws -> PixelBuffer {
+        guard !kinds.isEmpty else { return b }
+        do {
+            let cpu = CPUBackend()
+            var s = try cpu.surface(b)
+            for step in AdjustKinds.adjustments(kinds) { s = try cpu.adjusted(s, step) }
+            return try cpu.read(s)
+        } catch {
+            throw LibraryError.renderFailed("\(error)")
+        }
+    }
+
     public func histogram(of buffer: PixelBuffer) throws -> HistogramBins {
         let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .sRGB)
         return HistogramBins(red: h.red, green: h.green, blue: h.blue,
                              shadowClipped: h.shadowClipped, highlightClipped: h.highlightClipped)
     }
 
-    /// `pass`'s one CoreRaster call; whites and blacks act on sRGB values. A
-    /// shared step runs on `cpu`, as the shared list's CPU route runs it.
+    /// `pass` run on `cpu`, as the shared list's CPU route runs it.
     private static func run(_ pass: Pass, on b: PixelBuffer, cpu: CPUBackend) throws -> PixelBuffer {
         switch pass {
-        case .whiteBalance(let temperature, let tint): try b.whiteBalance(temperature: temperature, tint: tint)
-        case .contrast(let amount): try b.contrast(amount)
-        case .highlightsShadows(let highlights, let shadows): try b.highlightsShadows(highlights: highlights, shadows: shadows)
-        case .whitesBlacks(let inBlack, let inWhite, let outBlack, let outWhite):
-            try b.levels(inBlack: inBlack, inWhite: inWhite, gamma: 1, outBlack: outBlack, outWhite: outWhite, encoding: .sRGB)
         case .color: throw LibraryError.renderFailed(waiting[.vibrance] ?? "Vibrance isn't built yet")
         case .shared(let step):
-            try {
-                let input = try cpu.surface(b)
-                defer { cpu.release(input) }
-                let output = try cpu.adjusted(input, step)
-                defer { cpu.release(output) }
-                return try cpu.read(output)
-            }()
+            let input = try cpu.surface(b)
+            defer { cpu.release(input) }
+            let output = try cpu.adjusted(input, step)
+            defer { cpu.release(output) }
+            return try cpu.read(output)
         }
     }
 }

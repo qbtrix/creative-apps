@@ -5,7 +5,7 @@
 // (`NSEvent.modifierFlags`, the device state), which an event a test sends can't set, so the editor
 // is hosted with the window's live-drag routing and Option held for it. The drag is design-window
 // D0-8b's `dragSamples` (DesignWindowDragTests): its `move` presses at (20, 20) and goes by
-// (160, 90), so A starts selected around that point. DesignEditor.bodyRuns is a process-global debug
+// (160, 90), so A starts selected around that point. DesignEditor.bodyRuns is a debug body
 // counter, so the suite nests in BodyCountSuites. macOS only.
 #if canImport(AppKit)
 import AppKit

@@ -8,7 +8,7 @@
 # bisected by prefix; a proof gone stale on a ratchet or baseline change is
 # checked again on today's dev), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
 # per code batch scoped to its apps, priority order, slots, the timer, a red
-# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
+# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named, and LANE_KILN=1's hold for a local Mac check's local-ci/macos), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
 # bisect, with its 2-of-3 vote mode for a timing budget test, and the
 # auto-revert of a red dev's culprit, own-proof landing on the pre-screen and a
 # stale proof's batch of one holding only its own PR
@@ -638,7 +638,7 @@ gh() {
     "pr list "*)  # every open PR in the --json shape; the lane picks the labelled ones itself
       u=()
       for n in "$sw"/[0-9]*.json; do
-        [[ -e "${n%.json}.merged" ]] || u+=("$n")
+        [[ ! -e "$n" || -e "${n%.json}.merged" ]] || u+=("$n")
       done
       if (( ${#u[@]} )); then jq -s . "${u[@]}"; else echo '[]'; fi ;;
     "pr view "*"--json title "*) echo "title $2" ;;
@@ -650,13 +650,21 @@ gh() {
     "api "*"/status "*)  # a commit's statuses: $sw/status.<sha>.json ({statuses: [...]}), none if absent
       u="${2#*/commits/}"; u="${u%%/*}"
       jq -r "${!#}" "$sw/status.$u.json" 2>/dev/null || jq -rn '{statuses: []}' | jq -r "${!#}" ;;
+    "api "*"/commits/"*"--jq .commit.committer.date"*)  # a commit's committer date (mac_hold), from the bare remote, in UTC
+      u="${2#*/commits/}"
+      TZ=UTC git -C "$sw/origin.git" log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd "$u" 2>/dev/null \
+        | jq -R '{commit: {committer: {date: .}}}' | jq -r "${!#}" ;;
     "api "*"/pulls/"*"/files "*)
       n="${2#*/pulls/}"; n="${n%%/*}"
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
       else jq -rn '[{filename: "Sources/FlareModel/FlareWorkspace.swift", status: "modified"}]' | jq -r "${!#}"; fi ;;
     "api "*"/pulls/"*) n="${2##*/}"; jq -r "${!#}" "$sw/pull.$n.json" 2>/dev/null || true ;;  # a PR's body (bisect_post)
+    "api repos/"*"/issues?labels=dev-red&state=closed"*) jq -r "${!#}" "$sw/redclosed.json" 2>/dev/null || true ;;  # the last closed dev-red issue (flake_closed)
     "api repos/"*"/issues?labels=dev-red"*) jq -r "${!#}" "$sw/red.json" 2>/dev/null || true ;;  # the open dev-red issue
+    "issue list "*) cat "$sw/issues.json" 2>/dev/null || echo '[]' ;;  # the open finding issues (flake_finding)
+    "issue create "*) echo "$a" >>"$sw/calls"; echo "https://github.com/qbtrix/creative-apps/issues/$((699 + $(grep -c '^issue create' "$sw/calls")))" ;;  # #700, #701, ...
     "api search/issues"*) jq -r "${!#}" "$sw/search.json" 2>/dev/null || true ;;
+    "api "*"/actions/runs/"*"/jobs"*) u="${2#*/actions/runs/}"; jq -r "${!#}" "$sw/jobs.${u%%/*}.json" 2>/dev/null || true ;;  # a run's jobs (mac_tests' shards)
     "run view --job "*) cat "$sw/joblog.$4" 2>/dev/null || return 1 ;;  # a job's failed-step log (budget_failure)
     "run view "*) cat "$sw/run.$3.json" 2>/dev/null || return 1 ;;
     "run list "*"--commit "*)
@@ -707,10 +715,10 @@ gh() {
       (cd "$sw/refs/$u" 2>/dev/null && find . -type f | sed 's:^\./::') | jq -R '{path: ., type: "blob"}' | jq -s '{truncated: false, tree: .}' ;;
     "api "*"/contents/"*) u="${!#}"; u="${u#*/contents/}"; cat "$sw/refs/${u##*\?ref=}/${u%%\?*}" ;;
     "api "*"/issues/"*"/comments "*) n="${2#*/issues/}"; cat "$sw/${n%%/*}.comments" 2>/dev/null || true ;;
-    "api repos/"*"/issues/"*)  # an issue's labels: $sw/labels.<n>, none if absent, a failure if .fail
+    "api repos/"*"/issues/"*)  # an issue's state ($sw/state.<n>, OPEN if absent) and labels ($sw/labels.<n>, none if absent, a failure if .fail)
       n="${2##*/}"; echo "labels $n" >>"$sw/lookups"
       [[ ! -e "$sw/labels.$n.fail" ]] || return 1
-      jq -c '{labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
+      jq -c --arg s "$(cat "$sw/state.$n" 2>/dev/null || echo OPEN)" '{state: $s, labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
     "pr comment "*|"issue comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
     "pr merge "*) [[ ! -e "$sw/merge.fail.$3" ]] || return 1  # $sw/merge.fail.<n>: GitHub refuses the merge
       echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
@@ -724,13 +732,18 @@ gh() {
       jq '.labels += [{"name": "needs-fix"}]' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
     "pr edit "*"--remove-label needs-fix"*) echo "$a" >>"$sw/calls"
       jq '.labels |= map(select(.name != "needs-fix"))' "$sw/$3.json" >"$sw/x" && mv "$sw/x" "$sw/$3.json" ;;
-    "pr create "*)  # the lane's revert PR: fixture #600 on the branch it pushed, by the lane's bot
+    "pr create "*)  # a lane PR (a revert or a quarantine change): the next fixture from #600 on the branch it pushed, by the
+      # lane's bot, with the command's labels; its files are the branch's diff against dev
       echo "$a" >>"$sw/calls"; u="${a#*--head }"; u="${u%% *}"
-      jq -n --arg b "$u" --arg h "$(git -C "$sw/origin.git" rev-parse "refs/heads/$u")" --arg body "${!#}" '{number: 600, state: "OPEN",
-        isDraft: false, baseRefName: "dev", headRefName: $b, headRefOid: $h, labels: [{name: "lane-revert"}, {name: "p0"}],
+      n=600; while [[ -e "$sw/$n.json" ]]; do n=$((n + 1)); done
+      git -C "$sw/origin.git" diff --name-only dev "refs/heads/$u" | jq -R '{filename: ., status: "modified"}' | jq -s . >"$sw/files.$n.json"
+      jq -n --argjson n "$n" --arg b "$u" --arg h "$(git -C "$sw/origin.git" rev-parse "refs/heads/$u")" --arg body "${!#}" \
+        --argjson labels "$(grep -oE -- '--label [^ ]+' <<<"$a" | cut -d' ' -f2 | jq -R '{name: .}' | jq -s .)" '{number: $n, state: "OPEN",
+        isDraft: false, baseRefName: "dev", headRefName: $b, headRefOid: $h, labels: $labels,
         author: {login: "app/github-actions", is_bot: true}, additions: 1, deletions: 1, changedFiles: 1,
-        mergeable: "MERGEABLE", mergeStateStatus: "CLEAN", body: $body}' >"$sw/600.json"
-      echo "https://github.com/qbtrix/creative-apps/pull/600" ;;
+        mergeable: "MERGEABLE", mergeStateStatus: "CLEAN", body: $body}' >"$sw/$n.json"
+      echo "https://github.com/qbtrix/creative-apps/pull/$n" ;;
+    "pr close "*) echo "$a" >>"$sw/calls"; touch "$sw/$3.merged" ;;  # a closed PR leaves the open list like a merged one
     *) echo "$a" >>"$sw/calls" ;;
   esac
 }
@@ -1329,7 +1342,7 @@ git -C "$w" push -q "$sw/origin.git" main dev
 M=$(git -C "$w" rev-parse main); C1=$(git -C "$w" rev-parse dev~2); C2=$(git -C "$w" rev-parse dev~1); C3=$(git -C "$w" rev-parse dev)
 R7=${C3:0:7}
 jq -n --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9001\n- Failing jobs: linux\n- Culprit range: `main..%s`\n' "$C3")" '[{number: 500, body: $b, pull_request: null}]' >"$sw/red.json"
-printf '%s\n' "Likely cause: #102 feat(b): two (Clef 0.93). Flaky: 0.10." >"$sw/500.comments"
+printf '%s\n' "Likely cause: #102 feat(b): two (Clef 0.93). Flaky: 0.10." "$RERUN_MARK $R7 red -->" >"$sw/500.comments"
 jq -n '{body: "Adds two.\n\nFeature: easing\nFast-Check: pass"}' >"$sw/pull.102.json"
 jq -n '{items: [{number: 70, title: "Feature: easing (old)"}, {number: 78, title: "Feature: easing"}]}' >"$sw/search.json"
 verdict "$M" success; verdict "$C3" failure
@@ -1351,6 +1364,7 @@ expect "bisect dev: a red with its verdict posted is not redone (two runs, two c
 # the issue already has its verdict, so nothing is bisected again.
 echo c4 >"$w/c4.md"; git -C "$w" add -A; git -C "$w" commit -qm "docs: four (#104)"; git -C "$w" push -q "$sw/origin.git" dev
 C4=$(git -C "$w" rev-parse dev); verdict "$C4" failure
+printf '%s\n' "$RERUN_MARK ${C4:0:7} red -->" >>"$sw/500.comments"
 jq --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9002\n- Failing jobs: linux\n- Culprit range: `main..%s`\n' "$C4")" '.[0].body = $b' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
 lane_sweep
 expect "bisect dev: a newer red run on the same issue starts no second bisect" \
@@ -1647,6 +1661,41 @@ fresh; cpr 122 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
 gate "$TIP" success in_progress "macOS (photo)"; lstatus "$TIP" success; lane_sweep
 expect "local: a local pass lands while GitHub's macOS job still runs" "$(merges)" "pr merge 122"
 
+# LANE_KILN=1: a fresh batch holds its mac_only run up to LANE_KILN_WAIT_MIN
+# minutes for the local Mac check's local-ci/macos status, read by state and
+# context, never by its description. Its `error` is no answer: no red, no
+# bisect, and mac_only goes out once the wait runs out (LANE_KILN_WAIT_MIN=0
+# here stands for a batch older than the wait).
+mac_only() { grep -c -- "-f mac_only=true -f app=photo --ref $1\$" "$sw/calls" || true; }
+ldesc() { jq -n --arg s "$2" --arg d "$3" '{statuses: [{context: "local-ci/macos", state: $s, description: $d, target_url: "https://mac.local/ci/1"}]}' >"$sw/status.$1.json"; }
+fresh; cpr 140 Sources/PhotoModel/A.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+expect "local hold: a fresh batch gets its Linux check and no mac_only run" \
+  "$(grep -c -- "-f linux_only=true --ref $BR\$" "$sw/calls"),$(mac_only "$BR")" "1,0"
+gate "$TIP" success none; ldesc "$TIP" success "mac check ✘ (a description the lane ignores)"; LANE_KILN=1 lane_sweep
+expect "local hold: a green local-ci/macos within the wait lands it with no mac_only run" \
+  "$(merges),$(mac_only "$BR")" "pr merge 140,0"
+fresh; cpr 141 Sources/PhotoModel/A.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success none; LANE_KILN=1 lane_sweep
+expect "local hold: no answer yet keeps holding" "$(mac_only "$BR"),$(merges)" "0,"
+gate "$TIP" success none; LANE_KILN=1 LANE_KILN_WAIT_MIN=0 lane_sweep
+expect "local hold: no answer within the wait dispatches mac_only as before" "$(mac_only "$BR"),$(merges)" "1,"
+fresh; cpr 142 Sources/PhotoModel/A.swift; cpr 143 Sources/PhotoModel/B.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success none; ldesc "$TIP" error "mac check ✘ infra"; LANE_KILN=1 lane_sweep
+expect "local hold: an error within the wait is no answer: held, not red" \
+  "$(mac_only "$BR"),$(probe_sha 1),$(redref),$(grep -c '^pr edit .*needs-fix' "$sw/calls" || true)" "0,,0,0"
+LANE_KILN=1 LANE_KILN_WAIT_MIN=0 lane_sweep
+expect "local hold: an error past the wait dispatches mac_only, no bisect" \
+  "$(mac_only "$BR"),$(probe_sha 1),$(redref),$(merges)" "1,,0,"
+fresh; cpr 144 Sources/PhotoModel/A.swift; cpr 145 Sources/PhotoModel/B.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success none; ldesc "$TIP" failure "mac check ✔ (a description the lane ignores)"; LANE_KILN=1 lane_sweep
+expect "local hold: a failure is red: the bisect probes the chain after 1 PR" \
+  "$(probe_sha 1),$(grep -c -- "-f linux_only=true --ref $BR-1\$" "$sw/calls"),$(mac_only "$BR"),$(merges)" \
+  "$(git -C "$sw/origin.git" rev-parse "$TIP~1"),1,0,"
+
 # Slots: the lane's queued and running macOS runs (gates and per-PR builds;
 # other runs don't count) at LANE_MAC_SLOTS form no batch.
 fresh; cpr 100 Sources/PhotoModel/A.swift
@@ -1732,6 +1781,18 @@ expect "dev red macOS: an unreadable log lands nothing and names nothing" "$(mer
 devred 116; printf 'macOS (photo)\tscripts/ci\t2026-10-23T04:39:07Z TEST PROCESS DIED\n' >"$sw/joblog.201"; mlog 202 Old.swift/a\(\); mlog 203 Old.swift/a\(\); lane_sweep
 expect "dev red macOS: a crash with no test named is red, never dev's" \
   "$(merges),$(grep -c '^pr edit 117 .*--add-label needs-fix' "$sw/calls"),$(grep -c "own proof" "$sw/calls")" "pr merge 116,1,0"
+# Sharded macOS tests (#5775): the `macOS` gate job only sums its shards, so
+# the failing tests are read from the run's failed `macOS tests i/n` jobs.
+fresh
+printf 'macOS\tUNKNOWN STEP\t2026-10-26T21:58:21Z | macOS tests 1/3 | failure | 26 |\n' >"$sw/joblog.300"
+jq -n '{jobs: [{id: 301, name: "macOS tests 1/3", conclusion: "failure"}, {id: 302, name: "macOS tests 2/3", conclusion: "failure"},
+  {id: 303, name: "macOS compile", conclusion: "success"}, {id: 300, name: "macOS", conclusion: "failure"}]}' >"$sw/jobs.889.json"
+printf 'macOS tests 1/3\tUNKNOWN STEP\t2026-10-26T21:32:14Z \xe2\x9c\x98 Test homeAtEachWidth() recorded an issue at AfterGlowHomeLayoutTests.swift:182:29: Expectation failed\n' >"$sw/joblog.301"
+printf 'macOS tests 2/3\tUNKNOWN STEP\t2026-10-26T21:32:14Z \xe2\x94\x81 Test opens(_:) recorded a known issue with 1 argument c at ImportTests.swift:55:13: x\n' >"$sw/joblog.302"
+SHARD_RED="red|https://github.com/qbtrix/creative-apps/actions/runs/889/job/300|macOS"
+expect "dev red macOS: a sharded run's failing test is read from its shard, a known issue isn't" "$(mac_tests "$SHARD_RED")" "AfterGlowHomeLayoutTests.swift/homeAtEachWidth()"
+rm "$sw/joblog.302"
+expect "dev red macOS: an unreadable shard log fails the read, never a partial list" "$(mac_tests "$SHARD_RED" || echo unread)" "unread"
 # dev red on macOS only (#5183's "Failing jobs: macos"): a batch that would
 # run the macOS gate can't pass on that base, so none forms, and one in flight
 # on the red sha is marked and dropped once dev is green on a fix. A docs batch
@@ -1755,7 +1816,7 @@ expect "dev red macOS only: green on a fix drops it and forms a fresh batch ther
 # lane-revert and p0, never fast-lane) and lands on its own Linux check, with
 # no prescreen and no batch; CI on dev runs once it lands. The culprit's
 # feature-lead issue hears why and a finding is filed for its app. One revert
-# call per dev-red issue (its marker), never a revert of a revert.
+# call per culprit (its marker on the issue), never a revert of a revert.
 rvdev() {  # rvdev <jobs> <path|subject>...: main at a base, dev one commit per spec past it, dev-red #520 naming main..<dev tip> (RED), red on Linux there
   local jobs="$1" w="$sw/work" spec; shift
   fresh
@@ -1771,6 +1832,8 @@ rvdev() {  # rvdev <jobs> <path|subject>...: main at a base, dev one commit per 
   jq -n --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9500\n- Failing jobs: %s\n- Culprit range: `main..%s`\n' "$jobs" "$RED")" \
     '[{number: 520, body: $b, pull_request: null}]' >"$sw/red.json"
   tip_red "$RED" 4343 '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)'
+  # The flake check already judged this red real (its rerun failed), so these cases start where today's lane does.
+  printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
   jq -n '{body: "Adds a.\n\nFeature: easing"}' >"$sw/pull.201.json"
   jq -n '{items: [{number: 78, title: "Feature: easing"}]}' >"$sw/search.json"
 }
@@ -1816,10 +1879,10 @@ expect "auto-revert: never reverts a revert, and says so once on the issue" \
 rvdev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
 LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(jq -r .headRefOid "$sw/600.json")" success
 jq '.[0].number = 530' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
-printf '%s\n' "Auto-revert: an earlier call. <!-- lane-revert none -->" >"$sw/530.comments"
+printf '%s\n' "Auto-revert: an earlier call. <!-- lane-revert none -->" "$RERUN_MARK ${RED:0:7} red -->" >"$sw/530.comments"
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-revert: a revert from an older dev-red issue is never checked or landed under a new one" \
-  "$(merges),$(grep -c -- '--ref lane/revert-201$' "$sw/calls")" ",0"
+  "$(merges),$(grep -c -- '--ref lane/revert-201$' "$sw/calls"),$(creates)" ",0,1"
 
 # A culprit on a protected path stays with a human (the lane's token can't push workflows either).
 rvdev linux "scripts/tool.sh|chore: tool (#201)"
@@ -1844,6 +1907,19 @@ verdict "$(git -C "$sw/origin.git" rev-parse dev~1)" failure; LANE_VERIFY_AFTER=
 expect "auto-revert: once the bisect names #201, only #201 is reverted" \
   "$(creates),$(grep -c -- '^pr create .*--head lane/revert-201 ' "$sw/calls"),$(git -C "$sw/origin.git" diff --name-only dev refs/heads/lane/revert-201),$(grep -c 'line:suite' "$sw/calls")" "1,1,docs/a.md,1"
 
+# One call per certain culprit, not per issue (#5350): an open dev-red issue
+# whose first call was a no-culprit note still reverts the PR a later bisect
+# names, once; later sweeps on the same culprit open none.
+rvdev linux "docs/a.md|docs: a (#201)" "Sources/PhotoModel/B.swift|feat(photo): b (#202)"
+printf '%s\n' "Auto-revert: 2 PRs in main..abc1234 and no bisect verdict names one of them (red: macos), so a human picks the culprit. <!-- lane-revert none -->" >>"$sw/520.comments"
+LANE_VERIFY_AFTER=1 lane_sweep
+verdict "$(git -C "$sw/origin.git" rev-parse dev~1)" failure; C201=$(git -C "$sw/origin.git" rev-parse dev~1); LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: after a no-culprit note, a certain Linux culprit still gets exactly one revert" \
+  "$(creates),$(grep -c -- '^pr create .*--head lane/revert-201 ' "$sw/calls"),$(grep -c "^issue comment 520 .*<!-- lane-revert ${C201:0:7} -->" "$sw/calls")" "1,1,1"
+LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(jq -r .headRefOid "$sw/600.json")" success; LANE_VERIFY_AFTER=1 lane_sweep; LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: later sweeps on the same culprit, its revert open or landed, open no second one" \
+  "$(creates),$(merges),$(grep -c "^issue comment 520 .*<!-- lane-revert ${C201:0:7} -->" "$sw/calls")" "1,pr merge 600,1"
+
 # macOS-only reds: no bisect runs there. One PR in range is the culprit; with
 # two, the lane names none and leaves the pick to a human.
 rvdev macos "Sources/LibraryApp/A.swift|fix(library): a (#201)"
@@ -1854,6 +1930,57 @@ rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignMo
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-revert: a macOS red with two PRs reverts nothing and leaves the pick to a human" \
   "$(creates),$(grep -c "^issue comment 520 .*2 PRs in main\.\.${RED:0:7} and no bisect verdict names one of them (red: macos), so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls")" "0,1"
+# macOS compile reds (10-27: #5235, #5128, #4912 sat red until a human
+# fixed them): the run's failed `macOS compile` job log names the files its
+# Swift errors are in (an `error:` line, or the `expanded code originates
+# here` note under a macro's error); the newest PR in range that changed one
+# of them is the culprit. One PR: reverted. None, or several for different
+# files: a note naming the files and PRs, no revert. A macOS test red is never
+# reverted this way. Two PRs in range each time, so the only-PR rule can't decide.
+R=/Users/runner/work/creative-apps/creative-apps
+CPFX=$'macOS compile\tRun scripts/ci --build-only\t2026-10-27T01:02:03.4567890Z '
+macjobs() {  # macjobs <compile conclusion> <tests conclusion>: run 9500's macOS jobs, the compile job's log at joblog.9601
+  jq -n --arg c "$1" --arg t "$2" '{jobs: [{id: 9601, name: "macOS compile", conclusion: $c},
+    {id: 9602, name: "macOS tests 1/3", conclusion: $t}, {id: 9603, name: "macOS", conclusion: "failure"}]}' >"$sw/jobs.9500.json"
+}
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/SuiteUI/Theme.swift|refactor(suite): drop gone (#202)"
+macjobs failure skipped
+printf '%s\n' "${CPFX}Building for debugging..." "${CPFX}$R/Sources/PhotoModel/A.swift:3:9: error: cannot find 'gone' in scope" \
+  "${CPFX}$R/Sources/SuiteUI/Theme.swift:10:5: note: 'gone' declared here" "${CPFX}CI: FAIL (swift build)" >"$sw/joblog.9601"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS compile error in one PR's file reverts that PR, not the newest one (a declared-here note is no blame)" \
+  "$(creates),$(grep -c -- '^pr create .*--head lane/revert-201 ' "$sw/calls"),$(grep -c "^issue comment 520 .*Auto-revert: #201 (.*) is the culprit (its macOS compile errors are in Sources/PhotoModel/A\.swift, last changed in main\.\.${RED:0:7} by #201); the lane opened #600 to revert it\. <!-- lane-revert " "$sw/calls"),$(grep -c -- '--label line:photo ' "$sw/calls")" "1,1,1,1"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS compile culprit is called once" "$(creates),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "1,1"
+
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)"
+macjobs failure skipped
+printf '%s\n' "${CPFX}$R/Sources/LibraryModel/C.swift:4:1: error: cannot find 'x' in scope" >"$sw/joblog.9601"
+LANE_VERIFY_AFTER=1 lane_sweep; LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: macOS compile errors in a file no PR in range changed: one note naming it, no revert" \
+  "$(creates),$(grep -c "^issue comment 520 .*Auto-revert: the macOS compile errors are in Sources/LibraryModel/C\.swift, which no PR in main\.\.${RED:0:7} changed, so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls"),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "0,1,1"
+
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Tests/AppSnapshotTests/X.swift|test(suite): snapshots (#202)"
+macjobs failure skipped
+printf '%s\n' "${CPFX}$R/Sources/PhotoModel/A.swift:3:9: error: cannot find 'gone' in scope" \
+  "${CPFX}/var/folders/q1/T/swift-generated-sources/@__swiftmacro_16AppSnapshotTests1XV4testyyF6expectfMf_.swift:1:5: error: type 'Y' has no member 'z'" \
+  "${CPFX}$R/Tests/AppSnapshotTests/X.swift:7:3: note: expanded code originates here" >"$sw/joblog.9601"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: macOS compile errors in two PRs' files (one under a macro): a note naming both, no revert" \
+  "$(creates),$(grep -c "^issue comment 520 .*Auto-revert: the macOS compile errors are in files 2 PRs in main\.\.${RED:0:7} changed: Tests/AppSnapshotTests/X\.swift (#202), Sources/PhotoModel/A\.swift (#201), so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls")" "0,1"
+
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)"
+macjobs success failure
+printf '%s\n' "${CPFX}$R/Sources/PhotoModel/A.swift:3:9: error: stale log line" >"$sw/joblog.9601"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS test red (compile green) is never reverted by file: the human-picks note as before" \
+  "$(creates),$(grep -c "^issue comment 520 .*Auto-revert: 2 PRs in main\.\.${RED:0:7} and no bisect verdict names one of them (red: macos), so a human picks the culprit\. <!-- lane-revert none -->" "$sw/calls")" "0,1"
+
+rvdev macos "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)"
+macjobs failure skipped
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-revert: a macOS compile log not readable yet: no revert, no note, the next sweep looks again" \
+  "$(creates),$(grep -c '^issue comment 520 .*Auto-revert' "$sw/calls")" "0,0"
 # Verify after merge, own-proof landing (LANE_VERIFY_AFTER=1): a code PR lands
 # alone as soon as its head has Linux proof and a green local-ci/prescreen (the
 # supervisor's pre-screen on the Mac), with no batch and no macOS run; without
@@ -1940,6 +2067,234 @@ LANE_VERIFY_AFTER=1 lane_sweep; verdict "$(batch_tip)" in_progress
 cpr 177 Sources/DesignModel/B.swift; prescreen "$(head_of 177)" success
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "verify after: a batch of one changing a ratchet path still holds the lane" "$(merges),$(batch_br | wc -l | tr -d ' ')" ",1"
+
+# Flake check (dev red 10 h on a 3.1x-vs-3x timing ratio, 2026-10-26): before
+# the lane treats dev as red it reruns the red run's failed jobs once at the
+# red sha (gh run rerun --failed) and records that on the dev-red issue
+# (RERUN_MARK <sha7> started). While the rerun runs nothing is held, bisected
+# or reverted; a pass is a flake (one finding naming the tests, no hold, the
+# mark says flake); a failure makes the red real (the mark says red) and the
+# lane goes on as before. One rerun per sha, never a second.
+runstate() { jq -n --arg s "$1" --arg c "${2:-}" '{status: $s, conclusion: $c}' >"$sw/run.9500.json"; }
+bisects() { git -C "$sw/origin.git" for-each-ref 'refs/heads/ci/bisect-*' | wc -l | tr -d ' '; }
+reruns() { grep -c '^run rerun 9500 -R qbtrix/creative-apps --failed$' "$sw/calls" || true; }
+findings() { grep -c -- '^issue create .*--label flaky ' "$sw/calls" || true; }  # the lane's flake findings (a revert files one too)
+FLAKE_RUN="https://github.com/qbtrix/creative-apps/actions/runs/9500"
+flakedev() {  # flakedev <jobs> <spec>...: rvdev with the red's test file in the tree (no PR's commit) and no flake check done yet
+  rvdev "$1" "Tests/PhotoModelTests/OpenTests.swift|test(photo): opens" "${@:2}"
+  : >"$sw/520.comments"; rm -f "$sw/run.9500.json"
+}
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+cpr 190 docs/flake.md
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a new red gets one rerun of its failed jobs, recorded on the dev-red issue with the failing tests" \
+  "$(reruns),$(grep -c "^issue comment 520 .*Flake check: re-running the failed jobs (linux) of $FLAKE_RUN once at ${RED:0:7}; failing OpenTests.swift/opens(). .* <!-- lane-rerun ${RED:0:7} started -->" "$sw/calls")" "1,1"
+expect "flake check: meanwhile dev is not red: no bisect, no revert, the ready docs PR lands" "$(bisects),$(creates),$(merges)" "0,0,pr merge 190"
+runstate in_progress; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a running rerun is waited for, never a second rerun, still no hold" "$(reruns),$(bisects),$(creates)" "1,0,0"
+runstate completed success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a passing rerun files one finding naming the test, labelled for a fixer and the app" \
+  "$(findings),$(grep -c -- "^issue create -R qbtrix/creative-apps --title Flaky test: OpenTests.swift/opens() --label finding --label flaky --label line:photo --body .*$FLAKE_RUN.*${RED:0:7}" "$sw/calls")" "1,1"
+expect "flake check: and marks the issue as a flake, with no bisect or revert" \
+  "$(grep -c "^issue comment 520 .*Flake check: the rerun of $FLAKE_RUN passed at ${RED:0:7}, so that red was a flake and the lane held nothing on it; filed https://github.com/qbtrix/creative-apps/issues/700\. <!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls"),$(bisects),$(creates)" "1,0,0"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a judged flake is not rerun, refiled or held on later sweeps" "$(reruns),$(findings),$(bisects)" "1,1,0"
+# An open finding with that title is updated, never duplicated.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+jq -n '[{number: 701, title: "Flaky test: OpenTests.swift/opens()"}]' >"$sw/issues.json"
+LANE_VERIFY_AFTER=1 lane_sweep; runstate completed success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: an open finding for the test gets a comment, not a duplicate" \
+  "$(findings),$(grep -c "^issue comment 701 .*Flaked again: .*$FLAKE_RUN.*${RED:0:7}" "$sw/calls"),$(grep -c "updated #701\. <!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls")" "0,1,1"
+# A rerun that fails too: the red is real, and the lane holds, bisects and reverts as today.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep; runstate completed failure; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a failing rerun makes the red real: marked once, then the culprit is reverted as before" \
+  "$(reruns),$(grep -c "^issue comment 520 .*Flake check: the rerun of $FLAKE_RUN failed too (failure), so this red is real\. <!-- lane-rerun ${RED:0:7} red -->" "$sw/calls"),$(creates),$(findings)" "1,1,1,0"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a judged red is never rerun again" "$(reruns)" 1
+# ci.yml's promote reruns with the passed jobs and closes the issue, usually
+# before a sweep sees the pass: the finding is still filed, off the closed issue.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep
+mv "$sw/red.json" "$sw/redclosed.json"; runstate completed success; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a flake whose issue promote closed first still gets its one finding and mark" \
+  "$(findings),$(grep -c "<!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls")" "1,1"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: and only one" "$(findings),$(grep -c "<!-- lane-rerun ${RED:0:7} flake -->" "$sw/calls")" "1,1"
+# A dev-red issue without a run to rerun is red at once, as today.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+jq '.[0].body |= sub("- Run: [^\n]*\n"; "")' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: no run named, nothing to rerun: red as today" "$(reruns),$(creates)" "0,1"
+
+# Scoped hold: a red dev holds only the ready PRs that touch the failing
+# module (red_scope: the failing tests' files in the tree give Tests/<Target>/
+# and Sources/<Target minus Tests>/); the rest batch as if dev were green. A
+# red whose module can't be placed (no test named, or a target with no
+# Sources module) holds the whole queue as before. LANE_VERIFY_AFTER=0 batches
+# code; code PRs on their own proof under LANE_VERIFY_AFTER=1 land as before.
+LANE_MAC_PER_PR=0
+batch_prs() { git -C "$sw/origin.git" log --first-parent --format=%s "dev..$(batch_tip)" 2>/dev/null | grep -oE '#[0-9]+' | sort | paste -sd, -; }
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+cpr 191 Sources/PhotoModel/B.swift; cpr 192 Sources/DesignModel/C.swift; cpr 193 docs/scope.md
+lane_sweep
+expect "scoped hold: PRs off the red module batch; the one touching it waits" "$(batch_prs),$(merges)" "#192,#193,"
+expect "scoped hold: the held PR gets no label and no comment" "$(grep -cE '^pr (edit|comment) 191 ' "$sw/calls")" 0
+# The module is read from the fixture remote's tree, never from the checkout
+# the tests run in: FooModel exists only at the fixture (a SCRATCH made in a
+# subshell died with it and the lane read this repo instead, which passed on a
+# Mac and failed on Linux).
+rvdev linux "Tests/FooModelTests/OpenTests.swift|test(foo): opens" "Sources/FooModel/A.swift|feat(foo): a (#201)"
+printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"; rm -f "$sw/run.9500.json"
+cpr 1001 Sources/FooModel/B.swift; cpr 1002 docs/scope.md
+lane_sweep
+expect "scoped hold: the red module comes from the remote's tree, not this checkout: the lone docs PR lands, the FooModel one waits" "$(batch_prs),$(merges)" ",pr merge 1002"
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+printf 'error: compile failed\nCI: FAIL\n' >"$sw/joblog.4343"
+cpr 194 Sources/DesignModel/C.swift; cpr 195 docs/scope.md
+lane_sweep
+expect "scoped hold: a red naming no test holds the whole queue as before" "$(batch_tip),$(merges)" ","
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Tests/AppSnapshotTests/SnapTests.swift|test(snap): s (#202)"
+printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+tip_red "$RED" 4343 '✘ Test snaps() recorded an issue at SnapTests.swift:9:5: Expectation failed: (a → 3) == (4 → 4)'
+cpr 196 Sources/DesignModel/C.swift; cpr 197 docs/scope.md
+lane_sweep
+expect "scoped hold: a test target with no Sources module holds the whole queue as before" "$(batch_tip),$(merges)" ","
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"; printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+cpr 198 Sources/PhotoModel/B.swift; prescreen "$(head_of 198)" success
+LANE_VERIFY_AFTER=1 lane_sweep
+expect "scoped hold: verify after still lands a code PR on its own proof, red module or not" "$(merges)" "pr merge 198"
 LANE_MAC_PER_PR=1
+
+# Auto-quarantine (LANE_VERIFY_AFTER=1, "trunk never stops"): a real red the
+# lane has no revert for (revert_sweep ended in a note, or its revert is in
+# the red range and dev is still red) gets its failing tests quarantined: one
+# `Quarantined: <id>` p0 finding per test as owner, a `lane` entry in
+# UITests/quarantine.json (dev-red issue, culprit range, expiry 24 h out) on
+# the lane's one lane/quarantine PR (lane-quarantine, p0, never fast-lane),
+# landed on its own Linux check: the one protected-path change the lane lands,
+# keyed on the bot author, the branch, the label and the file set being exactly
+# that file. Past its expiry the owner is labelled blocker and the entry stays;
+# once the owner closes, the same PR path removes it. Never more than 5 tests
+# per sweep, never a security, billing or auth test, one call per red sha.
+quardev() {  # quardev <jobs> <spec>...: rvdev, then dev gains the red tests' real files and an empty quarantine; the red is that tip
+  rvdev "$@"
+  local w="$sw/work"
+  mkdir -p "$w/Tests/PhotoModelTests" "$w/UITests"
+  printf '%s\n' 'import Testing' '@Suite struct OpenTests {' '    @Test func opens() {}' '    @Test func saves() {}' '}' >"$w/Tests/PhotoModelTests/OpenTests.swift"
+  printf '%s\n' 'import Testing' '@Suite struct AuthTests {' '    @Test func login() {}' '}' >"$w/Tests/PhotoModelTests/AuthTests.swift"
+  echo '[]' >"$w/UITests/quarantine.json"
+  git -C "$w" add -A; git -C "$w" commit -qm "test(photo): fixtures"; git -C "$w" push -q "$sw/origin.git" dev
+  RED=$(git -C "$w" rev-parse dev)
+  jq --arg r "$RED" '.[0].body |= sub("main\\.\\.[0-9a-f]+"; "main..\($r)")' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
+  tip_red "$RED" 4343 '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)'
+  printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
+  jq -n '{body: "Adds b.\n\nFeature: easing"}' >"$sw/pull.202.json"
+}
+qbranch() { git -C "$sw/origin.git" rev-parse --verify -q refs/heads/lane/quarantine || true; }
+qjson() { git -C "$sw/origin.git" show "refs/heads/lane/quarantine:UITests/quarantine.json" 2>/dev/null || echo '[]'; }
+quarantines() { grep -c -- '^pr create .*--label lane-quarantine ' "$sw/calls" || true; }
+qnotes() { grep -c '^issue comment 520 .*Auto-quarantine' "$sw/calls" || true; }
+NOW=2026-10-26T10:00:00Z
+TWO=("Sources/PhotoModel/A.swift|feat(photo): a (#201)" "Sources/DesignModel/B.swift|feat(design): b (#202)")
+check "a human PR touching the quarantine stays refused (the lane's exception is its own PR only)" \
+  "not-eligible|touches protected paths: UITests/quarantine.json" . $'UITests/quarantine.json\nTests/PhotoModelTests/OpenTests.swift' .
+quardev macos "${TWO[@]}"
+FAST_LANE_NOW=$NOW lane_sweep
+expect "auto-quarantine: off with LANE_VERIFY_AFTER=0: a red with no revert quarantines nothing" "$(quarantines),$(qbranch),$(qnotes)" "0,,0"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: no certain culprit (a macOS red, two PRs): the failing test is quarantined on lane/quarantine, off today's dev, that file only" \
+  "$(git -C "$sw/origin.git" diff --name-only dev "$(qbranch)" | paste -sd, -),$(git -C "$sw/origin.git" rev-parse "$(qbranch)~1")" "UITests/quarantine.json,$RED"
+expect "auto-quarantine: the entry carries the test id, its p0 issue as owner, the dev-red issue, the culprit range and a 24 h expiry" \
+  "$(qjson | jq -c '[.[] | .test, .owner, .expires, .lane.red, .lane.range, .lane.until]')" \
+  "[\"PhotoModelTests.OpenTests/opens\",\"#700\",\"2026-10-27\",\"#520\",\"main..${RED:0:7}\",\"2026-10-27T10:00:00Z\"]"
+expect "auto-quarantine: one p0 finding per test, labelled for its line, naming the run, the range's PRs with their leads, and the expiry" \
+  "$(grep -c -- "^issue create -R qbtrix/creative-apps --title Quarantined: PhotoModelTests.OpenTests/opens --label p0 --label finding --label line:photo --body .*runs/9500.*#201 (lead #78), #202 (lead #78).*2026-10-27T10:00:00Z" "$sw/calls")" 1
+expect "auto-quarantine: opened as a lane-quarantine p0 PR, never fast-lane, that refs dev-red without closing it" \
+  "$(quarantines),$(grep -c -- '^pr create .*--head lane/quarantine --label lane-quarantine --label p0 --title test(quarantine): skip PhotoModelTests.OpenTests/opens ' "$sw/calls"),$(grep -c -- '--label fast-lane' "$sw/calls"),$(jq -r .body "$sw/600.json" | grep -c 'Refs #520'),$(jq -r .body "$sw/600.json" | grep -cE '([Cc]loses|[Ff]ixes) #520')" "1,1,0,1,0"
+expect "auto-quarantine: the dev-red issue records the one call" \
+  "$(grep -c "^issue comment 520 .*Auto-quarantine: .*quarantined PhotoModelTests.OpenTests/opens (#700) for 24 h in #600.*<!-- lane-quarantine ${RED:0:7} -->" "$sw/calls")" 1
+# The exception is exactly that file: a lane-quarantine PR changing anything else is never landed.
+cp "$sw/files.600.json" "$sw/x"; jq '. + [{filename: "Sources/PhotoModel/A.swift", status: "modified"}]' "$sw/x" >"$sw/files.600.json"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a lane-quarantine PR touching more than the quarantine file gets no check, no merge, one comment" \
+  "$(grep -c -- '--ref lane/quarantine$' "$sw/calls"),$(merges),$(grep -c '^pr comment 600 .*changes more than UITests/quarantine.json (UITests/quarantine.json, Sources/PhotoModel/A.swift), so the lane will not land it' "$sw/calls")" "0,,1"
+mv "$sw/x" "$sw/files.600.json"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: then one Linux check on it, once; no second PR, issue or note" \
+  "$(grep -c -- '-f linux_only=true --ref lane/quarantine$' "$sw/calls"),$(quarantines),$(grep -c '^issue create' "$sw/calls"),$(qnotes)" "1,1,1,1"
+verdict "$(head_of 600)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: it lands on that check alone (no prescreen, no batch, dev red and all) and CI on dev runs" \
+  "$(merges),$(batch_tip),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "pr merge 600,,1"
+# Expiry: past `until` with the owner open, the owner is labelled blocker and told once; the entry stays.
+git -C "$sw/origin.git" update-ref refs/heads/dev "$(qbranch)"  # the merge landed on dev
+FAST_LANE_NOW=2026-10-27T10:00:01Z LANE_VERIFY_AFTER=1 lane_sweep
+expect "expiry: past its expiry with the issue open, the owner gets the blocker label and a comment, and the entry stays" \
+  "$(grep -c '^issue edit 700 -R qbtrix/creative-apps --add-label blocker$' "$sw/calls"),$(grep -c '^issue comment 700 .*expired at 2026-10-27T10:00:00Z.*stays skipped' "$sw/calls"),$(quarantines)" "1,1,1"
+echo '["p0", "blocker"]' >"$sw/labels.700"
+FAST_LANE_NOW=2026-10-27T10:00:01Z LANE_VERIFY_AFTER=1 lane_sweep
+expect "expiry: said once" "$(grep -c -- '--add-label blocker' "$sw/calls"),$(grep -c '^issue comment 700 ' "$sw/calls")" "1,1"
+# Removal: once the owner closes, the lane's PR removes the entry; its Linux check runs the test again.
+rm -f "$sw/red.json"; echo CLOSED >"$sw/state.700"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a closed owner gets a lane-quarantine PR removing its entry, off today's dev" \
+  "$(quarantines),$(qjson | jq length),$(grep -c -- '^pr create .*--head lane/quarantine --label lane-quarantine --label p0 --title test(quarantine): run PhotoModelTests.OpenTests/opens again ' "$sw/calls"),$(git -C "$sw/origin.git" rev-parse "$(qbranch)~1")" "2,0,1,$(git -C "$sw/origin.git" rev-parse dev)"
+verdict "$(head_of 601)" failure; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a red check means the fix didn't hold: the owner is reopened and told, the PR closed, nothing merged" \
+  "$(grep -c '^issue reopen 700 ' "$sw/calls"),$(grep -c '^issue comment 700 .*still fails without its quarantine entry' "$sw/calls"),$(grep -c '^pr close 601 ' "$sw/calls"),$(merges)" "1,1,1,pr merge 600"
+echo OPEN >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: with the owner open again nothing is opened" "$(quarantines)" 2
+echo CLOSED >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+verdict "$(head_of 602)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: a green check lands it and CI on dev runs" \
+  "$(quarantines),$(merges),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "3,pr merge 600,pr merge 602,2"
+# A Linux red whose bisect stopped short (no `Bisect:` verdict) has no certain culprit either.
+quardev macos "${TWO[@]}"
+printf '%s\n' "Bisect on dev stopped after 8 Linux runs: the Linux job is green at aaaaaaa and red at ${RED:0:7}; the culprit is one of the 2 commits between them. $BISECT_MARK ${RED:0:7} -->" >>"$sw/520.comments"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a Linux red with an inconclusive bisect quarantines the test and reverts nothing" \
+  "$(quarantines),$(grep -c -- '--label lane-revert' "$sw/calls"),$(qjson | jq -r '.[0].test')" "1,0,PhotoModelTests.OpenTests/opens"
+# Never more than 5 tests in one sweep: more means something broke broadly, so today's red handling stands.
+quardev macos "${TWO[@]}"
+for t in a b c d e f; do echo "✘ Test $t() recorded an issue at OpenTests.swift:9:5: x"; done >"$sw/joblog.4343"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: 6 failing tests quarantine nothing and say so on the dev-red issue, once" \
+  "$(quarantines),$(grep -c "^issue comment 520 .*Auto-quarantine: 6 tests fail at ${RED:0:7}.*more than 5, so something broke broadly; nothing is quarantined.*<!-- lane-quarantine ${RED:0:7} -->" "$sw/calls")" "0,1"
+# Never a test on a security, billing or auth path.
+quardev macos "${TWO[@]}"
+printf '%s\n' '✘ Test login() recorded an issue at AuthTests.swift:3:5: x' 'CI: FAIL' >"$sw/joblog.4343"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test on a protected path is never quarantined, and the issue says why" \
+  "$(quarantines),$(grep -c '^issue comment 520 .*Auto-quarantine: nothing to quarantine: PhotoModelTests.AuthTests/login: a security, billing or auth test is never quarantined.*<!-- lane-quarantine' "$sw/calls")" "0,1"
+# A failing test whose file isn't in the tree (rvdev's bare fixtures) can't be placed: a note, no PR.
+rvdev macos "${TWO[@]}"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test the lane can't place in the tree is noted, not quarantined" \
+  "$(quarantines),$(grep -c '^issue comment 520 .*Auto-quarantine: nothing to quarantine: OpenTests.swift/opens(): its file is not under Tests/ on dev' "$sw/calls")" "0,1"
+# A certain culprit is reverted, never quarantined.
+quardev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a certain culprit gets the revert and no quarantine" "$(creates),$(quarantines),$(qnotes)" "1,0,0"
+
+# A test process that dies (scripts/ci's TEST PROCESS DIED block) prints no
+# "recorded an issue" line: mac_tests reads the block's names and places each in
+# the Tests/ file whose `func <name>(` declares it on dev. The quarantine takes
+# it from there; a name in several files or none is left out.
+DIED=$'TEST PROCESS DIED: swift test printed no \'Test run with\' summary; 1 test(s) started and never finished:\n  opens()'
+quardev macos "${TWO[@]}"
+tip_red "$RED" 4343 "$DIED"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test the process died in is quarantined, its file found by func name" \
+  "$(quarantines),$(qjson | jq -c '[.[] | .test]')" '1,["PhotoModelTests.OpenTests/opens"]'
+w="$sw/work"
+for f in OpenTests AuthTests; do printf '%s\n' '    func twin() {}' >>"$w/Tests/PhotoModelTests/$f.swift"; done
+git -C "$w" add -A; git -C "$w" commit -qm "test(photo): twin"; git -C "$w" push -q "$sw/origin.git" dev
+SCRATCH=""; scratch dev
+PFX=$'macOS tests 1/3\tscripts/ci\t2026-10-27T01:02:03.4567890Z '
+printf '%s\n' "${PFX}Test run started." "${PFX}" "${PFX}TEST PROCESS DIED: swift test printed no 'Test run with' summary; 3 test(s) started and never finished:" \
+  "${PFX}  opens()" "${PFX}  twin()" "${PFX}  ghost()" "${PFX}" "${PFX}  saves()" "${PFX}✘ Test login() recorded an issue at AuthTests.swift:3:5: x" >"$sw/joblog.9100"
+DIEDRED="red|https://github.com/qbtrix/creative-apps/actions/runs/889/job/9100|macOS"
+expect "dev red: a died process's tests are named by file; an ambiguous or unfound name, and lines after the block, are left out" \
+  "$(mac_tests "$DIEDRED" 2>/dev/null | paste -sd, -)" "AuthTests.swift/login(),OpenTests.swift/opens()"
 
 exit "$fail"

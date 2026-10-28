@@ -34,9 +34,9 @@ public struct NewDocumentSpec: Sendable, Equatable {
 
     /// Why Create can't make a document from this spec; nil when it can.
     public var problem: String? {
-        let sides = 1...Self.maxSide, side = "1 to \(Int(Self.maxSide)) px."
-        if !sides.contains(width) { return "Width must be \(side)" }
-        if !sides.contains(height) { return "Height must be \(side)" }
+        // Size goes through the kernel's rule (document-setup DS-14), as the shared New sheet checks it.
+        let limits = DocumentLimits(maxSide: Int(Self.maxSide))
+        if let size = DocumentSetup(width: width, height: height).problems(limits).first { return size.text }
         if !fps.sceneRate.isValid || !Self.fpsRange.contains(fps.nominal) {
             return "Frame rate must be \(Self.fpsRange.lowerBound) to \(Self.fpsRange.upperBound) fps."
         }

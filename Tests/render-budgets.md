@@ -13,12 +13,15 @@ lower its budget in the same PR. Never raise one. The target is where the row
 has to end up.
 
 - **Window bodies** come from a debug-only `bodyRuns` counter in the app's window
-  file. The count is deterministic, so `RenderBudget<App>Tests/bodies` runs in
-  the merge gate. Every suite that reads one of these process-global counters
-  nests in `BodyCountSuites`, which is `.serialized`, so two of them never run
-  at once and count each other's renders. A new counter-reading suite nests
-  there too, and its `perf-suites.txt` line reads
-  `AppSnapshotTests.BodyCountSuites/<Suite>`.
+  file, which reports through SuiteUI's `BodyTally`. The count is deterministic,
+  so `RenderBudget<App>Tests/bodies` runs in the merge gate. Every suite that
+  reads one nests in `BodyCountSuites`: its trait gives each test case its own
+  tally, every window the harness (`RenderBudgetWindow`) opens in that test
+  reports to it, and `bodyRuns` counts those windows only, so suites running
+  alongside never move it (factory lesson 345). `.serialized` still
+  keeps those suites' timings apart. A new counter-reading suite nests there
+  too (`scripts/check-body-counts` fails one that doesn't), and its
+  `perf-suites.txt` line reads `AppSnapshotTests.BodyCountSuites/<Suite>`.
 - **Step p95** is wall time, so `RenderBudget<App>Tests/timing` is listed in
   `Tests/perf-suites.txt`. It runs nightly on the captain's Mac (perf-nightly), one test at a
   time. The numbers below come from a debug build on an M2 Pro (max of
@@ -38,11 +41,13 @@ has to end up.
 | Design | drag a shape on `crowd`, 120 samples | 3 / 3 / 3 | 4.1 / 6 / 8.3 ms | none in flight; at design-window DW-b's bound |
 | Design | marquee select on `crowd`, 120 samples | 3 / 3 / 3 | 2.7 / 4 / 8.3 ms | none in flight; at DW-b's bound |
 | Library | scroll the grid, 120 steps of 12 pt (`samples`) | 0 / 0 / 0 | 6.6 / 10 / 8.3 ms | none in flight |
+| Library | step the Develop tab's Midtones handle 120 times at 120 Hz (`samples`, first photo in the loupe; `RenderBudgetLibraryLevelsTests`) | 120 / 120 / 0 | 24.7 ms p95, printed, not judged | each step reruns the window body once; a Levels edit should only touch the inspector and the loupe. The histogram is counted once per loupe render off the main thread (`LibraryHistogramBudgetTests`) |
 | Library | select, 10 clicks on grid cells | 10 / 10 / 10 | 80 / 120 / 33 ms | none in flight |
 | Library | loupe step | not driven | not driven | the loupe's arrow keys need a key window, which a test process can't have |
 | Flare | step the easing X1 scrub row 60 times | 60 / 60 / 60 | 11–13 ms p95 release, 12 ms debug / 20 / 8.3 ms | #1471 removed the per-step ticks; measured on the finisher's Mac (busy, not quiet), over the 8.3 ms target and under the 20 ms report bound |
 | Flare | draw an ellipse on the canvas, 120 samples (Rectangle is not connected yet, IN-1) | 1 / 3 / 3 (debug; 122 before #1792) | p95 2.3–2.5 ms release, 2.3–2.5 debug / 20 / 8.3 ms | #1792 runs the samples on the stage's FlareLiveDrag; the window runs once, at mouse-up |
 | Flare | drag a star with the Shape tool, 120 samples (`RenderBudgetFlareShapeTests/starDragInThreeBodies`; the draw waits on shape-tools FS-6) | not yet / 3 / 3 | not timed (packet: p95 ≤ 8 ms; its `timing` test is disabled until the supervisor lists it in Tests/perf-suites.txt) / 20 / 8 ms | first measured by the macOS run after shape-tools FS-4; the draft runs on the stage's FlareLiveDrag |
+| Photo | Free Transform rotate drag, 120 samples (`sample` for the counts, a 24 MP layer for the time), `RenderBudgetPhotoLiveTransformTests` | 1 / 1 / 1; CPU resamples 0 during the drag, 1 at the release, on the tile path and Metal | 2.1 release (24 MP, p50 1.2) / 4 / 4 ms | was 89 resamples and p95 187 ms debug: the drag moves the layer on SuiteUI's `CanvasLiveLayer`, and the Adjust panel and Transform rows sit out a held drag. The lift itself takes about 0.15 s at the press on 24 MP |
 | Photo | brush stroke, 120 samples (`large`), `PhotoWindowStrokeTests` | 0 / 1 / 1 | 7.1 / 11 / 8.3 ms | none in flight; the body bound is the stroke's existing one (`PhotoWindowStrokeTests`, measured 0) |
 | SuiteUI | stroke pad on the editor-kernel chrome panel, 120 samples, `RenderBudgetEditorKernelStrokeTests` | not yet / 1 / 0 | not yet / not gated / 8.3 ms | first measured by the macOS run after EK-31; the pad's samples stay in its own state, paced by `SuiteStrokePacer` |
 | SuiteUI gallery `editor-kernel` | drag Card 7 onto Header in the 200-row layer tree, 120 samples (`RenderBudgetEditorKernelTests`) | not yet / 3 / 1 | not timed | first measured by the macOS run after EK-6; the drop's log line and move should be the one body |
@@ -226,3 +231,82 @@ p95 for an adjustment step and 80 ms for a Move, and the target is 16 ms.
 Levels and Curves still build their tables on the CPU each step (about 2.5 ms),
 and a Move composites every layer again, so those rows sit over the target.
 Blur, a masked adjustment layer and the CPU route keep the old path.
+
+## Photo: a Move step on a many-layer picture
+
+A Move step used to damage the whole canvas and composite every visible layer
+over it again, on both routes. On the stress document (3840 x 2160, 100
+layers, a quarter adjustment layers and a quarter masked) one render took
+seconds, so the drag's renders ran on after the release and the stress gate
+read 472% / 489% CPU 3 s after it (#3663). The dispatcher route now keeps each
+region's composite of the layers the stack still shares with the last render
+(PhotoCompositeCache.composite) and composites only the changed layer and the
+ones above it, and a Move damages only where the layer was and is.
+`IdleWorkTests` (AppSnapshotTests) reports what a 30-sample drag leaves
+running; debug build, 1024 x 576 in 60 layers (the dev rows are from a
+1280 x 720, 100-layer run, where the dev build never finished one GPU render):
+
+| Route | Layer composites in the drag | Pictures in the drag | Rendering in the gate's readings |
+|---|---|---|---|
+| GPU, dev | 69, the first render still running 12 s later | 0 | yes, 12 s later too |
+| GPU, now | 9 (one per region, 9 cache hits) | 2 | none |
+| CPU, dev | 1556 | 0 | the queued render, 22 regions |
+| CPU, now | 96 (one per region, 96 hits) | 7 | none |
+
+What ran after the release was the Curves histogram recount (one row at a
+time through every layer, one core for seconds; a masked layer's tile is now
+masked only over the row, not the whole 256 px tile) and the autosave 5 s
+after the last edit.
+
+The histogram now keeps each sampled row's composite in a PhotoCompositeCache
+of the inspector's own (`curvesHistogram(composites:)`): a Levels or Exposure
+step recounts the kept rows with no layer composited, and a layer change lays
+that layer and the ones above it on each row's kept base. Its work counts as
+the reference path's (`rows`, `rowLayers`), apart from the canvas's regions
+and layers. `IdleWorkTests` drives the stress journey's Levels drag and eye
+toggles and the real-perf journey's Hue drag on the same document, debug
+build, both routes, and gates counts: it waits for the canvas's renders to
+drain and the counters to hold still, then checks the gesture's work and that
+3 s more show no region, picture, row or row layer:
+
+| Gesture | Histogram after the release, dev | now (GPU / CPU) |
+|---|---|---|
+| Levels Black, 30 steps | 192 rows x 60 layers, 7 to 17 rows a second for about 20 s on one core | 229 / 296 rows, 0 row layers (gated: no layer) |
+| Hue, 30 steps | no count (outside the key) | 0 rows (gated) |
+| 4 eyes hidden then shown | a count per click, the last 192 rows x 60 layers, about 20 s | 593 / 378 rows, 623 / 249 row layers over all the clicks' counts |
+
+Those tests drop the window's autosave after the gesture: it still flattens
+the picture through the reference path 5 s after the last edit, which would
+read as a recount.
+
+## Photo: a Free Transform drag frame on a photo-sized layer
+
+Since #5285 the canvas draws the Free Transform draft live, and every render
+resampled the whole layer with CoreRaster's lanczos3 `transformed` on one
+thread (`transformPreview`). `PhotoAdjustSliderLatencyTests` (perf list) times
+the "transform turn drag" case: the 8K document's Fill layer (7680 x 4320,
+33 MP) turned 1 degree a step, each step a drag frame
+(`PhotoRenderer.update(live: true)`), from the edit to the picture holding it.
+Release, M2 Pro, machine load 80 to 100 (many agents building), p50 / p95 per
+step:
+
+| Step | GPU, resident | CPU |
+|---|---|---|
+| dev (#5285: whole-layer lanczos3 resample per frame; 6 steps) | 10782 / 12089 ms | 10533 / 11381 ms |
+| drag frame through CoreRender's affine composite per band (first cut) | 3932 / 5388 ms | 472 / 582 ms |
+| drag frame: 256 px chunks of the region resampled across the cores, one upload per region (this change, 60 steps) | 308 / 416 ms | 222 / 278 ms |
+
+The first cut's GPU row is CoreRaster's through-composite itself: it resamples
+the whole source once per output row, so a 7680 x 256 band paid 256 times its
+source. The chunked frame calls `transformed` once per 256 px chunk (the same
+sampling; transform-then-composite is what the through-composite is defined to
+equal) and composites the region as a tile, so the picture never leaves the
+GPU. The still frame after the drag (the window taking the live copy back)
+resamples once as before, and Return lays that same resample. The budget for
+the case sits a little above the measurement, 500 ms p95, so the suite is green
+today and fails on a regression; the target stays one frame. The rest of a step
+is the resample itself (CoreRaster's `transformed`, bilinear, 33 M output
+pixels a frame) plus the full-canvas redraw it forces (31 to 74 ms at 8K, the
+table above). The affine family is CPU-only in CoreRender
+(`RenderOp.notOnMetalYet`), so a Metal `.affine` kernel is where both rows go
+next.

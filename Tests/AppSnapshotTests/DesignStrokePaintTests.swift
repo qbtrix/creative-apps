@@ -82,5 +82,43 @@ import Testing
         #expect(try isRed(image, 145, 400), "the cap past the dash")
         #expect(try !isRed(image, 170, 400), "the gap's middle")
     }
+
+    @Test func aDottedStrokePaintsDots() throws {
+        // 0 on, 20 off with round caps: a dot every 20 pt along the top edge, bare between (#4925).
+        var dotted = try #require(rect.vectorStroke)
+        (dotted.cap, dotted.dash) = (.round, [0, 20])
+        let image = try draw(rect, dotted)
+        #expect(try isRed(image, 120, 100), "a dot")
+        #expect(try !isRed(image, 130, 100), "between dots")
+    }
+
+    @Test func aDashedStrokeKeepsTheFillsCorners() throws {
+        // A blue box (25, 25, 150, 150) with radius 60 at 4x: the corner's 45 degree point is at (170.3, 170.3) in
+        // view points. A 2 pt red stroke dashed 1000 on, 0.001 off traces the Model's outline but paints like a solid
+        // one; both sit on the fill's edge there, with no blue past them (#5009).
+        var node = DesignNode(id: "c", name: "C", kind: .rectangle, frame: DesignRect(x: 25, y: 25, width: 150, height: 150),
+                              fill: DesignColor(0, 0, 255), stroke: DesignStroke(color: DesignColor(255, 0, 0), width: 2))
+        node.cornerRadius = 60
+        let solid = try #require(node.vectorStroke)
+        var dashed = solid
+        dashed.dash = [1000, 0.001]
+        for stroke in [solid, dashed] {
+            let painted = DesignPainted(node: node, backdrop: nil, opacity: 1, stroke: stroke)
+            let image = try #require(render(DesignArtwork(painted: [painted], zoom: 4), scheme: .light))
+            #expect(try isRed(image, 170, 170), "the stroke on the corner, dashed: \(!stroke.dash.isEmpty)")
+            for d in 150...166 {
+                let c = try #require(image.colorAt(x: d, y: d)?.usingColorSpace(.sRGB))
+                #expect(!(c.blueComponent > 0.6 && c.redComponent < 0.4), "fill past the stroke at \(d), dashed: \(!stroke.dash.isEmpty)")
+            }
+        }
+    }
+
+    @Test func aHalfClearStrokePaintsHalfClear() throws {
+        // A red stroke at alpha 0.5 over the white fill paints pink, as the SVG's stroke-opacity does (#4989).
+        var clear = try #require(rect.vectorStroke)
+        clear.color.a = 0.5
+        let c = try #require(draw(rect, clear).colorAt(x: 300, y: 101)?.usingColorSpace(.sRGB))
+        #expect(c.redComponent > 0.85 && (0.35...0.65).contains(c.greenComponent), "pink, not red")
+    }
 }
 #endif

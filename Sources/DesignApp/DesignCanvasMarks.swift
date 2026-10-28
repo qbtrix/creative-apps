@@ -17,6 +17,8 @@
 // - Text nodes scale with the zoom, like the artwork they sit in; marks keep one
 //   line width on screen at any zoom. A document stroke is artwork: its width scales.
 // - A node draws at `DesignPainted.opacity`, its own opacity times its ancestors'.
+// - A rectangle's or frame's picture draws by cover through SuiteUI's drawPlaced, clipped to its rounded box,
+//   over its fill and under its stroke, in the same one Canvas (placed-images PD-u).
 // - A turned or mirrored node draws its upright shape through artworkPlacement, the kernel's matrix.
 // - A shape node draws its spec's path in its frame (DesignNode.path(in:), the kernel's ShapeRules), so a
 //   resize redraws it; its box only when the spec can't be drawn. A line or arrow is stroked, and an arrow's
@@ -73,7 +75,8 @@ func drawnOpacity(_ opacity: Double) -> Double {
 }
 
 /// The outline `node` fills at `scale` (view points), or nil for a kind with no shape of its own:
-/// rectangles, frames and instances as rounded rectangles at `drawnCornerRadius`, ellipses as
+/// rectangles, frames and instances as rounded rectangles at `drawnCornerRadius` (circular corners, as the kernel
+/// outline a dashed stroke traces and the SVG's `rx` draw them), ellipses as
 /// ellipses, a shape as its spec's path in its frame (its box when the spec draws none). All keep their curves.
 func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     let scale = usable(scale)
@@ -81,7 +84,7 @@ func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     switch node.kind {
     case .frame, .rectangle, .instance, .shape:
         if node.kind == .shape, let path = node.path(in: node.frame) { return artworkPath(path, scale: scale) }
-        return RoundedRectangle(cornerRadius: node.drawnCornerRadius * scale).path(in: box)
+        return RoundedRectangle(cornerRadius: node.drawnCornerRadius * scale, style: .circular).path(in: box)
     case .ellipse:
         return Path(ellipseIn: box)
     case .text, .group:
@@ -113,7 +116,7 @@ func artworkIsOpen(_ node: DesignNode) -> Bool {
 /// How a line or arrow `node` strokes at `scale`: its own stroke, else a default-width line in its fill colour,
 /// so an open shape always shows.
 func artworkLine(for node: DesignNode, stroke: VectorStroke?, scale: Double) -> (color: Color, style: StrokeStyle) {
-    if let stroke, let style = artworkStyle(stroke, scale: scale) { return (stroke.designColor.color, style) }
+    if let stroke, let style = artworkStyle(stroke, scale: scale) { return (artworkInk(stroke), style) }
     return (node.fill.color, StrokeStyle(lineWidth: DesignStroke.default.width * usable(scale)))
 }
 
@@ -161,9 +164,15 @@ func artworkStyle(_ stroke: VectorStroke, scale: Double) -> StrokeStyle? {
     return StrokeStyle(lineWidth: stroke.width * usable(scale), lineCap: cap, lineJoin: join)
 }
 
-/// What `stroke` traces on `node` at `scale`: the Model's `strokedPath` (dashed, trimmed) in view points, else `shape`.
+/// What `stroke` traces on `node` at `scale`: the Model's `strokedPath` (dashed, trimmed, already in view points),
+/// else `shape`, the fill's own outline, for a stroke that paints it whole.
 func artworkTrace(_ node: DesignNode, _ stroke: VectorStroke?, shape: Path, scale: Double) -> Path {
-    stroke.flatMap(node.strokedPath).map { artworkPath($0, scale: usable(scale)) } ?? shape
+    stroke.flatMap { node.strokedPath($0, scale: usable(scale)) }.map { artworkPath($0, scale: 1) } ?? shape
+}
+
+/// The colour `stroke` paints in: its colour at its opacity, as the SVG writes it.
+func artworkInk(_ stroke: VectorStroke) -> Color {
+    stroke.designColor.color.opacity(stroke.designOpacity)
 }
 
 /// The page's nodes at `zoom`. The text node being edited is left out: the inline field sits there.
@@ -202,9 +211,12 @@ func paintArtwork(
             faded.stroke(artworkTrace(node, item.stroke, shape: shape, scale: scale), with: .color(line.color), style: line.style)
         } else if let shape {
             faded.fill(shape, with: artworkShading(for: node, scale: scale))
+            if let asset = node.placedAsset, let image = node.placedImage {
+                faded.drawPlaced(asset, image, cornerRadius: node.drawnCornerRadius, scale: scale)
+            }
             if let stroke = item.stroke, let style = artworkStyle(stroke, scale: scale) {
                 let trace = artworkTrace(node, stroke, shape: shape, scale: scale)
-                faded.stroke(trace, with: .color(stroke.designColor.color), style: style)
+                faded.stroke(trace, with: .color(artworkInk(stroke)), style: style)
             } else if node.kind == .frame {
                 faded.stroke(shape, with: .color(SuiteColor.overlayInk.opacity(0.15)), lineWidth: 1)
             }
