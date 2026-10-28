@@ -371,3 +371,4 @@ utc	stage	event	ref	note
 2026-10-28T10:15Z	check-in	5353 open; 5957/5959 clean awaiting batch; 5966 closed as stale; new dev-red 5969 (Halo drag, Photo rapid-rotate, Suite scrub timing; range 5257/5864/5962/5964, none ours), flake rerun pending; 41 findings, none new
 2026-10-28T10:58Z	check-in	5957 merged; 5959 needs-rebase: merged dev, golden list-commands union, ci --changed PASS, head 081611b9; 5353 open; dev-red 5969 real (not ours); 41 findings, none new
 2026-10-28T11:31Z	check-in	5959 clean at 081611b9, needs-rebase dropped, awaiting batch; 5353 open; dev-red 5969 real, supervisor quarantined 3 window budget tests (5972), not ours; 41 findings, none new
+2026-10-28T12:04Z	check-in	No new Photo findings (41 open). #5353 open, PX-9 waits. #5959 clean at 081611b9, waiting on a batch. #5969 dev-red is not ours (window budget tests, quarantined in #5972).
