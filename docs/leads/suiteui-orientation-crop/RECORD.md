@@ -177,3 +177,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-28T03:54:10Z critic panel: flip/portrait screens wait on full journeys 40624216539 (in progress); OC-14 red tracked as #5913
 - 2026-10-28T04:15:58Z critic panel: full journeys 40624216539 cancelled; flip/portrait screens wait on photo 40627113747 / full 40629484488 (in progress); OC-14 red tracked as #5913
 - 2026-10-28T04:38:18Z critic panel: flip/portrait screens wait on journeys full 40629484488 / photo 40631947954 (both running); OC-14 red tracked as #5913
+- 2026-10-28T04:59:54Z critic panel: full journeys 40629484488 cancelled; flip/portrait screens wait on photo 40631947954 / full 40634896663 (running); OC-14 red tracked as #5913
