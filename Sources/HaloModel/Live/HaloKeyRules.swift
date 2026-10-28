@@ -34,8 +34,13 @@ enum HaloKeyRules {
     /// Layer space to composition space, parents applied outermost last,
     /// through the kernel's `worldPlacement`. The walk stops at a parent it
     /// has already seen (a cycle) or an unknown one. Nil for an unknown id.
+    /// A layer that follows nothing is its own local matrix, the walk's
+    /// answer for a root, without building the tree: a frame's draw list
+    /// asks for every layer, so a tree per layer cost layers squared (#5844).
     static func worldMatrix(of id: String, in c: HaloComposition, at f: Int) -> HaloMatrix? {
-        guard layer(id, in: c) != nil else { return nil }
+        guard let layer = layer(id, in: c) else { return nil }
+        // ponytail: a followed layer still builds the tree per call; build one per draw list if parented comps grow.
+        guard layer.parentID != nil else { return localMatrix(of: layer, in: c, at: f) }
         return c.layerTree.worldPlacement(of: id) { localMatrix(of: $0.payload, in: c, at: f) }
     }
 
