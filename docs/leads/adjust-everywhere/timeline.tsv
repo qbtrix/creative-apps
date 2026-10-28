@@ -264,3 +264,4 @@ utc	stage	event	ref	note
 16:08Z	3	AJ-z feature-done branch c9b3c9d6b gate PASS (RealJobs, AllAppsCatalog green), pushed; PR waits on #5260 merge
 16:18Z	3	#5991 (AJ-z C4) merged 81d606521; #5260 clean, waits on local-ci/prescreen; 0 open findings
 16:38Z	3	#5260 merged f437fabab (AJ-photo complete); AJ-z feature-done PR #5993 opened; slice-done lines wait on main (held by dev-red #5983)
+16:59Z	3	wait-main	#5993 merged db12af089; all slice PRs in dev; main held at f89f5255c by dev-red #5983 (not ours)
