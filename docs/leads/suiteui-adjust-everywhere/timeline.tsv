@@ -256,3 +256,4 @@ utc	stage	event	ref	note
 07:43Z	3	fix #5252 needs-fix (live stand-in baseline: Library looks default); gating
 07:52Z	3	#5252 fixed: baseline line pushed 3bfbf2072, Head moved
 07:55	3	fixing	#5252	needs-fix: live stand-in baseline line; merged dev, gating
+08:03Z	3	check-in: all 6 PRs clean, #5252 needs-fix dropped; waiting on prescreen

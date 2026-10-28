@@ -455,3 +455,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 07:43Z #5252 got needs-fix from lane run 40648298368: LiveStandInTests flags LibraryLaunch.swift looks: FakePresetStore() default; listed it in Tests/live-standins-baseline.txt, gating before push. Others clean, waiting on prescreen.
 - 07:52Z #5252: gate CI: PASS, pushed 3bfbf2072 (baseline line for Library looks default), Head: moved. Lane drops needs-fix on new head.
 - 2026-10-28T07:55Z main c73c958a9; dev 8ea49c081; dev-red #5966 (not ours); #5252 needs-fix (LiveStandInTests: LibraryLaunch looks default unlisted) fix round 1 gating
+- 08:03Z check-in: #5250 #5259 #5260 #5252 #5257 #5258 all clean [fast-lane,beta]; lane dropped needs-fix on #5252 head 3bfbf2072. dev 8ea49c081, main c73c958a9. Nothing merged.
