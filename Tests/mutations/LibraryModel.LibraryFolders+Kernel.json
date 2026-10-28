@@ -40,5 +40,12 @@
     "find": "while path.count > 1, path.hasSuffix(\"/\") { path.removeLast() }",
     "replace": "_ = path.count",
     "tests": "LibraryFoldersTests/showFolder"
+  },
+  {
+    "label": ".oneSlashOnly: only one trailing slash is dropped, so /p/trips// is refused",
+    "file": "Sources/LibraryModel/LibraryFolders+Kernel.swift",
+    "find": "while path.count > 1, path.hasSuffix(\"/\") { path.removeLast() }",
+    "replace": "if path.count > 1, path.hasSuffix(\"/\") { path.removeLast() }",
+    "tests": "LibraryFoldersTests/showFolder"
   }
 ]
