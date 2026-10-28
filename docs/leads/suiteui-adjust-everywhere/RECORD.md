@@ -5,7 +5,7 @@ Run: act-1a175f7cbe0-4gv1 (this run; earlier runs act-1a1702c5766-a1ju, act-1a15
 Stage: 3 wave 3
 Base: main fef52e66 / dev ef1a0ca7
 Next: Wave 2 merged on dev on 2026-10-27: AJ-k #5064 (f14778f8), AJ-c #5233 (308591c9), AJ-u #5235 and #5236 (ebcdbb35). Belt-Slice-Done for AJ-k, AJ-c and AJ-u goes up once a green main run contains them. Wave 3: #5247 AJ-photo (fef4bfd9), #5248 AJ-library (7900f7c6, prescreen success) and #5249 AJ-halo (15ade3a6) are clean and queued; their UI follow-ups #5250, #5252, #5257, #5258, #5259 and #5260 restack once those land. Then AJ-z.
-Polled: 2026-10-28T07:19Z
+Polled: 2026-10-28T07:55Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -454,3 +454,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 07:22Z Check-in: no change. #5250, #5259, #5260, #5252, #5257, #5258 all clean with fast-lane, waiting on local-ci/prescreen. dev 5ab48854a, main 9ece0e0e9.
 - 07:43Z #5252 got needs-fix from lane run 40648298368: LiveStandInTests flags LibraryLaunch.swift looks: FakePresetStore() default; listed it in Tests/live-standins-baseline.txt, gating before push. Others clean, waiting on prescreen.
 - 07:52Z #5252: gate CI: PASS, pushed 3bfbf2072 (baseline line for Library looks default), Head: moved. Lane drops needs-fix on new head.
+- 2026-10-28T07:55Z main c73c958a9; dev 8ea49c081; dev-red #5966 (not ours); #5252 needs-fix (LiveStandInTests: LibraryLaunch looks default unlisted) fix round 1 gating
