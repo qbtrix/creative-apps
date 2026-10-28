@@ -86,8 +86,8 @@
   {
     "label": "Set Develop takes any tone slider, Brightness included",
     "file": "Sources/LibraryModel/LibraryCommandCatalog.swift",
-    "find": "guard ToneSlider.develop.contains(p.slider) else {",
-    "replace": "guard true else {",
+    "find": "oneOf: ToneSlider.develop.map(\\.rawValue)",
+    "replace": "oneOf: ToneSlider.allCases.map(\\.rawValue)",
     "tests": "LibraryCommandCatalogTests"
   },
   {

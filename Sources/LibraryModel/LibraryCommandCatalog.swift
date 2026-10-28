@@ -337,9 +337,6 @@ extension LibraryCatalog {
         example: .object(["slider": .string("vibrance"), "value": .number(50)]),
         availability: { available($0.services.unavailable["develop"] ?? $0.developHelp) }
     ) { c, p in
-        guard ToneSlider.develop.contains(p.slider) else {
-            throw CatalogError.unavailable(id: "photo.set-develop", why: "Develop has no \(p.slider.title) slider.")
-        }
         if let why = c.sliderHelp(p.slider) { throw CatalogError.unavailable(id: "photo.set-develop", why: why) }
         c.setDevelop(p.slider, to: p.value, coalesceKey: p.drag)
         return c.developValue(p.slider)?.shared.map { JSONValue.object([p.slider.rawValue: .number($0)]) } ?? .object([:])

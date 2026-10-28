@@ -139,7 +139,10 @@ struct LibraryCatalogDoc: HeadlessDocument {
         _ = try set("saturation", -20, drag: "d1"); _ = try set("saturation", -40, drag: "d1")
         #expect(c.history.undo.count == steps + 2, "one drag is one step")
         #expect(try set("exposure", 99) == .object(["exposure": .number(5)]), "clamped to the range")
-        #expect(throws: CatalogError.unavailable(id: "photo.set-develop", why: "Develop has no Brightness slider.")) { try set("brightness", 10) }
+        // Develop has no Brightness slider: the params refuse it before the command runs.
+        let refused = #expect(throws: CatalogError.self) { try set("brightness", 10) }
+        #expect(refused.map { "\($0)" }?.contains("/slider expected one of") == true)
+        #expect(c.history.undo.count == steps + 3)
         var none = LibraryCatalog(services: .fake())
         #expect(throws: CatalogError.self) {
             try Self.catalog.run("photo.set-develop", params: .object(["slider": .string("tint"), "value": .number(1)]), on: &none)
