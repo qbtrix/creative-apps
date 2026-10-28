@@ -41,7 +41,7 @@ public struct DesignEdit: Sendable, Equatable {
 }
 
 /// Why a use case refused. `help` is the sentence a disabled control shows as its tooltip.
-public enum DesignRefusal: Error, Equatable, Sendable {
+public enum DesignRefusal: Error, Equatable, Sendable, CustomStringConvertible {
     case nothingSelected
     case locked(String)
     case hidden(String)
@@ -91,6 +91,9 @@ public enum DesignRefusal: Error, Equatable, Sendable {
         case .notYet(let reason), .cantExport(let reason): reason
         }
     }
+
+    /// The help, so a command catalog's refusal (the CLI, MCP) reads as plain words, never the case name.
+    public var description: String { help }
 }
 
 /// Mints node ids no page or node of the file holds. The workspace makes one from its held-id
