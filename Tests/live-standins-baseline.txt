@@ -19,6 +19,7 @@ Sources/LibraryModel/Live/LiveDevelop.swift: case .color: throw LibraryError.ren
 Sources/PhotoModel/Live/LiveExportSizing.swift: enum LiveExportSizing { static func make() -> any ExportSizing { NotBuiltExportSizing() } }  ## export-pack (Photo) #3470, PV-8
 Sources/PhotoModel/Live/LiveSelection.swift: static func selection() -> any SelectionShaping { NotBuiltSelection() }  ## area-selection #3752, PV-5
 Sources/PhotoModel/PhotoServices.swift: public var text: any TextServices = FakeText()  ## #5193 (Photo headless gets FakeText)
+Sources/PhotoModel/PhotoServices.swift: public var looks: any PresetStoring = FakePresetStore()  ## adjust-everywhere AJ-photo-ui #5259 (PhotoWindow hands it the suite's PresetStore)
 Sources/SuiteShell/Live/AssetsSlot.swift: FakeAssets(unavailable: SuiteServices.notConnected("assets"))  ## shared-assets feature
 Sources/SuiteShell/Live/LinkingSlot.swift: FakeLinking()  ## kept: pure reference conformance (linked-assets); its refusal is the answer
 Sources/SuiteShell/Live/RoundTripSlot.swift: FakeRoundTrips(unavailable: SuiteServices.notConnected("roundTrips"))  ## photo-round-trip feature

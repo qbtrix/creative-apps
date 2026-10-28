@@ -64,7 +64,7 @@ struct GalleryEyedropperBoard: SampleTarget {
 
     /// What the loupe shows at `point` (canvas points) at the current size.
     func loupeColor(at point: CGPoint) -> HexColor? {
-        sampledColor(at: Point(x: Double(point.x), y: Double(point.y)), size: size).flatMap { HexColor(SampleRules.hex($0)) }
+        sampledColor(at: Point(x: Double(point.x), y: Double(point.y)), size: size).map { HexColor($0) }
     }
 
     /// A row change (the screen sampler or the hex field): one `Colour` step until `endPick`.
