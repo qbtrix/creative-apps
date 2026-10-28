@@ -274,3 +274,4 @@ time	task	event	note
 2026-10-28T20:17Z	3	heartbeat	lane	poll 2026-10-28T20:17Z: fixing #5109 mac pre-screen (retouchHelp in key test); #4904/#5256 queued
 2026-10-28T20:46Z	3	heartbeat	lane	poll 2026-10-28T20:46Z: AR-z #5256 merged (awaiting main run); #5109 fixed b08e85dc; CB-z building stacked on #4904
 2026-10-28T21:01Z	3	heartbeat	lane	poll 2026-10-28T21:01Z: CB-z opened as #5999 (stacked on #4904); AR-z merged, awaiting main; #5109 at b08e85dc
+2026-10-28T21:36Z	3	heartbeat	lane	poll 2026-10-28T21:36Z: FH-10 and CB-z: merged dev after #5109/#4904, gates running
