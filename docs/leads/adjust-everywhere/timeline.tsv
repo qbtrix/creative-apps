@@ -222,3 +222,4 @@ utc	stage	event	ref	note
 03:56Z	3	check-in	#5249 #5252 #5250	all clean, unmerged; wait for local-ci/prescreen
 04:15Z	3	check-in	#5249 #5252 #5250	all clean, unmerged; wait for local-ci/prescreen
 04:34Z	3	check-in	#5249 #5252 #5250	all clean, unmerged; wait for local-ci/prescreen
+04:54Z	3	restack	#5249 merged → #5257	AJ-halo landed 417c58ed3; #5257 halo-model restacked onto dev (+226-12 f=12), gating
