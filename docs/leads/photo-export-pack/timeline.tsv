@@ -372,3 +372,4 @@ utc	stage	event	ref	note
 2026-10-28T10:58Z	check-in	5957 merged; 5959 needs-rebase: merged dev, golden list-commands union, ci --changed PASS, head 081611b9; 5353 open; dev-red 5969 real (not ours); 41 findings, none new
 2026-10-28T11:31Z	check-in	5959 clean at 081611b9, needs-rebase dropped, awaiting batch; 5353 open; dev-red 5969 real, supervisor quarantined 3 window budget tests (5972), not ours; 41 findings, none new
 2026-10-28T12:04Z	check-in	No new Photo findings (41 open). #5353 open, PX-9 waits. #5959 clean at 081611b9, waiting on a batch. #5969 dev-red is not ours (window budget tests, quarantined in #5972).
+2026-10-28T12:40Z	check-in	No new Photo findings (41 open). #5353 open, PX-9 waits. #5959 clean at 081611b9, waiting on a batch. #5969 dev-red: lane rerunning macOS at 82b1bf3 (budget tests incl. Photo live-transform), not ours.
