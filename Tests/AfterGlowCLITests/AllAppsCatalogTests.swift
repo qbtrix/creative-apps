@@ -1,6 +1,7 @@
-// AllAppsCatalogTests.swift (adopt-command-catalog AC-z1): one walk over every app the CLI knows. `list-apps` and each
-// app's `list-commands` match their goldens in Golden/apps/, every catalog keeps the kernel's laws on a real job's
-// input, and every real job under Tests/RealJobs/<app>/ passes or is skipped for a reason that names its gap.
+// AllAppsCatalogTests.swift (adopt-command-catalog AC-z1): one walk over every app the CLI knows. `list-apps` (on
+// macOS its -macos golden, where Photo also opens the system's images) and each app's `list-commands` match their
+// goldens in Golden/apps/, every catalog keeps the kernel's laws on a real job's input, and every real job under
+// Tests/RealJobs/<app>/ passes or is skipped for a reason that names its gap.
 import AfterGlowCLICore
 import DesignModel
 import FlareModel
@@ -32,7 +33,13 @@ struct AllAppsCatalogTests {
 
     @Test func listAppsMatchesItsGolden() throws {
         let apps = try Self.printed(["list-apps"])
-        #expect(apps == (try Self.golden("list-apps")), "list-apps differs")
+        // macOS reads more images through the system (SystemImageDecoder), so Photo opens more there.
+        #if canImport(CoreImage)
+        let golden = "list-apps-macos"
+        #else
+        let golden = "list-apps"
+        #endif
+        #expect(apps == (try Self.golden(golden)), "\(golden) differs")
         guard case .object(let fields) = apps, case .array(let listed)? = fields["apps"] else { Issue.record("no apps"); return }
         let named = listed.compactMap { app -> String? in
             if case .object(let f) = app, case .string(let name)? = f["name"] { name } else { nil }
