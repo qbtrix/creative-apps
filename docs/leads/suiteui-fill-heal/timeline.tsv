@@ -324,3 +324,4 @@ utc	stage	event	ref	note
 2026-10-28T19:02Z	3	heartbeat	lane	poll 2026-10-28T19:02Z: 19:03Z: #5254 conflict resolved (a4988a0a), prescreen green, awaiting lane; full CI 40740800666 running
 2026-10-28T19:32:27Z	heartbeat	restacking #5109 (FH-8) onto dev: merged FH-7-jobs, fix-5093 and dev; gate running
 2026-10-28T19:57:09Z	heartbeat	#5109 (FH-8) restacked onto dev at 3613d6532 (gate PASS), base dev, in the lane; #5251 (FH-10) merged with it at 1da8a74a9, gate running
+2026-10-28T19:58Z	3	heartbeat	lane	poll 2026-10-28T19:58Z: CB-flare/halo/library done; gates: #4904 fix, #5256 dev merge, #5109 dev merge
