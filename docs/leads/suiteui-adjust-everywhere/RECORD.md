@@ -451,3 +451,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 06:41Z Check-in: no change. #5250, #5259, #5260, #5252, #5257, #5258 all clean with fast-lane, waiting on local-ci/prescreen. dev 5ab48854a, main 9ece0e0e9.
 - 07:02Z Check-in: no change. #5250, #5259, #5260, #5252, #5257, #5258 all clean with fast-lane, waiting on local-ci/prescreen. dev 5ab48854a, main 9ece0e0e9.
 - 2026-10-28T07:19Z main 9ece0e0e9; dev 5ab48854a; dev-red #5963 open (not ours); #5252 prescreen success, others await prescreen
+- 07:22Z Check-in: no change. #5250, #5259, #5260, #5252, #5257, #5258 all clean with fast-lane, waiting on local-ci/prescreen. dev 5ab48854a, main 9ece0e0e9.
