@@ -1,0 +1,16 @@
+[
+  {
+    "label": "fakeTakesShorthand: the fake loses its six-digit guard, so \"#F00\" reads",
+    "file": "Sources/SuiteUI/Contracts/HexColorEditing.swift",
+    "find": "guard digits.count == 6 else { return nil }",
+    "replace": "_ = digits",
+    "tests": "InspectorFakeTests|HexColorKernelTests"
+  },
+  {
+    "label": "fakeDropsHash: the fake writes its digits without the leading #",
+    "file": "Sources/SuiteUI/Contracts/HexColorEditing.swift",
+    "find": "HexColorText().format(c)",
+    "replace": "String(HexColorText().format(c).dropFirst())",
+    "tests": "InspectorFakeTests|HexColorKernelTests"
+  }
+]

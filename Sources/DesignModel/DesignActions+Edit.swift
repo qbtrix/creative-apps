@@ -124,7 +124,7 @@ extension DesignWorkspace {
         case .fill(let color): try styling.setFill(color, ids, on: page)
         case .cornerRadius(let radius): try styling.setCornerRadius(radius, ids, on: page)
         case .opacity(let opacity): try styling.setOpacity(opacity, ids, on: page)
-        case .stroke(let stroke): try styling.setStroke(stroke, ids, on: page)
+        case .stroke(let stroke): try strokeEdit(stroke, on: page)
         case .textStyle(let style): try styling.setTextStyle(style, ids, on: page)
         }
         apply(edit)

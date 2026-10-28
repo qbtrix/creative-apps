@@ -27,7 +27,7 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone
+    case move, marquee, ellipse, lasso, polygon, wand, brush, eraser, clone
     /// Spot Heal (fill-heal): a click heals a spot from its surroundings. Before
     /// Heal, so J picks it first.
     case spotHeal = "spot-heal"
@@ -43,7 +43,7 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
     /// `drag`. The eyedropper's text is the fallback; the workspace's
-    /// `toolHelp` asks its sampling service instead.
+    /// `toolHelp` enables it, since it reads the kernel's mean.
     public var unavailableHelp: String? {
         switch self {
         case .eyedropper: "Not built yet (PV-9)."
@@ -70,6 +70,8 @@ public struct CanvasSize: Sendable, Hashable {
 public struct PhotoWorkspace: Sendable {
     /// The open image's size; nil with no image open.
     public internal(set) var canvas: CanvasSize?
+    /// Pixels per inch: what File > New asked for (document-setup DS-8), 72 for anything else.
+    public internal(set) var resolution = 72.0
     /// The open file's name ("beach.jpg"); nil for a new image.
     public internal(set) var documentName: String?
     /// The layer stack, top first.
@@ -120,18 +122,31 @@ public struct PhotoWorkspace: Sendable {
     /// The use cases (PhotoServices); `.live` in the app, `.fake` under -PhotoFixture.
     public internal(set) var services: PhotoServices = .live
     /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
-    public internal(set) var selectionMask: Mask?
+    public internal(set) var selectionMask: Mask? {
+        didSet { if selectionMask != oldValue { maskOutline = Self.outline(selectionMask) } }
+    }
+    /// `selectionMask`'s outline, traced once per change for the ants (PhotoSelectionMask.swift).
+    var maskOutline: [[Point]] = []
+    /// The selection's kernel recipe and Reselect's (PhotoArea+Kernel.swift).
+    var area = PhotoArea()
+    /// The area tools' mode, feather and wand options (PhotoAreaTool.swift).
+    public internal(set) var areaOptions = PhotoAreaOptions()
+    /// The Polygon Lasso's corners so far, before it closes (PhotoAreaTool.swift).
+    var areaCorners: [Mask.Point] = []
     /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
     public internal(set) var selectionOptions = SelectionOptions()
     /// Each masked layer's mask, its own size, coverage as gray, alpha 1 (PhotoMask.swift).
     public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
     /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
     public internal(set) var editsMask = false
-    /// The crop's aspect lock (PhotoCropSize.swift).
+    /// The crop's aspect lock (PhotoCropTool+Kernel.swift).
     public internal(set) var cropAspect = CropAspect.free
     /// Free Transform in progress (PhotoTransform.swift).
     public internal(set) var transformDraft: TransformDraft?
-    /// The eyedropper's sample size (PhotoEyedropper.swift).
+    /// A drag frame: the routes draw the draft's layer through its matrix at composite time instead of its
+    /// resample (`transformPreview(live:)`, PhotoTransform+Kernel.swift). Set on a render's copy, never the document.
+    var liveDraft = false
+    /// The eyedropper's sample size (PhotoSample+Kernel.swift).
     public internal(set) var sampleSize = SampleSize.point
     /// The Export sheet's last choices (PhotoExportOptions.swift).
     public internal(set) var exportOptions = ExportOptions()
@@ -151,6 +166,8 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var progress: String?
     /// The file flow's recents, open path and requests for the window (PhotoFileFlow+Kernel.swift).
     public internal(set) var fileFlow = PhotoFileFlowState()
+    /// The layer style panel's open section, nil when closed (PhotoStyle+Kernel.swift).
+    public internal(set) var stylePanel: StyleKind?
     /// The document's paths and the Pen's view state (PhotoPaths+Kernel.swift).
     var pathState = PhotoPathState()
     /// Test hook: how many times `layerGeometryChanged` ran, and its last call
@@ -199,6 +216,7 @@ public struct PhotoWorkspace: Sendable {
     /// Replaces the open image with `background` as its one layer.
     mutating func start(with background: TiledPixels, name: String?) {
         canvas = CanvasSize(width: background.width, height: background.height)
+        resolution = 72
         documentName = name
         layers = []
         pixels = [:]
@@ -208,6 +226,8 @@ public struct PhotoWorkspace: Sendable {
         cloneSource = nil
         stroke = nil
         selectionMask = nil
+        area = PhotoArea()
+        areaCorners = []
         masks = [:]
         editsMask = false
         transformDraft = nil
@@ -232,6 +252,7 @@ public struct PhotoWorkspace: Sendable {
         endDrag()
         if tool != .text { commitTextBox() }
         self.tool = tool
+        areaCorners = []
         if tool != .crop, pendingCrop != nil { pendingCrop = nil }
     }
 
@@ -401,11 +422,12 @@ extension PhotoWorkspace: Equatable {
             && lhs.eraserOptions == rhs.eraserOptions && lhs.bucketOptions == rhs.bucketOptions && lhs.adjustments == rhs.adjustments
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
             && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
-            && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask
+            && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask && lhs.area == rhs.area
+            && lhs.areaOptions == rhs.areaOptions && lhs.areaCorners == rhs.areaCorners
             && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
-            && lhs.exportRun == rhs.exportRun
+            && lhs.exportRun == rhs.exportRun && lhs.stylePanel == rhs.stylePanel
             && lhs.fileKind == rhs.fileKind && lhs.savedStepID == rhs.savedStepID
             && lhs.statusMessage == rhs.statusMessage && lhs.textBox == rhs.textBox && lhs.progress == rhs.progress && lhs.masks == rhs.masks && lhs.pixels == rhs.pixels
             && lhs.pathState == rhs.pathState
@@ -442,6 +464,8 @@ extension AdjustmentKind {
         case .curves: "Curves"
         case .blur: "Blur"
         case .hueSaturation: "Hue/Saturation"
+        case .blackAndWhite: "Black & White"
+        case .invert: "Invert"
         }
     }
 }

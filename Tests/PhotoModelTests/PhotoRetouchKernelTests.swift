@@ -74,7 +74,7 @@ import Testing
 
     @Test func theBucketKeepsInsideTheSelection() throws {
         var workspace = try dotted()
-        try run("select.rect", ["x": .number(8), "y": .number(8), "width": .number(16), "height": .number(16)], on: &workspace)
+        try run("select.rect", ["minX": .number(8), "minY": .number(8), "maxX": .number(24), "maxY": .number(24)], on: &workspace)
         let before = try #require(workspace.selectedLayerID.flatMap { workspace.pixels[$0] })
         try run("fill.bucket", ["x": .number(10), "y": .number(10)], on: &workspace)
         let after = try #require(workspace.selectedLayerID.flatMap { workspace.pixels[$0] })
@@ -88,7 +88,7 @@ import Testing
         #expect(workspace.selectionCoverage == nil)
         #expect(PhotoWorkspace.catalog.availability("retouch.remove", on: workspace) == .available)
         #expect(throws: CatalogError.self) { try run("retouch.remove", [:], on: &workspace) }
-        try run("select.rect", ["x": .number(28), "y": .number(28), "width": .number(8), "height": .number(8)], on: &workspace)
+        try run("select.rect", ["minX": .number(28), "minY": .number(28), "maxX": .number(36), "maxY": .number(36)], on: &workspace)
         let mask = try #require(workspace.selectionCoverage)
         #expect(try mask.coverage(x: 30, y: 30) == 1 && mask.coverage(x: 4, y: 4) == 0)
         workspace.deselect()
@@ -133,7 +133,7 @@ import Testing
         #expect(abs(paint.r - 1) < 1e-4 && paint.g == 0 && paint.b == 0 && paint.a == 1)
     }
 
-    @Test(arguments: ["bucket-background"])
+    @Test(arguments: ["bucket-background", "dust-spots"])
     func realJobPasses(job: String) throws {
         #expect(try PhotoJob.check(job) == [], "\(job)")
     }

@@ -77,8 +77,8 @@ public enum FlareIntent: Sendable, Equatable {
     public enum Export: Sendable, Equatable {
         case showSheet, setFormat(ExportFormat), setFrames(from: Int, to: Int), setStep(Int), setScale(Double),
              setTransparent(Bool), start, cancel, dismiss, tryAgain, reveal,
-             // MP4 and GIF (export-pack FV-2): the shared Size row's scale, the frame rate, GIF's loop.
-             setSize(Double), setFrameRate(Int), setLoop(Bool)
+             // MP4 and GIF (export-pack FV-2): the whole size (a scale, a long edge or pixels), the frame rate, GIF's loop.
+             setSize(SuiteExportSize), setFrameRate(Int), setLoop(Bool)
     }
     public enum Assist: Sendable, Equatable { case showPopover }
 
@@ -167,7 +167,7 @@ public enum FlareIntent: Sendable, Equatable {
         .interactions(.toggleEditor),
         .export(.showSheet), .export(.setFormat(.svgFrame)), .export(.setFrames(from: 0, to: 47)),
         .export(.setStep(1)), .export(.setScale(1)), .export(.setTransparent(false)), .export(.start),
-        .export(.cancel), .export(.dismiss), .export(.tryAgain), .export(.reveal), .export(.setSize(1)),
+        .export(.cancel), .export(.dismiss), .export(.tryAgain), .export(.reveal), .export(.setSize(.scale(1))),
         .export(.setFrameRate(30)), .export(.setLoop(true)),
         .assist(.showPopover),
     ]

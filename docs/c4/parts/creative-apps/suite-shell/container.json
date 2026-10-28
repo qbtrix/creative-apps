@@ -20,6 +20,12 @@
       "target": "suiteui",
       "description": "builds the Switch To and Open In menus and small views from SuiteUI parts",
       "style": "sync"
+    },
+    {
+      "source": "suite-shell",
+      "target": "suite-text",
+      "description": "re-exports the live text service and serves it as SuiteServices.text",
+      "style": "sync"
     }
   ]
 }

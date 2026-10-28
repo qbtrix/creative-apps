@@ -111,7 +111,7 @@
                 "id": "design-model-sources",
                 "name": "DesignModel sources",
                 "description": "Linux-safe state and logic behind Design's window: DesignWorkspace (pages, the selected page and node, the tool, the open file's URL), the multi-layer selection (DesignSelection: the ordered selected layers with the last as primary, Shift-click toggling, the box around them), DesignNode (the node tree on a page, each node with a fill and text, in absolute page points) and the tree flattened into rows under the expanded set, DesignHistory (the model-owned undo and redo, one named step per edit; New File's step carries the replaced document's file URL, which Undo puts back), the canvas gestures (hit testing, the handles a selection shows, draw, move, resize, nudge, delete, in DesignCanvasEditing and DesignDrawing), what the canvas shows before a click (DesignCanvasHints: the hover answer, the Text tool's placement box, the size badge and where it hangs), what an arrow, Delete, Escape or Return pressed on the canvas does, ignoring the numeric-pad flag every arrow carries (DesignCanvasKeys), the inline text edit, whose commit fits the box to the measured text in the same step (DesignText), where the canvas puts a frame's name, above the frame or inside it at the artboard's top (DesignFrameLabel), the inspector's header lines (DesignInspectorContent), the lock that covers a node's subtree and the line saying why (DesignLocking), the Layers row's eye and lock toggles, the hidden-in-tree check and the move target a drop above, below or into a row maps to and the insertion line a pointer over a row draws (DesignLayerToggles), the held-id index id minting reads (DesignHeldIDs), aligning the selected layer to its enclosing frame or page with the reason a command is off (DesignAlign), the window toolbar's eight commands with their titles, symbols, identifiers and the reason each can't run (DesignToolbarItems), the page's size as one undo step, its visible content bounds and which layers reach past its edge (DesignPageSize), the file codec (DesignFile), the open document as SuiteKernel's DocumentSession over the history's step serials, a save setting its saved token and ending the edit run, and the file version read through VersionedJSON.probe (DesignSession+Kernel), the export contract (DesignExport+Kernel: the scope and options, the workspace's export targets, plan and SVG readouts over the export slot, and the remembered options, never a history step), what the export sheet reads (DesignExportSheet+Kernel: the scope chips' titles, the options it opens with, a whole 1x to 3x scale, the run's shown options and the file list with skipped hidden layers) and the SVG text of nodes inside a box (Live/DesignSVG), what a PNG of a planned export item draws (DesignRaster: the item's nodes moved to the origin on a page its whole-point size, the plan's pixel size and scale, a side over its max refused), the eyedropper's sample adapter onto SuiteKernel's SampleTarget (DesignSample+Kernel: why nothing can be sampled, the colour of the topmost visible painted layer at a point, and applying it to the selection's fill or stroke as one step), the stroke adapter (DesignStroke+Kernel: a node's stroke as the kernel's VectorStroke, the workspace as SuiteKernel's StrokeTarget with its help, trim refused in Design, and the stroke editor's intents as the inspector's style change), the loupe the eyedropper shows at the pointer and a click's pick (DesignLoupe: the pointer's page point, the colour read there and whether Option sends it to the stroke), the layer tree adapter onto SuiteKernel's LayerTree (DesignNode+Kernel: a node as the kernel's layer payload and back; Live/LiveOrdering's Move Layer and Arrange, Live/LiveGrouping's Group and Ungroup, Live/LiveDuplicating's Duplicate, the Layers rows and the lock cascade run on it, and the refusals map to Design's by layer name), and the use cases a workspace runs on (DesignServices, whose `.live` set is NotBuilt in every slot until each feature lands: each help says the feature isn't built yet and each write refuses; `.fake` is the fixture fakes in Fakes/ that snapshots and fake-mode journeys use), and the workspace actions the window, menus and canvas call (DesignActions: each command's help and run through the services as one named undo step, one-layer delete, nudge and align on today's methods, Zoom to Selection and Select All; DesignActions+Edit: Copy, Cut and Paste, with Paste into the selected frame, Move Layer, and the inspector's style rows as DesignStyleChange, one-layer frame, fill and corner radius on today's methods), the command catalog (DesignCommandCatalog: every DesignCommand, palette tool, page and file action as a SuiteKernel CommandSpec whose availability is today's help and whose run is today's method, under ids kept in Tests/command-ids/design.txt), what the menu bar's items read (DesignMenuState: those specs over the focused window's workspace, with the menus' own rules for Open, a focused field's Undo and Redo, Rename Page and Align), Design's document with no window for the CLI and the real jobs (DesignHeadless: open and save through the file codec, the catalog lifted onto the workspace, SVG export of every page's top-level frames), and DesignLiveEdit: the copy a canvas drag or inspector scrub shows until it ends, then replays into the workspace as one step, and the gradient fill (DesignFill+Kernel: a node's kernel Fill in its unit box, the workspace as SuiteKernel's GradientFillTarget, and runFill, which sends a fill gesture through the catalog).",
-                "technology": "Swift 6, Foundation",
+                "technology": "Swift 6, Foundation, CoreRaster",
                 "paths": [
                   "Sources/DesignModel/"
                 ]
@@ -192,7 +192,7 @@
               {
                 "id": "library-model-sources",
                 "name": "LibraryModel sources",
-                "description": "Linux-safe state and logic behind Library's window: LibraryCatalog (photos, collections with counts, the selected collection, sort order, the loupe's photo, stepping and position), the grid's selection on SuiteKernel's Selection (LibrarySelectionAdapter: a click's pick through the display order, the arrow move, select), PhotoItem with its sort orders, keywords, title, caption and camera details (PhotoDetails: CameraDetails cleaned from Exif, CameraField and the Info tab's camera rows for the selected photos),metadata edits on the selected photos with mixed values (PhotoMetadata, PhotoFlag) and the metadata inspector's accessibility identifiers (MetadataInspectorID), 60 seeded sample photos and the launch fixtures (LibraryFixtures: shoot, cameras with invented camera details and keywords, large), and LibraryThumbnailCache (the grid's held thumbnails, pending requests and size bucket, reading the catalog without changing it and returning failures as availability changes for applyThumbnailFailures), and the status contract (LibraryStatusRow and LibraryStatusPill: the row under the content with its count, selection, cell size or loupe zoom and place, import, render, save and Preview data pills; LibraryInspectorHeader: the inspector's title and facts), and the export contract: export names (ExportNaming+Kernel, an adapter onto SuiteModel's UniqueFileNames) and the Library-local export formats, presets and XMP sidecar (ExportFormats, ExportPresets, ExportSidecar) with the catalog's export methods and runner (LibraryExport), and the sidecar contract (SidecarContracts: SidecarWriting with its unconnected live default, SidecarFields and SidecarWrite; FakeSidecars in memory) on LibraryServices, and the metadata-more slots later slices fill (LibraryKeywords: KeywordState and the keyword edits, with keywordHelp real; title and caption on PhotoMetadata; XMPSidecar: the sidecar packet, name and write plan; PhotoSearch: the search field's value), and the menu and key actions (LibraryAction with the catalog's help and run, refusing with the menu's reason as a LibraryRefusal: LibraryActions), and those actions as SuiteKernel command specs with the catalog's history (LibraryCommandCatalog), and the catalog file on SuiteKernel's DocumentSession and VersionedJSON probe (LibrarySession+Kernel), and the headless document for the CLI and MCP (LibraryHeadless: a .library zip of catalog.json and its images, import, save, and the picks exported as PNG), and the file-flow adapter (LibraryFileFlow+Kernel: the catalog as a SuiteDocumentHost and FileFlowTarget, always open, placing the photo kinds it imports and handing other apps' documents to them), and filters and collections (LibraryFilter: flags, rating rule, labels and Hide Rejected over the selected collection, with the filter bar's methods and summary; LibraryCollections: collections you make and smart collections from the filter, each edit one undo step, and the collections.json codec, restore and set-aside notice).",
+                "description": "Linux-safe state and logic behind Library's window: LibraryCatalog (photos, collections with counts, the selected collection, sort order, the loupe's photo, stepping and position), the grid's selection on SuiteKernel's Selection (LibrarySelectionAdapter: a click's pick through the display order, the arrow move, select), PhotoItem with its sort orders, keywords, title, caption and camera details (PhotoDetails: CameraDetails cleaned from Exif, CameraField and the Info tab's camera rows for the selected photos),metadata edits on the selected photos with mixed values (PhotoMetadata, PhotoFlag) and the metadata inspector's accessibility identifiers (MetadataInspectorID), 60 seeded sample photos and the launch fixtures (LibraryFixtures: shoot, cameras with invented camera details and keywords, large), and LibraryThumbnailCache (the grid's held thumbnails, pending requests and size bucket, reading the catalog without changing it and returning failures as availability changes for applyThumbnailFailures), and the status contract (LibraryStatusRow and LibraryStatusPill: the row under the content with its count, selection, cell size or loupe zoom and place, import, render, save and Preview data pills; LibraryInspectorHeader: the inspector's title and facts), and the export contract: export names (ExportNaming+Kernel, an adapter onto SuiteModel's UniqueFileNames) and the Library-local export formats, presets and XMP sidecar (ExportFormats, ExportPresets, ExportSidecar) with the catalog's export methods and runner (LibraryExport), and the sidecar contract (SidecarContracts: SidecarWriting with its unconnected live default, SidecarFields and SidecarWrite; FakeSidecars in memory) on LibraryServices, and the metadata-more slots later slices fill (LibraryKeywords: KeywordState and the keyword edits, with keywordHelp real; title and caption on PhotoMetadata; XMPSidecar: the sidecar packet, name and write plan; PhotoSearch: the search field's value), and the menu and key actions (LibraryAction with the catalog's help and run, refusing with the menu's reason as a LibraryRefusal: LibraryActions), and those actions as SuiteKernel command specs with the catalog's history (LibraryCommandCatalog), and the catalog file on SuiteKernel's DocumentSession and VersionedJSON probe (LibrarySession+Kernel), and the headless document for the CLI and MCP (LibraryHeadless: a .library zip of catalog.json and its images, import, save, and the picks exported as PNG), and the file-flow adapter (LibraryFileFlow+Kernel: the catalog as a SuiteDocumentHost and FileFlowTarget, always open, placing the photo kinds it imports and handing other apps' documents to them), and filters and collections (LibraryFilter: flags, rating rule, labels and Hide Rejected over the selected collection, with the filter bar's methods and summary; LibraryCollections: collections you make and smart collections from the filter, each edit one undo step, and the collections.json codec, restore and set-aside notice), and the Trash (TrashContracts: PhotoTrashing on LibraryServices, FakeTrash in memory and LiveTrash on the macOS Trash; LibraryDeleteRejects: Delete Rejected Photos' title, help and targets and its one-step run whose undo puts files and photos back, with the trashed paths import skips; LibraryKeys: the label keys 6 to 9).",
                 "technology": "Swift 6, Foundation",
                 "paths": [
                   "Sources/LibraryModel/"
@@ -459,6 +459,15 @@
                   "Sources/AfterGlowCLICore/HelpReports.swift",
                   "Sources/AfterGlowCLICore/MCPConfig.swift"
                 ]
+              },
+              {
+                "id": "suite-edit-menu",
+                "name": "Edit menu routing",
+                "description": "Where an editor's Edit item goes while a text field has focus: the field's own cut:, copy:, paste:, selectAll:, undo:, redo: or the app's action (TextFieldEditRouting).",
+                "technology": "Swift 6, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteModel/EditMenu/"
+                ]
               }
             ]
           },
@@ -493,7 +502,7 @@
               {
                 "id": "kernel-selection",
                 "name": "Selection",
-                "description": "Selection<ID>, the one ordered selection: the picked ids in picking order, the primary (the last picked), the anchor, one pick rule (replace, toggle, extend over an order) with canAdd, replace, clear, selectAll, prune and an arrow move in a grid. EK-2 declares it as a stub that keeps its ids; EK-10 fills the bodies and adds Nudge and Marquee here.",
+                "description": "Selection<ID>, the one ordered selection: the picked ids in picking order, the primary (the last picked), the anchor, one pick rule (replace, toggle, extend over an order) with canAdd, replace, clear, selectAll, prune and an arrow move in a grid, plus Nudge and Marquee. Area selection lives here too: AreaShape (rect, ellipse, lasso, polygon, wand), AreaCombine from the held keys, AreaRecipe (the ordered steps with invert, feather and expand) and the ten AreaSelectCommands; GroupPick is the group-aware click with Enter and Exit Group. Design adopts GroupPick (DesignGroupPick+Kernel.swift); Photo adopts the area commands (PhotoArea+Kernel.swift).",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Selection/"
@@ -520,8 +529,17 @@
                 "description": "LayerTree<Payload>, the one layer tree: LayerPayload, LayerNode (nesting, hide, lock, a follow link), LayerRow (the layers panel's flat rows from rows(expanded:)), ArrangeStep and TreeRefusal; move, arrange, group, ungroup, duplicate and the follow link are stubs for EK-12 and EK-13. Fakes/KernelFixtures.swift holds the shared fixtures: tree200 (200 nodes, seven roots, groups three deep, one hidden, one locked) and cards (the snapping packet's page in Desktop). Fakes/FakeCanvasDocument.swift is the command catalog's fake app: a headless document of named rects with its six commands plus undo and redo, the file-flow commands and the eight fill commands (each rect an optional fill in its own box, left out of the JSON when nil, and an optional ShapeSpec from shape.draw, the same way), its fixture, and CommandCatalog.empty for an app that has adopted no command yet.",
                 "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
                 "paths": [
-                  "Sources/SuiteKernel/Layers/",
+                  "Sources/SuiteKernel/Layers/Layer*.swift",
                   "Sources/SuiteKernel/Fakes/"
+                ]
+              },
+              {
+                "id": "kernel-clip",
+                "name": "Clipping rule",
+                "description": "Layers/Clip*.swift: ClipRules, the clipping rule on LayerTree's nodes: base(of:in:isClipped:) finds the layer a clipped layer clips to (the nearest unclipped sibling below it; nil for the bottom layer or only clipped layers below, and never across a group's edge), clipped(onto:in:isClipped:) lists the run of clipped layers right above a base, and noBaseHelp is the clip command's unavailable help. The kernel half of Photo's clipping groups; layer-styles LS-10 writes it.",
+                "technology": "Swift 6, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Layers/Clip*.swift"
                 ]
               },
               {
@@ -550,7 +568,7 @@
               {
                 "id": "kernel-export-session",
                 "name": "Export run and document session",
-                "description": "Export/ExportRun.swift: ExportRun<Options> (idle, editing, running with done and total, finished with the written files, failed with words; begin, start, progress that never goes back, end, dismiss). Export/ExportOptions.swift: SuiteExportOptions (format, size, quality, metadata policy, alpha, frame rate, loop; init(json:defaults:) and its ParamSchema, the one params schema every export reads), SuiteExportSize (scale, pixels with stretch, long edge), ExportMetadata (All, All but location, None), ExportFormatSpec and ExportFormats (the suite's format list and what each carries), ExportRules (exact output pixels, the metadata tags to drop, why options can't run) and ExportOptionRefusal; stubs from export-pack XP-1, bodies XP-6. Session/DocumentSession.swift: SaveStatus, DocumentSession (dirty from the saved and current tokens, autosave due a delay after the last edit, didSave and didEdit, stateText: the save indicator word every app shows), UnsavedPrompt (the one unsaved-changes alert wording and Save / Don't Save / Cancel choices every app builds) and RecoveryOffer. Session/VersionedJSON.swift: VersionedJSON (probe a file's version before decoding, a decoding error in words) and VersionError. Stubs from EK-3; bodies EK-22 and EK-24. Session/AutosaveSchedule.swift: AutosaveSchedule, when an open document writes its recovery copy (once per edit a delay after it, a write a save or discard overtook deleted, a failed write retried on the next edit); stub from autosave-history AH-1, body AH-5.",
+                "description": "Export/ExportRun.swift: ExportRun<Options> (idle, editing, running with done and total, finished with the written files, failed with words; begin, start, progress that never goes back, end, dismiss). Export/ExportOptions.swift: SuiteExportOptions (format, size, quality, metadata policy, alpha, frame rate, loop; init(json:defaults:) and its ParamSchema, the one params schema every export reads), SuiteExportSize (scale, pixels with stretch, long edge), ExportMetadata (All, All but location, None), ExportFormatSpec and ExportFormats (the suite's format list and what each carries), ExportRules (exact output pixels, the metadata tags to drop, why options can't run) and ExportOptionRefusal; stubs from export-pack XP-1, bodies XP-6. The export sheet's Size row (scale, pixels with the ratio lock, long edge, the live pixel readout) and Metadata row (All, All but location, None) in SuiteUI edit these options, and every pick plans through ExportRules before it runs (export-pack XP-4, XP-8). Session/DocumentSession.swift: SaveStatus, DocumentSession (dirty from the saved and current tokens, autosave due a delay after the last edit, didSave and didEdit, stateText: the save indicator word every app shows), UnsavedPrompt (the one unsaved-changes alert wording and Save / Don't Save / Cancel choices every app builds) and RecoveryOffer. Session/VersionedJSON.swift: VersionedJSON (probe a file's version before decoding, a decoding error in words) and VersionError. Stubs from EK-3; bodies EK-22 and EK-24. Session/AutosaveSchedule.swift: AutosaveSchedule, when an open document writes its recovery copy (once per edit a delay after it, a write a save or discard overtook deleted, a failed write retried on the next edit); stub from autosave-history AH-1, body AH-5.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), Linux and macOS",
                 "paths": [
                   "Sources/SuiteKernel/Export/ExportOptions.swift",
@@ -668,6 +686,15 @@
                 "paths": [
                   "Sources/SuiteKernel/Zoom/"
                 ]
+              },
+              {
+                "id": "kernel-playback",
+                "name": "Playback",
+                "description": "Playback/: the suite's one playback clock (#5077). PlaybackTicker turns display-link target timestamps into elapsed seconds (the first tick after a reset only sets the baseline); PlaybackTiming maps seconds from a start frame onto the frame shown at the exact rate through FlareCore's Timeline.playbackFrame, with once, loop and ping-pong; PlaybackBudget counts QB-L4's dropped frames. SuiteUI's PlaybackDriver runs it on the display link; Flare and Halo adapt it.",
+                "technology": "Swift 6, Foundation (FoundationEssentials) and FlareCore, Linux and macOS",
+                "paths": [
+                  "Sources/SuiteKernel/Playback/"
+                ]
               }
             ]
           },
@@ -696,7 +723,7 @@
               {
                 "id": "imaging-adjust-kinds",
                 "name": "Adjust kinds, filters and looks",
-                "description": "The adjust-everywhere part of Adjust/: AdjustKinds (GrayWeights, ImagingKind's Black & White and Invert compiled to a GPU tone program and its CPU twin, and ImagingFilter's five filters with their ranges), FilterRules (each filter over creative-core on a layer's padded bounds, mixed by a selection's coverage), LookPresets (LookPreset and the six BuiltInLooks) and AdjustCommands, the adjust.*, filter.* and look.* commands an app adds on an AdjustTarget, each edit one undo step. adjust-everywhere AJ-1 and AJ-2 declare them as stubs; AJ-5, AJ-5f and AJ-6 fill the bodies.",
+                "description": "The adjust-everywhere part of Adjust/: AdjustKinds (GrayWeights, ImagingKind's Black & White and Invert compiled to a GPU tone program and its CPU twin, and ImagingFilter's five filters with their ranges), FilterRules (each filter over creative-core on a layer's padded bounds, mixed by a selection's coverage), LookPresets (LookPreset and the six BuiltInLooks) and AdjustCommands, the adjust.*, filter.* and look.* commands an app adds on an AdjustTarget, each edit one undo step. Photo (PhotoAdjust+Kernel: filters on the selected pixel layer inside the selection, B&W and Invert as adjustments and layer kinds), Library (LibraryLooks+Kernel: Black & White and looks on whole photos, filters unavailable) and Halo (HaloFilters+Kernel: a per-layer list drawn live and in the render) adopt them through their catalogs.",
                 "technology": "Swift 6, CoreRaster, CoreRender and SuiteKernel, Linux and macOS",
                 "paths": [
                   "Sources/SuiteImaging/Adjust/AdjustKinds.swift",
@@ -717,7 +744,7 @@
               {
                 "id": "imaging-retouch",
                 "name": "Retouch",
-                "description": "Retouch/: the paint bucket and the heal tools over creative-core. BucketOptions (tolerance 0 to 255, contiguous, all layers, anti-alias) and BucketRules (the seed's flood mask times the selection's coverage, the colour mixed in by it), HealRules (spot heal and remove through filledFromSurroundings, heal through healed from a source offset, and a stroke's DabCoverage grid placed into a buffer-sized mask), and RetouchCommands, the four edits a raster app adds on a RetouchTarget: fill.bucket, retouch.spot-heal, retouch.heal and retouch.remove, one undo step each. fill-heal FH-1 declares them as stubs; FH-5b, FH-5h and FH-6 fill the bodies.",
+                "description": "Retouch/: the paint bucket and the heal tools over creative-core. BucketOptions (tolerance 0 to 255, contiguous, all layers, anti-alias) and BucketRules (the seed's flood mask times the selection's coverage, the colour mixed in by it), HealRules (spot heal and remove through filledFromSurroundings, heal through healed from a source offset, and a stroke's DabCoverage grid placed into a buffer-sized mask), and RetouchCommands, the four edits a raster app adds on a RetouchTarget: fill.bucket, retouch.spot-heal, retouch.heal and retouch.remove, one undo step each. Photo adopts them through PhotoWorkspace's RetouchTarget conformance (PhotoModel/PhotoRetouch+Kernel.swift; its old per-dab tone-match heal is gone). Library's dust-spot fix is the next adopter: a conformance of its develop target to RetouchTarget, calling retouch.spot-heal.",
                 "technology": "Swift 6, CoreRaster and SuiteKernel, Linux and macOS",
                 "paths": [
                   "Sources/SuiteImaging/Retouch/"
@@ -738,7 +765,8 @@
                 "description": "Tone/ (docs/blueprints/suiteui/features/tone-controls.md): the suite's one tone and sharpen adjustment. ToneSlider and ToneGroup (White Balance, Tone, Presence, Sharpen), ToneSettings with Library's Develop keys, ToneRules (the settings as one CoreRender tone program, the same CPU steps, one unsharp pass and Auto from CoreRaster's AutoTone, with the sliders still waiting on the engine), and ToneCommands: the ToneTarget protocol, the ToneIntents the SuiteUI tone rows send and the tone.read, tone.set, tone.reset and tone.auto specs every adopting app registers. tone-controls TC-1 declares them as stubs; TC-5 to TC-7 fill the bodies.",
                 "technology": "Swift 6, Foundation (FoundationEssentials), SuiteKernel's command catalog, CoreRender and CoreRaster, Linux and macOS",
                 "paths": [
-                  "Sources/SuiteImaging/Tone/"
+                  "Sources/SuiteImaging/Tone/",
+                  "Sources/SuiteImaging/Fakes/FakeToneDocument.swift"
                 ]
               },
               {
@@ -757,6 +785,27 @@
                 "technology": "Swift 6, SuiteKernel's command catalog, CoreRaster, Linux and macOS",
                 "paths": [
                   "Sources/SuiteImaging/Style/"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "suite-text",
+            "name": "SuiteText",
+            "description": "The live text service on Core Text: LiveText, SuiteModel's TextServices made real (measure spans, list the Mac's font families, draw placed glyphs). Its own module so a headless tool can draw text without SuiteShell's UI glue; SuiteShell re-exports it for the apps. Imports SuiteModel only.",
+            "technology": "Swift 6, Core Text and AppKit, macOS 26",
+            "tags": [
+              "internal",
+              "macos-only"
+            ],
+            "components": [
+              {
+                "id": "shell-text",
+                "name": "Text on Core Text",
+                "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
+                "technology": "Swift 6, Core Text and AppKit, macOS 26",
+                "paths": [
+                  "Sources/SuiteText/"
                 ]
               }
             ]
@@ -872,7 +921,8 @@
                   "Sources/SuiteShell/SuiteHelpCommands.swift",
                   "Sources/SuiteShell/ShellHelpProvider.swift",
                   "Sources/SuiteShell/CrashFolderReader.swift",
-                  "Sources/SuiteShell/ProblemReportActions.swift"
+                  "Sources/SuiteShell/ProblemReportActions.swift",
+                  "Sources/SuiteShell/InstallCommandLineTool.swift"
                 ]
               },
               {
@@ -882,15 +932,6 @@
                 "technology": "Swift 6, AVFoundation, VideoToolbox and CoreGraphics, macOS 26",
                 "paths": [
                   "Sources/SuiteShell/Media/"
-                ]
-              },
-              {
-                "id": "shell-text",
-                "name": "Text on Core Text",
-                "description": "The live half of SuiteModel's text contract, reached as SuiteServices.text through LiveText: measures spans on Core Text into one advance per grapheme (ligatures split evenly, an emoji whole), ascent and descent, and names the fallback family; lists the Mac's font families with their faces; and draws placed glyphs at their origins and angles into an sRGB MediaFrame. It measures and draws only: line breaks, alignment and type on a path are creative-core text-engine's, so an app Model measures here, lays out in core, and draws here.",
-                "technology": "Swift 6, Core Text and AppKit, macOS 26",
-                "paths": [
-                  "Sources/SuiteShell/Text/"
                 ]
               },
               {
@@ -1426,6 +1467,12 @@
         "style": "sync"
       },
       {
+        "source": "suite-text",
+        "target": "suite-model",
+        "description": "implements SuiteModel's text contract (TextServices)",
+        "style": "sync"
+      },
+      {
         "source": "suite-shell",
         "target": "suite-model",
         "description": "implements the live conformances of SuiteModel's contracts",
@@ -1435,6 +1482,12 @@
         "source": "suite-shell",
         "target": "suiteui",
         "description": "builds the Switch To and Open In menus and small views from SuiteUI parts",
+        "style": "sync"
+      },
+      {
+        "source": "suite-shell",
+        "target": "suite-text",
+        "description": "re-exports the live text service and serves it as SuiteServices.text",
         "style": "sync"
       },
       {

@@ -81,13 +81,13 @@ extension LibraryWindow {
     }
 
     /// A drag's sample: Show Original off, a quick preview in the loupe.
-    private func developPreview() {
+    func developPreview() {
         if areas.develop.originalPhotoID != nil { areas.develop.originalPhotoID = nil }
         developRender(.preview, original: false)
     }
 
     /// An edit that ended: the full render, then the changed photos' thumbnails redrawn.
-    private func developFinish(_ ids: Set<String>) {
+    func developFinish(_ ids: Set<String>) {
         if areas.develop.originalPhotoID != nil { areas.develop.originalPhotoID = nil }
         developRender(.full, original: false)
         guard !ids.isEmpty else { return }
@@ -116,16 +116,12 @@ extension LibraryWindow {
         let service = model.services.loupe
         let deliver = state.deliver
         let queue = state.queue
+        let preferGPU = loupeGPU?.prefersGPU ?? false
         Task.detached(priority: .userInitiated) {
             await queue.submit(token: request.token) {
-                let result: Result<RenderedPhoto, LibraryError>
-                do {
-                    let photo = try await service.render(
-                        request.photo, settings: settings, longSide: request.longSide, quality: request.quality)
-                    result = .success(photo)
-                } catch {
-                    result = .failure(error as? LibraryError ?? .renderFailed("the develop edit couldn't be drawn"))
-                }
+                let result = await LoupePicture.make(
+                    request, settings: settings, preferGPU: preferGPU, service: service,
+                    failure: "the develop edit couldn't be drawn")
                 deliver.yield(LoupeRenderResult(token: request.token, result: result))
             }
         }

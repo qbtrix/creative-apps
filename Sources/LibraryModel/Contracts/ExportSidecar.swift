@@ -9,6 +9,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteImaging
 import SuiteKernel
 import SuiteModel
 
@@ -39,8 +40,8 @@ public enum ExportSidecar {
         out.append(("library:Name", photo.name))
         if photo.flag != .none { out.append(("library:Flag", photo.flag.rawValue.lowercased())) }
         let develop = photo.develop
-        for slider in DevelopSlider.allCases where develop.value(slider) != 0 {
-            out.append(("library:" + slider.rawValue, number(develop.value(slider))))
+        for slider in ToneSlider.develop where develop.value(slider) != 0 {
+            out.append(("library:" + slider.title, number(develop.value(slider))))
         }
         if let crop = develop.crop {
             out.append(("library:CropAngle", number(crop.angle)))

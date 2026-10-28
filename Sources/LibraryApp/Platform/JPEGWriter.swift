@@ -5,13 +5,23 @@
 // `.withoutOverwriting`, so a name that already exists throws `writeFailed`
 // and its file is never touched. `writeSidecar` writes the XMP bytes the same
 // way. `writableFormats` is the four formats ImageIO on this Mac can encode.
+// export-pack LX-4: the `metadataFrom:dropping:` write passes the encoded
+// bytes, the original's bytes and the policy's dropped properties through
+// `metadata` (the suite's `services.metadata`) via `CarriedMetadata.still`
+// before writing; an unreadable original copies nothing.
 import CoreGraphics
 import Foundation
 import ImageIO
 import LibraryModel
+import SuiteModel
 import UniformTypeIdentifiers
 
 struct JPEGWriter: JPEGWriting {
+    /// Copies the original's metadata onto each export, minus the policy's drops (`SuiteServices.metadata`).
+    let metadata: any MetadataCarrying
+
+    init(metadata: any MetadataCarrying = FakeMetadata()) { self.metadata = metadata }
+
     /// The export formats ImageIO on this Mac can encode, asked once (the sheet reads it per body).
     static func writableFormats() -> Set<ExportFormat> { writable }
 
@@ -41,14 +51,29 @@ struct JPEGWriter: JPEGWriting {
 
     func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String) async throws {
         let path = Self.path(folder, fileName)
+        try Self.writeNew(try Self.encoded(image, quality: quality, path: path, fileName: fileName), to: path, fileName: fileName)
+    }
+
+    /// The same write, with the metadata of the file at `source` minus `dropping` carried onto the encoded bytes.
+    func write(_ image: DisplayImage, quality: Int, folder: String, fileName: String,
+               metadataFrom source: String?, dropping: Set<String>) async throws {
+        let path = Self.path(folder, fileName)
+        let data = try Self.encoded(image, quality: quality, path: path, fileName: fileName)
+        let carried = CarriedMetadata.still(data, from: source, dropping: dropping, carrier: metadata)
+        try Self.writeNew(carried, to: path, fileName: fileName)
+    }
+
+    /// `image` encoded in the format `fileName`'s extension names; throws `writeFailed` for any other name or
+    /// when this Mac can't encode it.
+    private static func encoded(_ image: DisplayImage, quality: Int, path: String, fileName: String) throws -> Data {
         guard let format = ExportFormat.forFileName(fileName) else {
             throw LibraryError.writeFailed(
                 path: path, reason: "Library can only write JPEG, PNG, TIFF or HEIC files, not \(fileName).")
         }
-        guard let data = Self.encode(image, as: format, quality: quality) else {
+        guard let data = encode(image, as: format, quality: quality) else {
             throw LibraryError.writeFailed(path: path, reason: "Couldn't encode \(fileName) as \(format.rawValue).")
         }
-        try Self.writeNew(data, to: path, fileName: fileName)
+        return data
     }
 
     /// Writes an XMP sidecar's bytes to `folder`/`fileName`, never overwriting.

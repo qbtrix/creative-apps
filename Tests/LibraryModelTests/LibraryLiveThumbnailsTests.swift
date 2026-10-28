@@ -132,3 +132,16 @@ private func filePhoto(_ id: String, _ size: PixelSize) -> PhotoItem {
 @Test func liveThumbnailsAreConnected() {
     #expect(LiveThumbnails.unavailable == nil)
 }
+
+/// LG-5: a request the grid scrolled past (its task cancelled) decodes nothing.
+@Test func aCancelledRequestDecodesNothing() async throws {
+    let size = PixelSize(width: 64, height: 48)
+    let decoder = GradientDecoder(size: size, flat: true)
+    let live = LiveThumbnails(decoder: decoder, develop: LiveDevelop())
+    let task = Task {
+        withUnsafeCurrentTask { $0?.cancel() }
+        return try await live.thumbnail(for: filePhoto("a", size), longSide: 32)
+    }
+    await #expect(throws: LibraryError.cancelled) { try await task.value }
+    #expect(await decoder.calls == 0)
+}

@@ -14,6 +14,7 @@ import FlareModel
 import HaloModel
 import LibraryModel
 import PhotoModel
+import SuiteImaging
 
 /// One app's headless document type, erased so the router can list it and open files with it.
 public struct HeadlessApp: Sendable {
@@ -34,6 +35,13 @@ public struct HeadlessApp: Sendable {
         describe = { D.catalog.describeAll() }
         self.open = { data, name in HeadlessSession(app: D.app, box: TypedSession(document: try open(data, name))) }
         make = { options in HeadlessSession(app: D.app, box: TypedSession(document: try new(options))) }
+    }
+
+    /// Whether a save may land on `path`: its extension is the app's native one. A file opened as an import (a
+    /// Lottie .json, a PNG) never gets the native format written over it.
+    public func savesNatively(to path: String) -> Bool {
+        let file = path.split(separator: "/").last.map(String.init) ?? path
+        return file.lastIndex(of: ".").map { file[file.index(after: $0)...].lowercased() } == openExtensions.first
     }
 
     /// Every command the app runs, by id.
@@ -99,6 +107,8 @@ public enum Apps {
     public static let suite = HeadlessApp(SuiteHelpDocument.self, open: { data, _ in try HelpReports.open(data) }, new: HelpReports.new)
     /// The fake app ("fake", SuiteKernel's FakeCanvasDocument). Never in `all`; the tests add it.
     public static let fake = HeadlessApp(FakeCanvasDocument.self)
+    /// The tone fake ("fake-tone", SuiteImaging's FakeToneDocument): one picture's tone settings, for RJ-X41.
+    public static let fakeTone = HeadlessApp(FakeToneDocument.self)
 
     /// The app called `name` in `apps`, nil when there is none.
     public static func named(_ name: String, in apps: [HeadlessApp]) -> HeadlessApp? { apps.first { $0.name == name } }

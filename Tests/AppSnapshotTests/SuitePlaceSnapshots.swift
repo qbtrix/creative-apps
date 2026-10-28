@@ -3,7 +3,8 @@
 // suiteui-place-wide-{light,dark}.png (Wide PNG fitted 800 × 267 with its rows), suiteui-place-cover-{light,dark}.png
 // (the wide picture in a square box, cropped by cover at the left, centre and right focus, never squashed),
 // suiteui-place-svg-{light,dark}.png (Logo SVG at its natural 240 × 80), suiteui-place-drop-target-{light,dark}.png
-// (the canvas with the drop's accent ring) and suiteui-place-refused-{light,dark}.png (the format note). macOS only.
+// (the canvas with the drop's accent ring), suiteui-place-refused-{light,dark}.png (the format note) and
+// suiteui-place-selected-{light,dark}.png (the live page with Wide PNG placed: its outline and right-edge handle). macOS only.
 import SuiteKernel
 import SwiftUI
 import Testing
@@ -16,6 +17,8 @@ import Testing
         let wide = try #require(GalleryPlaceImage.samples.first { $0.format == .png })
         let logo = try #require(GalleryPlaceImage.samples.first { $0.format == .svg })
         #expect(!wide.data.isEmpty, "the Wide PNG sample has no bytes")
+        var board = GalleryPlaceBoard()
+        _ = board.run(.place(name: wide.name, data: wide.data, at: nil))
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(GalleryPlaceImagePage(), name: "suiteui-place-empty-\(scheme.name)", scheme: scheme)
             try snapshot(PlaceSample(sample: wide), name: "suiteui-place-wide-\(scheme.name)", scheme: scheme)
@@ -23,6 +26,7 @@ import Testing
             try snapshot(PlaceSample(sample: logo), name: "suiteui-place-svg-\(scheme.name)", scheme: scheme)
             try snapshot(PlaceSample(sample: nil, ringed: true), name: "suiteui-place-drop-target-\(scheme.name)", scheme: scheme)
             try snapshot(PlaceSample(sample: nil, note: PlaceRules.formatHelp), name: "suiteui-place-refused-\(scheme.name)", scheme: scheme)
+            try snapshot(GalleryPlaceImagePage(board: board), name: "suiteui-place-selected-\(scheme.name)", scheme: scheme)
         }
     }
 

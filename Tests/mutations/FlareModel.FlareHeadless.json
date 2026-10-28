@@ -1,7 +1,30 @@
 [
-  {"label": "framesOffByOne: an SVG export writes the frame after each one asked for", "file": "Sources/FlareModel/FlareHeadless.swift", "find": "SVGExporter.export(scene: scene, frame: Double(frame), symbols: clean.symbols)", "replace": "SVGExporter.export(scene: scene, frame: Double(frame + 1), symbols: clean.symbols)", "tests": "FlareHeadlessTests|RealJobsTests"},
-  {"label": "fileCommandsLeftOn: the window's file commands stay available headless", "file": "Sources/FlareModel/FlareHeadless.swift", "find": "availability: { windowOnly ? .unavailable(fileCommandHelp)", "replace": "availability: { false ? .unavailable(fileCommandHelp)", "tests": "FlareHeadlessTests"},
-  {"label": "sceneOptionIgnored: an export always writes the selected scene", "file": "Sources/FlareModel/FlareHeadless.swift", "find": "id = o.scene ?? workspace.selectedSceneID", "replace": "id = workspace.selectedSceneID", "tests": "FlareHeadlessTests"},
-  {"label": "lastFrameRefused: the scene's last frame is outside the export's range", "file": "Sources/FlareModel/FlareHeadless.swift", "find": "guard (0..<scene.durationFrames).contains(frame)", "replace": "guard (0..<scene.durationFrames - 1).contains(frame)", "tests": "FlareHeadlessTests"},
-  {"label": "newSizeIgnored: new keeps the preset's width", "file": "Sources/FlareModel/FlareHeadless.swift", "find": "spec.setSize(width: o.width ?? spec.width,", "replace": "spec.setSize(width: spec.width,", "tests": "FlareHeadlessTests"}
+  {
+    "label": "framesOffByOne: an SVG export writes the frame after each one asked for",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "SVGExporter.export(scene: scene, frame: Double(frame), symbols: clean.symbols)",
+    "replace": "SVGExporter.export(scene: scene, frame: Double(frame + 1), symbols: clean.symbols)",
+    "tests": "FlareHeadlessTests|RealJobsTests"
+  },
+  {
+    "label": "fileCommandsLeftOn: the window's file commands stay available headless",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "availability: { windowOnly ? .unavailable(fileCommandHelp)",
+    "replace": "availability: { false ? .unavailable(fileCommandHelp)",
+    "tests": "FlareHeadlessTests"
+  },
+  {
+    "label": "sceneOptionIgnored: an export always writes the selected scene",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "id = o.scene ?? workspace.selectedSceneID",
+    "replace": "id = workspace.selectedSceneID",
+    "tests": "FlareHeadlessTests"
+  },
+  {
+    "label": "lastFrameRefused: the scene's last frame is outside the export's range",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "guard (0..<scene.durationFrames).contains(frame)",
+    "replace": "guard (0..<scene.durationFrames - 1).contains(frame)",
+    "tests": "FlareHeadlessTests"
+  }
 ]

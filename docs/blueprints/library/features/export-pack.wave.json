@@ -2,7 +2,7 @@
   "title": "Export without location: a Metadata row that keeps camera details and drops GPS, serials and maker notes, in the file and the sidecar",
   "wave": 5,
   "order": 5,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "library/export-pack (adopter of S11); RJ-L16, RJ-X03",

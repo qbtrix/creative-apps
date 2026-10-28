@@ -4,7 +4,9 @@
 // placed by FakeLayerPlacing) under 2 ms on a device; HB-5: a scrub step
 // (`scrub(to:)`, `timelineRows`, `viewerDrawList`) under 3 ms; HB-11: a
 // playback tick (`tick(now:)`, `viewerDrawList`) under 2 ms. Ten times each
-// in debug CI. Runs on Linux and macOS.
+// in debug CI. HB-2 also holds on `crowd` (300 layers) with the real
+// LiveLayerPlacing, so placing a frame's layers stays linear in the layer
+// count (#5844). Runs on Linux and macOS.
 @testable import HaloModel
 import Testing
 
@@ -31,6 +33,23 @@ struct HaloViewerBudgetTests {
         }
         #expect(cost <= budget)
         #expect(drawn > 0)
+    }
+
+    /// #5844: each layer's world matrix used to rebuild the whole layer tree, so a frame cost layers squared.
+    @Test func liveDrawListOnCrowd() throws {
+        var project = HaloProject(services: .fake)
+        project.restore(try #require(HaloFixtures.project("crowd")))
+        let comp = try #require(project.selectedComposition)
+        let drawing = LiveFrameDrawing()
+        let budget = haloBudget(device: 2)
+        var frame = 0
+        var drawn = 0
+        let cost = haloP95("drawList-live-crowd", budget: budget) {
+            frame = (frame + 7) % comp.durationFrames
+            drawn = drawing.drawList(comp, at: frame).items.count
+        }
+        #expect(cost <= budget)
+        #expect(drawn == 300)
     }
 
     @Test func playheadScrubStep() throws {

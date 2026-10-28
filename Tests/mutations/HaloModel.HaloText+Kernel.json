@@ -1,0 +1,4 @@
+[
+  {"label": "oldProjectsUnchanged: the style is written at its defaults too", "file": "Sources/HaloModel/HaloText+Kernel.swift", "find": "        if face != TextStyle.standard { try c.encode(face, forKey: .style) }\n", "replace": "        try c.encode(face, forKey: .style)\n", "tests": "HaloTextStyleTests.oldProjectsUnchanged"},
+  {"label": "linesAddHeight: the height comes from one line only", "file": "Sources/HaloModel/HaloText+Kernel.swift", "find": "        let height = fontSize * (1 + style.paragraph.lineHeight * Double(max(lines.count - 1, 0)))\n", "replace": "        let height = fontSize\n", "tests": "HaloTextStyleTests.linesAddHeight"}
+]

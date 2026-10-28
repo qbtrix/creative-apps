@@ -1,6 +1,6 @@
 // SampleRules.swift (eyedropper EY-1 stubs, EY-5 bodies): the one N × N mean every sampler uses, over a reader
 // closure, so a pixel app's composite, a vector app's render and the gallery's fake canvas read colours the same
-// way.
+// way. The hex and the byte rounding are HexText's.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -49,16 +49,9 @@ public enum SampleRules {
         return FillColor(r: r / sumA / 255, g: g / sumA / 255, b: b / sumA / 255, a: sumA / Double(count) / 255)
     }
 
-    /// `color` as "#RRGGBB", each channel rounded.
-    public static func hex(_ color: FillColor) -> String {
-        "#" + [color.r, color.g, color.b].map { channel in
-            let digits = String(byte(channel), radix: 16, uppercase: true)
-            return digits.count < 2 ? "0" + digits : digits
-        }.joined()
-    }
+    /// `color` as "#RRGGBB": HexText's format, the sampler's name for it.
+    public static func hex(_ color: FillColor) -> String { HexText.format(color) }
 
-    /// A 0...1 channel as 0...255, rounded; out of range clamps, NaN reads 0.
-    public static func byte(_ channel: Double) -> Int {
-        channel.isNaN ? 0 : Int((min(max(channel, 0), 1) * 255).rounded())
-    }
+    /// A 0...1 channel as 0...255: HexText's rounding (out of range clamps, a NaN or an infinity reads 0).
+    public static func byte(_ channel: Double) -> Int { Int(HexText.byte(channel)) }
 }

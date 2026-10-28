@@ -6,9 +6,12 @@
 // written as Floats, `enabled` in AdjustmentKind order, and output levels
 // written only when they move off 0 and 1, so a file from before them opens
 // with neutral output levels and saves again byte for byte; `tone` likewise
-// only when off neutral (tone-controls PT-1). Hue/saturation
+// only when off neutral (tone-controls PT-1). Tone's steps (ToneRules) run
+// before every section, and its sharpen is one unsharp pass over the base
+// before them (tone-controls PT-3). Hue/saturation
 // stays Photo's own matrix (HueSaturation.swift): the GPU route and the live
-// tone route run that matrix, and they move together (IM-8). Linux-safe.
+// tone route run that matrix, and they move together (IM-8). `kinds` (AJ-8)
+// run after it and are stored under "kinds" only when there are any. Linux-safe.
 import CoreRaster
 import CoreRender
 import SuiteImaging
@@ -33,51 +36,68 @@ extension AdjustmentSettings {
         AdjustCurve(points: points.map { AdjustCurvePoint(x: Double($0.x), y: Double($0.y)) })
     }
 
-    /// ImagingProgram's steps for the enabled sections among `kinds`.
-    func imagingSteps(_ kinds: Set<AdjustmentKind> = Set(AdjustmentKind.allCases)) -> [ToneAdjustment] {
+    /// The tone section's steps (temperature, tint, vibrance and the rest), which run before every section.
+    var toneSteps: [ToneAdjustment] { ToneRules.adjustments(tone) }
+
+    /// The tone section's sharpen: one unsharp pass over the base before every step, nil when off.
+    var unsharp: (amount: Double, sigma: Double, threshold: Double)? { ToneRules.unsharp(tone) }
+
+    /// ImagingProgram's steps: `tone` (the tone section's own steps when nil) first, then the enabled
+    /// sections among `kinds`.
+    func imagingSteps(
+        _ kinds: Set<AdjustmentKind> = Set(AdjustmentKind.allCases), tone: [ToneAdjustment]? = nil
+    ) -> [ToneAdjustment] {
         let on = kinds.intersection(enabled)
         let neutral = AdjustSettings.neutral
-        return ImagingProgram.adjustments(AdjustSettings(
+        let sections = AdjustSettings(
             exposure: on.contains(.exposure) ? imaging.exposure : neutral.exposure,
             levels: on.contains(.levels) ? imaging.levels : neutral.levels,
             curve: on.contains(.curves) ? imaging.curve : neutral.curve,
-            hueSaturation: on.contains(.hueSaturation) ? imaging.hueSaturation : neutral.hueSaturation))
+            hueSaturation: on.contains(.hueSaturation) ? imaging.hueSaturation : neutral.hueSaturation)
+        return ImagingProgram.adjustments(sections, tone: tone ?? toneSteps)
+            + AdjustKinds.adjustments(self.kinds.filter { kinds.contains($0.adjustment) })
     }
 
     /// Every enabled section's step, as the render runs them.
     var imagingSteps: [ToneAdjustment] { imagingSteps() }
 
-    /// `steps` run on `buffer` by CoreRender's CPU backend, a hue/saturation
+    /// `steps` run in order on `buffer` by CoreRender's CPU backend, a hue/saturation
     /// step through Photo's matrix. Throws `RasterError.invalid` when a step fails.
     func runImaging(_ steps: [ToneAdjustment], on buffer: PixelBuffer) throws -> PixelBuffer {
-        var result = buffer
-        let tone = steps.filter { if case .hueSaturation = $0 { false } else { true } }
-        if !tone.isEmpty {
-            let cpu = CPUBackend(name: "photo-imaging")
-            do {
-                var surface = try cpu.surface(buffer)
-                defer { cpu.release(surface) }
-                for step in tone {
-                    let next = try cpu.adjusted(surface, step)
-                    cpu.release(surface)
-                    surface = next
-                }
-                result = try cpu.read(surface)
-            } catch RenderError.raster(let message) {
-                throw RasterError.invalid(message)
+        var result = buffer, run: [ToneAdjustment] = []
+        for step in steps {
+            if case .hueSaturation = step {
+                result = try Self.runCPU(run, on: result).hueSaturation(hue: hue, saturation: saturation, lightness: lightness)
+                run = []
+            } else {
+                run.append(step)
             }
         }
-        if tone.count != steps.count {
-            result = try result.hueSaturation(hue: hue, saturation: saturation, lightness: lightness)
+        return try Self.runCPU(run, on: result)
+    }
+
+    private static func runCPU(_ steps: [ToneAdjustment], on buffer: PixelBuffer) throws -> PixelBuffer {
+        guard !steps.isEmpty else { return buffer }
+        let cpu = CPUBackend(name: "photo-imaging")
+        do {
+            var surface = try cpu.surface(buffer)
+            defer { cpu.release(surface) }
+            for step in steps {
+                let next = try cpu.adjusted(surface, step)
+                cpu.release(surface)
+                surface = next
+            }
+            return try cpu.read(surface)
+        } catch RenderError.raster(let message) {
+            throw RasterError.invalid(message)
         }
-        return result
     }
 }
 
 extension AdjustmentSettings: Codable {
     private enum CodingKeys: String, CodingKey {
         case exposure, blackPoint, whitePoint, gamma, outputBlack, outputWhite, curvePoints, blurSigma
-        case hue, saturation, lightness, enabled, tone
+        case hue, saturation, lightness, enabled, tone, kinds
     }
 
     public init(from decoder: any Decoder) throws {
@@ -99,7 +119,8 @@ extension AdjustmentSettings: Codable {
                 hueSaturation: hueSaturation),
             blurSigma: try c.decode(Double.self, forKey: .blurSigma),
             enabled: Set(try c.decode([AdjustmentKind].self, forKey: .enabled)),
-            tone: try c.decodeIfPresent(ToneSettings.self, forKey: .tone) ?? .neutral)
+            tone: try c.decodeIfPresent(ToneSettings.self, forKey: .tone) ?? .neutral,
+            kinds: try c.decodeIfPresent([ImagingKind].self, forKey: .kinds) ?? [])
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -115,7 +136,8 @@ extension AdjustmentSettings: Codable {
         try c.encode(hue, forKey: .hue)
         try c.encode(saturation, forKey: .saturation)
         try c.encode(lightness, forKey: .lightness)
-        try c.encode(AdjustmentKind.allCases.filter(enabled.contains), forKey: .enabled)
+        try c.encode(AdjustmentKind.sections.filter(enabled.contains), forKey: .enabled)
         if !tone.isNeutral(nil) { try c.encode(tone, forKey: .tone) }
+        if !kinds.isEmpty { try c.encode(kinds, forKey: .kinds) }
     }
 }

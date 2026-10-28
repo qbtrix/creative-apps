@@ -70,6 +70,96 @@ struct FlareVideoExportTests {
         #expect(w.exportProblem == nil && w.exportFrameRate == 12)
     }
 
+    /// #5012: the sheet reads the planned pixels, frames and length live, even for MP4 and as given for GIF.
+    @Test(.tags(.mp4IsEven)) func theSheetReadsThePlannedPixelsFramesAndLength() throws {
+        var w = bounce(); _ = w.openExport()
+        #expect(w.exportPixelSize == nil && w.exportVideoSummary == nil, "PNG has no video readout")
+        w.setExportFormat(.mp4); w.setExportSize(.scale(0.5))
+        #expect(w.exportPixelSize?.width == 274 && w.exportPixelSize?.height == 200, "275 rounds down to even")
+        #expect(w.exportVideoSummary == "274 × 200 px · 60 frames · 2.0 s")
+        w.setExportSize(.pixels(width: 1081, height: 721, stretch: true)); w.setExportFrameRate(24)
+        #expect(w.exportVideoSummary == "1080 × 720 px · 48 frames · 2.0 s")
+        w.setExportFormat(.gif); w.setExportFrameRate(1)
+        #expect(w.exportVideoSummary == "1081 × 721 px · 2 frames · 2.0 s")
+        w.setExportSize(.longEdge(0))
+        #expect(w.exportVideoSummary == nil && w.exportPixelSize == nil)
+    }
+
+    /// #5014: the Size row's modes carry a whole size: Long edge and Pixels start from the current pixels.
+    @Test func theSizeRowSwitchesBetweenScaleLongEdgeAndPixels() throws {
+        var w = bounce(); _ = w.openExport(); w.setExportFormat(.gif)
+        #expect(w.exportingOptions?.sizeMode == .scale)
+        #expect(w.exportSize(.longEdge) == .longEdge(550))
+        #expect(w.exportSize(.pixels) == .pixels(width: 550, height: 400, stretch: true))
+        w.setExportSize(w.exportSize(.longEdge))
+        #expect(w.exportingOptions?.sizeMode == .longEdge)
+        let intent = FlareIntent.export(.setSize(.longEdge(480)))
+        guard case .export(.setSize(let size)) = intent else { Issue.record("not a size"); return }
+        w.setExportSize(size)
+        #expect(w.exportingOptions?.size == .longEdge(480) && w.exportPixelSize?.width == 480)
+        w.setExportSize(w.exportSize(.pixels))
+        #expect(w.exportingOptions?.size == .pixels(width: 480, height: 349, stretch: true))
+        #expect(w.exportingOptions?.sizeMode == .pixels && w.exportSize(.scale) == .scale(1))
+        #expect(ExportSizeMode.allCases.map(\.title) == ["Scale", "Long edge", "Pixels"])
+    }
+
+    /// #5015: the file is named once, by the Model, and the writer's own "already exists" reads as the sheet's.
+    @Test func theVideoFileIsNamedByTheModelAndATakenNameReadsAsAlreadyThere() throws {
+        var w = bounce(); _ = w.openExport()
+        #expect(w.exportVideoFileName == nil)
+        w.setExportFormat(.gif)
+        #expect(w.exportVideoFileName == "scene-1.gif")
+        w.setExportFormat(.mp4)
+        #expect(w.exportVideoFileName == "scene-1.mp4")
+        let taken = FlareWorkspace.videoWriteError(
+            SuiteError.notAvailable("A file named scene-1.mp4 already exists."), name: "scene-1.mp4", folder: "Exports")
+        #expect(taken as? ExportWriteRefusal == .alreadyThere(name: "scene-1.mp4", folder: "Exports"))
+        #expect(FlareWorkspace.exportMessage(taken) == "scene-1.mp4 is already in Exports. Choose another folder.")
+        let other = FlareWorkspace.videoWriteError(SuiteError.notAvailable("No encoder."), name: "scene-1.mp4", folder: "Exports")
+        #expect(other as? SuiteError == .notAvailable("No encoder.") && FlareWorkspace.exportMessage(other) == "No encoder.")
+    }
+
+    /// #5017: an exporter that can't write MP4 or GIF refuses Export with its reason instead of writing blank frames,
+    /// while SVG, Lottie and PNG still start. The live one draws real frames (StageRasterizer's `frame`), so it has none.
+    @Test(arguments: [ExportFormat.mp4, .gif])
+    func anExporterWithoutVideoRefusesItWithItsReason(format: ExportFormat) throws {
+        #expect(LiveExportAdapter(stage: FakeStage()).videoUnbuiltReason == nil)
+        var document = FlareFixtures.bounce
+        document.scenes[0].fps = 30; document.scenes[0].durationFrames = 60
+        var services = FlareServices.fake(); services.export = NoVideoExport()
+        var w = FlareWorkspace(services: services); w.load(document); _ = w.openExport()
+        #expect(w.exportProblem == nil)
+        w.setExportFormat(format)
+        #expect(w.exportProblem == NoVideoExport.reason && w.exportFileCount == 0)
+        let started = w.startExport()
+        #expect(!started)
+    }
+
+    /// #5018: a rate of exactly 1 exports, and only MP4 and GIF read the rate.
+    @Test func aRateOf1ExportsAndOnlyVideoReadsTheRate() throws {
+        var w = bounce(); _ = w.openExport()
+        w.setExportFrameRate(0)
+        #expect(w.exportProblem == nil, "PNG ignores the video rate")
+        w.setExportFormat(.gif)
+        #expect(w.exportProblem == "The frame rate must be 1 or more.")
+        w.setExportFrameRate(1)
+        #expect(w.exportProblem == nil && w.exportFileCount == 1)
+    }
+
+    /// Packet-Review 2: a GIF runs at 1 to 50 frames a second (MediaRules), so the sheet refuses 51 before Export
+    /// instead of the writer failing mid-run; MP4 still takes 60.
+    @Test func aGIFAbove50FramesASecondIsRefusedButMP4IsNot() throws {
+        var w = bounce(); _ = w.openExport(); w.setExportFormat(.gif)
+        w.setExportFrameRate(50)
+        #expect(w.exportProblem == nil)
+        w.setExportFrameRate(51)
+        #expect(w.exportProblem == "A GIF runs at 1 to 50 frames a second." && w.exportFileCount == 0)
+        w.setExportFormat(.mp4)
+        #expect(w.exportProblem == nil, "MP4 takes up to 120")
+        w.setExportFrameRate(60)
+        #expect(w.exportProblem == nil)
+    }
+
     /// FV-5: an MP4 or GIF run counts the plan's frames, so the sheet's bar moves through one file; a file run
     /// still counts files.
     @Test(arguments: [ExportFormat.mp4, .gif])
@@ -199,4 +289,22 @@ extension Tag {
     @Tag static var everyFrame: Self
     @Tag static var gifKeepsAlpha: Self
     @Tag static var mp4IsEven: Self
+}
+
+/// FakeExport, but it can't write MP4 or GIF.
+private struct NoVideoExport: Exporting {
+    static let reason = "This exporter can't write video."
+    let base = FakeExport(frameDelay: .zero)
+    var videoUnbuiltReason: String? { Self.reason }
+    func warnings(_ document: Document, options: ExportOptions) -> [String] { base.warnings(document, options: options) }
+    func export(_ document: Document, options: ExportOptions, rasterizer: any FrameRasterizing,
+                progress: @Sendable (Double) -> Void) async throws -> ExportResult {
+        try await base.export(document, options: options, rasterizer: rasterizer, progress: progress)
+    }
+    func writeVideo(_ document: Document, sceneID: String, plan: FlareVideoPlan, to path: String,
+                    media: any MediaEncoding, rasterizer: any FrameRasterizing,
+                    progress: @Sendable (Double) -> Void) async throws -> String {
+        try await base.writeVideo(document, sceneID: sceneID, plan: plan, to: path, media: media,
+                                  rasterizer: rasterizer, progress: progress)
+    }
 }

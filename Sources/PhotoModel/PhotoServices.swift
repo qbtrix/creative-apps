@@ -17,8 +17,12 @@ public struct PhotoServices: Sendable {
     public var adjustmentLayers: any AdjustmentLayering
     public var transform: any LayerTransforming
     public var exportSizing: any ExportSizing
-    /// Measures, lists and draws text layers' words; the fake until TX-7 wires the live one.
+    /// Measures, lists and draws text layers' words. FakeText (a clear frame) by default; the window sets
+    /// SuiteText's LiveText (`PhotoWindow.liveServices`), which this Linux-safe module can't reach.
     public var text: any TextServices = FakeText()
+    /// The saved looks (adjust-everywhere AJ-8); in memory until the app hands it
+    /// the suite's PresetStore, so no test writes to disk.
+    public var looks: any PresetStoring = FakePresetStore()
 
     public init(archive: any DocumentArchiving, recovery: any RecoveryStoring, clipboard: any PixelClipboard,
                 merging: any LayerMerging, crop: any CropSizing, selection: any SelectionShaping,

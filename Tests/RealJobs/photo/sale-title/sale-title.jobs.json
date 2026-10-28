@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-P02, pending #5951 (items 2 and 3): the command line's Photo draws text through a fake that paints nothing and knows only the System family, so the words never reach the export and no bundled family can be picked, and platforms is [] until it draws through live text. Opens beach.png (64 x 48 sRGB), adds \"SUMMER SALE\" at the centre, sets a weight-900 family, size 120 and centre alignment, saves, and exports a PNG. The trap: text rasterised on save, or the font silently swapped on reopen. The turn-on names the bundled family in text.set-font, adds the reopen after file.save, checks text.read still says that family at weight 900, size 120 and centre, puts the reference export under expected/, and sets platforms to linux and macos.",
+  "pending": "#5951",
+  "waits_on": "#5951",
+  "inputs": ["input/*.png"],
+  "steps": [
+    {"id": "text.add", "params": {"x": 32, "y": 24, "words": "SUMMER SALE"}},
+    {"id": "text.set-font", "params": {"family": "System", "weight": 900}},
+    {"id": "text.set-size", "params": {"size": 120}},
+    {"id": "text.set-alignment", "params": {"alignment": "center"}},
+    {"id": "file.save", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-sale", "format": "png", "options": {}},
+  "expect": {
+    "out/beach-sale.png": {"pixels": {"size": [64, 48], "tolerance": 2, "reference": "expected/beach-sale.png"}}
+  },
+  "platforms": []
+}
