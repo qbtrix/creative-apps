@@ -489,3 +489,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 16:08Z lead/adjust-everywhere-AJ-z c9b3c9d6b: gate PASS, pushed. Opens as feature-done PR once #5260 merges. #5260 and #5991 clean.
 - 16:18Z check-in: #5991 merged (81d606521). #5260 clean, labels ok, no local-ci/prescreen yet (verify-after). 0 open adjust-everywhere findings. dev-red #5983 not ours. AJ-z feature-done PR opens once #5260 merges.
 - 2026-10-28T16:34Z #5259 merged; #5260 clean, awaiting prescreen
+- 16:38Z #5260 merged (f437fabab): AJ-photo's PRs all in. Opened #5993 (AJ-z, feature-done: wave built, RJ-X60 pending #5990), Head c9b3c9d6b. Belt-Slice-Done AJ-photo and AJ-z (gaps: #5990) once main contains them and ci.yml on that sha is green; main held at f89f5255c by dev-red #5983 (not ours).
