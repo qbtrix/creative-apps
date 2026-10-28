@@ -142,7 +142,7 @@ struct HaloWindow: View {
 
     /// Every area's hook over `content`, in a fixed order.
     private func scenes(_ content: some View) -> some View {
-        historyScene(textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content))))))))))
+        stylingScene(historyScene(textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content)))))))))))
     }
 }
 
