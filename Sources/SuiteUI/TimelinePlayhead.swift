@@ -37,6 +37,9 @@ struct TimelinePlayhead: View {
     /// How many times a playhead's body ran; the real-window budget tests count a scrub's.
     static var bodyRuns = 0
     #endif
+    #if DEBUG
+    @Environment(\.timelineBodyTally) private var tally
+    #endif
 
     /// What the pill reads: the playhead in the host's unit.
     var label: String { TimelineTime.label(frame: mapping.clamp(playhead), fps: fps, rate: rate, unit: unit) }
@@ -44,6 +47,7 @@ struct TimelinePlayhead: View {
     var body: some View {
         #if DEBUG
         Self.bodyRuns += 1
+        tally?.playhead += 1
         #endif
         return GeometryReader { proxy in
             let lineX = tickX(mapping, mapping.clamp(playhead)) - scroll.x
