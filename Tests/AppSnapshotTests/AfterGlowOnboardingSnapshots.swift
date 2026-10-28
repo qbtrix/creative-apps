@@ -3,7 +3,8 @@
 // afterglow-onboarding-{welcome,focus,focus-selected,start,start-default,
 // start-missing,start-error}-{light,dark,light-ic,dark-ic},
 // each the real OnboardingWindow over an OnboardingModel on the fakes, built
-// fresh for every appearance (closing a window is Skip, which would clear the
+// fresh for every appearance on a key host, so the default button reads as one
+// (closing a window is Skip, which would clear the
 // focus of a shared model). "start" is Photos' order, "start-default" no
 // focus; "start-missing" says Halo's sample isn't in this build, "start-error"
 // is a refused hand-off's sentence in place. "start-launching" (Flare's
@@ -65,8 +66,9 @@ extension BodyCountSuites {
         private func shoot(_ name: String, _ make: () async -> OnboardingModel) async {
             for appearance in SnapshotAppearance.allCases {
                 let model = await make()
+                // Key: the welcome window is only ever seen in front, Continue in the accent.
                 assertGolden(OnboardingWindow(model: model), size: size, name: "afterglow-onboarding-\(name)",
-                             area: "afterglow-onboarding", appearance: appearance)
+                             area: "afterglow-onboarding", appearance: appearance, key: true)
             }
         }
 

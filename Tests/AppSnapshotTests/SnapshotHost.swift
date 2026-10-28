@@ -5,7 +5,10 @@
 // appearance decides how dynamic colors resolve, and draws it at backing
 // scale 2, so a 100 × 50 pt view is a 200 × 100 px image and a 1 pt hairline is 2 device pixels (QB-V3). The
 // bitmap is tagged sRGB, so a token's hex comes back as written. Glass draws
-// as SuiteUI's flat stand-in (`suiteSnapshotRendering`). Its images feed
+// as SuiteUI's flat stand-in (`suiteSnapshotRendering`). The window is not
+// key unless `key` is set: a key host draws a front window's look (the
+// default button in the accent), for a window people only ever see in
+// front, like the welcome window. Its images feed
 // GoldenImage (SH-9) through `assertGolden(_:size:name:area:appearance:)`.
 // macOS only.
 import AppKit
@@ -53,7 +56,11 @@ enum SnapshotAppearance: String, CaseIterable, Sendable {
 /// that size their layers by the window's scale rasterize at 2× on a 1× CI
 /// display too. SnapshotHostTests.hairline catches a blurred upscale.
 private final class ScaledSnapshotWindow: NSWindow {
+    /// Whether the window says it is key and main, so controls draw active.
+    var isFront = false
     override var backingScaleFactor: CGFloat { SnapshotHost.scale }
+    override var isKeyWindow: Bool { isFront || super.isKeyWindow }
+    override var isMainWindow: Bool { isFront || super.isMainWindow }
 }
 
 /// Renders views at scale 2 in one appearance.
@@ -61,6 +68,8 @@ private final class ScaledSnapshotWindow: NSWindow {
 struct SnapshotHost {
     nonisolated static let scale: CGFloat = 2
     let appearance: SnapshotAppearance
+    /// Draw as the key window (SnapshotHostTests.keyHostDrawsTheDefaultButtonInTheAccent).
+    var key = false
 
     /// `view` at `size` points over the window background, as a 2× bitmap; nil
     /// when the size is empty or AppKit has no such appearance. AppKit gives
@@ -93,6 +102,7 @@ struct SnapshotHost {
         let window = ScaledSnapshotWindow(
             contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
         window.appearance = named
+        window.isFront = key
         window.contentView = host
         // Two layout passes around a short run loop turn, so lists and scroll views settle.
         host.layoutSubtreeIfNeeded()
@@ -116,13 +126,13 @@ struct SnapshotHost {
     }
 }
 
-/// Renders `view` at `size` points through SnapshotHost and checks it as
+/// Renders `view` at `size` points through SnapshotHost (as the key window when `key`) and checks it as
 /// `Golden/<area>/<name>-<appearance>.png` (light, dark, light-ic, dark-ic).
 @MainActor
 func assertGolden(_ view: some View, size: CGSize, name: String, area: String, appearance: SnapshotAppearance,
-                  tolerance: GoldenTolerance = .standard, filePath: String = #filePath,
+                  key: Bool = false, tolerance: GoldenTolerance = .standard, filePath: String = #filePath,
                   sourceLocation: SourceLocation = #_sourceLocation) {
-    guard let image = SnapshotHost(appearance: appearance).image(view, size: size) else {
+    guard let image = SnapshotHost(appearance: appearance, key: key).image(view, size: size) else {
         Issue.record("could not render \(area)/\(name)-\(appearance.rawValue)", sourceLocation: sourceLocation)
         return
     }
