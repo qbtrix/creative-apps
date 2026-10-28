@@ -41,12 +41,6 @@
     "scope": "full"
   },
   {
-    "test": "AppSnapshotTests.BodyCountSuites/SuiteTimelineScrubWindowTests/aScrubRedrawsOnlyThePlayhead",
-    "owner": "#5804",
-    "reason": "Dev macOS shard 1/3 counts about 18,169 lane bodies during the scrub (run 40357785665) even after #5803's warm-up; it passes alone and in a local shard 1/3, so shared state from another suite in the heavy-pass process re-renders the lane. #5804 finds and resets it.",
-    "expires": "2026-10-29"
-  },
-  {
     "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/rotateInLoupe",
     "owner": "#5807",
     "reason": "Dev macOS shard 1/3 (run 40357785665) reads 3 bodies against a budget of 2 since the heavy tests moved into one heavy-pass process (#5781). #5807 finds the third body.",
@@ -56,18 +50,6 @@
     "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryLevelsTests/bodies",
     "owner": "#5924",
     "reason": "121 window bodies against 120 on dev macOS under load (runs 40394212348, 40564904343), then the process died in it; #5924 owns the fix (split Library's window state).",
-    "expires": "2026-10-29"
-  },
-  {
-    "test": "AppSnapshotTests.PhotoAdjustTargetSnapshots/backgroundTargetsTheImage",
-    "owner": "#5943",
-    "reason": "adjustSections doesn't match the expected list after AJ-8 (#5247), run 40605553090. #5943 owns the fix or the revert.",
-    "expires": "2026-10-29"
-  },
-  {
-    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoToneTests/temperatureDragInThreeBodies",
-    "owner": "#5943",
-    "reason": "5 bodies against a budget of 3 after AJ-8 (#5247), run 40605553090. #5943 owns the fix or the revert.",
     "expires": "2026-10-29"
   }
 ]

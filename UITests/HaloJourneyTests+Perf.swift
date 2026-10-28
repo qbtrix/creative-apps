@@ -4,12 +4,13 @@
 // journey launches on `-HaloSample reference` (50 keyed layers, 300 frames at
 // 30 fps) or `crowd` (300 solids) with `-SuitePerfProbe` and ends with
 // `perf()` (Journey+Input.swift), which attaches "perf-<test>" and checks the
-// gates below through `PerfBudgeted`. Every gate is report-only: `limit` is
-// 7.1's CI placeholder and `enforced` stays false until ten green runs on
-// `dev`. The series names are HaloProbe's (CL-8): `viewer-drag`,
-// `inspector-scrub` and `playhead-scrub` take samples; `playback`,
-// `lanes-scroll` and `layers-scroll` record drawn frames. Each test fails
-// only a series with fewer than 60 samples or intervals, never its timing.
+// gates below through `PerfBudgeted`. H-P3's playhead scrub and H-P4's
+// playback are gated on their row's limit (#5844): a p95 over it fails the
+// test. The rest are report-only: `limit` is 7.1's CI placeholder and
+// `enforced` stays false until ten green runs on `dev`. The series names are
+// HaloProbe's (CL-8): `viewer-drag`, `inspector-scrub` and `playhead-scrub`
+// take samples; `playback`, `lanes-scroll` and `layers-scroll` record drawn
+// frames. Every test also fails a series with fewer than 60 samples or intervals.
 // The viewer drag presses at the selected layer's position (its TRANSFORM
 // rows, as H-J5 aims), so the press hits a drawn layer and starts a drag, and
 // each leg starts where the last one left that layer. At the runners'
@@ -306,10 +307,10 @@ extension HaloPerfJourneyTests: PerfBudgeted {
     /// HB-U2, H-P2: inspector bar on screen (target p95 ≤ 2).
     static let inspectorScrub = PerfBudget(row: "HB-U2", series: ["inspector-scrub"], measure: .latency, limit: 3)
     /// HB-U3, H-P3: playhead on screen (target p95 ≤ 2).
-    static let playheadScrub = PerfBudget(row: "HB-U3", series: ["playhead-scrub"], measure: .latency, limit: 3)
+    static let playheadScrub = PerfBudget(row: "HB-U3", series: ["playhead-scrub"], measure: .latency, limit: 3, enforced: true)
     /// HB-U4, H-P4: playback holds its rate, refreshes between drawn frames
     /// (target 0 dropped, jitter p95 < 2 ms).
-    static let playback = PerfBudget(row: "HB-U4", series: ["playback"], measure: .intervals, limit: 1.5)
+    static let playback = PerfBudget(row: "HB-U4", series: ["playback"], measure: .intervals, limit: 1.5, enforced: true)
     /// QB-L10's UI half, H-P5: lanes and layer list scroll (target p95 ≤ 1.5
     /// refreshes); the gate is set from CI, so no placeholder.
     static let scroll = PerfBudget(row: "QB-L10", series: ["lanes-scroll", "layers-scroll"], measure: .intervals, limit: nil)

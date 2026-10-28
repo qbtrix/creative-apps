@@ -18,6 +18,12 @@
 // layer in one Place step, centred; with none open it opens; another app's
 // file goes to that app; the mark at the bottom says which before the drop.
 // With the Pen, PhotoPenOverlay puts SuiteUI's PathEditOverlay over the canvas.
+// In debug builds `bodyRuns` counts every editor's body runs process-wide, and
+// the window's SuiteUI BodyTally (`bodyTally` in the environment) counts only
+// that window's, for a budget test that runs alongside suites drawing their own
+// Photo windows. The inspector, layer list, status line and canvas overlay read
+// the window's PhotoSession facets themselves, so an option step that moves no
+// facet the window reads never re-runs this body.
 import PhotoModel
 import SuiteShell
 import SuiteUI
@@ -46,11 +52,13 @@ struct PhotoEditor: View {
     #if DEBUG
     /// How many times an editor's body ran; PhotoWindowStrokeTests counts a stroke's.
     static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
         let _ = Self.bodyRuns += 1
+        let _ = bodyTally?.ran(Self.self)
         #endif
         SuiteWindow(
             title: model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"),
@@ -174,6 +182,11 @@ struct PhotoCanvas: View {
 
     private func key(_ press: KeyPress) -> KeyPress.Result {
         guard press.modifiers.subtracting(.shift).isEmpty else { return .ignored }
+        // While a Type tool box is open its keys type into it, not pick tools (#4798).
+        if let typed = model.textBox?.key(press.characters) {
+            perform(.text(.key(typed)))
+            return .handled
+        }
         switch press.key {
         case .delete, .deleteForward:
             perform(press.modifiers.contains(.shift) ? .fillSelection : .deleteSelection)

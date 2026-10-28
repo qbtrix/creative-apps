@@ -1,7 +1,7 @@
 # Feature packet: cull-finish
 
 **Feature:** the last two steps of a cull. **Delete Rejected Photos…** (Photo
-menu, ⌘⌫) moves the selected collection's rejected photos to the macOS Trash
+menu, ⌥⌘⌫) moves the selected collection's rejected photos to the macOS Trash
 after one confirmation, takes them out of the catalog, and remembers their
 paths so importing the folder again doesn't bring them back. It is one undo
 step: Undo puts the files back from the Trash where they were and the photos
@@ -57,7 +57,7 @@ Blueprint sections: library.md 1.3 (never deletes, amended), 3 (cull), 6.2
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
 | DR-a | The Trash service with its fake and a live stub, the label keys' cases, and the catalog's Delete Rejects title, help, targets and run exist as stubs, and the checks and RJ-L06's job are written, disabled. | DR-1, DR-2 | MJ-DR | filters-collections:FC-a; metadata-more:MD-a |
-| DR-u | Photo > Delete Rejected Photos… ⌘⌫ asks once with the count and runs on the stubs, and Set Label's items name keys 6–9, with snapshots, the render budget and the journey written. | DR-3, DR-4 | J-DR1 | DR-a; filters-collections:FC-a; metadata-more:MD-d, MD-e (DR-3) |
+| DR-u | Photo > Delete Rejected Photos… ⌥⌘⌫ asks once with the count and runs on the stubs, and Set Label's items name keys 6–9, with snapshots, the render budget and the journey written. | DR-3, DR-4 | J-DR1 | DR-a; filters-collections:FC-a; metadata-more:MD-d, MD-e (DR-3) |
 | DR-m | Keys 6–9 set Red, Yellow, Green and Blue as one step each; Delete Rejects moves every reject of the collection to the Trash, removes them and remembers their paths in one step whose undo puts files and photos back; the catalog file keeps those paths and import skips them; it runs from the catalog. | DR-5, DR-6, DR-7, DR-8 | MJ-DR | DR-a; metadata-more:MD-c, MD-e (DR-6, DR-7) |
 | DR-z | The window runs on live services, the journey passes on live, and the blueprint says Library moves rejects to the Trash. | DR-9, DR-10 | J-DR1 | DR-u, DR-m |
 
@@ -169,7 +169,7 @@ import(folder): known = item paths ∪ excludedPaths                     # DR-6,
 |---|---|---|---|---|---|
 | DR-1 | – | `PhotoTrashing`, the services member, `FakeTrash` (a dictionary of moved paths, failures by path), the `LiveTrash` stub, `LibraryKey.label` and its characters, the catalog extension as stubs, `TrashedPhoto` | `Sources/LibraryModel/Contracts/TrashContracts.swift`, `Sources/LibraryModel/LibraryServices.swift`, `Sources/LibraryModel/Fakes/FakeTrash.swift`, `Sources/LibraryModel/Live/LiveTrash.swift`, `Sources/LibraryModel/LibraryKeys.swift`, `Sources/LibraryModel/LibraryDeleteRejects.swift` | filters-collections:FC-a, metadata-more:MD-a | ~220, 6 |
 | DR-2 | – | Checks first, disabled by name: `LibraryDeleteRejectsTests`, `LibraryLabelKeysTests`, `LibraryNeverDeletesTests` (enabled: it passes today with its one allowed line, `CatalogStore`'s set-aside); RJ-L06's job folder with `waits_on: DR-8` | `Tests/LibraryModelTests/LibraryDeleteRejectsTests.swift`, `Tests/LibraryModelTests/LibraryLabelKeysTests.swift`, `Tests/LibraryModelTests/LibraryNeverDeletesTests.swift`, `Tests/RealJobs/library/delete-rejects/` | DR-1 | ~320, 9 |
-| DR-3 | – | Reachable: Photo > Delete Rejected Photos… ⌘⌫ (its title and help from the Model), the `confirmationDialog` in `LibraryWindow+Trash`, mounted by the window; Set Label's items name 6–9 | `Sources/LibraryApp/LibraryWindow+Trash.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryCommands.swift`, `Sources/LibraryApp/LibraryMenus.swift` | DR-1, metadata-more:MD-e | ~180, 4 |
+| DR-3 | – | Reachable: Photo > Delete Rejected Photos… ⌥⌘⌫ (its title and help from the Model), the `confirmationDialog` in `LibraryWindow+Trash`, mounted by the window; Set Label's items name 6–9 | `Sources/LibraryApp/LibraryWindow+Trash.swift`, `Sources/LibraryApp/LibraryWindow.swift`, `Sources/LibraryApp/LibraryCommands.swift`, `Sources/LibraryApp/LibraryMenus.swift` | DR-1, metadata-more:MD-e | ~180, 4 |
 | DR-4 | – | Snapshots, the render budget test, the journey written and skipped (`XCTSkip("waits on DR-9")`) | `Tests/AppSnapshotTests/LibraryCullFinishSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetLibraryDeleteRejectsTests.swift`, `UITests/LibraryJourneyTests+CullFinish.swift` | DR-3 | ~220, 3 |
 | DR-5 | – | Label keys: `cullChange(for: .label)` is `.label`, one "Set Label" step on the targets, never moving the loupe (Auto Advance leaves labels alone); turns on `LibraryLabelKeysTests` | `Sources/LibraryModel/LibraryCulling.swift`, `Tests/LibraryModelTests/LibraryLabelKeysTests.swift`, `Tests/mutations/LibraryModel.LibraryCulling.json` | DR-2 | ~120, 3 |
 | DR-6 | – | `deleteRejects` and its title, help and message; the trashed step and its undo and redo; `excludedPaths` stored and fed to import; turns on `LibraryDeleteRejectsTests` | `Sources/LibraryModel/LibraryDeleteRejects.swift`, `Sources/LibraryModel/LibraryUndoAdapter.swift`, `Sources/LibraryModel/LibraryCatalog.swift`, `Sources/LibraryModel/LibraryImport.swift`, `Tests/LibraryModelTests/LibraryDeleteRejectsTests.swift`, `Tests/mutations/LibraryModel.LibraryDeleteRejects.json` | DR-2, metadata-more:MD-e | ~360, 6 |
@@ -220,7 +220,7 @@ live Trash, DR-10 is the prose task.
 | Never permanent | no `removeItem`, `unlink` or Trash-emptying call in Library | `LibraryNeverDeletesTests` |
 | One gesture, one step | a label key, a Delete Rejects | `LibraryLabelKeysTests`, `LibraryDeleteRejectsTests` |
 | No dead controls | Delete Rejected Photos… in `library.controls`, disabled with its reason | `testDeleteRejects` |
-| Keyboard parity | ⌘⌫ opens the dialog; Return is Cancel, not Move to Trash | `testDeleteRejects` step 3 |
+| Keyboard parity | ⌥⌘⌫ opens the dialog; Return is Cancel, not Move to Trash | `testDeleteRejects` step 3 |
 | Audit | zero new over Library's baseline | `audit-library-*.json` |
 
 ## Done check
