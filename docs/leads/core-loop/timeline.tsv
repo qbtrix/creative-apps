@@ -290,3 +290,4 @@ utc	stage	event	ref	note
 2026-10-28T16:43Z	3	check-in	no new Halo cases	halo 40711987595 running; full runs cancelled
 2026-10-28T18:16Z	3	check-in	H-J12 same; PlayHittable pass	halo 40711987595 done 92 cases; failure set unchanged
 2026-10-28T20:20Z	3	check-in	no new Halo cases	halo 40753193824 waiting; full runs cancelled
+2026-10-28T21:54Z	3	check-in	no new Halo cases	halo 40753193824 still waiting
