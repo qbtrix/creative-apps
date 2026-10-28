@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-28T22:23Z · CB-z #5999 merged; FH-10 #5251 green, awaiting lane; waiting on main-promoting run (dev CI 40776885348 on 09cb3117)
+Polled: 2026-10-28T23:11Z · CB-design done (run 40771139414); waiting on CI 40782400633 for CB-z and FH-photo
 
 
 
