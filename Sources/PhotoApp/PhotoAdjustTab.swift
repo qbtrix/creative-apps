@@ -4,7 +4,9 @@
 // section (PhotoTextInspector), then the adjustment target's header
 // ("Image" or the selected adjustment layer's name, over adjustHeader.info)
 // and its sections, then Looks (PhotoLooks), in one scroll view. Values in,
-// intents out.
+// intents out. Everything under the tool options is PhotoAdjustSections, which
+// is equal while every facet but `toolOptions` is, so a brush-size step
+// re-runs the options and skips the adjustment sections.
 import PhotoModel
 import SuiteImaging
 import SuiteUI
@@ -24,17 +26,37 @@ struct PhotoAdjustTab: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 ToolOptionsSection(model: model, perform: perform)
-                if showsLayerSettings {
-                    PhotoLayerSettings(model: model, perform: perform)
-                    PhotoTextInspector(model: model, perform: perform)
-                }
-                InspectorHeader(model.adjustHeader.title, details: [model.adjustHeader.info])
-                    .accessibilityIdentifier("photo.adjust.header")
-                AdjustmentsPanel(model: model, perform: perform)
-                PhotoLooks(target: looks)
+                PhotoAdjustSections(model: model, perform: perform, showsLayerSettings: showsLayerSettings, looks: looks)
+                    .equatable()
             }
         }
         .scrollIndicators(.never)
+    }
+}
+
+/// The tab under the tool options: the layer's settings, the adjustment sections and Looks. None shows an option,
+/// so two are equal while every facet but `toolOptions` is (`perform` is always the window's; Looks' placeholder
+/// target keeps the first one).
+struct PhotoAdjustSections: View, Equatable {
+    let model: PhotoWorkspace
+    let perform: PhotoPerform
+    let showsLayerSettings: Bool
+    let looks: PendingAdjustTarget
+
+    var body: some View {
+        if showsLayerSettings {
+            PhotoLayerSettings(model: model, perform: perform)
+            PhotoTextInspector(model: model, perform: perform)
+        }
+        InspectorHeader(model.adjustHeader.title, details: [model.adjustHeader.info])
+            .accessibilityIdentifier("photo.adjust.header")
+        AdjustmentsPanel(model: model, perform: perform)
+        PhotoLooks(target: looks)
+    }
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.showsLayerSettings == rhs.showsLayerSettings
+            && lhs.model.facets.equal(to: rhs.model.facets, except: .toolOptions)
     }
 }
 

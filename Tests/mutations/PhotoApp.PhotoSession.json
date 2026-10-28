@@ -1,0 +1,16 @@
+[
+  {
+    "label": "optionsNeverPublished: the session re-derives the facets but never stores the toolOptions one, so no view sees a size step",
+    "file": "Sources/PhotoApp/PhotoSession.swift",
+    "find": "        toolOptions.set(facets.toolOptions)\n",
+    "replace": "",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  },
+  {
+    "label": "writeOnlyOnRead: a write through the session's workspace skips the refresh, so no facet ever moves after an edit",
+    "file": "Sources/PhotoApp/PhotoSession.swift",
+    "find": "            defer { refresh() }\n",
+    "replace": "",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  }
+]
