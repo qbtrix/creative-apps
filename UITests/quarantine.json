@@ -53,18 +53,6 @@
     "expires": "2026-10-29"
   },
   {
-    "test": "AppSnapshotTests.BodyCountSuites/HaloWindowLiveDragTests/aViewerDragRunsTheWindowAtMostThreeTimes",
-    "owner": "#5971",
-    "reason": "Reads a process-wide bodyRuns counter that parallel suites' windows also bump; red on dev run 40661826310 (dev-red #5969). #5971 owns the per-window fix (BodyTally behind every bodyRuns).",
-    "expires": "2026-10-29"
-  },
-  {
-    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoRapidRotateTests/rapidRotationsThenReturnApplyOneCommit",
-    "owner": "#5971",
-    "reason": "Reads a process-wide bodyRuns counter that parallel suites' windows also bump; red on dev run 40661826310 (dev-red #5969). #5971 owns the per-window fix (BodyTally behind every bodyRuns).",
-    "expires": "2026-10-29"
-  },
-  {
     "test": "AppSnapshotTests.BodyCountSuites/SuiteTimelineScrubWindowTests/aScrubRedrawsOnlyThePlayhead",
     "owner": "#5971",
     "reason": "Reads a process-wide bodyRuns counter that parallel suites' windows also bump; red on dev run 40661826310 (dev-red #5969). #5971 owns the per-window fix (BodyTally behind every bodyRuns).",
