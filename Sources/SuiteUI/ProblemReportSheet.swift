@@ -1,5 +1,6 @@
 // ProblemReportSheet.swift (report-problem RP-3): Help > Report a Problem…'s sheet. A note field on top, the
-// report read-only below it, then Copy, Save…, Email… and Close. The sheet sends nothing itself: each action
+// report read-only below it in body-size code type, then Copy (which reads Copied for a moment), Save…, Email…
+// and Close. The sheet sends nothing itself: each action
 // hands the note plus the report (`ProblemReport.text(note:)`) to its host, and Save… and Email… stay disabled,
 // saying why, until the host passes them (RP-3e). The note lives in its own field view and a plain box the
 // sheet doesn't watch, so a keystroke runs no sheet body (RenderBudgetHelpTests). Every control carries
@@ -47,7 +48,7 @@ public struct ProblemReportSheet: View {
             }
             ProblemReportNote(draft: draft).accessibilityIdentifier(Self.identifier("note"))
             ScrollView {
-                Text(shown).font(SuiteFont.timecode).textSelection(.enabled)
+                Text(shown).font(SuiteFont.code).textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading).padding(SuiteSpacing.s)
             }
             .frame(height: SuiteSize.contentMinimum.height / 2)
@@ -59,7 +60,7 @@ public struct ProblemReportSheet: View {
                 Spacer()
                 action("Save…", onSave, why: "Saving the report isn't in this build yet.", id: "save")
                 action("Email…", onEmail, why: "Emailing the report isn't in this build yet.", id: "email")
-                Button("Copy") { onCopy(report.text(note: draft.text)) }
+                CopyButton { onCopy(report.text(note: draft.text)) }
                     .buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
                     .accessibilityIdentifier(Self.identifier("copy"))
             }

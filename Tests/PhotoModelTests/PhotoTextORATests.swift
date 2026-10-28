@@ -147,4 +147,24 @@ extension PhotoTextORATests {
         let reopened = try archive.decode(try archive.encode(original, codec: RawCodec()), codec: RawCodec())
         #expect(reopened.layers.first?.kind == .text(tricky))
     }
+
+    /// Every `.ora` fixture in the tests, from before text layers.
+    private static let fixtures: [URL] = {
+        let tests = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        return ["PhotoModelTests/Fixtures/adjust-legacy.ora", "RealJobs/photo/free-transform/input/logo-on-photo.ora",
+                "RealJobs/photo/fade-layers/input/four-layers.ora", "RealJobs/photo/flip-canvas/input/two-layers.ora"]
+            .map { tests.appendingPathComponent($0) }
+    }()
+
+    @Test(arguments: fixtures) func anExistingFileOpensAndResavesUnchanged(_ url: URL) throws {
+        let doc = try PhotoHeadless.open(Data(contentsOf: url), name: url.lastPathComponent)
+        #expect(doc.workspace.layers.allSatisfy { $0.kind.textLayer == nil }, "a pixel layer read as text")
+        let again = try PhotoHeadless.open(doc.save(), name: url.lastPathComponent)
+        #expect(again.workspace.layers.map(\.name) == doc.workspace.layers.map(\.name))
+        #expect(again.workspace.layers.map(\.kind) == doc.workspace.layers.map(\.kind))
+        let png = { (d: PhotoHeadless) throws -> Data in try #require(d.export("png", options: .object([:])).first).data }
+        let before = try PhotoHeadless.codec.decode(png(doc), longestSide: nil)
+        let after = try PhotoHeadless.codec.decode(png(again), longestSide: nil)
+        #expect(after == before)
+    }
 }

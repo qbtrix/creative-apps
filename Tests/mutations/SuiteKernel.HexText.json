@@ -1,0 +1,86 @@
+[
+  {
+    "label": "rounds: each channel is truncated instead of rounded",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "UInt8((min(max(channel, 0), 1) * 255).rounded())",
+    "replace": "UInt8(min(max(channel, 0), 1) * 255)",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "infinityReads255: an infinite channel clamps to FF instead of reading 0",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "channel.isFinite ? ",
+    "replace": "!channel.isNaN ? ",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "noShorthand: three digits no longer double up, so \"#F80\" reads as nothing",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "digits.count == 3 ?",
+    "replace": "digits.count == -1 ?",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "noAlphaForm: eight digits are refused, so \"#FF880080\" reads as nothing",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "full.count == 6 || full.count == 8",
+    "replace": "full.count == 6",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "alphaIgnored: six digits leave alpha 0 instead of opaque",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "value << 8 | 0xFF",
+    "replace": "value << 8",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "hashKept: a leading # is no longer stripped",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "if digits.first == \"#\" { digits.removeFirst() }",
+    "replace": "_ = digits.first",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "signAccepted: the hex-digit check goes, so \"+12345\" reads as a colour",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "full.allSatisfy(\\.isHexDigit),",
+    "replace": "",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "spacesKept: trailing spaces are no longer trimmed",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "while digits.last?.isWhitespace == true { digits.removeLast() }",
+    "replace": "_ = digits.last",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "alphaAlways: the alpha byte is written even when opaque",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "if alpha, byte(color.a) != 255 {",
+    "replace": "if alpha {",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "alphaUnasked: the alpha byte is written when the caller didn't ask",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "if alpha, byte(color.a) != 255 {",
+    "replace": "if byte(color.a) != 255 {",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "lowerCase: the digits are written lower case",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "String($0, radix: 16, uppercase: true)",
+    "replace": "String($0, radix: 16)",
+    "tests": "HexTextTests"
+  },
+  {
+    "label": "noPad: a byte under 16 writes one digit",
+    "file": "Sources/SuiteKernel/Fill/HexText.swift",
+    "find": "($0 < 16 ? \"0\" : \"\") + ",
+    "replace": "",
+    "tests": "HexTextTests"
+  }
+]

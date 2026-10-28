@@ -169,9 +169,9 @@ pixel painting to Photo.
 | Viewer | Draws the composition at the playhead, fitted, with the layer under the pointer selectable and draggable; selection box | Zoom and pan beyond fit; guides; safe-area overlays |
 | Playback | Play and pause (Space), loop, step a frame, go to start and end; holds the composition rate | Cached full-resolution preview; audio |
 | Undo | Every edit one named step, 100 steps; scrubs and drags coalesce | History panel |
-| Files | Save, Save As, Open, Open Recent; `.halo` JSON; damaged, newer and oversized files refused with a message | Autosave and crash recovery (first Later item); collect files |
+| Files | Save, Save As, Open, Open Recent; `.halo` JSON; damaged, newer and oversized files refused with a message. Open Recent, Clear Menu and Open In ▸ come from the suite's File commands and list the suite's shared recents, Halo's files only (file-flow); a file dropped on the window opens when it is a `.halo` and otherwise goes to the app that reads it, a mark at the window's bottom saying which first | Autosave and crash recovery (first Later item); collect files |
 | Blend | The 16 W3C blend modes per layer (shipped in the Model) | Track mattes (H8); masks |
-| Render | Render Frame (⌘R) into the viewer; Render… to a PNG sequence or an H.264 movie, full or half size, with progress and Cancel | Other codecs; render queue; alpha movie |
+| Render | Render Frame (⌘R) into the viewer; Render… to a PNG sequence, an H.264 movie or a ProRes 4444 movie, full or half size, with progress and Cancel; a transparent background keeps alpha in PNG and ProRes 4444, and the sheet says H.264 can't carry it (export-pack) | Other codecs; render queue |
 | Text | One-line text layers: string, size, the layer's color | Fonts, paragraph text, per-character animation |
 | Effects | – | Effects stack (#39): blur, fill, levels; motion blur (H9) |
 

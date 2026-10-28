@@ -63,14 +63,6 @@ struct NotBuiltSelection: SelectionShaping {
     func outline(of mask: Mask) -> [[Mask.Point]] { [] }
 }
 
-struct NotBuiltMasking: LayerMasking {
-    let not = NotBuilt(feature: "PV-5")
-    var unavailableHelp: String? { not.help }
-    func mask(from selection: Mask?, layerBounds: PixelRect) throws -> TiledPixels { throw not.refuse() }
-    func applying(_ mask: TiledPixels, to pixels: TiledPixels) throws -> TiledPixels { throw not.refuse() }
-    func masked(_ region: PixelBuffer, at origin: (x: Int, y: Int), by mask: TiledPixels) throws -> PixelBuffer { region }
-}
-
 struct NotBuiltAdjustmentLayers: AdjustmentLayering {
     let not = NotBuilt(feature: "PV-6")
     var unavailableHelp: String? { not.help }

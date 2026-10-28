@@ -75,7 +75,16 @@
     "Sources/LibraryModel/Contracts/ExportPresets.swift",
     "Tests/LibraryModelTests/LibraryFormatsTests.swift",
     "Tests/mutations/LibraryModel.LibraryValues.json",
-    "Tests/AppSnapshotTests/SuiteImageIOFormatsTests.swift"
+    "Tests/AppSnapshotTests/SuiteImageIOFormatsTests.swift",
+    "Sources/PhotoModel/PhotoDocumentFile.swift",
+    "Sources/LibraryModel/LibraryCommandCatalog.swift",
+    "Sources/LibraryApp/LibraryExportSheet.swift",
+    "Sources/LibraryModel/LibraryStatusText.swift",
+    "Sources/LibraryApp/Platform/XMPSidecarWriter.swift",
+    "Sources/LibraryModel/Fakes/FakeSidecars.swift",
+    "Sources/SuiteShell/PasteboardBridge.swift",
+    "Sources/SuiteUI/Gallery/GalleryPlaceImage.swift",
+    "Sources/SuiteUI/PlacedImageView.swift"
   ],
   "slices": [
     {
@@ -114,9 +123,22 @@
         "Sources/LibraryModel/Contracts/ExportPresets.swift",
         "Sources/LibraryApp/Platform/JPEGWriter.swift",
         "Tests/LibraryModelTests/LibraryFormatsTests.swift",
-        "Tests/mutations/LibraryModel.LibraryValues.json"
+        "Tests/mutations/LibraryModel.LibraryValues.json",
+        "Sources/PhotoModel/PhotoDocumentFile.swift",
+        "Sources/LibraryModel/LibraryCommandCatalog.swift",
+        "Sources/LibraryApp/LibraryExportSheet.swift",
+        "Sources/LibraryModel/LibraryStatusText.swift",
+        "Sources/LibraryApp/Platform/XMPSidecarWriter.swift",
+        "Sources/LibraryModel/Fakes/FakeSidecars.swift"
       ],
-      "waits": {},
+      "waits": {
+        "shared-thumbnails:ST-m": [
+          "SC-16"
+        ],
+        "clipboard-interop:CB-library": [
+          "SC-16"
+        ]
+      },
       "ui": true
     },
     {
@@ -277,7 +299,10 @@
         "Tests/imageio-baseline.txt",
         "Tests/SuiteModelTests/ImageIOImportRatchetTests.swift",
         "docs/c4/parts/creative-apps/suite-shell/shell-imageio.json",
-        "docs/blueprints/suiteui/features/shared-codecs.wave.json"
+        "docs/blueprints/suiteui/features/shared-codecs.wave.json",
+        "Sources/SuiteShell/PasteboardBridge.swift",
+        "Sources/SuiteUI/Gallery/GalleryPlaceImage.swift",
+        "Sources/SuiteUI/PlacedImageView.swift"
       ],
       "waits": {
         "SC-photo": [
@@ -294,6 +319,15 @@
         ],
         "adopt-kernel-autosave:AK-z": [
           "SC-11"
+        ],
+        "clipboard-interop:CB-s": [
+          "SC-12"
+        ],
+        "placed-images:PL-u": [
+          "SC-12"
+        ],
+        "placed-images:PL-z": [
+          "SC-12"
         ]
       },
       "ui": false

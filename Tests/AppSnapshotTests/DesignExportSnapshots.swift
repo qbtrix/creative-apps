@@ -57,7 +57,7 @@ import Testing
         let options = model.exportSheetDefaults
         #expect(options == DesignExportOptions(format: .png, scale: 1, scope: .frame))
         #expect(model.exportHelp(options) == nil)
-        #expect(model.exportRows(options).map(\.text) == ["Desktop.png 1440 × 1024, 1x, 1440 × 1024 px"])
+        #expect(model.exportRows(options).map(\.text) == ["Desktop.png 1440 × 1024 pt, 1x, 1440 × 1024 px"])
         try shoot(model, .editing(options), "design-export-sheet")
     }
 

@@ -6,7 +6,7 @@
 // popover (`suite.shape.chip-star`, `suite.shape.points`, typed into as
 // SuiteJourneyTests+Shapes does), drags across `halo.viewer.canvas` at a
 // hand's pace (as H-J5) for a new selected "Star" layer (the inspector
-// header names it), drags its Scale X bar (`halo.inspector.row.scaleX`, as
+// header names it by its kind, never its undo step "Draw Star"), drags its Scale X bar (`halo.inspector.row.scaleX`, as
 // H-J6 drags Rotation), then presses ⌘R at frame 0 (`halo.viewer.rendered`,
 // as H-J20) and renders a half-size PNG sequence through File > Render… (as
 // H-J21): `<tmp>/Intro/` holds a PNG that ImageIO decodes. HS-2 wrote it;
@@ -38,18 +38,21 @@ final class HaloShapeJourneyTests: XCTestCase {
         field.typeKey("a", modifierFlags: .command)
         field.typeText("6\r")
         XCTAssert(
-            FirstFive.wait(5) { (points.value as? String) == "6" }, "typing 6 left Points at \(points.value ?? "nothing")")
+            // The row reads its value as a number or as text ("6" either way, #4222).
+            FirstFive.wait(5) { "\(points.value ?? "")" == "6" }, "typing 6 left Points at \(points.value ?? "nothing")")
         halo.shot("shape-1-options")
         halo.press(.escape)
 
-        // 2. Drag in the viewer: a new "Star" layer, selected.
+        // 2. Drag in the viewer: a new layer named by its kind, "Star" (not its undo step, "Draw Star"), selected.
         let canvas = halo.element("halo.viewer.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 5), "no artboard (halo.viewer.canvas)")
         let from = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.35, dy: 0.3))
         from.click(forDuration: 0.1, thenDragTo: canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.7)),
             withVelocity: 100, thenHoldForDuration: 0.1)
         let header = halo.app.descendants(matching: .any).matching(
-            NSPredicate(format: "identifier == 'halo.inspector.header' AND label CONTAINS %@", "Star")).firstMatch
+            NSPredicate(
+                format: "identifier == 'halo.inspector.header' AND label CONTAINS %@ AND NOT label CONTAINS %@", "Star", "Draw")
+        ).firstMatch
         XCTAssert(
             header.waitForExistence(timeout: 5),
             "no Star layer selected: the header reads \(halo.element("halo.inspector.header").label)")

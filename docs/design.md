@@ -240,8 +240,10 @@ Nothing goes below 10 pt.
 
 **Motion.** Hover and state changes fade background, color and border over
 0.14 s, ease in and out (`SuiteMotion.state`). Under Reduce Motion they
-change at once. No other chrome animates; the artwork is the only thing that
-moves.
+change at once. The one other chrome motion is feedback: a refused rename's
+field shakes once, side to side, and stays still under Reduce Motion
+(`SuiteMotion.shakeOffset`, #3462). Otherwise the artwork is the only thing
+that moves.
 
 ### State colors
 
@@ -376,10 +378,10 @@ capsule of round icon buttons (`textSecondary`, hover `rowHover`) and a
 larger round play button in `accentFill` with a white glyph. Timecode in
 `timecode`: the current value `textPrimary`, the total `textSecondary`.
 
-**Tabs and the tool rail.** Segmented tabs (`SegmentedTabs`): a `row`
-capsule with 2 pt padding and `chip`-tall pills, labels `textSecondary`; the
-selected pill is the `stateSelected` tint with `textPrimary`. It stays a
-`Picker` underneath. Tool rail (`ToolbarGroup(style: .rail)`): idle symbols
+**Tabs and the tool rail.** Segmented tabs (`SegmentedTabs`): the stock
+macOS segmented control exactly as the HIG and AppKit's `NSSegmentedControl`
+draw it (captain, 10-27), with no custom capsule, tint or fill; it fills the
+panel's width. A tabbed pane is `NSTabView`. Tool rail (`ToolbarGroup(style: .rail)`): idle symbols
 in `textSecondary`, hover `rowHover`, selected on the `stateSelected` tint
 with the symbol in `accentText`.
 
@@ -422,7 +424,7 @@ no second row component.
   an adjustable value with units. Color is never alone. Differentiate
   Without Color adds the shape cues on the stage too.
 - **Reduce Motion:** state fades become instant, the recording dot stops,
-  the curve editor's preview dot stops.
+  the curve editor's preview dot stops, a refused rename's field doesn't shake.
 - **Increase Contrast:** the Dark + IC and Light + IC columns above: the
   ladder steps double, `outline` goes to 30%, secondary text moves toward
   primary, and the state colors brighten (Dark) or deepen (Light).

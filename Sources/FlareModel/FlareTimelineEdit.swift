@@ -5,6 +5,7 @@
 // Frame edits act on every layer of the edited owner at the playhead, so a scene's labels move with its keys.
 // The key selection is a thin set of `KeyRef`s that follows the keys it names; the editor kernel takes it over later.
 import FlareCore
+import SuiteKernel
 
 extension FlareWorkspace {
     /// What a timeline edit says when no key is selected.
@@ -27,7 +28,7 @@ extension FlareWorkspace {
         guard !selectedKeys.isEmpty else { return timelineError = Self.selectKeyFirst }
         guard frames != 0 else { return }
         let keys = Set(selectedKeys), keyframes = services.keyframes
-        let coalesceKey = "keys-\(dragStart)-\(keyDragSerial)"
+        let coalesceKey = CoalesceKey.key("keys", drag: "\(dragStart)-\(keyDragSerial)")
         guard timelineStep({ owner, engine in
             try keyframes.moveKeys(keys, by: frames, owner: owner, coalesceKey: coalesceKey, in: &engine)
         }) else { return }

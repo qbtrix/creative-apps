@@ -22,6 +22,7 @@
 // change, such as a sheet opening, would re-run the window). The toolbar's New Composition… is `halo.composition.new`. Views only read HaloProject and call its methods; all
 // state lives in HaloModel (scripts/ci checks this).
 import HaloModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -112,7 +113,7 @@ struct HaloWindow: View {
         .environment(\.haloLiveEdit, live)
         .onAppear { live.current = { model } }
         .modifier(RefreshLinkHandoff(live: live))
-        .modifier(HaloLiveTaking(project: { model }, land: { model.landLive($0) }))
+        .suiteLiveWindow(HaloLive.front, read: { HaloHeadless(workspace: model) }, write: { model.landLive($0.workspace) })
         .focusedSceneValue(\.haloPerform, perform)
         .focusedSceneValue(\.haloProject, model)
         .haloControlsProbe(HaloLaunch.current.controlsProbe)
@@ -141,7 +142,7 @@ struct HaloWindow: View {
 
     /// Every area's hook over `content`, in a fixed order.
     private func scenes(_ content: some View) -> some View {
-        historyScene(textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content))))))))))
+        stylingScene(historyScene(textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content)))))))))))
     }
 }
 

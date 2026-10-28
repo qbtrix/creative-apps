@@ -40,6 +40,7 @@ import Testing
             try base.applied(draft, to: content)
         }
         func flipped(_ content: PlacedPixels, _ axis: PhotoModel.FlipAxis) throws -> PlacedPixels { try base.flipped(content, axis) }
+        func matrix(_ draft: TransformDraft, origin: (x: Int, y: Int)) throws -> AffineMatrix { try base.matrix(draft, origin: origin) }
     }
 
     /// The selected layer's pixels, flattened.
@@ -113,6 +114,33 @@ import Testing
         let flipped = TransformRules.flipped(try #require(workspace.transformSelection), .horizontal)
         try workspace.setTransform(flipped, name: "Flip Horizontal", drag: nil)
         #expect(workspace.historySteps.count == steps + 3)
+    }
+
+    /// A mouse drag on the canvas while Free Transform is up (#5197): one on
+    /// the box's body moves it, one on its bottom-right corner scales it with
+    /// the top-left fixed, each one undo step. Samples carry the previous
+    /// sample as `from`, as the canvas sends them; at 400 % the 20 x 10 box's
+    /// centre is clear of the side handles' 6 pt reach.
+    @Test func aCanvasDragMovesTheBoxAndACornerDragScalesIt() throws {
+        var workspace = try logoOnPhoto()
+        try workspace.beginTransform()
+        let box = try #require(workspace.transformSelection).box, steps = workspace.historySteps.count
+        func drag(_ points: [Mask.Point]) {
+            for (from, to) in zip([points[0]] + points, points) { workspace.drag(from: from, to: to, modifiers: [], zoom: 4) }
+            workspace.endDrag()
+        }
+        let (cx, cy) = ((box.minX + box.maxX) / 2, (box.minY + box.maxY) / 2)
+        drag([Mask.Point(x: cx, y: cy), Mask.Point(x: cx + 2, y: cy + 1), Mask.Point(x: cx + 5, y: cy + 3)])
+        let moved = Rect(minX: box.minX + 5, minY: box.minY + 3, maxX: box.maxX + 5, maxY: box.maxY + 3)
+        #expect(near(try #require(workspace.transformSelection).box, moved, 1e-9), "the body drag moves the box")
+        #expect(workspace.historySteps.count == steps + 1)
+        drag([Mask.Point(x: moved.maxX, y: moved.maxY), Mask.Point(x: moved.maxX + 4, y: moved.maxY + 2),
+              Mask.Point(x: moved.maxX + 10, y: moved.maxY + 5)])
+        let scaled = Rect(minX: moved.minX, minY: moved.minY, maxX: moved.maxX + 10, maxY: moved.maxY + 5)
+        #expect(near(try #require(workspace.transformSelection).box, scaled, 1e-9), "the corner drag scales the box")
+        #expect(workspace.historySteps.count == steps + 2)
+        workspace.undo()
+        #expect(near(try #require(workspace.transformSelection).box, moved, 1e-9), "undo takes the scale back in one step")
     }
 
     @Test func commitIsOneFreeTransformStep() throws {

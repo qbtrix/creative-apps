@@ -3,6 +3,7 @@
 // table is unchanged. Fails when a reason changes, an edit records no step, or an id goes missing. Linux-safe.
 import Foundation
 @testable import LibraryModel
+import SuiteImaging
 import SuiteKernel
 import Testing
 
@@ -49,8 +50,9 @@ struct LibraryCatalogDoc: HeadlessDocument {
             ("empty", LibraryCatalog(services: .fake())), ("grid", grid), ("two selected", two), ("culled", culled),
             ("undone", with(culled) { $0.undo() }), ("loupe", loupe),
             ("cropping", with(loupe) { $0.toggleCrop(); $0.setCropAngle(-3) }),
+            ("black & white", with(two) { $0.setKinds([.blackAndWhite(.neutral)], name: "Black & White") }),  // AJ-10: {} removes it
             ("every slider", with(two) { c in  // CS-5: each Reset <slider> has a value to reset
-                for slider in DevelopSlider.allCases { c.setDevelop(slider, to: 1, coalesceKey: nil); c.endCoalescing() }
+                for slider in ToneSlider.develop { c.setDevelop(slider, to: 1, coalesceKey: nil); c.endCoalescing() }
             }),
         ]
     }
@@ -85,15 +87,25 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "file.show-catalog": .some(c.catalogState == .damaged ? nil : "The catalog file isn't damaged.")
         case "notice.close": .some(c.notice?.source == .import || c.notice?.source == .cull ? nil : "There is no notice to close.")
         case "notice.show-failures": .some(c.notice?.source == .import && c.importNotice?.failures.isEmpty == false ? nil : "No files failed to import.")
-        case let id where DevelopSlider.allCases.map(LibraryCatalog.resetSliderID).contains(id):
+        case let id where ToneSlider.develop.map(LibraryCatalog.resetSliderID).contains(id):
             .some(menu(c.canEditDevelop, "develop", "Develop isn't connected yet."))
         case "view.show-original": .some(c.services.unavailable["develop"] ?? c.developHelp
             ?? (c.canShowOriginal ? nil : "Open a photo in the loupe to see its original."))
+        case "image.rotate-cw", "image.rotate-ccw", "image.rotate-180", "image.flip":  // OC-8: the develop settings' reason
+            .some(c.services.unavailable["develop"] ?? c.developHelp)
+        case "crop.set-aspect", "crop.swap", "crop.set-frame", "crop.apply", "crop.reset": .some(c.cropHelp)
         case "file.recent", "file.open-recent", "file.drop": .some(nil)
         case "file.clear-recent": .some("No Recent Files")
         case "file.open-in": .some(c.openInHelp)
         case "file.share-prepare": .some(c.shareHelp)
+        case "edit.copy": .some(c.copyHelp)
+        case "catalog.backups": .some(nil)
+        case "catalog.restore-backup": .some(c.importState != .idle ? LibraryBackups.importing
+                                             : c.backup.backups == nil ? LibraryBackups.noBackups : nil)
         case "thumbnails.stats": .some(c.thumbnailDisk == nil ? "Thumbnails aren't kept on disk yet." : nil)
+        case "adjust.black-and-white", "adjust.invert", "look.apply": .some(c.services.unavailable["develop"] ?? c.developHelp)
+        case let id where id.hasPrefix("filter."): .some(c.services.unavailable["develop"] ?? c.developHelp ?? LibraryCatalog.filtersInPhoto)
+        case "look.list", "look.save", "look.delete": .some(nil)
         case "folders.list", "view.show-folder": .some(c.items.contains { $0.path?.hasPrefix("/") == true } ? nil : LibraryCatalog.noFolders)
         default: nil
         }
@@ -160,16 +172,21 @@ struct LibraryCatalogDoc: HeadlessDocument {
                 let noOpEdit = unchanged && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes", "redoRestoresBytes"]
                     .contains { problem.contains(": \($0):") }
                 // Library has no recent files, so Open Recent's example names one it can't find.
-                let needsFile = id == "file.open-recent" && problem.contains("exampleRuns")
-                return !((off || needsFile) && problem.contains("exampleRuns")) && !noOpEdit
+                // Nor saved looks: Delete Look's example names one the fake store doesn't hold.
+                let needsFile = ["file.open-recent", "look.delete"].contains(id) && problem.contains("exampleRuns")
+                // The kernel's image.flip is titled Flip while its step names the axis (OC-8).
+                let flipStep = problem == "image.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\""
+                return !((off || needsFile) && problem.contains("exampleRuns")) && !noOpEdit && !flipStep
             }
             #expect(problems.isEmpty, "\(state): \(problems.joined(separator: "\n"))")
             for spec in LibraryCatalog.commands where spec.kind == .edit && spec.availability(c).why == nil {
                 var ran = c
-                if (try? Self.catalog.run(spec.id, params: spec.example, on: &ran).undoStep) == spec.title { stepped.insert(spec.id) }
+                let step = try? Self.catalog.run(spec.id, params: spec.example, on: &ran).undoStep
+                if step == spec.title || (spec.id == "image.flip" && step == "Flip Horizontal") { stepped.insert(spec.id) }
             }
         }
-        let edits = Set(LibraryCatalog.commands.filter { $0.kind == .edit }.map(\.id))
+        // AJ-10: Library runs no filter, so no filter.<id> ever records a step.
+        let edits = Set(LibraryCatalog.commands.filter { $0.kind == .edit && !$0.id.hasPrefix("filter.") }.map(\.id))
         #expect(edits.subtracting(stepped).isEmpty, "never recorded its step: \(edits.subtracting(stepped))")
     }
 
@@ -216,6 +233,16 @@ struct LibraryCatalogDoc: HeadlessDocument {
         "file.show-catalog | Show Catalog in Finder | The catalog file isn't damaged.",
         "notice.close | Close Notice | There is no notice to close.",
         "notice.show-failures | Show Failures | No files failed to import.",
-    ] + DevelopSlider.allCases.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.rawValue) | on" } + ["file.share-prepare | Share | on",
+    ] + ToneSlider.develop.map { "\(LibraryCatalog.resetSliderID($0)) | Reset \($0.title) | on" } + ["file.share-prepare | Share | on", "edit.copy | Copy | on",
         "thumbnails.stats | Thumbnail Stats | Thumbnails aren't kept on disk yet."]
+        + ["catalog.backups | Catalog Backups | on", "catalog.restore-backup | Restore Catalog Backup | \(LibraryBackups.noBackups)"]
+        + ["image.rotate-cw | Rotate Right | on", "image.rotate-ccw | Rotate Left | on", "image.rotate-180 | Rotate 180° | on",
+           "image.flip | Flip | on"]
+        + ["crop.set-aspect | Crop Ratio", "crop.swap | Swap Crop", "crop.set-frame | Crop Frame", "crop.apply | Crop",
+           "crop.reset | Reset Crop"].map { "\($0) | Open a photo in the loupe to crop it." }
+        + ["adjust.black-and-white | Black & White | on", "adjust.invert | Invert | on"]
+        + ["Gaussian Blur", "Motion Blur", "Sharpen", "Reduce Noise", "Add Noise"].map { title in
+            "filter.\(title.lowercased().replacingOccurrences(of: " ", with: "-")) | \(title) | Filters are in Photo."
+        }
+        + ["look.list | Looks | on", "look.apply | Apply Look | on", "look.save | Save Look | on", "look.delete | Delete Look | on"]
 }

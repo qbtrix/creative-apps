@@ -6,6 +6,7 @@
 // ellipse would still cover. Linux and macOS.
 import Foundation
 @testable import HaloModel
+import SuiteImaging
 import SuiteKernel
 import Testing
 
@@ -20,7 +21,7 @@ import Testing
         let id = try HaloProject.catalog.run("shape.draw", params: params, on: &project).result
         let layer = try #require(project.selectedLayer)
         #expect(id == .object(["id": .string(layer.id)]))
-        #expect(layer.name == "Draw Star" && layer.shape == HaloShapeTests.star)
+        #expect(layer.name == "Star" && layer.shape == HaloShapeTests.star)
         #expect(layer.rect == HaloLayerRect(x: 760, y: 340, width: 400, height: 400))
         #expect(project.history.undo.count == 1)
         project.undo()
@@ -37,9 +38,11 @@ import Testing
         let history = HistoryCommands.specs(HaloProject.self).count  // HA-6: read and jump
         let transforms = TransformCommands.specs(HaloProject.self).count  // HT-6: the six transform commands
         let places = PlaceCommands.specs(HaloProject.self).count  // PH-6: the five place commands
+        let styles = StyleCommands.specs(HaloProject.self).count  // HY-1: the eleven style commands
+        let files = FileFlowCommands.specs(HaloProject.self).count - 1  // HF-3: the file flow, whose file.open-recent replaces Halo's
         #expect(HaloProject.catalog.ids.count  // FR-8b: + 1 for set-frame-rate
-            == HaloCommand.allCases.count + 2 + fills + strokes + history + transforms + 1 + places
-            + HaloProject.windowSpecs.count)
+            == HaloCommand.allCases.count + 2 + fills + strokes + history + transforms + 1 + places + styles + files
+            + HaloProject.textStyleSpecs.count + 2 + HaloProject.windowSpecs.count)  // TS-9: the kernel's text commands; CB-10: + 2 for edit.copy-frame and edit.paste
     }
 
     @Test func runShapeKeepsThePickedTool() throws {

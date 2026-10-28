@@ -155,9 +155,10 @@ extension HaloJourneyTests {
         return Double(plain[range])
     }
 
-    /// The bar's typing field, under the inspector while it is open.
+    /// The bar's typing field, inside the Rotation row while it is open. Not the inspector's first field: a
+    /// solid's FILL has its Color Hex field there at all times (#4398).
     @MainActor private func typingField(_ halo: Journey) -> XCUIElement {
-        halo.element("suite.inspector").textFields.firstMatch
+        rotationBar(halo).textFields.firstMatch
     }
 
     /// Clicks the Rotation bar, which opens its typing field.
