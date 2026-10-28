@@ -10,7 +10,8 @@
 // document point under it stays put (ZoomMath.anchoredOrigin); the scroll
 // wheel pans. Tile layers magnify nearest from 2 px per pixel up and minify
 // trilinear. The live layer (CanvasHostView+LiveLayer.swift) rides above
-// the picture, in the tiles' document space, while a drag moves it. macOS only.
+// the picture, in the tiles' document space, while a drag moves it. Debug
+// builds count this view's `show` calls (`showCalls`). macOS only.
 import AppKit
 import Combine
 import IOSurface
@@ -88,8 +89,16 @@ public final class CanvasHostView: NSView {
     override public var wantsUpdateLayer: Bool { true }
     override public func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
+    #if DEBUG
+    /// This view's `show` calls, for a budget test that counts one window's canvas work (never a static).
+    private(set) var showCalls = 0
+    #endif
+
     /// Shows `content`'s tiles: all of them when the document size changed, else only the dirty ones.
     public func show(_ content: any CanvasContentProviding) {
+        #if DEBUG
+        showCalls += 1
+        #endif
         let restart = content.documentSize != documentSize
         CATransaction.begin()
         CATransaction.setDisableActions(true)
