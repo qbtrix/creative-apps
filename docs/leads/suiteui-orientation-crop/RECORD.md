@@ -193,3 +193,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-28T09:48:24Z Critic panel waits on a finished journeys run; photo 40660486045 and full 40661399999 in progress
 - 2026-10-28T10:11:32Z critic panel waits on photo journeys 40660486045 / full 40669303681 (in progress) for photo-crop-portrait.png
 - 2026-10-28T10:34:23Z critic panel waits on photo journeys 40660486045 / full 40669303681 (in progress) for photo-crop-portrait.png
+- 2026-10-28T10:55:57Z critic panel waits on photo journeys 40660486045 / full 40669303681 (in progress), full 40675943152 pending, for photo-crop-portrait.png
