@@ -267,3 +267,4 @@ utc	stage	event	ref	note
 16:59Z	3	wait-main	#5993 merged db12af089; all slice PRs in dev; main held at f89f5255c by dev-red #5983 (not ours)
 17:19Z	3	wait-main	main still f89f5255c (dev-red #5983 open, not ours); 0 open findings
 17:39Z	3	wait-main	main still f89f5255c (dev-red #5983 open, not ours); 0 open findings
+17:58Z	3	wait-main	main still f89f5255c (dev-red #5983 open, not ours); 0 open findings
