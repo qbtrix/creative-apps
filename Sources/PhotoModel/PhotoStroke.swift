@@ -246,7 +246,8 @@ extension PhotoWorkspace {
         guard var done = stroke else { return }
         stroke = nil
         if let before = done.transformFrom {
-            if transformDraft != before { record(.draft(before), named: "Transform") }
+            // A press on no handle moved nothing itself (the handles' own drag records its steps).
+            if done.transformHandle != nil, transformDraft != before { record(.draft(before), named: "Transform") }
             return
         }
         switch done.tool {

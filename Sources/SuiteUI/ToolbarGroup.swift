@@ -186,15 +186,17 @@ public struct ToolbarGroup: View {
         return ControlEntry(id: id, enabled: action.isEnabled, reason: reason).selecting(action.toggleState)
     }
 
-    /// The action a key picks on a `.floating` palette: the rule's enabled tool on that one character, with
-    /// Shift or none held; nil on `.rail`, with Command, Control or Option, or for any other key.
+    /// The action a key picks on a `.floating` palette: the rule's enabled tool on that one character; with Shift,
+    /// the next enabled one on that letter after the selected tool (ToolKeys); nil on `.rail`, with Command,
+    /// Control or Option, or for any other key.
     nonisolated static func pick(
         _ characters: String, modifiers: EventModifiers, in actions: [ToolbarAction], style: Style,
         picking: some ToolPicking = SuiteToolPicking()
     ) -> ToolbarAction? {
+        let current = modifiers.contains(.shift) ? actions.first { $0.isSelected }?.id ?? "" : nil
         guard style == .floating, characters.count == 1, let key = characters.first,
               modifiers.isDisjoint(with: [.command, .control, .option]),
-              let id = picking.tool(forKey: key, in: actions.map { face($0) })
+              let id = ToolKeys.id(forKey: key, in: actions.map { face($0) }, after: current, picking: picking)
         else { return nil }
         return actions.first { $0.id == id }
     }

@@ -220,19 +220,31 @@ extension FlareWorkspace {
             newDocument()
             return .object([:])
         }
+        let spec = try Self.newSpec(p, base: .hd1080, id: "file.new")
+        try attempt("file.new") { $0.newDocument(spec) }
+        return .object([:])
+    }
+
+    /// The spec `p` asks for: the named preset's values (`base`'s, as Custom, with none), then any size, rate, length
+    /// and background `p` gives. A preset name no preset has, or a background that isn't "#RRGGBB", is refused under
+    /// `id` rather than silently replaced (#5841).
+    static func newSpec(_ p: NewParams, base: CanvasPreset, id: String) throws(CatalogError) -> NewDocumentSpec {
         let named = CanvasPreset.all.first { $0.name == p.preset }
-        var spec = NewDocumentSpec(preset: named ?? .hd1080)
+        if let name = p.preset, named == nil {
+            throw .failed(id: id, message: "No canvas preset is called \u{201C}\(name)\u{201D}. Pick one of: "
+                + CanvasPreset.all.map(\.name).joined(separator: ", ") + ".")
+        }
+        var spec = NewDocumentSpec(preset: named ?? base)
         spec.preset = named
         spec.width = p.width ?? spec.width
         spec.height = p.height ?? spec.height
         spec.fps = p.fps.map { FrameRate(whole: $0) } ?? spec.fps
         spec.durationFrames = p.durationFrames ?? spec.durationFrames
         guard let background = NewDocumentSpec.color(hex: p.background ?? "#FFFFFF") else {
-            throw CatalogError.failed(id: "file.new", message: "Pick a valid background color.")
+            throw .failed(id: id, message: "Pick a valid background color.")
         }
         spec.background = background
-        try attempt("file.new") { $0.newDocument(spec) }
-        return .object([:])
+        return spec
     }
 
     /// Add Label (a name) or Remove Label (none), refused as the timeline's menu disables them.

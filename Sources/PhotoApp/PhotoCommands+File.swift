@@ -23,10 +23,9 @@ extension PhotoCommands {
             menu.item("file.open", shortcut: KeyboardShortcut("o")) { menu.perform(.open) }
         }
         SuiteFileCommands(app: .photo, bridge: PhotoShell.bridge, document: menu.workspace.suiteDocument)
-        CommandGroup(before: .saveItem) {
-            menu.placeItem
-        }
         CommandGroup(replacing: .saveItem) {
+            // Place… shares the replaced group: a separate `before: .saveItem` group never showed (#4333).
+            menu.placeItem
             // `.saveItem` holds the system's Close, so replacing it brings Close back here.
             Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
                 .keyboardShortcut("w")

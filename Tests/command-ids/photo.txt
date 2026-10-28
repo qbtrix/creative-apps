@@ -5,6 +5,7 @@ edit.cut
 edit.delete-selection
 edit.fill-selection
 edit.paste
+edit.paste-as-image
 edit.redo
 edit.select-all
 edit.undo
@@ -135,3 +136,18 @@ tone.read
 tone.set
 tone.reset
 tone.auto
+fill.bucket
+retouch.spot-heal
+retouch.heal
+retouch.remove
+adjust.black-and-white
+adjust.invert
+filter.gaussian-blur
+filter.motion-blur
+filter.sharpen
+filter.reduce-noise
+filter.add-noise
+look.list
+look.apply
+look.save
+look.delete

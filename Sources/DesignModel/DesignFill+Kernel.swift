@@ -36,7 +36,7 @@ extension DesignWorkspace: GradientFillTarget {
         let before = snapshot
         for id in ids { _ = pages.update(id) { $0.paint(unit) } }
         guard snapshot != before else { throw DesignRefusal.unchanged }
-        record(name, before: before, coalescing: drag.map { "gradient-" + $0 })
+        record(name, before: before, coalescing: drag.map { CoalesceKey.key("fill", on: ids, drag: $0) })
     }
 
     /// Runs the fill editor's gesture as its command through `catalog`. A refusal changes nothing; the

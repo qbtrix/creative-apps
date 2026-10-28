@@ -5,6 +5,7 @@ import FoundationEssentials
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
 import SuiteKernel
 import Testing
 @testable import PhotoModel
@@ -83,9 +84,23 @@ struct PhotoCommandCatalogTests {
     /// transform packet asks, and image.flip does the same; tone.set likewise names its step for the slider
     /// ("Temperature"). On this flat fill tone.auto has nothing to suggest, so it records no step;
     /// PhotoToneCommandTests runs it on a range of tones.
+    /// The kernel's retouch.spot-heal example heals at (20, 20), off the 16 x 12 fixture, so it changes no pixel and
+    /// records no step (fill-heal FH-7; PhotoRetouchKernelTests heals a spot on the image as one step).
     /// (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
+    /// The suite's adjust examples (AJ-8) change nothing on the flat fixture (no B&W to remove, flat colour has no noise,
+    /// no saved look "mine"); PhotoAdjustTests runs each on a picture it changes.
     static let tolerated = [
+        "adjust.black-and-white: stepNamedTitle: its undo step reads \"Delete\", not \"Black & White\"",
+        "adjust.black-and-white: editRecordsOneStep: it recorded 0 undo steps, not one",
+        "adjust.black-and-white: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
+        "filter.reduce-noise: stepNamedTitle: its undo step reads \"Delete\", not \"Reduce Noise\"",
+        "filter.reduce-noise: editRecordsOneStep: it recorded 0 undo steps, not one",
+        "filter.reduce-noise: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
         "image.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
+        "look.delete: exampleRuns: the example refused on the fixture: look.delete is unavailable: There is no saved look \u{201C}mine\u{201D}.",
+        "retouch.spot-heal: stepNamedTitle: its undo step reads \"Delete\", not \"Spot Heal\"",
+        "retouch.spot-heal: editRecordsOneStep: it recorded 0 undo steps, not one",
+        "retouch.spot-heal: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
         "tone.auto: stepNamedTitle: its undo step reads \"Delete\", not \"Auto Tone\"",
         "tone.auto: editRecordsOneStep: it recorded 0 undo steps, not one",
         "tone.auto: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
@@ -140,7 +155,7 @@ struct PhotoCommandCatalogTests {
         let adjust = ws.addAdjustmentLayerHelp
         return [row("New Image", true), row("Open…", true), row("Save", image), row("Save As…", image), row("Export…", image),
                 row(ws.undoActionName, ws.canUndo), row(ws.redoActionName, ws.canRedo),
-                row("Cut", image, ws.cutHelp), row("Copy", image, ws.copyHelp), row("Paste", true, ws.pasteHelp(true)),
+                row("Cut", image, ws.cutHelp), row("Copy", image, ws.copyHelp), row("Paste", true, ws.pasteHelp(true)), row("Paste as Image", false),
                 row("Select All", ws.canSelectAll), row("Delete Selection", ws.canEditSelection), row("Fill Selection", ws.canEditSelection),
                 row("All", image), row("Deselect", ws.canDeselect)]
             + ["Invert", "Feather…", "Expand…", "Contract…"].map { row($0, image && !ws.areaRecipe.isEmpty) }
@@ -172,7 +187,11 @@ struct PhotoCommandCatalogTests {
             && !$0.hasPrefix("tone.") // tone-controls PT-4: the inspector's Tone rows run them; no menu items.
             && !$0.hasPrefix("style.") // layer-styles PY-2 adds their Layer menu items.
             && !$0.hasPrefix("path.") && !$0.hasPrefix("paths.") // the Pen and its overlay run them (#5072); no menu yet.
+            && !retouchIDs.contains($0) // fill-heal FH-8 adds the palette's fill and heal tools.
+            && !$0.hasPrefix("adjust.") && !$0.hasPrefix("filter.") && !$0.hasPrefix("look.") // AJ-9's Filter menu runs them.
     }
+    /// The fill and heal commands (fill-heal FH-7), which the palette's tools run, not a menu.
+    static let retouchIDs = Set(RetouchCommands.specs(PhotoWorkspace.self).map(\.id))
     /// The place commands (place-image PP-5): File > Place… runs place.image through PhotoPlace+Menu, not a catalog row.
     static let placeIDs = Set(PlaceCommands.specs(PhotoWorkspace.self).map(\.id))
     /// The shared file-flow commands (PF-3), which today's menus don't show yet.

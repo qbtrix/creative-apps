@@ -4,6 +4,7 @@
 // Select All, Deselect, Delete and Fill stay flat intents.
 import PhotoModel
 import SuiteKernel
+import SuiteUI
 import SwiftUI
 
 /// What the selection area can be asked to do.

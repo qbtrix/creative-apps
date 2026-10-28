@@ -175,7 +175,7 @@ extension PhotoWorkspace {
                 case .exposure: settings.apply(.exposure(0.1))
                 case .levels: settings.apply(.blackPoint(0.02))
                 case .curves: settings.apply(.curvePoints([CurvePoint(x: 0, y: 0), CurvePoint(x: 0.5, y: 0.55), CurvePoint(x: 1, y: 1)]))
-                case .hueSaturation, .blur: break
+                case .hueSaturation, .blur, .blackAndWhite, .invert: break
                 }
                 selectedLayerID = insertLayer(named: "\(kind.title) \(n / 4)", pixels: nil, kind: .adjustment(settings), at: 0)
                 continue
