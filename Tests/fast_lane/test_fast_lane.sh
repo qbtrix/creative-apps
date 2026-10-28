@@ -8,7 +8,7 @@
 # bisected by prefix; a proof gone stale on a ratchet or baseline change is
 # checked again on today's dev), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
 # per code batch scoped to its apps, priority order, slots, the timer, a red
-# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
+# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named, and LANE_KILN=1's hold for a local Mac check's local-ci/macos), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
 # bisect, with its 2-of-3 vote mode for a timing budget test, and the
 # auto-revert of a red dev's culprit, own-proof landing on the pre-screen and a
 # stale proof's batch of one holding only its own PR
@@ -650,6 +650,10 @@ gh() {
     "api "*"/status "*)  # a commit's statuses: $sw/status.<sha>.json ({statuses: [...]}), none if absent
       u="${2#*/commits/}"; u="${u%%/*}"
       jq -r "${!#}" "$sw/status.$u.json" 2>/dev/null || jq -rn '{statuses: []}' | jq -r "${!#}" ;;
+    "api "*"/commits/"*"--jq .commit.committer.date"*)  # a commit's committer date (mac_hold), from the bare remote, in UTC
+      u="${2#*/commits/}"
+      TZ=UTC git -C "$sw/origin.git" log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd "$u" 2>/dev/null \
+        | jq -R '{commit: {committer: {date: .}}}' | jq -r "${!#}" ;;
     "api "*"/pulls/"*"/files "*)
       n="${2#*/pulls/}"; n="${n%%/*}"
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
@@ -1656,6 +1660,41 @@ expect "local: a GitHub pass doesn't land a batch the local gate fails" "$(merge
 fresh; cpr 122 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
 gate "$TIP" success in_progress "macOS (photo)"; lstatus "$TIP" success; lane_sweep
 expect "local: a local pass lands while GitHub's macOS job still runs" "$(merges)" "pr merge 122"
+
+# LANE_KILN=1: a fresh batch holds its mac_only run up to LANE_KILN_WAIT_MIN
+# minutes for the local Mac check's local-ci/macos status, read by state and
+# context, never by its description. Its `error` is no answer: no red, no
+# bisect, and mac_only goes out once the wait runs out (LANE_KILN_WAIT_MIN=0
+# here stands for a batch older than the wait).
+mac_only() { grep -c -- "-f mac_only=true -f app=photo --ref $1\$" "$sw/calls" || true; }
+ldesc() { jq -n --arg s "$2" --arg d "$3" '{statuses: [{context: "local-ci/macos", state: $s, description: $d, target_url: "https://mac.local/ci/1"}]}' >"$sw/status.$1.json"; }
+fresh; cpr 140 Sources/PhotoModel/A.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+expect "local hold: a fresh batch gets its Linux check and no mac_only run" \
+  "$(grep -c -- "-f linux_only=true --ref $BR\$" "$sw/calls"),$(mac_only "$BR")" "1,0"
+gate "$TIP" success none; ldesc "$TIP" success "mac check ✘ (a description the lane ignores)"; LANE_KILN=1 lane_sweep
+expect "local hold: a green local-ci/macos within the wait lands it with no mac_only run" \
+  "$(merges),$(mac_only "$BR")" "pr merge 140,0"
+fresh; cpr 141 Sources/PhotoModel/A.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success none; LANE_KILN=1 lane_sweep
+expect "local hold: no answer yet keeps holding" "$(mac_only "$BR"),$(merges)" "0,"
+gate "$TIP" success none; LANE_KILN=1 LANE_KILN_WAIT_MIN=0 lane_sweep
+expect "local hold: no answer within the wait dispatches mac_only as before" "$(mac_only "$BR"),$(merges)" "1,"
+fresh; cpr 142 Sources/PhotoModel/A.swift; cpr 143 Sources/PhotoModel/B.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success none; ldesc "$TIP" error "mac check ✘ infra"; LANE_KILN=1 lane_sweep
+expect "local hold: an error within the wait is no answer: held, not red" \
+  "$(mac_only "$BR"),$(probe_sha 1),$(redref),$(grep -c '^pr edit .*needs-fix' "$sw/calls" || true)" "0,,0,0"
+LANE_KILN=1 LANE_KILN_WAIT_MIN=0 lane_sweep
+expect "local hold: an error past the wait dispatches mac_only, no bisect" \
+  "$(mac_only "$BR"),$(probe_sha 1),$(redref),$(merges)" "1,,0,"
+fresh; cpr 144 Sources/PhotoModel/A.swift; cpr 145 Sources/PhotoModel/B.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success none; ldesc "$TIP" failure "mac check ✔ (a description the lane ignores)"; LANE_KILN=1 lane_sweep
+expect "local hold: a failure is red: the bisect probes the chain after 1 PR" \
+  "$(probe_sha 1),$(grep -c -- "-f linux_only=true --ref $BR-1\$" "$sw/calls"),$(mac_only "$BR"),$(merges)" \
+  "$(git -C "$sw/origin.git" rev-parse "$TIP~1"),1,0,"
 
 # Slots: the lane's queued and running macOS runs (gates and per-PR builds;
 # other runs don't count) at LANE_MAC_SLOTS form no batch.
