@@ -112,14 +112,14 @@ extension BodyCountSuites {
             }
             try await w.settle(untilStable: bodies)
             #expect(w.value("photo.text.box") == "A B")
-            // Return adds the layer: the box closes and Undo names the step (PJ-TX's "Undo Add Text").
+            #expect(await w.element("photo.text.size") == nil, "a Text section before any text layer")
+            // Return adds the layer: the box closes, and the new text layer, selected, shows the Text section.
             try await w.ticks(1) { _ in
                 BodyCountSuites.RenderBudgetNewDocumentTests.press("\r", keyCode: 36, in: w.window)
             }
             try await w.settle(untilStable: bodies)
             #expect(await w.element("photo.text.box") == nil, "Return left the box open")
-            let undo = w.label("photo.bar.undo")
-            #expect(undo?.contains("Add Text") == true, "Undo reads \(undo ?? "nothing")")
+            #expect(await w.element("photo.text.size") != nil, "Return added no text layer (no Text section)")
         }
     }
 }
