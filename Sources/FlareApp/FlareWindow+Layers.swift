@@ -28,7 +28,7 @@ extension SidebarSection {
 
 /// A row's context menu: Rename, then its commands as ToolbarActions that send their intent through `perform`.
 enum FlareRowMenu {
-    static func actions(_ commands: [FlareRowCommand], perform: @escaping @MainActor (FlareIntent.Layers) -> Void) -> [ToolbarAction] {
+    @MainActor static func actions(_ commands: [FlareRowCommand], perform: @escaping @MainActor (FlareIntent.Layers) -> Void) -> [ToolbarAction] {
         guard !commands.isEmpty else { return [] }
         return [SidebarRow.renameMenuItem] + commands.map { command in
             ToolbarAction(command.title, systemImage: command.systemImage, unavailableHelp: command.help) {
