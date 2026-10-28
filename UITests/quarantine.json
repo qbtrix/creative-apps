@@ -69,5 +69,23 @@
     "owner": "#5924",
     "reason": "121 window bodies against 120 on dev macOS under load (runs 40394212348, 40564904343), then the process died in it; #5924 owns the fix (split Library's window state).",
     "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoRapidRotateTests/rapidRotationsThenReturnApplyOneCommit",
+    "owner": "#5942",
+    "reason": "The .gpu, not-back-to-back case makes 540 tile surfaces on the CI runner (run 40605553090 at 0c204c3e3, after #5938); the other 3 cases pass. #5942 owns the fix.",
+    "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.PhotoAdjustTargetSnapshots/backgroundTargetsTheImage",
+    "owner": "#5943",
+    "reason": "adjustSections doesn't match the expected list after AJ-8 (#5247), run 40605553090. #5943 owns the fix or the revert.",
+    "expires": "2026-10-29"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoToneTests/temperatureDragInThreeBodies",
+    "owner": "#5943",
+    "reason": "5 bodies against a budget of 3 after AJ-8 (#5247), run 40605553090. #5943 owns the fix or the revert.",
+    "expires": "2026-10-29"
   }
 ]
