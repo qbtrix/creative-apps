@@ -232,7 +232,7 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
         #expect(items.allSatisfy { $0.ref.app == .photo && $0.ref.type == .png })
     }
 
-    /// RJ-P42 on Linux: the CLI keeps file commands window-only, so the walk runs the job's steps here.
+    /// RJ-P42 on Linux: the job's steps on a headless workspace, each drop's bytes handed over first.
     @Test func dropLayerRealJobPasses() throws {
         let folder = PhotoJob.root.appendingPathComponent("drop-layer")
         let script = try JSONDecoder().decode(DropJob.self, from: Data(contentsOf: folder.appendingPathComponent("drop-layer.jobs.json")))
@@ -241,8 +241,11 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
         for step in script.steps {
             var params = step.params
             if case .object(var fields) = params, case .array(let paths)? = fields["paths"] {
-                fields["paths"] = .array(paths.map { if case .string(let p) = $0 { .string(folder.appendingPathComponent(p).path) } else { $0 } })
+                let full = paths.compactMap { if case .string(let p) = $0 { folder.appendingPathComponent(p).path } else { nil } }
+                fields["paths"] = .array(full.map(JSONValue.string))
                 params = .object(fields)
+                // A headless workspace places only what its host handed over, as the CLI's DropFiles does.
+                workspace.receiveDropped(try Dictionary(uniqueKeysWithValues: full.map { ($0, try Data(contentsOf: URL(fileURLWithPath: $0))) }))
             }
             _ = try PhotoWorkspace.catalog.run(step.id, params: params, on: &workspace)
             counts.append(workspace.layers.count)
