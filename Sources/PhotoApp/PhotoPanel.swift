@@ -41,7 +41,7 @@ struct PhotoPanel: View {
 
     var body: some View {
         #if DEBUG
-        let _ = bodyTally?.ran(Self.self)
+        let _ = bodyTally.ran(Self.self)
         #endif
         let model = self.model
         VStack(alignment: .leading, spacing: 0) {

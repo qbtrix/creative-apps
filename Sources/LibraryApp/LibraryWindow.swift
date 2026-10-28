@@ -41,7 +41,7 @@ final class LibraryAreas {
     let filters = FiltersAreaState()
 }
 
-struct LibraryWindow: View {
+struct LibraryWindow: View, BodyCounted {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
     /// The loupe's GPU route (suite-imaging IM-11); nil in a test window.
@@ -63,13 +63,12 @@ struct LibraryWindow: View {
     nonisolated static let dropTarget = "Library"
 
     #if DEBUG
-    /// How many times a window's body ran; RenderBudgetLibraryTests counts an interaction's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         let filters = filtersMenu
         SuiteWindow(

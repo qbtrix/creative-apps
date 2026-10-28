@@ -18,10 +18,9 @@
 // layer in one Place step, centred; with none open it opens; another app's
 // file goes to that app; the mark at the bottom says which before the drop.
 // With the Pen, PhotoPenOverlay puts SuiteUI's PathEditOverlay over the canvas.
-// In debug builds `bodyRuns` counts every editor's body runs process-wide, and
-// the window's SuiteUI BodyTally (`bodyTally` in the environment) counts only
-// that window's, for a budget test that runs alongside suites drawing their own
-// Photo windows. The inspector, layer list, status line and canvas overlay read
+// In debug builds its body runs report to SuiteUI's BodyTally, and `bodyRuns`
+// reads the running test's windows only, so a budget test that runs alongside
+// suites drawing their own Photo windows counts only its own. The inspector, layer list, status line and canvas overlay read
 // the window's PhotoSession facets themselves, so an option step that moves no
 // facet the window reads never re-runs this body.
 import PhotoModel
@@ -29,7 +28,7 @@ import SuiteShell
 import SuiteUI
 import SwiftUI
 
-struct PhotoEditor: View {
+struct PhotoEditor: View, BodyCounted {
     let model: PhotoWorkspace
     var tiles: CanvasTiles?
     var renderMilliseconds: Double?
@@ -50,15 +49,12 @@ struct PhotoEditor: View {
     private static let trailingItems: [PhotoToolbarItem] = [.undo, .redo, .zoomOut, .fit, .zoomIn]
 
     #if DEBUG
-    /// How many times an editor's body ran; PhotoWindowStrokeTests counts a stroke's.
-    static var bodyRuns = 0
     @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
-        let _ = bodyTally?.ran(Self.self)
+        let _ = bodyTally.ran(Self.self)
         #endif
         SuiteWindow(
             title: model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"),
