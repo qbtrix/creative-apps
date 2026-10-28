@@ -278,3 +278,4 @@ utc	stage	event	ref	note
 2026-10-27T20:00Z	3	check-in	waiting	halo 40554102602 at 79a9f50c queued; nothing new
 2026-10-27T21:34Z	3	check-in	waiting	halo 40554102602 cancelled at 13 cases; halo 40584004208 at e4f1c950 queued
 2026-10-27T23:07Z	3	check-in	waiting	halo 40590212020 at 6dab26f7 running
+2026-10-28T00:41Z	3	check-in	same	H-J12 same fail at 6dab26f7; PlayHittable pass; full 40603757576 waiting
