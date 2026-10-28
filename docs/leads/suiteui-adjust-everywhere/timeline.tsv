@@ -246,3 +246,4 @@ utc	stage	event	ref	note
 05:13Z	3	AJ-halo	#5258 gate PASS, pushed 357361888, Head moved; needs-split until #5257 merges
 05:14Z	3	check-in	#5250 #5252 #5257 clean, wait prescreen; #5258 waits #5257; main fef52e668
 05:33Z	3	check-in	no change; #5258 lost fast-lane (stacked size), relabel after #5257 merges
+05:52Z	3	check-in	#5258 base retargeted to #5257 branch (5 files), fast-lane back; all wait prescreen
