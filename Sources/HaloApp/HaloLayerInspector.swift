@@ -3,7 +3,7 @@
 // the LAYER group, FILL for a solid or shape (HaloFillInspector, its
 // gestures to `runFill`), IMAGE for a solid (HaloPlaceInspector, its picture
 // and the Fill checkbox, PH-3), STROKE for a shape (HaloStrokeInspector, its
-// gestures to `runStroke`), then the EASING and TEXT slots. TRANSFORM has one InspectorSliderRow per
+// gestures to `runStroke`), FILTERS while the layer has filters (HaloFilterSection, AJ-13), then the EASING and TEXT slots. TRANSFORM has one InspectorSliderRow per
 // `propertyRows` row (shown value, range, step, unit, decimals; keyed while
 // a key sits at the playhead) with a KeyframeButton beside it, or under it
 // when the full titles and widest typical values (`widestTypicalText`) don't
@@ -71,6 +71,9 @@ struct HaloLayerInspector: View {
                     }
                     if HaloStrokeInspector.shows(layer.kind) {
                         HaloStrokeInspector(model: model, perform: perform, runStroke: runStroke)
+                    }
+                    if HaloFilterSection.shows(layer.filters) {
+                        HaloFilterSection(filters: layer.filters, help: model.adjustHelp, model: model)
                     }
                 }
                 HaloEasingInspector(model: model, perform: perform)
