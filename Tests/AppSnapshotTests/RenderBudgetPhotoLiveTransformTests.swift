@@ -1,6 +1,6 @@
 // RenderBudgetPhotoLiveTransformTests.swift: Free Transform's rotate drag on the real Photo window moves
 // pixels the compositor already has (SuiteUI's CanvasHostView lift), so a drag sample does no pixel work.
-// It hosts PhotoWindow on the `sample` fixture (800 x 600, one pixel layer) with Free Transform begun,
+// It hosts PhotoWindow on a 400 x 300 one-layer image with Free Transform begun,
 // presses in the rotate zone off the box's bottom-right corner and turns the pointer 120 samples at 120 Hz
 // round the box's centre, on the tile path and on Metal; a canvas drag on the box's body (the window's drag
 // intents) does the same through the live copy. While the pointer is down Photo resamples the layer on the CPU
@@ -78,7 +78,7 @@ extension BodyCountSuites {
             var (during, lifted, bodiesDuring) = (0, false, 0)
             let step = try await w.measure("photo live transform canvas body drag, 120 samples", bodies: RenderBudgetPhotoTransformTests.bodies) {
                 try await w.ticks(Self.samples) { i in
-                    send(.drag(CGPoint(x: 300 + Double(i - 1) * 2, y: 300), CGPoint(x: 300 + Double(i) * 2, y: 300 + Double(i) / 2)))
+                    send(.drag(CGPoint(x: 200 + Double(i - 1) * 2, y: 150), CGPoint(x: 200 + Double(i) * 2, y: 150 + Double(i) / 2)))
                 }
                 try await w.settle(200)
                 during = Self.resamples() - before
@@ -123,10 +123,11 @@ extension BodyCountSuites {
             return nil
         }
 
-        /// The sample fixture (800 x 600, one pixel layer) with the Move tool and Free Transform begun: small, so a
-        /// debug build's one lift (the layer's bytes and the picture under it) lands within the drag.
+        /// A 400 x 300 white image (one pixel layer) with the Move tool and Free Transform begun: small, so a debug
+        /// build's lift and the release's exact frame (a lanczos3 resample on the CPU) stay quick on a CI runner.
         static func draft() throws -> RenderBudgetPhotoTransformTests.Draft {
-            var model = try PhotoWorkspace.fixture(.sample)
+            var model = PhotoWorkspace()
+            try model.newImage(DocumentSetup(width: 400, height: 300))
             model.selectTool(.move)
             try model.beginTransform()
             return RenderBudgetPhotoTransformTests.Draft(model: model, before: try #require(model.transformSelection))
@@ -161,11 +162,17 @@ extension BodyCountSuites {
         /// Every resample of Free Transform's layer in the process so far (debug only).
         static func resamples() -> Int { PhotoRenderCount.resamples.withLock { $0 } }
 
-        /// Waits up to 60 s for every canvas render in the process to finish.
+        /// Waits up to 60 s for the window's canvas renders and its live-layer pixels to finish.
         static func idle<V: View>(_ w: RenderBudgetWindow<V>) async throws {
-            for _ in 0..<3000 where CanvasRenderer.inFlight != 0 { try await Task.sleep(for: .milliseconds(20)) }
+            // This window's renderer only: windows of suites running alongside keep the process-wide count busy.
+            let renderer = canvas(in: w.host).flatMap(CanvasRenderer.rendering(into:))
+            for _ in 0..<3000 where renderer?.isSettled == false || (renderer == nil && CanvasRenderer.inFlight != 0) {
+                try await Task.sleep(for: .milliseconds(20))
+            }
             try await w.settle(100)
         }
+
+        struct NoRenderer: Error {}
     }
 }
 

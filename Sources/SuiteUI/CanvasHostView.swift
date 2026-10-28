@@ -58,6 +58,8 @@ public final class CanvasHostView: NSView {
     let liftSpace = CALayer()
     /// The live layer in `liftSpace`; nil with none up.
     var lifted: CALayer?
+    /// The live layer hid the picture (`showLiveLayer(_:at:hidingPicture:)`) until its drop.
+    var pictureHidden = false
     /// A dropped live layer the Metal path keeps until the drawable with the exact picture is on screen.
     var droppedLift: CALayer?
 
