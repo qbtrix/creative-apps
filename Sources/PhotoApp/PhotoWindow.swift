@@ -1,5 +1,9 @@
-// PhotoWindow.swift: the root of a Photo window. It holds the one
-// PhotoWorkspace (`model`) and the window's presentation state (zoom, the
+// PhotoWindow.swift: the root of a Photo window. It holds the window's
+// PhotoSession, whose PhotoWorkspace it edits as `model` (every write re-derives
+// the session's facets; PhotoSession.swift), and puts the session in the
+// environment. Its body reads every facet but `toolOptions`, so a brush-size step
+// re-runs only the inspector and the canvas overlay, never this body or the
+// editor's. It also holds the window's presentation state (zoom, the
 // open file's URL, sheets and alerts, the Straighten draft the
 // canvas previews, and the v2 presentation flags), turns every PhotoIntent
 // into a workspace method or a panel, and keeps the picture rendered (CanvasRenderer) whenever the
@@ -33,7 +37,7 @@ import SuiteUI
 import SwiftUI
 
 struct PhotoWindow: View {
-    @State var model: PhotoWorkspace
+    @State var session: PhotoSession
     @State var renderer = CanvasRenderer()
     @State var pacer = StrokePacer()
     @State var liveStroke = LiveStroke()
@@ -98,15 +102,30 @@ struct PhotoWindow: View {
     init(model: PhotoWorkspace = PhotoWindow.launchWorkspace(), zoom: Double = 1) {
         var model = model
         model.readImages(with: ImageIOCodec())
-        _model = State(initialValue: model)
+        self.init(session: PhotoSession(model), zoom: zoom)
+    }
+
+    /// A window on `session`, which a test keeps to read the workspace and its facets.
+    init(session: PhotoSession, zoom: Double = 1) {
+        _session = State(initialValue: session)
         _zoom = State(initialValue: zoom)
     }
 
+    /// The session's workspace; a write goes through the session, in place, and re-derives its facets.
+    var model: PhotoWorkspace {
+        get { session.workspace }
+        nonmutating set { session.workspace = newValue }
+        nonmutating _modify { yield &session.workspace }
+    }
+
     var body: some View {
+        // Every facet but the options: an option step re-runs only the views that show options.
+        let _ = session.workspace(reading: .document, .tool, .adjust, .history, .status, .canvas, .file)
         PhotoEditor(
             model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
             renderBackend: renderer.backend, note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
             straighten: straightenDraft)
+            .environment(session)
             .environment(\.photoDragLine, dragLine)
             .environment(\.photoLiveTransform, liveTransform)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))

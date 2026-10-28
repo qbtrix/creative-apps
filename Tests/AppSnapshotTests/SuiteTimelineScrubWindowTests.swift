@@ -13,7 +13,11 @@
 // warm-up scrub and once no body has run for 300 ms: in a cold process (the
 // first body-count suite in a CI test shard) the 300 lanes were still being
 // laid out half a second in, and 18,170 lane bodies landed in the count
-// (#5321). PhotoWindowStrokeTests warms its window the same way. macOS only.
+// (#5321). PhotoWindowStrokeTests warms its window the same way. The
+// expectations read this window's own counts (TimelineBodyTally, set on the
+// host): the bodyRuns statics count every timeline in the test process, so
+// they are only printed, as process-wide, beside whether the settle finished
+// (#5804). macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -24,7 +28,8 @@ extension BodyCountSuites {
     @MainActor @Suite struct SuiteTimelineScrubWindowTests {
         @Test(.timeLimit(.minutes(2))) func aScrubRedrawsOnlyThePlayhead() async throws {
             let scrubs = ScrubLog()
-            let host = CountingHostingView(rootView: ScrubHost(log: scrubs))
+            let tally = TimelineBodyTally()
+            let host = CountingHostingView(rootView: ScrubHost(log: scrubs, tally: tally))
             let frame = CGRect(x: 0, y: 0, width: 1280, height: 400)
             host.frame = frame
             let window = NSWindow(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
@@ -44,9 +49,9 @@ extension BodyCountSuites {
                 send(.leftMouseDragged, at: CGPoint(x: start.x + 5 * Double(i), y: start.y), to: window)
             }
             send(.leftMouseUp, at: CGPoint(x: start.x + 60, y: start.y), to: window)
-            try await settled()
+            let settledOK = try await settled(tally)
             scrubs.frames.removeAll()
-            let before = (bodies(), host.layouts)
+            let before = (own(tally), bodies(), host.layouts)
             send(.leftMouseDown, at: start, to: window)
             var xs = [start.x]
             let clock = ContinuousClock(), began = clock.now
@@ -57,7 +62,7 @@ extension BodyCountSuites {
                 send(.leftMouseDragged, at: CGPoint(x: x, y: start.y), to: window)
             }
             try await Task.sleep(for: .milliseconds(150))
-            let after = (bodies(), host.layouts)
+            let after = (own(tally), bodies(), host.layouts)
             send(.leftMouseUp, at: CGPoint(x: start.x + 600, y: start.y), to: window)
             // Frames crossed: the pointer's x anchored at the first frame sent.
             let first = try #require(scrubs.frames.first, "the ruler press sent no frame")
@@ -66,8 +71,9 @@ extension BodyCountSuites {
             let visited = [0] + xs.map { mapping.frame(atX: $0 - origin) }
             let crossed = zip(visited, visited.dropFirst()).filter { $0 != $1 }.count
             let runs = zip(after.0, before.0).map { $0 - $1 }
+            let process = zip(after.1, before.1).map { $0 - $1 }
             let report = "SCRUB-WINDOW host=\(box) lanes=300 frames=10000 crossed=\(crossed) scrubs=\(scrubs.frames.count) "
-                + "bodies lane/ruler/playhead/strip=\(runs) layouts=\(after.1 - before.1)"
+                + "bodies lane/ruler/playhead/strip=\(runs) process-wide=\(process) settled=\(settledOK) layouts=\(after.2 - before.2)"
             print(report)
             #expect(runs[0] == 0, "a lane redrew during the scrub: \(report)")
             #expect(runs[1] == 0, "the ruler redrew during the scrub: \(report)")
@@ -77,19 +83,23 @@ extension BodyCountSuites {
             #expect(zip(scrubs.frames, scrubs.frames.dropFirst()).allSatisfy { $0 != $1 }, "a frame was sent twice: \(report)")
         }
 
-        /// Returns once no lane, ruler, playhead or strip body has run for 300 ms (10 s at most): a cold
-        /// process lays the 300 lanes out well past the first half second.
-        private func settled() async throws {
-            var last = bodies(), idle = 0
+        /// Whether no lane, ruler, playhead or strip body of this window ran for 300 ms (waits 10 s at most):
+        /// a cold process lays the 300 lanes out well past the first half second.
+        private func settled(_ tally: TimelineBodyTally) async throws -> Bool {
+            var last = own(tally), idle = 0
             for _ in 0..<100 {
                 try await Task.sleep(for: .milliseconds(100))
-                let now = bodies()
+                let now = own(tally)
                 if now == last { idle += 1 } else { last = now; idle = 0 }
-                if idle == 3 { return }
+                if idle == 3 { return true }
             }
+            return false
         }
 
-        /// Lane, ruler, playhead and strip body runs so far; zeros in release, which has no counters.
+        /// This window's lane, ruler, playhead and strip body runs so far; zeros in release, which counts none.
+        private func own(_ tally: TimelineBodyTally) -> [Int] { [tally.lane, tally.ruler, tally.playhead, tally.strip] }
+
+        /// The same over every window in the process; printed, never asserted. Zeros in release.
         private func bodies() -> [Int] {
             #if DEBUG
             return [TimelineLane<Int>.bodyRuns, TimelineRuler.bodyRuns, TimelinePlayhead.bodyRuns, TimelineStrip<Int>.bodyRuns]
@@ -121,6 +131,7 @@ private struct ScrubHost: View {
             .map { TimelineKey(frame: $0, shape: .linear) })
     }
     let log: ScrubLog
+    let tally: TimelineBodyTally
     @State private var playhead = 0
 
     var body: some View {
@@ -134,5 +145,6 @@ private struct ScrubHost: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         // Every press here activates the window; a hand's press in the active window needs no opt-in.
         .allowsWindowActivationEvents()
+        .environment(\.timelineBodyTally, tally)
     }
 }

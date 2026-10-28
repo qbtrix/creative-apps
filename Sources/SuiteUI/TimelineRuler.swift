@@ -72,10 +72,14 @@ struct TimelineRulerMarks: View {
     let unit: TimeUnit
     let fps: Int
     var rate: FrameRate? = nil
+    #if DEBUG
+    @Environment(\.timelineBodyTally) private var tally
+    #endif
 
     var body: some View {
         #if DEBUG
         TimelineRuler.bodyRuns += 1
+        tally?.ruler += 1
         #endif
         let mapping = mapping
         let visibleX = visibleX
