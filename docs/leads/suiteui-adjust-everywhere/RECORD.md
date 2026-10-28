@@ -492,3 +492,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 16:38Z #5260 merged (f437fabab): AJ-photo's PRs all in. Opened #5993 (AJ-z, feature-done: wave built, RJ-X60 pending #5990), Head c9b3c9d6b. Belt-Slice-Done AJ-photo and AJ-z (gaps: #5990) once main contains them and ci.yml on that sha is green; main held at f89f5255c by dev-red #5983 (not ours).
 - 2026-10-28T16:58Z #5260 merged: AJ-photo all on dev; Belt-Slice-Done waits for main to move past f89f5255c (dev-red #5983 not ours)
 - 16:59Z #5993 merged as db12af089: every slice's PRs are in dev. Waiting for main to move past dev-red #5983 (not ours) and a green ci.yml run on it, then Belt-Slice-Done AJ-photo, AJ-z (gaps: #5990) and Belt-Contact-Sheet.
+- 17:19Z Check-in: main still at f89f5255c behind db12af089 (dev-red #5983 open, not ours); 0 open adjust-everywhere findings. Slice-done lines wait.
