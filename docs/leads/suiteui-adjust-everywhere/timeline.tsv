@@ -265,3 +265,4 @@ utc	stage	event	ref	note
 09:23Z	3	check-in: 5 open PRs clean; waiting on prescreen
 09:43Z	3	check-in: 5 PRs clean [fast-lane,beta], waiting on prescreen; dev 746ee995b main c73c958a9
 09:59	3	merged	#5252	AJ-library merged; awaiting green main for done
+10:03Z	3	AJ-library #5252 merged to dev (6ef2d459b); waiting for main; photo/halo PRs clean, waiting on prescreen
