@@ -17,7 +17,9 @@
 // sending the control's action, never by an accessibility press, which
 // ends the test process in a later test (#5883).
 // `measure` turns one interaction into a RenderStep: the window body's runs
-// (a debug-only `bodyRuns` counter the caller reads), the root hosting view's
+// (a debug-only `bodyRuns` counter the caller reads; each window puts its own
+// BodyTally in its environment and reports to the running test's, so the
+// counter reads this test's windows, never a parallel suite's), the root hosting view's
 // layout passes and time, and the per-step p50 / p95 (FrameProbe's nearest
 // rank). `expectBodies` gates a body count; `expectP95` judges time and
 // belongs only in tests Tests/perf-suites.txt lists.
@@ -71,15 +73,27 @@ private final class KeyCapableWindow: NSWindow {
 
 /// An app's real window hosted off screen, driven by scripted events.
 @MainActor final class RenderBudgetWindow<Content: View> {
-    let host: CountingHostingView<Content>
+    let host: CountingHostingView<BodyTallied<Content>>
     let window: NSWindow
+    /// This window's own body runs (SuiteUI's BodyTally, in its environment). Unless it was opened with
+    /// `underTest: false` they count in the test's `bodyRuns` too.
+    let tally: BodyTally
+    /// The view the window hosts; set it to show another.
+    var rootView: Content {
+        get { host.rootView.content }
+        set { host.rootView.content = newValue }
+    }
     /// Wall milliseconds of each step in the interaction being measured.
     private var stepTimes: [Double] = []
 
     /// `keyCapable` builds a window that may become key, for a test that sends keys. Never isa-swizzle the window
     /// instead: it is KVO-observed from the start, and a swapped class makes its dealloc throw (NSRangeException
-    /// on "_windowLayerContext") in whichever test is running when it is freed.
-    init(_ view: Content, size: CGSize = CGSize(width: 1280, height: 820), keyCapable: Bool = false) {
+    /// on "_windowLayerContext") in whichever test is running when it is freed. `underTest: false` opens a
+    /// neighbour whose bodies never count in the test's `bodyRuns`.
+    init(
+        _ view: Content, size: CGSize = CGSize(width: 1280, height: 820), keyCapable: Bool = false,
+        underTest: Bool = true
+    ) {
         _ = DragSessions.faked
         _ = TestDefaults.registered
         // The accessibility tree, which `element` and `label` read, is built only for a client that asks;
@@ -87,7 +101,8 @@ private final class KeyCapableWindow: NSWindow {
         for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
             NSApplication.shared.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
         }
-        host = CountingHostingView(rootView: view)
+        tally = BodyTally.forNewWindow(underTest: underTest)
+        host = CountingHostingView(rootView: BodyTallied(content: view, tally: tally))
         let frame = CGRect(origin: .zero, size: size)
         host.frame = frame
         let kind = keyCapable ? KeyCapableWindow.self : NSWindow.self
@@ -417,6 +432,15 @@ func expectP95(
 }
 
 /// An NSHostingView that counts its layout passes: one per SwiftUI update of the window.
+/// A harness window's root: its view with the window's BodyTally in the environment, so the view's body
+/// counters report to this window.
+struct BodyTallied<Content: View>: View {
+    var content: Content
+    let tally: BodyTally
+
+    var body: some View { content.environment(\.bodyTally, tally) }
+}
+
 final class CountingHostingView<Content: View>: NSHostingView<Content> {
     private(set) var layouts = 0
     /// Milliseconds spent in all the layout passes.

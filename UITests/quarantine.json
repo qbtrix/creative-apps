@@ -53,21 +53,21 @@
     "expires": "2026-10-29"
   },
   {
-    "test": "AppSnapshotTests.BodyCountSuites/HaloWindowLiveDragTests/aViewerDragRunsTheWindowAtMostThreeTimes",
-    "owner": "#5971",
-    "reason": "Reads a process-wide bodyRuns counter that parallel suites' windows also bump; red on dev run 40661826310 (dev-red #5969). #5971 owns the per-window fix (BodyTally behind every bodyRuns).",
+    "test": "AppSnapshotTests.BodyCountSuites/SuiteTimelineScrubWindowTests/aScrubRedrawsOnlyThePlayhead",
+    "owner": "#5804",
+    "reason": "The test counts its own window and still sees about 18,000 lane redraws per scrub on CI (run 40661826310); #5804 owns the lane re-render.",
     "expires": "2026-10-29"
   },
   {
     "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoRapidRotateTests/rapidRotationsThenReturnApplyOneCommit",
-    "owner": "#5971",
-    "reason": "Reads a process-wide bodyRuns counter that parallel suites' windows also bump; red on dev run 40661826310 (dev-red #5969). #5971 owns the per-window fix (BodyTally behind every bodyRuns).",
+    "owner": "#5978",
+    "reason": "Fails on hasLiveLayer after rapid rotations on CI (run 40661826310), not on a counter; #5978 owns it.",
     "expires": "2026-10-29"
   },
   {
-    "test": "AppSnapshotTests.BodyCountSuites/SuiteTimelineScrubWindowTests/aScrubRedrawsOnlyThePlayhead",
-    "owner": "#5971",
-    "reason": "Reads a process-wide bodyRuns counter that parallel suites' windows also bump; red on dev run 40661826310 (dev-red #5969). #5971 owns the per-window fix (BodyTally behind every bodyRuns).",
+    "test": "AppSnapshotTests.BodyCountSuites/HaloWindowLiveDragTests/aViewerDragRunsTheWindowAtMostThreeTimes",
+    "owner": "#5979",
+    "reason": "A draw is skipped on the CI runner (run 40661826310), not counter bleed; #5979 owns it.",
     "expires": "2026-10-29"
   }
 ]

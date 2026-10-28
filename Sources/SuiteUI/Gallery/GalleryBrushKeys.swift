@@ -24,10 +24,9 @@ enum GalleryBrushKeys {
 /// The opacity digits typed so far; a box, so typing one changes no state the body reads.
 @MainActor final class GalleryBrushKeyBuffer { var digits = OpacityDigits() }
 
-struct GalleryBrushKeysPage: View {
+struct GalleryBrushKeysPage: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     @State private var settings = BrushSettings()
     @State private var last: BrushKeyAction?
@@ -37,7 +36,7 @@ struct GalleryBrushKeysPage: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Brush keys").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText).accessibilityAddTraits(.isHeader)
