@@ -103,6 +103,8 @@ struct AllAppsCatalogTests {
         "The suite's Black & White example removes a B&W the file doesn't have": [
             "adjust.black-and-white: stepNamedTitle", "adjust.black-and-white: editRecordsOneStep",
             "adjust.black-and-white: undoRestoresBytes"],
+        "Photo's file.drop example places a file from disk, and the law has no host to hand over its bytes "
+            + "(PhotoDropCLITests runs it through the CLI)": ["file.drop: exampleRuns"],
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its
