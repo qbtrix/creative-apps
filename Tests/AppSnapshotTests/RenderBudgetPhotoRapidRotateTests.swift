@@ -1,11 +1,11 @@
 // RenderBudgetPhotoRapidRotateTests.swift: many Free Transform rotations in a row on the real Photo window, on
-// the tile path and on Metal, then Return. 30 knob drags, each turning the other way from the last and held until
+// the CPU's tiles, on Metal, and on the GPU route drawing tiles (no Metal presenter), then Return. 30 knob drags, each turning the other way from the last and held until
 // the layer rides the canvas's live layer, either waiting for the release's exact picture or pressing again at
 // once (so the next drag starts before the last drop's picture is presented). Return must apply (a 10 s hang
 // guard; the time is printed) and lay exactly one commit of the final transform (the same draft committed on a
 // fresh copy). The window's own work must stay flat: one set of live-layer pixels for the whole Free Transform,
 // made when its draft first shows (its pixels never change while the draft is up) and none by the drags, at most
-// one lift per drag, and on the tile path one picture's tiles per drag at most. A second Photo window drawing
+// one lift per drag, and wherever pictures come back as tiles one picture's tiles per drag at most. A second Photo window drawing
 // alongside (as CI's parallel suites do) must not count: every count is the window's renderer's, and the process's
 // footprint and GPU-resident bytes are only printed. Nested in BodyCountSuites. macOS only.
 #if canImport(AppKit)
@@ -24,8 +24,18 @@ extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetPhotoRapidRotateTests {
         static let drags = 30
 
-        @Test(.timeLimit(.minutes(6)), arguments: [RenderingChoice.cpu, .gpu], [false, true])
-        func rapidRotationsThenReturnApplyOneCommit(_ choice: RenderingChoice, backToBack: Bool) async throws {
+        /// Where the window draws: the CPU's tiles; the GPU into the Metal presenter's texture (the app on a Mac);
+        /// or the GPU route with the view on its tile layers, so each render reads its tiles back (a runner whose
+        /// Metal presenter isn't up, as CI's was in run 40605553090).
+        enum Route: String, CaseIterable, CustomTestStringConvertible, Sendable {
+            case tiles, metal, gpuTiles
+            var choice: RenderingChoice { self == .tiles ? .cpu : .gpu }
+            var testDescription: String { rawValue }
+        }
+
+        @Test(.timeLimit(.minutes(6)), arguments: Route.allCases, [false, true])
+        func rapidRotationsThenReturnApplyOneCommit(_ route: Route, backToBack: Bool) async throws {
+            let choice = route.choice
             var model = try PhotoWorkspace.fixture(ProcessInfo.processInfo.environment["RAPID_LARGE"] == nil ? .sample : .large)
             model.selectTool(.move)
             try model.beginTransform()
@@ -46,11 +56,16 @@ extension BodyCountSuites {
             }
             let edited = try await RenderBudgetPhotoTransformTests.settle(w)
             let renderer = try await Self.renderer(of: w)
+            if route == .gpuTiles {
+                // The view leaves Metal for its tile layers while the renderer stays on the GPU: no presenter texture.
+                let host = try #require(RenderBudgetPhotoLiveTransformTests.canvas(in: w.host))
+                host.useRendering(.cpu, device: nil, presenter: ClearingMetalPresenter())
+            }
             try await RenderBudgetPhotoLiveTransformTests.idle(w)
             let send = try #require(edited.send)
             // The draft's first show makes the live layer's pixels, once.
             for _ in 0..<500 where renderer.spritesMade == 0 { try await Task.sleep(for: .milliseconds(20)) }
-            #expect(renderer.spritesMade == 1, "\(choice): Free Transform's first show made \(renderer.spritesMade) live-layer pixel sets")
+            #expect(renderer.spritesMade == 1, "\(route): Free Transform's first show made \(renderer.spritesMade) live-layer pixel sets")
             let start = Self.reading(gpu, renderer)
             var readings: [Reading] = []
             for drag in 0..<Self.drags {
@@ -79,13 +94,13 @@ extension BodyCountSuites {
             #expect(grew.lifts <= Self.drags, "\(grew.lifts) lifts for \(Self.drags) drags")
             // The lifted pixels are the untransformed layer in the draft's box, the same for every drag of one
             // draft: one set for the whole Free Transform, on every route.
-            #expect(grew.sprites == 0, "\(choice): the drags made \(grew.sprites) live-layer pixel sets")
+            #expect(grew.sprites == 0, "\(route): the drags made \(grew.sprites) live-layer pixel sets")
             // On the tile path a drag draws one picture, its release's exact one: a layer with nothing under it
             // hides the picture rather than drawing an empty one. (Metal draws into its texture: no tile surfaces.)
             let canvas = try #require(fixture.canvas)
             let tilesPerPicture = ((canvas.width + 255) / 256) * ((canvas.height + 255) / 256)
             #expect(grew.surfaces <= Self.drags * tilesPerPicture,
-                    "\(choice): \(grew.surfaces) tile surfaces over \(Self.drags) drags, more than one picture (\(tilesPerPicture) tiles) a drag")
+                    "\(route): \(grew.surfaces) tile surfaces over \(Self.drags) drags, more than one picture (\(tilesPerPicture) tiles) a drag")
             var reference = fixture
             try reference.setTransform(final, name: "Rotate", drag: nil)
             try reference.commitTransform()
