@@ -447,3 +447,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 14:24Z check-in: #5259/#5260 clean, labelled, waiting on prescreen. dev 56ca32ecb, main f89f5255c. New dev-red #5983 (macOS, SuiteTimelineScrubWindowTests; flake rerun pending) has no PRs of ours in its range: not ours.
 - 14:45Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. dev 56ca32ecb, main f89f5255c; #5983 (not ours) is still open.
 - 15:05Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. dev 56ca32ecb, main f89f5255c; #5983 (not ours) is still open.
+- 15:30Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. dev c0cd6c25e, main f89f5255c; #5983 (not ours) is still open.
