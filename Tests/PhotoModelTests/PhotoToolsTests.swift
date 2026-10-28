@@ -20,15 +20,15 @@ import SuiteKernel
 import Testing
 
 /// Whether `tool` visibly changed from `a` to `b`: the pixels for the
-/// painting tools, the selection for marquee, the pending crop for crop, the
+/// painting tools, the selection or the drawn outline for the area tools, the pending crop for crop, the
 /// layers' offsets for move, the brush color for the eyedropper, the open
 /// box for the Type tool and the draft or paths for the Pen.
 private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoWorkspace) -> Bool {
     switch tool {
     case .brush, .eraser, .clone, .heal, .gradient, .bucket, .spotHeal, .remove:
         a.pixels != b.pixels
-    case .marquee:
-        a.selection != b.selection || a.selectionMask != b.selectionMask
+    case .marquee, .ellipse, .lasso, .polygon, .wand:
+        a.selection != b.selection || a.selectionMask != b.selectionMask || a.areaDraft != b.areaDraft
     case .crop:
         a.pendingCrop != b.pendingCrop
     case .move:
@@ -51,8 +51,10 @@ private func ready(_ workspace: inout PhotoWorkspace, _ tool: PhotoTool, source:
     workspace.endDrag()
 }
 
-/// One whole drag: press at `start`, move to `end`, lift.
+/// One whole drag: press at `start`, move to `end`, lift. The lasso bends
+/// through (`end.x`, `start.y`) on the way, so its path has an area.
 private func stroke(_ workspace: inout PhotoWorkspace, from start: Mask.Point, to end: Mask.Point) {
+    if workspace.tool == .lasso { workspace.drag(from: start, to: Mask.Point(x: end.x, y: start.y), modifiers: []) }
     workspace.drag(from: start, to: end, modifiers: [])
     workspace.endDrag()
 }

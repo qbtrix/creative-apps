@@ -47,7 +47,7 @@ struct ToolOptionsSection: View {
                     "Opacity", value: options.opacityPercent, in: ToolOptions.opacityRange, unit: "%", decimals: 0
                 ) { perform(.toolOption(.opacity(percent: $0))) }
                 .accessibilityIdentifier("photo.tool.opacity")
-            case .marquee:
+            case .marquee, .ellipse, .lasso, .polygon, .wand:
                 hint("Drag over the image to select. Delete clears the selection; Fill paints it.")
                 colorRow(options)
                 HStack(spacing: SuiteSpacing.xs) {
