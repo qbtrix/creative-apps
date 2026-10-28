@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
-Polled: 2026-10-28T02:53Z
+Polled: 2026-10-28T03:19Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -62,3 +62,4 @@ Answered on #3752: both amendments (AreaSelectTarget Sendable with areaHelp and 
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #5096 (AR-photo-u) clean and ready; #5103/#5254/#5256 stacked, conflict until #5096 lands.
 - 2026-10-28T02:53Z #5096 merged (f46358bbe); #5103 merged dev in (golden photo.list-commands.json taken from dev), gated CI: PASS, head 49ef94426, retargeted to dev, fast-lane re-added; #5254/#5256 stay stacked
+- 2026-10-28T03:19Z poll: #5103 on dev at 49ef94426 awaits prescreen; #5254/#5256 stacked; dev-red #5818 flake rerun at 8e567a5
