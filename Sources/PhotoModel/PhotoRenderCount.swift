@@ -2,7 +2,7 @@
 // tests (AppSnapshotTests' IdleWorkTests). `regions` is every region a canvas route composites (a CPU tile,
 // a GPU band) and `layerComposites` every layer laid onto one; `rows` and `rowLayers` are the same for the
 // reference path (a Curves histogram row, an export, a snapshot); `bases` and `hits` are the canvas's
-// PhotoCompositeCache's. The histogram composites its rows through the canvas routes' seam with a cache of its
+// PhotoCompositeCache's; `resamples` counts Free Transform's CPU resamples of the draft layer. The histogram composites its rows through the canvas routes' seam with a cache of its
 // own, so it counts inside `asRows`, where a region, a layer and a cache lookup land on the reference path's
 // counters: a test tells a drag's work from a recount's. The counters are process-wide, so a suite that reads
 // them nests in BodyCountSuites like the body counters. A test that drives the renderer itself reads a `Tally`
@@ -19,6 +19,9 @@ public enum PhotoRenderCount {
     public static let rows = Mutex(0), rowLayers = Mutex(0)
     /// The canvas's PhotoCompositeCache bases made, and regions served from a kept base.
     public static let bases = Mutex(0), hits = Mutex(0)
+    /// Free Transform's CPU resamples of the draft's layer: an exact frame or commit (`draftPlaced`), or a drag
+    /// frame's draw through the matrix (`compositeDraft`). A drag the compositor moves makes none.
+    public static let resamples = Mutex(0)
     /// True inside `asRows`.
     @TaskLocal static var countingRows = false
 
@@ -77,6 +80,13 @@ public enum PhotoRenderCount {
         guard !countingRows else { return }
         if made { bases.withLock { $0 += 1 } } else { hits.withLock { $0 += 1 } }
         tally?.add(made ? "bases" : "hits")
+        #endif
+    }
+
+    /// One more CPU resample of Free Transform's draft layer.
+    @inline(__always) static func resample() {
+        #if DEBUG
+        resamples.withLock { $0 += 1 }
         #endif
     }
 

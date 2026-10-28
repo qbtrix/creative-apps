@@ -47,7 +47,7 @@ struct LibraryLoupe: View {
         let fit = ZoomMath.fit(document: document, in: viewport)
         let zoom = model.loupeZoom.scale(fit: fit)
         CanvasViewport(
-            documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false,
+            documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false, holdsRulerBand: false,
             onSize: { viewport = $0 }, onZoom: menu.view.zoomTo,
             // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
             onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key

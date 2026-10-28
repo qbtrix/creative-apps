@@ -1,7 +1,8 @@
 // FlareJourneyTests+ExportErrors.swift: J23 of flare-export (FX-3, steps 1 to
 // 3 live in FX-9; docs/blueprints/flare/features/flare-export.md, section 4).
 // The first test runs on `-FlareFixture bounce` (scene `scene-1`, 48 frames)
-// with the fakes, whose 20 ms per PNG frame keeps Cancel reachable; the second
+// with the fakes, whose PNG frames step 4 slows to 200 ms each (`-FlareExportFrameDelay`) so the run outlasts
+// XCUITest's lookups and Cancel is still there; the second
 // runs steps 1 to 3 again on `-FlareSample bounce` (LiveExportAdapter, no frame
 // pause, so step 4's Cancel stays on the fakes). Every launch passes
 // `-FlareExportTo` on a folder this test makes and removes. A second SVG
@@ -20,7 +21,9 @@ final class FlareExportErrorJourneys: XCTestCase {
 
         // 4. A fresh folder; PNG sequence; 2x; Export; Cancel within the run: the sheet goes and no PNG is left.
         let fresh = try folder("Fresh")
-        let flare = launch(fakes, on: fresh)
+        // 200 ms a frame: at the fakes' 20 ms the 48 frames finished in under 2 s, before XCUITest's lookups
+        // reached Cancel, so the sheet read Done (#3806).
+        let flare = launch(fakes + ["-FlareExportFrameDelay", "200"], on: fresh)
         let export = openSheet(flare)
         let chip = flare.element("flare.export.format.pngSequence")
         XCTAssert(chip.waitForExistence(timeout: 5), "the sheet has no PNG sequence chip")

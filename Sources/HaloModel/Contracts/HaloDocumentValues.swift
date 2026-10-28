@@ -34,18 +34,21 @@ public struct HaloDrawItem: Sendable, Hashable {
     /// PH-1: a solid's picture and its box and focus; nil draws `color`. HaloDrawRules fills them in PH-5.
     public var placedAsset: PlacedAsset?
     public var placedImage: PlacedImage?
+    /// AJ-12: the layer's filters and kinds, run on its pixels before the blend; hidden ones are skipped.
+    public var filters: [HaloLayerFilter]
     /// HY-6: the layer's style with its keyable numbers sampled at the frame; nil draws none.
     public var style: LayerStyle?
     public init(
         layerID: String, kind: HaloLayerKind, bounds: HaloLayerRect, matrix: HaloMatrix, opacity: Double,
         color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil, gradient: Fill? = nil,
         shape: ShapeSpec? = nil, stroke: VectorStroke? = nil, placedAsset: PlacedAsset? = nil, placedImage: PlacedImage? = nil,
+        filters: [HaloLayerFilter] = [],
         style: LayerStyle? = nil
     ) {
         self.layerID = layerID; self.kind = kind; self.bounds = bounds; self.matrix = matrix
         self.opacity = opacity; self.color = color; self.blendMode = blendMode; self.text = text
         self.gradient = gradient; self.shape = shape; self.stroke = stroke
-        self.placedAsset = placedAsset; self.placedImage = placedImage; self.style = style
+        self.placedAsset = placedAsset; self.placedImage = placedImage; self.filters = filters; self.style = style
     }
 }
 

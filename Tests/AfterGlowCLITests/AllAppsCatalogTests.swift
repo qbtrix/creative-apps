@@ -74,6 +74,9 @@ struct AllAppsCatalogTests {
         "Photo's square.png is flat where the heal examples act, so they change no pixel and record no step": [
             "retouch.spot-heal: stepNamedTitle", "retouch.spot-heal: editRecordsOneStep", "retouch.spot-heal: undoRestoresBytes",
             "retouch.remove: stepNamedTitle", "retouch.remove: editRecordsOneStep", "retouch.remove: undoRestoresBytes"],
+        "The suite's Black & White example removes a B&W the file doesn't have": [
+            "adjust.black-and-white: stepNamedTitle", "adjust.black-and-white: editRecordsOneStep",
+            "adjust.black-and-white: undoRestoresBytes"],
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its

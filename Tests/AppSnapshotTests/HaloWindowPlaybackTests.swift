@@ -13,7 +13,8 @@
 // two animated rows (x, opacity), in both of the inspector's layouts, per
 // frame. Layout passes and step times are reported; RenderBudgetHaloTests'
 // timing test judges them. HALO_WINDOW_PLAYBACK_SECONDS=20 first plays that
-// long at 120 Hz, for `sample`. The suite nests in BodyCountSuites: it reads
+// long at 120 Hz, for `sample`; HALO_WINDOW_PLAYBACK_SAMPLE plays another
+// sample (`reference`, 50 layers) in its place. The suite nests in BodyCountSuites: it reads
 // process-global body counters. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -48,13 +49,13 @@ extension BodyCountSuites {
             }
         }
 
-        /// One second of 120 Hz refreshes on the playing window, after `warmUp` unmeasured ones (default:
+        /// One second of 120 Hz refreshes on the window playing `sample`, after `warmUp` unmeasured ones (default:
         /// HALO_WINDOW_PLAYBACK_SECONDS), `selecting` that layer first: the step, the composition's frame
         /// rate and the timeline lanes' and TRANSFORM rows' body runs (nil in release).
         static func playOneSecond(
-            selecting layer: String? = nil, warmUp: Int? = nil
+            sample: String = ProcessInfo.processInfo.environment["HALO_WINDOW_PLAYBACK_SAMPLE"] ?? "keyed", selecting layer: String? = nil, warmUp: Int? = nil
         ) async throws -> (step: RenderStep, fps: Int, lanes: Int?, rows: Int?) {
-            var project = HaloLaunch(arguments: ["Halo", "-HaloSample", "keyed"]).project()
+            var project = HaloLaunch(arguments: ["Halo", "-HaloSample", sample]).project()
             let fps = try #require(project.selectedComposition?.framesPerSecond)
             if let layer { project.selectLayer(layer) }
             let start = 5000.0
@@ -79,7 +80,7 @@ extension BodyCountSuites {
             let measured = start + Double(warm) / 120
             let before = childBodies()
             let step = try await w.measure(
-                "halo playback, 1 s at 120 Hz (\(fps) fps), selected \(layer ?? "none")", bodies: windowBodies
+                "halo playback of \(sample), 1 s at 120 Hz (\(fps) fps), selected \(layer ?? "none")", bodies: windowBodies
             ) {
                 try await w.ticks(120) { link.fire(measured + Double($0) / 120) }
             }

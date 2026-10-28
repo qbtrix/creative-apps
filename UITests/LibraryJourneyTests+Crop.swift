@@ -409,8 +409,10 @@ extension LibraryJourneyTests {
         return value.isEmpty ? element.label : value
     }
 
-    /// The first number an element reads ("5.0°" is 5); nil reads as NaN.
+    /// The first number an element reads: a slider's own number (Straighten is a ScrubField bar, which XCUI
+    /// sees as its Slider representation), else the first in its text ("5.0°" is 5); nil reads as NaN.
     @MainActor private static func cropNumber(_ element: XCUIElement) -> Double {
+        if let number = element.value as? NSNumber { return number.doubleValue }
         let words = cropText(element).split(whereSeparator: { !"+-.0123456789".contains($0) })
         return words.lazy.compactMap { Double($0) }.first ?? .nan
     }

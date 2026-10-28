@@ -44,6 +44,7 @@ has to end up.
 | Flare | step the easing X1 scrub row 60 times | 60 / 60 / 60 | 11–13 ms p95 release, 12 ms debug / 20 / 8.3 ms | #1471 removed the per-step ticks; measured on the finisher's Mac (busy, not quiet), over the 8.3 ms target and under the 20 ms report bound |
 | Flare | draw an ellipse on the canvas, 120 samples (Rectangle is not connected yet, IN-1) | 1 / 3 / 3 (debug; 122 before #1792) | p95 2.3–2.5 ms release, 2.3–2.5 debug / 20 / 8.3 ms | #1792 runs the samples on the stage's FlareLiveDrag; the window runs once, at mouse-up |
 | Flare | drag a star with the Shape tool, 120 samples (`RenderBudgetFlareShapeTests/starDragInThreeBodies`; the draw waits on shape-tools FS-6) | not yet / 3 / 3 | not timed (packet: p95 ≤ 8 ms; its `timing` test is disabled until the supervisor lists it in Tests/perf-suites.txt) / 20 / 8 ms | first measured by the macOS run after shape-tools FS-4; the draft runs on the stage's FlareLiveDrag |
+| Photo | Free Transform rotate drag, 120 samples (`sample` for the counts, a 24 MP layer for the time), `RenderBudgetPhotoLiveTransformTests` | 1 / 1 / 1; CPU resamples 0 during the drag, 1 at the release, on the tile path and Metal | 2.1 release (24 MP, p50 1.2) / 4 / 4 ms | was 89 resamples and p95 187 ms debug: the drag moves the layer on SuiteUI's `CanvasLiveLayer`, and the Adjust panel and Transform rows sit out a held drag. The lift itself takes about 0.15 s at the press on 24 MP |
 | Photo | brush stroke, 120 samples (`large`), `PhotoWindowStrokeTests` | 0 / 1 / 1 | 7.1 / 11 / 8.3 ms | none in flight; the body bound is the stroke's existing one (`PhotoWindowStrokeTests`, measured 0) |
 | SuiteUI | stroke pad on the editor-kernel chrome panel, 120 samples, `RenderBudgetEditorKernelStrokeTests` | not yet / 1 / 0 | not yet / not gated / 8.3 ms | first measured by the macOS run after EK-31; the pad's samples stay in its own state, paced by `SuiteStrokePacer` |
 | SuiteUI gallery `editor-kernel` | drag Card 7 onto Header in the 200-row layer tree, 120 samples (`RenderBudgetEditorKernelTests`) | not yet / 3 / 1 | not timed | first measured by the macOS run after EK-6; the drop's log line and move should be the one body |
@@ -274,3 +275,35 @@ drain and the counters to hold still, then checks the gesture's work and that
 Those tests drop the window's autosave after the gesture: it still flattens
 the picture through the reference path 5 s after the last edit, which would
 read as a recount.
+
+## Photo: a Free Transform drag frame on a photo-sized layer
+
+Since #5285 the canvas draws the Free Transform draft live, and every render
+resampled the whole layer with CoreRaster's lanczos3 `transformed` on one
+thread (`transformPreview`). `PhotoAdjustSliderLatencyTests` (perf list) times
+the "transform turn drag" case: the 8K document's Fill layer (7680 x 4320,
+33 MP) turned 1 degree a step, each step a drag frame
+(`PhotoRenderer.update(live: true)`), from the edit to the picture holding it.
+Release, M2 Pro, machine load 80 to 100 (many agents building), p50 / p95 per
+step:
+
+| Step | GPU, resident | CPU |
+|---|---|---|
+| dev (#5285: whole-layer lanczos3 resample per frame; 6 steps) | 10782 / 12089 ms | 10533 / 11381 ms |
+| drag frame through CoreRender's affine composite per band (first cut) | 3932 / 5388 ms | 472 / 582 ms |
+| drag frame: 256 px chunks of the region resampled across the cores, one upload per region (this change, 60 steps) | 308 / 416 ms | 222 / 278 ms |
+
+The first cut's GPU row is CoreRaster's through-composite itself: it resamples
+the whole source once per output row, so a 7680 x 256 band paid 256 times its
+source. The chunked frame calls `transformed` once per 256 px chunk (the same
+sampling; transform-then-composite is what the through-composite is defined to
+equal) and composites the region as a tile, so the picture never leaves the
+GPU. The still frame after the drag (the window taking the live copy back)
+resamples once as before, and Return lays that same resample. The budget for
+the case sits a little above the measurement, 500 ms p95, so the suite is green
+today and fails on a regression; the target stays one frame. The rest of a step
+is the resample itself (CoreRaster's `transformed`, bilinear, 33 M output
+pixels a frame) plus the full-canvas redraw it forces (31 to 74 ms at 8K, the
+table above). The affine family is CPU-only in CoreRender
+(`RenderOp.notOnMetalYet`), so a Metal `.affine` kernel is where both rows go
+next.

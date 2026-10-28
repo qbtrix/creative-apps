@@ -12,7 +12,10 @@
 // It drives scripted steps, each paced at 120 Hz and timed on its own clock as
 // the event's work plus the layout and display it forced: a mouse drag of N
 // samples, clicks, a split-divider drag, a scroll, N increments of an
-// adjustable element and N ticks of any closure (a fake refresh link).
+// adjustable element, a segmented-control segment pick and N ticks of any
+// closure (a fake refresh link). A segment is picked by setting it and
+// sending the control's action, never by an accessibility press, which
+// ends the test process in a later test (#5883).
 // `measure` turns one interaction into a RenderStep: the window body's runs
 // (a debug-only `bodyRuns` counter the caller reads), the root hosting view's
 // layout passes and time, and the per-step p50 / p95 (FrameProbe's nearest
@@ -266,6 +269,16 @@ private final class KeyCapableWindow: NSWindow {
         Self.node(identifier, in: host)?.accessibilityLabel?() ?? nil
     }
 
+    /// The accessibility value of the element called `identifier` as text (a slider row's "42 px"); nil when
+    /// there is no such element or it has no value.
+    func value(_ identifier: String) -> String? {
+        // The value is `Any?` (a slider's is a number); an AnyObject call would bridge it as a String and trap.
+        guard let node = Self.node(identifier, in: host) as? NSObject,
+              node.responds(to: Selector(("accessibilityValue")))
+        else { return nil }
+        return node.value(forKey: "accessibilityValue").map { "\($0)" }
+    }
+
     /// The window point of `point` on an artboard `size` big drawn in `box` (window coordinates, so y up),
     /// `point` measured from the artboard's top left in its own units.
     func point(_ point: CGPoint, on size: CGSize, in box: CGRect) -> CGPoint {
@@ -285,6 +298,25 @@ private final class KeyCapableWindow: NSWindow {
         }
         walk(host, 0)
         return ids
+    }
+
+    /// Picks the segmented-control segment called `identifier` the way its click ends: it sets the selected
+    /// segment and sends the control's action; false when there is no such segment. Never press a segment
+    /// through accessibility here: NSSegmentedCell's press spins a nested event loop, and in a test process
+    /// (which never runs NSApplication.run) that later ends the main run loop, so the process exits 0 in
+    /// whichever test runs next, with no summary (#5883).
+    @discardableResult func select(segment identifier: String) -> Bool {
+        func controls(_ view: NSView) -> [NSSegmentedControl] {
+            ((view as? NSSegmentedControl).map { [$0] } ?? []) + view.subviews.flatMap(controls)
+        }
+        guard let segment = Self.node(identifier, in: host), let cell = segment.accessibilityParent?() as AnyObject?,
+              let control = controls(host).first(where: { $0.cell === cell }),
+              let index = (0..<control.segmentCount).first(where: {
+                  control.label(forSegment: $0) == segment.accessibilityLabel?()
+              })
+        else { return false }
+        control.selectedSegment = index
+        return control.sendAction(control.action, to: control.target)
     }
 
     /// `count` increments of the adjustable element called `identifier` (a slider, a scrub row), one per
