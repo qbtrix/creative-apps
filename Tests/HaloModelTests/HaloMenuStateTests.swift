@@ -13,7 +13,7 @@ import Testing
            .newComposition, .duplicateComposition, .deleteComposition, .undo, .redo,
            .open, .save, .saveAs, .openRenderSheet, .renderFrame,
            .playPause, .toggleLoop, .nextFrame, .previousFrame, .goToStart, .goToEnd, .setInPoint, .setOutPoint]
-        + HaloEasingPreset.allCases.map(HaloCommand.setEasing)
+        + EasePreset.allCases.map(HaloCommand.setEasing)
 
     static let states: [HaloProject?] = [nil] + HaloCommandCatalogTests.keyedStates()
 
@@ -34,7 +34,7 @@ import Testing
         project.newLayer(.solid)
         let state = HaloMenuState(project: project)
         #expect(state.title(.undo) == "Undo New Layer" && state.title(.redo) == "Redo")
-        #expect(state.title(.newLayer(.text)) == "Text" && state.title(.setEasing(.easeIn)) == HaloEasingPreset.easeIn.title)
+        #expect(state.title(.newLayer(.text)) == "Text" && state.title(.setEasing(.easeIn)) == EasePreset.easeIn.title)
         #expect(HaloMenuState(project: nil).title(.undo) == "Undo")
         #expect(HaloMenuState.spec("file.save").title == "Save")
     }

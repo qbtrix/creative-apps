@@ -8,8 +8,10 @@ import Testing
 
 @Test func aSegmentRowSaysItsNumbersAreFrames() {
     let segment = EasingSegment(property: "x", startFrame: 0, endFrame: 24)
-    #expect(segment.frameSpan == "frames 0 → 24")
-    #expect(segment.title == "x frames 0 → 24")
+    #expect(segment.frameSpan == "frames 0\u{2013}24")
+    // The property by its inspector name, as Halo titles its spans (#5832).
+    #expect(segment.title == "X, frames 0\u{2013}24")
+    #expect(EasingSegment(property: "scaleX", startFrame: 12, endFrame: 36).title == "Scale X, frames 12\u{2013}36")
 }
 
 @Test func eachHandleRowHasItsLabelAndADistinctTooltip() {

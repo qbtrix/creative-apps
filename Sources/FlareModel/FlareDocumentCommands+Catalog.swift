@@ -1,7 +1,9 @@
 // FlareDocumentCommands+Catalog.swift (adopt-command-catalog AC-f1): one catalog spec per FlareCore command id in
 // CommandRegistry.builtIn, over FlareWorkspace. A spec's params are the command's own JSON (what the registry's
-// envelope carries as "params"), its schema is SchemaProbe's unless `coreSchemaOverrides` has one, it is available
-// when its example runs on a copy of the workspace, and it runs through the workspace's CommandEngine as one undo step.
+// envelope carries as "params"), its schema is SchemaProbe's unless `coreSchemaOverrides` has one, and it runs through
+// the workspace's CommandEngine as one undo step. Availability has no params, so a command is unavailable only for what
+// no params could change (no document, masks, FlareCore's notBuilt); a refusal of its own params is the run's `.failed`.
+// keyframe.move refuses a frame outside its scene or symbol with the key drag's sentence (LiveKeyframes+Edit.swift).
 // Catalog ids allow no capitals, so a FlareCore id keeps its words in kebab case: layer.setFlags is layer.set-flags.
 // The stage and PNG frames don't draw masks or mattes yet while SVG and Lottie write them, so the commands that make
 // or change one (`notDrawnOnStage`) are unavailable with `masksNotDrawn` rather than export a different picture.
@@ -19,6 +21,7 @@ extension FlareWorkspace {
 
     /// Runs `command` on the engine as one undo step; a refusal throws the message `layerError` reads.
     mutating func performCore(_ command: some FlareCore.Command, id: String) throws(CatalogError) {
+        if let move = command as? MoveKeyframe, let why = outsideOwner(move) { throw .failed(id: id, message: why) }
         apply(command)
         if let error = layerError { throw .failed(id: id, message: error.message) }
     }
@@ -29,13 +32,26 @@ extension FlareWorkspace {
     public static let masksNotDrawn = "Flare's stage and PNG frames don't draw masks or mattes yet, so this would "
         + "export a different picture from the one on the stage. Removing or reordering a mask still works."
 
-    /// The dry run: `example` on a copy of `workspace`; unavailable with the engine's message when it is refused.
-    /// A `notDrawnOnStage` id is unavailable with `masksNotDrawn` whenever a document is open.
+    /// Why `move` would land its key where it never plays: before frame 0 or past its owner's last frame. Nil when
+    /// it stays inside, or the owner is gone (the engine says that).
+    func outsideOwner(_ move: MoveKeyframe) -> String? {
+        guard let document, let length = try? LiveKeyframes.length(of: move.owner, in: document) else { return nil }
+        if move.to < 0 { return LiveKeyframes.beforeFrameZero }
+        guard move.to >= length else { return nil }
+        if case .symbol = move.owner { return LiveKeyframes.pastSymbolEnd }
+        return LiveKeyframes.pastSceneEnd
+    }
+
+    /// Unavailable with no document, with `masksNotDrawn` for a `notDrawnOnStage` id, and with the engine's sentence
+    /// when FlareCore hasn't built the command (its example on a copy throws notBuilt). Anything else depends on the
+    /// params, so it is available and the run refuses with the engine's message.
     static func dryRun<C: FlareCore.Command>(_ example: C, on workspace: FlareWorkspace) -> Availability {
-        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }
+        guard workspace.document != nil else { return .unavailable(FlareLayerError.noDocument.message) }
+        if notDrawnOnStage.contains(C.id) { return .unavailable(masksNotDrawn) }
         var copy = workspace
         copy.apply(example)
-        return copy.layerError.map { .unavailable($0.message) } ?? .available
+        if let error = copy.layerError, case .command(.notBuilt) = error { return .unavailable(error.message) }
+        return .available
     }
 }
 

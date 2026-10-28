@@ -1,6 +1,6 @@
 // HaloAnimationMenu.swift: Halo's Animation menu: Play/Pause, Loop, Next
 // Frame, Previous Frame, Go to Start, Go to End, Set In Point, Set Out Point
-// and Keyframe Easing ▸ (Linear, Ease In, Ease Out, Ease In and Out, Hold),
+// and Keyframe Easing ▸ (SuiteKernel's six presets: Linear, Ease, Ease In, Ease Out, Ease In-Out, Hold),
 // then Select All Keys (⌘A in the timeline, not a key equivalent here so a
 // field keeps ⌘A) and Move Keyframes Left and Right, each one frame and its
 // own step (nudgeKeysCommands), disabled with the Model's reason (KE-2).
@@ -10,6 +10,7 @@
 // spec (HaloMenuTarget.item), sent through the focused window and disabled
 // with the spec's reason as help.
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -33,7 +34,7 @@ struct HaloAnimationMenu: Commands {
             target.item(.setOutPoint)
             Divider()
             Menu("Keyframe Easing") {
-                ForEach(HaloEasingPreset.allCases, id: \.self) { preset in
+                ForEach(EasePreset.allCases, id: \.self) { preset in
                     target.item(.setEasing(preset))
                 }
             }

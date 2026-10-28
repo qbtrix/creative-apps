@@ -49,7 +49,7 @@ public struct FakeEasingEditing: EasingEditing, Equatable {
     }
 
     public mutating func moveEasingHandle(_ handle: EasingHandle, to point: Point) {
-        guard easingUnavailableReason == nil, let easing = currentEasing, let next = EasingCurve.moving(easing, handle, to: point) else { return }
+        guard easingUnavailableReason == nil, let next = movedEasing(handle, to: point) else { return }
         if dragging == handle, let segment = selectedEasingSegment {
             easings[segment] = next
         } else {
@@ -59,10 +59,6 @@ public struct FakeEasingEditing: EasingEditing, Equatable {
     }
 
     public mutating func endEasingHandleDrag() { dragging = nil }
-
-    public func easingCurveSamples(count: Int) -> [Point] {
-        currentEasing.map { EasingCurve.samples(of: $0, count: count) } ?? []
-    }
 
     public mutating func undo() {
         dragging = nil

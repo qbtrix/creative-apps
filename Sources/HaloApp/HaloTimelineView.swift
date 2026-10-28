@@ -14,7 +14,7 @@
 // until TK-6 builds them they can't, and the tooltip says why. A scrub or a name click gives
 // the timeline focus so HaloViewer's keys reach it; a lane press leaves the
 // focus on the strip, which ⌘A needs.
-// The strip's context menu holds the five easing presets for the picked keys
+// The strip's context menu holds the six easing presets for the picked keys
 // and Select All Keys, each disabled with the Model's unavailableHelp as its
 // help while it can't act. Plain diamonds until key shapes land (#771). The tooltip is the
 // Model's timelineHelp. No layers: how to add one, in the lane under the ruler.
@@ -37,6 +37,7 @@
 // ruler scrub records a `playhead-scrub` sample and each lane scroll offset a
 // `lanes-scroll` frame (HaloProbe).
 import HaloModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -161,9 +162,9 @@ struct HaloTimelineView: View {
         }
     }
 
-    /// The five easing presets for the picked keys, each disabled with why.
+    /// The six easing presets for the picked keys, each disabled with why.
     @ViewBuilder private var easingItems: some View {
-        ForEach(HaloEasingPreset.allCases, id: \.self) { preset in
+        ForEach(EasePreset.allCases, id: \.self) { preset in
             menuTarget.item(.setEasing(preset))
         }
     }

@@ -13,7 +13,10 @@
 // layer's picked keys; the EASING list still reads the selected layer's.
 // EZ-3: easing the picked keys. A preset is one "Keyframe Easing" step; a
 // handle drag is one step until `endCoalescing()` (coalesced per layer); the
-// curve and handles the inspector draws come from the first picked segment.
+// curve and handles the inspector draws come from the first picked segment,
+// through SuiteKernel's `EasePreset` and `EaseCurve` directly. `selectKey`
+// refuses a key that starts no segment (`keyPickRefusal`), and a key on another
+// layer selects that layer first.
 // Linux-safe: no UI imports.
 import SuiteKernel
 
@@ -25,7 +28,7 @@ public struct HaloKeySegment: Identifiable, Sendable, Hashable {
     /// The next key on the same track.
     public var endFrame: Int
     public var easing: HaloEasing
-    public var preset: HaloEasingPreset? { HaloEasingPreset(easing) }
+    public var preset: EasePreset? { EasePreset(easing) }
     public var isPicked: Bool
     /// "Position X, frames 0–24": the numbers name frames, not values (#1413).
     public var title: String { "\(key.property.title), frames \(key.frame)–\(endFrame)" }
@@ -76,17 +79,37 @@ extension HaloProject {
 
     /// The preset every picked key shares; nil when they differ, one is
     /// custom, or none is picked.
-    public var pickedPreset: HaloEasingPreset? {
+    public var pickedPreset: EasePreset? {
         let presets = Set(keySegments.filter(\.isPicked).map(\.preset))
         guard presets.count == 1, let only = presets.first else { return nil }
         return only
     }
 
+    /// Why `key` can't be picked, in a sentence: no such layer in the
+    /// selected composition, or no key at its frame that a later key on the
+    /// track follows (a track's last key, a frame with no key). Nil when it
+    /// starts a segment.
+    public func keyPickRefusal(_ key: HaloKeyRef) -> String? {
+        guard let layer = selectedComposition?.layers.first(where: { $0.id == key.layerID }) else {
+            return "This composition has no layer \(key.layerID)."
+        }
+        let frames = HaloProperty.keyable.contains(key.property) ? (layer.tracks[key.property.rawValue] ?? []).map(\.frame) : []
+        guard frames.contains(key.frame), let last = frames.max(), key.frame < last else {
+            return "\(layer.name) has no key on \(key.property.title) at frame \(key.frame) that a later key follows, so there\u{2019}s no span to ease."
+        }
+        return nil
+    }
+
     /// Picks `key` from an EASING row. Extending (Shift) toggles it in the
-    /// current pick; otherwise it becomes the only pick. A key that starts no
-    /// segment (a track's last key, another layer's) changes nothing.
+    /// current pick; otherwise it becomes the only pick. A key on another
+    /// layer selects that layer first and starts the pick over, as a diamond
+    /// does. A key `keyPickRefusal` refuses changes nothing.
     public mutating func selectKey(_ key: HaloKeyRef, extending: Bool) {
-        guard keySegments.contains(where: { $0.key == key }) else { return }
+        guard keyPickRefusal(key) == nil else { return }
+        if key.layerID != selectedLayerID {
+            selectLayer(key.layerID)
+            return keySelection.replace([key])
+        }
         guard extending else { return keySelection.replace([key]) }
         narrowToPickedKeys()
         keySelection.pick(key, .toggle)
@@ -181,7 +204,7 @@ extension HaloProject {
     /// Where the picked segment's handles sit; linear and hold read as
     /// (0, 0) and (1, 1). Nil with nothing picked.
     public var easingHandles: (first: HaloPoint, second: HaloPoint)? {
-        pickedSegment?.easing.handles
+        pickedSegment.map { EaseCurve.handlePair(of: $0.easing) }
     }
 
     /// `count` points along the picked segment's curve, x from 0 to 1
@@ -192,7 +215,7 @@ extension HaloProject {
 
     /// Gives every picked key `preset`, as one "Keyframe Easing" step. The
     /// same preset again records nothing (the copy equals the document).
-    public mutating func setEasing(_ preset: HaloEasingPreset) {
+    public mutating func setEasing(_ preset: EasePreset) {
         applyEasing(preset.easing, coalesceKey: nil)
     }
 
@@ -208,7 +231,8 @@ extension HaloProject {
     /// non-finite point.
     public mutating func moveEasingHandle(_ handle: HaloEasingHandle, to point: HaloPoint) {
         guard let segment = pickedSegment, point.x.isFinite, point.y.isFinite else { return }
-        setCustomEasing(segment.easing.movingHandle(handle, to: point), coalesceKey: "\(segment.key.layerID).easing")
+        let moved = EaseCurve.moving(handle == .first ? 0 : 1, to: point, in: segment.easing)
+        setCustomEasing(moved, coalesceKey: "\(segment.key.layerID).easing")
     }
 
     /// One "Keyframe Easing" edit on the picked keys of the selected
@@ -221,22 +245,5 @@ extension HaloProject {
             else { throw HaloEditError.noComposition }
             try service.setEasing(easing, on: keys, in: &doc.compositions[c])
         }
-    }
-}
-
-extension HaloEasing {
-    /// The curve's two handles (SuiteKernel's `EaseCurve.handles`); linear
-    /// and hold read as (0, 0) and (1, 1).
-    var handles: (first: HaloPoint, second: HaloPoint) {
-        guard let points = EaseCurve.handles(of: self), points.count == 2,
-            let first = points.first, let second = points.last
-        else { return (HaloPoint(x: 0, y: 0), HaloPoint(x: 1, y: 1)) }
-        return (first, second)
-    }
-
-    /// This curve with `handle` at `point` (SuiteKernel's `EaseCurve.moving`):
-    /// x clamped to 0...1, y kept.
-    func movingHandle(_ handle: HaloEasingHandle, to point: HaloPoint) -> HaloEasing {
-        EaseCurve.moving(handle == .first ? 0 : 1, to: point, in: self)
     }
 }

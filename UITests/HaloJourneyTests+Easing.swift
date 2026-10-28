@@ -5,7 +5,7 @@
 // the inspector's LAYERS list, scrolls to that list's end so EASING's rows
 // and "Pick a span above to shape its easing." show whole above it, finds
 // Animation > Keyframe Easing off with nothing picked, picks the
-// Position X row in EASING, gives it Ease In and Out from the chips, reads
+// Position X row in EASING, gives it Ease In-Out from the chips, reads
 // Position X at 12 and 6, bends the curve by dragging `halo.easing.handle1`,
 // gives it Hold from `halo.timeline`'s context menu, then ⌘Z three times.
 // An EASING row is `halo.easing.key.<property>.<frame>`, labelled with its
@@ -31,7 +31,7 @@ final class HaloEasingJourneyTests: XCTestCase {
     /// The `keyed` fixture's Ball, and its Position X row in EASING.
     private static let ball = "comp-1-layer-2", floor = "comp-1-layer-1"
     private static let xRow = "halo.easing.key.x.0", opacityRow = "halo.easing.key.opacity.0"
-    private static let presets = ["Linear", "Ease In", "Ease Out", "Ease In and Out", "Hold"]
+    private static let presets = ["Linear", "Ease", "Ease In", "Ease Out", "Ease In-Out", "Hold"]
 
     /// H-J7: pick a key, ease it from the chips, the curve and the timeline, then undo.
     @MainActor func testEaseKeys() {
@@ -83,14 +83,12 @@ final class HaloEasingJourneyTests: XCTestCase {
         scrollInspector(toShow: halo.element("halo.easing.row.y2"), halo)
         halo.shot("easing-3-pick-row")
 
-        // 4. The Ease In and Out chip, a row of its own so its title shows
-        // whole: the row reads it, and Edit names the step.
+        // 4. The Ease In-Out chip (the kernel's title, as in Flare): the row
+        // reads it, and Edit names the step.
         showChips(halo)
-        let easeInOut = chip("Ease In and Out", halo)
-        XCTAssert(easeInOut.frame.width > chip("Linear", halo).frame.width, "Ease In and Out's chip isn't its own row")
-        easeInOut.click()
-        expectRow(reads: "Ease In and Out", halo)
-        expectChipOn("Ease In and Out", halo)
+        chip("Ease In-Out", halo).click()
+        expectRow(reads: "Ease In-Out", halo)
+        expectChipOn("Ease In-Out", halo)
         expectUndo("Undo Keyframe Easing", halo)
         halo.shot("easing-4-ease-in-out")
 
@@ -129,8 +127,8 @@ final class HaloEasingJourneyTests: XCTestCase {
         expectPositionX("160.0 px", halo)
         halo.shot("easing-7-hold")
 
-        // 8. ⌘Z three times: Custom, Ease In and Out, Linear; the row stays picked.
-        for easing in ["Custom", "Ease In and Out", "Linear"] {
+        // 8. ⌘Z three times: Custom, Ease In-Out, Linear; the row stays picked.
+        for easing in ["Custom", "Ease In-Out", "Linear"] {
             halo.press(character: "z", .command)
             expectRow(reads: easing, halo)
         }
@@ -155,13 +153,13 @@ final class HaloEasingJourneyTests: XCTestCase {
             format: "label == %@ AND identifier BEGINSWITH %@", title, "halo.easing.preset.")).firstMatch
     }
 
-    /// Scrolls the inspector until the Linear and Ease In and Out chips lie
+    /// Scrolls the inspector until the Linear and Ease In-Out chips lie
     /// whole inside it. The chips sit just above the curve (`halo.easing`),
     /// so it scrolls toward the curve's top at the inspector's middle.
     @MainActor private func showChips(_ halo: Journey) {
         let inspector = halo.element("suite.inspector"), curve = halo.element("halo.easing")
         XCTAssert(curve.waitForExistence(timeout: 5), "no easing curve (halo.easing) under the chips")
-        let first = chip("Linear", halo), last = chip("Ease In and Out", halo)
+        let first = chip("Linear", halo), last = chip("Ease In-Out", halo)
         let shown = {
             first.exists && last.exists && inspector.frame.contains(first.frame) && inspector.frame.contains(last.frame)
         }

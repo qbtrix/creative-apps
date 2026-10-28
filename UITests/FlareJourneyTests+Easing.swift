@@ -12,8 +12,8 @@ extension FlareJourneyTests {
         XCTAssert(span.waitForExistence(timeout: 10), "TIMING has no Span picker")
         expectEasingGeometry(flare)
         span.click()
-        let item = flare.app.menuItems["x frames 0 → 24"]
-        XCTAssert(item.waitForExistence(timeout: 5), "Span doesn't list x frames 0 → 24")
+        let item = flare.app.menuItems["X, frames 0\u{2013}24"]
+        XCTAssert(item.waitForExistence(timeout: 5), "Span doesn't list X, frames 0\u{2013}24")
         item.click()
         expectTiming(reads: "Linear", flare)
         flare.shot("easing-span")

@@ -5,6 +5,7 @@
 // draws, the file round trip, and H-J7 steps 1 to 8 on the Model. Linux and
 // macOS.
 @testable import HaloModel
+import SuiteKernel
 import Testing
 
 private let easingServices: [HaloServices] = [.fake, .live]
@@ -36,7 +37,7 @@ private func xEasing(_ project: HaloProject) -> String? {
 
 @Test(arguments: easingServices)
 func positionFollowsEachPreset(_ services: HaloServices) throws {
-    for preset in HaloEasingPreset.allCases {
+    for preset in EasePreset.allCases {
         var project = try pickedX0(services).project
         project.setEasing(preset)
         for frame in [6, 12, 18] {
@@ -157,9 +158,9 @@ func testEaseKeysJourney(_ services: HaloServices) throws {
     project.selectKey(HaloKeyRef(layerID: ball, property: .x, frame: 0), extending: false)
     #expect(project.pickedPreset == .linear)
     #expect(project.easingHandles?.first == HaloPoint(x: 0, y: 0))
-    // 4. Ease In and Out.
+    // 4. Ease In-Out.
     project.setEasing(.easeInOut)
-    #expect(xEasing(project) == "Ease In and Out")
+    #expect(xEasing(project) == "Ease In-Out")
     #expect(project.title(for: .undo) == "Undo Keyframe Easing")
     // 5. The symmetric curve keeps the midpoint; frame 6 lags.
     #expect(try positionX(&project, at: 12).text == "560.0 px")
@@ -181,7 +182,7 @@ func testEaseKeysJourney(_ services: HaloServices) throws {
     project.undo()
     #expect(xEasing(project) == "Custom")
     project.undo()
-    #expect(xEasing(project) == "Ease In and Out")
+    #expect(xEasing(project) == "Ease In-Out")
     project.undo()
     #expect(xEasing(project) == "Linear")
     #expect(try positionX(&project, at: 6).text == "360.0 px")

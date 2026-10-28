@@ -2,6 +2,7 @@
 // without its unit and spaces, refuses what isn't a finite number, and shows
 // each property's value in its unit and places. Runs on Linux and macOS.
 import HaloModel
+import SuiteKernel
 import Testing
 
 @Test(arguments: [
@@ -37,7 +38,7 @@ func parseRefusesWhatIsNotAFiniteNumber(typed: String) {
 }
 
 @Test func easingPresetsRoundTripThroughTheirEasing() {
-    for preset in HaloEasingPreset.allCases {
-        #expect(HaloEasingPreset(preset.easing) == preset)
+    for preset in EasePreset.allCases {
+        #expect(EasePreset(preset.easing) == preset)
     }
 }

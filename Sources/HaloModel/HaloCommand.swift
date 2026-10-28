@@ -34,7 +34,7 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
     // files
     case save, saveAs, open, openRecent(String)
     // easing
-    case setEasing(HaloEasingPreset), selectKey(HaloKeyRef, extending: Bool)
+    case setEasing(EasePreset), selectKey(HaloKeyRef, extending: Bool)
     case selectLaneKeys(layerID: String, frame: Int, extending: Bool), clearKeySelection, deleteKeys
     case setCustomEasing(HaloEasing), moveEasingHandle(index: Int, x: Double, y: Double), endEasingDrag
     // key editing (key-editing KE-1): a nil frame is a press on the lane's bed, which clears the pick;
@@ -62,7 +62,7 @@ public enum HaloCommand: Hashable, Sendable, CaseIterable {
         .save, .saveAs, .open, .openRecent("/tmp/Bounce.halo"),
         .setEasing(.easeInOut), .selectKey(HaloKeyRef(layerID: "comp-1-layer-2", property: .x, frame: 0), extending: false),
         .selectLaneKeys(layerID: "comp-1-layer-2", frame: 0, extending: false), .clearKeySelection, .deleteKeys,
-        .setCustomEasing(HaloEasingPreset.easeIn.easing), .moveEasingHandle(index: 0, x: 0.3, y: 0), .endEasingDrag,
+        .setCustomEasing(EasePreset.easeIn.easing), .moveEasingHandle(index: 0, x: 0.3, y: 0), .endEasingDrag,
         .pickLaneKeys(layerID: "comp-1-layer-2", frame: 0, mode: .replace), .selectAllKeys,
         .moveKeys(by: 6, dragStart: 0), .endKeyDrag,
         .renderFrame, .openRenderSheet, .startRender(HaloRenderSettings(format: .pngSequence)), .cancelRender,

@@ -17,20 +17,21 @@ import AppKit
 import HaloModel
 import SuiteUI
 import SwiftUI
+import SuiteKernel
 import Testing
 
 @testable import HaloApp
 
 @MainActor
 @Suite struct HaloEasingSnapshots {
-    /// x 0 picked with Ease In and Out: its row reads it, its chip is on.
+    /// x 0 picked with Ease In-Out: its row reads it, its chip is on.
     @Test func pickedSegment() throws {
         var project = try layer("Ball")
         let x0 = try #require(project.keySegments.first { $0.key.property == .x && $0.key.frame == 0 })
         project.selectKey(x0.key, extending: false)
         project.setEasing(.easeInOut)
         #expect(project.pickedSegment?.key == x0.key)
-        #expect(project.pickedSegment?.easingTitle == "Ease In and Out")
+        #expect(project.pickedSegment?.easingTitle == "Ease In-Out")
         #expect(project.pickedPreset == .easeInOut)
         #expect(project.easingHandles != nil)
         #expect(project.easingCurve(count: 129).count == 129)
@@ -43,10 +44,10 @@ import Testing
     /// Every preset chip carries its own id, `halo.easing.preset.<case>` (#4453).
     @Test func eachChipHasItsIdentifier() {
         let options = HaloEasingInspector.chipRows.flatMap { $0.map(HaloEasingInspector.chipOption) }
-        #expect(Set(options.map(\.id)) == Set(HaloEasingPreset.allCases))
+        #expect(Set(options.map(\.id)) == Set(EasePreset.allCases))
         #expect(options.map(\.identifier) == options.map { "halo.easing.preset.\($0.id.rawValue)" })
         #expect(HaloEasingInspector.chipOption(.easeOut).identifier == "halo.easing.preset.easeOut")
-        #expect(HaloEasingInspector.chipOption(.easeInOut).title == "Ease In and Out")
+        #expect(HaloEasingInspector.chipOption(.easeInOut).title == "Ease In-Out")
     }
 
     @Test func unpicked() throws {
@@ -78,11 +79,11 @@ import Testing
     }
 
     /// #1414: each preset once, and every chip's title fits its cell at the
-    /// inspector's minimum width (three a row cut "Ease In and Out").
+    /// inspector's minimum width (three a row cut "Ease In-Out").
     @Test func chipsFit() {
         let rows = HaloEasingInspector.chipRows
         #expect(
-            rows.flatMap { $0 }.map(\.rawValue).sorted() == HaloEasingPreset.allCases.map(\.rawValue).sorted())
+            rows.flatMap { $0 }.map(\.rawValue).sorted() == EasePreset.allCases.map(\.rawValue).sorted())
         let content = SuiteSize.inspectorWidth.min - 2 * SuiteSpacing.m
         for row in rows {
             let columns = CGFloat(row.count)
@@ -164,7 +165,7 @@ import Testing
     }
 
     /// Every title a segment row's value can read: each preset's and Custom.
-    private static let easingTitles = HaloEasingPreset.allCases.map(\.title) + ["Custom"]
+    private static let easingTitles = EasePreset.allCases.map(\.title) + ["Custom"]
 
     /// The width InspectorSection leaves a row in an inspector `inspector` pt wide.
     private func rowWidth(_ inspector: CGFloat) -> CGFloat { inspector - 2 * SuiteSpacing.m }
