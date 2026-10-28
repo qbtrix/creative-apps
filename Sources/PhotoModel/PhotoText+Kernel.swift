@@ -35,7 +35,7 @@ extension PhotoWorkspace: TextStyleTarget {
             throw CatalogError.unavailable(id: "text", why: "Select a text layer first.")
         }
         text.style = s
-        try redraw(id, as: text, named: name, coalescing: drag.map { "text-style-\(id)-\($0)" })
+        try redraw(id, as: text, named: name, coalescing: drag.map { CoalesceKey.key("text-style", on: [id], drag: $0) })
     }
 
     /// Adds a text layer of `p`'s words above the selected layer, selected, in one step.
@@ -119,7 +119,7 @@ extension PhotoWorkspace: TextStyleTarget {
         return (TiledPixels(try PixelBuffer(rgba8: frame.rgba, width: frame.width, height: frame.height)), x, y)
     }
 
-    /// text.add, text.set-words and the kernel's seven text commands.
+    /// text.add, text.set-words, text.set-color and the kernel's seven text commands.
     static var textCommands: [CommandSpec<PhotoWorkspace>] {
         [
             .typed("text.add", title: "Add Text", summary: "Adds a text layer above the selected one, its box's top-left at x, y.",
@@ -135,6 +135,7 @@ extension PhotoWorkspace: TextStyleTarget {
                    schema: .object(["words": .string("The new words.")], required: ["words"]),
                    example: .object(["words": .string("SALE NOW")]), availability: { wordsAvailability($0) }
             ) { w, p -> JSONValue in try w.setTextWords(p.words); return .object([:]) },
+            textColorCommand,
         ] + TextCommands.specs(PhotoWorkspace.self)
     }
 

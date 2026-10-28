@@ -164,17 +164,19 @@ extension SuiteWindow where Sidebar == SuiteSidebarList {
 }
 
 extension SuiteWindow {
-    /// An app's own sidebar list: Design's pages and layer tree, Photo's layers.
+    /// An app's own sidebar list: Design's pages and layer tree, Photo's layers. `contextActions` gives the
+    /// context menu of each SuiteSidebarList row in it by the row's id.
     public init(
         title: String, subtitle: String? = nil, documentActions: [ToolbarAction] = [],
         actions: [ToolbarAction] = [], inspectorWidth: CGFloat? = nil,
+        contextActions: (@MainActor (SidebarItem.ID) -> [ToolbarAction])? = nil,
         @ViewBuilder sidebar: () -> Sidebar, @ViewBuilder content: () -> Content,
         @ViewBuilder inspector: () -> Inspector
     ) {
         self.init(
-            galleryPage: SuiteGallery.request(from: ProcessInfo.processInfo.arguments), title: title,
+            gallery: SuiteGallery.request(from: ProcessInfo.processInfo.arguments), title: title,
             subtitle: subtitle, documentActions: documentActions, actions: actions, inspectorWidth: inspectorWidth,
-            sidebar: sidebar, content: content, inspector: inspector)
+            contextActions: contextActions, sidebar: sidebar(), content: content(), inspector: inspector())
     }
 
     /// The same window without the launch-argument check: it shows
