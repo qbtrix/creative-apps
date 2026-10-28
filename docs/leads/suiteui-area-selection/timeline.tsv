@@ -262,3 +262,4 @@ time	task	event	note
 2026-10-28T01:00Z	3	heartbeat	lane	poll 2026-10-28T01:00Z: 01:00Z check-in: no change; #5818 still open (0c204c3 macOS rerun pending); PRs ready, footers clean; no #5093 answer; no new main run
 2026-10-28T01:29Z	3	waiting	lane	dev-red #5818 open; no prescreen yet
 2026-10-28T01:48Z	3	heartbeat	lane	poll 2026-10-28T01:48Z: 01:48Z check-in: no change; #5818 still red (0c204c3 rerun red); PRs ready, footers clean; no #5093 answer; no new main run
+2026-10-28T02:17Z	3	waiting	lane	dev-red #5818 real; awaiting prescreen/lane
