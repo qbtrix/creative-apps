@@ -323,3 +323,4 @@ utc	stage	event	ref	note
 2026-10-28T21:36Z	3	heartbeat	lane	poll 2026-10-28T21:36Z: FH-10 and CB-z: merged dev after #5109/#4904, gates running
 2026-10-28T22:23Z	3	heartbeat	lane	poll 2026-10-28T22:23Z: CB-z #5999 merged; FH-10 #5251 green, awaiting lane; waiting on main-promoting run (dev CI 40776885348 on 09cb3117)
 2026-10-28T23:11Z	3	heartbeat	lane	poll 2026-10-28T23:11Z: CB-design done (run 40771139414); waiting on CI 40782400633 for CB-z and FH-photo
+2026-10-28T23:59Z	3	heartbeat	lane	poll 2026-10-28T23:59Z: CB-z done, #3753 contact sheet; FH-photo waits on CI 40782400633
