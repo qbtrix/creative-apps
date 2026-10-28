@@ -84,8 +84,17 @@ struct PhotoCommandCatalogTests {
     /// ("Temperature"). On this flat fill tone.auto has nothing to suggest, so it records no step;
     /// PhotoToneCommandTests runs it on a range of tones.
     /// (Free Transform's commit and cancel refuse without a draft: the filter above drops them.)
+    /// The suite's adjust examples (AJ-8) change nothing on the flat fixture (no B&W to remove, flat colour has no noise,
+    /// no saved look "mine"); PhotoAdjustTests runs each on a picture it changes.
     static let tolerated = [
+        "adjust.black-and-white: stepNamedTitle: its undo step reads \"Delete\", not \"Black & White\"",
+        "adjust.black-and-white: editRecordsOneStep: it recorded 0 undo steps, not one",
+        "adjust.black-and-white: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
+        "filter.reduce-noise: stepNamedTitle: its undo step reads \"Delete\", not \"Reduce Noise\"",
+        "filter.reduce-noise: editRecordsOneStep: it recorded 0 undo steps, not one",
+        "filter.reduce-noise: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
         "image.flip: stepNamedTitle: its undo step reads \"Flip Horizontal\", not \"Flip\"",
+        "look.delete: exampleRuns: the example refused on the fixture: look.delete is unavailable: There is no saved look \u{201C}mine\u{201D}.",
         "tone.auto: stepNamedTitle: its undo step reads \"Delete\", not \"Auto Tone\"",
         "tone.auto: editRecordsOneStep: it recorded 0 undo steps, not one",
         "tone.auto: undoRestoresBytes: edit.undo after it leaves save() bytes unlike those before it",
@@ -172,6 +181,7 @@ struct PhotoCommandCatalogTests {
             && !$0.hasPrefix("tone.") // tone-controls PT-4: the inspector's Tone rows run them; no menu items.
             && !$0.hasPrefix("style.") // layer-styles PY-2 adds their Layer menu items.
             && !$0.hasPrefix("path.") && !$0.hasPrefix("paths.") // the Pen and its overlay run them (#5072); no menu yet.
+            && !$0.hasPrefix("adjust.") && !$0.hasPrefix("filter.") && !$0.hasPrefix("look.") // AJ-9's Filter menu runs them.
     }
     /// The place commands (place-image PP-5): File > Place… runs place.image through PhotoPlace+Menu, not a catalog row.
     static let placeIDs = Set(PlaceCommands.specs(PhotoWorkspace.self).map(\.id))

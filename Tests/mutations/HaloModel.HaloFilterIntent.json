@@ -1,0 +1,5 @@
+[
+  {"label": "addSkipsAnEntryThere: a second Add of the same filter is another step", "file": "Sources/HaloModel/HaloFilterIntent.swift", "find": "            guard !layerFilters.contains(where: { $0.id == id }) else { return }\n", "replace": "", "tests": "HaloFilterIntentTests.addPutsOneEntryOnAtItsStart"},
+  {"label": "aDragIsOneStep: each sample of a drag is its own step", "file": "Sources/HaloModel/HaloFilterIntent.swift", "find": "coalesceKey: drag.map { \"\\(selectedLayerID ?? \"\").filter.\\($0)\" }", "replace": "coalesceKey: nil", "tests": "HaloFilterIntentTests.aDragIsOneStepClampedAndKeepsTheOtherValues"},
+  {"label": "aValueClamps: a slider value past its range is kept as typed", "file": "Sources/HaloModel/HaloFilterIntent.swift", "find": "func c(_ r: ClosedRange<Double>) -> Double { min(max(v, r.lowerBound), r.upperBound) }", "replace": "func c(_ r: ClosedRange<Double>) -> Double { v }", "tests": "HaloFilterIntentTests.aDragIsOneStepClampedAndKeepsTheOtherValues"}
+]

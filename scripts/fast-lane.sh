@@ -177,6 +177,12 @@ case "${LANE_MAC_PER_PR:-0}" in 0) LANE_MAC_PER_PR=0 ;; *) LANE_MAC_PER_PR=1 ;; 
 # 1: verify after merge (docs/fast-lane.md): a code PR lands alone on Linux proof plus
 # PRESCREEN_CONTEXT (prescreen_gate, settle_ready), and a red dev's culprit is reverted (revert_sweep).
 case "${LANE_VERIFY_AFTER:-0}" in 0) LANE_VERIFY_AFTER=0 ;; *) LANE_VERIFY_AFTER=1 ;; esac
+# 1: a local Mac check answers first (mac_hold): a batch commit's mac_only run waits up to
+# LANE_KILN_WAIT_MIN minutes after the commit for LOCAL_MAC_CONTEXT, and that
+# context's `error` (the local check's infra failure, never a test result) counts as no answer.
+case "${LANE_KILN:-0}" in 0) LANE_KILN=0 ;; *) LANE_KILN=1 ;; esac
+LANE_KILN_WAIT_MIN="${LANE_KILN_WAIT_MIN:-20}"
+[[ "$LANE_KILN_WAIT_MIN" =~ ^[0-9]+$ ]] || LANE_KILN_WAIT_MIN=20
 LANE_MAC_SLOTS="${LANE_MAC_SLOTS:-4}"            # lane macOS runs queued or running before no batch forms (5 hosted runners, one kept for dev)
 LANE_BATCH_MAX="${LANE_BATCH_MAX:-12}"           # PRs per batch, and probes per bisect (12 PRs need at most 4)
 LANE_BATCH_WAIT_MIN="${LANE_BATCH_WAIT_MIN:-10}" # with no slot just freed, form once the oldest ready head is this old (minutes)
@@ -896,14 +902,14 @@ mac_verdict() {
   local runs st
   runs=$(gh api "repos/$REPO/commits/$1/check-runs?per_page=100" --jq '.check_runs' 2>/dev/null) || { echo running; return; }
   st=$(gh api "repos/$REPO/commits/$1/status" --jq '.statuses' 2>/dev/null) || { echo running; return; }
-  jq -rn --argjson runs "${runs:-[]}" --argjson st "${st:-[]}" --arg re "$MAC_GATE_RE" --arg ctx "$LOCAL_MAC_CONTEXT" '
+  jq -rn --argjson runs "${runs:-[]}" --argjson st "${st:-[]}" --arg re "$MAC_GATE_RE" --arg ctx "$LOCAL_MAC_CONTEXT" --argjson hold "$LANE_KILN" '
     def lc: (. // "") | ascii_downcase;
     ([ $runs[] | select((.name // "" | test($re)) and .conclusion != "action_required") ] | sort_by(.started_at // "") | last) as $r
     | ([ $st[] | select(.context == $ctx) ] | first) as $s
     | (if $r == null then "none" elif ($r.status | lc) != "completed" then "running"
        elif ($r.conclusion | lc) == "success" then "green|\($r.details_url // $r.html_url // "")"
        else "red|\($r.details_url // $r.html_url // "")|\($r.name)" end) as $gh
-    | (if $s == null then "none" elif ($s.state | lc) == "success" then "green|\($s.target_url // "")"
+    | (if $s == null or ($hold == 1 and ($s.state | lc) == "error") then "none" elif ($s.state | lc) == "success" then "green|\($s.target_url // "")"
        elif ($s.state | lc) == "pending" then "running" else "red|\($s.target_url // "")|\($ctx)" end) as $loc
     | [$gh, $loc] as $v
     | first(($v[] | select(startswith("red|"))), ($v[] | select(startswith("green|"))),
@@ -1040,8 +1046,22 @@ batch_dispatch() {
     case "$v" in none|more) dispatch_linux "$1" "$3" ;; esac
   fi
   if [[ -n "$BATCH_APPS" && " $BATCH_IGNORE " != *" macOS "* && "$(mac_verdict "$2")" == none ]]; then
-    dispatch_mac "$1" "$1#mac"
+    mac_hold "$2" || dispatch_mac "$1" "$1#mac"
   fi
+}
+
+# mac_hold <sha>: with LANE_KILN=1, true (hold the mac_only dispatch) while
+# <sha>'s commit is under LANE_KILN_WAIT_MIN minutes old, so a local Mac check
+# polling lane/batch-* heads can post LOCAL_MAC_CONTEXT first (its pending
+# reads as running in mac_verdict). Keys on that status's state and context,
+# never its description. False when the date can't be read.
+mac_hold() {
+  (( LANE_KILN )) || return 1
+  local at
+  at=$(gh api "repos/$REPO/commits/$1" --jq '.commit.committer.date' 2>/dev/null) || return 1
+  at=$(jq -rn --arg d "$at" '$d | fromdateiso8601' 2>/dev/null) || return 1
+  (( $(date +%s) - at < LANE_KILN_WAIT_MIN * 60 )) || return 1
+  log "batch: holding the macOS gate on ${1:0:7} up to ${LANE_KILN_WAIT_MIN} min for a local Mac check ($LOCAL_MAC_CONTEXT)"
 }
 
 # batch_apps <base sha> <tip sha>: the batch's macOS gate scope: mac_scope

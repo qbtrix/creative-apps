@@ -17,7 +17,7 @@
 import SuiteKernel
 import SwiftUI
 
-struct TimelinePlayhead: View {
+struct TimelinePlayhead: View, BodyCounted {
     let mapping: FrameMapping
     let playhead: Int
     let unit: TimeUnit
@@ -34,8 +34,7 @@ struct TimelinePlayhead: View {
     @State private var sender = TimelineScrubSender()
 
     #if DEBUG
-    /// How many times a playhead's body ran; the real-window budget tests count a scrub's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     /// What the pill reads: the playhead in the host's unit.
@@ -43,7 +42,7 @@ struct TimelinePlayhead: View {
 
     var body: some View {
         #if DEBUG
-        Self.bodyRuns += 1
+        bodyTally.ran(Self.self)
         #endif
         return GeometryReader { proxy in
             let lineX = tickX(mapping, mapping.clamp(playhead)) - scroll.x

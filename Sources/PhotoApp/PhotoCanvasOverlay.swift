@@ -15,7 +15,9 @@
 // clear rectangle at the mark's frame that the journeys find by identifier,
 // an image and never a control, that never takes a click. `marks` lists the
 // elements shown, for tests. Values in; only Free Transform's handles send
-// intents out (`perform`).
+// intents out (`perform`). In a window it reads the PhotoSession's
+// `toolOptions` facet itself, so the brush cursor follows a size step that
+// re-runs nothing above it; without a session (tests) the workspace it was given.
 import CoreRaster
 import PhotoModel
 import SuiteKernel
@@ -23,7 +25,7 @@ import SuiteUI
 import SwiftUI
 
 struct PhotoCanvasOverlay: View {
-    let model: PhotoWorkspace
+    private let given: PhotoWorkspace
     let zoom: Double
     /// The document point under the pointer (CanvasViewport's `onPointer`); nil when outside.
     let hover: CGPoint?
@@ -31,6 +33,15 @@ struct PhotoCanvasOverlay: View {
     var perform: PhotoPerform = { _ in }
     /// The window's live drag line; read here only, so its samples re-run this body and not the editor's.
     var liveLine: LiveDragLine?
+    @Environment(PhotoSession.self) private var session: PhotoSession?
+
+    init(model: PhotoWorkspace, zoom: Double, hover: CGPoint?, perform: @escaping PhotoPerform = { _ in },
+         liveLine: LiveDragLine? = nil) {
+        (given, self.zoom, self.hover, self.perform, self.liveLine) = (model, zoom, hover, perform, liveLine)
+    }
+
+    /// The window's workspace now, read through the `toolOptions` facet; the given one outside a window.
+    private var model: PhotoWorkspace { session?.workspace(reading: .toolOptions) ?? given }
 
     var body: some View {
         ZStack(alignment: .topLeading) {

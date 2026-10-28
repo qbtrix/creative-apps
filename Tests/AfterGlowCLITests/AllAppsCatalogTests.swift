@@ -71,6 +71,9 @@ struct AllAppsCatalogTests {
             "style.add: exampleRuns", "style.enable: exampleRuns", "style.fill-opacity: exampleRuns", "style.panel: exampleRuns",
             "style.paste: exampleRuns", "style.preset: exampleRuns", "style.read: exampleRuns", "style.remove: exampleRuns",
             "style.set: exampleRuns"],
+        "The suite's Black & White example removes a B&W the file doesn't have": [
+            "adjust.black-and-white: stepNamedTitle", "adjust.black-and-white: editRecordsOneStep",
+            "adjust.black-and-white: undoRestoresBytes"],
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its

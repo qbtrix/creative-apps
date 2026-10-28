@@ -44,10 +44,12 @@ extension HaloProject: HeadlessDocument {
         // TS-9: the kernel's text commands but text.set-size, which stays Halo's own
         let texts = ["text.read", "text.set-font", "text.set-italic", "text.set-alignment", "text.set-line-height", "text.set-tracking"]
         let files = FileFlowCommands.specs(HaloProject.self).map(\.id)  // HF-3: the suite's file flow, its file.open-recent too
+        let filters = ["adjust.black-and-white", "adjust.invert"] + ImagingFilter.ids.map { "filter.\($0)" }
+            + ["filter.set-hidden", "filter.remove", "filter.move"]  // AJ-12/13: the layer's kinds, filters and list
         let clip = ["edit.copy-frame", "edit.paste"]  // CB-10: Copy Frame and Paste
         let window = ["render.choose-folder", "file.answer-unsaved"]  // CS-7: the window's own steps close the list
         let all = ids.filter { $0 != "file.open-recent" } + shapes + fills + strokes + history + transforms + rates + places + styles
-            + texts + files + clip + window
+            + texts + files + filters + clip + window
         #expect(catalog.ids == all.sorted() && HaloProject.commandSpecs.map(\.id) == all)
     }
 
@@ -140,6 +142,11 @@ extension HaloProject: HeadlessDocument {
         "the examples need a placed image; Ball shows none (HaloPlaceTests run them, PH-6)": ["place.focus place.read place.replace place.reset-size: exampleRuns"],
         "Ball has no recent files and no other app opens a .halo (HaloFileFlowTests run them, HF-3)": ["file.clear-recent file.open-in: exampleRuns"],
         "the style commands are LS-a's stubs until LS-6; Ball has no style to copy or clear (HY-5)": ["style.add style.clear style.copy style.enable style.fill-opacity style.panel style.paste style.preset style.read style.remove style.set: exampleRuns"],
+        "the black-and-white example ({}) clears it, and Ball has none, so nothing changes (AJ-12)": [
+            "adjust.black-and-white: stepNamedTitle", "adjust.black-and-white: editRecordsOneStep",
+            "adjust.black-and-white: undoRestoresBytes"],
+        "the list examples need a filter; Ball has none (HaloFiltersTests run them, AJ-12)": [
+            "filter.move filter.remove filter.set-hidden: exampleRuns"],
     ]
 
     @Test func conformance() {

@@ -18,7 +18,7 @@ enum HaloDrawRules {
                 color: layer.color, blendMode: layer.blendMode, text: layer.text, gradient: layer.gradient,
                 shape: layer.shape, stroke: HaloOutlines.stroke(of: layer, in: c, at: frame),
                 placedAsset: layer.kind == .solid ? layer.placedAsset : nil, placedImage: layer.placedImage(in: c),
-                style: style(of: layer, in: c, at: frame, placing: placing))
+                filters: layer.filters, style: style(of: layer, in: c, at: frame, placing: placing))
         }
         return HaloDrawList(width: c.width, height: c.height, frame: frame, items: items)
     }
