@@ -275,3 +275,4 @@ utc	stage	event	ref	note
 2026-10-27T23:51Z	3	waiting	lane	dev-red #5818 flake rerun at 7b2c437; waiting on prescreen
 2026-10-28T00:12Z	3	heartbeat	lane	poll 2026-10-28T00:12Z: 00:12Z check-in: no change; #5818 still red (7b2c437 rerun red); PRs ready, footers clean; no #5093 answer; no new main run
 2026-10-28T00:39Z	3	waiting	lane	dev-red #5818 real; waiting on prescreen
+2026-10-28T01:00Z	3	heartbeat	lane	poll 2026-10-28T01:00Z: 01:00Z check-in: no change; #5818 still open (0c204c3 macOS rerun pending); PRs ready, footers clean; no #5093 answer; no new main run
