@@ -51,7 +51,10 @@ public struct PhotoHeadless: HeadlessDropReceiver {
         var workspace = PhotoWorkspace(services: services)
         let files = PhotoReusingCodec(codec)
         switch name.split(separator: ".").last.map({ $0.lowercased() }) ?? "" {
-        case "ora": try workspace.openDocument(workspace.services.archive.package(fromContainer: data), name: name, codec: files)
+        case "ora":
+            let package = try workspace.services.archive.package(fromContainer: data)
+            for path in ["mergedimage.png", "Thumbnails/thumbnail.png"] { package.files[path].map(files.keep) }
+            try workspace.openDocument(package, name: name, codec: files)
         case let ext where openExtensions.contains(ext): try workspace.openImage(data, name: name, codec: files)
         default: throw CatalogError.unavailable(id: "open", why: openHelp)
         }

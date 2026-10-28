@@ -1,7 +1,9 @@
 // PhotoReusingCodec.swift: the codec Photo's headless document saves through, so one CLI edit re-encodes only the
 // images it changed. It remembers every PNG it decodes, each image beside the file's own bytes, and when asked to
 // encode a PNG whose pixels equal one it remembers it hands back those bytes instead of compressing again (a 24 MP
-// layer costs about a second to encode). Every other read and write goes to `base`. Its memory only ever holds
+// layer costs about a second to encode). PNGs in the file that no layer reads (the merged image, the thumbnail) are
+// kept undecoded (`keep`) and decoded only when an encode misses, under one lock, so parallel encodes wait for that
+// decode instead of compressing. Every other read and write goes to `base`. Its memory only ever holds
 // files as they were read, so copies of a document may share one. Thread-safe: the archive decodes and encodes
 // across the cores. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -21,6 +23,11 @@ final class PhotoReusingCodec: PhotoImageCodec {
     var readExtensions: Set<String> { base.readExtensions }
 
     private let handedBack = Mutex(0)
+    /// PNGs no layer decoded, read only when an encode finds no match.
+    private let unread = Mutex([Data]())
+
+    /// Holds `png` to hand back if an encode asks for its pixels; it is decoded only then.
+    func keep(_ png: Data) { unread.withLock { $0.append(png) } }
 
     /// How many PNGs it holds, and how many encodes it answered with one, for tests.
     var remembered: Int { read.withLock { $0.count } }
@@ -36,10 +43,22 @@ final class PhotoReusingCodec: PhotoImageCodec {
 
     func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data {
         // Compared outside the lock, so parallel encodes don't wait on each other's compares.
-        if format == .png, let png = read.withLock({ $0 }).first(where: { $0.image == image })?.png {
+        if format == .png, let png = remembered(image) {
             handedBack.withLock { $0 += 1 }
             return png
         }
         return try base.encode(image, as: format, quality: quality)
+    }
+
+    /// The bytes `image` was read from: a decoded layer's, else, once the kept PNGs are decoded, one of theirs.
+    private func remembered(_ image: DecodedImage) -> Data? {
+        func match() -> Data? { read.withLock({ $0 }).first(where: { $0.image == image })?.png }
+        if let png = match() { return png }
+        // Another encode may have decoded them while this one waited on the lock; either way they are read now.
+        unread.withLock { pending in
+            for png in pending { _ = try? decode(png, longestSide: nil) }
+            pending = []
+        }
+        return match()
     }
 }

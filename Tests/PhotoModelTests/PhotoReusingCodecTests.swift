@@ -1,6 +1,7 @@
 // PhotoReusingCodecTests.swift: a CLI edit re-encodes only the images it changed (quality gate #5833). Opening a
-// saved .ora, adding a layer and saving keeps the photo layer's PNG byte for byte, as read; resizing the image
-// writes a new one. Runs on Linux and macOS.
+// saved .ora, adding a layer and saving keeps the photo layer's PNG byte for byte, as read, and on a document of two
+// layers the merged image's PNG too, though no layer reads it; resizing the image writes a new one. Runs on Linux
+// and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -33,6 +34,22 @@ import Testing
         #expect(try layerPNG(out) == before)
         #expect(document.files.reused >= 1, "the untouched photo layer was encoded again")
         #expect(try PhotoHeadless.open(out, name: "photo.ora").workspace.layers.count == 2)
+    }
+
+    @Test func anEditThatLeavesTheCompositeAloneKeepsTheMergedPNG() throws {
+        var two = try PhotoHeadless.open(try savedDocument(), name: "photo.ora")
+        let dot = try PhotoHeadless.codec.encode(DecodedImage(rgba8: [9, 200, 40, 255, 9, 200, 40, 128], width: 2, height: 1),
+                                                 as: .png, quality: 1)
+        two.receiveDropped(["/drop/dot.png": dot])
+        _ = try PhotoHeadless.catalog.run("file.drop", params: .object(["paths": .array([.string("/drop/dot.png")])]), on: &two)
+        let saved = try two.save()
+        var document = try PhotoHeadless.open(saved, name: "photo.ora")
+        _ = try PhotoHeadless.catalog.run("layer.new", params: .object([:]), on: &document)
+        let out = try document.save()
+        let merged = { (ora: Data) in try PhotoServices.live.archive.package(fromContainer: ora).files["mergedimage.png"] }
+        #expect(try merged(out) == (try #require(try merged(saved))))
+        // Both layers' PNGs and the merged image's (equal bytes alone don't show it: the encoder is deterministic).
+        #expect(document.files.reused >= 3, "the unchanged merged image was encoded again")
     }
 
     @Test func anEditThatChangesALayerWritesANewPNG() throws {
