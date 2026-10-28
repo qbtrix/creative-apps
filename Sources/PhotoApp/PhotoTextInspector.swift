@@ -133,8 +133,9 @@ struct PhotoTextInspector: View {
                 scrub.lineHeight = nil
                 scrub.tracking = nil
             }
+            // On the field, not the row: its adjustable action is the one VoiceOver and the harness step.
+            .control(id, help: help)
         }
-        .control(id, help: help)
     }
 }
 
