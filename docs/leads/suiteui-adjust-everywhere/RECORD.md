@@ -465,3 +465,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 09:43Z check-in: #5250 #5259 #5260 #5252 #5258 all clean, no needs-fix/needs-rebase; waiting on the lane's prescreen. dev 746ee995b, main c73c958a9. No open findings.
 - 2026-10-28T09:59Z #5252 AJ-library merged 09:48Z (dev 6ef2d459b); main c73c958a9 held by dev-red #5966 (macOS, not ours); #5250 prescreened; #5258 #5103 #5245 awaiting prescreen
 - 10:03Z AJ-library: #5252 merged to dev as 6ef2d459b. Belt-Slice-Done follows once main holds it under a green ci.yml run. #5250 #5259 #5260 #5258 clean, waiting on prescreen. dev 6ef2d459b, main c73c958a9.
+- 10:22Z check-in: no change. AJ-library (6ef2d459b) waits for main. #5250 #5259 #5260 #5258 clean, waiting on prescreen. dev 6ef2d459b, main c73c958a9.
