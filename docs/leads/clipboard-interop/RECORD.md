@@ -5,7 +5,7 @@ Run: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-he
 Stage: 3 wave check
 Base: afef017c27a56ec18983e58672a8a15c94083ce4 (origin/dev = origin/main)
 Next: wait for the lane to batch #5116 (re-integrated at 0e1cc330, Fast-Check pass) and the other CB PRs; on merge, check main runs for Belt-Slice-Done.
-Polled: 2026-10-28T19:02Z · 19:03Z: #5254 conflict resolved (a4988a0a), prescreen green, awaiting lane; full CI 40740800666 running
+Polled: 2026-10-28T19:58Z · CB-flare/halo/library done; gates: #4904 fix, #5256 dev merge, #5109 dev merge
 
 
 
