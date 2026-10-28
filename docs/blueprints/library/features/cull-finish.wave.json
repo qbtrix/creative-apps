@@ -2,7 +2,7 @@
   "title": "Finish the cull: Delete Rejected Photos to the Trash with undo, and colour label keys 6 to 9",
   "wave": 6,
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "feature map A5 (Delete Rejects, label keys; not full screen); RJ-L06; captain 2026-10-18 (Delete Rejects in the beta); filters stay #1563's FC-b",
