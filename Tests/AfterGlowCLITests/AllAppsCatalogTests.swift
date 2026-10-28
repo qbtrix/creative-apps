@@ -71,6 +71,9 @@ struct AllAppsCatalogTests {
             "style.add: exampleRuns", "style.enable: exampleRuns", "style.fill-opacity: exampleRuns", "style.panel: exampleRuns",
             "style.paste: exampleRuns", "style.preset: exampleRuns", "style.read: exampleRuns", "style.remove: exampleRuns",
             "style.set: exampleRuns"],
+        "Photo's square.png is flat where the heal examples act, so they change no pixel and record no step": [
+            "retouch.spot-heal: stepNamedTitle", "retouch.spot-heal: editRecordsOneStep", "retouch.spot-heal: undoRestoresBytes",
+            "retouch.remove: stepNamedTitle", "retouch.remove: editRecordsOneStep", "retouch.remove: undoRestoresBytes"],
         "The suite's Black & White example removes a B&W the file doesn't have": [
             "adjust.black-and-white: stepNamedTitle", "adjust.black-and-white: editRecordsOneStep",
             "adjust.black-and-white: undoRestoresBytes"],
