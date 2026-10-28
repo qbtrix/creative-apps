@@ -388,3 +388,4 @@ utc	stage	event	ref	note
 2026-10-28T20:17Z	check-in	Quiet: #5353 open, PX-9 waits. No new findings (45 Photo open). dev green, no open dev-red.
 2026-10-28T20:49Z	check-in	Quiet: #5353 open, PX-9 waits. No new findings (45 Photo open). dev green, no open dev-red.
 2026-10-28T21:23Z	check-in	Quiet: #5353 open, PX-9 waits. No new findings (45 Photo open). dev green, no open dev-red.
+2026-10-28T21:55Z	check-in	#5353 open, PX-9 waits. dev-red #6001 (macos, range #5129/#5254/#5997, not ours); finding #6002 histogram quarantine, owned by leads #3778/#3752, skipped. 46 Photo findings open, none export/text.
