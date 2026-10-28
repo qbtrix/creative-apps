@@ -462,3 +462,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 09:03Z #5257 (AJ-halo model) merged as 83d413f29. #5258 base PATCHed to dev, rebased onto dev cleanly (ae708a9b2, +227-4 f=5), gate running.
 - 09:05Z #5258: CI: PASS on restack, pushed ae708a9b2 with lease, Head: moved.
 - 09:23Z check-in: #5250 #5259 #5260 #5252 #5258 clean [fast-lane,beta]; dev 746ee995b, main c73c958a9. Nothing new merged.
+- 09:43Z check-in: #5250 #5259 #5260 #5252 #5258 all clean, no needs-fix/needs-rebase; waiting on the lane's prescreen. dev 746ee995b, main c73c958a9. No open findings.
