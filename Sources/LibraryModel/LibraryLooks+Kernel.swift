@@ -46,6 +46,14 @@ extension LibraryCatalog: AdjustTarget {
 
     public var looks: any PresetStoring { services.looks }
 
+    /// One sample of a B&W weight drag (AJ-11): every target in B&W with `weights`, Invert kept, as the step
+    /// "Black & White". Samples sharing an open `coalesceKey` stay one step until `endDevelopDrag()`.
+    public mutating func setGrayWeights(_ weights: GrayWeights, coalesceKey: String?) {
+        recordEdit("Black & White", coalesceKey: coalesceKey, ids: developTargets) {
+            $0.develop = $0.develop.setting(kinds: [.blackAndWhite(weights)] + $0.develop.kinds.filter { $0 == .invert })
+        }
+    }
+
     /// `look` over neutral settings with `old`'s crop: the `sliders` it carries (exposure adds the
     /// adjust exposure), its levels and curve, and its kinds.
     static func developing(_ look: LookPreset, keeping old: DevelopSettings, sliders: [ToneSlider]) -> DevelopSettings {
