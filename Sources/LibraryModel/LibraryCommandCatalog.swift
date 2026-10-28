@@ -333,7 +333,7 @@ extension LibraryCatalog {
         schema: .object(["slider": .string("The slider.", oneOf: ToneSlider.develop.map(\.rawValue)),
                          "value": .number("The value, clamped to the slider's range."),
                          "drag": .optional(.string("A drag's token; steps under one token are one undo step.", maxLength: 64))],
-                        required: ["slider", "value", "drag"]),
+                        required: ["slider", "value"]),
         example: .object(["slider": .string("vibrance"), "value": .number(50)]),
         availability: { available($0.services.unavailable["develop"] ?? $0.developHelp) }
     ) { c, p in
