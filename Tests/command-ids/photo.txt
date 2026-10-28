@@ -5,6 +5,7 @@ edit.cut
 edit.delete-selection
 edit.fill-selection
 edit.paste
+edit.paste-as-image
 edit.redo
 edit.select-all
 edit.undo
@@ -88,15 +89,19 @@ tool.brush
 tool.bucket
 tool.clone
 tool.crop
+tool.ellipse
 tool.eraser
 tool.eyedropper
 tool.gradient
 tool.heal
+tool.lasso
 tool.marquee
 tool.move
+tool.polygon
 tool.remove
 tool.spot-heal
 tool.text
+tool.wand
 transform.begin
 transform.cancel
 transform.commit

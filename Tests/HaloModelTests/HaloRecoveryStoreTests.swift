@@ -10,6 +10,7 @@ import FoundationEssentials
 import Foundation
 #endif
 @testable import HaloModel
+import SuiteKernel
 import SuiteModel
 import Testing
 
@@ -45,7 +46,8 @@ import Testing
 
     @Test func restoreRecoveredReplacesTheOpenProject() throws {
         var source = HaloProject(services: .live, document: try #require(HaloFixtures.project("keyed")))
-        source.setRecent([HaloRecentFile(name: "a", path: "/a.halo")])
+        let listed = RecentFileEntry(fileID: "a", name: "a.halo", path: "/a.halo", app: "halo", lastUsed: Date(timeIntervalSince1970: 0))
+        source.updateFileFlow(recents: [listed])
         var window = source
         window.didSave(name: "w", path: "/w.halo")
         window.newComposition()
@@ -56,7 +58,7 @@ import Testing
         #expect(window.file.path == nil)
         #expect(window.windowTitle == "title")
         #expect(window.historyListing.steps.isEmpty)
-        #expect(window.recent.map(\.path) == ["/w.halo", "/a.halo"])
+        #expect(window.recentFiles == [listed], "the restore dropped the file flow's recents")
     }
 
     @Test func damagedBytesLeaveTheProjectAsItWas() throws {

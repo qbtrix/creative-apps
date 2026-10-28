@@ -8,8 +8,8 @@
 // the summary is EX-6's `library.export.summary`; the buttons and the Write
 // Sidecar checkbox are found by title.
 //
-// Written before its code (lead.md, contract rule 13, LX-6); LX-7 turns it on
-// once LX-3 and LX-4 write the policy into the sidecar and the JPEG.
+// Written before its code (lead.md, contract rule 13, LX-6); on since LX-7,
+// with LX-3 and LX-4 writing the policy into the sidecar and the JPEG.
 import CoreGraphics
 import Foundation
 import ImageIO
@@ -20,7 +20,6 @@ final class LibraryExportPackJourneyTests: XCTestCase {
     /// LJ-X1: All but location keeps the camera and the date and drops the GPS;
     /// None drops the date too, from the JPEG and its sidecar alike.
     @MainActor func testExportWithoutLocation() throws {
-        try XCTSkipIf(true, "waits on LX-7")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         let out = try LibraryFiles.freshPhotoFolder()
