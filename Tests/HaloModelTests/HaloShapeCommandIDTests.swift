@@ -21,7 +21,7 @@ import Testing
         let id = try HaloProject.catalog.run("shape.draw", params: params, on: &project).result
         let layer = try #require(project.selectedLayer)
         #expect(id == .object(["id": .string(layer.id)]))
-        #expect(layer.name == "Draw Star" && layer.shape == HaloShapeTests.star)
+        #expect(layer.name == "Star" && layer.shape == HaloShapeTests.star)
         #expect(layer.rect == HaloLayerRect(x: 760, y: 340, width: 400, height: 400))
         #expect(project.history.undo.count == 1)
         project.undo()
@@ -42,7 +42,7 @@ import Testing
         let files = FileFlowCommands.specs(HaloProject.self).count - 1  // HF-3: the file flow, whose file.open-recent replaces Halo's
         #expect(HaloProject.catalog.ids.count  // FR-8b: + 1 for set-frame-rate
             == HaloCommand.allCases.count + 2 + fills + strokes + history + transforms + 1 + places + styles + files
-            + HaloProject.windowSpecs.count)
+            + HaloProject.textStyleSpecs.count + 2 + HaloProject.windowSpecs.count)  // TS-9: the kernel's text commands; CB-10: + 2 for edit.copy-frame and edit.paste
     }
 
     @Test func runShapeKeepsThePickedTool() throws {

@@ -164,6 +164,12 @@ import Testing
         let saved = try Self.catalog.run("export.save-preset", params: .object(["name": .string("Mine")]), on: &e).result
         #expect(saved == (try JSONValue(encoding: ExportPreset(name: "Mine", options: ExportOptions(longEdge: 1024, quality: 80, folder: "/web")))))
         #expect(throws: CatalogError.self) { try Self.catalog.run("export.apply-preset", params: .object(["name": .string("Nope")]), on: &e) }
+        // A blank name saves nothing, from the CLI too (#4673).
+        for blank in ["", "   "] {
+            #expect(throws: CatalogError.failed(id: "export.save-preset", message: "Name the preset.")) {
+                try Self.catalog.run("export.save-preset", params: .object(["name": .string(blank)]), on: &e)
+            }
+        }
         var f = Self.state("export failed")
         #expect(try Self.catalog.run("export.retry", params: .object([:]), on: &f).result == .object(["photos": .number(1)]))
         #expect(f.exportState == .running(done: 0, total: 1))

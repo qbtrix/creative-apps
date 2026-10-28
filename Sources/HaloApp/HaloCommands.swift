@@ -39,10 +39,12 @@ struct HaloMenuTarget {
 }
 
 /// Layer: New ▸ (Solid, Shape, Text, Null), Duplicate ⇧⌘D, Rename…, Delete
-/// (⌫ in the viewer or timeline), Bring Forward ⌘], Send Backward ⌘[.
+/// (⌫ in the viewer or timeline), Bring Forward ⌘], Send Backward ⌘[; then Layer Style…,
+/// Copy, Paste and Clear Layer Style (HaloStyleMenuItems, HaloWindow+Styling.swift).
 struct HaloCommands: Commands {
     @FocusedValue(\.haloProject) private var model
     @FocusedValue(\.haloPerform) private var perform
+    @FocusedValue(\.haloRunStyleMenu) private var runStyleMenu
 
     private var target: HaloMenuTarget { HaloMenuTarget(model: model, perform: perform) }
 
@@ -61,6 +63,8 @@ struct HaloCommands: Commands {
             Divider()
             target.item(.bringLayerForward, shortcut: KeyboardShortcut("]"))
             target.item(.sendLayerBackward, shortcut: KeyboardShortcut("["))
+            Divider()
+            HaloStyleMenuItems(model: model, run: runStyleMenu)
         }
     }
 }

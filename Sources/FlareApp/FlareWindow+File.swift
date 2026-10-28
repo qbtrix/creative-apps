@@ -14,7 +14,7 @@
 // Open Sample opens the named fixture document (FlareFixtures, as `-FlareSample`
 // does) through `finishOpen`, clean and with no undo history; Keyed Ball is
 // FlareWindow's menu door. Each open and save is noted in the suite's recents
-// through the documents bridge (the first also hands over Flare's old list),
+// through the documents bridge, the one list Open Recent reads (#5126),
 // and Clear Menu and the file-flow commands' requests go to the bridge (FL-4).
 // A Lottie JSON (`FlareWorkspace.opensAsLottie`, lottie-open LO-4) opens through
 // FlareLottieOpen off the main actor and lands through `finishLottieOpen`:
@@ -158,9 +158,8 @@ extension FlareWindow {
         return FlareShell.bridge
     }
 
-    /// Notes `url` in the suite's recents; the first note also hands over Flare's old list.
+    /// Notes `url` in the suite's recents.
     func noteSuite(_ url: URL, _ event: RecentEvent) {
-        for ref in model.takeOldRecents() where ref.path != url.path { Self.bridge.noted(ref, .opened) }
         if let ref = FlareWorkspace.suiteRef(url.path) { Self.bridge.noted(ref, event) }
     }
 
@@ -177,13 +176,13 @@ extension FlareWindow {
     }
 
     /// Where Save writes without asking: `-FlareSaveTo`'s folder, else the
-    /// file this document was opened from or last saved to (the head of
-    /// Open Recent while it carries the document's name); nil asks.
+    /// file this document was opened from or last saved to (`filePath`,
+    /// while it carries the document's name); nil asks.
     private var saveURL: URL? {
         if let folder = launch.saveFolder {
             return URL(fileURLWithPath: folder, isDirectory: true).appending(path: "\(model.title).flare")
         }
-        guard let path = model.recent.first, let name = model.fileName,
+        guard let path = model.filePath, let name = model.fileName,
             URL(fileURLWithPath: path).lastPathComponent == name
         else { return nil }
         return URL(fileURLWithPath: path)

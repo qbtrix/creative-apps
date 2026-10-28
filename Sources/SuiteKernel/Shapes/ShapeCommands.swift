@@ -51,7 +51,7 @@ public enum ShapeIntent: Hashable, Sendable {
 }
 
 public enum ShapeCommands {
-    /// tool.shape's params, and with the box and line ends (unit space) shape.draw's.
+    /// tool.shape's params, and with the box and line ends (fractions of the box) shape.draw's.
     struct Tool: Decodable, Sendable {
         var kind: ShapeKind, sides: Int?, points: Int?, innerRatio: Double?, cornerRadius: Double?, head: Double?
         /// `spec` with this kind and every option given here; the rest kept.
@@ -87,8 +87,12 @@ public enum ShapeCommands {
     ]
     static let drawSchema = ParamSchema.object(options.merging([
         "x": .number(), "y": .number(), "w": .number(minimum: 0), "h": .number(minimum: 0),
-        "x1": .optional(.number()), "y1": .optional(.number()), "x2": .optional(.number()), "y2": .optional(.number()),
+        "x1": end("start's x"), "y1": end("start's y"), "x2": end("end's x"), "y2": end("end's y"),
     ]) { old, _ in old }, required: ["kind", "x", "y", "w", "h"])
+    /// A line end on one axis: a fraction of the box, 0 at its left or top and 1 at its right or bottom, never pixels.
+    static func end(_ what: String) -> ParamSchema {
+        .optional(.number("A line's \(what), as a fraction of the box from 0 to 1.", minimum: 0, maximum: 1))
+    }
 
     /// shape.draw (an edit, one undo step) and tool.shape (view state), both unavailable while `shapeHelp` is set.
     public static func specs<T: ShapeTarget>(_ target: T.Type) -> [CommandSpec<T>] {

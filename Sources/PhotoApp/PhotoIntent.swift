@@ -121,8 +121,7 @@ extension PhotoTool: PaletteTool {
         case .clone: "s"
         case .spotHeal: "j"
         case .heal: "j"
-        // Shift-J cycling through Spot Heal, Heal and Remove waits on SuiteUI.
-        case .remove: nil
+        case .remove: "j"
         case .crop: "c"
         case .eyedropper: "i"
         case .bucket: "g"

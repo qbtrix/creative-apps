@@ -1087,7 +1087,7 @@
     "app": "suite",
     "weight": "high",
     "job": "Turn Library's Show Original on and off with the afterglow CLI and read its state back.",
-    "outcome": "After the first run view.read reports showOriginal true, after the second false, and the photo's develop values are unchanged both times.",
+    "outcome": "After view.show-original the json export with contents shown reports original true; toggled twice in one run (a CLI run starts with it off) it reports original false, and the photo's develop values are unchanged both times.",
     "needs": [
       "suite/command-state",
       "AI2"
