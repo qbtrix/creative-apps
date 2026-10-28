@@ -20,8 +20,9 @@
 // taking the copy back) redraws the whole picture exactly, even at the same
 // revision. A drag sample of a draft that lifts (PhotoTransformLift) draws nothing: the first renders the
 // picture once without the draft's layer and lifts the layer's pixels onto the view's live layer (SuiteUI's CanvasLiveLayer), every
-// later one only places them (`moveLift`), and the next plain picture drops the lift as it lands. On the
-// tile path a layer with nothing under it hides the picture instead of drawing an empty one. The lifted
+// later one only places them (`moveLift`), and the next plain picture drops the lift as it lands. Wherever a
+// picture comes back as tiles (no presenter texture to write), a layer with nothing under it hides the picture
+// instead of drawing an empty one. The lifted
 // pixels are made once per Free Transform (when its draft first shows) and serve every drag of it. A lift that
 // fails leaves its drag on the region path.
 // On the GPU route the renderer keeps the layer tiles resident on the backend
@@ -290,9 +291,10 @@ final class CanvasRenderer {
                 }
                 guard let made, let base = workspace.liftedBase else { throw RasterError.invalid("the layer can't lift") }
                 if sprite?.of != made.of { sprite = made }
-                // On the tile path a layer with nothing under it hides the picture instead of drawing an empty one:
-                // no tile surfaces. The GPU route draws the picture under it into its texture, which costs no surfaces.
-                let alone = !route.isGPU && workspace.liftsAlone
+                // Wherever a picture comes back as tiles (the CPU, or the GPU with no presenter texture to write), a
+                // layer with nothing under it hides the picture instead of drawing an empty one: no tile surfaces. A
+                // render into the presenter's texture costs no surfaces, so it still draws the picture under it.
+                let alone = target == nil && workspace.liftsAlone
                 let update = alone ? nil : try await PhotoRenderer.update(base, since: nil, route: route, target: target)
                 var prepared: [PixelRect: CanvasTiles.Prepared]?
                 if let update { prepared = await Self.prepared(update) }
