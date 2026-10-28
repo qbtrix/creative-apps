@@ -256,3 +256,4 @@ time	task	event	note
 2026-10-28T05:43Z	3	heartbeat	lane	poll 2026-10-28T05:43Z: 05:43Z check-in: no change; #5818 still open (186be9a rerun pending); #5103/#5149 ready; no #5093 answer; no new main run
 2026-10-28T06:31Z	3	heartbeat	lane	poll 2026-10-28T06:31Z: 06:30Z dev green at 9ece0e0 (#5818 closed); FH-u, FH-c, CB-photo slice-done; #5103/#5149 ready
 2026-10-28T07:20Z	3	heartbeat	lane	poll 2026-10-28T07:20Z: 07:19Z no change; #5103/#5149 ready; dev-red #5963 is a stale 186be9a red (test fixed by #5956 in green 9ece0e0), not ours
+2026-10-28T08:10Z	3	heartbeat	lane	poll 2026-10-28T08:10Z: 08:10Z main c73c958; #5103/#5149 ready, awaiting lane; dev-red #5966 is the same stale 186be9a red, not ours
