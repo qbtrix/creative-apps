@@ -33,8 +33,9 @@ extension BodyCountSuites {
             let first = try #require(w.identifiers().first { $0.hasPrefix(LibraryGrid.cellIdentifierPrefix) })
             #expect(w.perform("Open", on: first), "no Open action on \(first)")
             try await w.settle(500)
-            // A synthetic click on the segmented control waits in its tracking loop, so press it the AX way.
-            _ = Self.node("library.inspector.develop", in: w.host)?.accessibilityPerformPress?()
+            // A synthetic click on the segmented control waits in its tracking loop, and an accessibility
+            // press ends the test process later (#5883), so pick the segment as its click would.
+            #expect(w.select(segment: "library.inspector.develop"), "no Develop tab")
             try await w.settle(untilStable: bodies, turns: 8)
             let id = DevelopInspector.levelsID(.gamma)
             #expect(await w.element(id) != nil, "no Midtones handle")
@@ -51,23 +52,6 @@ extension BodyCountSuites {
 
         /// What this branch measured (Tests/render-budgets.md); it only ratchets down.
         static let budget = 120
-
-        /// The element called `identifier` under `root`, walking accessibility children and subviews as the
-        /// harness does.
-        static func node(_ identifier: String, in root: NSView) -> AnyObject? {
-            var seen = Set<ObjectIdentifier>()
-            func find(_ node: AnyObject, _ depth: Int) -> AnyObject? {
-                guard seen.insert(ObjectIdentifier(node)).inserted else { return nil }
-                if (node.accessibilityIdentifier?() ?? nil) == identifier { return node }
-                guard depth < 60 else { return nil }
-                let children = ((node.accessibilityChildren?() ?? nil) ?? []) + ((node as? NSView)?.subviews ?? [])
-                for child in children {
-                    if let hit = find(child as AnyObject, depth + 1) { return hit }
-                }
-                return nil
-            }
-            return find(root, 0)
-        }
     }
 }
 #endif

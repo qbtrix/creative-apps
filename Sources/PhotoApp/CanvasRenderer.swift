@@ -20,7 +20,10 @@
 // taking the copy back) redraws the whole picture exactly, even at the same
 // revision. A drag sample of a draft that lifts (PhotoTransformLift) draws nothing: the first renders the
 // picture once without the draft's layer and lifts the layer's pixels onto the view's live layer (SuiteUI's CanvasLiveLayer), every
-// later one only places them (`moveLift`), and the next plain picture drops the lift as it lands. A lift that
+// later one only places them (`moveLift`), and the next plain picture drops the lift as it lands. Wherever a
+// picture comes back as tiles (no presenter texture to write), a layer with nothing under it hides the picture
+// instead of drawing an empty one. The lifted
+// pixels are made once per Free Transform (when its draft first shows) and serve every drag of it. A lift that
 // fails leaves its drag on the region path.
 // On the GPU route the renderer keeps the layer tiles resident on the backend
 // (ResidentSurfaces) and, while the view draws through its Metal presenter,
@@ -66,12 +69,31 @@ final class CanvasRenderer {
     @ObservationIgnored private var liftWaiting: PhotoWorkspace?
     /// A lift that failed: its drag draws through the region path instead.
     @ObservationIgnored private var refusedLift: PhotoTransformLift.Key?
+    /// The live layer's pixels for the Free Transform up now, made once (when the draft first shows) and
+    /// reused by every drag of it; dropped once no draft shows. Nil before then.
+    @ObservationIgnored private var sprite: Sprite?
+    /// The sprite being made off the main thread for this draft, so a show doesn't start a second.
+    @ObservationIgnored private var preparing: PhotoTransformLift.Sprite?
+
+    /// A live layer's pixels and what they were made from. The surface is only read once made.
+    struct Sprite: @unchecked Sendable {
+        let of: PhotoTransformLift.Sprite
+        let surface: IOSurface
+        let width: Int, height: Int
+    }
     /// Called with each picture's revision as its tiles reach the view (the brush ink test times this).
     @ObservationIgnored var onPicture: ((Int) -> Void)?
     #if DEBUG
     /// Pictures every renderer in the process has handed its view, and the renders in flight across every
     /// renderer (0 once every queue drained): the idle-work tests read them.
     static var pictures = 0, inFlight = 0
+    /// Every renderer alive (weakly), so a test finds its own window's (`rendering(into:)`) and counts only its work.
+    static let all = NSHashTable<AnyObject>.weakObjects()
+    /// This renderer's live-layer pixel sets made (one per Free Transform while a draft's pixels hold), and lifts.
+    @ObservationIgnored private(set) var spritesMade = 0
+    @ObservationIgnored private(set) var liftsRun = 0
+    /// Lifts every renderer in the process has started (each makes one layer surface).
+    static var lifts = 0
     #endif
     /// Where renders run; `use` switches it.
     @ObservationIgnored private(set) var route = PhotoRenderRoute.cpu
@@ -88,6 +110,22 @@ final class CanvasRenderer {
 
     /// No render is running or waiting, so nothing dropped is still held.
     var isIdle: Bool { !isRendering && waiting == nil }
+
+    init() {
+        #if DEBUG
+        Self.all.add(self)
+        #endif
+    }
+
+    #if DEBUG
+    /// No render running or waiting and no live-layer pixels being made.
+    var isSettled: Bool { isIdle && preparing == nil && liftWaiting == nil }
+
+    /// The renderer drawing into `view`; nil when none is.
+    static func rendering(into view: CanvasHostView) -> CanvasRenderer? {
+        all.allObjects.lazy.compactMap { $0 as? CanvasRenderer }.first { $0.tiles.attachedView === view }
+    }
+    #endif
 
     /// Draws on `route` from now on: the next `show` redraws every tile there. A GPU route gets this
     /// renderer's resident tiles for its backend, so a frame uploads only the layer tiles that changed.
@@ -126,6 +164,7 @@ final class CanvasRenderer {
         if quietly, moveLift(workspace) { return }
         // Any other picture replaces the lift: one not shown yet is dropped now, a shown one as the picture lands.
         if lift?.shown != true { (lift, liftWaiting) = (nil, nil) }
+        prepareSprite(for: workspace)
         quiet = quietly
         guard let canvas = workspace.canvas else {
             tiles.clear()
@@ -228,6 +267,8 @@ final class CanvasRenderer {
         isRendering = true
         #if DEBUG
         Self.inFlight += 1
+        Self.lifts += 1
+        liftsRun += 1
         #endif
         let route = self.route
         redrawAll = false
@@ -239,20 +280,34 @@ final class CanvasRenderer {
         }
         Task { [target] in
             do {
-                let made = try await Self.lifted(workspace)
-                guard let made else { throw RasterError.invalid("the layer can't lift") }
-                let update = try await PhotoRenderer.update(made.lift.base, since: nil, route: route, target: target)
-                let prepared = await Self.prepared(update)
-                if let up = lift, up.key == key, !up.shown {
-                    tiles.apply(update, prepared: prepared)
-                    tiles.lift(made.surface, width: made.lift.width, height: made.lift.height,
-                               opacity: made.lift.opacity, placement: up.placement)
-                    lift?.shown = true
-                    if backend != update.backend { backend = update.backend }
+                // The pixels are the same for every drag of the draft: made once, here or when the draft showed.
+                let wanted = workspace.liftSprite
+                var made = sprite.flatMap { $0.of == wanted ? $0 : nil }
+                if made == nil {
+                    made = try await Self.sprite(of: workspace)
                     #if DEBUG
-                    Self.pictures += 1
+                    spritesMade += 1
                     #endif
-                    revision = update.revision
+                }
+                guard let made, let base = workspace.liftedBase else { throw RasterError.invalid("the layer can't lift") }
+                if sprite?.of != made.of { sprite = made }
+                // Wherever a picture comes back as tiles (the CPU, or the GPU with no presenter texture to write), a
+                // layer with nothing under it hides the picture instead of drawing an empty one: no tile surfaces. A
+                // render into the presenter's texture costs no surfaces, so it still draws the picture under it.
+                let alone = target == nil && workspace.liftsAlone
+                let update = alone ? nil : try await PhotoRenderer.update(base, since: nil, route: route, target: target)
+                var prepared: [PixelRect: CanvasTiles.Prepared]?
+                if let update { prepared = await Self.prepared(update) }
+                if let up = lift, up.key == key, !up.shown {
+                    if let update { tiles.apply(update, prepared: prepared) }
+                    tiles.lift(made.surface, width: made.width, height: made.height,
+                               opacity: made.of.opacity, placement: up.placement, hidingPicture: alone)
+                    lift?.shown = true
+                    if let update, backend != update.backend { backend = update.backend }
+                    #if DEBUG
+                    if update != nil { Self.pictures += 1 }
+                    #endif
+                    revision = update?.revision ?? workspace.revision
                     if failure != nil { failure = nil }
                 }
             } catch {
@@ -264,12 +319,32 @@ final class CanvasRenderer {
         }
     }
 
-    /// `workspace`'s lift and its pixels as an IOSurface, made off the main thread; nil when nothing lifts.
-    nonisolated static func lifted(_ workspace: PhotoWorkspace) async throws -> (lift: PhotoTransformLift, surface: IOSurface)? {
-        guard let lift = try workspace.lifted(),
-            let surface = CanvasTile.surface(premultipliedRGBA: lift.rgba8, width: lift.width, height: lift.height)
+    /// Makes the live layer's pixels for `workspace`'s draft off the main thread when its Free Transform first
+    /// shows, so the first drag only renders the picture under them; drops them once no draft shows.
+    private func prepareSprite(for workspace: PhotoWorkspace) {
+        guard let wanted = workspace.liftSprite else {
+            if workspace.transformDraft == nil { (sprite, preparing) = (nil, nil) }
+            return
+        }
+        guard sprite?.of != wanted, preparing != wanted else { return }
+        preparing = wanted
+        Task {
+            let made = try? await Self.sprite(of: workspace)
+            #if DEBUG
+            if made != nil { spritesMade += 1 }
+            #endif
+            guard preparing == wanted else { return }
+            preparing = nil
+            if let made, sprite?.of != made.of { sprite = made }
+        }
+    }
+
+    /// `workspace`'s live-layer pixels as an IOSurface, made off the main thread; nil when nothing lifts.
+    nonisolated static func sprite(of workspace: PhotoWorkspace) async throws -> Sprite? {
+        guard let of = workspace.liftSprite, let pixels = try workspace.liftedPixels(),
+            let surface = CanvasTile.surface(premultipliedRGBA: pixels.rgba8, width: pixels.width, height: pixels.height)
         else { return nil }
-        return (lift, surface)
+        return Sprite(of: of, surface: surface, width: pixels.width, height: pixels.height)
     }
 
     /// `update`'s tile images and surfaces, made off the main thread (a nonisolated async function runs on

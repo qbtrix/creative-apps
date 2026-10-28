@@ -27,7 +27,7 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone
+    case move, marquee, ellipse, lasso, polygon, wand, brush, eraser, clone
     /// Spot Heal (fill-heal): a click heals a spot from its surroundings. Before
     /// Heal, so J picks it first once it works.
     case spotHeal = "spot-heal"
@@ -129,6 +129,10 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var selectionMask: Mask?
     /// The selection's kernel recipe and Reselect's (PhotoArea+Kernel.swift).
     var area = PhotoArea()
+    /// The area tools' mode, feather and wand options (PhotoAreaTool.swift).
+    public internal(set) var areaOptions = PhotoAreaOptions()
+    /// The Polygon Lasso's corners so far, before it closes (PhotoAreaTool.swift).
+    var areaCorners: [Mask.Point] = []
     /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
     public internal(set) var selectionOptions = SelectionOptions()
     /// Each masked layer's mask, its own size, coverage as gray, alpha 1 (PhotoMask.swift).
@@ -223,6 +227,7 @@ public struct PhotoWorkspace: Sendable {
         stroke = nil
         selectionMask = nil
         area = PhotoArea()
+        areaCorners = []
         masks = [:]
         editsMask = false
         transformDraft = nil
@@ -247,6 +252,7 @@ public struct PhotoWorkspace: Sendable {
         endDrag()
         if tool != .text { commitTextBox() }
         self.tool = tool
+        areaCorners = []
         if tool != .crop, pendingCrop != nil { pendingCrop = nil }
     }
 
@@ -417,6 +423,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
             && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
             && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask && lhs.area == rhs.area
+            && lhs.areaOptions == rhs.areaOptions && lhs.areaCorners == rhs.areaCorners
             && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
@@ -457,6 +464,8 @@ extension AdjustmentKind {
         case .curves: "Curves"
         case .blur: "Blur"
         case .hueSaturation: "Hue/Saturation"
+        case .blackAndWhite: "Black & White"
+        case .invert: "Invert"
         }
     }
 }
