@@ -423,3 +423,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 2026-10-27T23:51Z poll: no change on our PRs (all clean with fast-lane, no prescreen yet). dev-red #5818 open; the lane's second flake rerun is in flight at 7b2c437. main fef52e668, dev bddf9c033.
 - 23:55Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev bddf9c033, main fef52e668.
 - 00:15Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 0c204c3e3, main fef52e668.
+- 00:35Z check-in: no change. #5249, #5252, #5250 clean, waiting for local-ci/prescreen. dev 533d237ad, main fef52e668.
