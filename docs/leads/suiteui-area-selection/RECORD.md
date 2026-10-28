@@ -2,10 +2,10 @@
 
 Issue: #3752 · Packet: docs/blueprints/suiteui/features/area-selection.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: done (all slices Belt-Slice-Done; Belt-Contact-Sheet posted)
-Base: main b661530c (verified, full CI 40771139414 green)
-Next: none
-Polled: 2026-10-28T22:59Z · main b661530c contains #5254 and #5256; Belt-Slice-Done AR-z and Belt-Contact-Sheet posted on #3752
+Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
+Base: main fef52e66 (verified) / dev 5e4a0922
+Next: #5096 (AR-photo-u) re-integrated at 4d85628f (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #5103, then #5254, #5256; Belt-Slice-Done on a green main run that contains the last AR-photo-u/AR-z PR.
+Polled: 2026-10-28T23:11Z · CB-design done (run 40771139414); waiting on CI 40782400633 for CB-z and FH-photo
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -15,9 +15,9 @@ Polled: 2026-10-28T22:59Z · main b661530c contains #5254 and #5256; Belt-Slice-
 | AR-u | SuiteUI ants and area tool options | AR-7, AR-8 | SJ-AR | AR-a | true | 0 | done | – | – |
 | AR-r | recipe to CoreRaster mask in SuiteImaging | AR-5, AR-6 | MJ-AR-raster | AR-a, IM-a (met) | false | 0 | done (Belt-Slice-Done run 40029042081) | – | – |
 | AR-photo-m | Photo selection on the kernel recipe | AR-9, AR-10 | MJ-AR-photo | AR-r | false | 0 | done (Belt-Slice-Done 40179648854) | – | – |
-| AR-photo-u | Photo tools, Select menu, SuiteUI ants | AR-11, AR-12 | PJ-AR | AR-photo-m; adopt-suiteui-chrome:AC-colour | true | 0 | done (Belt-Slice-Done 40740800666) | 40740800666 | – |
+| AR-photo-u | Photo tools, Select menu, SuiteUI ants | AR-11, AR-12 | PJ-AR | AR-photo-m; adopt-suiteui-chrome:AC-colour | true | 0 | building (#5096 on #4877, #5103 on #5096) | – | – |
 | AR-design | group click, enter, exit, deep pick | AR-13, AR-14 | DJ-AR | AR-m, AT-design (met) | true | 0 | done (Belt-Slice-Done posted) | 40129856269 | wanted (Mac-Finish-Wanted posted) |
-| AR-z | Photo copies deleted, C4, RJ-X70/71, built | AR-15, AR-16 | MJ-AR, PJ-AR, DJ-AR | AR-photo-m, AR-photo-u, AR-design; suite-imaging:IM-z | false | 0 | done (#5254 1a2831b8, #5256 95b9e001; Belt-Slice-Done 40771139414) | 40771139414 | – |
+| AR-z | Photo copies deleted, C4, RJ-X70/71, built | AR-15, AR-16 | MJ-AR, PJ-AR, DJ-AR | AR-photo-m, AR-photo-u, AR-design; suite-imaging:IM-z | false | 0 | startable (contract-first: IM-a merged; Wire IM-z) | – | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
@@ -33,7 +33,6 @@ Polled: 2026-10-28T22:59Z · main b661530c contains #5254 and #5256; Belt-Slice-
 |---|---|---|---|---|---|
 
 ## Decisions
-- 2026-10-28T22:59Z: main promoted to b661530c by green full run 40771139414, which contains #5254 and #5256. Posted Belt-Slice-Done AR-z and the Belt-Contact-Sheet on #3752 (journeys 40781788708 running; #5986 noted, not filed against this feature). Feature done.
 - 2026-10-26T02:14Z: Run act-1a175f7cb67-l7rh resumed. #5096 got needs-rebase (photo.list-commands.json conflict); fixing by merging origin/dev and regenerating the golden from `afterglow photo list-commands`.
 - 2026-10-25T05:20Z: #5096 lost fast-lane at 578 lines after #4877 squash-merged; merged origin/dev (PhotoStroke/PhotoWorkspace both-sides fields, setArea kept, golden union by id), scripts/ci --changed PASS, pushed 7c7f27654, body Head moved and footer stripped, fast-lane re-added.
 - 2026-10-25T04:45Z: #4877 merged; retargeted #5096 to dev (REST PATCH base=dev).
@@ -49,8 +48,8 @@ Polled: 2026-10-28T22:59Z · main b661530c contains #5254 and #5256; Belt-Slice-
 - #4877 leaves the marquee's Shift/Option modes and ellipse out (not AR-10); RJ-X70 fills black (no brush-colour command yet).
 
 ## Open
-- AR-photo-u: done (40740800666).
-- Wire: suite-imaging:IM-z [x] (feature-lead #4498 closed; AR-z shipped on IM-a's merged contract)
+- AR-photo-u: AC-colour done; only AR-photo-m (internal) remains, so it stacks on #4877.
+- Wire: suite-imaging:IM-z [ ] (AR-z builds ahead on IM-a's merged contract; swap and tick once IM-z's Belt-Slice-Done lands)
 - Open findings for this feature: 0.
 - 2026-10-24T07:05Z: run act-1a16cae7989-hj12 resumes on dev 830af22d. Server-added footers removed from #4848, #4859, #4865, #4872 bodies so Head: is the last line again (#4828, #4861, #4875, #4876 already clean). Contract-first waits (rule 12) applied to the slice table.
 
