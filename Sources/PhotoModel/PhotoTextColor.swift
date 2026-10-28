@@ -26,10 +26,8 @@ extension PhotoWorkspace {
                example: .object(["rgba": .array([200, 30, 30, 255].map(JSONValue.number))]),
                availability: { $0.canvas == nil ? .unavailable("Open an image first.") : $0.textStyle == nil ? .unavailable("Select a text layer first.") : .available }
         ) { w, p -> TextStyle? in
-            guard p.rgba.count == 4, p.rgba.allSatisfy({ (0...255).contains($0) }) else {
-                throw CatalogError.failed(id: "text.set-color", message: "A colour is four values, 0 to 255.")
-            }
-            try w.setTextColor(p.rgba.map { UInt8($0) }, drag: p.drag)
+            // The schema refuses values outside 0 to 255 before this runs.
+            try w.setTextColor(p.rgba.map { UInt8(clamping: $0) }, drag: p.drag)
             return w.textStyle
         }
     }

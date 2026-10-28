@@ -1,5 +1,5 @@
 [
   {"label": "colorNotSet: text.set-color keeps the old colour", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": "        style.rgba = rgba\n", "replace": "", "tests": "PhotoTextColorTests"},
-  {"label": "dragNotPassed: every colour under one drag is its own undo step", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": "try w.setTextColor(p.rgba.map { UInt8($0) }, drag: p.drag)", "replace": "try w.setTextColor(p.rgba.map { UInt8($0) }, drag: nil)", "tests": "PhotoTextColorTests"},
-  {"label": "rangeUnchecked: a value over 255 is taken", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": "guard p.rgba.count == 4, p.rgba.allSatisfy({ (0...255).contains($0) }) else {", "replace": "guard p.rgba.count == 4, p.rgba.allSatisfy({ (0...999).contains($0) }) else {", "tests": "PhotoTextColorTests"}
+  {"label": "dragNotPassed: every colour under one drag is its own undo step", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": "try w.setTextColor(p.rgba.map { UInt8(clamping: $0) }, drag: p.drag)", "replace": "try w.setTextColor(p.rgba.map { UInt8(clamping: $0) }, drag: nil)", "tests": "PhotoTextColorTests"},
+  {"label": "rangeUnchecked: a value over 255 is taken", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": ".integer(\"0 to 255.\", minimum: 0, maximum: 255)", "replace": ".integer(\"0 to 255.\", minimum: 0, maximum: 999)", "tests": "PhotoTextColorTests"}
 ]
