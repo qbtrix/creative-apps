@@ -450,3 +450,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 15:30Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. dev c0cd6c25e, main f89f5255c; #5983 (not ours) is still open.
 - 15:50Z stage: #5259 merged. The lane retargeted #5260 to dev and merged dev into it (head f538be60e, 1 file, +191/-9). Gating that head to move Head:. #5983 (not ours) still open.
 - 15:53Z AJ-z: RJ-X60 cannot run until the harness runs `stages` (other line); filed #5990. AJ-z PR after #5260 merges: AJ-15 (C4 adopters, wave built, feature-done), RJ-X60 pending re-pointed to #5990; slice closes with gaps: #5990.
+- 15:55Z #5260 gate PASS, Head: f538be60e. AJ-z split: C4-only PR (imaging-adjust-kinds names Photo/Library/Halo adopters; a description change must be C4-only) gating on lead/adjust-everywhere-AJ-z-c4; then wave built + RJ-X60 pending #5990 as the feature-done PR after #5260 merges.
