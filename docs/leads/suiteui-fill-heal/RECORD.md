@@ -2,10 +2,10 @@
 
 Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: FH-photo restack
+Stage: FH-photo in lane
 Base: main fef52e66 (verified) / dev 5e4a0922
-Next: push FH-8, retarget #5109 to dev, then #5251 after it merges
-Polled: 2026-10-28T19:32:27Z
+Next: retarget #5251 to dev once #5109 merges
+Polled: 2026-10-28T19:57:09Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -64,3 +64,4 @@ Polled: 2026-10-28T19:32:27Z
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
 - 2026-10-28T19:32:27Z restacking #5109 (FH-8) onto dev: merged FH-7-jobs, fix-5093 and dev; gate running
+- 2026-10-28T19:57:09Z #5109 (FH-8) restacked onto dev at 3613d6532 (gate PASS), base dev, in the lane; #5251 (FH-10) merged with it at 1da8a74a9, gate running
