@@ -44,15 +44,14 @@ extension BodyCountSuites {
 }
 
 /// The counted window: a header over the page, which owns the stroke.
-private struct StrokeEditorBudgetWindow: View {
+private struct StrokeEditorBudgetWindow: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Stroke").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText)

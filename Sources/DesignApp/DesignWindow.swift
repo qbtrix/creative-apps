@@ -56,7 +56,7 @@ import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct DesignWindow: View {
+struct DesignWindow: View, BodyCounted {
     /// What the window starts with; nil starts empty.
     var launch: DesignLaunch?
 
@@ -92,8 +92,7 @@ struct DesignWindow: View {
     private static let fileType = UTType(filenameExtension: "design") ?? .data
 
     #if DEBUG
-    /// How many times a window's body ran; RenderBudgetDesignTests counts an interaction's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     /// The workspace after the last intent; DesignLiveDragTests reads it.
     static var lastWorkspace: DesignWorkspace?
     /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
@@ -111,7 +110,7 @@ struct DesignWindow: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         DesignEditor(
             model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom,
