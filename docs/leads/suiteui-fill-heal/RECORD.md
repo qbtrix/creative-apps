@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-28T07:19Z
+Polled: 2026-10-28T07:55Z
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -65,3 +65,4 @@ Polled: 2026-10-28T07:19Z
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
 - 2026-10-28T06:55Z main 9ece0e0e9; dev 5ab48854a; dev-red #5963 open (not ours); dev-based heads await prescreen
 - 2026-10-28T07:19Z main 9ece0e0e9; dev 5ab48854a; dev-red #5963 open (not ours); #5252 prescreen success, others await prescreen
+- 2026-10-28T07:55Z main c73c958a9; dev 8ea49c081; dev-red #5966 (not ours); #5252 needs-fix (LiveStandInTests: LibraryLaunch looks default unlisted) fix round 1 gating
