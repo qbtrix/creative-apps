@@ -473,3 +473,4 @@ Read the cancelled lane run 40253768128 (job 121351177020). At 01:43-01:45Z the 
 - 11:44Z check-in: dev-red #5969 is real (flake rerun failed). Its tests are quarantined, owned by #5807, #5924 (both before #5252) and #5971 (shared bodyRuns counter); not ours. main still c73c958a9, dev f89f5255c. #5259 (5f7de8b4b) → #5260 (5e0e27327) clean, labelled, waiting on prescreen.
 - 12:20Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. main c73c958a9 (held by #5969, not ours), dev f89f5255c. 0 open findings.
 - 2026-10-28T12:38Z all PRs clean, waiting on lane prescreen; full CI 40680351181 running on dev f89f5255c (contains #5252 #5258); main c73c958a9 held by dev-red #5969
+- 12:44Z check-in: no change. #5259/#5260 clean, labelled, waiting on prescreen. main c73c958a9 (held by #5969, not ours), dev f89f5255c.
