@@ -75,5 +75,11 @@
     "owner": "#5994",
     "reason": "Exceeds its 120 s limit on the CI macOS runner (run 40703460275, dev-red #5983); passes in 2.5 s locally at the same commit. #5994 owns it. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
     "expires": "2026-10-31"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetSuiteTimelineRateTests/scrubAt2997",
+    "owner": "#5804",
+    "reason": "Exceeded its 120 s limit on the CI runner (run 40761742332, dev-red #6001). Same family as the scrub lane re-render #5804 owns: a scrub redraws every lane, which at 29.97 fps blows the limit.",
+    "expires": "2026-10-30"
   }
 ]
