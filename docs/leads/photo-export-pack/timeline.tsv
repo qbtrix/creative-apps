@@ -383,3 +383,4 @@ utc	stage	event	ref	note
 2026-10-28T17:36Z	check-in	#5353 open, PX-9 waits. No new export/text findings (45 Photo open). dev-red #5983: lane names #5977 (protected paths), human revert; not ours.
 2026-10-28T18:09Z	check-in	#5353 open, PX-9 waits. No new export/text findings (45 Photo open). dev-red #5983 now on a Photo live-transform render budget test (quarantined by #5995); not export/text, not ours.
 2026-10-28T18:41Z	check-in	#5353 open, PX-9 waits. No new export/text findings (45 Photo open). dev-red #5983 open, not ours.
+2026-10-28T19:13Z	check-in	#5353 open, PX-9 waits. No new export/text findings (45 Photo open). dev green again at e6f406f4 (#5983 closed 19:02), main moved.
