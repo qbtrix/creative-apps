@@ -1,4 +1,6 @@
 # Halo command ids (adopt-command-catalog AC-h1), one per line; a removed one stays as "retired <id>".
+adjust.black-and-white
+adjust.invert
 animation.easing
 animation.go-to-end
 animation.go-to-start
@@ -43,6 +45,13 @@ fill.stop-color
 fill.stop-move
 fill.stop-remove
 fill.type
+filter.add-noise
+filter.gaussian-blur
+filter.motion-blur
+filter.reduce-noise
+filter.remove
+filter.set-hidden
+filter.sharpen
 history.jump
 history.read
 inspector.end-property-scrub
