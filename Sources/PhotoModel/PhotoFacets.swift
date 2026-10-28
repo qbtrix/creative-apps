@@ -115,6 +115,26 @@ public struct PhotoFacets: Equatable, Sendable {
     public let file: File
 }
 
+extension PhotoFacets {
+    /// Equal in every facet but `facet`: what a view that shows nothing of that facet compares to skip a re-run.
+    public func equal(to other: PhotoFacets, except facet: PhotoFacet) -> Bool {
+        PhotoFacet.allCases.allSatisfy { $0 == facet || same($0, other) }
+    }
+
+    private func same(_ facet: PhotoFacet, _ other: PhotoFacets) -> Bool {
+        switch facet {
+        case .document: document == other.document
+        case .tool: tool == other.tool
+        case .toolOptions: toolOptions == other.toolOptions
+        case .adjust: adjust == other.adjust
+        case .history: history == other.history
+        case .status: status == other.status
+        case .canvas: canvas == other.canvas
+        case .file: file == other.file
+        }
+    }
+}
+
 extension PhotoWorkspace {
     /// Each stored field's facet. Every field is in exactly one list (PhotoFacetsTests).
     public static let facetFields: [PhotoFacet: [String]] = [

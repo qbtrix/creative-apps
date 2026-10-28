@@ -29,6 +29,8 @@ import Testing
         let before = workspace.facets
         workspace.setToolOption(.size(before.toolOptions.brush.size + 7))
         #expect(Self.changed(before, workspace.facets) == [.toolOptions])
+        #expect(before.equal(to: workspace.facets, except: .toolOptions))
+        #expect(!before.equal(to: workspace.facets, except: .document))
     }
 
     @Test func aLayerPickMovesOnlyTheDocument() throws {
@@ -37,6 +39,7 @@ import Testing
         let before = workspace.facets
         workspace.pickLayer(other, .replace)
         #expect(Self.changed(before, workspace.facets) == [.document])
+        #expect(!before.equal(to: workspace.facets, except: .toolOptions))
     }
 
     @Test func aToolSwitchMovesOnlyTheTool() throws {
