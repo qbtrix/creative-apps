@@ -289,3 +289,4 @@ utc	stage	event	ref	note
 2026-10-28T04:56Z	3	heartbeat	lane	poll 2026-10-28T04:56Z: 04:56Z check-in: no change; #5818 still red (f46358b rerun red); #5103/#5149 ready; no #5093 answer; no new main run
 2026-10-28T05:15Z	3	waiting	lane	awaiting prescreen
 2026-10-28T05:39Z	3	waiting	lane	awaiting prescreen
+2026-10-28T05:43Z	3	heartbeat	lane	poll 2026-10-28T05:43Z: 05:43Z check-in: no change; #5818 still open (186be9a rerun pending); #5103/#5149 ready; no #5093 answer; no new main run
