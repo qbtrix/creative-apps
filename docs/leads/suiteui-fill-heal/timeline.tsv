@@ -335,3 +335,4 @@ utc	stage	event	ref	note
 2026-10-28T23:22Z	3	heartbeat	lane	poll 2026-10-28T23:22Z: main b661530c (full CI 40771139414 green) does not contain FH-10 b0e24d172 yet; full CI 40782400633 on dev at b0e24d172 pending
 2026-10-28T23:11Z	3	heartbeat	lane	poll 2026-10-28T23:11Z: CB-design done (run 40771139414); waiting on CI 40782400633 for CB-z and FH-photo
 2026-10-28T23:49Z	3	heartbeat	lane	poll 2026-10-28T23:49Z: main 09cb3117 does not contain FH-10 b0e24d172 yet; full CI 40782400633 on dev at b0e24d172 in progress
+2026-10-28T23:59Z	3	heartbeat	lane	poll 2026-10-28T23:59Z: CB-z done, #3753 contact sheet; FH-photo waits on CI 40782400633
