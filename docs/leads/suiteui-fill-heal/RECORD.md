@@ -4,8 +4,8 @@ Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/feat
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
-Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-28T21:36Z · FH-10 and CB-z: merged dev after #5109/#4904, gates running
+Next: #5109 (FH-8) merged as e149c784. #5251 (FH-10, feature-done) restacked on dev at 4b9053dd, scripts/ci --changed PASS, Head moved; waiting on the lane. Then FH-photo Belt-Slice-Done on a green main run, the contact sheet and the final RECORD.
+Polled: 2026-10-28T22:11Z · dev-red #6001 open (macOS time limits, not our range; #6002 closed); full CI on dev keeps restarting, main still 5a28b4a6
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -63,3 +63,4 @@ Polled: 2026-10-28T21:36Z · FH-10 and CB-z: merged dev after #5109/#4904, gates
 
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
+- 2026-10-28T22:11Z heartbeat: dev-red #6001 open (macOS time limits, not our range; #6002 closed); full CI on dev keeps restarting, main still 5a28b4a6
