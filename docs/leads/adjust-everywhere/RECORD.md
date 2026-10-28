@@ -430,3 +430,4 @@ Polled: 2026-10-27T11:52Z · 11:52Z: no change; #5096 #5245 #5247 #5248 clean an
 - 08:23Z check-in: no change; 6 PRs clean [fast-lane,beta], dev 8ea49c081, main c73c958a9.
 - 08:43Z check-in: no change; 6 PRs clean [fast-lane,beta], dev 8ea49c081, main c73c958a9.
 - 09:03Z #5257 (AJ-halo model) merged as 83d413f29. #5258 base PATCHed to dev, rebased onto dev cleanly (ae708a9b2, +227-4 f=5), gate running.
+- 09:05Z #5258: CI: PASS on restack, pushed ae708a9b2 with lease, Head: moved.
