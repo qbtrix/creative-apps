@@ -132,9 +132,12 @@ public struct DesignDocument: Sendable, Equatable {
     public var pages: [DesignPage]
     public var components: [DesignComponent]
     public var variables: [DesignVariable]
+    /// The frame rate and length; the default for a still document.
+    public var time: DesignDocumentTime
 
-    public init(pages: [DesignPage], components: [DesignComponent] = [], variables: [DesignVariable] = []) {
-        (self.pages, self.components, self.variables) = (pages, components, variables)
+    public init(pages: [DesignPage], components: [DesignComponent] = [], variables: [DesignVariable] = [],
+                time: DesignDocumentTime = DesignDocumentTime()) {
+        (self.pages, self.components, self.variables, self.time) = (pages, components, variables, time)
     }
 }
 

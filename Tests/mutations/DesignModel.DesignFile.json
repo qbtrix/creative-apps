@@ -33,5 +33,19 @@
     "find": "DesignFileProblem(title: \"\\(file) can't be saved.\", message: reason)",
     "replace": "DesignFileProblem(title: \"\\(file) can't be opened.\", message: reason)",
     "tests": "DesignModelTests.aFileProblem"
+  },
+  {
+    "label": "aSetDocumentTimeAloneWritesVersion2: Save drops the document time",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "encode(DesignDocument(pages: pages, time: time))",
+    "replace": "encode(DesignDocument(pages: pages))",
+    "tests": "LiveFilingVersionTests"
+  },
+  {
+    "label": "aSetDocumentTimeAloneWritesVersion2: Open ignores the file's document time",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "        time = document.time\n",
+    "replace": "",
+    "tests": "LiveFilingVersionTests"
   }
 ]

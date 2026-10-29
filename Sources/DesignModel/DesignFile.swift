@@ -74,7 +74,7 @@ extension DesignWorkspace {
     /// The open document as file bytes, written by `services.filing`. Throws `.noFile` with nothing open.
     public func fileData() throws(DesignFileError) -> Data {
         guard isOpen else { throw .noFile }
-        return try services.filing.encode(DesignDocument(pages: pages))
+        return try services.filing.encode(DesignDocument(pages: pages, time: time))
     }
 
     /// Replaces the document with the file's pages, read by `services.filing`, selects the first
@@ -83,6 +83,7 @@ extension DesignWorkspace {
     public mutating func open(_ data: Data, at url: URL? = nil) throws(DesignFileError) {
         let document = try services.filing.decode(data)
         load(document.pages)
+        time = document.time
         documentURL = url
     }
 
