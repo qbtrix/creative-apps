@@ -8,7 +8,8 @@
 // to the pointer: the window's LiveDragLine while it lasts, else the Model's
 // `gradientDrag`; `photo.canvas.gradient-line`), Remove's outline while it
 // drags (SuiteUI's MotionPathMarks through its points, from the same live copy
-// or `removeStroke`; `photo.canvas.remove-stroke`)
+// or `removeStroke`; `photo.canvas.remove-stroke`), the Select tool's box while it drags (SuiteUI's
+// SelectBoxMark, from the same live copy or `selectBox`)
 // and the Eyedropper's loupe (PhotoSampleLoupe, `suite.sample.loupe`), in
 // that order. SuiteUI's marks are hidden from
 // accessibility, so each visible mark also gets one probe (`probe(zoom:)`): a
@@ -65,6 +66,10 @@ struct PhotoCanvasOverlay: View {
             if let points = removePath, let mark = removeOutline {
                 MotionPathMarks(points: points.map { CGPoint(x: $0.x, y: $0.y) }, zoom: zoom)
                 mark.probe(zoom: zoom)
+            }
+            if let box = liveLine?.box ?? model.selectBox {
+                SelectBoxMark(rect: CGRect(x: box.minX, y: box.minY, width: box.maxX - box.minX, height: box.maxY - box.minY),
+                              zoom: zoom)
             }
             PhotoSampleLoupe(model: model, zoom: zoom, hover: hover)
         }

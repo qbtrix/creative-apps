@@ -7,7 +7,7 @@
 // pointer and the pointer handler come from DesignCanvasFeedback. The overlay
 // (not clipped to the page) is, bottom to top: the layers past the page's edge,
 // dimmed (DesignPastEdge), the frame names (DesignFrameLabels), the selection's marks (DesignSelectionMarks), the marquee
-// under way (DesignMarqueeMark), DesignTextOverlay, the inline text editor, and
+// under way (SuiteUI's SelectBoxMark), DesignTextOverlay, the inline text editor, and
 // DesignCanvasFeedback's marks. `show` is the rect View > Zoom to Selection asks
 // for, kept until CanvasViewport can scroll to a rect. Keys reach the
 // canvas while it has focus. During an inline text edit the canvas passes no key
@@ -65,7 +65,7 @@ struct DesignCanvas: View {
             DesignPastEdge(page: page, painted: painted, zoom: zoom, editingTextID: model.editingTextID)
             DesignFrameLabels(painted: painted, zoom: zoom)
             DesignSelectionMarks(model: shown, painted: painted, zoom: zoom)
-            if let marquee = shown.marquee { DesignMarqueeMark(rect: marquee, zoom: zoom) }
+            if let marquee = shown.marquee { SelectBoxMark(rect: marquee.cgRect, zoom: zoom) }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
             feedback
         }

@@ -9,7 +9,8 @@
 // release or any other intent, so the release draws from the last sample.
 // PhotoWindow owns one and hands it down as the `photoDragLine` environment
 // value; without one (a view hosted alone) the overlay draws the workspace's
-// line. Remove's outline (`path`, fill-heal FH-4) rides the same copy.
+// line. Remove's outline (`path`, fill-heal FH-4) and Select's box (`box`, #6012; its press goes
+// here too) ride the same copy.
 // Presentation state only.
 import CoreRaster
 import Observation
@@ -23,6 +24,8 @@ import SwiftUI
     private(set) var line: (from: Mask.Point, to: Mask.Point)?
     /// The copy's Remove outline, the points from the press, in canvas pixels; nil with none live.
     private(set) var path: [Mask.Point]?
+    /// The copy's Select box, in canvas pixels; nil with none live.
+    private(set) var box: Rect?
 
     /// `moves` run on the copy, made from `model` at the first, when `model`
     /// holds a line-only drag; false when it doesn't, for the window to apply them.
@@ -33,6 +36,7 @@ import SwiftUI
         copy.begin(live)
         line = live.gradientDrag
         path = live.removeStroke
+        box = live.selectBox
         return true
     }
 
@@ -40,6 +44,7 @@ import SwiftUI
     func take() -> PhotoWorkspace? {
         if line != nil { line = nil }
         if path != nil { path = nil }
+        if box != nil { box = nil }
         return copy.take()
     }
 }

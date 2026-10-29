@@ -56,7 +56,10 @@ public struct DesignPage: Identifiable, Sendable, Hashable, Codable {
 
 /// The tools on Design's tool palette.
 public enum DesignTool: String, CaseIterable, Sendable {
-    case move, frame, rectangle, ellipse, shape, text, pen, eyedropper
+    case move
+    /// Select (#6012): a click picks the layer under it and moves nothing; a drag on empty canvas boxes layers.
+    case select
+    case frame, rectangle, ellipse, shape, text, pen, eyedropper
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Set it to nil in the change that makes `drag` do something.
@@ -64,7 +67,7 @@ public enum DesignTool: String, CaseIterable, Sendable {
     /// reason names the tool and its key itself.
     public var unavailableHelp: String? {
         switch self {
-        case .move, .frame, .rectangle, .ellipse, .shape, .text, .eyedropper: nil
+        case .move, .select, .frame, .rectangle, .ellipse, .shape, .text, .eyedropper: nil
         case .pen: "Drawing paths isn't built yet."
         }
     }
@@ -79,7 +82,7 @@ public enum DesignTool: String, CaseIterable, Sendable {
         case .ellipse: .ellipse
         case .text: .text
         case .shape: .shape
-        case .move, .pen, .eyedropper: nil
+        case .move, .select, .pen, .eyedropper: nil
         }
     }
 }

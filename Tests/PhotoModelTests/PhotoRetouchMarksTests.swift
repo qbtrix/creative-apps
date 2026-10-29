@@ -41,7 +41,7 @@ import Testing
             model.selectTool(tool)
             model.drag(from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 200, y: 160), modifiers: [])
             #expect(model.removeStroke == nil, "\(tool)")
-            #expect(model.dragShowsLineOnly == (tool == .gradient), "\(tool)")
+            #expect(model.dragShowsLineOnly == (tool == .gradient || tool == .select), "\(tool)")
         }
     }
 

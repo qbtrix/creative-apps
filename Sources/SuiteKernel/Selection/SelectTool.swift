@@ -3,8 +3,8 @@
 // canvas it clears (Shift on empty canvas keeps it). A drag on empty canvas draws a box whose touched items
 // replace the selection, or with Shift join it (`Marquee.union`). An app supplies only a `SelectTarget` adapter
 // (`<X>Select+Kernel.swift`): its point hit, its rect hit and the selection it keeps. A selection change is view
-// state, never an undo step. SuiteUI's `SelectGesture` holds the press and the box while the pointer is down and
-// calls `click` or `box` once, at the release, so a sample changes no model state. Linux-safe.
+// state, never an undo step. The app's canvas drag carries the gesture (it keeps the samples off the state its root
+// body reads), SuiteUI's `SelectBoxMark` draws the box, and `release` runs once, when the pointer lifts. Linux-safe.
 
 /// A canvas the Select tool picks on: an app's workspace conforms in its `<X>Select+Kernel.swift`.
 public protocol SelectTarget: Sendable {
@@ -22,12 +22,15 @@ public protocol SelectTarget: Sendable {
 
 /// The Select tool's click and box rules.
 public enum SelectTool {
-    /// The selection after a click on `hit` (nil: empty canvas), with Shift held when `extending`.
-    public static func click<ID>(_ selection: Selection<ID>, hit: ID?, extending: Bool) -> Selection<ID> {
+    /// The selection after a click on `hit` (nil: empty canvas), with Shift held when `extending`. `canAdd` refuses
+    /// an id that may not join (a locked or hidden layer); one already picked can always leave.
+    public static func click<ID>(
+        _ selection: Selection<ID>, hit: ID?, extending: Bool, canAdd: (ID) -> Bool = { _ in true }
+    ) -> Selection<ID> {
         var next = selection
         switch (hit, extending) {
-        case (let id?, false): next.pick(id, .replace)
-        case (let id?, true): next.pick(id, .toggle)
+        case (let id?, false): next.pick(id, .replace, canAdd: canAdd)
+        case (let id?, true): next.pick(id, .toggle, canAdd: canAdd)
         case (nil, false): next.clear()
         case (nil, true): break
         }

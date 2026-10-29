@@ -232,9 +232,11 @@ extension PhotoWorkspace {
 
     /// Whether the drag under way only moves a line over the canvas until its
     /// release draws (the Gradient tool's, and Remove's outline), so the window can keep its later
-    /// samples off the workspace the panels read.
+    /// samples off the workspace the panels read. Select's whole gesture, its press too, changes nothing but its
+    /// box until the release picks, so it is true for Select before the press.
     public var dragShowsLineOnly: Bool {
-        (stroke?.tool == .gradient && transformDraft == nil) || stroke?.tool == .remove || stroke?.tool == .select
+        (stroke?.tool == .gradient && transformDraft == nil) || stroke?.tool == .remove
+            || (tool == .select && transformDraft == nil)
     }
 
     /// Becomes `live`: a copy of this workspace a stroke drew on

@@ -35,6 +35,9 @@
 //   frame, rectangle, ellipse, shape, text   DesignDrawing; once the pointer has moved, the start and
 //           the end each snap to the lines of the frame drawn into (Shift: the end's nearer
 //           axis only), before whole points (SN-5). A click places the default box unsnapped.
+//   select  SuiteKernel's shared Select rule (DesignSelect+Kernel, #6012): a press picks the layer under it
+//           (Shift toggles it) and moves nothing; on empty canvas it deselects (Shift keeps) and a drag boxes
+//           the top-level layers it touches, joined to the selection with Shift.
 //   pen     nothing.
 //
 // A drawing tool is good for one shape: once its gesture adds a node (a Text
@@ -75,8 +78,9 @@ struct DesignGesture: Sendable, Equatable {
         case move(String)
         /// Resize the node by the drag from the frame it had at the start.
         case resize(String, DesignHandle, DesignRect)
-        /// Select what `services.marquee` picks among the children of this frame (nil: the top level).
-        case marquee(String?)
+        /// Select what `services.marquee` picks among the children of this frame (nil: the top level), joined
+        /// after these ids (the Select tool's Shift box; empty replaces) through SuiteKernel's `SelectTool.box`.
+        case marquee(String?, joining: [String] = [])
         /// Move these selected layers through `services.transforming`.
         case moveSeveral([String])
         /// Resize the box of these selected layers by its handle through `services.transforming`.
@@ -234,13 +238,13 @@ extension DesignWorkspace {
             let frame = current.moved ? raw.wholePoints : raw
             _ = pages.update(id) { $0.frame = frame }
             current.guides = landedGuides(on: frame, modifiers: modifiers, current)
-        case .marquee(let parent):
+        case .marquee(let parent, let joining):
             guard current.moved, let page = selectedPage else { break }
             let box = Marquee.rect(enclosing: Point(x: current.start.x, y: current.start.y), Point(x: end.x, y: end.y))
             let rect = DesignRect(x: box.minX, y: box.minY, width: box.maxX - box.minX, height: box.maxY - box.minY)
             marquee = rect
             let found = services.marquee.layers(touching: rect, in: parent, on: page)
-            selectedNodeIDs = Marquee.union(selectedNodeIDs, found, extending: false)
+            selectedNodeIDs = SelectTool.box(Selection(joining), found: found, extending: !joining.isEmpty).ordered
             for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) }
         case .moveSeveral, .resizeSeveral, .optionCopy, .turn:
             applyStep(&current, delta: delta, modifiers: modifiers)
@@ -448,7 +452,7 @@ extension DesignWorkspace {
             if !done.moved, done.wasSelected, findNode(id)?.kind == .text { try? beginTextEdit(id) }
         case .resize:
             record("Resize", before: done.before)
-        case .marquee(let frame):
+        case .marquee(let frame, _):
             // A click without moving: the frame's background selects it; outside, nothing.
             if !done.moved, let frame { selectItem(frame) }
         case .moveSeveral, .resizeSeveral, .optionCopy, .turn:
@@ -506,6 +510,14 @@ extension DesignWorkspace {
             } else if !shift {
                 deselect()
                 route = .marquee(nil)
+            }
+        case .select:
+            // SuiteKernel's shared Select rule (DesignSelect+Kernel): a hit is picked and nothing moves.
+            if let id = pressedLayer(at: start, modifiers: modifiers) {
+                selectClick(id, extending: shift)
+            } else {
+                if !shift { deselect() }
+                route = .marquee(nil, joining: shift ? ids : [])
             }
         case .frame, .rectangle, .ellipse:
             if let kind = tool.nodeKind { route = .draw(kind) }
