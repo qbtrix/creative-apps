@@ -56,9 +56,10 @@ import Testing
         let still = try LiveTransforming().move(["node-2"], by: DesignPoint(x: 100, y: 0), on: Self.page)
         #expect(Self.near(Self.shown(still.nodes, "node-2", at: 60), 147, 40))
         #expect(Self.near(Self.shown(still.nodes, "node-2", at: 0), 130, 30))
-        // Setting the frame's X with no playhead moves its keys and node-2's by 90.
-        let x = try LiveStyling().setFrame(.x, to: 100, ["node-1"], on: Self.page, at: nil)
-        #expect(Self.near(Self.shown(x.nodes, "node-2", at: 60), 137, 40))
+        // `writing` x with no playhead moves the frame's keys and node-2's by 90.
+        let x = Self.page.nodes.node("node-1")!.writing(.x, 100, at: nil)
+        #expect(x.time?.tracks[.x]?.map(\.value) == [100, 110])
+        #expect(x.children.node("node-2")?.time?.tracks[.x]?.map(\.value) == [120, 144])
     }
 
     @Test func anOptionDragCopyShowsAtTheDragOffsetAtEveryFrame() throws {
