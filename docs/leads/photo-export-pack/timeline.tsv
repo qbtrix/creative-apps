@@ -403,3 +403,4 @@ utc	stage	event	ref	note
 2026-10-29T04:18Z	check-in	#5353 open, PX-9 waits. Merged: captain's #5992 (library) and #6009 (halo) mac finish, not Photo. No new findings (49 Photo open). No open dev-red.
 2026-10-29T04:49Z	check-in	#5353 open, PX-9 waits. Merged: captain's #6024 (photo move tool on the live transform), not export/text. No new findings (49 Photo open). No open dev-red.
 2026-10-29T05:21Z	check-in	Quiet: #5353 open (clean), PX-9 waits. No merges, no new findings (49 Photo open). No open dev-red.
+2026-10-29T05:54Z	check-in	#5353 open (clean), PX-9 waits. New dev-red #6030 (macOS, range #5992 #6009 #6010 #6024; red-triage guesses captain's #6024 photo move tool): not this lead's, left to the lane bisect and owner. No new findings (49 Photo open).
