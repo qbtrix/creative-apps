@@ -40,7 +40,6 @@ extension BodyCountSuites {
 
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
         static let exclusions: [String: (reason: String, issue: Int)] = [
-            "photo.move": ("rewrites layer offsets every sample: 63 bodies, 2019 renders down", 6019),
             "photo.marquee": ("re-runs the editor body and re-renders every sample", 6020),
             "photo.ellipse": ("re-runs the editor body and re-renders every sample", 6020),
             "photo.lasso": ("re-runs the editor body and re-renders every sample", 6020),
