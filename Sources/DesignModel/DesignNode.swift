@@ -384,11 +384,29 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         try container.encodeIfPresent(time, forKey: .time)
     }
 
-    /// Shifts this node and everything under it by `delta`.
-    mutating func translate(by delta: DesignPoint) {
+    /// Shifts this node and everything under it by `delta`. Only frames move unless `carryingKeys`: then each keyed
+    /// node's x and y keys move too, so its animation shows at the same offset at every frame (duplicate, paste and
+    /// rest-pose moves). The sampled tree and scratch copies move frames only.
+    mutating func translate(by delta: DesignPoint, carryingKeys: Bool = false) {
         frame.x += delta.x
         frame.y += delta.y
-        for index in children.indices { children[index].translate(by: delta) }
+        if carryingKeys, let time { self.time = time.translated(by: delta) }
+        for index in children.indices { children[index].translate(by: delta, carryingKeys: carryingKeys) }
+    }
+}
+
+extension DesignNodeTime {
+    /// These keys moved by `delta`: every x key by its x, every y key by its y; opacity keys are unchanged.
+    public func translated(by delta: DesignPoint) -> DesignNodeTime {
+        var time = self
+        for (property, by) in [(DesignKeyProperty.x, delta.x), (.y, delta.y)] where by != 0 {
+            time.tracks[property] = time.tracks[property]?.map { key in
+                var key = key
+                key.value += by
+                return key
+            }
+        }
+        return time
     }
 }
 

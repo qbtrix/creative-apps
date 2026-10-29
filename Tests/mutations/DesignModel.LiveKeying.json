@@ -26,5 +26,19 @@
     "find": "return time?.value(of: property, at: Double(playhead)) ?? rest",
     "replace": "return rest",
     "tests": "DesignAutoKeyTests"
+  },
+  {
+    "label": "track offset: a rest move leaves the subtree's keys behind",
+    "file": "Sources/DesignModel/Live/LiveKeying.swift",
+    "find": "node.translate(by: DesignPoint(x: keyedX ? 0 : delta.x, y: keyedY ? 0 : delta.y), carryingKeys: true)",
+    "replace": "node.translate(by: DesignPoint(x: keyedX ? 0 : delta.x, y: keyedY ? 0 : delta.y))",
+    "tests": "DesignTrackOffsetTests"
+  },
+  {
+    "label": "track offset: setting x on an unkeyed axis leaves the subtree's keys behind",
+    "file": "Sources/DesignModel/Live/LiveKeying.swift",
+    "find": "case .x: node.translate(by: DesignPoint(x: value - frame.x, y: 0), carryingKeys: true)",
+    "replace": "case .x: node.translate(by: DesignPoint(x: value - frame.x, y: 0))",
+    "tests": "DesignTrackOffsetTests"
   }
 ]

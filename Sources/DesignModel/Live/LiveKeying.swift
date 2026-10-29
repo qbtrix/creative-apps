@@ -1,13 +1,13 @@
 // Live/LiveKeying.swift: the one write-back rule for edits at a playhead (one-document OD-5, rule 1 of 4). A keyed
 // property edited at a playhead gets a key there holding the asked-for value (replacing one already there), so the
 // canvas shows what was asked and other frames keep their keys; no track or no playhead edits the rest pose (the
-// first key is a deliberate act). Values are the node's own, what its keys hold; `moved(by:at:)` adds a shown delta
+// first key is a deliberate act); a rest-pose move carries the subtree's x and y keys with it. Values are the node's own, what its keys hold; `moved(by:at:)` adds a shown delta
 // to them. The only file in DesignModel that knows the rule. Linux-safe.
 import SuiteKernel
 
 extension DesignNode {
     /// This node with `property` set to `value`: a key at `playhead` when the property has a track and a
-    /// playhead is set, else the rest pose (x and y move the subtree, as `translate` does).
+    /// playhead is set, else the rest pose (x and y move the subtree and its keys).
     public func writing(_ property: DesignKeyProperty, _ value: Double, at playhead: Int?) -> DesignNode {
         var node = self
         if let playhead, keys(property, at: playhead), var time, var track = time.tracks[property] {
@@ -21,19 +21,19 @@ extension DesignNode {
             return node
         }
         switch property {
-        case .x: node.translate(by: DesignPoint(x: value - frame.x, y: 0))
-        case .y: node.translate(by: DesignPoint(x: 0, y: value - frame.y))
+        case .x: node.translate(by: DesignPoint(x: value - frame.x, y: 0), carryingKeys: true)
+        case .y: node.translate(by: DesignPoint(x: 0, y: value - frame.y), carryingKeys: true)
         case .opacity: node.opacity = value
         }
         return node
     }
 
     /// This node moved by `delta` as it shows at `playhead`: each axis through `writing`, from its own value there.
-    /// An axis with no track moves the rest pose by the raw delta, exactly as `translate` always has.
+    /// An axis with no track moves the rest pose by the raw delta, the subtree's keys with it.
     public func moved(by delta: DesignPoint, at playhead: Int?) -> DesignNode {
         let (keyedX, keyedY) = (keys(.x, at: playhead), keys(.y, at: playhead))
         var node = self
-        node.translate(by: DesignPoint(x: keyedX ? 0 : delta.x, y: keyedY ? 0 : delta.y))
+        node.translate(by: DesignPoint(x: keyedX ? 0 : delta.x, y: keyedY ? 0 : delta.y), carryingKeys: true)
         if keyedX, delta.x != 0 { node = node.writing(.x, ownValue(.x, at: playhead) + delta.x, at: playhead) }
         if keyedY, delta.y != 0 { node = node.writing(.y, ownValue(.y, at: playhead) + delta.y, at: playhead) }
         return node

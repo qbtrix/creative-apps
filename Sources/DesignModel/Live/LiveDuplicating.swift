@@ -38,7 +38,7 @@ public struct LiveDuplicating: LayerDuplicating {
         var nodes = tree.designNodes
         for id in copies {
             _ = nodes.update(id) { copy in
-                copy.translate(by: offset)
+                copy.translate(by: offset, carryingKeys: true)
                 copy.isLocked = false
             }
         }
