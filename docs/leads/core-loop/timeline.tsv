@@ -301,3 +301,4 @@ utc	stage	event	ref	note
 2026-10-29T12:36Z	3	check-in	no new results	2 full runs cancelled 0 cases; full 40869919369 running; #4283/#4282 open
 2026-10-29T15:01Z	3	check-in	no new results	full 40869919369 timed out in Photo, 0 Halo cases; #4283/#4282 open
 2026-10-29T17:04Z	3	check-in	pending	halo 40913947455 queued; blockers #4283 #4282 open
+2026-10-29T18:36Z	3	check-in	pending	halo 40913947455 + full 40925450024 waiting; blockers open
