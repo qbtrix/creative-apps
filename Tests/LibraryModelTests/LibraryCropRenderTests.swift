@@ -16,6 +16,18 @@ func cropEveryPixelIsOpaque(_ buffer: PixelBuffer) throws -> Bool {
     return true
 }
 
+/// The largest difference of any component of two same-size buffers.
+func cropLargestDifference(_ a: PixelBuffer, _ b: PixelBuffer) throws -> Float {
+    var most: Float = 0
+    for y in 0..<a.height {
+        for x in 0..<a.width {
+            let p = try a.pixel(x: x, y: y), q = try b.pixel(x: x, y: y)
+            most = max(most, abs(p.r - q.r), abs(p.g - q.g), abs(p.b - q.b), abs(p.a - q.a))
+        }
+    }
+    return most
+}
+
 @Suite
 struct LibraryCropRenderTests {
     let develop = LiveDevelop()
@@ -62,6 +74,24 @@ struct LibraryCropRenderTests {
         let out = try develop.render(gradient, settings: toned.setting(crop: half))
         let byHand = try develop.render(gradient, settings: toned).cropped(x: 150, y: 0, width: 300, height: 400)
         #expect(out == byHand)
+    }
+
+    /// #3619: the turned frame samples only its own pixels, in bands, and
+    /// still gives what turning the whole photo and cutting the frame gives.
+    @Test func aTurnedCropMatchesTurningTheWholePhotoThenCutting() throws {
+        let gradient = try developGradient(width: 600, height: 400)
+        let crop = cropLiveGeometry()
+        for (aspect, angle) in [(CropAspect.square, 5.0), (.threeTwo, -12), (.free, 30), (.square, 44.9)] {
+            var settings = try crop.initial(aspect: aspect, angle: angle, photo: gradientSize)
+            // Off center, so a dropped frame origin shows.
+            settings = try crop.dragged(settings, handle: .topLeft, dx: 40, dy: 25, photo: gradientSize)
+            let f = try crop.frame(settings, photo: gradientSize)
+            let out = try develop.render(gradient, settings: DevelopSettings.neutral.setting(crop: settings))
+            let byHand = try gradient.rotated(degrees: angle, filter: .lanczos3)
+                .cropped(x: f.x, y: f.y, width: f.width, height: f.height)
+            #expect(out.width == byHand.width && out.height == byHand.height, "\(aspect) at \(angle)°")
+            #expect(try cropLargestDifference(out, byHand) <= 1e-4, "\(aspect) at \(angle)°")
+        }
     }
 
     /// MJ6L: J6's live geometry and pixels without the app.
