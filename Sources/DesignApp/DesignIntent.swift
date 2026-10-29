@@ -13,6 +13,8 @@ import SwiftUI
 
 enum DesignIntent {
     case newFile, open, save, saveAs, export
+    /// A finished export's options, which the next Export sheet opens with (`rememberExport`).
+    case rememberExport(DesignExportOptions)
     case undo, redo
     case tool(DesignTool)
     case drag(CGPoint, CGPoint, DesignModifiers)
