@@ -45,6 +45,18 @@ extension PhotoTool {
     public var areaCommand: String? {
         self == .marquee ? "select.rect" : [.ellipse, .lasso, .polygon, .wand].contains(self) ? "select.\(rawValue)" : nil
     }
+
+    /// How this area tool selects, in one line for its options; nil for a tool that doesn't select.
+    public var areaHint: String? {
+        switch self {
+        case .marquee: "Drag over the image to select a rectangle. Shift adds, Option subtracts."
+        case .ellipse: "Drag over the image to select an ellipse. Shift adds, Option subtracts."
+        case .lasso: "Drag round the part to select; the release closes the outline."
+        case .polygon: "Click each corner, then click the first corner again to close the outline."
+        case .wand: "Click a color to select the pixels like it. Tolerance sets how alike."
+        default: nil
+        }
+    }
 }
 
 extension PhotoWorkspace {

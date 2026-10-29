@@ -3,7 +3,8 @@
 // item with a sheet opens SuiteUI's FilterSheet on the window's
 // `filterDraft`; Invert runs at once. While the sheet is open its Preview
 // shows the choice on a copy of the picture at most 1024 px on a side
-// (`PhotoWorkspace.adjustPreview`, made off the main actor), so the document
+// (`PhotoWorkspace.adjustPreview`, made off the main actor, in a slot held
+// from the sheet's first frame so the sheet never grows), so the document
 // never changes until OK, which runs the sheet's catalog command as one undo
 // step. Looks apply, save and delete through the catalog's look commands on
 // the workspace's store (the suite's PresetStore, PhotoWindow+File.swift).
@@ -83,14 +84,24 @@ struct PhotoFilterSheetAdapter: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if draft.preview, let preview {
-                Image(decorative: preview, scale: 1)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: SuiteSize.inspectorWidth.max, height: SuiteSize.inspectorWidth.ideal)
-                    .padding(.top, SuiteSpacing.l)
-                    .accessibilityLabel("Preview")
-                    .accessibilityIdentifier("photo.filter.preview")
+            // The slot is there from the first frame, so the sheet doesn't grow when the picture arrives.
+            if draft.preview {
+                ZStack {
+                    if let preview {
+                        Image(decorative: preview, scale: 1)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .accessibilityLabel("Preview")
+                            .accessibilityIdentifier("photo.filter.preview")
+                    } else {
+                        ProgressView()
+                            .controlSize(.small)
+                            .accessibilityLabel("Making the preview")
+                            .accessibilityIdentifier("photo.filter.preview.pending")
+                    }
+                }
+                .frame(width: SuiteSize.inspectorWidth.max, height: SuiteSize.inspectorWidth.ideal)
+                .padding(.top, SuiteSpacing.l)
             }
             FilterSheet(draft: draft, target: model, onDraft: { perform(.filter(.draft($0))) },
                         onOK: { perform(.filter(.ok($0))) }, onCancel: { perform(.filter(.cancel)) })

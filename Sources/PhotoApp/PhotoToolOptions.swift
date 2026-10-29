@@ -48,7 +48,7 @@ struct ToolOptionsSection: View {
                 ) { perform(.toolOption(.opacity(percent: $0))) }
                 .accessibilityIdentifier("photo.tool.opacity")
             case .marquee, .ellipse, .lasso, .polygon, .wand:
-                hint("Drag over the image to select. Delete clears the selection; Fill paints it.")
+                if let areaHint = model.tool.areaHint { hint(areaHint) }
                 colorRow(options)
                 HStack(spacing: SuiteSpacing.xs) {
                     command("Select All", "checkmark.rectangle", help: nil, .selectAll)

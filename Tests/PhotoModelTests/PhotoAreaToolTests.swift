@@ -145,4 +145,15 @@ import Testing
         #expect(workspace.selectionCoverage(x: 50, y: 50) == 1 && workspace.selectionCoverage(x: 30, y: 32) == 0)
         #expect(workspace.undoActionName == "Undo Magic Wand")
     }
+
+    /// A mouse-only user reads how each area tool works in its options: the wand clicks and the polygon closes on
+    /// its first corner, so neither may say "drag".
+    @Test func eachAreaToolSaysHowItWorks() {
+        let hints = [PhotoTool.marquee, .ellipse, .lasso, .polygon, .wand].map(\.areaHint)
+        #expect(Set(hints).count == hints.count, "each tool has its own hint")
+        #expect(PhotoTool.polygon.areaHint?.contains("first corner") == true)
+        #expect(PhotoTool.wand.areaHint?.hasPrefix("Click") == true)
+        #expect(PhotoTool.brush.areaHint == nil)
+    }
 }
+

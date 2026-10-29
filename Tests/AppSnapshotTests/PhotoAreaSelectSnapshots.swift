@@ -1,10 +1,12 @@
 // PhotoAreaSelectSnapshots.swift: the area tools on an 800 x 600 image (area-selection AR-11). Writes
 // photo-select-ellipse-feather-light/dark.png (an ellipse feathered by 12 px, then inverted: the ants run round the
-// ellipse and the canvas's edge, with the Ellipse's options in the inspector) and photo-select-wand-light/dark.png
-// (the Magic Wand's options with Contiguous off, after a click on the dark band picks every dark pixel). macOS only.
+// ellipse and the canvas's edge) and photo-select-wand-light/dark.png (a click on the dark band with Contiguous off
+// picks every dark pixel). photo-select-options-<tool>-light/dark.png show the inspector's Tool Options section for
+// the Ellipse, the Polygon Lasso and the Magic Wand. macOS only.
 import CoreRaster
 import PhotoModel
 import SuiteKernel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -59,5 +61,18 @@ import Testing
         #expect(model.areaOptions.contiguous == false)
         #expect(model.areaOutline.count >= 2, "both bands are picked")
         try write(model, "photo-select-wand")
+    }
+
+    @Test(arguments: [PhotoTool.ellipse, .polygon, .wand])
+    func areaOptions(_ tool: PhotoTool) throws {
+        var model = try opened(tool)
+        model.setAreaOptions(PhotoAreaOptions(feather: 12, tolerance: 20, contiguous: false))
+        for scheme in [ColorScheme.light, .dark] {
+            let view = ToolOptionsSection(model: model, perform: { _ in })
+                .padding(SuiteSpacing.m)
+                .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)
+                .padding(SuiteSpacing.xxl)
+            try snapshot(view, name: "photo-select-options-\(tool.rawValue)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
     }
 }

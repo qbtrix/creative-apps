@@ -26,5 +26,19 @@
     "find": "return Self.area(stroke.points) >= 1 ?",
     "replace": "return Self.area(stroke.points) >= 0 ?",
     "tests": "PhotoAreaToolTests"
+  },
+  {
+    "label": ".areaHintPolygon: the polygon says to drag like the rest",
+    "file": "Sources/PhotoModel/PhotoAreaTool.swift",
+    "find": "case .polygon: \"Click each corner, then click the first corner again to close the outline.\"",
+    "replace": "case .polygon: \"Drag over the image to select a rectangle. Shift adds, Option subtracts.\"",
+    "tests": "PhotoAreaToolTests"
+  },
+  {
+    "label": ".areaHintWand: the wand says to drag",
+    "file": "Sources/PhotoModel/PhotoAreaTool.swift",
+    "find": "case .wand: \"Click a color to select the pixels like it. Tolerance sets how alike.\"",
+    "replace": "case .wand: \"Drag a color to select the pixels like it. Tolerance sets how alike.\"",
+    "tests": "PhotoAreaToolTests"
   }
 ]

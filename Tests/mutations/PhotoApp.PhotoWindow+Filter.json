@@ -1,0 +1,9 @@
+[
+  {
+    "label": ".previewSlotHeld: the preview takes room only once its picture arrives",
+    "file": "Sources/PhotoApp/PhotoWindow+Filter.swift",
+    "find": "if draft.preview {",
+    "replace": "if draft.preview, preview != nil {",
+    "tests": "PhotoFilterAdapterTests"
+  }
+]
