@@ -26,7 +26,7 @@ import Testing
     }
 
     @Test func keyStates() throws {
-        let states: [(String, DesignWorkspace, KeyState)] = [
+        let states: [(String, DesignWorkspace, SuiteKernel.KeyState)] = [
             ("idle", Self.selected(DesignFixtures.cards, at: nil), .notAnimated),
             ("animated", Self.selected(DesignFixtures.animated(1), at: 60), .animated),
             ("here", Self.selected(DesignFixtures.animated(1), at: 0), .keyedHere),
