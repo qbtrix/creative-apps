@@ -212,7 +212,10 @@ extension BodyCountSuites {
             }
             try await w.settle(400)
             let missed = aims(gesture) ? await effect() : nil
-            if let missed { Issue.record("\(app.rawValue) \(tool) (\(gesture)): drag hit nothing: \(missed)") }
+            if let missed {
+                let what = missed.contains(" moved ") ? "drag moved off its delta" : "drag hit nothing"
+                Issue.record("\(app.rawValue) \(tool) (\(gesture)): \(what): \(missed)")
+            }
             print("GESTURE-CONTRACT | \(app.rawValue) | \(tool) | \(gesture) | bodies down \(bodiesDown)"
                 + " | hit \(aims(gesture) ? (missed == nil ? "yes" : "NO") : "-")" + " | pixel work down \(pixels == nil ? "n/a" : "\(pixelsDown)") | p95 \(step.p95) ms | \(step)")
             contract("\(app.rawValue).\(tool)") {
@@ -229,9 +232,9 @@ extension BodyCountSuites {
         /// The drag's delta in document units at `zoom` window points per unit, y down.
         static func delta(_ zoom: Double) -> CGVector { CGVector(dx: Double(2 * samples) / zoom, dy: Double(samples) / zoom) }
 
-        /// nil when `got` is within 5% (and 3 units) of `want`, else what moved where.
+        /// nil when `got` is within 5% (and 12 units, room for a snap to a guide or grid) of `want`, else what moved where.
         static func near(_ got: CGVector, _ want: CGVector, _ what: String) -> String? {
-            let slack = { (v: Double) in max(3, abs(v) * 0.05) }
+            let slack = { (v: Double) in max(12, abs(v) * 0.05) }
             if got.dx == 0 && got.dy == 0 { return "\(what) didn't move" }
             return abs(got.dx - want.dx) <= slack(want.dx) && abs(got.dy - want.dy) <= slack(want.dy)
                 ? nil : "\(what) moved \(got), want \(want)"
