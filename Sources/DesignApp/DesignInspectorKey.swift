@@ -37,7 +37,7 @@ struct DesignKeyControl: View {
     }
 
     /// SuiteUI's stopwatch state for the kernel's key state, one to one.
-    static func state(_ state: SuiteKernel.KeyState) -> SuiteUI.KeyState {
+    nonisolated static func state(_ state: SuiteKernel.KeyState) -> SuiteUI.KeyState {
         switch state {
         case .notAnimated: .idle
         case .animated: .animated
