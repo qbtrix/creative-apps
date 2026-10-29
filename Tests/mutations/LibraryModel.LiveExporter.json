@@ -16,8 +16,8 @@
   {
     "label": "develop is skipped: render returns the decoded buffer",
     "file": "Sources/LibraryModel/Live/LiveExporter.swift",
-    "find": "            buffer = try develop.render(buffer, settings: photo.develop)\n",
-    "replace": "",
+    "find": "let buffer = try develop.render(preShrunk(b, photo: photo, longSide: longSide), settings: photo.develop)",
+    "replace": "let buffer = try preShrunk(b, photo: photo, longSide: longSide)",
     "tests": "LibraryExportPlanTests"
   },
   {
@@ -61,5 +61,19 @@
     "find": "digits = String(max(photos.count, 1)).count",
     "replace": "digits = 1",
     "tests": "LargeCatalogEquivalenceTests"
+  },
+  {
+    "label": "the source isn't shrunk: develop runs on all 24 MP of a 2,000 px export",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "guard full > longSide, longSide > 0 else { return b }",
+    "replace": "guard full < 0 else { return b }",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the shrink ignores the crop: a cropped photo develops at the uncropped scale",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "let full = croppedSize(photo).longSide",
+    "replace": "let full = photo.orientedSize.longSide",
+    "tests": "LibraryExportPlanTests"
   }
 ]
