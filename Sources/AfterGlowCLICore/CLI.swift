@@ -70,6 +70,7 @@ public enum CLI {
             return ["command": try JSONValue(encoding: description)]
         case .open(let app, let file): return ["summary": try open(file, as: app, io: io).summary()]
         case .new(let app, let out, let options, let force):
+            try refuseForeign(out, as: app, inPlace: false)
             try refuseExisting([out], force: force, io: io)
             let session = try app.session(new: options)
             try write(try session.save(), to: out, replace: force, io: io)
@@ -77,9 +78,7 @@ public enum CLI {
         case .command(let app, let step, let input, let output, let force):
             var session = try open(input, as: app, io: io)
             let target = output ?? input
-            if output == nil, !app.savesNatively(to: input), let native = app.openExtensions.first {
-                throw Refusal.usage("--in-place would write a .\(native) over \(input); pass --out <file>.\(native)")
-            }
+            try refuseForeign(target, as: app, inPlace: output == nil)
             if output != nil { try refuseExisting([target], force: force, io: io) }
             if let why = session.availability(step.id).why { throw CatalogError.unavailable(id: step.id, why: why) }
             let outcome = try session.run(step)
@@ -104,6 +103,14 @@ public enum CLI {
         do { return try app.session(open: data, name: file) } catch let error as CatalogError { throw error } catch {
             throw Refusal.data("\(file) is not a \(app.name) document: \(error)")
         }
+    }
+
+    /// Refuses (64) a save to `target` when its extension isn't `app`'s native one, `--force` or not: the native
+    /// format never lands in a Lottie .json or a PNG, which the app would then open as something else or refuse.
+    static func refuseForeign(_ target: String, as app: HeadlessApp, inPlace: Bool) throws {
+        guard !app.savesNatively(to: target), let native = app.openExtensions.first else { return }
+        throw Refusal.usage(inPlace ? "--in-place would write a .\(native) over \(target); pass --out <file>.\(native)"
+            : "--out \(target) would get a .\(native) document; name it <file>.\(native), or use export for another format")
     }
 
     /// Refuses (73) when any of `paths` exists and `force` is false.

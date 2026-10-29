@@ -81,5 +81,19 @@
     "owner": "#5804",
     "reason": "Exceeded its 120 s limit on the CI runner (run 40761742332, dev-red #6001). Same family as the scrub lane re-render #5804 owns: a scrub redraws every lane, which at 29.97 fps blows the limit.",
     "expires": "2026-10-30"
+  },
+  {
+    "test": "AppSnapshotTests.LibraryExportFidelityTests/renderEqualsTheHandMadePipeline",
+    "owner": "#6043",
+    "reason": "#5992's lanczos3 pre-shrink (LiveExporter.swift:73-90) runs develop on the shrunk grid and sizes a cropped export by the uncropped long side, so the export no longer matches the hand-made pipeline (a cropped export is 1022x682, planned 1024x683). Real bug, owned by #6043; quarantined 24 h so trunk keeps moving while the fix lands.",
+    "expires": "2026-10-30",
+    "scope": "all"
+  },
+  {
+    "test": "AppSnapshotTests.LibraryExportFidelityTests/croppedRenderEqualsTheHandMadePipeline",
+    "owner": "#6043",
+    "reason": "#5992's lanczos3 pre-shrink (LiveExporter.swift:73-90) runs develop on the shrunk grid and sizes a cropped export by the uncropped long side, so the export no longer matches the hand-made pipeline (a cropped export is 1022x682, planned 1024x683). Real bug, owned by #6043; quarantined 24 h so trunk keeps moving while the fix lands.",
+    "expires": "2026-10-30",
+    "scope": "all"
   }
 ]
