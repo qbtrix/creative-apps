@@ -93,16 +93,23 @@ struct PlaceDoc: PlacedImageTarget {
     @Test func refusesUnlistedFormatAndOver32MB() throws {
         let catalog = try #require(Self.catalog)
         var doc = PlaceDoc(placeFormats: [.png, .jpeg])
-        #expect(throws: CatalogError.unavailable(id: "place.image", why: PlaceRules.formatHelp)) {
+        #expect(throws: CatalogError.unavailable(id: "place.image", why: "Place takes PNG or JPEG files.")) {
             try catalog.run("place.image", params: Self.place(Data("plain text".utf8)), on: &doc)
         }
-        #expect(throws: CatalogError.unavailable(id: "place.image", why: PlaceRules.formatHelp)) {
+        #expect(throws: CatalogError.unavailable(id: "place.image", why: "Place takes PNG or JPEG files.")) {
             try catalog.run("place.image", params: Self.place(Self.svg), on: &doc)
         }
         #expect(throws: CatalogError.unavailable(id: "place.image", why: PlaceRules.sizeHelp)) {
             try catalog.run("place.image", params: Self.place(Self.png + Data(count: PlaceRules.maxBytes)), on: &doc)
         }
         #expect(doc.history.steps.isEmpty)
+    }
+    /// Each target's refusal names only the formats it takes (#6027).
+    @Test func theFormatRefusalNamesTheTargetsFormats() {
+        #expect(PlaceRules.formatHelp(for: [.png, .jpeg]) == "Place takes PNG or JPEG files.")
+        #expect(PlaceRules.formatHelp(for: [.svg]) == "Place takes SVG files.")
+        #expect(PlaceRules.formatHelp(for: Set(PlacedFormat.allCases)) == PlaceRules.formatHelp)
+        #expect(PlaceRules.formatHelp(for: []) == PlaceRules.formatHelp)
     }
     @Test func naturalAspectHasNothingToMoveOrReset() throws {
         let catalog = try #require(Self.catalog)

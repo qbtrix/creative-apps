@@ -39,7 +39,9 @@ extension PhotoWorkspace: PlacedImageTarget {
     public var placeFillBox: Rect? { nil }
 
     /// PNG and JPEG; Photo doesn't rasterize SVG yet.
-    public var placeFormats: Set<PlacedFormat> { [.png, .jpeg] }
+    public var placeFormats: Set<PlacedFormat> { Self.placesFormats }
+    /// The formats Photo places, which its status line and the kernel's refusal both name.
+    static let placesFormats: Set<PlacedFormat> = [.png, .jpeg]
 
     /// Always nil: a placed image becomes pixels, so no layer keeps its picture.
     public var placedSelection: (id: String, image: PlacedImage, asset: PlacedAsset)? { nil }

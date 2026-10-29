@@ -1,6 +1,7 @@
 // PhotoPlaceTests.swift (place-image PP-1 written, PP-5 turns on): MJ-PP, the Model walk of File > Place…
 // in Photo. A placed PNG or JPEG becomes a pixel layer above the selection, fitted inside the canvas by the
-// kernel's `PlaceRules.fitted` and centred or at the drop point, in one undo step; SVG is refused. The stub
+// kernel's `PlaceRules.fitted` and centred or at the drop point, in one undo step; SVG is refused, the catalog's
+// refusal naming only PNG and JPEG (#6027). The stub
 // contract and the walk run now (PP-5 built PhotoPlace+Kernel's bodies). Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -108,7 +109,8 @@ private func place(_ asset: PlacedAsset, on workspace: inout PhotoWorkspace, at:
     func svgAndTextRefused(_ name: String, _ text: String) throws {
         var workspace = try opened()
         let params = PlaceIntent.place(name: name, data: Data(text.utf8), at: nil).command.params
-        #expect(throws: CatalogError.self) { try PhotoWorkspace.catalog.run("place.image", params: params, on: &workspace) }
+        let refusal = CatalogError.unavailable(id: "place.image", why: "Place takes PNG or JPEG files.")
+        #expect(throws: refusal) { try PhotoWorkspace.catalog.run("place.image", params: params, on: &workspace) }
         #expect(workspace.layers.count == 1)
     }
 
