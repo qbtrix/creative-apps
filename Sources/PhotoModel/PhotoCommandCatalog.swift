@@ -127,6 +127,7 @@ extension PhotoWorkspace {
         + ToneCommands.specs(PhotoWorkspace.self)
         + RetouchCommands.specs(PhotoWorkspace.self)
         + AdjustCommands.specs(PhotoWorkspace.self)
+        + agentCommands
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new image at a size, unit, resolution and background.", kind: .file,

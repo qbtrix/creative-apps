@@ -102,6 +102,8 @@ struct PhotoStroke: Sendable, Equatable {
     /// Move: the drag runs as a body drag on an implied draft the compositor lifts (`moveDraft`), and the
     /// release lays its move into the layer's offsets (`endMove`).
     var movesLayer = false
+    /// Brush and eraser: the undo step's name when a command, not a drag, made the stroke ("Brush Stroke").
+    var stepName: String?
 }
 
 extension PhotoWorkspace {
@@ -280,7 +282,7 @@ extension PhotoWorkspace {
         case .brush, .eraser:
             paint(&done, adding: nil, pressure: 1)
             guard let id = done.layerID, !done.before.isEmpty else { return }
-            record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
+            record(.tiles(layer: id, done.before), named: done.stepName ?? (done.tool == .brush ? "Paint" : "Erase"))
         case .clone:
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: "Clone")
