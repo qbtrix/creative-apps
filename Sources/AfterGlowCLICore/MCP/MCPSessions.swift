@@ -200,7 +200,7 @@ public struct MCPSessions: Sendable {
     /// real location (every symlink resolved) is not inside the real location of a root.
     func place(_ path: String) throws(Refused) -> String {
         let roots = options.roots.map { Self.fold($0.hasPrefix("/") ? $0 : Self.cwd() + "/" + $0) }
-        guard let base = roots.first else { throw Refused("this server has no allowed roots") }
+        guard let base = roots.first else { throw Refused("this server has no allowed roots; start afterglow mcp with --root <dir> to use files") }
         let lexical = Self.fold(path.hasPrefix("/") ? path : base + "/" + path)
         let real = Self.real(lexical)
         guard roots.map(Self.real).contains(where: { Self.inside(real, $0) }) else {

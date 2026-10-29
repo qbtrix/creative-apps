@@ -303,7 +303,7 @@ absolute paths: the client picks the working directory, and a relative
 
 | flag | meaning |
 |---|---|
-| `--root <dir>` | a folder the tools may read and write. Required; give it more than once for more folders. |
+| `--root <dir>` | a folder the tools may read and write. Required unless `--live` is given; give it more than once for more folders. With `--live` and no root, the file tools refuse. |
 | `--app <name>` | serve only this app's tools (`photo`, `design`, `flare`, `halo`, `library` or `fake`); repeat for more. Left out, every app. |
 | `--live` | also list the running apps' tools (Live mode below). macOS only. |
 
@@ -312,7 +312,7 @@ before serving, with the usual one JSON object:
 
 | when | message | exit |
 |---|---|---|
-| no `--root` | `afterglow mcp needs --root <dir>, the folder its tools may read and write` | 64 |
+| no `--root` and no `--live` | `afterglow mcp needs --root <dir>, the folder its tools may read and write` | 64 |
 | an unknown flag or app | `unknown flag --port`, `unknown app paint` | 64 |
 | `--app <name>` or `--live` given twice | `--app fake is given twice`, `--live is given twice` | 64 |
 | `--live` off macOS | `afterglow mcp --live runs only on macOS, where the apps listen` (kind `unavailable`) | 69 |
@@ -460,7 +460,7 @@ Every path a tool takes, to open, save or export, must lie inside a
 
 ### Live mode (macOS)
 
-`afterglow mcp --live --root <dir>` also bridges the apps running on this
+`afterglow mcp --live [--root <dir>]` also bridges the apps running on this
 Mac, so a client edits the document in an open window, each edit an
 ordinary undo step there. In `.mcp.json`, add `"--live"` to `args`. Off
 macOS it exits 69 (above).
@@ -500,6 +500,16 @@ this section is what the code does once an app passes a channel.
   `history.undo-request {name}` undoes the request's steps in one call. It
   is refused when any later step follows them, by the person or anyone
   else, so undo those first.
+- **Seeing and painting (Photo).** `live.photo.document.read` lists the
+  canvas size, the layers top-first (id, name, kind, box, hidden, opacity)
+  and the selected ids. `live.photo.view.snapshot {maxSide, region?}`
+  returns `{png, width, height}`: the canvas, or one region of it, as the
+  window shows it, scaled so its longer side is at most `maxSide` (16 to
+  2048), base64 PNG. Both change nothing. `live.photo.paint.stroke
+  {points: [{x, y}], size, hardness, color: {r, g, b, a}, opacity}` paints
+  one brush stroke on the selected image layer as one undo step, "Brush
+  Stroke", with Photo's own brush; hardness, colour and opacity run 0 to 1,
+  and the person's brush and tool are left as they were.
 
 #### Approval
 

@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the stroke keeps the engine's step name, so it reads Paint, not Brush Stroke",
+    "file": "Sources/PhotoModel/PhotoDocumentRead+Kernel.swift",
+    "find": "        stroke?.stepName = \"Brush Stroke\"\n",
+    "replace": "",
+    "tests": "PhotoModelTests.PhotoAgentCommandsTests/strokePaintsOneBrushStrokeStepAndRestoresTheBrush"
+  },
+  {
+    "label": "the stroke leaves the person's brush colour as the agent's",
+    "file": "Sources/PhotoModel/PhotoDocumentRead+Kernel.swift",
+    "find": "        setToolOption(.color(red: options.red, green: options.green, blue: options.blue))\n",
+    "replace": "",
+    "tests": "PhotoModelTests.PhotoAgentCommandsTests/strokePaintsOneBrushStrokeStepAndRestoresTheBrush"
+  },
+  {
+    "label": "the snapshot ignores its region and shows the whole canvas",
+    "file": "Sources/PhotoModel/PhotoDocumentRead+Kernel.swift",
+    "find": "            rect = inside\n",
+    "replace": "",
+    "tests": "PhotoModelTests.PhotoAgentCommandsTests/snapshotIsADownscaledPNGAndRecordsNothing"
+  }
+]
