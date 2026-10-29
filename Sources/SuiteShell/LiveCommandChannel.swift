@@ -3,7 +3,7 @@
 // (folder 0700, socket 0600, dead sockets removed at start), served to peers of this user only. `live/describe`
 // answers `{app, title, commands}`; `live/run {client, id, params}` needs a grant (else -32010; `ask` shows the sheet
 // while the bridge waits up to 120 s), runs the command through the catalog on the main actor and answers
-// `{result, undoStep}`. Each run leaves one AIAccessAuditLine in ~/Library/Logs/AfterGlow/ai-access.log.
+// `{result, undoStep}`; every step it records is `.agent(client:)` (CommandCatalog's `run(..., origin:)`). Each run leaves one AIAccessAuditLine in ~/Library/Logs/AfterGlow/ai-access.log.
 import Darwin
 import Foundation
 import Observation
@@ -24,7 +24,7 @@ public final class LiveCommandChannel {
     /// The app's name on the wire ("photo") and in the sheet ("Photo"), and its catalog.
     let app: String, title: String, commands: [CommandDescription]
     /// Runs a command on the window's document and hands the new one to the app; nil with no document open.
-    let perform: @MainActor (String, JSONValue) -> Result<CommandOutcome, CatalogError>?
+    let perform: @MainActor (String, JSONValue, String) -> Result<CommandOutcome, CatalogError>?
     let ask: @MainActor (AIAccessRequest) async -> AIAccessDecision
     let grants: any PreferencesStoring
     @ObservationIgnored var wire: Wire?
@@ -38,9 +38,13 @@ public final class LiveCommandChannel {
     public init<D: HeadlessDocument>(app: String, document: @escaping @MainActor () -> D?, apply: @escaping @MainActor (D) -> Void,
                                      ask: @escaping @MainActor (AIAccessRequest) async -> AIAccessDecision) {
         (self.app, title, commands, self.ask) = (D.app, app, D.catalog.describeAll(), ask)
-        perform = { id, params in
+        perform = { id, params, client in
             guard var doc = document() else { return nil }
-            do throws(CatalogError) { let outcome = try D.catalog.run(id, params: params, on: &doc); apply(doc); return .success(outcome) }
+            do throws(CatalogError) {
+                let outcome = try D.catalog.run(id, params: params, on: &doc, origin: .agent(client: client, request: nil))
+                apply(doc)
+                return .success(outcome)
+            }
             catch { return .failure(error) }
         }
         let support = SuiteLocations.processSupportFolder
@@ -115,7 +119,7 @@ public final class LiveCommandChannel {
             if AIAccessGrants.holdsConnection(decision: decision, kind: kind.rawValue, waited: waited) { allowedOnce[connection] = client }
         }
         (drivers[connection], connectedClient) = (client, client)
-        let (outcome, reply): (String, [UInt8]) = switch perform(command, params) {
+        let (outcome, reply): (String, [UInt8]) = switch perform(command, params, client) {
         case .success(let done)?: ("ran", Self.success(id, .object(["result": done.result, "undoStep": done.undoStep.map(JSONValue.string) ?? .null])))
         case .failure(let error)?: ("failed", Self.failure(id, -32000, error.description))
         case nil: ("failed", Self.failure(id, -32000, "\(title) has no document open; open one, then call again"))

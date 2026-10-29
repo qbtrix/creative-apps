@@ -241,6 +241,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         "place.replace | Replace Image | Select a placed image first.", "place.reset-size | Reset Size | Select a placed image first.",
         "place.focus | Move Inside | Select a placed image first.",
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
+        "history.begin | Begin Request | on", "history.end | End Request | No request is open.",
+        "history.undo-request | Undo Request | No applied step belongs to a request.",
         "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
         "view.zoom-to-selection | Zoom to Selection | on",
     ]

@@ -264,3 +264,81 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
         #expect(menuState(history) == (true, false, "Nudge", nil, true))
     }
 }
+
+/// Provenance (#6028): who made each step, and the request span an agent's steps carry.
+@Suite struct HistoryOriginTests {
+    static let agent = StepOrigin.agent(client: "claude", request: nil)
+
+    @Test func stepsAreTheUsersUnlessALiveCallSetsTheOrigin() {
+        var history = History<String>()
+        history.record("Move", "a")
+        StepOrigin.$current.withValue(Self.agent) { history.record("Fill", "b") }
+        history.record("Crop", "c")
+        #expect(history.stepOrigins == [.user, Self.agent, .user])
+        #expect(history.undoSteps.map(\.origin) == [.user, Self.agent, .user])
+        let reading: any HistoryReading = history
+        #expect(reading.stepOrigins == [.user, Self.agent, .user])
+    }
+
+    @Test func agentStepsInsideARequestCarryItsName() {
+        var history = History<String>()
+        #expect(history.beginRequest("AI: Birds"))
+        #expect(!history.beginRequest("AI: Sun"))
+        history.record("Move", "a")
+        StepOrigin.$current.withValue(Self.agent) { history.record("Brush Stroke", "b"); history.record("Brush Stroke", "c") }
+        #expect(history.openRequest == "AI: Birds")
+        #expect(history.endRequest() && !history.endRequest())
+        StepOrigin.$current.withValue(Self.agent) { history.record("Fill", "d") }
+        let birds = StepOrigin.agent(client: "claude", request: "AI: Birds")
+        #expect(history.stepOrigins == [.user, birds, birds, Self.agent])
+        #expect(history.stepOrigins.map(\.request) == [nil, "AI: Birds", "AI: Birds", nil])
+    }
+
+    @Test func aRunFoldsOnlyAcrossOneOrigin() {
+        var history = History<String>()
+        history.record("Move", "a", key: "drag")
+        StepOrigin.$current.withValue(Self.agent) { history.record("Move", "b", key: "drag") }
+        history.record("Move", "c", key: "drag")
+        #expect(history.stepOrigins == [.user, Self.agent, .user])
+        history.record("Move", "d", key: "drag")
+        #expect(history.steps.count == 3)
+    }
+
+    @Test func beginEndsTheOpenRun() {
+        var history = History<String>()
+        StepOrigin.$current.withValue(Self.agent) {
+            history.record("Move", "a", key: "drag")
+            _ = history.beginRequest("AI: Birds")
+            history.record("Move", "b", key: "drag")
+        }
+        #expect(history.stepOrigins.map(\.request) == [nil, "AI: Birds"])
+    }
+
+    @Test func undoAndRedoKeepTheOrigin() {
+        var history = History<String>()
+        StepOrigin.$current.withValue(Self.agent) { history.record("Fill", "a") }
+        _ = history.undo { $0 }
+        #expect(history.redoSteps.map(\.origin) == [Self.agent] && history.stepOrigins == [Self.agent])
+        _ = history.redo { $0 }
+        #expect(history.undoSteps.map(\.origin) == [Self.agent])
+    }
+
+    @Test func anOpenRequestTellsHistoriesApart() {
+        var spanned = History<String>()
+        _ = spanned.beginRequest("AI: Birds")
+        #expect(spanned != History<String>())
+        #expect(spanned.hashValue != History<String>().hashValue)
+    }
+
+    @Test func originJSONIsFlat() throws {
+        let user = try JSONValue(encoding: StepOrigin.user)
+        let agent = try JSONValue(encoding: StepOrigin.agent(client: "claude", request: "AI: Birds"))
+        let loose = try JSONValue(encoding: Self.agent)
+        #expect(user == .object(["kind": .string("user")]))
+        #expect(agent == .object(["kind": .string("agent"), "client": .string("claude"), "request": .string("AI: Birds")]))
+        #expect(loose == .object(["kind": .string("agent"), "client": .string("claude")]))
+        for origin in [StepOrigin.user, .agent(client: "claude", request: "AI: Birds"), Self.agent] {
+            #expect(try JSONValue(encoding: origin).decode(StepOrigin.self) == origin)
+        }
+    }
+}
