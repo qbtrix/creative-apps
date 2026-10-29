@@ -15,7 +15,7 @@ import Testing
         model.setLayersHidden(ids, hidden: true)
         #expect(model.historySteps.count == before + 1, "a no-op recorded a step")
         model.undo()
-        #expect(model.layers.allSatisfy(\.isVisible))
+        #expect(model.layers.allSatisfy { $0.isVisible })
     }
 
     @Test func selectPicksLiveIDsInListOrder() throws {

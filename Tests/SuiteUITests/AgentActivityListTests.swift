@@ -18,7 +18,7 @@ import Testing
 
     @Test func rowsOpenToStepsThenLayers() {
         let closed = AgentActivityList.rows(Self.requests, expanded: [], names: [:], hidden: [])
-        #expect(closed.map(\.name) == ["Blur", "Make a poster"] && closed.allSatisfy(\.holdsChildren))
+        #expect(closed.map(\.name) == ["Blur", "Make a poster"] && closed.allSatisfy { $0.holdsChildren })
         let open = AgentActivityList.rows(Self.requests, expanded: ["agent.1"], names: ["l1": "Title"],
                                           hidden: ["l1", "l2"])
         #expect(open.map(\.name) == ["Blur", "Make a poster", "Add Layer", "Paint", "Title", "l2"])
