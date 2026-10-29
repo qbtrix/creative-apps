@@ -1,10 +1,10 @@
 [
   {
-    "label": "a newer file version opens as if it were version 1",
+    "label": "version3IsRefused: a file from a newer format opens",
     "file": "Sources/DesignModel/Live/LiveFiling.swift",
-    "find": "guard version == Self.fileVersion else",
-    "replace": "guard version >= 0 else",
-    "tests": "DesignFilingTests"
+    "find": "guard (1...Self.fileVersion).contains(version) else",
+    "replace": "guard (1...Self.fileVersion + 1).contains(version) else",
+    "tests": "DesignFilingTests|LiveFilingVersionTests"
   },
   {
     "label": "encode writes its keys unsorted",
@@ -47,5 +47,33 @@
     "find": "rect.width >= 1 && rect.height >= 1",
     "replace": "rect.width > 1 && rect.height >= 1",
     "tests": "DesignFileTests"
+  },
+  {
+    "label": "aKeyedDocumentWritesVersion2AndKeepsItsKeys: a keyed document is written as version 1, so a version 1 build opens it and drops the keys",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "return keyed || document.time != DesignDocumentTime() ? 2 : 1",
+    "replace": "return document.time != DesignDocumentTime() ? 2 : 1",
+    "tests": "LiveFilingVersionTests"
+  },
+  {
+    "label": "aSetDocumentTimeAloneWritesVersion2: a set document time on a still document is written as version 1 and lost",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "return keyed || document.time != DesignDocumentTime() ? 2 : 1",
+    "replace": "return keyed ? 2 : 1",
+    "tests": "LiveFilingVersionTests"
+  },
+  {
+    "label": "aSetDocumentTimeAloneWritesVersion2: the document time is never written",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "time: version == 2 ? document.time : nil",
+    "replace": "time: nil",
+    "tests": "LiveFilingVersionTests"
+  },
+  {
+    "label": "aSetDocumentTimeAloneWritesVersion2: the file's document time is not read back",
+    "file": "Sources/DesignModel/Live/LiveFiling.swift",
+    "find": "return DesignDocument(pages: content.pages, time: content.time ?? DesignDocumentTime())",
+    "replace": "return DesignDocument(pages: content.pages)",
+    "tests": "LiveFilingVersionTests"
   }
 ]

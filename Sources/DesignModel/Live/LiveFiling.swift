@@ -1,11 +1,18 @@
 // Live/LiveFiling.swift: Design's file codec, behind Open, Save and Save As on
 // the live services (DesignFile calls it through `services.filing`). A file is
-// JSON, `{"pages":[...],"version":1}` with sorted keys, so the same document
-// always writes the same bytes.
+// JSON with sorted keys, so the same document always writes the same bytes.
+//
+// Version policy: the version is a function of the content. A still document
+// (no keyed node, the default document time) writes `{"pages":[...],"version":1}`,
+// byte for byte as before time existed. A document with keys or a set time writes
+// version 2, which adds `"time"` and the nodes' `"time"` tracks. Decoding accepts
+// 1 and 2 and refuses anything else with `unsupportedVersion(n)`, so a build that
+// only knows 1 refuses a version 2 file rather than opening it with its keys gone.
+// Recovery copies use the same codec, so they carry the same version.
 //
 // Decoding is all or nothing: the whole file is checked before a document is
 // returned, so a refused file throws and the caller keeps what it had. A file
-// is refused when it isn't JSON of this shape, names a version other than 1,
+// is refused when it isn't JSON of this shape, names a version other than 1 or 2,
 // has no page, repeats an id (page and node ids share one namespace, as
 // `selectItem` looks them up together), nests children under a node that
 // cannot hold them, or has a page or node whose size is under 1 point or whose
@@ -24,10 +31,19 @@ import Foundation
 private struct DesignFileContent: Codable {
     var version: Int
     var pages: [DesignPage]
+    /// Written only at version 2.
+    var time: DesignDocumentTime?
 }
 
 public struct LiveFiling: DocumentFiling {
-    static let fileVersion = 1
+    /// The newest version this build reads and writes.
+    static let fileVersion = 2
+
+    /// 2 for a document with keys or a set document time, else 1.
+    static func version(of document: DesignDocument) -> Int {
+        let keyed = document.pages.contains { $0.nodes.contains { $0.isKeyed } }
+        return keyed || document.time != DesignDocumentTime() ? 2 : 1
+    }
 
     public init() {}
 
@@ -36,7 +52,9 @@ public struct LiveFiling: DocumentFiling {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .sortedKeys
         do {
-            return try encoder.encode(DesignFileContent(version: Self.fileVersion, pages: document.pages))
+            let version = Self.version(of: document)
+            return try encoder.encode(
+                DesignFileContent(version: version, pages: document.pages, time: version == 2 ? document.time : nil))
         } catch {
             // Every number is finite after `check`, which is all that makes the encoder throw.
             throw .unreadable
@@ -49,7 +67,7 @@ public struct LiveFiling: DocumentFiling {
             // The version first, through the kernel's probe (`probeVersion`, DesignSession+Kernel.swift),
             // so a file from a future format reports its version and not "unreadable".
             let version = try Self.probeVersion(data)
-            guard version == Self.fileVersion else { throw DesignFileError.unsupportedVersion(version) }
+            guard (1...Self.fileVersion).contains(version) else { throw DesignFileError.unsupportedVersion(version) }
             content = try JSONDecoder().decode(DesignFileContent.self, from: data)
         } catch let error as DesignFileError {
             throw error
@@ -57,7 +75,7 @@ public struct LiveFiling: DocumentFiling {
             throw .unreadable
         }
         try Self.check(content.pages)
-        return DesignDocument(pages: content.pages)
+        return DesignDocument(pages: content.pages, time: content.time ?? DesignDocumentTime())
     }
 
     /// Throws the first problem in `pages` that would make the document unusable.

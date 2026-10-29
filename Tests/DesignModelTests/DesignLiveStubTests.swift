@@ -54,8 +54,8 @@ import Testing
         do { _ = try LiveFiling().encode(DesignDocument(pages: [twice])); encode = nil } catch { encode = error }
         #expect(encode == .duplicateID("node-2"))
         let version: DesignFileError?
-        do { _ = try LiveFiling().decode(Data(#"{"pages":[],"version":2}"#.utf8)); version = nil } catch { version = error }
-        #expect(version == .unsupportedVersion(2))
+        do { _ = try LiveFiling().decode(Data(#"{"pages":[],"version":3}"#.utf8)); version = nil } catch { version = error }
+        #expect(version == .unsupportedVersion(3))
         let empty: DesignFileError?
         do { _ = try LiveFiling().decode(Data(#"{"pages":[],"version":1}"#.utf8)); empty = nil } catch { empty = error }
         #expect(empty == .noPages)

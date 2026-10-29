@@ -87,7 +87,8 @@ public enum DesignTool: String, CaseIterable, Sendable {
 public struct DesignWorkspace: Sendable, Equatable {
     /// Pages of the open file; empty when no file is open.
     public internal(set) var pages: [DesignPage] = []
-    /// The document's frame rate and length (DesignNodeTime.swift); the default until a slice sets or loads it.
+    /// The document's frame rate and length (DesignNodeTime.swift): the default for a new or still file, the file's when
+    /// opened (DesignFile.swift). Saved only at file version 2 (LiveFiling).
     public internal(set) var time = DesignDocumentTime()
     public internal(set) var selectedPageID: String?
     /// The selected layers on the selected page: SuiteKernel's ordered selection (DesignSelection).
@@ -178,6 +179,7 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// don't move the counters, but minting skips them, so a new id never repeats one (#296).
     mutating func load(_ pages: [DesignPage]) {
         self.pages = pages
+        time = DesignDocumentTime()
         held.scan(pages)
         (selectedPageID, selectedNodeID, expandedNodeIDs) = (pages.first?.id, nil, [])
         (history, gesture, placedText) = (DesignHistory(), nil, nil)
