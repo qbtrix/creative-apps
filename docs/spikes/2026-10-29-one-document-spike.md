@@ -14,7 +14,7 @@ Measured on a release build (`-c release -Xswiftc -enable-testing -Xswiftc -DDEB
 
 ## (a) Edit at a non-zero playhead
 
-PENDING_A
+The runnable check is `Tests/DesignModelTests/SpikeEditAtPlayheadTests.swift`. It prints what each edit shows at 1 s against what was asked for. Its run is in the same queued release job (see (b)). The table below comes from reading the code, and the test confirms the same behaviour.
 
 Survey of all 11 `Sources/DesignModel/Live` editors, by reading. "Write-back" means the editor writes the rest pose (`frame`, `opacity`) on an axis a key overrides, so it needs a rule: write the key at the playhead (auto-key), or offset the whole track.
 
@@ -38,16 +38,24 @@ Non-editor paths: snapping (`DesignSnapping+Kernel`) snaps to the rest frames of
 
 ## (b) Playback
 
-PENDING_B
+**Not measured yet.** The release build sat in the counted gate pool for 64 min at LOW priority behind 8 holders (the bug-fix lanes, mac-finish lanes, kiln and supfix), and never started. A detached runner, `.build/spike/run.sh` in the worktree, keeps re-queuing it. Progress goes to `.build/spike/progress.log`, and the SPIKE lines go to `.build/spike/results.txt`. The tests that produce the numbers are committed: `Tests/AppSnapshotTests/SpikeOneDocumentTests.swift`.
+
+Method: `playback()` runs 242 frames, each one PlaybackTiming tick per document frame, then layout and display forced (RenderBudgetWindow.timed's method). A dropped frame is a step over 8.3 ms at 120 Hz, and over 16.7 ms at 60 Hz. Body counts come from `DesignWindow.bodyRuns`. That runs for the painter, then for one pre-rastered lift of the whole frame on `CanvasHostView.showLiveLayer` / `moveLiveLayer`. There is no QB-L4 row in `Tests/render-budgets.md`, so this copies the Halo play-row method.
+
+Already known from the code: `CanvasHostView` holds **one** lift (`lifted`). A per-node lift of 500 nodes is not possible on today's API. A compositor-deferred hero can only lift a whole pre-rastered frame, or a selection, as one layer. Per-node layers are H6 work.
 
 ## (c) Raster cost
 
-PENDING_C
+Pending, with the same runner. `rasterCost()` times the sampled 50- and 500-node trees through DesignArtwork with ImageRenderer at 2x, and reports per-node microseconds plus the sampling cost on its own. `playLongForSample()` plays the 500-node fixture for 24 s while the runner takes `sample <pid> 20 1` into `.build/spike/sample.txt`.
 
 ## (d) Big-document drag
 
-PENDING_D
+Pending, with the same runner. `crowdDrag()` runs RenderBudgetDesignTests' 120-sample drag on the plain crowd, then on `keyedCrowd` sampled at 1 s, in the same session. The baseline is today's 4.1 ms p95 / 6 ms budget, 3 bodies (render-budgets.md). The audit's 57-63 ms is not from this harness: #4479 is the design-seams packet issue and carries no number. Expect the sampled run to cost at least one full `page.sampled` tree copy of 2k nodes per sample. The sampler walks and copies the whole tree on every body.
 
 ## Verdict
 
-PENDING_V
+Provisional. Only (a) has evidence; (b)-(d) wait on the queued run.
+
+- **Hero range:** (a) supports the **low half of H4+H4b+H5 (about 22-30 h)** as long as time stays top-level with no full interleave. That is 7 editors plus 3 paths, but only 4 shared rules (auto-key at the playhead, track offset on copy, track rebase on reparent, sampled reads), so the cost doesn't grow per editor. Keep the hero at **140-290 h** until (b)-(d) land. Nothing yet moves H6-H9.
+- **Staged (compositor-deferred) hero:** not decided. One known limit: CanvasLiveLayer lifts one layer, so staging means painter playback, or one whole-frame lift, which only fits playback that never edits.
+- **Surprises:** (1) Dragging a keyed node at a non-zero playhead does nothing on screen. The key overrides the rest pose that the live drag writes, so auto-key is hero-critical, not polish. (2) Absolute frames force subtree translation at sample time, and they make reparenting jump a node by the new parent's delta, so the track-rebase rule is needed even for the hero. (3) The read side is cheap only for draw and export. Hit-testing is a Model function with no playhead, and handles, snapping, marquee and framing all read rest frames, so the "page.painted de-risks reads" claim misses interaction.
