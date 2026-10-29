@@ -59,7 +59,7 @@ import Testing
             #expect(rows.rows.contains { if case .metadata = $0 { true } else { false } } == !vector, "\(state.name)")
         }
         #expect(ExportSheetRows.readout(.pixels(width: 1080, height: 1351), source: GalleryExportPack.source).refused)
-        for state in Self.states { #expect((Self.rows(state.pick).startBlock != nil) == (state.name == "refused"), "\(state.name)") }
+        for state in Self.states { #expect((Self.rows(state.pick).startHelp(blocked: nil) != nil) == (state.name == "refused"), "\(state.name)") }
     }
 }
 #endif

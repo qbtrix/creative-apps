@@ -1,13 +1,15 @@
 // DesignExport+Kernel.swift: File > Export…'s sheet (design-export DE-6) on SuiteUI's
 // SuiteExportSheet. DesignExportArea keeps the run (DesignExportRun) as its own state, so editing
 // the sheet never runs the window's body; each change of `request` opens it on the Model's
-// `exportSheetDefaults`, after the last run's options (`rememberExport`). Ids hang off
+// `exportSheetDefaults`, which a finished run updates through `remember` (the window's
+// `rememberExport` intent, so the Model itself keeps them). Ids hang off
 // `design.export`: Format (no Size row: Scale is the one scale control), then DesignExportRows'
 // Scale (`scale.<n>x`, off with `scaleHelp` for SVG and PDF) and Scope (`scope.<scope>`) chips, the
-// file list (`items`) and the plan's refusal (`result`). Export on the fakes (DE-7) runs fake steps
+// file list (`items`) and the plan's refusal (`result`), which also disables Export, saying why
+// (SuiteExportSheet's `blocked`). Export on the fakes (DE-7) runs fake steps
 // that write nothing. Export on the live services (DE-10) writes into `-DesignExportTo`, else the
 // folder an NSOpenPanel picks (its Cancel leaves the sheet editing): the plan is named against the
-// folder's listing, each item renders (SVG from `exportSVG`, PNG and PDF from DesignRasterizer) and
+// folder's listing, each item renders (SVG from `exportSVG`, PNG, JPEG and PDF from DesignRasterizer) and
 // is written `.withoutOverwriting` through the Model's DesignExportLive loop, progress steps per
 // file, and the sheet and the status line read its finished line, naming the folder and the files.
 // A render or write that throws ends the run failed with the file's name, the system's reason and
@@ -25,10 +27,10 @@ struct DesignExportArea: ViewModifier {
     /// Bumped by File > Export…; each change opens the sheet.
     let request: Int
     let onNote: @MainActor (String) -> Void
+    /// A finished run's options, for the Model to open the next sheet with.
+    let remember: @MainActor (DesignExportOptions) -> Void
     @State private var run: DesignExportRun = .idle
     @State private var task: Task<Void, Never>?
-    /// The last run's options, which the next sheet opens with.
-    @State private var remembered: DesignExportOptions?
     /// A finished live run's line (DesignExportLive.finished); nil on the fakes.
     @State private var finishedLine: String?
 
@@ -51,12 +53,10 @@ struct DesignExportArea: ViewModifier {
             }
     }
 
-    /// Opens the sheet on the defaults, after the last run's options.
+    /// Opens the sheet on the Model's defaults: the last finished run's options, else PNG 1x Frame.
     private func open() {
-        var seed = model
-        if let remembered { seed.rememberExport(remembered) }
         finishedLine = nil
-        _ = run.begin(seed.exportSheetDefaults)
+        _ = run.begin(model.exportSheetDefaults)
     }
 
     /// Cancel or Escape: stops a run under way after its current file, else closes the sheet.
@@ -121,23 +121,23 @@ struct DesignExportArea: ViewModifier {
                 onNote(line)
                 return
             }
-            remembered = options
             guard !outcome.written.isEmpty else { return run.end(.failure(CancellationError())) }
             let line = DesignExportLive.finished(outcome.written, folder: folder.lastPathComponent)
             finishedLine = line
             run.end(.success(outcome.written))
+            remember(options)
             onNote(line)
         }
     }
 
-    /// One item's file: SVG text from the Model, PNG and PDF from DesignRasterizer.
+    /// One item's file: SVG text from the Model; PNG, JPEG (on the item's background) and PDF from DesignRasterizer.
     // view-static: main-actor
     private static func render(_ item: DesignExportItem, _ format: DesignExportFormat, _ model: DesignWorkspace) throws -> Data {
         switch format {
         case .svg: Data(try model.exportSVG(item).utf8)
         case .png: try DesignRasterizer.png(try model.exportRaster(item))
         case .pdf: try DesignRasterizer.pdf(try model.exportRaster(item))
-        case .jpeg: throw DesignRefusal.notYet("JPEG files are written once DX-4 rasterizes them; PNG keeps transparency.")
+        case .jpeg: try DesignRasterizer.jpeg(try model.exportRaster(item), background: item.background ?? .white)
         }
     }
 
@@ -162,7 +162,7 @@ struct DesignExportArea: ViewModifier {
                     run.progressed(done: index + 1)
                 }
                 run.end(.success(names))
-                remembered = options
+                remember(options)
                 onNote(DesignWorkspace.exportSummary(names))
             } catch {
                 run.end(.failure(error))
@@ -197,7 +197,8 @@ struct DesignExportArea: ViewModifier {
             onScale: { edit(options.scaled($0)) },
             onQuality: { _ in },
             onExport: export,
-            onClose: close
+            onClose: close,
+            blocked: run.shownOptions.flatMap { model.exportHelp($0) }
         ) {
             if run.shownOptions != nil { DesignExportRows(model: model, options: options, edit: edit) }
         }

@@ -2,8 +2,8 @@
   {
     "label": "exportSelectedPageOnly",
     "file": "Sources/DesignModel/DesignHeadless.swift",
-    "find": "for page in workspace.pages {",
-    "replace": "for page in workspace.pages where page.id == workspace.selectedPageID {",
+    "find": "for page in pages {",
+    "replace": "for page in pages where page.id == workspace.selectedPageID {",
     "tests": "DesignHeadlessTests/realJobPasses"
   },
   {
@@ -21,17 +21,17 @@
     "tests": "DesignHeadlessTests"
   },
   {
-    "label": "svgSizeIgnored: a sized SVG export writes 1x without a word (#5834)",
+    "label": "svgSizeUnnamed: a size gets the generic other-key sentence, not why SVG takes none (#5834)",
     "file": "Sources/DesignModel/DesignHeadless.swift",
-    "find": "guard asked.size == .scale(1) else {",
-    "replace": "guard asked.size == asked.size else {",
+    "find": "if keys[\"size\"] != nil {",
+    "replace": "if keys[\"size\"] == .null {",
     "tests": "DesignHeadlessExportOptionsTests"
   },
   {
-    "label": "svgOptionsUnread: SVG export skips the options schema, so a stray key is let through (#5834)",
+    "label": "svgStrayKeyFailed: a stray option is a failure, not bad input (#5834)",
     "file": "Sources/DesignModel/DesignHeadless.swift",
-    "find": "let asked = try SuiteExportOptions(json: options, defaults: SuiteExportOptions(format: format))",
-    "replace": "let asked = (try? SuiteExportOptions(json: options, defaults: SuiteExportOptions(format: format))) ?? SuiteExportOptions(format: format)",
+    "find": "throw ExportOptionRefusal.invalid(\"Design's SVG export takes one option",
+    "replace": "throw CatalogError.failed(id: \"export\", message: \"Design's SVG export takes one option",
     "tests": "DesignHeadlessExportOptionsTests"
   }
 ]
