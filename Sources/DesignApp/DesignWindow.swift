@@ -168,8 +168,8 @@ struct DesignWindow: View, BodyCounted {
         #endif
         // Anything but a transport intent pauses playback first, so it acts at the frame on screen.
         switch intent {
-        case .play, .pause, .stop, .playPause: break
-        default: if player.isPlaying { model.setPlayhead(player.halt(stopping: false, live: live)) }
+        case .play, .pause, .stop, .playPause, .scrub, .loop: break
+        default: if player.isActive { model.setPlayhead(player.halt(stopping: false, live: live)) }
         }
         // An open text edit ends, fitted to its text, before anything else acts (canvas-basics CB-6).
         switch intent {
@@ -224,9 +224,12 @@ struct DesignWindow: View, BodyCounted {
         case .playPause: perform(player.isPlaying ? .pause : .play)
         case .play:
             guard !model.isStill, !player.isPlaying else { break }
+            if player.isActive { model.setPlayhead(player.halt(stopping: false, live: live)) }
             player.play(model, live: live, makeLink: makeLink) { model.setPlayhead($0) }
         case .pause: if player.isPlaying { model.setPlayhead(player.halt(stopping: false, live: live)) }
         case .stop: model.setPlayhead(player.halt(stopping: true, live: live))
+        case .scrub(let frame): player.scrub(to: frame, live: live) { model.setPlayhead($0) }
+        case .loop(let on): live.playLoops = on
         case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
         case .fit:
             fitting = true
