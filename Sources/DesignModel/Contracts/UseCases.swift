@@ -29,6 +29,10 @@ public protocol SelectionTransforming: Sendable {
                 on page: DesignPage) throws(DesignRefusal) -> DesignEdit
     /// Coalescing "nudge": 1 pt, or 10 pt with `large`.
     func nudge(_ ids: [String], _ direction: DesignDirection, large: Bool, on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// `move` as the canvas shows it at `playhead`: a keyed axis keys there (LiveKeying.swift).
+    func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit
+    /// `nudge` at `playhead`, as `move`.
+    func nudge(_ ids: [String], _ direction: DesignDirection, large: Bool, on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit
     /// Single "Delete" (one layer: "Delete <Kind>").
     func delete(_ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
 }
@@ -38,6 +42,8 @@ public protocol LayerAligning: Sendable {
     func alignHelp(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) -> String?
     /// Single, named `edge.title`. Locked layers count toward the bounds but don't move.
     func align(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// `align` over the frames shown at `playhead`; a keyed axis keys there (LiveKeying.swift).
+    func align(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit
     func distributeHelp(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) -> String?
     /// Single, named `axis.title`. Needs three or more layers (`.tooFewToDistribute`); the outer two stay.
     func distribute(_ axis: DesignDistributeAxis, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
@@ -104,6 +110,10 @@ public protocol StyleEditing: Sendable {
     /// Coalescing "opacity". Clamped to 0...1. The layer's opacity: it fades the fill, stroke and text,
     /// and for a frame or group everything inside it.
     func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
+    /// `setFrame` with X and Y as shown at `playhead`; a keyed axis keys there (LiveKeying.swift).
+    func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit
+    /// `setOpacity` at `playhead`, as `setFrame`.
+    func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit
     /// Coalescing "stroke". nil removes the stroke; width clamped to 0...1000.
     func setStroke(_ stroke: DesignStroke?, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit
     /// Coalescing "text-style". Size clamped to 1...1000, weight to 100...900. Text layers take it;
@@ -195,4 +205,29 @@ public protocol VariableEditing: Sendable {
     /// Single "Bind Fill" (nil: "Unbind Fill"). Binds each layer's fill to a color variable.
     func bind(_ variableID: String?, _ ids: [String], on page: DesignPage,
               variables: [DesignVariable]) throws(DesignRefusal) -> DesignEdit
+}
+
+// The playhead overloads for services that don't key (fakes, not-built): they edit the rest pose.
+extension SelectionTransforming {
+    public func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
+        try move(ids, by: delta, on: page)
+    }
+    public func nudge(_ ids: [String], _ direction: DesignDirection, large: Bool, on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
+        try nudge(ids, direction, large: large, on: page)
+    }
+}
+
+extension LayerAligning {
+    public func align(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
+        try align(edge, ids, on: page)
+    }
+}
+
+extension StyleEditing {
+    public func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
+        try setFrame(field, to: value, ids, on: page)
+    }
+    public func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
+        try setOpacity(opacity, ids, on: page)
+    }
 }

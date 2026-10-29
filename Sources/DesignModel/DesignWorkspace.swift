@@ -10,7 +10,8 @@
 // - `held` holds exactly the page and node ids on the pages; every change that
 //   adds or removes an id updates it, so minting never walks the tree (#433).
 // - Every node frame is absolute page points, children included (DesignNode).
-// - `playhead` is shown state: reads of the screen go through `shownPage`, edits write the rest pose.
+// - `playhead` is shown state: reads of the screen go through `shownPage`; an edit of a keyed property at the
+//   playhead writes a key there, every other edit writes the rest pose (Live/LiveKeying.swift).
 // - Every document edit records exactly one named undo step (DesignHistory). A
 //   refused call (it throws, names an unknown id, hits a locked node, or changes
 //   nothing) records nothing and leaves the workspace as it was.
@@ -381,13 +382,14 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// value and width and height stay at least 1. Changing x or y moves the node's subtree with
     /// it; changing the size leaves its children. A run of changes to one node is one step.
     public mutating func setNodeFrame(_ id: String, x: Double, y: Double, width: Double, height: Double) throws(DesignTreeError) {
-        guard let old = findNode(id)?.frame else { throw .unknownID(id) }
+        guard let rest = findNode(id)?.frame else { throw .unknownID(id) }
+        let old = shownPage?.nodes.node(id)?.frame ?? rest  // X and Y are what the canvas shows
         let new = DesignRect(
             x: x.isFinite ? x : old.x, y: y.isFinite ? y : old.y,
             width: width.isFinite ? Swift.max(width, 1) : old.width, height: height.isFinite ? Swift.max(height, 1) : old.height)
-        try editNode(id, named: "Change Frame", coalescing: "frame-\(id)") { node in
-            node.translate(by: DesignPoint(x: new.x - old.x, y: new.y - old.y))
-            node.frame = new
+        try editNode(id, named: "Change Frame", coalescing: "frame-\(id)") { [playhead] node in
+            node = node.moved(by: DesignPoint(x: new.x - old.x, y: new.y - old.y), at: playhead)
+            (node.frame.width, node.frame.height) = (new.width, new.height)
         }
     }
 

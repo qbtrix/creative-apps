@@ -33,5 +33,19 @@
     "find": "/ Double(inner.count + 1)",
     "replace": "/ Double(inner.count)",
     "tests": "DesignDistributeTests"
+  },
+  {
+    "label": "autokey: align uses rest frames",
+    "file": "Sources/DesignModel/Live/LiveAligning.swift",
+    "find": "let shown = page.shown(at: playhead)",
+    "replace": "let shown = page",
+    "tests": "DesignAutoKeyTests"
+  },
+  {
+    "label": "autokey: align edits the rest pose at a playhead",
+    "file": "Sources/DesignModel/Live/LiveAligning.swift",
+    "find": "_ = nodes.update(node.id) { $0 = $0.moved(by: delta, at: playhead) }",
+    "replace": "_ = nodes.update(node.id) { $0 = $0.moved(by: delta, at: nil) }",
+    "tests": "DesignAutoKeyTests"
   }
 ]
