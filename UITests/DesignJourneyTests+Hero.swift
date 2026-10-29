@@ -54,6 +54,9 @@ extension DesignJourneyTests {
         XCTAssert(diamondX.waitForExistence(timeout: 5), "an animated X shows no diamond")
         diamondX.click()
         XCTAssert(Self.heroWait { Self.heroText(keyX) == "Keyed at this frame" }, "X's diamond set no key at the playhead")
+        let key120 = design.app.descendants(matching: .any).matching(NSPredicate(
+            format: "identifier BEGINSWITH 'design.timeline.key.' AND identifier ENDSWITH '.120'")).firstMatch
+        XCTAssert(key120.waitForExistence(timeout: 5), "the ruler drag missed frame 120 (timecode \(at120))")
         let x = design.element("suite.inspector").descendants(matching: .any)["design.inspector.x"].firstMatch
         XCTAssert(x.waitForExistence(timeout: 5), "no X field in the inspector (design.inspector.x)")
         x.click()

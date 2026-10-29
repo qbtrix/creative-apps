@@ -10,7 +10,7 @@ import SuiteKernel
 import SuiteUI
 import SwiftUI
 
-struct DesignKeyButton: View {
+struct DesignKeyControl: View {
     let model: DesignWorkspace
     let property: DesignKeyProperty
     /// Why the row can't edit (a locked layer), which also turns the key button off.
@@ -27,7 +27,7 @@ struct DesignKeyButton: View {
                 onToggle: { if let commands = model.keyAnimate(id, property) { perform(.keys(commands)) } },
                 onKey: { if let command = model.keyToggle(id, property) { perform(.keys([command])) } })
                 // One size on every row: InspectorRow sets a smaller font on X and Y's, and the symbols scale with it.
-                .font(.body)
+                .font(SuiteFont.body)
                 .disabled(help != nil)
                 .suiteControl(id: key, enabled: help == nil, reason: help, identifies: false)
                 .suiteControl(

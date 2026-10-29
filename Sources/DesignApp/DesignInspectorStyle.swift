@@ -94,7 +94,7 @@ struct DesignOpacityRow: View {
             .disabled(help != nil)
             .help(help ?? "")
             .suiteControl(id: DesignControlID.inspectorOpacity, enabled: help == nil, reason: help)
-            if !model.hasMultipleSelection { DesignKeyButton(model: model, property: .opacity, help: help, perform: perform) }
+            if !model.hasMultipleSelection { DesignKeyControl(model: model, property: .opacity, help: help, perform: perform) }
         }
     }
 }
