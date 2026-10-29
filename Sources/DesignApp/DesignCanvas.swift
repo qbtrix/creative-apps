@@ -39,8 +39,7 @@ struct DesignCanvas: View {
     @Environment(\.designLiveDrag) private var live
 
     var body: some View {
-        var shown = live?.workspace ?? model
-        if let frame = live?.playingFrame { shown.setPlayhead(frame) }
+        let shown = Self.shown(live?.workspace ?? model, at: live?.playingFrame)
         if let page = shown.shownPage {
             canvas(page, shown: shown)
         } else {
@@ -50,6 +49,14 @@ struct DesignCanvas: View {
                 action: ToolbarAction("New File", systemImage: "plus") { perform(.newFile) })
             .accessibilityIdentifier("design.new-file")
         }
+    }
+
+    /// `workspace` at the frame playback shows; itself when nothing plays.
+    private static func shown(_ workspace: DesignWorkspace, at frame: Int?) -> DesignWorkspace {
+        guard let frame else { return workspace }
+        var copy = workspace
+        copy.setPlayhead(frame)
+        return copy
     }
 
     /// `page` of `shown`, the live copy while a drag or scrub lasts and `model` otherwise.
