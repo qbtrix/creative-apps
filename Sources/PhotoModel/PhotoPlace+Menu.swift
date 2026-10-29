@@ -44,7 +44,7 @@ extension PhotoWorkspace {
     /// refusal names the three formats Photo places; the status line says it in Photo's words.
     static func placeRefusal(_ error: CatalogError) -> String {
         switch error {
-        case .unavailable(_, let why) where why == PlaceRules.formatHelp: placeFormatHelp
+        case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: placesFormats): placeFormatHelp
         case .unavailable(_, let why): why
         case .failed(_, let message): message
         default: error.description

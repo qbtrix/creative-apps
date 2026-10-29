@@ -65,15 +65,15 @@
   {
     "label": "an SVG goes to the image codec, which can't read it, so it never places",
     "file": "Sources/PhotoModel/PhotoPlace+Kernel.swift",
-    "find": "let drawn = asset.format == .svg",
-    "replace": "let drawn = asset.format == .png",
+    "find": "        if asset.format == .svg {\n            guard let vector",
+    "replace": "        if asset.format == .png {\n            guard let vector",
     "tests": "PhotoPlaceTests/svgBecomesPixelsAtDocumentScale"
   },
   {
     "label": "Photo's formats drop SVG again",
     "file": "Sources/PhotoModel/PhotoPlace+Kernel.swift",
-    "find": "public var placeFormats: Set<PlacedFormat> { Set(PlacedFormat.allCases) }",
-    "replace": "public var placeFormats: Set<PlacedFormat> { [.png, .jpeg] }",
+    "find": "static let placesFormats: Set<PlacedFormat> = Set(PlacedFormat.allCases)",
+    "replace": "static let placesFormats: Set<PlacedFormat> = [.png, .jpeg]",
     "tests": "PhotoPlaceTests"
   }
 ]

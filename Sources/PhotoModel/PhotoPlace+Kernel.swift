@@ -42,7 +42,9 @@ extension PhotoWorkspace: PlacedImageTarget {
     public var placeFillBox: Rect? { nil }
 
     /// PNG, JPEG and SVG, which becomes pixels at the size it is placed.
-    public var placeFormats: Set<PlacedFormat> { Set(PlacedFormat.allCases) }
+    public var placeFormats: Set<PlacedFormat> { Self.placesFormats }
+    /// The formats Photo places, which its status line and the kernel's refusal both name.
+    static let placesFormats: Set<PlacedFormat> = Set(PlacedFormat.allCases)
 
     /// Always nil: a placed image becomes pixels, so no layer keeps its picture.
     public var placedSelection: (id: String, image: PlacedImage, asset: PlacedAsset)? { nil }
