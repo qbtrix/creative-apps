@@ -23,7 +23,10 @@
 # A Model maps to its Model tests, an App to its snapshot suites, SuiteUI to
 # SuiteUITests and its snapshot suites, SuiteModel to every Model's tests,
 # SuiteKernel (the editor kernel every Model and SuiteUI link) to
-# SuiteKernelTests plus every Model's tests; the afterglow CLI
+# SuiteKernelTests plus every Model's tests, SuiteImaging (the imaging library
+# the Design, Halo, Library and Photo Models, the CLI core and SuiteUI link) to
+# SuiteImagingTests, those Models' tests, AfterGlowCLITests, SuiteUITests and
+# every app's snapshot suites; the afterglow CLI
 # (Sources/AfterGlowCLI*) and the real jobs (Tests/RealJobs/) to
 # AfterGlowCLITests, which every Model and SuiteKernel also map to, so an
 # adopt PR runs its app's real jobs; docs, scripts, UITests and the
@@ -153,6 +156,9 @@ def path_units(path):
             return [CLI]
         if top in ("AfterGlowApp", "SuiteShell", "SuiteText"):
             return app_units("suite")
+        if top == "SuiteImaging":  # the Design, Halo, Library and Photo Models, the CLI core and SuiteUI link it
+            return [("SuiteImagingTests", None), CLI, ("SuiteUITests", None)] + [(x + "ModelTests", None) for x in ("Design", "Halo", "Library", "Photo")] \
+                + [(SNAP, SNAPSHOTS[a]) for a in (*APPS, "suiteui")]  # every App links it, Flare's included
         if top == "SuiteUI":
             return [("SuiteUITests", None), (SNAP, SNAPSHOTS["suiteui"])]
         for app, x in APPS.items():
