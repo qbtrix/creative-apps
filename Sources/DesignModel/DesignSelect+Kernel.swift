@@ -1,15 +1,20 @@
-// DesignSelect+Kernel.swift: Design's adapter onto SuiteKernel's shared Select tool (#6012). A point hits what the
-// Move tool's press hits (`hitTest`, the topmost visible unlocked layer), a box touches what Move's marquee
-// touches at the top level (`services.marquee`), and the picks are `selection`, the one the Layers list shows.
-// Move's Shift-click and its marquee run the same kernel rule (DesignSelection, DesignCanvasEditing), so the two
-// tools share one implementation. A pick is view state, never an undo step. Linux-safe.
+// DesignSelect+Kernel.swift: Design's adapter onto SuiteKernel's shared Select tool (#6012). Design's one pointer
+// tool on V (the `move` case) is its Select: a click selects and a drag on a selected layer moves it. A point hits
+// what its press hits (`hitTest`, the topmost visible unlocked layer), a box touches what its marquee
+// touches (`services.marquee`), inside the top-level frame that holds the whole box, and the picks are `selection`, the one the Layers list shows.
+// Its Shift-click and its marquee run the kernel's `SelectTool.click` and `SelectTool.box` (DesignSelection,
+// DesignCanvasEditing), so Design has no select logic of its own. A pick is view state, never an undo step. Linux-safe.
 import SuiteKernel
 
 extension DesignWorkspace: SelectTarget {
     public func layerHits(in rect: Rect) -> [String] {
         guard let page = selectedPage else { return [] }
         let box = DesignRect(x: rect.minX, y: rect.minY, width: rect.maxX - rect.minX, height: rect.maxY - rect.minY)
-        return services.marquee.layers(touching: box, in: nil, on: page)
+        // At the level of the top-level frame holding the whole box, as Move's marquee from that frame's background.
+        let frame = page.nodes.first {
+            $0.kind == .frame && $0.frame.x <= box.x && $0.frame.y <= box.y && $0.frame.maxX >= box.maxX && $0.frame.maxY >= box.maxY
+        }
+        return services.marquee.layers(touching: box, in: frame?.id, on: page)
     }
 
     public var selectPicks: Selection<String> { selection }
@@ -18,11 +23,5 @@ extension DesignWorkspace: SelectTarget {
         guard picks != selection else { return }
         adopt(picks)
         if let page = selectedPage { for id in picks.ordered { expandAncestors(of: id, in: page.nodes) } }
-    }
-
-    /// A Select press on `id`: the kernel's click (Shift toggles); a layer that can't join is refused.
-    mutating func selectClick(_ id: String, extending: Bool) {
-        commitTextEdit()
-        setSelectPicks(SelectTool.click(selection, hit: id, extending: extending, canAdd: canAddToSelection))
     }
 }

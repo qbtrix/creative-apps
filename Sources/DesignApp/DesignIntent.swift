@@ -91,7 +91,6 @@ extension DesignTool: PaletteTool {
     public var title: String {
         switch self {
         case .move: "Move"
-        case .select: "Select"
         case .frame: "Frame"
         case .rectangle: "Rectangle"
         case .ellipse: "Ellipse"
@@ -105,7 +104,6 @@ extension DesignTool: PaletteTool {
     public var systemImage: String {
         switch self {
         case .move: "cursorarrow"
-        case .select: "cursorarrow.click"
         case .frame: "number"
         case .rectangle: "rectangle"
         case .ellipse: "circle"
@@ -119,7 +117,6 @@ extension DesignTool: PaletteTool {
     public var shortcut: Character? {
         switch self {
         case .move: "v"
-        case .select: "a"
         case .frame: "f"
         case .rectangle: "r"
         case .ellipse: "o"
@@ -133,7 +130,7 @@ extension DesignTool: PaletteTool {
     /// The pointer over the canvas while this tool is active.
     var pointer: PointerStyle {
         switch self {
-        case .move, .select, .pen, .eyedropper: .default
+        case .move, .pen, .eyedropper: .default
         case .frame, .rectangle, .ellipse, .shape: .rectSelection
         case .text: .horizontalText
         }
