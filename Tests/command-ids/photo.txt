@@ -79,6 +79,7 @@ style.set
 text.add
 text.read
 text.set-alignment
+text.set-color
 text.set-font
 text.set-italic
 text.set-line-height
@@ -136,6 +137,10 @@ tone.read
 tone.set
 tone.reset
 tone.auto
+fill.bucket
+retouch.spot-heal
+retouch.heal
+retouch.remove
 adjust.black-and-white
 adjust.invert
 filter.gaussian-blur

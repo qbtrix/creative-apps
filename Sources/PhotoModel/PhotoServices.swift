@@ -12,7 +12,6 @@ public struct PhotoServices: Sendable {
     public var clipboard: any PixelClipboard
     public var merging: any LayerMerging
     public var crop: any CropSizing
-    public var selection: any SelectionShaping
     public var masking: any LayerMasking
     public var adjustmentLayers: any AdjustmentLayering
     public var transform: any LayerTransforming
@@ -25,11 +24,11 @@ public struct PhotoServices: Sendable {
     public var looks: any PresetStoring = FakePresetStore()
 
     public init(archive: any DocumentArchiving, recovery: any RecoveryStoring, clipboard: any PixelClipboard,
-                merging: any LayerMerging, crop: any CropSizing, selection: any SelectionShaping,
+                merging: any LayerMerging, crop: any CropSizing,
                 masking: any LayerMasking, adjustmentLayers: any AdjustmentLayering,
                 transform: any LayerTransforming, exportSizing: any ExportSizing) {
         self.archive = archive; self.recovery = recovery; self.clipboard = clipboard; self.merging = merging
-        self.crop = crop; self.selection = selection; self.masking = masking
+        self.crop = crop; self.masking = masking
         self.adjustmentLayers = adjustmentLayers; self.transform = transform
         self.exportSizing = exportSizing
     }
@@ -39,7 +38,7 @@ public struct PhotoServices: Sendable {
     public static var fake: PhotoServices {
         PhotoServices(
             archive: FakeArchive(), recovery: FakeRecovery(), clipboard: FakeClipboard(), merging: FakeMerging(),
-            crop: FakeCrop(), selection: FakeSelection(), masking: FakeMasking(),
+            crop: FakeCrop(), masking: FakeMasking(),
             adjustmentLayers: FakeAdjustmentLayers(), transform: FakeTransform(), exportSizing: FakeExportSizing())
     }
 
@@ -49,8 +48,8 @@ public struct PhotoServices: Sendable {
     public static var live: PhotoServices {
         PhotoServices(
             archive: LiveDocuments.archive(), recovery: LiveDocuments.recovery(), clipboard: LiveEdit.clipboard(),
-            merging: LiveEdit.merging(), crop: LiveCrop.make(), selection: LiveSelection.selection(),
-            masking: LiveSelection.masking(), adjustmentLayers: LiveAdjustmentLayers.make(),
+            merging: LiveEdit.merging(), crop: LiveCrop.make(),
+            masking: LiveEdit.masking(), adjustmentLayers: LiveAdjustmentLayers.make(),
             transform: LiveTransform.make(), exportSizing: LiveExportSizing.make())
     }
 }

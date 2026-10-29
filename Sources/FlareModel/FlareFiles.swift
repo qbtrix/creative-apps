@@ -51,10 +51,15 @@ extension FlareWorkspace {
     /// Whether a file handed to Flare opens in this window rather than a new one: no animation open, none opening.
     public var takesOpenedFile: Bool { document == nil && loadState != .loading }
 
+    /// Why a file that decodes is still refused: an animation has at least one scene, so a file with none is damaged
+    /// (#5841), said at open rather than as a missing scene at export.
+    static let noScenes = "it has no scenes"
+
     /// Decodes a file's bytes; pure, so the app runs it off the main thread (QB-L12).
     public static func decodeFile(_ data: Data) -> Result<Document, FormatError> {
         do {
-            return .success(try FlareFormat.decode(data))
+            let document = try FlareFormat.decode(data)
+            return document.scenes.isEmpty ? .failure(.invalid(noScenes)) : .success(document)
         } catch let error as FormatError {
             return .failure(error)
         } catch {
