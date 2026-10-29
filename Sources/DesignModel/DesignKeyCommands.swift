@@ -6,8 +6,10 @@
 // as the canvas shows it at a frame, its containers' keyed offsets included. time.playhead moves the shown frame:
 // shown state, no undo step, no change to the file. Easing names are the kernel's EasePreset list. Ids follow the
 // ledger's lowercase-dash style (Tests/command-ids/design.txt), as Flare's and Halo's do. The inspector's key button
-// (`keyState`, `keyToggle`) adds no id: its press is keyframe.set with the layer's own value at the playhead, or
-// keyframe.remove when a key sits there. Linux-safe.
+// and the Animate menu add no id: they run keyframe.set and keyframe.remove. The button's state is KeyRules.state at
+// the playhead; its stopwatch (`keyAnimate`) is KeyRules.toggleAnimated's pair of keys, its diamond (`keyToggle`) sets
+// or removes the key there. The menu's Set Key and Remove Key (`menuKeys`) act on every row of the one selected layer.
+// Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -164,5 +166,39 @@ extension DesignWorkspace {
         let rest = switch property { case .x: node.frame.x; case .y: node.frame.y; case .opacity: node.opacity }
         params["value"] = .number(node.time?.value(of: property, at: Double(frame)) ?? rest)
         return ("keyframe.set", .object(params))
+    }
+
+    /// The commands the row's stopwatch runs. On a row that isn't animated: keyframe.set at the playhead and at the
+    /// last frame, both holding the value shown there (KeyRules.toggleAnimated's pair; one key when they are the same
+    /// frame). On an animated row: keyframe.remove on every key but the first, which stays as the row's held value.
+    // ponytail: one undo step per key; a one-step keyframe.animate id is the upgrade.
+    public func keyAnimate(_ id: String, _ property: DesignKeyProperty) -> [(id: String, params: JSONValue)]? {
+        guard let node = findNode(id), let first = keyToggle(id, property) else { return nil }
+        let track = node.time?.tracks[property] ?? []
+        func params(_ frame: Int, _ value: Double? = nil) -> JSONValue {
+            var p: [String: JSONValue] = ["node": .string(id), "property": .string(property.rawValue), "frame": .number(Double(frame))]
+            if let value { p["value"] = .number(value) }
+            return .object(p)
+        }
+        guard keyState(id, property) == .notAnimated else {
+            return track.dropFirst().map { ("keyframe.remove", params($0.frame)) }
+        }
+        let last = Swift.max(time.durationFrames - 1, 0)
+        guard case .object(let p) = first.params, case .number(let at)? = p["frame"], case .number(let value)? = p["value"]
+        else { return [first] }
+        return Int(at) == last ? [first] : [first, ("keyframe.set", params(last, value))]
+    }
+
+    /// The Animate menu's Set Key (`removing` false) or Remove Key on the one selected layer: keyframe.set on each
+    /// row with no key at the playhead, or keyframe.remove on each row keyed there. Empty when there is nothing to do.
+    public func menuKeys(removing: Bool) -> [(id: String, params: JSONValue)] {
+        guard !hasMultipleSelection, let node = selectedNode else { return [] }
+        let at = playhead ?? 0
+        return DesignKeyProperty.allCases.compactMap { property in
+            guard let command = keyToggle(node.id, property) else { return nil }
+            if removing { return command.id == "keyframe.remove" ? command : nil }
+            let keyed = node.time?.tracks[property]?.contains { $0.frame == at } ?? false
+            return keyed ? nil : command
+        }
     }
 }

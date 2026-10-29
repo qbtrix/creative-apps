@@ -75,7 +75,7 @@ struct DesignFrameScrub: View {
     }
 }
 
-/// The Layer section's Opacity bar, in percent: "Mixed" when the selected layers differ.
+/// The Layer section's Opacity bar, in percent ("Mixed" when the selected layers differ), with one layer's key button.
 struct DesignOpacityRow: View {
     let model: DesignWorkspace
     let perform: DesignPerform
@@ -85,13 +85,16 @@ struct DesignOpacityRow: View {
         let send = DesignStyleSend(model: model, live: live, perform: perform)
         let opacity = (live?.workspace ?? model).sharedValue(\.opacity)
         let help = model.styleHelp(.opacity)
-        InspectorSliderRow(
-            "Opacity", value: (opacity ?? 1) * 100, in: 0...100, step: 1, unit: "%", decimals: 0, mixed: opacity == nil,
-            onChange: { send.preview(.opacity($0 / 100)) }, onEnd: send.end
-        )
-        .disabled(help != nil)
-        .help(help ?? "")
-        .suiteControl(id: DesignControlID.inspectorOpacity, enabled: help == nil, reason: help)
+        HStack(spacing: SuiteSpacing.xs) {
+            InspectorSliderRow(
+                "Opacity", value: (opacity ?? 1) * 100, in: 0...100, step: 1, unit: "%", decimals: 0, mixed: opacity == nil,
+                onChange: { send.preview(.opacity($0 / 100)) }, onEnd: send.end
+            )
+            .disabled(help != nil)
+            .help(help ?? "")
+            .suiteControl(id: DesignControlID.inspectorOpacity, enabled: help == nil, reason: help)
+            if !model.hasMultipleSelection { DesignKeyButton(model: model, property: .opacity, help: help, perform: perform) }
+        }
     }
 }
 

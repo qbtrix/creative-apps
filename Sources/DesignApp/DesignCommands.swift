@@ -3,7 +3,7 @@
 // Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
-// Distribute (DesignObjectMenu); View: Zoom In, Zoom Out, Fit Page, Snap to
+// Distribute (DesignObjectMenu); Animate: Play/Pause, Stop, Set Key and Remove Key (DesignAnimateMenu); View: Zoom In, Zoom Out, Fit Page, Snap to
 // Layers (a checked preference in user defaults, DesignSnapToLayersItem), Zoom to Selection, Show History
 // (the trailing History panel, DesignHistoryArea; Hide History while it shows). Every top bar command is here too. Every item Design adds carries
 // its SF Symbol, the toolbar's where the toolbar has the same command.
@@ -155,6 +155,7 @@ struct DesignCommands: Commands {
         }
         CommandMenu("Page") { DesignPageMenu(menu: menu) }
         CommandMenu("Object") { DesignObjectMenu(menu: menu) }
+        CommandMenu("Animate") { DesignAnimateMenu(menu: menu) }
         CommandGroup(after: .toolbar) {
             DesignViewMenu(menu: menu)
             DesignShowHistoryItem(panel: historyPanel)

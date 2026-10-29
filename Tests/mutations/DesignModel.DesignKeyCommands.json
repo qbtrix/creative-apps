@@ -61,5 +61,26 @@
     "find": "node.time?.value(of: property, at: Double(frame)) ?? rest",
     "replace": "rest",
     "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "animateDropsTheLastKey: the stopwatch keys the playhead only",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "return Int(at) == last ? [first] : [first, (\"keyframe.set\", params(last, value))]",
+    "replace": "return [first]",
+    "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "stopAnimatingRemovesNothing: the stopwatch on an animated row keeps every key",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "return track.dropFirst().map {",
+    "replace": "return track.dropFirst(track.count).map {",
+    "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "menuSetsKeyedRows: Set Key offers a row already keyed at the playhead",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "return keyed ? nil : command",
+    "replace": "return command",
+    "tests": "DesignKeyToggleTests"
   }
 ]

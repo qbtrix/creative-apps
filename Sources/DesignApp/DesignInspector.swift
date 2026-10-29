@@ -2,7 +2,7 @@
 // container identified `design.properties` inside the scroll view. A selected
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
-// fields), Transform (Rotation and the flips, DesignInspectorTransform, on one layer or several) and Fill (the type switch, then the color well, or the gradient editor in its place on a gradient layer; a text layer's is its text color, a group
+// fields; X and Y, like Opacity, carry DesignKeyButton), Transform (Rotation and the flips, DesignInspectorTransform, on one layer or several) and Fill (the type switch, then the color well, or the gradient editor in its place on a gradient layer; a text layer's is its text color, a group
 // has none), then Text (DesignInspectorText, disabled on a layer that isn't text). A
 // locked layer, or one inside a locked group, can't be edited, so Frame and
 // Fill are disabled and a line says why. With only a page selected it shows
@@ -84,6 +84,9 @@ private struct FrameRow: Identifiable {
         FrameRow(label: "H", name: "Height", field: .height, range: sizeRange),
     ]
 
+    /// The keyed property X and Y carry a key button for; W and H have none.
+    var keyProperty: DesignKeyProperty? { field == .x ? .x : field == .y ? .y : nil }
+
     /// This row's value in `frame`.
     func value(in frame: DesignRect) -> Double {
         switch field {
@@ -146,10 +149,15 @@ private struct DesignNodeProperties: View {
                 VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
                     ForEach(FrameRow.all) { row in
                         InspectorRow(row.label) {
-                            row.scrubField(model, help: lockHelp, draft: draft, perform: perform)
-                                .onGeometryChange(for: CGFloat.self) {
-                                    $0.frame(in: .named(Self.hintSpace)).minX
-                                } action: { if row.field == .x { valueColumn = $0 } }
+                            HStack(spacing: SuiteSpacing.xs) {
+                                row.scrubField(model, help: lockHelp, draft: draft, perform: perform)
+                                    .onGeometryChange(for: CGFloat.self) {
+                                        $0.frame(in: .named(Self.hintSpace)).minX
+                                    } action: { if row.field == .x { valueColumn = $0 } }
+                                if let property = row.keyProperty {
+                                    DesignKeyButton(model: model, property: property, help: lockHelp, perform: perform)
+                                }
+                            }
                         }
                     }
                 }
