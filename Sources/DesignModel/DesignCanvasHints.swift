@@ -89,8 +89,14 @@ extension DesignWorkspace {
     /// `node`'s frame as the canvas shows it now: the box of the open text edit fitted to the
     /// draft's measured `extent` the way its commit fits it (#3335), else the node's own frame.
     public func liveFrame(of node: DesignNode, draft extent: DesignTextExtent?) -> DesignRect {
-        node.id == editingTextID ? Self.fitted(node.frame, node.textStyle, extent) : node.frame
+        let node = shown(node)
+        return node.id == editingTextID ? Self.fitted(node.frame, node.textStyle, extent) : node.frame
     }
+
+    /// `node` as the canvas shows it: sampled at the playhead when one is set, so the inspector's X, Y and Opacity
+    /// read what is on screen rather than the rest pose.
+    // ponytail: samples the node alone, exact unless a keyed group around it also moves it; shownPage is the upgrade.
+    public func shown(_ node: DesignNode) -> DesignNode { playhead.map { node.sampled(at: Double($0)) } ?? node }
 
     /// The selection's bounds with the open edit's box fitted to `extent` (the edited node is then
     /// the whole selection); `selectionBounds` otherwise.

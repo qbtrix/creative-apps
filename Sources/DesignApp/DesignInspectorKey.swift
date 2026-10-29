@@ -3,7 +3,8 @@
 // the playhead to the last frame, or leave one held key), the diamond `keyToggle` (set or remove the key at the
 // playhead), both as keyframe.set and keyframe.remove through `.keys`. One selected layer only; off with the row's
 // own reason. KeyframeButton sets its own identifiers (DesignControlID.inspectorKey and its diamond's), so
-// nothing may wrap the pair in an identifier or a `.help` (#1282); both are only listed in `suite.controls` here.
+// nothing may wrap the pair in an identifier or a `.help` (#1282); both are only listed in `suite.controls` here. The
+// body font keeps the button one size beside a bar (Opacity) and inside an InspectorRow (X, Y).
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -25,6 +26,8 @@ struct DesignKeyButton: View {
                 unavailableHelp: help,
                 onToggle: { if let commands = model.keyAnimate(id, property) { perform(.keys(commands)) } },
                 onKey: { if let command = model.keyToggle(id, property) { perform(.keys([command])) } })
+                // One size on every row: InspectorRow sets a smaller font on X and Y's, and the symbols scale with it.
+                .font(.body)
                 .disabled(help != nil)
                 .suiteControl(id: key, enabled: help == nil, reason: help, identifies: false)
                 .suiteControl(
