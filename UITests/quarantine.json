@@ -81,5 +81,27 @@
     "owner": "#5804",
     "reason": "Exceeded its 120 s limit on the CI runner (run 40761742332, dev-red #6001). Same family as the scrub lane re-render #5804 owns: a scrub redraws every lane, which at 29.97 fps blows the limit.",
     "expires": "2026-10-30"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/IdleWorkTests/photoMoveSettlesAfterTheDrag",
+    "owner": "#6032",
+    "reason": "Quarantined by the fast lane: fails on dev at af21f20 (dev-red #6030) with no culprit to revert; #6032 owns the fix",
+    "expires": "2026-10-30",
+    "lane": {
+      "red": "#6030",
+      "range": "main..af21f20",
+      "until": "2026-10-30T06:53:59Z"
+    }
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetRetouchTests/removeStrokeInThreeBodies",
+    "owner": "#6033",
+    "reason": "Quarantined by the fast lane: fails on dev at af21f20 (dev-red #6030) with no culprit to revert; #6033 owns the fix",
+    "expires": "2026-10-30",
+    "lane": {
+      "red": "#6030",
+      "range": "main..af21f20",
+      "until": "2026-10-30T06:53:59Z"
+    }
   }
 ]
