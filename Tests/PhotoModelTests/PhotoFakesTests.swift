@@ -25,10 +25,10 @@ import Testing
 
     @Test func everyFakeIsAvailable() {
         let fakes: [any PhotoUseCase] = [
-            FakeArchive(), FakeRecovery(), FakeClipboard(), FakeMerging(), FakeCrop(), FakeSelection(),
+            FakeArchive(), FakeRecovery(), FakeClipboard(), FakeMerging(), FakeCrop(),
             FakeMasking(), FakeAdjustmentLayers(), FakeTransform(), FakeExportSizing(),
         ]
-        #expect(fakes.count == 10)
+        #expect(fakes.count == 9)
         for fake in fakes { #expect(fake.unavailableHelp == nil, "\(type(of: fake))") }
     }
 
@@ -84,13 +84,6 @@ import Testing
         #expect(throws: PhotoRefusal("Merge Down needs a pixel layer below.")) {
             try FakeMerging().mergeDown(upper, onto: lower)
         }
-    }
-
-    @Test func fakeSelectionSelectsTheShapesRectangle() throws {
-        let mask = try FakeSelection().mask(for: .ellipse(PixelRect(x: 1, y: 1, width: 2, height: 2)),
-                                            canvas: CanvasSize(width: 4, height: 4))
-        #expect(mask.area > 0)
-        #expect(throws: PhotoRefusal.self) { try FakeSelection().mask(for: .lasso([]), canvas: CanvasSize(width: 4, height: 4)) }
     }
 
     @Test func fakeTransformMovesThePixels() throws {

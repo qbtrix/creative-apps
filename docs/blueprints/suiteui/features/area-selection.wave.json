@@ -2,7 +2,7 @@
   "title": "Area selection: ellipse, lasso and polygon areas that add, subtract and intersect, invert, feather, expand and contract, a magic wand, marching ants, and group-aware clicks, on SuiteKernel and SuiteImaging; Photo and Design adopt",
   "wave": "XK4",
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 C1 (Photo row 1 and 2, Design row 1); feature map S5; real jobs RJ-X70, RJ-X71 (new)",
