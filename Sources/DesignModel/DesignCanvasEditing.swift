@@ -413,13 +413,13 @@ extension DesignWorkspace {
         switch current.route {
         case .move(let id), .resize(let id, _, _): moving = [id]
         case .moveSeveral(let ids), .optionCopy(let ids, _), .resizeSeveral(let ids, _): moving = ids
-        case .draw, .shape, .text: parent = selectedPage?.nodes.deepestFrame(containing: current.start)
+        case .draw, .shape, .text: parent = shownPage?.nodes.deepestFrame(containing: current.start)
         default: return
         }
         var candidates = snapCandidates(moving: moving, drawingInto: parent)
         // A draw outside every frame lines up with the page's top level, which the kernel's
         // candidates give only for a moving layer there.
-        if moving.isEmpty, parent == nil, let page = selectedPage {
+        if moving.isEmpty, parent == nil, let page = shownPage {
             let roots = page.nodes.filter { !$0.isHidden }.map { DesignSnapCandidate(id: $0.id, frame: $0.frame.snapRect) }
             candidates.insert(contentsOf: roots, at: 0)
         }

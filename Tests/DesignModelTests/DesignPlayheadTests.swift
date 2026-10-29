@@ -21,8 +21,8 @@ import Testing
 
     @Test func shownPageIsTheSampledPageOnlyWithAPlayhead() {
         #expect(abs(Self.shown.x - 47) < 1 && abs(Self.shown.y - 40) < 1)
-        #expect(at(60).shownPage == at(60).selectedPage!.sampled(at: 60))
-        #expect(at(nil).shownPage == at(nil).selectedPage)
+        #expect(Self.at(60).shownPage == Self.at(60).selectedPage!.sampled(at: 60))
+        #expect(Self.at(nil).shownPage == Self.at(nil).selectedPage)
     }
 
     @Test func movingThePlayheadIsNoEdit() {
