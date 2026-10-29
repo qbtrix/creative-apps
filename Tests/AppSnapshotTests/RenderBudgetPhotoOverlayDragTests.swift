@@ -1,15 +1,16 @@
 // RenderBudgetPhotoOverlayDragTests.swift: a drag whose only picture is an overlay mark (the marquee's ants, the
 // lasso's path, the crop box) does no pixel work on the real Photo window (#6020). `OverlayDragger` lists every
 // PhotoTool whose drag draws a selection or a crop box, derived from the enum minus an explicit exclusion list, so
-// a new area tool is measured by default. Each hosts PhotoWindow on a 24 MP one-layer image (6000 x 4000), presses
-// at the canvas's centre and drags 120 samples at 120 Hz along three legs (right, down, back), a path that encloses
+// a new area tool is measured by default. Each hosts PhotoWindow on a one-layer image (3 MP, 2000 x 1500: the counts
+// don't depend on the image's size, and a 24 MP window ran past CI's time limit on its slow runner), presses at the
+// canvas's centre and drags 120 samples at 120 Hz along three legs (right, down, back), a path that encloses
 // an area for the lasso and ends away from the press for the others. While the pointer is down the canvas
 // composites 0 regions (PhotoRenderCount.regions, layerComposites and resamples, debug only), the window's editor
 // body runs at most once, and the marquee's selection or the crop box shows on the overlay; the release lands the
 // tool's result (a selection, the polygon's corners, a pending crop) as one step, as it does today. Nested in
 // BodyCountSuites: it reads process-wide counters. `RenderBudgetPhotoOverlayDragTimingTests` (a perf suite,
-// Tests/perf-suites.txt) runs the same drag with its release and holds each sample's step to the Move tool's p95
-// bound of 4 ms on a release build (Tests/render-budgets.md). macOS only.
+// Tests/perf-suites.txt) runs the same drag with its release on 24 MP (6000 x 4000) and holds each sample's step to
+// the Move tool's p95 bound of 4 ms on a release build (Tests/render-budgets.md). macOS only.
 #if canImport(AppKit)
 import AppKit
 import PhotoModel
@@ -81,7 +82,7 @@ enum OverlayDragger {
         #endif
     }
 
-    /// Waits up to 90 s for the release to land (the wand floods 24 MP in a debug build); the workspace then.
+    /// Waits up to 90 s for the release to land (the wand floods the whole canvas in a debug build); the workspace then.
     @MainActor static func landed(_ tool: PhotoTool, in edited: PhotoWindowEditedView, from before: PhotoWorkspace) async -> PhotoWorkspace? {
         for _ in 0..<4500 {
             if let shown = edited.workspace, landed(tool, shown, from: before) { return shown }
@@ -97,7 +98,7 @@ extension BodyCountSuites {
 
         @Test(.timeLimit(.minutes(5)), arguments: OverlayDragger.allCases)
         func overlayDraggerDoesNoPixelWorkUntilTheRelease(_ tool: PhotoTool) async throws {
-            let model = try OverlayDragger.model(tool, width: 6000, height: 4000)
+            let model = try OverlayDragger.model(tool, width: 2000, height: 1500)
             let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
             defer { w.close() }
             let edited = try await PixelMover.settle(w)
@@ -106,7 +107,7 @@ extension BodyCountSuites {
             let bodies = RenderBudgetPhotoTransformTests.bodies
             let (pixelsBefore, bodiesBefore) = (OverlayDragger.pixels(), bodies() ?? 0)
             var (pixelsDuring, bodiesDuring, shown) = (0, 0, true)
-            let step = try await w.measure("photo \(tool.rawValue) drag, 24 MP, \(Self.samples) samples", bodies: bodies) {
+            let step = try await w.measure("photo \(tool.rawValue) drag, 3 MP, \(Self.samples) samples", bodies: bodies) {
                 try await w.drag(from: start, samples: Self.samples, release: false) {
                     OverlayDragger.point(start, $0, of: Self.samples)
                 }
