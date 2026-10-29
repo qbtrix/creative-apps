@@ -100,6 +100,15 @@ private func required(_ schema: JSONValue) -> [String]? {
         #expect(workspace.faces(of: "No Such Family").isEmpty)
     }
 
+    /// A new layer's standard "System" family is no listed name; the inspector shows the family the text
+    /// service draws it in, so its Weight row has that family's faces (#5951: a Weight label with no chips).
+    @Test func theStandardFamilyResolvesToAListedOne() throws {
+        let workspace = try opened()
+        #expect(workspace.textFamily(TextStyle.standard.family) == FakeText.systemFamily)
+        #expect(workspace.textFamily("Serif") == "Serif")
+        #expect(workspace.faces(of: workspace.textFamily(TextStyle.standard.family)).map(\.weight) == [400, 700])
+    }
+
     // MJ-TX: the text edits.
 
     @Test func addMakesOneLayerAboveTheSelected() throws {

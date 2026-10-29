@@ -167,6 +167,9 @@ struct PhotoCanvas: View {
                             .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
                     }
                 }
+                // The viewport keeps Space for its pan before `onKey` or the box's field sees it, so the box's
+                // space is typed out here, outside it (#5951: SUMMER SALE came out SUMMERSALE).
+                .onKeyPress(.space) { key(" ") }
             } else {
                 EmptyStateView(
                     PhotoInspectorContent.noImageTitle, systemImage: PhotoInspectorContent.noImageSymbol,
@@ -176,13 +179,17 @@ struct PhotoCanvas: View {
         }
     }
 
+    /// Types `characters` into the open Type tool box; ignored when none is open or the box doesn't take them.
+    private func key(_ characters: String) -> KeyPress.Result {
+        guard let typed = model.textBox?.key(characters) else { return .ignored }
+        perform(.text(.key(typed)))
+        return .handled
+    }
+
     private func key(_ press: KeyPress) -> KeyPress.Result {
         guard press.modifiers.subtracting(.shift).isEmpty else { return .ignored }
         // While a Type tool box is open its keys type into it, not pick tools (#4798).
-        if let typed = model.textBox?.key(press.characters) {
-            perform(.text(.key(typed)))
-            return .handled
-        }
+        if case .handled = key(press.characters) { return .handled }
         switch press.key {
         case .delete, .deleteForward:
             perform(press.modifiers.contains(.shift) ? .fillSelection : .deleteSelection)
