@@ -149,6 +149,10 @@ public enum DesignControlID {
     /// A Distribute button: "design.distribute.horizontal".
     public static func distribute(_ axis: DesignDistributeAxis) -> String { "design.distribute.\(axis.rawValue)" }
 
+    /// The key button beside an inspector row (one-document OD-13): "design.inspector.key.x". Its diamond's id is
+    /// SuiteUI's KeyframeButton.diamondID of this one.
+    public static func inspectorKey(_ property: DesignKeyProperty) -> String { "design.inspector.key.\(property.rawValue)" }
+
     /// A Transform section flip button, by the kernel's FlipDirection raw value: "design.inspector.flip-horizontal".
     public static func inspectorFlip(_ axis: String) -> String { "design.inspector.flip-\(axis)" }
 
@@ -165,5 +169,5 @@ public enum DesignControlID {
         exportCancel, exportDone, exportResult,
     ] + DesignToolbarItem.allCases.map(\.identifier) + DesignTool.allCases.map(tool)
         + DesignFrameField.allCases.map(frameField) + DesignAlignEdge.allCases.map(align)
-        + DesignDistributeAxis.allCases.map(distribute)
+        + DesignDistributeAxis.allCases.map(distribute) + DesignKeyProperty.allCases.map(inspectorKey)
 }

@@ -2,7 +2,7 @@
 // KeyframeButton over the Model's `keyState` at the playhead. The stopwatch runs `keyAnimate` (animate the row from
 // the playhead to the last frame, or leave one held key), the diamond `keyToggle` (set or remove the key at the
 // playhead), both as keyframe.set and keyframe.remove through `.keys`. One selected layer only; off with the row's
-// own reason. KeyframeButton sets its own identifiers (`design.inspector.key.<property>` and its diamond's), so
+// own reason. KeyframeButton sets its own identifiers (DesignControlID.inspectorKey and its diamond's), so
 // nothing may wrap the pair in an identifier or a `.help` (#1282); both are only listed in `suite.controls` here.
 import DesignModel
 import SuiteKernel
@@ -18,7 +18,7 @@ struct DesignKeyButton: View {
 
     var body: some View {
         if let id = model.selectedNode?.id, let state = model.keyState(id, property) {
-            let key = "design.inspector.key.\(property.rawValue)"
+            let key = DesignControlID.inspectorKey(property)
             let shown = Self.state(state)
             KeyframeButton(
                 property == .opacity ? "Opacity" : property.rawValue.uppercased(), id: key, state: shown,
