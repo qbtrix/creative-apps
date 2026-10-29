@@ -30,8 +30,8 @@
   {
     "label": "svgRefusalNamesPhotosFormats: an SVG's refusal names SVG among the formats Photo takes",
     "file": "Sources/PhotoModel/PhotoPlace+Menu.swift",
-    "find": "case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: [.png, .jpeg]): placeFormatHelp",
-    "replace": "case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: [.png, .jpeg]): why",
+    "find": "case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: placesFormats): placeFormatHelp",
+    "replace": "case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: placesFormats): why",
     "tests": "PhotoPlaceTests"
   }
 ]
