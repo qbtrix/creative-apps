@@ -21,11 +21,9 @@ struct DesignTimeline: View {
             HStack(spacing: SuiteSpacing.s) {
                 DesignTimelineTransport(model: model, perform: perform)
                 Spacer()
-                Button(collapsed ? "Show Timeline" : "Hide Timeline",
-                       systemImage: collapsed ? "chevron.up" : "chevron.down") { collapsed.toggle() }
-                    .labelStyle(.iconOnly)
-                    .buttonStyle(.borderless)
-                    .help(collapsed ? "Show Timeline" : "Hide Timeline")
+                let title = collapsed ? "Show Timeline" : "Hide Timeline"
+                Button(title, systemImage: collapsed ? "chevron.up" : "chevron.down") { collapsed.toggle() }
+                    .labelStyle(.iconOnly).buttonStyle(.borderless).help(title)
                     .accessibilityIdentifier("design.timeline.collapse")
             }
             .padding(.horizontal, SuiteSpacing.s)

@@ -15,16 +15,11 @@ import Testing
 
 @MainActor
 @Suite struct DesignTimelineSnapshots {
-    /// `animated(count)`, or `cards` with no keys when `count` is 0.
-    static func doc(_ count: Int) -> DesignWorkspace {
-        count == 0 ? DesignFixtures.cards : DesignFixtures.animated(count)
-    }
-
     @Test func slot() throws {
-        for (name, count) in [("still", 0), ("one", 1), ("fifty", 50)] {
-            #expect(Self.doc(count).showsTimeline == (count > 0))
+        for (name, doc) in [("still", DesignFixtures.cards), ("one", .animated(1)), ("fifty", .animated(50))] {
+            #expect(doc.showsTimeline == (name != "still"))
             for scheme in [ColorScheme.light, .dark] {
-                try snapshot(DesignEditor(model: Self.doc(count), zoom: 0.5),
+                try snapshot(DesignEditor(model: doc, zoom: 0.5),
                              name: "design-timeline-\(name)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
             }
         }
@@ -53,13 +48,11 @@ extension BodyCountSuites {
 
             // A ruler drag: 30 scrub steps run the canvas and the strip, never the window, then land once as the
             // playhead with no undo step or unsaved change.
-            perform(.pause)  // nothing plays; records the window's workspace
+            perform(.pause)  // nothing plays: it only records the window's workspace
             let pre = try #require(DesignWindow.lastWorkspace)
             let beforeScrub = DesignWindow.bodyRuns
             for frame in 1...30 {
-                perform(.scrub(frame))
-                w.host.layoutSubtreeIfNeeded()
-                w.window.displayIfNeeded()
+                perform(.scrub(frame)); w.host.layoutSubtreeIfNeeded(); w.window.displayIfNeeded()
             }
             let scrubRan = DesignWindow.bodyRuns - beforeScrub
             try await w.settle(400)
