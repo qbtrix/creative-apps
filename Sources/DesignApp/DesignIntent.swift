@@ -41,7 +41,7 @@ enum DesignIntent {
     case editText(String)
     case textDraft(String), commitText, cancelText
     case zoomIn, zoomOut, fit
-    /// Playback on the one clock (DesignWindow+Playback.swift): shown state, never an edit.
+    /// Playback on the one clock (DesignPlayer+Kernel.swift): shown state, never an edit.
     case play, pause, stop, playPause
     /// The timeline's ruler, steps and ends: show `frame` now, land it as the playhead once the scrub rests.
     case scrub(Int)

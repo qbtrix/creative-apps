@@ -1,4 +1,4 @@
-// DesignWindow+Playback.swift: the window's player (one-document OD-11). It holds the DesignTransport, the
+// DesignPlayer+Kernel.swift: the window's player (one-document OD-11). It holds the DesignTransport, the
 // suite's one display-link driver (SuitePlaybackDriver) and a PlaybackTicker reset on each play. Each refresh
 // plays the seconds since the last one and puts the frame in DesignLiveDrag's `playingFrame`, which only the
 // canvas reads, so a tick runs the canvas and never the window, and never writes the workspace: no history,
