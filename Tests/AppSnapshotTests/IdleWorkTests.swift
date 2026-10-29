@@ -10,8 +10,10 @@
 // steps, and the top eyes toggled hidden then shown. It counts the editor's bodies, the renderer's pictures and
 // PhotoRenderCount's regions, layer composites, bases and hits (the canvas) and rows and row layers (the Curves
 // histogram's recount). The gates are counts, never clocks, so a loaded Mac passes or fails the same way: every
-// step waits for the work before it to finish (a deadline poll, not a sleep); a Move step lays one layer on each
-// region's kept base, a Levels recount lays no layer, a Hue drag recounts nothing, and once a gesture's work has
+// step waits for the work before it to finish (a deadline poll, not a sleep); a Move drag is a compositor lift
+// (docs/render-contract.md): its press renders the picture under the moved layer once, its samples render nothing,
+// and its release lands one picture, so a 30-sample drag costs what a one-sample drag does; a Levels recount lays
+// no layer, a Hue drag recounts nothing, and once a gesture's work has
 // finished nothing renders or recounts again. A Free Transform step on a layer mid-stack, rendered straight
 // through the renderer (no window) on the CPU and Metal routes, lays that layer and the ones above it on each
 // region's kept base and makes no base, counted on a task-local tally so the suites running alongside never
@@ -250,20 +252,23 @@ extension BodyCountSuites {
             let label = Self.label("move", choice)
             let (w, send, _, _) = try await Self.stressWindow(choice, label)
 
-            // A step after an unchanged picture makes the base under the moved layer once per region (one full
-            // composite, as the open's render was), and the first render into a new presenter texture is a full
-            // one too. Steps go first until one is all hits, so the drag measures what every step after costs.
-            var step: [String: Int] = [:], steps = 0
-            repeat {
+            // A Move drag lifts the layer onto the compositor's live layer (PhotoTransformLift): the press renders
+            // the picture under it once (one base per region, the layers below), each sample only places the lifted
+            // pixels, and the release lands one picture where the layer was and is. So the drag's cost is per
+            // drag, not per sample: a one-sample drag is the reference, measured after two steps that warm the
+            // route (the first render into a new presenter texture is a full one, and the histogram's first
+            // recounts).
+            var step: [String: Int] = [:]
+            for n in 1...3 {
                 let before = Self.photoCounts()
-                try await w.ticks(1) { _ in send(.drag(CGPoint(x: 400, y: 300), CGPoint(x: 402 + Double(steps) * 2, y: 300))) }
+                try await w.ticks(1) { _ in send(.drag(CGPoint(x: 400, y: 300), CGPoint(x: 400 + Double(n) * 2, y: 300))) }
                 send(.endDrag)
-                #expect(try await Self.rendered(w), Comment(rawValue: "\(label): step \(steps + 1)'s renders never drained"))
+                #expect(try await Self.rendered(w), Comment(rawValue: "\(label): step \(n)'s renders never drained"))
                 step = IdleWork.delta(Self.photoCounts(), since: before)
-                steps += 1
-                print("\(label): step \(steps) and its renders" + IdleWork.describe(step))
-            } while (step["bases"] ?? 0) > 0 && steps < 4
-            #expect(step["bases"] == 0, Comment(rawValue: "\(label): \(steps) steps and each still made a base" + IdleWork.describe(step)))
+                print("\(label): step \(n) and its renders" + IdleWork.describe(step))
+            }
+            #expect((step["pictures"] ?? 0) >= 1 && (step["bases"] ?? 0) <= (step["regions"] ?? 0),
+                    Comment(rawValue: "\(label): a one-sample drag landed no picture, or made more than a base per region" + IdleWork.describe(step)))
 
             let before = Self.photoCounts()
             try await w.ticks(30) { i in
@@ -276,11 +281,13 @@ extension BodyCountSuites {
             print("\(label): 30 drag samples and the renders they queued" + IdleWork.describe(drag))
             for reading in idle { print("\(label): \(reading)") }
 
-            // Counts, not clocks. The drag's renders drain; every region came from a kept base (a hit, no base
-            // made) and laid one layer on it, the moved one; at least one picture landed.
+            // Counts, not clocks. The drag's renders drain; 30 samples cost no more than one did on every canvas
+            // counter (the lift's base at the press, nothing per sample, one picture at the release), and that
+            // picture landed.
             #expect(rendered, Comment(rawValue: "\(label): the drag's renders never drained"))
-            #expect(drag["bases"] == 0 && drag["hits"] == drag["regions"] && drag["layers"] == drag["regions"] && (drag["pictures"] ?? 0) >= 1,
-                    Comment(rawValue: "\(label): a step did more than lay the moved layer on each region's kept base" + IdleWork.describe(drag)))
+            let perDrag = ["bases", "regions", "layers", "pictures"].allSatisfy { (drag[$0] ?? 0) <= (step[$0] ?? 0) }
+            #expect(perDrag && (drag["pictures"] ?? 0) >= 1,
+                    Comment(rawValue: "\(label): 30 samples rendered more than one sample does" + IdleWork.describe(drag) + "; one sample" + IdleWork.describe(step)))
             // Once drained, the canvas stays still: no region starts, no picture lands.
             let after = IdleWork.total(idle)
             #expect(after["regions"] == 0 && after["pictures"] == 0,

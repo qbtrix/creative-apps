@@ -93,7 +93,7 @@ public enum DesignRefusal: Error, Equatable, Sendable, CustomStringConvertible {
         }
     }
 
-    /// The help, so a command catalog's refusal (the CLI, MCP) reads as plain words, never the case name.
+    /// `help`, so a refusal that reaches the command catalog (CLI, MCP) reads in words, not as its case name.
     public var description: String { help }
 }
 
