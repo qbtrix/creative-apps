@@ -124,5 +124,12 @@
     "find": "            if case .scale = options.size { return item }\n",
     "replace": "            return item\n",
     "tests": "DesignExportPackTests|DesignExportOptionsSizeTests"
+  },
+  {
+    "label": "frameIgnored: an SVG export draws the rest pose at any frame",
+    "file": "Sources/DesignModel/DesignExport+Kernel.swift",
+    "find": "guard let page = selectedPage?.shown(at: frame) else { throw .nothingToExport }",
+    "replace": "guard let page = selectedPage else { throw .nothingToExport }",
+    "tests": "DesignExportFrameTests"
   }
 ]

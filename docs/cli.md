@@ -416,6 +416,12 @@ key are off with `Set a key first.` on a file with no keys. Easing names are
 | `time.sample` | returns `{x, y, opacity}` of `node` as the canvas shows it at `frame`, its containers' keys included |
 | `time.playhead` | shows the file at `frame` (left out: the rest pose); no undo step, the file is unchanged |
 
+`file.export` takes an optional `frame`: an animated file is written as it
+shows at that frame, a still file the same at any frame. Design's SVG export
+reads `frame` from its options the same way, for example
+`afterglow design export ui.design --format svg --out out --json '{"frame":60}'`;
+PNG export stays in the window for now.
+
 ### Handles
 
 `<app>.open` and `<app>.new` hold the document in the server and return

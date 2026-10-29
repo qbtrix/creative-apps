@@ -133,6 +133,7 @@ public enum DesignControlID {
     public static let exportFormat = "design.export.format"
     public static let exportScale = "design.export.scale"
     public static let exportScope = "design.export.scope"
+    public static let exportFrame = "design.export.frame"
     public static let exportItems = "design.export.items"
     public static let exportRun = "design.export.start"
     public static let exportCancel = "design.export.cancel"

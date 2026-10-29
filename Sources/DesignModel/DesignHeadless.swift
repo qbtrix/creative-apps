@@ -2,7 +2,7 @@
 // window, for the afterglow CLI, MCP and the real jobs. It is the workspace on its live services: `open` and `save`
 // go through the file codec (DesignFile), every command through Design's catalog (DesignCommandCatalog), and SVG
 // export writes every visible top-level frame of every page through the export plan and its SVG (DesignExport+Kernel),
-// names unique across the file. PNG waits on a Linux PNG writer (the App rasterizes it today). Linux-safe.
+// names unique across the file, at the options' `frame` (the rest pose without one). PNG waits on a Linux PNG writer (the App rasterizes it today). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -51,12 +51,15 @@ public struct DesignHeadless: HeadlessDocument {
     }
 
     /// `svg`: one file per visible top-level frame of every page, in page order, each named after its frame and unique
-    /// across the file. A file with no frame to export throws `failed`; `png` is not built on Linux yet. No options.
+    /// across the file, each page as it shows at `options.frame` (left out: the rest pose). A file with no frame to
+    /// export throws `failed`; `png` is not built on Linux yet.
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         guard format == "svg" else {
             if format == "png" { throw CatalogError.notBuilt(id: "export.png", feature: "a Linux PNG writer for Design's raster path") }
             throw CatalogError.failed(id: "export", message: "Design exports \(Self.exportFormats.joined(separator: ", ")), not \(format).")
         }
+        var frame: Int?
+        if case .object(let fields) = options, case .number(let value)? = fields["frame"], value.isFinite { frame = Int(value) }
         var files: [ExportedFile] = [], taken = Set<String>()
         for page in workspace.pages {
             var onPage = workspace
@@ -67,7 +70,7 @@ public struct DesignHeadless: HeadlessDocument {
             catch { throw CatalogError.failed(id: "export", message: error.help) }
             for item in items {
                 let svg: String
-                do throws(DesignRefusal) { svg = try onPage.exportSVG(item) } catch { throw CatalogError.failed(id: "export", message: error.help) }
+                do throws(DesignRefusal) { svg = try onPage.exportSVG(item, at: frame) } catch { throw CatalogError.failed(id: "export", message: error.help) }
                 files.append(ExportedFile(suggestedName: item.fileName, format: format, data: Data(svg.utf8)))
                 taken.insert(item.fileName)
             }

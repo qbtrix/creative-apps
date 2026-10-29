@@ -2,7 +2,7 @@
 // the scope chips' titles, the options it opens with (Selection falls back to Frame when nothing
 // exportable is selected), a whole 1x to 3x scale (PNG only; `scaleHelp` says why it's off), the run's
 // options until idle, and the file list: the plan's files, then (Selection) each hidden selected
-// layer, skipped. The fake run (DE-7): its files, its steps (one fails on `-DesignExportFail`) and
+// layer, skipped. The Frame field shows only for a document with keys (`exportShowsFrame`). The fake run (DE-7): its files, its steps (one fails on `-DesignExportFail`) and
 // the finished summary. Linux-safe.
 import SuiteKernel
 
@@ -77,6 +77,9 @@ extension DesignWorkspace {
         if options.scope == .selection, exportTargetIDs(.selection).isEmpty { options.scope = .frame }
         return options
     }
+
+    /// True when the sheet shows its Frame field: the document has keys, so a still of one moment differs from the rest pose.
+    public var exportShowsFrame: Bool { !isStill }
 
     /// The sheet's file list for `options`: the plan's files, then (Selection only) each selected
     /// layer hidden in the tree, skipped. Empty when the plan is refused.

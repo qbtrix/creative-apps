@@ -19,5 +19,12 @@
     "find": "nodes.reduce(nodes.count)",
     "replace": "nodes.reduce(0)",
     "tests": "DesignHeadlessTests"
+  },
+  {
+    "label": "headlessFrameIgnored: the headless SVG export drops the options' frame",
+    "file": "Sources/DesignModel/DesignHeadless.swift",
+    "find": "svg = try onPage.exportSVG(item, at: frame)",
+    "replace": "svg = try onPage.exportSVG(item)",
+    "tests": "DesignExportFrameTests"
   }
 ]

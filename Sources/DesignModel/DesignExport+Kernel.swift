@@ -7,6 +7,9 @@
 // remembered options. The options hold a SuiteExportSize; the plan sizes every still
 // file to its exact pixels through the kernel's ExportRules (vectors take a scale only),
 // and a format without alpha (JPEG) flattens onto the frame's fill, white with no frame.
+// The options' `frame` (one-document OD-9) is the moment an animated document is written at: the
+// SVG and the raster draw the selected page sampled there (`DesignPage.shown(at:)`), and nil or a
+// still document draws the rest pose, byte for byte.
 // Those options are not document state: remembering
 // them is never a history step and undo never touches them. Linux-safe.
 import SuiteKernel
@@ -21,6 +24,8 @@ public struct DesignExportOptions: Hashable, Sendable {
     public var format: DesignExportFormat = .png
     public var size: SuiteExportSize = .scale(1)
     public var scope: DesignExportScope = .frame
+    /// The frame an animated document is written at; nil is the rest pose. A still document reads the same at any frame.
+    public var frame: Int?
 
     public init(format: DesignExportFormat = .png, size: SuiteExportSize, scope: DesignExportScope = .frame) {
         (self.format, self.size, self.scope) = (format, size, scope)
@@ -172,9 +177,10 @@ extension DesignWorkspace {
         return frame.fill
     }
 
-    /// The SVG document of one planned item (a layer, or the page when `item.nodeID` is the page's id).
-    public func exportSVG(_ item: DesignExportItem) throws(DesignRefusal) -> String {
-        guard let page = selectedPage else { throw .nothingToExport }
+    /// The SVG document of one planned item (a layer, or the page when `item.nodeID` is the page's id), the
+    /// page as it shows at `frame` (nil: the rest pose).
+    public func exportSVG(_ item: DesignExportItem, at frame: Int? = nil) throws(DesignRefusal) -> String {
+        guard let page = selectedPage?.shown(at: frame) else { throw .nothingToExport }
         if item.nodeID == page.id {
             let box = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)
             return DesignSVG.document(page.nodes, box: box, clip: true)

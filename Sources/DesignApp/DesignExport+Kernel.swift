@@ -107,7 +107,7 @@ struct DesignExportArea: ViewModifier {
         task = Task {
             let outcome = await DesignExportLive.run(
                 items, name: \.fileName,
-                render: { try Self.render($0, options.format, model) },
+                render: { try Self.render($0, options, model) },
                 write: { data, item in try data.write(to: folder.appendingPathComponent(item.fileName), options: .withoutOverwriting) },
                 progressed: { done in
                     run.progressed(done: done)
@@ -130,13 +130,13 @@ struct DesignExportArea: ViewModifier {
         }
     }
 
-    /// One item's file: SVG text from the Model, PNG and PDF from DesignRasterizer.
+    /// One item's file at the options' frame: SVG text from the Model, PNG and PDF from DesignRasterizer.
     // view-static: main-actor
-    private static func render(_ item: DesignExportItem, _ format: DesignExportFormat, _ model: DesignWorkspace) throws -> Data {
-        switch format {
-        case .svg: Data(try model.exportSVG(item).utf8)
-        case .png: try DesignRasterizer.png(try model.exportRaster(item))
-        case .pdf: try DesignRasterizer.pdf(try model.exportRaster(item))
+    private static func render(_ item: DesignExportItem, _ options: DesignExportOptions, _ model: DesignWorkspace) throws -> Data {
+        switch options.format {
+        case .svg: Data(try model.exportSVG(item, at: options.frame).utf8)
+        case .png: try DesignRasterizer.png(try model.exportRaster(item, at: options.frame))
+        case .pdf: try DesignRasterizer.pdf(try model.exportRaster(item, at: options.frame))
         case .jpeg: throw DesignRefusal.notYet("JPEG files are written once DX-4 rasterizes them; PNG keeps transparency.")
         }
     }
@@ -206,7 +206,8 @@ struct DesignExportArea: ViewModifier {
     }
 }
 
-/// Design's rows in the export sheet's options slot: Scale, Scope, the file list and the plan's refusal.
+/// Design's rows in the export sheet's options slot: Scale, Scope, Frame (a document with keys only), the file list
+/// and the plan's refusal.
 struct DesignExportRows: View {
     let model: DesignWorkspace
     let options: DesignExportOptions
@@ -233,6 +234,15 @@ struct DesignExportRows: View {
                     var next = options
                     next.scope = scope
                     edit(next)
+                }
+            }
+            if model.exportShowsFrame {
+                labeled("Frame", DesignControlID.exportFrame) {
+                    ScrubField("Frame", value: Double(options.frame ?? 0), in: 0...100_000, step: 1, decimals: 0) { value in
+                        var next = options
+                        next.frame = Int(value.rounded())
+                        edit(next)
+                    }
                 }
             }
             labeled("Files", DesignControlID.exportItems) {
