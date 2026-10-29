@@ -1,10 +1,8 @@
-// Live/LiveKeying.swift: the one write-back rule for edits at a playhead (one-document OD-5, rule 1 of 4). A
-// property the node already keys, edited with a playhead set, gets a key at the playhead holding the asked-for
-// value (replacing a key already there), so the canvas shows what was asked and every other frame keeps its keys.
-// A property with no track, or no playhead, edits the rest pose as before: the first key is a deliberate act.
-// Values are the node's own (what its keys hold), not its shown page position: an editor that knows the shown
-// delta passes `moved(by:at:)`, which adds the delta to the own value. This file is the only one in DesignModel
-// that knows the rule; OD-6, OD-7, OD-8 and OD-13 reuse it. Linux-safe.
+// Live/LiveKeying.swift: the one write-back rule for edits at a playhead (one-document OD-5, rule 1 of 4). A keyed
+// property edited at a playhead gets a key there holding the asked-for value (replacing one already there), so the
+// canvas shows what was asked and other frames keep their keys; no track or no playhead edits the rest pose (the
+// first key is a deliberate act). Values are the node's own, what its keys hold; `moved(by:at:)` adds a shown delta
+// to them. The only file in DesignModel that knows the rule. Linux-safe.
 import SuiteKernel
 
 extension DesignNode {

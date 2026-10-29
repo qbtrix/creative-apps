@@ -65,8 +65,8 @@
   {
     "label": "autokey: the X row measures the rest frame",
     "file": "Sources/DesignModel/Live/LiveStyling.swift",
-    "find": "let frame = shown.nodes.node(node.id)?.frame ?? node.frame",
-    "replace": "let frame = node.frame",
+    "find": "let frame = DesignRect(x: node.frame.x + seen.x - rest.x, y: node.frame.y + seen.y - rest.y,",
+    "replace": "let frame = DesignRect(x: node.frame.x, y: node.frame.y,",
     "tests": "DesignAutoKeyTests"
   },
   {

@@ -1,16 +1,13 @@
-// DesignAutoKeyTests.swift: auto-key at the playhead (one-document OD-5, rule 1 of 4). At a playhead, an edit to
-// a property a node already keys writes a key there with the asked-for value, so the canvas shows what was asked
-// and the rest pose (and every other frame's keys) stays; a property with no track, or no playhead, edits the rest
-// pose as before. Covers move, nudge, align, the X/Y rows and opacity, on the live services and on the one-layer
-// workspace paths. On `animated(50)` at frame 60 node-2 shows x 47, y 40, opacity 0.65; its rest frame is 30, 30.
-// Runs on Linux and macOS.
+// DesignAutoKeyTests.swift: auto-key at the playhead (one-document OD-5, rule 1 of 4). An edit to a keyed property
+// at a playhead keys the asked-for value there and keeps the rest pose; no track or no playhead edits the rest pose.
+// Move, nudge, align, X/Y and opacity, live services and one-layer paths. On `animated(50)` at frame 60 node-2 shows
+// x 47, y 40, opacity 0.65; its rest frame is 30, 30. Runs on Linux and macOS.
 @testable import DesignModel
 import SuiteKernel
 import Testing
 
 @Suite struct DesignAutoKeyTests {
     static let page = DesignFixtures.animated(50).selectedPage!
-    static let rest = page.nodes.node("node-2")!
 
     /// Node `id` of `nodes` as it shows at `frame`.
     static func shown(_ nodes: [DesignNode], _ id: String, at frame: Double) -> DesignNode {
@@ -80,10 +77,8 @@ import Testing
         #expect(y.nodes.node("node-1")?.time == Self.page.nodes.node("node-1")?.time)
         let still = try LiveTransforming().move(["node-2"], by: DesignPoint(x: 100, y: 0), on: Self.page)
         #expect(still.nodes.node("node-2")?.frame.x == 130)
-        #expect(still.nodes.node("node-2")?.time == Self.rest.time)
+        #expect(still.nodes.node("node-2")?.time == Self.page.nodes.node("node-2")?.time)
     }
-
-    // MARK: - The workspace's one-layer paths and the drag
 
     static func at(_ frame: Int?, selecting ids: [String]) -> DesignWorkspace {
         var workspace = DesignFixtures.animated(50)
