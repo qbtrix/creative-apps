@@ -4,7 +4,9 @@
 // own box, its fill at the middle; on a page with one shape, the corner where nothing is drawn
 // has alpha 0 and the shape is opaque; and QD-V9, the 2x Desktop PNG against the canvas's own
 // artwork drawn by the golden host, is report-only until #331 and #332. DE-9: the Desktop PDF
-// opens with CGPDFDocument as one page whose media box is 1440 × 1024 pt at any scale. macOS only.
+// opens with CGPDFDocument as one page whose media box is 1440 × 1024 pt at any scale. One-document OD-9: an animated
+// page's PNG at frame 60 is not its frame-0 PNG (the first rectangle has moved off its rest corner), and a still
+// page's PNG bytes are the same at any frame. macOS only.
 #if canImport(AppKit)
 import AppKit
 import ImageIO
@@ -85,6 +87,20 @@ import Testing
             #expect(pixel(image, x: x, y: y).last == 0, "(\(x), \(y)) is \(pixel(image, x: x, y: y))")
         }
         #expect(near(pixel(image, x: 100, y: 50), [217, 217, 217, 255]), "the shape: \(pixel(image, x: 100, y: 50))")
+    }
+
+    /// OD-9: frame 60 of `animated(5)` moves the first rectangle off its rest corner; a still page ignores the frame.
+    @Test func aFrameIsItsMoment() throws {
+        let animated = DesignFixtures.animated(5)
+        let page = try item(animated, DesignExportOptions(format: .png, scale: 1, scope: .page))
+        let rest = try DesignRasterizer.png(try animated.exportRaster(page))
+        let moved = try DesignRasterizer.png(try animated.exportRaster(page, at: 60))
+        #expect(rest != moved)
+        let restImage = try #require(RGBAImage(png: rest)), movedImage = try #require(RGBAImage(png: moved))
+        #expect(pixel(restImage, x: 31, y: 31) != pixel(movedImage, x: 31, y: 31), "the rest corner of Rectangle 1")
+        let cards = DesignFixtures.cards
+        let desktop = try item(cards, DesignExportOptions(format: .png, scale: 1, scope: .frame))
+        #expect(try DesignRasterizer.png(try cards.exportRaster(desktop, at: 60)) == DesignRasterizer.png(try cards.exportRaster(desktop)))
     }
 
     /// DE-9: the Desktop frame's PDF is one page, its media box the frame in points, never scaled.
