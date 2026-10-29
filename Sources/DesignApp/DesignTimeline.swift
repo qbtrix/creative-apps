@@ -3,8 +3,8 @@
 // keyed layer (DesignWorkspace.timelineRows). DesignEditor shows it only while the document has keys
 // (`showsTimeline`), sliding it in from the bottom on the first key. Collapsed or open is the user's and stays
 // (SceneStorage). Values in, intents out: a scrub, step or end sends `.scrub`, play and loop their intents, a lane
-// name or key press selects that layer. The frame shown reads the live drag box's `playingFrame` (playback and a
-// scrub in flight) in this leaf, beside the canvas, so neither runs the window. Content, not chrome: no glass.
+// name or key press selects that layer. A scrub's frame shows at once from the live drag box's `playingFrame`;
+// while playing, the slot reads only `isPlaying`, so a tick runs the canvas alone and the slot catches up on pause. Content, not chrome: no glass.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -37,7 +37,8 @@ struct DesignTimeline: View {
     }
 }
 
-/// The transport and its timecode: the one part of the slot that follows every playback frame.
+/// The transport and its timecode. Like the lanes it reads only `isPlaying` while playing, so a tick runs the
+/// canvas alone; the timecode shows the playhead and catches up on pause.
 private struct DesignTimelineTransport: View {
     let model: DesignWorkspace
     let perform: DesignPerform
@@ -45,7 +46,8 @@ private struct DesignTimelineTransport: View {
 
     var body: some View {
         let last = model.timelineLastFrame
-        let frame = live?.playingFrame ?? model.playhead ?? 0
+        // ponytail: a ticking timecode cost ~1.5 ms a frame (QB-L4 went red); a Text-only leaf for it is the upgrade.
+        let frame = (live?.isPlaying == true ? nil : live?.playingFrame) ?? model.playhead ?? 0
         TransportCapsule(
                     state: TransportState(frame: frame, frameCount: last + 1, fps: model.time.rate.nominal,
                                           isPlaying: live?.isPlaying ?? false,
