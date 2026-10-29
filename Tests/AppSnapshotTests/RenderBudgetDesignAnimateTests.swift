@@ -42,30 +42,37 @@ extension BodyCountSuites {
             let start = 5000.0, refreshes = Int(PlaybackBudget.seconds * 120)
             link.fire(start)
             let before = Self.bodies()
+            var whilePlaying = before
             var times: [Double] = [], frames: [Int] = []
             let clock = ContinuousClock()
             for i in 1...refreshes {
+                // Counted up to the refresh that ends play once: landing the last frame runs the window once.
+                whilePlaying = Self.bodies()
                 let began = clock.now
                 link.fire(start + Double(i) / 120)
                 w.host.layoutSubtreeIfNeeded()
                 w.window.displayIfNeeded()
                 times.append(Double((clock.now - began) / .microseconds(1)) / 1000)
-                frames.append(live.playingFrame ?? -1)
+                guard let frame = live.playingFrame else { break }
+                frames.append(frame)
                 if i % 30 == 0 { try await Task.sleep(for: .milliseconds(1)) }
             }
-            let ran = Self.bodies().flatMap { a in before.map { a - $0 } }
+            let ran = whilePlaying.flatMap { a in before.map { a - $0 } }
             let sorted = times.sorted()
             let late = times.filter { $0 > 16.7 }.count
             print(String(format: "BUDGET design playback animated(500): %d refreshes | p50 %.2f p95 %.2f max %.2f ms | over 8.3 ms %d | over 16.7 ms %d | window bodies %@",
-                         refreshes, sorted[refreshes / 2], sorted[Int(Double(refreshes) * 0.95)], sorted.last ?? 0,
+                         times.count, sorted[times.count / 2], sorted[Int(Double(times.count) * 0.95)], sorted.last ?? 0,
                          times.filter { $0 > 8.33 }.count, late, ran.map(String.init) ?? "n/a"))
             if let ran { #expect(ran == 0, "a playback tick ran the window: \(ran) bodies") }
             #expect(late <= PlaybackBudget.ciMaxDroppedFrames, "QB-L4: \(late) refreshes over 16.7 ms in 5 s")
             #expect(PlaybackBudget.droppedFrames(in: frames, timelineFrames: seed.time.durationFrames) == 0)
-            #expect(frames.first == 0 && frames.last == seed.time.durationFrames - 1, "play once from the rest pose ends on the last frame")
+            #expect(frames.first == 0 && live.playingFrame == nil, "play once from the rest pose ran to its end")
 
-            // Play once ended on its last frame; stop goes back to the rest pose, with no undo step or unsaved change.
+            // Play once landed its last frame as the playhead; stop goes back to the rest pose, with no undo step or
+            // unsaved change.
             try await w.settle(200)
+            perform(.pause)  // nothing plays, so it changes nothing; it records the window's workspace
+            #expect(DesignWindow.lastWorkspace?.playhead == seed.time.durationFrames - 1)
             perform(.stop)
             let after = try #require(DesignWindow.lastWorkspace)
             #expect(after.playhead == nil && live.playingFrame == nil)

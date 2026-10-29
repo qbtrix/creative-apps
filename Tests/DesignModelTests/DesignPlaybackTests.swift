@@ -44,12 +44,14 @@ import Testing
 
     @Test func showingAFrameIsNeverAnEditOrAnUnsavedChange() throws {
         var w = DesignFixtures.animated(50)
-        let (dirty, undo, page) = (w.isDirty, w.canUndo, w.selectedPage)
+        let (dirty, steps, page) = (w.isDirty, w.history.undo.count, w.selectedPage)
         var t = DesignTransport()
         t.play(from: nil, time: w.time)
         for _ in 0..<120 { t.tick(by: 1.0 / 120, time: w.time); w.show(t) }
         #expect(w.playhead == 60)
-        #expect(w.isDirty == dirty && w.canUndo == undo && w.selectedPage == page)
+        #expect(w.history.undo.count == steps, "120 ticks add no undo step")
+        #expect(w.isDirty == dirty, "nor an unsaved change")
+        #expect(w.selectedPage == page, "and the document's layers are untouched")
         t.stop()
         w.show(t)
         #expect(w.playhead == nil && w.shownPage == page)
