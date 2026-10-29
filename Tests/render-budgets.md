@@ -13,12 +13,15 @@ lower its budget in the same PR. Never raise one. The target is where the row
 has to end up.
 
 - **Window bodies** come from a debug-only `bodyRuns` counter in the app's window
-  file. The count is deterministic, so `RenderBudget<App>Tests/bodies` runs in
-  the merge gate. Every suite that reads one of these process-global counters
-  nests in `BodyCountSuites`, which is `.serialized`, so two of them never run
-  at once and count each other's renders. A new counter-reading suite nests
-  there too, and its `perf-suites.txt` line reads
-  `AppSnapshotTests.BodyCountSuites/<Suite>`.
+  file, which reports through SuiteUI's `BodyTally`. The count is deterministic,
+  so `RenderBudget<App>Tests/bodies` runs in the merge gate. Every suite that
+  reads one nests in `BodyCountSuites`: its trait gives each test case its own
+  tally, every window the harness (`RenderBudgetWindow`) opens in that test
+  reports to it, and `bodyRuns` counts those windows only, so suites running
+  alongside never move it (factory lesson 345). `.serialized` still
+  keeps those suites' timings apart. A new counter-reading suite nests there
+  too (`scripts/check-body-counts` fails one that doesn't), and its
+  `perf-suites.txt` line reads `AppSnapshotTests.BodyCountSuites/<Suite>`.
 - **Step p95** is wall time, so `RenderBudget<App>Tests/timing` is listed in
   `Tests/perf-suites.txt`. It runs nightly on the captain's Mac (perf-nightly), one test at a
   time. The numbers below come from a debug build on an M2 Pro (max of
@@ -275,3 +278,35 @@ drain and the counters to hold still, then checks the gesture's work and that
 Those tests drop the window's autosave after the gesture: it still flattens
 the picture through the reference path 5 s after the last edit, which would
 read as a recount.
+
+## Photo: a Free Transform drag frame on a photo-sized layer
+
+Since #5285 the canvas draws the Free Transform draft live, and every render
+resampled the whole layer with CoreRaster's lanczos3 `transformed` on one
+thread (`transformPreview`). `PhotoAdjustSliderLatencyTests` (perf list) times
+the "transform turn drag" case: the 8K document's Fill layer (7680 x 4320,
+33 MP) turned 1 degree a step, each step a drag frame
+(`PhotoRenderer.update(live: true)`), from the edit to the picture holding it.
+Release, M2 Pro, machine load 80 to 100 (many agents building), p50 / p95 per
+step:
+
+| Step | GPU, resident | CPU |
+|---|---|---|
+| dev (#5285: whole-layer lanczos3 resample per frame; 6 steps) | 10782 / 12089 ms | 10533 / 11381 ms |
+| drag frame through CoreRender's affine composite per band (first cut) | 3932 / 5388 ms | 472 / 582 ms |
+| drag frame: 256 px chunks of the region resampled across the cores, one upload per region (this change, 60 steps) | 308 / 416 ms | 222 / 278 ms |
+
+The first cut's GPU row is CoreRaster's through-composite itself: it resamples
+the whole source once per output row, so a 7680 x 256 band paid 256 times its
+source. The chunked frame calls `transformed` once per 256 px chunk (the same
+sampling; transform-then-composite is what the through-composite is defined to
+equal) and composites the region as a tile, so the picture never leaves the
+GPU. The still frame after the drag (the window taking the live copy back)
+resamples once as before, and Return lays that same resample. The budget for
+the case sits a little above the measurement, 500 ms p95, so the suite is green
+today and fails on a regression; the target stays one frame. The rest of a step
+is the resample itself (CoreRaster's `transformed`, bilinear, 33 M output
+pixels a frame) plus the full-canvas redraw it forces (31 to 74 ms at 8K, the
+table above). The affine family is CPU-only in CoreRender
+(`RenderOp.notOnMetalYet`), so a Metal `.affine` kernel is where both rows go
+next.

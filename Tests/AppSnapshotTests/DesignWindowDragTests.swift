@@ -11,7 +11,7 @@
 // `dragSamples` drives one gesture and counts the editor;
 // later drag checks (D0-9d) call it. The window is hosted off screen through
 // the render-budget harness (RenderBudgetHarness.swift); DesignEditor.bodyRuns
-// is a process-global debug counter, so the suite nests in BodyCountSuites.
+// is a debug body counter, so the suite nests in BodyCountSuites.
 // macOS only.
 #if canImport(AppKit)
 import AppKit

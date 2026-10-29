@@ -97,6 +97,7 @@ import Testing
     }
 
     @Test func aHealStrokePaintsAsBefore() throws {
-        #expect(try strokeDigest(.heal) == 7_887_995_755_704_010_076)
+        // fill-heal FH-7: heal's release runs retouch.heal now, so this digest was re-recorded then.
+        #expect(try strokeDigest(.heal) == 12_907_476_719_616_381_848)
     }
 }

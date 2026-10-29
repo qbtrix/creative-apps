@@ -15,14 +15,14 @@ import Testing
 @testable import SuiteUI
 
 /// The window's root, counting its bodies; the boxes and the mark live in the page under it.
-private struct AnchorBudgetPage: View {
+private struct AnchorBudgetPage: View, BodyCounted {
     #if DEBUG
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         GalleryAnchorPage()
     }

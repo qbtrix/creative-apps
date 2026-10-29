@@ -11,13 +11,14 @@
 // (single-layer Align's "already at the left edge"). A help never depends on
 // the value being written.
 // DesignContractLawTests checks every fake and live conformance on `cards`.
-// Coalescing keys are `runKey(base, ids)`, so a run never spans two
-// selections. Linux-safe.
+// Coalescing keys are `runKey(base, ids)`, SuiteKernel's `CoalesceKey`, so a
+// run never spans two selections. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteKernel
 
 /// One edit to the selected page: its whole new node tree and selection, named for Undo.
 public struct DesignEdit: Sendable, Equatable {
@@ -34,9 +35,9 @@ public struct DesignEdit: Sendable, Equatable {
         (self.name, self.nodes, self.selection, self.coalescingKey) = (name, nodes, selection, coalescingKey)
     }
 
-    /// The coalescing key for a run of `base` edits on exactly these layers: "move-node-3,node-4".
+    /// The coalescing key for a run of `base` edits on exactly these layers, in any order.
     public static func runKey(_ base: String, _ ids: [String]) -> String {
-        "\(base)-\(ids.sorted().joined(separator: ","))"
+        CoalesceKey.key(base, on: ids)
     }
 }
 

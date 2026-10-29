@@ -815,7 +815,7 @@
     "sources": [
       "captain"
     ],
-    "waits_on": "AJ-12",
+    "test": "Tests/RealJobs/halo/blur-title/blur-title.jobs.json",
     "added_by": "suiteui/adjust-everywhere"
   },
   "RJ-H51": {

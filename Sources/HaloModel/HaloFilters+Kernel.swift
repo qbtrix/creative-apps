@@ -1,9 +1,9 @@
 // HaloFilters+Kernel.swift (adjust-everywhere AJ-12): Halo's project as SuiteImaging's AdjustTarget, per selected
 // layer. A layer keeps an ordered list of filters and kinds (`HaloLayer.filters`, each key at most once) that
 // LiveFrameRendering runs on that layer's pixels before its blend, so a frame and a render draw it alike. A filter
-// command edits its entry in place (keeping hidden) or appends it; the kinds keep their places. `filter.set-hidden`
-// and `filter.remove` change the list for the inspector's rows. Each change is one step through `edit`. Looks stay
-// Photo's and Library's: Halo lists no look commands. Linux-safe.
+// command edits its entry in place (keeping hidden) or appends it; the kinds keep their places. `filter.set-hidden`,
+// `filter.remove` and `filter.move` (AJ-13) change the list for the inspector's rows. Each change is one step through
+// `edit`. Looks stay Photo's and Library's: Halo lists no look commands. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -131,6 +131,14 @@ extension HaloProject: AdjustTarget {
         try editFilters("filter.remove", "Remove Filter") { list in list.remove(at: try Self.entry(id, in: list)) }
     }
 
+    /// Moves the entry `id` to `index` (0 runs first, clamped to the list): one step.
+    public mutating func moveLayerFilter(_ id: String, to index: Int) throws {
+        try editFilters("filter.move", "Move Filter") { list in
+            let entry = list.remove(at: try Self.entry(id, in: list))
+            list.insert(entry, at: min(max(index, 0), list.count))
+        }
+    }
+
     static func entry(_ id: String, in list: [HaloLayerFilter]) throws -> Int {
         if let at = list.firstIndex(where: { $0.id == id }) { return at }
         throw HaloEditError.notBuilt("A filter \u{201C}\(id)\u{201D} on this layer")
@@ -151,9 +159,11 @@ extension HaloProject: AdjustTarget {
 
     struct FilterID: Codable, Sendable { var id: String }
     struct FilterHidden: Codable, Sendable { var id: String; var hidden: Bool }
+    struct FilterMove: Codable, Sendable { var id: String; var index: Int }
 
-    /// The kernel's kind and filter commands, then the list's own two.
-    static let filterSpecs: [CommandSpec<HaloProject>] = AdjustCommands.specs(HaloProject.self).filter { !$0.id.hasPrefix("look.") } + listSpecs
+    /// The kernel's kind and filter commands, then the list's own three.
+    static let filterSpecs: [CommandSpec<HaloProject>] =
+        AdjustCommands.specs(HaloProject.self).filter { !$0.id.hasPrefix("look.") } + listSpecs
 
     static let listSpecs: [CommandSpec<HaloProject>] = {
         let key = ParamSchema.string("The entry's key.", oneOf: HaloLayerFilter.ids)
@@ -168,6 +178,11 @@ extension HaloProject: AdjustTarget {
                    kind: .edit, params: FilterID.self, schema: .object(["id": key], required: ["id"]),
                    example: .object(["id": .string("gaussian-blur")]), availability: ready
             ) { p, o in try p.removeLayerFilter(o.id); return done },
+            .typed("filter.move", title: "Move Filter", summary: "Moves one of the selected layer's filters in its list, 0 runs first.",
+                   kind: .edit, params: FilterMove.self,
+                   schema: .object(["id": key, "index": .integer(minimum: 0)], required: ["id", "index"]),
+                   example: .object(["id": .string("gaussian-blur"), "index": .number(0)]), availability: ready
+            ) { p, o in try p.moveLayerFilter(o.id, to: o.index); return done },
         ]
     }()
 }

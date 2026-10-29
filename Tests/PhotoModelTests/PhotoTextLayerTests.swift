@@ -67,8 +67,8 @@ private func required(_ schema: JSONValue) -> [String]? {
     @Test func listsTheTextCommands() throws {
         let catalog = try #require(catalog)
         let text = catalog.ids.filter { $0.hasPrefix("text.") }
-        #expect(text == ["text.add", "text.read", "text.set-alignment", "text.set-font", "text.set-italic",
-                         "text.set-line-height", "text.set-size", "text.set-tracking", "text.set-words"])
+        #expect(text == ["text.add", "text.read", "text.set-alignment", "text.set-color", "text.set-font",
+                         "text.set-italic", "text.set-line-height", "text.set-size", "text.set-tracking", "text.set-words"])
         let add = try #require(catalog.describe("text.add"))
         #expect(add.title == "Add Text")
         #expect(add.undoable)
@@ -98,6 +98,15 @@ private func required(_ schema: JSONValue) -> [String]? {
         let workspace = try opened()
         #expect(workspace.faces(of: "Serif").map(\.italic) == [false, true])
         #expect(workspace.faces(of: "No Such Family").isEmpty)
+    }
+
+    /// A new layer's standard "System" family is no listed name; the inspector shows the family the text
+    /// service draws it in, so its Weight row has that family's faces (#5951: a Weight label with no chips).
+    @Test func theStandardFamilyResolvesToAListedOne() throws {
+        let workspace = try opened()
+        #expect(workspace.textFamily(TextStyle.standard.family) == FakeText.systemFamily)
+        #expect(workspace.textFamily("Serif") == "Serif")
+        #expect(workspace.faces(of: workspace.textFamily(TextStyle.standard.family)).map(\.weight) == [400, 700])
     }
 
     // MJ-TX: the text edits.

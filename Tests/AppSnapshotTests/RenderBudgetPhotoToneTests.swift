@@ -3,7 +3,7 @@
 // It hosts PhotoWindow on the sample picture with the Adjust panel up and steps the Temperature row
 // (`suite.tone.temperature`) 120 times, as VoiceOver adjusts it. Each step is one `tone.set` under the
 // row's drag token, and those samples run on the window's live copy (LiveTransformCopy+Kernel.swift),
-// so the window's editor body runs at most 3 times, counted on a PhotoEditorBodyTally in this window's
+// so the window's editor body runs at most 3 times, counted on a SuiteUI BodyTally in this window's
 // environment (debug only), since the process-wide counter also counts the snapshot suites' editors. The window takes the copy
 // back once the steps go quiet, so the test reads the workspace after waiting, up to 2 s, for
 // Temperature to reach the top of its range (each VoiceOver step is its own gesture and undo step,
@@ -27,8 +27,8 @@ extension BodyCountSuites {
         @Test(.timeLimit(.minutes(2))) func temperatureDragInThreeBodies() async throws {
             let model = try PhotoWorkspace.fixture(.sample)
             let before = model.adjustments.tone.value(.temperature)
-            let tally = PhotoEditorBodyTally()
-            let w = RenderBudgetWindow(PhotoWindow(model: model).environment(\.photoEditorBodyTally, tally))
+            let tally = BodyTally()
+            let w = RenderBudgetWindow(PhotoWindow(model: model).environment(\.bodyTally, tally))
             defer { w.close() }
             let bodies = { Self.bodies(tally) }
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
@@ -53,9 +53,9 @@ extension BodyCountSuites {
 
         /// This window's editor body runs (debug only). Not `PhotoEditor.bodyRuns`, which also counts the editors
         /// that snapshot suites running alongside draw.
-        static func bodies(_ tally: PhotoEditorBodyTally) -> Int? {
+        static func bodies(_ tally: BodyTally) -> Int? {
             #if DEBUG
-            return tally.runs
+            return tally.runs(of: PhotoEditor.self)
             #else
             return nil
             #endif

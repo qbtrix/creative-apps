@@ -62,6 +62,7 @@ extension PhotoWorkspace {
         "edit.fill-selection": "Fill Selection", "image.resize": "Image Size…", "image.canvas-size": "Canvas Size…", "image.rotate-cw": "Rotate 90° Clockwise",
         "image.rotate-ccw": "Rotate 90° Counterclockwise", "image.rotate-180": "Rotate 180°", "image.straighten": "Straighten…",
         "layer.rename": "Rename Layer…", "layer.bring-forward": "Bring Forward", "layer.send-backward": "Send Backward",
+        "select.invert": "Invert", "select.feather": "Feather…", "select.expand": "Expand…", "select.contract": "Contract…",
     ]
     /// The tooltip of the menu item for `id`: what clicking it does, where the catalog's summary describes the agent call.
     public static func menuSummary(_ id: String) -> String { menuSummaries[id] ?? catalog.spec(id)?.summary ?? id }
@@ -124,6 +125,8 @@ extension PhotoWorkspace {
         }
         + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands + pathCommands
         + ToneCommands.specs(PhotoWorkspace.self)
+        + RetouchCommands.specs(PhotoWorkspace.self)
+        + AdjustCommands.specs(PhotoWorkspace.self)
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
         .typed("file.new", title: "New Image", summary: "Opens a new image at a size, unit, resolution and background.", kind: .file,

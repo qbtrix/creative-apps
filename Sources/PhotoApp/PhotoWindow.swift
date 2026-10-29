@@ -1,5 +1,9 @@
-// PhotoWindow.swift: the root of a Photo window. It holds the one
-// PhotoWorkspace (`model`) and the window's presentation state (zoom, the
+// PhotoWindow.swift: the root of a Photo window. It holds the window's
+// PhotoSession, whose PhotoWorkspace it edits as `model` (every write re-derives
+// the session's facets; PhotoSession.swift), and puts the session in the
+// environment. Its body reads every facet but `toolOptions`, so a brush-size step
+// re-runs only the inspector and the canvas overlay, never this body or the
+// editor's. It also holds the window's presentation state (zoom, the
 // open file's URL, sheets and alerts, the Straighten draft the
 // canvas previews, and the v2 presentation flags), turns every PhotoIntent
 // into a workspace method or a panel, and keeps the picture rendered (CanvasRenderer) whenever the
@@ -19,7 +23,7 @@
 // PhotoWindow+Export.swift.
 //
 // Each v2 area's intents go to its PhotoWindow+<Area>.swift (file, edit,
-// crop, history, select, adjustment layer, transform, export, sample), and
+// crop, history, select, adjustment layer, transform, export, sample, filter), and
 // each area's identity modifier (Photo<Area>Area) is applied here, so a
 // feature keeps its own state, alerts, dialogs and timers in its area file.
 // The window's state is internal so those files can reach it. Return
@@ -29,11 +33,12 @@ import AppKit
 import CoreRaster
 import PhotoModel
 import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
 struct PhotoWindow: View {
-    @State var model: PhotoWorkspace
+    @State var session: PhotoSession
     @State var renderer = CanvasRenderer()
     @State var pacer = StrokePacer()
     @State var liveStroke = LiveStroke()
@@ -55,6 +60,8 @@ struct PhotoWindow: View {
     /// The Straighten sheet's choices; nil while it is closed.
     @State var straightenDraft: StraightenDraft?
     @State var isRenaming = false
+    /// Feather…, Expand… or Contract…'s radius alert while it is open (PhotoWindow+Select.swift, AR-11).
+    @State var areaPrompt: AreaRadiusPrompt?
     @State var renameText = ""
     // v2 presentation flags (PV-0); each belongs to the area file named.
     /// A recovered document waiting for Restore or Discard (PhotoWindow+File.swift, PV-1).
@@ -73,13 +80,16 @@ struct PhotoWindow: View {
     @State var inspectorTab = PhotoInspectorTab.adjust
     /// File > New's sheet: Photo's presets and the clipboard image's size; nil while it is closed (document-setup DS-8).
     @State var newImageMode: NewDocumentMode?
+    /// The Filter sheet's choices while it is open (PhotoWindow+Filter.swift, AJ-9).
+    @State var filterDraft: FilterSheetDraft?
     /// The app's View > Rendering; nil in tests, which draw on the CPU.
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
     var isPresenting: Bool {
         model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil
-            || newImageMode != nil
+            || areaPrompt != nil || newImageMode != nil
+            || filterDraft != nil
     }
 
     /// The launch file opens in the first window only.
@@ -95,15 +105,30 @@ struct PhotoWindow: View {
 
     /// A window on `model`: the launch workspace in the app, a test's own in tests, at `zoom`.
     init(model: PhotoWorkspace = PhotoWindow.launchWorkspace(), zoom: Double = 1) {
-        _model = State(initialValue: model)
+        self.init(session: PhotoSession(model), zoom: zoom)
+    }
+
+    /// A window on `session`, which a test keeps to read the workspace and its facets.
+    init(session: PhotoSession, zoom: Double = 1) {
+        _session = State(initialValue: session)
         _zoom = State(initialValue: zoom)
     }
 
+    /// The session's workspace; a write goes through the session, in place, and re-derives its facets.
+    var model: PhotoWorkspace {
+        get { session.workspace }
+        nonmutating set { session.workspace = newValue }
+        nonmutating _modify { yield &session.workspace }
+    }
+
     var body: some View {
+        // Every facet but the options: an option step re-runs only the views that show options.
+        let _ = session.workspace(reading: .document, .tool, .adjust, .history, .status, .canvas, .file)
         PhotoEditor(
             model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
             renderBackend: renderer.backend, note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
             straighten: straightenDraft)
+            .environment(session)
             .environment(\.photoDragLine, dragLine)
             .environment(\.photoLiveTransform, liveTransform)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
@@ -173,11 +198,12 @@ struct PhotoWindow: View {
             .modifier(PhotoEditArea(model: model, perform: perform))
             .modifier(PhotoCropArea(model: model, perform: perform))
             .modifier(PhotoHistoryArea(model: model, perform: perform, tab: inspectorTab))
-            .modifier(PhotoSelectArea(model: model, perform: perform))
+            .modifier(PhotoSelectArea(model: model, perform: perform, prompt: areaPrompt))
             .modifier(PhotoAdjustmentLayerArea(model: model, perform: perform))
             .modifier(PhotoTransformArea(model: model, perform: perform, canvasSize: canvasSizeDraft))
             .modifier(PhotoExportArea(model: model, perform: perform))
             .modifier(PhotoSampleArea(model: model, perform: perform))
+            .modifier(PhotoFilterArea(model: model, draft: filterDraft, perform: perform))
     }
 
     func perform(_ intent: PhotoIntent) {
@@ -188,7 +214,9 @@ struct PhotoWindow: View {
         }
         switch intent {
         case .newImage:
-            let clipboard = PhotoPasteboard.read().map { (width: $0.image.width, height: $0.image.height) }
+            // The clipboard's picture through the bridge, as Paste reads it; nil when Paste would refuse it.
+            let picture = try? photoPasteboardAdapter.paste(PasteboardBridge().offered(), canvas: nil)
+            let clipboard = picture.map { (width: $0.image.width, height: $0.image.height) }
             newImageMode = .new(presets: PhotoWorkspace.newImagePresets, clipboard: clipboard)
         case .open: chooseFile()
         case .openFile(let url): open(url)
@@ -266,6 +294,7 @@ struct PhotoWindow: View {
         case .transform(let intent): performTransform(intent)
         case .export(let intent): performExport(intent)
         case .sample(let intent): performSample(intent)
+        case .filter(let intent): performFilter(intent)
         case .place(let intent): performPlace(intent)
         case .text(let intent): performType(intent)
         case .tone(let intent): performTone(intent)

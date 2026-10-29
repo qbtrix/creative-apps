@@ -12,5 +12,33 @@
     "find": "contiguous: options.contiguous,",
     "replace": "contiguous: false,",
     "tests": "BucketRulesTests/toleranceZeroFillsOneRegionExactly"
+  },
+  {
+    "label": ".edgeStaysInside: core's anti-alias, which covers rejected pixels up to twice the tolerance, tints the edge past it",
+    "file": "Sources/SuiteImaging/Retouch/BucketRules.swift",
+    "find": "                                     antiAlias: false)",
+    "replace": "                                     antiAlias: options.antiAlias)",
+    "tests": "BucketRulesTests/aHolePastTheToleranceStaysUnchanged"
+  },
+  {
+    "label": ".edgeBlendsByOwnCoverage: no soft edge fills a part-seed edge pixel as fully as the seed colour",
+    "file": "Sources/SuiteImaging/Retouch/BucketRules.swift",
+    "find": "        if options.antiAlias, tolerance > 0 { m = try softEdge(m, in: sample, seed: seed, tolerance: tolerance) }\n",
+    "replace": "",
+    "tests": "BucketRulesTests/anEdgePixelWithinTheToleranceBlendsByItsOwnCoverage"
+  },
+  {
+    "label": ".edgeBlendsByOwnCoverage: the closeness used as the shortfall leaves seed-coloured edge pixels unfilled",
+    "file": "Sources/SuiteImaging/Retouch/BucketRules.swift",
+    "find": "        shortfall.invert()\n",
+    "replace": "",
+    "tests": "BucketRulesTests/anEdgePixelPastTheToleranceStaysUnchanged"
+  },
+  {
+    "label": ".edgeBlendsByOwnCoverage: every taken pixel read as edge softens the inside too",
+    "file": "Sources/SuiteImaging/Retouch/BucketRules.swift",
+    "find": "try taken.coverage(x: $0.0, y: $0.1) == 0",
+    "replace": "try taken.coverage(x: $0.0, y: $0.1) > 0",
+    "tests": "BucketRulesTests/anEdgePixelWithinTheToleranceBlendsByItsOwnCoverage"
   }
 ]

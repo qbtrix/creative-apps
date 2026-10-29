@@ -162,8 +162,6 @@ final class PhotoFileSession {
 }
 
 extension PhotoWindow {
-    /// The services a window runs on when no fixture is asked for: `.live`,
-    /// its autosaves in `-PhotoRecoveryDir`'s folder when one is given.
     /// Photo's `.live` services with the suite's live text (Core Text), so text layers draw their words.
     nonisolated static var liveServices: PhotoServices {
         var services = PhotoServices.live
@@ -171,7 +169,13 @@ extension PhotoWindow {
         return services
     }
 
+    /// The services a window runs on when no fixture is asked for: `.live`,
+    /// its looks in the suite's PresetStore (`-SuiteSupportDir` moves it, AJ-9), its autosaves in
+    /// `-PhotoRecoveryDir`'s folder when one is given.
     nonisolated static func fileServices(_ live: PhotoServices) -> PhotoServices {
+        var live = live
+        live.looks = PresetStore(
+            folder: SuiteLocations.supportFolder(arguments: ProcessInfo.processInfo.arguments, home: NSHomeDirectory()))
         guard let folder = UserDefaults.standard.string(forKey: "PhotoRecoveryDir") else { return live }
         return live.recovering(in: URL(fileURLWithPath: folder, isDirectory: true))
     }

@@ -2,7 +2,7 @@
   "title": "Adjustments everywhere: Black & White, Invert, filters (blur, sharpen, noise) and looks (built-in and saved), built once in SuiteImaging and SuiteModel; Photo, Library and Halo adopt",
   "wave": "XK4",
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 cluster C8 (Photo audit rows 9 and 10, Library row 3); feature map S15 (preset store, looks) and the B&W and filter half of E3/E4 wiring; real jobs RJ-X60, RJ-P50, RJ-H50 (new); Brightness #3527 is tone-controls' (re-cut in this PR)",

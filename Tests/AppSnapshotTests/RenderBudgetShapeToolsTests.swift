@@ -63,16 +63,15 @@ extension BodyCountSuites {
 }
 
 /// The counted window: a header over the page, which owns the spec; `drawing` hosts the gallery page on Star instead.
-private struct ShapeToolsBudgetWindow: View {
+private struct ShapeToolsBudgetWindow: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     var drawing = false
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Shape tool").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText)

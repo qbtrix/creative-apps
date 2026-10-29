@@ -11,13 +11,13 @@ Sources/FlareModel/FlareServices.swift: assist: NotBuilt(reason: "Assist needs t
 Sources/HaloModel/HaloServices.swift: text: (any TextRasterizing)? = nil  ## #5280 (Halo headless runs .live with no text)
 Sources/LibraryApp/LibraryApp.swift: static let host = LibraryCatalog(services: .fake())  ## file-flow (Library) #3479
 Sources/LibraryModel/LibraryHeadless.swift: var services = LibraryServices.fake()  ## kept: the headless catalog decodes its own file's images (PNG.read); live culling and coding replace the fakes
+Sources/LibraryModel/LibraryLaunch.swift: looks: any PresetStoring = FakePresetStore(),  ## adjust-everywhere #3777 (LibraryWindow passes the suite's PresetStore; the default stays for headless runs)
 Sources/LibraryModel/LibraryLaunch.swift: sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {  ## metadata-more #1555 (LibraryWindow passes XMPSidecarWriter; the default stays off)
 Sources/LibraryModel/LibraryServices.swift: sidecars: any SidecarWriting = UnconnectedSidecars(), leveler: (any CropLeveling)? = nil,  ## Auto-straighten #3618 (leveler); sidecars: metadata-more #1555
 Sources/LibraryModel/LibraryServices.swift: sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {  ## metadata-more #1555 (LibraryWindow passes XMPSidecarWriter; the default stays off)
 Sources/LibraryModel/Live/LiveCulling.swift: try FakeCulling(mode: .ok).apply(change, to: ids, in: items)  ## cull-finish #3458
 Sources/LibraryModel/Live/LiveDevelop.swift: case .color: throw LibraryError.renderFailed(waiting[.vibrance] ?? "Vibrance isn't built yet")  ## Vibrance and Saturation DV-12 #3425
 Sources/PhotoModel/Live/LiveExportSizing.swift: enum LiveExportSizing { static func make() -> any ExportSizing { NotBuiltExportSizing() } }  ## export-pack (Photo) #3470, PV-8
-Sources/PhotoModel/Live/LiveSelection.swift: static func selection() -> any SelectionShaping { NotBuiltSelection() }  ## area-selection #3752, PV-5
 Sources/PhotoModel/PhotoServices.swift: public var text: any TextServices = FakeText()  ## #5193 (Photo headless gets FakeText)
 Sources/PhotoModel/PhotoServices.swift: public var looks: any PresetStoring = FakePresetStore()  ## adjust-everywhere AJ-photo-ui #5259 (PhotoWindow hands it the suite's PresetStore)
 Sources/SuiteShell/Live/AssetsSlot.swift: FakeAssets(unavailable: SuiteServices.notConnected("assets"))  ## shared-assets feature
