@@ -142,12 +142,13 @@ struct HistoryDoc: HistoryJumping {
         _ = try catalog.run("history.begin", params: Self.named("AI: Birds"), on: &doc)
         Self.set(&doc, [2, 3, 4], as: Self.claude)
         _ = try catalog.run("history.end", params: .object([:]), on: &doc)
+        #expect(throws: CatalogError.failed(id: "history.undo-request", message: "There is no request AI: Sun.")) {
+            try catalog.run("history.undo-request", params: Self.named("AI: Sun"), on: &doc)
+        }
         let done = try catalog.run("history.undo-request", params: Self.named("AI: Birds"), on: &doc)
         #expect(done.result == .object(["undone": .number(3)]))
         #expect(doc.value == 1 && doc.history.index == 1 && doc.history.steps.count == 4)
-        #expect(throws: CatalogError.failed(id: "history.undo-request", message: "There is no request AI: Birds.")) {
-            try catalog.run("history.undo-request", params: Self.named("AI: Birds"), on: &doc)
-        }
+        #expect(catalog.availability("history.undo-request", on: doc) == .unavailable("No applied step belongs to a request."))
     }
     @Test func undoRequestRefusesWhenALaterStepFollows() throws {
         let catalog = try #require(Self.catalog)

@@ -282,12 +282,13 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
 
     @Test func agentStepsInsideARequestCarryItsName() {
         var history = History<String>()
-        #expect(history.beginRequest("AI: Birds"))
-        #expect(!history.beginRequest("AI: Sun"))
+        let opened = history.beginRequest("AI: Birds"), second = history.beginRequest("AI: Sun")
+        #expect(opened && !second)
         history.record("Move", "a")
         StepOrigin.$current.withValue(Self.agent) { history.record("Brush Stroke", "b"); history.record("Brush Stroke", "c") }
         #expect(history.openRequest == "AI: Birds")
-        #expect(history.endRequest() && !history.endRequest())
+        let closed = history.endRequest(), again = history.endRequest()
+        #expect(closed && !again)
         StepOrigin.$current.withValue(Self.agent) { history.record("Fill", "d") }
         let birds = StepOrigin.agent(client: "claude", request: "AI: Birds")
         #expect(history.stepOrigins == [.user, birds, birds, Self.agent])
