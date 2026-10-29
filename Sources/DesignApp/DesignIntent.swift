@@ -45,6 +45,8 @@ enum DesignIntent {
     /// distribute or arrange; a refusal's help goes to the status line.
     case command(DesignCommand)
     case copy, cut, paste, selectAll
+    /// Edit > Copy As (one representation) and Paste as Image (an image or SVG only), clipboard-interop CB-6.
+    case copyAs(CopyAsFormat), pasteAsImage
     /// View > Zoom to Selection: the zoom that fits the selection, and the rect to show.
     case zoomToSelection
     /// A Layers panel drag: the layer, its new parent (nil: the page's top level) and index.

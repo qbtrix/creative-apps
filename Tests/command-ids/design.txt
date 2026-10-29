@@ -1,8 +1,10 @@
 # Design's command ids (adopt-command-catalog AC-d1). One id per line; a removed id stays as "retired <id>".
 color.pick
 color.sample
+edit.copy-as
 edit.delete
 edit.duplicate
+edit.paste-as-image
 edit.redo
 edit.select
 edit.select-all

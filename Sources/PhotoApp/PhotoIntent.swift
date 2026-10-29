@@ -48,7 +48,7 @@ enum PhotoIntent {
     // One case per v2 area; each area's enum lives in its PhotoWindow+<Area>.swift.
     case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
     case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
-    case place(PhotoPlaceIntent), text(TypeIntent)
+    case place(PhotoPlaceIntent), text(TypeIntent), filter(FilterIntent)
     /// A tone row's change, run as its tone.* command (PhotoWindow+Tone).
     case tone(ToneIntent)
     /// One Pen or point-editor gesture from PhotoPenOverlay, run through the catalog.
