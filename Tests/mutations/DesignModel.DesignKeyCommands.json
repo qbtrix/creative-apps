@@ -40,5 +40,26 @@
     "find": "playhead = frame.map { Swift.min(Swift.max($0, 0), Swift.max(time.durationFrames - 1, 0)) }",
     "replace": "playhead = frame",
     "tests": "DesignKeyCommandTests"
+  },
+  {
+    "label": "toggleAtFrameZero: the key button ignores the playhead",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "        let frame = playhead ?? 0\n",
+    "replace": "        let frame = 0\n",
+    "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "toggleNeverRemoves: a keyed-here press sets again",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "if state == .keyedHere { return (\"keyframe.remove\", .object(params)) }",
+    "replace": "if state == .notAnimated && false { return (\"keyframe.remove\", .object(params)) }",
+    "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "toggleKeysTheShownValue: the key takes the rest value under a track",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "node.time?.value(of: property, at: Double(frame)) ?? rest",
+    "replace": "rest",
+    "tests": "DesignKeyToggleTests"
   }
 ]

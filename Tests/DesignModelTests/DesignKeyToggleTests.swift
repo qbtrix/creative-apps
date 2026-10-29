@@ -25,11 +25,12 @@ import Testing
 
     @Test func atThePlayheadAPressAddsThenRemovesTheKeyThere() throws {
         var w = DesignFixtures.cards
-        _ = try Self.press(&w)
+        let params: JSONValue = .object(["node": .string("node-2"), "property": .string("x"), "frame": .number(0), "value": .number(40)])
+        try DesignWorkspace.catalog.run("keyframe.set", params: params, on: &w)
         w.setPlayhead(60)
         #expect(w.keyState("node-2", .x) == .animated)
         #expect(try Self.press(&w) == "Set Key")
-        #expect(Self.track(w).map(\.frame) == [0, 60] && Self.track(w).map(\.value) == [100, 100], "the value it shows there")
+        #expect(Self.track(w).map(\.frame) == [0, 60] && Self.track(w).map(\.value) == [40, 40], "the value its track shows there, not the rest value")
         #expect(w.keyState("node-2", .x) == .keyedHere)
         #expect(try Self.press(&w) == "Remove Key")
         #expect(Self.track(w).map(\.frame) == [0])

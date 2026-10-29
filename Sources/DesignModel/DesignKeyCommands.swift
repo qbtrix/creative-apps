@@ -5,7 +5,9 @@
 // write-back rule (Live/LiveKeying.swift), which edits the rest pose of an unkeyed property. time.sample reads a layer
 // as the canvas shows it at a frame, its containers' keyed offsets included. time.playhead moves the shown frame:
 // shown state, no undo step, no change to the file. Easing names are the kernel's EasePreset list. Ids follow the
-// ledger's lowercase-dash style (Tests/command-ids/design.txt), as Flare's and Halo's do. Linux-safe.
+// ledger's lowercase-dash style (Tests/command-ids/design.txt), as Flare's and Halo's do. The inspector's key button
+// (`keyState`, `keyToggle`) adds no id: its press is keyframe.set with the layer's own value at the playhead, or
+// keyframe.remove when a key sits there. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -144,4 +146,23 @@ extension DesignWorkspace {
                example: .object(["frame": .number(60)]), availability: openHelp
         ) { w, p in w.setPlayhead(p.frame); return JSONValue.object([:]) },
     ]
+}
+
+extension DesignWorkspace {
+    /// The key button's presence on layer `id`'s `property` row at the playhead (frame 0 with none); nil with no layer.
+    public func keyState(_ id: String, _ property: DesignKeyProperty) -> KeyState? {
+        findNode(id).map { KeyRules.state($0.time?.tracks[property] ?? [], at: playhead ?? 0) }
+    }
+
+    /// The command a press of that button runs: keyframe.remove when a key sits at the frame, else keyframe.set with
+    /// the layer's own value there (its rest value while unkeyed), so the first press starts the track.
+    public func keyToggle(_ id: String, _ property: DesignKeyProperty) -> (id: String, params: JSONValue)? {
+        guard let node = findNode(id), let state = keyState(id, property) else { return nil }
+        let frame = playhead ?? 0
+        var params: [String: JSONValue] = ["node": .string(id), "property": .string(property.rawValue), "frame": .number(Double(frame))]
+        if state == .keyedHere { return ("keyframe.remove", .object(params)) }
+        let rest = switch property { case .x: node.frame.x; case .y: node.frame.y; case .opacity: node.opacity }
+        params["value"] = .number(node.time?.value(of: property, at: Double(frame)) ?? rest)
+        return ("keyframe.set", .object(params))
+    }
 }
