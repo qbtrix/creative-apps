@@ -6,7 +6,7 @@
 // only the supervisor edits. macOS only.
 #if canImport(AppKit)
 import AppKit
-import DesignModel
+@testable import DesignModel
 import SwiftUI
 import Testing
 @testable import DesignApp
