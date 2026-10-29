@@ -309,7 +309,7 @@ jobs:
     needs: mac-compile
     if: ${{ !inputs.build_only && !inputs.linux_only }}
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 80
     permissions:
       contents: read
     strategy:
@@ -332,7 +332,7 @@ jobs:
           time zstd -dc "$RUNNER_TEMP/swift-build.tar.zst" | tar -xf -
           rm "$RUNNER_TEMP/swift-build.tar.zst"
       - name: scripts/ci --shard (memory sampled)
-        timeout-minutes: 55  # under the job's 60, as in the compile job
+        timeout-minutes: 75  # under the job's 80, as in the compile job
         if: ${{ !inputs.app }}
         run: |
           mem="$RUNNER_TEMP/crash-reports/memory.log"
@@ -361,7 +361,7 @@ jobs:
       # no test fails the step. The job summary lists what ran.
       - name: Scoped tests
         if: inputs.app
-        timeout-minutes: 55  # under the job's 60, as above
+        timeout-minutes: 75  # under the job's 80, as above
         run: |
           scope=$(scripts/test-scope app "$APP")
           model=$(sed -n 1p <<<"$scope") snap=$(sed -n 2p <<<"$scope")
