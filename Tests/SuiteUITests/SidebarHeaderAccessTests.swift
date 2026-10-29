@@ -25,7 +25,6 @@ import Testing
     defer { window.orderOut(nil) }
     _ = spinUntil { axLabelledButtons(in: window).contains { $0.label == "New Scene" } }
     let buttons = axLabelledButtons(in: window)
-    axDump(window, 0)
     #expect(buttons.contains { $0.label == "New Scene" && $0.id == "suite.sidebar.add.scenes" }, "buttons: \(buttons)")
 }
 
@@ -38,10 +37,4 @@ import Testing
     }
     for child in (node.accessibilityChildren?() ?? nil) ?? [] { found += axLabelledButtons(in: child) }
     return found
-}
-
-@MainActor private func axDump(_ element: Any, _ depth: Int) {
-    let node = element as AnyObject
-    print("AXDUMP" + String(repeating: " ", count: depth * 2) + "\(String(describing: node.accessibilityRole?())) '\((node.accessibilityLabel?() ?? nil) ?? "")' id=\((node.accessibilityIdentifier?() ?? nil) ?? "")")
-    for child in (node.accessibilityChildren?() ?? nil) ?? [] { axDump(child, depth + 1) }
 }
