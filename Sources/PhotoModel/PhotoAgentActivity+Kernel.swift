@@ -15,8 +15,9 @@ extension PhotoWorkspace {
     public var agentRequests: [AgentRequest] { AgentRequests.group(agentSteps) }
 
     /// The applied agent steps, oldest first. Wire: agent-provenance (#6028) maps
-    /// `history.kernel.undoSteps` whose origin is `.agent` to records, with
-    /// `payload.layerIDs(now: layers)` for their layers.
+    /// `history.kernel.undoSteps` whose `origin` is `.agent(client:request:)` to records,
+    /// keyed by `idAfter`, with `payload.layerIDs(now: layers)` for their layers and the
+    /// time from a `[idAfter: Date]` the workspace stamps on record (History carries no date).
     var agentSteps: [AgentStepRecord] { [] }
 
     /// Hides or shows every live layer in `ids` as one step; nothing when none changes.

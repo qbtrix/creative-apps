@@ -5,7 +5,8 @@
 // steps (by name) and the layers they created or changed. Each row's eye
 // shows or hides that row's layers (`setHidden`, one undo step in the app);
 // a click selects them; the context menu holds Select Layers, Undo Request
-// (a request row, `history.undo-request {title}`) and Keep, which only
+// (the newest named request only, as `history.undo-request {title}` refuses
+// any other) and Keep, which only
 // closes the row. Which rows are open is this view's own state, so opening
 // the tab or a row runs no app body and no canvas render. The list mutates
 // nothing: every gesture goes out through `onAction`. With no requests it
@@ -79,12 +80,20 @@ public struct AgentActivityList: View {
                                    unavailableHelp: layers(of: id).isEmpty ? "These steps changed no layer." : nil,
                                    identifier: Self.naming.control(id, "select")) { onAction(.select(layers(of: id))) }]
         guard let request = requests.first(where: { $0.id == id }) else { return items }
+        // history.undo-request refuses a request whose steps aren't the applied tail: only the newest one.
+        let tail = requests.first?.id == id && request.isSpan
         items.append(ToolbarAction("Undo Request", systemImage: "arrow.uturn.backward",
+                                   unavailableHelp: tail ? nil : Self.undoHelp(request, newest: requests.first?.id == id),
                                    identifier: Self.naming.control(id, "undo")) { onAction(.undoRequest(request.title)) })
         items.append(ToolbarAction("Keep", systemImage: "checkmark", identifier: Self.naming.control(id, "keep")) {
             expanded.remove(id)
         })
         return items
+    }
+
+    /// Why Undo Request can't run on `request`: not the newest, or not a named request.
+    nonisolated static func undoHelp(_ request: AgentRequest, newest: Bool) -> String {
+        newest ? "Only a named request (history.begin) can be undone as one." : "Undo the newer requests first."
     }
 
     /// The layers row `id` stands for: a request's, a step's or the one layer.
