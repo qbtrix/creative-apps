@@ -18,7 +18,6 @@
 #if canImport(AppKit) && DEBUG
 import AppKit
 import DesignModel
-import FlareModel
 import HaloModel
 import PhotoModel
 import SuiteKernel
@@ -28,6 +27,7 @@ import Testing
 
 @testable import DesignApp
 @testable import FlareApp
+@testable import FlareModel
 @testable import HaloApp
 @testable import PhotoApp
 
@@ -120,11 +120,10 @@ extension BodyCountSuites {
             let size = CGSize(width: page.frameWidth, height: page.frameHeight)
             let target = Self.aims(tool.gesture)
                 ? w.point(CGPoint(x: frame.x + frame.width / 2, y: frame.y + frame.height / 2), on: size, in: board) : nil
-            let corner = await w.element("suite.handles.bottomRight")
+            DesignWindow.lastWorkspace = nil
             try await Self.run(.design, tool.rawValue, tool.gesture, w, at: target, bodies: { DesignWindow.bodyRuns + DesignEditor.bodyRuns }, effect: {
-                // The selected node's handle rides it, in window points.
-                guard let corner, let after = await w.element("suite.handles.bottomRight") else { return "no handles on the star" }
-                return Self.near(CGVector(dx: after.midX - corner.midX, dy: corner.midY - after.midY), Self.delta(1), "the star's corner")
+                guard let after = DesignWindow.lastWorkspace?.selectedNode?.frame else { return "no intent reached the window" }
+                return Self.near(CGVector(dx: after.x - frame.x, dy: after.y - frame.y), Self.delta(board.width / size.width), "the star's frame")
             })
         }
 
@@ -132,7 +131,8 @@ extension BodyCountSuites {
             var model = FlareWorkspace(services: .built)
             model.newSampleAnimation()
             model.selectTool(tool)
-            if let first = model.selectedScene?.layers.first { model.selectLayer(first.id) }
+            model.selectAll()  // then just the first item, so the press lands on one object's box
+            if let first = model.selection.first { model.selection = [first] }
             let box = model.selectionBounds
             let w = RenderBudgetWindow(FlareWindow(model: model))
             defer { w.close() }
@@ -196,7 +196,11 @@ extension BodyCountSuites {
             if canvas == nil { canvas = await w.element("halo.viewer.canvas") }
             if aims(gesture) { #expect(target != nil, "\(app.rawValue) \(tool): no layer to press on") }
             let start = target ?? canvas.map { CGPoint(x: $0.midX, y: $0.midY) } ?? CGPoint(x: 640, y: 410)
-            let point = { (i: Int) in CGPoint(x: start.x + Double(i) * 2, y: start.y - Double(i)) }
+            // Right, then down: the path encloses an area (a lasso needs one) and ends (2n, -n) points from the press.
+            let half = samples / 2
+            let point = { (i: Int) in
+                i <= half ? CGPoint(x: start.x + Double(i) * 4, y: start.y) : CGPoint(x: start.x + Double(2 * samples), y: start.y - Double(i - half) * 2)
+            }
             let (bodies0, pixels0) = (bodies() ?? 0, pixels?() ?? 0)
             var (bodiesDown, pixelsDown) = (0, 0)
             let step = try await w.measure("gesture \(app.rawValue).\(tool)", bodies: bodies) {
