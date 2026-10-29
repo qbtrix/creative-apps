@@ -2,7 +2,7 @@
 // step: its name ("Add Rectangle") and the snapshot of the document just before
 // it. Undo swaps the current snapshot for the step's and keeps the current one
 // for Redo, and the reverse. A snapshot holds the pages, both selections, the
-// id counters and the held-id index (DesignHeldIDs). A restore sets each
+// id counters, the held-id index (DesignHeldIDs) and the document's rate and length. A restore sets each
 // counter to the larger of the current and the snapshot's, so an undone add
 // never gives its id away again (a redo of New File therefore doesn't restart
 // the ids). The restored selection's enclosing
@@ -47,6 +47,8 @@ struct DesignSnapshot: Sendable, Equatable {
     var nodeCount: Int
     /// Every page and node id in `pages` (DesignHeldIDs).
     var heldIDs: Set<String>
+    /// The document's rate and length, so undoing New File brings back the file's.
+    var time = DesignDocumentTime()
 }
 
 struct DesignHistory: Sendable, Equatable {
@@ -123,7 +125,7 @@ extension DesignWorkspace {
     var snapshot: DesignSnapshot {
         DesignSnapshot(
             pages: pages, selectedPageID: selectedPageID, selectedNodeIDs: selectedNodeIDs,
-            expandedNodeIDs: expandedNodeIDs, pageCount: pageCount, nodeCount: nodeCount, heldIDs: held.ids)
+            expandedNodeIDs: expandedNodeIDs, pageCount: pageCount, nodeCount: nodeCount, heldIDs: held.ids, time: time)
     }
 
     /// Records the edit just made as one step named `name`, undone by putting back `before`. Does
@@ -169,7 +171,7 @@ extension DesignWorkspace {
     private mutating func restore(_ step: DesignHistory.Revert) {
         let snapshot = step.snapshot
         if step.swapsDocument { documentURL = step.documentURL }
-        pages = snapshot.pages
+        (pages, time) = (snapshot.pages, snapshot.time)
         held.replace(with: snapshot.heldIDs)
         (selectedPageID, selectedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs)
         (pageCount, nodeCount) = (Swift.max(pageCount, snapshot.pageCount), Swift.max(nodeCount, snapshot.nodeCount))
@@ -179,7 +181,7 @@ extension DesignWorkspace {
     /// A gesture or discarded text edit: the document goes back to `snapshot` exactly, counters
     /// and expansion included, because nothing it made was ever recorded.
     mutating func rewind(to snapshot: DesignSnapshot) {
-        pages = snapshot.pages
+        (pages, time) = (snapshot.pages, snapshot.time)
         held.replace(with: snapshot.heldIDs)
         (selectedPageID, selectedNodeIDs, expandedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs, snapshot.expandedNodeIDs)
         (pageCount, nodeCount) = (snapshot.pageCount, snapshot.nodeCount)

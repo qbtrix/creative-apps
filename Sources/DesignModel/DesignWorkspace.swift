@@ -171,7 +171,8 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// The selected page's tree as rows under the current expanded set, as the Layers panel shows it.
     public var layerRows: [DesignRow] { selectedPage?.visibleRows(expanded: expandedNodeIDs) ?? [] }
 
-    /// Opens a new file with one desktop-sized page holding a "Desktop" frame the size of the page.
+    /// Opens a new file with one desktop-sized page holding a "Desktop" frame the size of the page, at the default
+    /// rate and length with no playhead.
     /// Over an open file it is the undo step "New File", so Undo brings the old file back, location
     /// included. The new file has no location until it is saved.
     public mutating func newFile() {
@@ -183,17 +184,18 @@ public struct DesignWorkspace: Sendable, Equatable {
         held.replace(with: [])
         let page = nextPage()
         (pages, selectedPageID, selectedNodeID, expandedNodeIDs) = ([page], page.id, nil, [])
+        (time, playhead) = (DesignDocumentTime(), nil)
         if wasOpen { record("New File", before: before, swapsDocument: true) }
         documentURL = nil
     }
 
     /// Replaces the document with `pages` (the file codec opens a file through this): selects the
-    /// first page, clears the history, any drag or inline edit and the expanded rows, and starts
+    /// first page, clears the history, the playhead, any drag or inline edit and the expanded rows, and starts
     /// the id counters past the highest "page-N" and "node-N" in the file. Ids at or past the cap
     /// don't move the counters, but minting skips them, so a new id never repeats one (#296).
     mutating func load(_ pages: [DesignPage]) {
         self.pages = pages
-        time = DesignDocumentTime()
+        (time, playhead) = (DesignDocumentTime(), nil)
         held.scan(pages)
         (selectedPageID, selectedNodeID, expandedNodeIDs) = (pages.first?.id, nil, [])
         (history, gesture, placedText) = (DesignHistory(), nil, nil)
