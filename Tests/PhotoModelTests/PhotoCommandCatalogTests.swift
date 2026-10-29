@@ -174,10 +174,11 @@ struct PhotoCommandCatalogTests {
     }
 
     /// Commands with no menu item: the catalog's only (gradient-fill PG-3; image.flip has Image > Flip Canvas since OC-13); the Layers list's pick, All Layers
-    /// (Select menu, PM-3) and opacity (multi-layer-select PM-5); the eyedropper's sample query (PE-6), a tool's.
+    /// (Select menu, PM-3) and opacity (multi-layer-select PM-5); the eyedropper's sample query (PE-6), a tool's; an agent's read,
+    /// snapshot and paint stroke (#6028).
     /// The area shapes (area-selection AR-10) run from their tools; Invert through Reselect have Select menu items (AR-11).
     static let noMenu: Set = ["select.rect", "select.ellipse", "select.lasso", "select.polygon", "select.wand", "image.gradient", "layer.pick", "layer.select-all", "layer.set-opacity", "layer.move-by",
-                              "color.sample"]
+                              "color.sample", "document.read", "view.snapshot", "paint.stroke"]
     /// Every non-tool command but the menu-less ones, the shared file-flow ones, the place ones and Free Transform's
     /// (transform PT-5, ahead of its menu items) and the History panel's (history-panel PH-5) and text layers' (the Type tool and inspector run them), in menu order (the catalog lists them as the menus do).
     static let menuIDs = PhotoWorkspace.commands.map(\.id).filter {
