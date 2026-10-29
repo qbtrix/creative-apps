@@ -40,6 +40,7 @@ has to end up.
 | Halo | drag Floor in the viewer, 120 samples | 2 / 3 / 3 | 2.9 / 4 / 8.3 ms | none: at the `haloViewerTakesActivationClicks` bound (3); could tighten to 2 |
 | Design | drag a shape on `crowd`, 120 samples | 3 / 3 / 3 | 4.1 / 6 / 8.3 ms | none in flight; at design-window DW-b's bound |
 | Design | marquee select on `crowd`, 120 samples | 3 / 3 / 3 | 2.7 / 4 / 8.3 ms | none in flight; at DW-b's bound |
+| Design | play `animated(500)` once, 5 s of 120 Hz refreshes on a hand-fired link (`RenderBudgetDesignAnimateTests.playback`) | 0 / 0 / 0 | 5.8 / QB-L4: at most 2 refreshes over 16.7 ms / 8.3 ms | measured `--no-parallel` at load ~60: p50 3.7, max 29.9 ms, 3 over 8.3 ms, 1 over 16.7 ms, no document frame skipped. Under parallel load ~70 it read p95 19.3 ms with 40 over 16.7 ms, so OD-16's quiet rerun owes the real tail |
 | Library | scroll the grid, 120 steps of 12 pt (`samples`) | 0 / 0 / 0 | 6.6 / 10 / 8.3 ms | none in flight |
 | Library | step the Develop tab's Midtones handle 120 times at 120 Hz (`samples`, first photo in the loupe; `RenderBudgetLibraryLevelsTests`) | 120 / 120 / 0 | 24.7 ms p95, printed, not judged | each step reruns the window body once; a Levels edit should only touch the inspector and the loupe. The histogram is counted once per loupe render off the main thread (`LibraryHistogramBudgetTests`) |
 | Library | select, 10 clicks on grid cells | 10 / 10 / 10 | 80 / 120 / 33 ms | none in flight |
