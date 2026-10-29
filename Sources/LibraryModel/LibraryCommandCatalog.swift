@@ -5,7 +5,7 @@
 // Import Folder… and Export… (CS-3) take the panel's folder as a param and begin the run; the window's panel and the
 // async importer and export runner do the rest. Show Original (CS-3) is state the loupe's render reads.
 // CS-5: the export sheet's controls (`export.*`), the notice row's (`notice.*`, `file.show-catalog`) and Develop's
-// per-slider resets (`photo.reset-<slider>`) as specs too; the window still opens panels and reveals files.
+// per-slider resets (`photo.reset-<slider>`) and `photo.set-develop` as specs too; the window still opens panels and reveals files.
 // The grid toolbar's controls (#3632) are view.thumbnail-size, view.sort, file.import-folder and file.export.
 // Ids are `<menu>.<action>` in lowercase; Tests/command-ids/library.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -61,7 +61,7 @@ extension LibraryCatalog {
     /// Every Library menu action as a command spec, in menu order.
     public static let commands: [CommandSpec<LibraryCatalog>] = fileAndEditSpecs + viewSpecs + photoSpecs + metadataSpecs
         + FileFlowCommands.specs(LibraryCatalog.self)
-        + folderSpecs + exportSheetSpecs + noticeSpecs + resetSliderSpecs + [sharePrepareSpec, copySpec, thumbnailStatsSpec] + backupSpecs
+        + folderSpecs + exportSheetSpecs + noticeSpecs + resetSliderSpecs + [setDevelopSpec, sharePrepareSpec, copySpec, thumbnailStatsSpec] + backupSpecs
         + LibraryCropDocument.specs + AdjustCommands.specs(LibraryCatalog.self)
 
     /// The specs as a catalog whose history is the catalog's own.
@@ -324,6 +324,22 @@ extension LibraryCatalog {
     static let resetSliderSpecs: [CommandSpec<LibraryCatalog>] = ToneSlider.develop.map { slider in
         photo(resetSliderID(slider), "Reset " + slider.title, "Sets the targets' \(slider.title.lowercased()) back to 0.", .edit,
               "develop", "Develop isn't connected yet.", on: { $0.canEditDevelop }, run: { $0.resetDevelop(slider) })
+    }
+
+    /// Develop's sliders as a command: one slider of the targets to a value, a drag's token making one step.
+    static let setDevelopSpec: CommandSpec<LibraryCatalog> = .typed(
+        "photo.set-develop", title: "Set Develop", summary: "Sets one develop slider of the targets, clamped to its range.",
+        kind: .edit, params: ToneCommands.SetParams.self,
+        schema: .object(["slider": .string("The slider.", oneOf: ToneSlider.develop.map(\.rawValue)),
+                         "value": .number("The value, clamped to the slider's range."),
+                         "drag": .optional(.string("A drag's token; steps under one token are one undo step.", maxLength: 64))],
+                        required: ["slider", "value"]),
+        example: .object(["slider": .string("vibrance"), "value": .number(50)]),
+        availability: { available($0.services.unavailable["develop"] ?? $0.developHelp) }
+    ) { c, p in
+        if let why = c.sliderHelp(p.slider) { throw CatalogError.unavailable(id: "photo.set-develop", why: why) }
+        c.setDevelop(p.slider, to: p.value, coalesceKey: p.drag)
+        return c.developValue(p.slider)?.shared.map { JSONValue.object([p.slider.rawValue: .number($0)]) } ?? .object([:])
     }
 }
 

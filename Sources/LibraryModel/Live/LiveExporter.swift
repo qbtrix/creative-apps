@@ -2,8 +2,10 @@
 // the options' long edge, never enlarged (nil keeps the photo's size), and
 // names it through EX-1's rule (`ExportNaming.stem`, `ExportNames.unique`).
 // `render` is one pipeline: a full-size decode (a sample's `SampleImage`,
-// never decoded), develop through `DevelopRendering` (tone, then crop),
-// lanczos3 to the planned long side, sRGB bytes. Decode errors pass through.
+// never decoded), a lanczos3 shrink so the cropped photo is about the planned
+// long side (`preShrunk`: develop runs on the export's pixels, not the
+// camera's), develop through `DevelopRendering` (tone, then crop), lanczos3
+// down to the planned long side when the crop left more, sRGB bytes. Decode errors pass through.
 // Each item carries the properties the options' metadata policy drops, for
 // the writer (export-pack, LX-3).
 #if canImport(FoundationEssentials)
@@ -40,14 +42,10 @@ public struct LiveExporter: PhotoExporting {
     public func render(_ item: ExportPlan.Item, photo: PhotoItem) async throws -> DisplayImage {
         let image = try await fullSize(photo)
         do {
-            var buffer = try PixelBuffer(rgba8: image.rgba8, width: image.size.width,
-                                         height: image.size.height, colorSpace: .sRGB)
-            buffer = try develop.render(buffer, settings: photo.develop)
-            // The developed buffer's shape is the real crop's; the plan sets the long side.
-            let target = PixelSize(width: buffer.width, height: buffer.height).fitting(longSide: item.size.longSide)
-            if target.width != buffer.width || target.height != buffer.height {
-                buffer = try buffer.resized(width: target.width, height: target.height, filter: .lanczos3)
-            }
+            let full = try PixelBuffer(rgba8: image.rgba8, width: image.size.width,
+                                       height: image.size.height, colorSpace: .sRGB)
+            let buffer = try Self.developed(full, photo: photo, longSide: item.size.longSide, develop: develop)
+            let target = PixelSize(width: buffer.width, height: buffer.height)
             guard let out = DisplayImage(size: target, rgba8: try buffer.rgba8(colorSpace: .sRGB)) else {
                 throw LibraryError.renderFailed("the exported picture has no pixels")
             }
@@ -55,7 +53,7 @@ public struct LiveExporter: PhotoExporting {
         } catch let error as LibraryError {
             throw error
         } catch {
-            throw LibraryError.renderFailed(String(describing: error))
+            throw LibraryError.renderFailed("the picture couldn't be drawn at the export size")
         }
     }
 
@@ -68,6 +66,28 @@ public struct LiveExporter: PhotoExporting {
             return image
         }
         return try await decoder.decode(path: path, maxLongSide: nil)
+    }
+
+    /// The photo's full-size pixels `b` shrunk, developed, then resized so the developed crop's long side is
+    /// `longSide`: the export's picture before encoding, shared with the headless export.
+    static func developed(_ b: PixelBuffer, photo: PhotoItem, longSide: Int,
+                          develop: any DevelopRendering) throws -> PixelBuffer {
+        let buffer = try develop.render(preShrunk(b, photo: photo, longSide: longSide), settings: photo.develop)
+        // The developed buffer's shape is the real crop's; the plan sets the long side.
+        let target = PixelSize(width: buffer.width, height: buffer.height).fitting(longSide: longSide)
+        guard target.width != buffer.width || target.height != buffer.height else { return buffer }
+        return try buffer.resized(width: target.width, height: target.height, filter: .lanczos3)
+    }
+
+    /// `b`, the photo's full-size pixels, shrunk by the planned long side over the cropped photo's (rounded as
+    /// `PixelSize.fitting` rounds, so an uncropped photo lands on the plan's size); untouched at full size.
+    static func preShrunk(_ b: PixelBuffer, photo: PhotoItem, longSide: Int) throws -> PixelBuffer {
+        let full = croppedSize(photo).longSide
+        guard full > longSide, longSide > 0 else { return b }
+        let scale = Double(longSide) / Double(full)
+        let w = max(Int((Double(b.width) * scale).rounded()), 1), h = max(Int((Double(b.height) * scale).rounded()), 1)
+        guard w < b.width || h < b.height else { return b }
+        return try b.resized(width: w, height: h, filter: .lanczos3)
     }
 
     /// The size the crop leaves of the oriented photo (EX-14 proves it), else the oriented photo's own.
