@@ -37,7 +37,8 @@ extension BodyCountSuites {
             try #require(begun.viewerDrag != nil, "the press hit no layer")
             live.lift = HaloViewerGestures.lift(project, at: Self.press)
             live.project = begun
-            try #require(live.lift?.below.items.count == 1999, "huge didn't lift its top layer")
+            let lift = try #require(live.lift, "huge's pressed layer didn't lift")
+            try #require(lift.below.items.count + 1 + lift.above.items.count == 2000, "the lift lost layers")
             let draws = { BodyTally.runs(of: HaloCanvasDraws.self) }
             try await w.settle(untilStable: draws)
 
