@@ -108,6 +108,26 @@ enum HaloKeyRules {
         }
     }
 
+    /// Delete Keyframes in one pass over the layers: each track drops its
+    /// picked frames at once, so 5,000 keys cost one walk, not 5,000 toggles
+    /// (#5988). The result matches `toggleKey` on each key: a track left with
+    /// one key goes static at it, one left with none at its first key.
+    static func deleteKeys(_ keys: Set<HaloKeyRef>, in c: inout HaloComposition) {
+        let byLayer = Dictionary(grouping: keys, by: \.layerID)
+        for i in c.layers.indices {
+            guard let refs = byLayer[c.layers[i].id] else { continue }
+            for (p, picked) in Dictionary(grouping: refs, by: \.property) {
+                guard let track = c.layers[i].tracks[p.rawValue] else { continue }
+                let frames = Set(picked.map(\.frame))
+                let left = track.filter { !frames.contains($0.frame) }
+                guard left.count < track.count else { continue }
+                if left.count >= 2 { c.layers[i].tracks[p.rawValue] = left; continue }
+                let first = left.first ?? track.min { $0.frame < $1.frame }
+                if let first { setStatic(first.value, p, of: &c.layers[i]) }
+            }
+        }
+    }
+
     /// The parent picker: layer `id` follows `pid` (nil clears it) through
     /// the kernel's `setFollow(keepingPlace:)` and keeps its anchor's place on
     /// screen at `f`, its x and y rewritten in the new parent's space through

@@ -30,7 +30,7 @@ import CoreRender
 
     @Test func stepsRenderWhatDevelopRenders() throws {
         let base = try Self.buffer(#require(FakeBehavior.gradient(for: Self.shot, longSide: 64)))
-        let steps = try #require(LiveDevelop.steps(for: Self.edit))
+        let steps = LiveDevelop.steps(for: Self.edit)
         #expect(steps.count == LiveDevelop.passes(for: Self.edit).count)
         let cpu = CPUBackend()
         var surface = try cpu.surface(base)
@@ -74,10 +74,10 @@ import CoreRender
         #expect(frame.histogram != undeveloped.histogram)
     }
 
-    @Test func waitingSliderThrowsItsReason() async throws {
-        let loupe = Self.loupe()
-        await #expect(throws: LibraryError.renderFailed(LiveDevelop.waiting[.vibrance] ?? "")) {
-            _ = try await loupe.gpuFrame(Self.shot, settings: Self.edit.setting(.vibrance, to: 10), longSide: 200, preferGPU: true)
-        }
+    /// Vibrance (DV-12) renders: core's `.color` family, so the CPU route, never a waiting error.
+    @Test func vibranceTakesTheCPURoute() async throws {
+        let vibrant = Self.edit.setting(.vibrance, to: 10)
+        #expect(LiveDevelop.steps(for: vibrant).contains(.vibrance(10)))
+        #expect(try await Self.loupe().gpuFrame(Self.shot, settings: vibrant, longSide: 200, preferGPU: true) == nil)
     }
 }
