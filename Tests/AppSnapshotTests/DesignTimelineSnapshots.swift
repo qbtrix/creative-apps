@@ -7,7 +7,7 @@
 import AppKit
 import DesignModel
 import SuiteKernel
-import SuiteUI
+@testable import SuiteUI
 import SwiftUI
 import Testing
 @testable import DesignApp
