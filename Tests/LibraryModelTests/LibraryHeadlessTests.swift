@@ -50,6 +50,22 @@ import Testing
         #expect(throws: CatalogError.self) { try doc.export("tiff", options: .object([:])) }
     }
 
+    /// Quality gate #5953: a failed export says what went wrong in plain words, never an enum dump.
+    @Test func failedExportSaysWhyInPlainWords() throws {
+        var doc = try LibraryHeadless.open(Self.input("import-rate-export"), name: "shoot.library")
+        let header = try #require(doc.images["images/meadow.png"]).prefix(33)
+        try doc.importImage(Data(header), name: "torn.png")
+        _ = try LibraryHeadless.catalog.run("edit.select", params: .object(["ids": .array([.string("torn")])]), on: &doc)
+        _ = try LibraryHeadless.catalog.run("metadata.pick", params: .object([:]), on: &doc)
+        #expect(throws: CatalogError.failed(id: "export.png", message: "Couldn't export torn: its image file is damaged.")) {
+            try doc.export("png", options: .object([:]))
+        }
+        #expect(LibraryHeadless.plainWords(LibraryError.renderFailed("the crop doesn't fit the photo"))
+            == "Couldn't render this photo: the crop doesn't fit the photo.")
+        #expect(LibraryHeadless.plainWords(CodecError.tooLarge("x")) == "its image is too large to write.")
+        #expect(!LibraryHeadless.plainWords(CancellationError()).contains("("))
+    }
+
     @Test func newAndSummary() throws {
         let doc = try LibraryHeadless.new(.object([:]))
         #expect(doc.library.items.isEmpty && doc.images.isEmpty)

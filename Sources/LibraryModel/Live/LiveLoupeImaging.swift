@@ -87,8 +87,8 @@ public actor LiveLoupeImaging: LoupeImaging {
         for slider in DevelopSlider.allCases where settings.value(slider) != 0 {
             if let why = LiveDevelop.waiting[slider] { throw LibraryError.renderFailed(why) }
         }
-        guard let steps = LiveDevelop.steps(for: settings),
-              ImagingRoute.choose(preferGPU: preferGPU, steps: steps) == .gpu else { return nil }
+        let steps = LiveDevelop.steps(for: settings)
+        guard ImagingRoute.choose(preferGPU: preferGPU, steps: steps) == .gpu else { return nil }
         let base = try await decoded(photo, longSide: longSide, quality: .full)
         let developed = try await render(photo, settings: settings, longSide: longSide, quality: .preview)
         return LoupeGPUFrame(base: base, steps: steps, histogram: developed.histogram)
