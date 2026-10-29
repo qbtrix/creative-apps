@@ -4,7 +4,7 @@
 // timeline shows on open with the rest pose at frame 0 and the keyed pose at 60. An autosave copy written to a real
 // RecoveryFolder recovers the same keys and time, dirty and with no location. A still file stays byte for byte
 // version 1 through a playhead change and through a key that is undone; a key marks the file dirty, a playhead
-// change doesn't. The fixture fakes' codec keeps the time too, writing the bytes it always wrote for a still file.
+// change doesn't. The fixture fakes' codec keeps the time too, writing a still file as the bare pages array it always wrote.
 // Linux-safe.
 @testable import DesignModel
 import Foundation
@@ -105,6 +105,7 @@ import Testing
 
         var still = DesignFixtures.cards
         still.useServices(.fake)
-        #expect(try still.fileData() == JSONEncoder().encode(still.pages), "a still file's fake bytes changed")
+        // The fake encoder doesn't sort keys, so its bytes vary between runs: check the shape, a bare pages array.
+        #expect(try JSONDecoder().decode([DesignPage].self, from: still.fileData()) == still.pages, "a still file's fake format changed")
     }
 }
