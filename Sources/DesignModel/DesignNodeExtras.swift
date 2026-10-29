@@ -13,6 +13,8 @@ struct DesignNodeExtras: Hashable, Sendable {
     var shape: ShapeSpec?
     var placedAsset: PlacedAsset?
     var placedFocus = DesignNode.centreFocus
+    /// Spike only (spike/one-document): keyed x, y and opacity; nil for a still node.
+    var time: DesignNodeTime?
 }
 
 /// `DesignNodeExtras` on the heap: reads share it, a write to a shared box copies it first.

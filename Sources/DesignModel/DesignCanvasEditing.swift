@@ -111,7 +111,8 @@ struct DesignGesture: Sendable, Equatable {
 extension DesignWorkspace {
     /// The topmost visible, unlocked node on the selected page under `point`.
     public func hitTest(_ point: DesignPoint) -> String? {
-        selectedPage?.nodes.hit(at: point)
+        if let frame = Self.spikePlayhead { return hitTest(point, at: frame) }  // spike/one-document
+        return selectedPage?.nodes.hit(at: point)
     }
 
     /// The handle of the selected node outside any lock and any hidden group (the canvas draws no
