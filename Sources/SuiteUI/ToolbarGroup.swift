@@ -9,7 +9,11 @@
 // action can only be disabled by saying why: its `unavailableHelp` is the
 // tooltip, so no shown control is silently dead. Apps build their palette
 // from their Model's tool enum through PaletteTool, which carries that reason
-// and the shortcut for every tool. The palette is one accessibility
+// and the shortcut for every tool, and its ToolGesture: the behaviour class
+// of its canvas drag or click, with no default, so a new tool can't compile
+// without one. The gesture contract (Tests/AppSnapshotTests/
+// GestureContractTests.swift) holds every tool of a class to the same budget
+// in every app. The palette is one accessibility
 // container, `suite.tools`, so the UI journeys in UITests/ can click every
 // tool in it without listing them. An action with an `identifier` carries it
 // as its accessibility identifier and lists itself in `suite.controls`, with
@@ -79,6 +83,26 @@ public protocol PaletteTool: Hashable {
     var unavailableHelp: String? { get }
     /// The key that picks the tool while the canvas has focus; nil for none.
     var shortcut: Character? { get }
+    /// What the tool's canvas drag or click does. No default: every tool picks a class.
+    var gesture: ToolGesture { get }
+}
+
+/// A tool's canvas gesture by behaviour class. Two tools of one class owe the same budget, in any app.
+public enum ToolGesture: String, CaseIterable, Sendable {
+    /// Drags pixels or objects that already exist (Move, Select).
+    case movesContent
+    /// Lays down or changes pixels along the pointer (Brush, Eraser, Clone, Bucket, Gradient).
+    case paints
+    /// Picks an area or the objects in it (Marquee, Lasso, Wand, a crop frame).
+    case selects
+    /// Places a new object or draws a new shape (Rectangle, Frame, Text).
+    case creates
+    /// Adds or moves path points and their handles (Pen, Direct Select).
+    case editsPoints
+    /// Reads without changing anything (Eyedropper).
+    case inspects
+    /// Takes no canvas gesture.
+    case none
 }
 
 extension PaletteTool {

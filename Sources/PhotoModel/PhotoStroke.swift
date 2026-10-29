@@ -82,6 +82,8 @@ struct PhotoStroke: Sendable, Equatable {
     var before: [Int: PixelBuffer] = [:]
     var coverage: [Int: [Float]] = [:]
     var samples: [StrokeSample] = []
+    /// Brush and eraser: the undo step's name when a command, not a drag, made the stroke ("Brush Stroke").
+    var stepName: String?
     /// Move: the layer list before the drag.
     var layersBefore: [PhotoLayer] = []
     /// Marquee: the modifier keys `selectionDrag` saw last (Shift adds,
@@ -286,7 +288,7 @@ extension PhotoWorkspace {
         case .brush, .eraser:
             paint(&done, adding: nil, pressure: 1)
             guard let id = done.layerID, !done.before.isEmpty else { return }
-            record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
+            record(.tiles(layer: id, done.before), named: done.stepName ?? (done.tool == .brush ? "Paint" : "Erase"))
         case .clone:
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: "Clone")

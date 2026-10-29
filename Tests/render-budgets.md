@@ -254,6 +254,15 @@ running; debug build, 1024 x 576 in 60 layers (the dev rows are from a
 | GPU, now | 9 (one per region, 9 cache hits) | 2 | none |
 | CPU, dev | 1556 | 0 | the queued render, 22 regions |
 | CPU, now | 96 (one per region, 96 hits) | 7 | none |
+| GPU, lift (#6024) | 357, all at the press: the picture under the lifted layer, 6 regions x 59 layers; a one-sample drag costs the same | 1 (the release) | none |
+| CPU, lift (#6024) | 1428, all at the press (24 regions); a one-sample drag costs the same | 1 (the release) | none |
+
+Since #6024 a Move drag is a compositor lift (docs/render-contract.md): the
+press renders the picture under the moved layer once, with one base per
+region (the kept base is not hit for that stack yet: a follow-up), the samples
+render nothing, and the release lands one picture. `photoMoveSettlesAfterTheDrag`
+gates that per-drag shape: a 30-sample drag costs no more than a one-sample
+drag on bases, regions, layers and pictures.
 
 What ran after the release was the Curves histogram recount (one row at a
 time through every layer, one core for seconds; a masked layer's tile is now

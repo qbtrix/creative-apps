@@ -1,5 +1,6 @@
 # Photo's command ids (adopt-command-catalog AC-p1). Never reuse one; mark a removed id "retired <id>".
 color.sample
+document.read
 edit.copy
 edit.cut
 edit.delete-selection
@@ -48,6 +49,7 @@ layer.select-below
 layer.send-backward
 layer.set-opacity
 layer.toggle-visibility
+paint.stroke
 place.focus
 place.image
 place.read
@@ -114,6 +116,7 @@ transform.scale
 transform.set
 view.actual-size
 view.fit
+view.snapshot
 view.zoom-in
 view.zoom-out
 history.jump

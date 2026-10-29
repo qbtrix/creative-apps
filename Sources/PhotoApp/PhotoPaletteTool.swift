@@ -5,6 +5,7 @@
 // is enabled on `.fake` and, with the live sampler built (eyedropper PE-5), on
 // `.live`: a drag samples the composite into the brush colour. A typed letter
 // picks a tool through SuiteUI's ToolKeys; Shift cycles a shared letter.
+// PhotoTool's `gesture` (its behaviour class) lives here too.
 import PhotoModel
 import SuiteUI
 
@@ -16,6 +17,21 @@ struct PhotoPaletteTool: PaletteTool {
     var systemImage: String { tool.systemImage }
     var unavailableHelp: String? { help }
     var shortcut: Character? { tool.shortcut }
+    var gesture: ToolGesture { tool.gesture }
+}
+
+extension PhotoTool {
+    /// The tool's behaviour class (SuiteUI's ToolGesture), which the gesture contract holds it to.
+    public var gesture: ToolGesture {
+        switch self {
+        case .move: .movesContent
+        case .marquee, .ellipse, .lasso, .polygon, .wand, .crop: .selects
+        case .brush, .eraser, .clone, .spotHeal, .heal, .remove, .bucket, .gradient: .paints
+        case .text: .creates
+        case .pen: .editsPoints
+        case .eyedropper: .inspects
+        }
+    }
 }
 
 extension PhotoPaletteTool {
