@@ -19,6 +19,7 @@
 // a scrub's once the drag rests (`settle`). Presentation state only.
 import HaloModel
 import Observation
+import SuiteUI
 import SwiftUI
 
 @MainActor @Observable final class HaloLiveEdit {
@@ -38,7 +39,7 @@ import SwiftUI
     /// an inspector scrub paces its writes on it. A row reading the closure
     /// from the environment would re-run whenever the window does, since
     /// SwiftUI can't compare closures.
-    @ObservationIgnored var makeLink: HaloPlaybackDriver.LinkMaker = HaloScreenLink.make
+    @ObservationIgnored var makeLink: SuitePlaybackDriver.LinkMaker = SuiteScreenLink.make
 
     /// What a viewer shows of `model`: the live drag's project, else the
     /// playing frame, else `model` itself.

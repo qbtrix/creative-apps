@@ -8,7 +8,7 @@
 // disagrees with its disabled state (#4352). Play shows pause.fill while playing and reads `playLabel`
 // as its value. Loop is a button-style Toggle that reads `loopLabel` and
 // draws its on state (system highlight, accent ink) so a person can see
-// whether looping is on. It owns the HaloPlaybackDriver: running while
+// whether looping is on. It owns a SuitePlaybackDriver (SuiteUI): running while
 // `model.playback.playing`, stopped otherwise or once the transport leaves
 // the screen, on the `haloRefreshLink` the environment gives; each refresh
 // sends `.tick(now)` through `perform`, and a playhead that moved while
@@ -25,7 +25,7 @@ struct HaloTransport: View {
     let model: HaloProject
     var perform: @MainActor (HaloCommand) -> Void = { _ in }
 
-    @State private var driver: HaloPlaybackDriver?
+    @State private var driver: SuitePlaybackDriver?
     @Environment(\.haloRefreshLink) private var makeLink
     @Environment(\.suiteProbeRecorder) private var recorder
 
@@ -41,7 +41,7 @@ struct HaloTransport: View {
         .background {
             HaloPlayheadShown(model: model) { shown in
                 Color.clear.onChange(of: shown.selectedComposition?.playheadFrame) {
-                    if shown.playback.playing { driver?.frameShown() }
+                    if shown.playback.playing { frameShown() }
                 }
             }
         }
@@ -79,11 +79,24 @@ struct HaloTransport: View {
             return
         }
         let perform = perform
-        let running = driver ?? HaloPlaybackDriver(onTick: { now in perform(.tick(now)) }, makeLink: makeLink)
-        running.probe = HaloProbe(recorder)
+        // The tick never stops the link itself: this view stops it once the Model stops playing.
+        let running = driver ?? SuitePlaybackDriver(onTick: { now in perform(.tick(now)); return true }, makeLink: makeLink)
         driver = running
         running.start()
     }
+
+    /// The latest tick moved the playhead: one `playback` frame at the target of the refresh that moved it.
+    private func frameShown() {
+        let probe = HaloProbe(recorder)
+        guard probe.isOn, let target = driver?.lastTarget else { return }
+        probe.drew(HaloProbe.playback, at: target)
+    }
+}
+
+extension EnvironmentValues {
+    /// The link the transport's driver and an inspector scrub run on: the main screen's display link. A test
+    /// hosting the whole window swaps in a link it fires by hand; no unit test ever starts a real one.
+    @Entry var haloRefreshLink: SuitePlaybackDriver.LinkMaker = SuiteScreenLink.make
 }
 
 /// The transport's buttons for `state`. `target` is the same frame on screen,

@@ -12,7 +12,7 @@ import SuiteUI
 
 @MainActor final class HaloInspectorScrubLink {
     private var scrub = HaloInspectorScrub()
-    private var link: (any HaloRefreshLink)?
+    private var link: (any SuiteRefreshLink)?
     private var write: @MainActor (Double) -> Void = { _ in }
     private var probe = HaloProbe(nil)
 
@@ -20,7 +20,7 @@ import SuiteUI
     /// kept it. `write` puts a value on screen; `probe` records what each
     /// refresh shows.
     func take(
-        _ value: Double?, probe: HaloProbe, makeLink: HaloPlaybackDriver.LinkMaker,
+        _ value: Double?, probe: HaloProbe, makeLink: SuitePlaybackDriver.LinkMaker,
         write: @escaping @MainActor (Double) -> Void
     ) {
         self.write = write
