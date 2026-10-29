@@ -8,7 +8,7 @@
 # bisected by prefix; a proof gone stale on a ratchet or baseline change is
 # checked again on today's dev), the batch macOS gate (LANE_MAC_PER_PR=0: one macOS gate
 # per code batch scoped to its apps, priority order, slots, the timer, a red
-# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
+# base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named, and LANE_KILN=1's hold for a local Mac check's local-ci/macos), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
 # bisect, with its 2-of-3 vote mode for a timing budget test, and the
 # auto-revert of a red dev's culprit, own-proof landing on the pre-screen and a
 # stale proof's batch of one holding only its own PR
@@ -650,6 +650,10 @@ gh() {
     "api "*"/status "*)  # a commit's statuses: $sw/status.<sha>.json ({statuses: [...]}), none if absent
       u="${2#*/commits/}"; u="${u%%/*}"
       jq -r "${!#}" "$sw/status.$u.json" 2>/dev/null || jq -rn '{statuses: []}' | jq -r "${!#}" ;;
+    "api "*"/commits/"*"--jq .commit.committer.date"*)  # a commit's committer date (mac_hold), from the bare remote, in UTC
+      u="${2#*/commits/}"
+      TZ=UTC git -C "$sw/origin.git" log -1 --date=format-local:%Y-%m-%dT%H:%M:%SZ --format=%cd "$u" 2>/dev/null \
+        | jq -R '{commit: {committer: {date: .}}}' | jq -r "${!#}" ;;
     "api "*"/pulls/"*"/files "*)
       n="${2#*/pulls/}"; n="${n%%/*}"
       if [[ -e "$sw/files.$n.json" ]]; then jq -r "${!#}" "$sw/files.$n.json"
@@ -1657,6 +1661,41 @@ fresh; cpr 122 Sources/PhotoModel/A.swift; lane_sweep; TIP=$(batch_tip)
 gate "$TIP" success in_progress "macOS (photo)"; lstatus "$TIP" success; lane_sweep
 expect "local: a local pass lands while GitHub's macOS job still runs" "$(merges)" "pr merge 122"
 
+# LANE_KILN=1: a fresh batch holds its mac_only run up to LANE_KILN_WAIT_MIN
+# minutes for the local Mac check's local-ci/macos status, read by state and
+# context, never by its description. Its `error` is no answer: no red, no
+# bisect, and mac_only goes out once the wait runs out (LANE_KILN_WAIT_MIN=0
+# here stands for a batch older than the wait).
+mac_only() { grep -c -- "-f mac_only=true -f app=photo --ref $1\$" "$sw/calls" || true; }
+ldesc() { jq -n --arg s "$2" --arg d "$3" '{statuses: [{context: "local-ci/macos", state: $s, description: $d, target_url: "https://mac.local/ci/1"}]}' >"$sw/status.$1.json"; }
+fresh; cpr 140 Sources/PhotoModel/A.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+expect "local hold: a fresh batch gets its Linux check and no mac_only run" \
+  "$(grep -c -- "-f linux_only=true --ref $BR\$" "$sw/calls"),$(mac_only "$BR")" "1,0"
+gate "$TIP" success none; ldesc "$TIP" success "mac check ✘ (a description the lane ignores)"; LANE_KILN=1 lane_sweep
+expect "local hold: a green local-ci/macos within the wait lands it with no mac_only run" \
+  "$(merges),$(mac_only "$BR")" "pr merge 140,0"
+fresh; cpr 141 Sources/PhotoModel/A.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success none; LANE_KILN=1 lane_sweep
+expect "local hold: no answer yet keeps holding" "$(mac_only "$BR"),$(merges)" "0,"
+gate "$TIP" success none; LANE_KILN=1 LANE_KILN_WAIT_MIN=0 lane_sweep
+expect "local hold: no answer within the wait dispatches mac_only as before" "$(mac_only "$BR"),$(merges)" "1,"
+fresh; cpr 142 Sources/PhotoModel/A.swift; cpr 143 Sources/PhotoModel/B.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success none; ldesc "$TIP" error "mac check ✘ infra"; LANE_KILN=1 lane_sweep
+expect "local hold: an error within the wait is no answer: held, not red" \
+  "$(mac_only "$BR"),$(probe_sha 1),$(redref),$(grep -c '^pr edit .*needs-fix' "$sw/calls" || true)" "0,,0,0"
+LANE_KILN=1 LANE_KILN_WAIT_MIN=0 lane_sweep
+expect "local hold: an error past the wait dispatches mac_only, no bisect" \
+  "$(mac_only "$BR"),$(probe_sha 1),$(redref),$(merges)" "1,,0,"
+fresh; cpr 144 Sources/PhotoModel/A.swift; cpr 145 Sources/PhotoModel/B.swift
+LANE_KILN=1 lane_sweep; TIP=$(batch_tip); BR=$(batch_br)
+gate "$TIP" success none; ldesc "$TIP" failure "mac check ✔ (a description the lane ignores)"; LANE_KILN=1 lane_sweep
+expect "local hold: a failure is red: the bisect probes the chain after 1 PR" \
+  "$(probe_sha 1),$(grep -c -- "-f linux_only=true --ref $BR-1\$" "$sw/calls"),$(mac_only "$BR"),$(merges)" \
+  "$(git -C "$sw/origin.git" rev-parse "$TIP~1"),1,0,"
+
 # Slots: the lane's queued and running macOS runs (gates and per-PR builds;
 # other runs don't count) at LANE_MAC_SLOTS form no batch.
 fresh; cpr 100 Sources/PhotoModel/A.swift
@@ -1793,6 +1832,8 @@ rvdev() {  # rvdev <jobs> <path|subject>...: main at a base, dev one commit per 
   jq -n --arg b "$(printf 'CI on dev is red.\n\n- Run: https://github.com/qbtrix/creative-apps/actions/runs/9500\n- Failing jobs: %s\n- Culprit range: `main..%s`\n' "$jobs" "$RED")" \
     '[{number: 520, body: $b, pull_request: null}]' >"$sw/red.json"
   tip_red "$RED" 4343 '✘ Test opens() recorded an issue at OpenTests.swift:9:5: Expectation failed: (doc.layers.count → 3) == (4 → 4)'
+  # The dev-red run 9500's jobs, every attempt (red_tests reads its newest failed attempt): that Linux job failed in attempt 1.
+  jq -n '{jobs: [{id: 4343, name: "Linux", conclusion: "failure", run_attempt: 1}]}' >"$sw/jobs.9500.json"
   # The flake check already judged this red real (its rerun failed), so these cases start where today's lane does.
   printf '%s\n' "$RERUN_MARK ${RED:0:7} red -->" >"$sw/520.comments"
   jq -n '{body: "Adds a.\n\nFeature: easing"}' >"$sw/pull.201.json"
@@ -2087,6 +2128,26 @@ flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
 jq '.[0].body |= sub("- Run: [^\n]*\n"; "")' "$sw/red.json" >"$sw/x" && mv "$sw/x" "$sw/red.json"
 LANE_VERIFY_AFTER=1 lane_sweep
 expect "flake check: no run named, nothing to rerun: red as today" "$(reruns),$(creates)" "0,1"
+# A cancelled rerun (the concurrency group replaced it, or no runner took it)
+# says nothing about the red (lesson 351): the failed jobs are rerun once
+# more; cancelled again, the lane waits for the next dev run. Never "failed
+# too", never a red mark, nothing held, bisected, reverted or quarantined.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep; runstate completed cancelled; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a cancelled rerun is inconclusive: one more rerun, said on the issue, never 'failed too' or red" \
+  "$(reruns),$(grep -c "^issue comment 520 .*Flake check: the rerun of $FLAKE_RUN was cancelled, so it says nothing about this red; re-running the failed jobs once more at ${RED:0:7}\. <!-- lane-rerun ${RED:0:7} again -->" "$sw/calls"),$(grep -c 'failed too' "$sw/calls"),$(grep -c "lane-rerun ${RED:0:7} red" "$sw/calls"),$(bisects),$(creates)" "2,1,0,0,0,0"
+LANE_VERIFY_AFTER=1 lane_sweep; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: cancelled again, it waits for the next dev run: no third rerun, no red, no revert or quarantine" \
+  "$(reruns),$(grep -c 'failed too' "$sw/calls"),$(grep -c "lane-rerun ${RED:0:7} red" "$sw/calls"),$(creates),$(grep -c 'Auto-quarantine' "$sw/calls")" "2,0,0,0,0"
+runstate completed failure; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: the retry failing for real makes the red real, and the lane goes on as before" \
+  "$(reruns),$(grep -c "^issue comment 520 .*the rerun of $FLAKE_RUN failed too (failure), so this red is real\. <!-- lane-rerun ${RED:0:7} red -->" "$sw/calls"),$(creates)" "2,1,1"
+# The same off a closed issue (flake_closed): a cancelled rerun is never called real.
+flakedev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
+LANE_VERIFY_AFTER=1 lane_sweep
+mv "$sw/red.json" "$sw/redclosed.json"; runstate completed cancelled; LANE_VERIFY_AFTER=1 lane_sweep
+expect "flake check: a closed issue's cancelled rerun gets no 'failed too' and no red mark" \
+  "$(grep -c 'failed too' "$sw/calls"),$(grep -c "lane-rerun ${RED:0:7} red" "$sw/calls")" "0,0"
 
 # Scoped hold: a red dev holds only the ready PRs that touch the failing
 # module (red_scope: the failing tests' files in the tree give Tests/<Target>/
@@ -2236,6 +2297,41 @@ expect "auto-quarantine: a test the lane can't place in the tree is noted, not q
 quardev linux "Sources/PhotoModel/A.swift|feat(photo): a (#201)"
 FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
 expect "auto-quarantine: a certain culprit gets the revert and no quarantine" "$(creates),$(quarantines),$(qnotes)" "1,0,0"
+
+# The quarantine reads the dev-red run's failed attempt and only its real
+# failures (lessons 351, 355; dev-red #6001, run 40761742332): attempt 1 failed
+# opens() and logged known issues, the rerun (attempt 2) was cancelled with no
+# jobs, and the sha's newest macOS check is another run's (a scoped dispatch)
+# failing saves(). Only opens() is quarantined.
+KPFX=$'macOS tests 3/3\tUNKNOWN STEP\t2026-10-28T21:19:22.9439410Z '
+quardev macos "${TWO[@]}"
+jq -n '{jobs: [{id: 9511, name: "macOS tests 3/3", conclusion: "failure", run_attempt: 1}, {id: 9512, name: "macOS", conclusion: "failure", run_attempt: 1},
+  {id: 9513, name: "macOS tests 1/3", conclusion: "success", run_attempt: 1}]}' >"$sw/jobs.9500.json"
+printf '%s\n' "${KPFX}━ Test saves() recorded a known issue at OpenTests.swift:4:5: Issue recorded" "${KPFX}━ Test saves() passed after 2.684 seconds with 1 known issue." \
+  "${KPFX}◇ Test opens() started." "${KPFX}✘ Test opens() recorded an issue at OpenTests.swift:3:6: Time limit was exceeded: 120.000 seconds" \
+  "${KPFX}✘ Test opens() failed after 120.764 seconds with 1 issue." "${KPFX}✘ Suite OpenTests failed after 243.006 seconds with 1 issue." \
+  "${KPFX}✘ Test run with 210 tests in 137 suites failed after 2795.477 seconds with 2 issues (including 1 known issue)." >"$sw/joblog.9511"
+printf '%s\n' $'macOS\tUNKNOWN STEP\t2026-10-28T21:24:22Z | macOS tests 3/3 | failure | 52 |' >"$sw/joblog.9512"
+jq -n '[{name: "macOS (photo)", status: "completed", conclusion: "failure", started_at: "2026-10-28T21:12:06Z",
+  details_url: "https://github.com/qbtrix/creative-apps/actions/runs/9300/job/9301"}]' >"$sw/checks.$RED.json"
+printf '%s\n' '✘ Test saves() recorded an issue at OpenTests.swift:4:5: Time limit was exceeded: 60.000 seconds' >"$sw/joblog.9301"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: the red run's failed attempt names the test, not a cancelled rerun or another run on the sha, and a known issue is skipped" \
+  "$(quarantines),$(qjson | jq -c '[.[] | .test]')" '1,["PhotoModelTests.OpenTests/opens"]'
+# A failed log whose only issues are known issues names no test: nothing is quarantined.
+quardev macos "${TWO[@]}"
+printf '%s\n' "${KPFX}━ Test saves() recorded a known issue at OpenTests.swift:4:5: Issue recorded" "${KPFX}━ Test saves() passed after 2.684 seconds with 1 known issue." \
+  "${KPFX}━ Test opens() recorded a known issue at OpenTests.swift:3:6: Issue recorded" \
+  "${KPFX}✘ Test run with 210 tests in 137 suites failed after 2795.477 seconds with 2 issues (including 2 known issues)." 'CI: FAIL' >"$sw/joblog.4343"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a log with only known issues quarantines nothing and says no test is named" \
+  "$(quarantines),$(grep -c "^issue comment 520 .*Auto-quarantine: no failing test is named in the red logs at ${RED:0:7}" "$sw/calls")" "0,1"
+# A `failed after` line with no `recorded an issue` line still names its test, placed by its func.
+quardev macos "${TWO[@]}"
+printf '%s\n' "${KPFX}✘ Test saves() failed after 3.100 seconds with 1 issue." 'CI: FAIL' >"$sw/joblog.4343"
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "auto-quarantine: a test with only a 'failed after' line is quarantined, its file found by func name" \
+  "$(quarantines),$(qjson | jq -c '[.[] | .test]')" '1,["PhotoModelTests.OpenTests/saves"]'
 
 # A test process that dies (scripts/ci's TEST PROCESS DIED block) prints no
 # "recorded an issue" line: mac_tests reads the block's names and places each in

@@ -3,6 +3,7 @@
 // built here, every layer inside the Desktop frame so a fake that acts only at
 // the top level fails. Runs on Linux and macOS.
 @testable import DesignModel
+import SuiteKernel
 import Testing
 
 /// Blueprint 4's `cards`: Desktop holding A, B, C, Title, Pair (E1, E2), Locked and Hidden.
@@ -70,7 +71,7 @@ private func frame(_ id: String, _ nodes: [DesignNode]) -> DesignRect? { nodes.n
 
         let small = try fake.nudge(["a", "b"], .right, large: false, on: page)
         #expect(small.name == "Nudge")
-        #expect(small.coalescingKey == "nudge-a,b")
+        #expect(small.coalescingKey == CoalesceKey.key("nudge", on: ["a", "b"]))
         #expect(frame("a", small.nodes)?.x == 101)
         let large = try fake.nudge(["a", "b"], .up, large: true, on: page)
         #expect(frame("b", large.nodes)?.y == 130)

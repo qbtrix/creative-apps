@@ -44,6 +44,9 @@
 //                  an undo step (PhotoSample+Kernel.swift).
 //   move           shifts every picked image layer by the drag, in whole
 //                  pixels, as one step ("Move Layer", "Move Layers" for several).
+//   bucket, spot heal, remove
+//                  nothing until the release runs one command, one undo step
+//                  (PhotoRetouchRelease.swift).
 //
 // Brush, eraser, clone and heal write through `paintTarget()`: the selected
 // layer's pixels, or on an adjustment layer nothing, with the refusal in
@@ -79,6 +82,8 @@ struct PhotoStroke: Sendable, Equatable {
     var before: [Int: PixelBuffer] = [:]
     var coverage: [Int: [Float]] = [:]
     var samples: [StrokeSample] = []
+    /// Brush and eraser: the undo step's name when a command, not a drag, made the stroke ("Brush Stroke").
+    var stepName: String?
     /// Move: the layer list before the drag.
     var layersBefore: [PhotoLayer] = []
     /// Marquee: the modifier keys `selectionDrag` saw last (Shift adds,
@@ -93,8 +98,12 @@ struct PhotoStroke: Sendable, Equatable {
     /// Free Transform: the draft at the press and the handle the press took (nil off the box).
     var transformFrom: TransformDraft?
     var transformHandle: TransformHandle?
+    /// Heal: the stroke's points so far, for `retouch.heal` on release.
     /// Remove: the points the stroke passed, from `start`, a quarter of the brush apart.
     var path: [Mask.Point] = []
+    /// Move: the drag runs as a body drag on an implied draft the compositor lifts (`moveDraft`), and the
+    /// release lays its move into the layer's offsets (`endMove`).
+    var movesLayer = false
 }
 
 extension PhotoWorkspace {
@@ -146,6 +155,14 @@ extension PhotoWorkspace {
         zoom: Double = 1
     ) {
         guard let canvas else { return }
+        // The Move tool's drag is Free Transform's body drag on an implied draft, so the layer rides the
+        // compositor's live layer (PhotoTransformLift+Kernel.swift) and the release lays the offsets (`endMove`).
+        if stroke == nil, tool == .move, transformDraft == nil, let draft = moveDraft() {
+            stroke = PhotoStroke(
+                tool: tool, start: start, layerID: nil, layersBefore: layers, transformFrom: draft, transformHandle: .inside,
+                movesLayer: true)
+            transformDraft = draft
+        }
         if transformDraft != nil { return transformDrag(from: start, to: end, modifiers: modifiers, zoom: zoom) }
         let begun = stroke == nil
         if begun, tool == .eyedropper { return sampleDrag(at: end) }
@@ -168,9 +185,10 @@ extension PhotoWorkspace {
                 // A move after the press starts on the dab the last event laid, so it skips that one.
                 let last = current.samples.last.map { Mask.Point($0.point) }
                 current.samples = [StrokeSample(point: end.kernel)]
+                if current.tool == .heal { current.path += last == nil ? [start, end] : [end] }
                 stamp(
                     along: [last ?? start, end], size: brushOptions.size, layer: id, before: &current.before,
-                    coverage: &current.coverage, healing: current.tool == .heal, skippingFirst: last != nil)
+                    coverage: &current.coverage, skippingFirst: last != nil)
             }
         case .marquee, .ellipse, .lasso, .polygon, .wand:
             areaDrag(&current, to: end, modifiers: modifiers, zoom: zoom, in: canvas)
@@ -203,6 +221,15 @@ extension PhotoWorkspace {
         }
         foldRevisions(since: start)
     }
+
+    /// Whether a canvas drag now runs on the window's live transform copy
+    /// (LiveTransformCopy): Free Transform's drags, and the Move tool's while
+    /// a layer can move, so no sample re-runs the editor.
+    public var dragRunsLive: Bool { transformDraft != nil || (tool == .move && canMoveSelection) }
+
+    /// Whether the canvas shows Free Transform's box and handles: a draft is
+    /// up and it isn't the Move tool's implied one.
+    public var showsTransformBox: Bool { transformDraft != nil && stroke?.movesLayer != true }
 
     /// Whether a drag now changes only the picture's pixels: brush, eraser,
     /// clone or heal with no Free Transform under way. The window draws such a
@@ -246,6 +273,7 @@ extension PhotoWorkspace {
         guard var done = stroke else { return }
         stroke = nil
         if let before = done.transformFrom {
+            if done.movesLayer { return endMove(done) }
             // A press on no handle moved nothing itself (the handles' own drag records its steps).
             if done.transformHandle != nil, transformDraft != before { record(.draft(before), named: "Transform") }
             return
@@ -254,13 +282,18 @@ extension PhotoWorkspace {
         case .brush, .eraser:
             paint(&done, adding: nil, pressure: 1)
             guard let id = done.layerID, !done.before.isEmpty else { return }
-            record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
-        case .clone, .heal:
+            record(.tiles(layer: id, done.before), named: done.stepName ?? (done.tool == .brush ? "Paint" : "Erase"))
+        case .clone:
             guard let id = done.layerID, !done.before.isEmpty else { return }
-            record(.tiles(layer: id, done.before), named: done.tool == .heal ? "Heal" : "Clone")
+            record(.tiles(layer: id, done.before), named: "Clone")
+        case .heal:
+            guard done.layerID != nil else { return }
+            healStroke(done)
         case .marquee, .ellipse, .lasso, .polygon, .wand:
             endAreaDrag(done)
-        case .crop, .eyedropper, .bucket, .spotHeal, .remove:
+        case .bucket, .spotHeal, .remove:
+            retouchRelease(done)
+        case .crop, .eyedropper:
             break
         case .gradient:
             guard let end = done.end else { return }
@@ -283,6 +316,46 @@ extension PhotoWorkspace {
         let dx = b.x - a.x, dy = b.y - a.y
         guard dx * dx + dy * dy >= 1 else { return nil }
         return PixelRect(from: a, to: b).intersection(canvas.rect)
+    }
+
+    /// The draft a Move tool drag runs on: the one picked image layer's whole
+    /// bounds, when the compositor can lift it (`liftKey`). Nil for several
+    /// picked layers, a text layer or a layer the lift can't draw (one under a
+    /// visible layer, masked, styled, blended): those move by offsets.
+    private func moveDraft() -> TransformDraft? {
+        let targets = movableSelectedLayers
+        guard targets.count == 1, let at = targets.first, let box = bounds(of: layers[at]) else { return nil }
+        var probe = self
+        probe.transformDraft = TransformDraft(layerID: layers[at].id, box: box)
+        return probe.liftKey == nil ? nil : probe.transformDraft
+    }
+
+    /// Self with the draft the Move tool's next drag begins (`moveDraft`), so
+    /// the canvas makes the lift's pixels before the press, as it does once a
+    /// Free Transform draft shows; nil when the tool isn't Move, a draft is
+    /// already up, or the next drag wouldn't lift.
+    public var movePrepared: PhotoWorkspace? {
+        guard tool == .move, transformDraft == nil, let draft = moveDraft() else { return nil }
+        var ahead = self
+        ahead.transformDraft = draft
+        return ahead
+    }
+
+    /// A Move tool drag's release: the draft goes and its move, rounded to
+    /// canvas pixels, goes into the layer's offsets as one "Move Layer" step
+    /// (no resample; the keyboard's is `moveSelectedLayers(dx:dy:)`). The
+    /// release's picture covers where the layer was and is, so the lift lands.
+    private mutating func endMove(_ done: PhotoStroke) {
+        defer { transformDraft = nil }
+        guard let draft = transformDraft, let at = index(of: draft.layerID) else { return }
+        let was = bounds(of: layers[at])
+        let (dx, dy) = (draft.transform.dx.rounded(), draft.transform.dy.rounded())
+        if dx != 0 || dy != 0, abs(dx) < 1e7, abs(dy) < 1e7, !done.layersBefore.isEmpty {
+            record(.layers(done.layersBefore, selected: selectedLayerID), named: "Move Layer")
+            layers[at].offsetX += Int(dx)
+            layers[at].offsetY += Int(dy)
+        }
+        if let was, let now = bounds(of: layers[at]) { touch(.region(was.union(now))) } else { touch(.all) }
     }
 
     /// Moves every picked image layer to where it was at the press plus the

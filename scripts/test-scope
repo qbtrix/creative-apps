@@ -23,13 +23,19 @@
 # A Model maps to its Model tests, an App to its snapshot suites, SuiteUI to
 # SuiteUITests and its snapshot suites, SuiteModel to every Model's tests,
 # SuiteKernel (the editor kernel every Model and SuiteUI link) to
-# SuiteKernelTests plus every Model's tests; the afterglow CLI
+# SuiteKernelTests plus every Model's tests, SuiteImaging (the imaging library
+# the Design, Halo, Library and Photo Models, the CLI core and SuiteUI link) to
+# SuiteImagingTests, those Models' tests, AfterGlowCLITests, SuiteUITests and
+# every app's snapshot suites; the afterglow CLI
 # (Sources/AfterGlowCLI*) and the real jobs (Tests/RealJobs/) to
 # AfterGlowCLITests, which every Model and SuiteKernel also map to, so an
 # adopt PR runs its app's real jobs; docs, scripts, UITests and the
 # like map to none. The suite and suiteui scopes include SuiteKernelTests.
 # --linux drops SuiteUITests and AppSnapshotTests, which Linux doesn't build;
 # SuiteKernelTests is Linux-safe and stays.
+#
+# An app's snapshot scope takes its suites by name and also its tests by name,
+# in any suite: photoMoveSettlesAfterTheDrag in IdleWorkTests is Photo's.
 #
 # perf prints one regex, empty when there is none. Tests/perf-suites.txt lists
 # the perf and timing tests: the gate and scoped runs skip them, and
@@ -61,7 +67,9 @@
 # CPU each in a debug build. scripts/ci runs them in a pass of their own, so
 # they never crowd the time-limited suites off the cores in the shared parallel
 # pass. With FILTER (a --changed run's test regex) it keeps only the listed
-# tests FILTER would run.
+# tests FILTER would run, and, for a listed parent suite FILTER doesn't take
+# whole (BodyCountSuites), the children FILTER picks: the snapshot pass skips
+# that parent, so those children run in the heavy pass, not nowhere.
 #
 # shard reads `swift test list` ids on stdin and prints the two lines of
 # shard K (1-based) of N, in the format of app and changed: the regex for the
@@ -106,7 +114,9 @@ SNAP = "AppSnapshotTests"
 # AppSnapshotTests suites per scope, by name (an app's RenderBudget<App>Tests
 # included). Flare and SuiteUI add the
 # suites and free tests whose names don't say so, and each app has its test
-# in the AppSnapshotTests suite. A snapshot test that fits no app runs in
+# in the AppSnapshotTests suite. A test named by its app (photoMoveSettles...)
+# in a shared suite (IdleWorkTests, TextStyleRowsInAppsSnapshots) is its app's
+# too, whatever the suite is called. A snapshot test that fits no app runs in
 # full runs only.
 SNAPSHOTS = {
     "flare": r"((RenderBudget)?Flare[A-Za-z]*|AutosaveTests|AutosaveRecoveryTests|PlaybackDriverTests|StagePathTests)/|AppSnapshotTests/flare\(",
@@ -117,6 +127,8 @@ SNAPSHOTS = {
     "suiteui": r"(Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders"
     r"|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\(",
 }
+SNAPSHOTS = {a: r + r"|[A-Za-z]+/%s[A-Z]" % ("suite" if a == "suiteui" else a) for a, r in SNAPSHOTS.items()}
+PARENT = "BodyCountSuites"  # the serialized suite the body-counter suites nest in
 MAC_ONLY = {"SuiteUITests", SNAP}
 CLI = ("AfterGlowCLITests", None)  # the CLI drives every Model and the kernel headless
 ALL = [("all", None)]
@@ -153,6 +165,9 @@ def path_units(path):
             return [CLI]
         if top in ("AfterGlowApp", "SuiteShell", "SuiteText"):
             return app_units("suite")
+        if top == "SuiteImaging":  # the Design, Halo, Library and Photo Models, the CLI core and SuiteUI link it
+            return [("SuiteImagingTests", None), CLI, ("SuiteUITests", None)] + [(x + "ModelTests", None) for x in ("Design", "Halo", "Library", "Photo")] \
+                + [(SNAP, SNAPSHOTS[a]) for a in (*APPS, "suiteui")]  # every App links it, Flare's included
         if top == "SuiteUI":
             return [("SuiteUITests", None), (SNAP, SNAPSHOTS["suiteui"])]
         for app, x in APPS.items():
@@ -183,8 +198,7 @@ def regexes(units, linux=False):
     if None in snaps:
         second = r"^AppSnapshotTests\."
     elif snaps:
-        # BodyCountSuites/ is the serialized parent the body-counter suites nest in.
-        second = r"^AppSnapshotTests\.(BodyCountSuites/)?(%s)" % "|".join(dict.fromkeys(snaps))
+        second = r"^AppSnapshotTests\.(%s/)?(%s)" % (PARENT, "|".join(dict.fromkeys(snaps)))
     else:
         second = ""
     return first + "\n" + second
@@ -247,8 +261,15 @@ def perf_regex(app=None):
 
 
 def heavy_regex(within=None):
-    ids = [i for _, i in perf_entries(HEAVY_LIST) if within is None or re.search(within, i + "/")]
-    return "^(%s)(/|\\()" % "|".join(i.replace(".", r"\.") for i in ids) if ids else ""
+    entries = [i for _, i in perf_entries(HEAVY_LIST)]
+    ids = [i for i in entries if within is None or re.search(within, i + "/")]
+    out = ["^(%s)(/|\\()" % "|".join(i.replace(".", r"\.") for i in ids)] if ids else []
+    # A heavy parent (BodyCountSuites) FILTER doesn't take whole still keeps the children FILTER picks:
+    # the snapshot pass skips the parent, so they run here. FILTER's alternatives, with the parent made
+    # required, take just those children.
+    if within and any(i.endswith("." + PARENT) and i not in ids for i in entries):
+        out += [("^" + alt).replace(f"({PARENT}/)?", PARENT + "/") for alt in within.lstrip("^").split("|^") if f"({PARENT}/)?" in alt]
+    return "|".join(out)
 
 
 def shard(ids, k, n):

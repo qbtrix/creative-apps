@@ -112,10 +112,13 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     // `onKeyPress` and `accessibilityActions` (LL-7) start a rename from Return
     // on the focused row or the "Rename" action through `requestRename`, the
     // `Button` being the action itself and `nil` its `if onRename != nil`: no
-    // pointer, so no toggle or blank space.
+    // pointer, so no toggle or blank space. `onChange` (LF-2) watches
+    // `renameAsk`, which only the context menu's Rename item bumps, and calls
+    // `requestRename`: no gesture or hit area either.
     let modifiers: Set = [
         "toggleStyle", "buttonStyle", "labelStyle", "foregroundStyle", "disabled", "help", "accessibilityLabel",
         "accessibilityIdentifier", "identifier", "badge", "selectionDisabled", "onKeyPress", "accessibilityActions",
+        "onChange",
     ]
     let calls: Set = [
         "View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label", "Text", "SidebarToggleIcon",

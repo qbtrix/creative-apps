@@ -17,7 +17,7 @@ import Testing
 @testable import PhotoModel
 
 @Suite struct PhotoAdjustTests {
-    /// The suite's adjust commands on Photo (PhotoWorkspace.catalog lists them once AJ-photo's catalog PR lands).
+    /// The suite's adjust commands on Photo; PhotoWorkspace.catalog lists them too.
     static let catalog = (try? CommandCatalog<PhotoWorkspace>(app: "photo", AdjustCommands.specs(PhotoWorkspace.self),
                                                               history: { $0.history.kernel })) ?? .empty(app: "photo")
 
@@ -143,6 +143,60 @@ import Testing
         #expect(other.adjustments.kinds == look.kinds && other.adjustments.tone == look.tone)
         other.undo()
         #expect(other.adjustments == AdjustmentSettings())
+    }
+
+    @Test func newAdjustmentLayerOffersBlackAndWhiteAndInvert() throws {
+        var ws = try Self.checker()
+        ws.services.adjustmentLayers = LiveAdjustmentLayering()  // the fake brightens whatever the settings
+        let plain = try ws.composite()
+        ws.addAdjustmentLayer(.invert)
+        #expect(ws.selectedLayer?.name == "Invert 1" && ws.selectedLayer?.kind.label == "Invert adjustment layer")
+        #expect(ws.kinds == [.invert])
+        let p = try plain.pixel(x: 0, y: 0), q = try ws.composite().pixel(x: 0, y: 0)
+        #expect(abs(q.r - (1 - p.r)) < 0.01)
+        ws.addAdjustmentLayer(.blackAndWhite)
+        #expect(ws.selectedLayer?.name == "Black & White 1" && ws.kinds == [.blackAndWhite(.neutral)])
+    }
+
+    @Test func theCatalogListsTheAdjustCommands() {
+        let ids = Set(PhotoWorkspace.commands.map(\.id))
+        for id in AdjustCommands.specs(PhotoWorkspace.self).map(\.id) { #expect(ids.contains(id), "\(id) is missing") }
+    }
+
+    @Test func thePreviewIsASmallCopyAndTheDocumentStaysAsItWas() throws {
+        var ws = try Self.checker()
+        ws.setSelection(PixelRect(x: 0, y: 0, width: 8, height: 12))
+        let before = ws
+        let shown = try #require(ws.adjustPreview("filter.gaussian-blur", ["radius": .number(2)], side: 8))
+        #expect(shown.width == 8 && shown.height == 6)
+        #expect(ws == before, "Preview changed the document")
+        let full = try #require(ws.adjustPreview("filter.gaussian-blur", ["radius": .number(2)]))
+        let plain = try ws.composite().rgba8()
+        #expect(full.width == 16 && full.rgba8 != plain, "the preview isn't blurred")
+        let grey = try #require(ws.adjustPreview("adjust.black-and-white", ["weights": Self.weights], side: 8))
+        #expect(grey.rgba8[0] == grey.rgba8[1] && grey.rgba8[1] == grey.rgba8[2])
+        #expect(PhotoWorkspace(services: .fake).adjustPreview("filter.sharpen", [:]) == nil)
+    }
+
+    @Test func aSheetsFilterAndKindRunAsTheirCommand() throws {
+        let filters: [ImagingFilter] = [
+            .gaussianBlur(radius: 1.5), .motionBlur(degrees: 30, distance: 4), .sharpen(amount: 150, radius: 1.5, threshold: 2),
+            .reduceNoise(strength: 70, detail: 20), .addNoise(amount: 20, monochrome: true, seed: 7),
+        ]
+        for f in filters {
+            var ws = try Self.checker()
+            let id = try #require(ws.selectedLayerID), before = try Self.layerPixels(ws, id)
+            let (command, params) = PhotoWorkspace.adjustCommand(f)
+            _ = try PhotoWorkspace.catalog.run(command, params: .object(params), on: &ws)
+            #expect(try Self.layerPixels(ws, id) == (try FilterRules.apply(f, to: before, coverage: nil)), "\(f.id)")
+        }
+        let w = GrayWeights(red: 10, yellow: 20, green: 30, cyan: 40, blue: 50, magenta: 60)
+        var ws = try Self.checker()
+        for kind in [ImagingKind.blackAndWhite(w), .invert] {
+            let (command, params) = PhotoWorkspace.adjustCommand(kind)
+            _ = try PhotoWorkspace.catalog.run(command, params: .object(params), on: &ws)
+        }
+        #expect(ws.adjustments.kinds == [.blackAndWhite(w), .invert])
     }
 
     @Test func kindsRoundTripAndAFileWithoutThemSavesAsBefore() throws {

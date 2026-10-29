@@ -1,8 +1,11 @@
 // LibraryExportFidelityTests.swift: QB-V4 on an uncropped photo (packet
 // docs/blueprints/library/features/export.md, EX-4; slice EX-b). An exported
 // file looks like the loupe: (a) `LiveExporter.render` of a 4000 × 3000 file
-// with exposure +0.5 at 1024 equals decode → `LiveDevelop.render` → lanczos3
-// by hand, bit for bit; (b) it sits within a mean absolute difference of
+// with exposure +0.5 at 1024 equals decode → lanczos3 to the smallest size
+// whose crop covers the plan → `LiveDevelop.render` → lanczos3 to the plan, by
+// hand, bit for bit (develop runs on the export's pixels, as the loupe's runs
+// on its decode, #5992), and is at most 2/255 on any channel from developing
+// at full size; (b) it sits within a mean absolute difference of
 // 1/255 of the loupe's `.full` render at 1024; (c) written at quality 95 and
 // decoded, it is at least 40 dB PSNR from (a), the file starts `FF D8` and is
 // tagged sRGB, and a second write to the same name throws `writeFailed` and
@@ -14,7 +17,9 @@
 // cropped 3:2 and straightened 2°, sized by the exporter's own plan, drawn at
 // 1440 × 1080: straightening a 4000 × 3000 file twice in a debug build ran past
 // CI's 600 s silence watchdog, and the crop's checks don't need the size
-// (EX-14 names none). macOS only.
+// (EX-14 names none). On the crop, developing at full size is not the
+// reference: its crop lands a fraction of a pixel off the loupe's (1.6/255
+// mean, #3453), the shrink-first order 0.38/255. macOS only.
 #if os(macOS)
 import CoreGraphics
 import CoreRaster
@@ -94,17 +99,41 @@ import UniformTypeIdentifiers
         return (photo, try #require(plan.items.first))
     }
 
-    /// Decode at full size → develop → lanczos3 to the item's size, by hand.
-    private func byHand(_ photo: PhotoItem, at item: ExportPlan.Item) async throws -> DisplayImage {
+    /// Decode at full size → lanczos3 to the smallest size whose crop covers the item's (`fullSize` skips it)
+    /// → develop → lanczos3 to the item's size, by hand.
+    private func byHand(_ photo: PhotoItem, at item: ExportPlan.Item, fullSize: Bool = false) async throws -> DisplayImage {
         let path = try #require(photo.path)
         let decoded = try await decoder.decode(path: path, maxLongSide: nil)
-        let buffer = try PixelBuffer(rgba8: decoded.rgba8, width: decoded.size.width, height: decoded.size.height)
+        var buffer = try PixelBuffer(rgba8: decoded.rgba8, width: decoded.size.width, height: decoded.size.height)
+        let side = try shrunkSide(photo, at: item)
+        if !fullSize, side < decoded.size.longSide {
+            let shrunk = decoded.size.fitting(longSide: side)
+            buffer = try buffer.resized(width: shrunk.width, height: shrunk.height, filter: .lanczos3)
+        }
         var developed = try develop.render(buffer, settings: photo.develop)
-        let target = PixelSize(width: developed.width, height: developed.height).fitting(longSide: item.size.longSide)
+        let target = item.size
         if target.width != developed.width || target.height != developed.height {
             developed = try developed.resized(width: target.width, height: target.height, filter: .lanczos3)
         }
         return try #require(DisplayImage(size: target, rgba8: try developed.rgba8(colorSpace: .sRGB)))
+    }
+
+    /// The photo's long side to shrink to: the plan's share of the crop, grown a pixel at a time until the
+    /// crop drawn at it is at least the item's size both ways (`LiveCrop.frame` rounds at every step).
+    private func shrunkSide(_ photo: PhotoItem, at item: ExportPlan.Item) throws -> Int {
+        let size = photo.pixelSize
+        func cut(_ s: PixelSize) throws -> PixelSize {
+            guard let crop = photo.develop.crop else { return s }
+            let f = try LiveCrop().frame(crop, photo: s)
+            return PixelSize(width: f.width, height: f.height)
+        }
+        var side = Int((Double(size.longSide) * Double(item.size.longSide) / Double(try cut(size).longSide)).rounded())
+        while side < size.longSide {
+            let c = try cut(size.fitting(longSide: side))
+            if c.width >= item.size.width && c.height >= item.size.height { break }
+            side += 1
+        }
+        return side
     }
 
     /// The mean absolute difference of the color channels, in 0...255.
@@ -114,6 +143,15 @@ import UniformTypeIdentifiers
             for c in 0..<3 { total += abs(Int(a.rgba8[at + c]) - Int(b.rgba8[at + c])); count += 1 }
         }
         return count == 0 ? .infinity : Double(total) / Double(count)
+    }
+
+    /// The largest difference on any color channel, in 0...255.
+    private func maxDifference(_ a: DisplayImage, _ b: DisplayImage) -> Int {
+        var worst = 0
+        for at in stride(from: 0, to: min(a.rgba8.count, b.rgba8.count), by: 4) {
+            for c in 0..<3 { worst = max(worst, abs(Int(a.rgba8[at + c]) - Int(b.rgba8[at + c]))) }
+        }
+        return worst
     }
 
     /// Peak signal-to-noise ratio of the color channels, in dB.
@@ -130,7 +168,8 @@ import UniformTypeIdentifiers
         return mse == 0 ? .infinity : 10 * log10(255 * 255 / mse)
     }
 
-    /// (a) The exporter's render is the hand-made pipeline, bit for bit.
+    /// (a) The exporter's render is the hand-made pipeline, bit for bit, and develop's order doesn't show:
+    /// developing at full size instead is at most 2/255 on any channel (1 measured on 3 of 2.4 M channels).
     @Test func renderEqualsTheHandMadePipeline() async throws {
         let photo = try writePhoto(in: try folder())
         let exporter = LiveExporter(decoder: decoder, develop: develop)
@@ -138,7 +177,9 @@ import UniformTypeIdentifiers
         let expected = try await byHand(photo, at: item)
         #expect(rendered.size == PixelSize(width: 1024, height: 768))
         #expect(rendered.size == expected.size)
-        #expect(rendered.rgba8 == expected.rgba8, "the export's pixels differ from decode → develop → lanczos3")
+        #expect(rendered.rgba8 == expected.rgba8, "the export's pixels differ from decode → shrink → develop")
+        let fullSize = maxDifference(rendered, try await byHand(photo, at: item, fullSize: true))
+        #expect(fullSize <= 2, "the export is \(fullSize)/255 from developing at full size on one channel")
     }
 
     /// (b) The export at 1024 looks like the loupe's `.full` render at 1024.
@@ -160,7 +201,7 @@ import UniformTypeIdentifiers
         let rendered = try await LiveExporter(decoder: decoder, develop: develop).render(item, photo: photo)
         let expected = try await byHand(photo, at: item)
         #expect(rendered.size == item.size, "rendered \(rendered.size), planned \(item.size)")
-        #expect(rendered.rgba8 == expected.rgba8, "the cropped export differs from decode → develop → lanczos3")
+        #expect(rendered.rgba8 == expected.rgba8, "the cropped export differs from decode → shrink → develop")
     }
 
     /// (b) on the cropped, straightened photo: the loupe decodes the whole
@@ -170,9 +211,9 @@ import UniformTypeIdentifiers
     /// not the 1073 its ratio gives), so that side is found from the frame's own
     /// arithmetic and rendered once. Not every fixture size has one (1600 × 1200
     /// plans 1024 × 682, which no decode crops to); 1440 × 1080 does.
-    /// Quarantined: the loupe straightens and crops at its decode's scale, so its crop sits a
-    /// fraction of a pixel off the export's and the two are 1.6/255 apart (#3453).
-    @Test(.disabled("quarantine #3453 until 2026-10-27")) func croppedRenderMatchesTheLoupe() async throws {
+    /// The export now straightens and crops at its shrunk scale, as the loupe does at its decode's: 0.38/255
+    /// apart, where developing at full size put them 1.6/255 apart (#3453).
+    @Test func croppedRenderMatchesTheLoupe() async throws {
         let (photo, item) = try writeCroppedPhoto(in: try folder())
         let rendered = try await LiveExporter(decoder: decoder, develop: develop).render(item, photo: photo)
         let crop = try #require(photo.develop.crop)

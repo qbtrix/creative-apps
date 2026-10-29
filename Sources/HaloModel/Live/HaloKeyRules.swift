@@ -34,8 +34,13 @@ enum HaloKeyRules {
     /// Layer space to composition space, parents applied outermost last,
     /// through the kernel's `worldPlacement`. The walk stops at a parent it
     /// has already seen (a cycle) or an unknown one. Nil for an unknown id.
+    /// A layer that follows nothing is its own local matrix, the walk's
+    /// answer for a root, without building the tree: a frame's draw list
+    /// asks for every layer, so a tree per layer cost layers squared (#5844).
     static func worldMatrix(of id: String, in c: HaloComposition, at f: Int) -> HaloMatrix? {
-        guard layer(id, in: c) != nil else { return nil }
+        guard let layer = layer(id, in: c) else { return nil }
+        // ponytail: a followed layer still builds the tree per call; build one per draw list if parented comps grow.
+        guard layer.parentID != nil else { return localMatrix(of: layer, in: c, at: f) }
         return c.layerTree.worldPlacement(of: id) { localMatrix(of: $0.payload, in: c, at: f) }
     }
 
@@ -100,6 +105,26 @@ enum HaloKeyRules {
             _ = KeyRules.toggleKey(&track, at: f, value: v, leaving: .propertyGoesStatic)
             if track.count < 2 { setStatic(staying ?? v, p, of: &layer) }
             else { layer.tracks[p.rawValue] = track }
+        }
+    }
+
+    /// Delete Keyframes in one pass over the layers: each track drops its
+    /// picked frames at once, so 5,000 keys cost one walk, not 5,000 toggles
+    /// (#5988). The result matches `toggleKey` on each key: a track left with
+    /// one key goes static at it, one left with none at its first key.
+    static func deleteKeys(_ keys: Set<HaloKeyRef>, in c: inout HaloComposition) {
+        let byLayer = Dictionary(grouping: keys, by: \.layerID)
+        for i in c.layers.indices {
+            guard let refs = byLayer[c.layers[i].id] else { continue }
+            for (p, picked) in Dictionary(grouping: refs, by: \.property) {
+                guard let track = c.layers[i].tracks[p.rawValue] else { continue }
+                let frames = Set(picked.map(\.frame))
+                let left = track.filter { !frames.contains($0.frame) }
+                guard left.count < track.count else { continue }
+                if left.count >= 2 { c.layers[i].tracks[p.rawValue] = left; continue }
+                let first = left.first ?? track.min { $0.frame < $1.frame }
+                if let first { setStatic(first.value, p, of: &c.layers[i]) }
+            }
         }
     }
 

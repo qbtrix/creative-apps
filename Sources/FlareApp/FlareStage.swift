@@ -301,6 +301,7 @@ private struct FlareKeyTool: PaletteTool {
     var title: String { tool.title }
     var systemImage: String { tool.systemImage }
     var shortcut: Character? { tool.shortcut }
+    var gesture: ToolGesture { tool.gesture }
 }
 
 extension DragModifiers {

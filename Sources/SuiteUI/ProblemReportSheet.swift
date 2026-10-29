@@ -9,10 +9,9 @@ import SuiteModel
 import SwiftUI
 
 /// The Report a Problem sheet over `report`.
-public struct ProblemReportSheet: View {
+public struct ProblemReportSheet: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     /// The controls, each with its `identifier(_:)`.
     nonisolated static let controls = ["note", "report", "copy", "save", "email", "close"]
@@ -38,7 +37,7 @@ public struct ProblemReportSheet: View {
 
     public var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {

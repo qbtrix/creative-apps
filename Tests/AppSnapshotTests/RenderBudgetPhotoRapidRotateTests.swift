@@ -42,7 +42,7 @@ extension BodyCountSuites {
             let fixture = model
             // Another Photo window drawing alongside, as the suites running in parallel on CI do: none of its work
             // may count as this window's.
-            let neighbor = RenderBudgetWindow(PhotoWindow(model: try PhotoWorkspace.fixture(.layered)))
+            let neighbor = RenderBudgetWindow(PhotoWindow(model: try PhotoWorkspace.fixture(.layered)), underTest: false)
             defer { neighbor.close() }
             // One GPU backend, the window's and the one whose resident bytes the readings take.
             let gpu = try #require(ImagingGPU.systemBackend(), "no GPU")

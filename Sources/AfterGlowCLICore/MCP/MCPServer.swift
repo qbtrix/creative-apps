@@ -6,7 +6,7 @@
 // `server/discover`, `initialize`, `ping`, `tools/list` and `tools/call` (rate
 // limited, run by MCPSessions). A notification is never answered, and
 // `handle` never prints. `serve` parses `[--app <name>]… --root <dir>…
-// [--live]` strictly, then answers stdin line by line until it ends; `--live`
+// [--live]` strictly (`--root` is optional with `--live`; the file tools then refuse), then answers stdin line by line until it ends; `--live`
 // (MC-11, macOS) adds the running apps' tools through LiveBridge.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -156,7 +156,8 @@ public final class MCPServer: Sendable {
         return CLI.Exit.ok
     }
 
-    /// Reads `--app <name>` (each at most once; none means every app), `--root <dir>` (one or more) and `--live`.
+    /// Reads `--app <name>` (each at most once; none means every app), `--root <dir>` (one or more; none only with
+    /// `--live`) and `--live`.
     static func parse(_ arguments: [String], apps: [HeadlessApp]) throws(Refusal) -> MCPOptions {
         var names: [String] = [], roots: [String] = [], live = false
         var rest = arguments[...]
@@ -174,7 +175,8 @@ public final class MCPServer: Sendable {
             default: throw .usage(token.hasPrefix("-") ? "unknown flag \(token)" : "unexpected operand \(token)")
             }
         }
-        guard !roots.isEmpty else { throw .usage("afterglow mcp needs --root <dir>, the folder its tools may read and write") }
+        // Live tools reach running apps, not files, so `--live` alone needs no root; the file tools then refuse.
+        guard !roots.isEmpty || live else { throw .usage("afterglow mcp needs --root <dir>, the folder its tools may read and write") }
         return MCPOptions(apps: names.isEmpty ? apps : apps.filter { names.contains($0.name) }, roots: roots, live: live)
     }
 }

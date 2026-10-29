@@ -363,7 +363,13 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   scoped to the union of the batch's apps by `scripts/test-scope build-apps`,
   every app for shared code; no journeys). A green `macOS` job or a
   `local-ci/macos` commit status on the batch head (the local Mac gate) is the
-  macOS pass. When both are green it squash-merges every PR in that order.
+  macOS pass. With the repo variable `LANE_KILN=1` (off by default) the lane
+  holds a batch's `mac_only` run for up to `LANE_KILN_WAIT_MIN` minutes (20)
+  after the batch commit, waiting for a local Mac check that posts
+  `local-ci/macos`: success is the pass, failure is red, and `error` or no
+  status by then sends the `mac_only` run as usual. It reads the status's
+  state and context, never its text.
+  When both are green it squash-merges every PR in that order.
   A lone PR without code lands at once; a lone code PR is a batch of one. A
   batch with code forms when a macOS slot frees (a batch just resolved), when
   12 PRs are ready, or once the oldest ready head is 10 minutes old
@@ -380,8 +386,9 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   `Head:` line; the lane drops the label on the new head. When `dev` alone is
   red on every job the batch is red on, the batch lands on each PR's own proof
   so a fix can get through; a job red only with the batch is still bisected.
-  A new `dev-red` first gets its run's failed jobs rerun once at the same
-  sha (the lane's flake check): a pass is a flake, which files a `finding`
+  A new `dev-red` first gets its run's failed jobs rerun at the same sha
+  (the lane's flake check; a cancelled rerun is inconclusive and gets one more
+  try, then the lane waits): a pass is a flake, which files a `finding`
   labelled `flaky` for the test and holds nothing; a failure makes the red
   real. While a real `dev-red` issue names a job a batch would run (Linux
   always, macOS when the batch has code), ready PRs that touch the failing

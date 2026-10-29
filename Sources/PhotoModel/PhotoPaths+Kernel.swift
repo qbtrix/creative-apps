@@ -77,7 +77,7 @@ extension PhotoWorkspace: PathEditTarget {
         guard let id = pathState.editingID, let at = paths.firstIndex(where: { $0.id == id }) else {
             throw CatalogError.unavailable(id: "path", why: pathHelp ?? "Select a path to edit its points.")
         }
-        recordPaths(named: name, coalescing: drag.map { "path-\(id)-\(name)-\($0)" })
+        recordPaths(named: name, coalescing: drag.map { CoalesceKey.key("path.\(name)", on: [id], drag: $0) })
         pathState.paths[at].path = path
     }
 

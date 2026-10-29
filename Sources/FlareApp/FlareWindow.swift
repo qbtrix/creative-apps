@@ -29,7 +29,7 @@ import SuiteShell
 import SuiteUI
 import SwiftUI
 
-struct FlareWindow: View {
+struct FlareWindow: View, BodyCounted {
     @State var model = FlareWorkspace(launch: FlareLaunch(arguments: ProcessInfo.processInfo.arguments))
     /// nil fits the stage; set once the user zooms.
     @State var zoom: Double? = nil
@@ -49,8 +49,7 @@ struct FlareWindow: View {
     var launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
-    /// How many times a window's body ran; RenderBudgetFlareTests counts an interaction's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     /// The model the last body ran on, for the hosted-window tests to read back.
     static var shownModel: FlareWorkspace?
     /// The last body's place (FlarePlace.swift), for RenderBudgetFlarePlaceTests to send the menu's place.
@@ -67,14 +66,15 @@ struct FlareWindow: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         let _ = Self.shownModel = model
         let _ = Self.placeProbe = { _ = place($0) }
         let _ = Self.shownPerform = { perform($0) }
         #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : model.title, actions: toolbar,
-            inspectorWidth: Self.inspectorWidth
+            inspectorWidth: Self.inspectorWidth,
+            contextActions: { FlareRowMenu.actions(model.sceneRowMenu($0), perform: { perform(.layers($0)) }) }
         ) {
             VStack(spacing: 0) {
                 SuiteSidebarList(

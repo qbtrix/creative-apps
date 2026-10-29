@@ -1,0 +1,3 @@
+[
+  {"label": "noScenesOpens: a .flare with no scenes decodes as a document (#5841)", "file": "Sources/FlareModel/FlareFiles.swift", "find": "            return document.scenes.isEmpty ? .failure(.invalid(noScenes)) : .success(document)\n", "replace": "            return .success(document)\n", "tests": "FlareLayersFilesGateTests"}
+]

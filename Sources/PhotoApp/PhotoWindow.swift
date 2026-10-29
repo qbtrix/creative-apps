@@ -23,7 +23,7 @@
 // PhotoWindow+Export.swift.
 //
 // Each v2 area's intents go to its PhotoWindow+<Area>.swift (file, edit,
-// crop, history, select, adjustment layer, transform, export, sample), and
+// crop, history, select, adjustment layer, transform, export, sample, filter), and
 // each area's identity modifier (Photo<Area>Area) is applied here, so a
 // feature keeps its own state, alerts, dialogs and timers in its area file.
 // The window's state is internal so those files can reach it. Return
@@ -33,6 +33,7 @@ import AppKit
 import CoreRaster
 import PhotoModel
 import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -59,6 +60,8 @@ struct PhotoWindow: View {
     /// The Straighten sheet's choices; nil while it is closed.
     @State var straightenDraft: StraightenDraft?
     @State var isRenaming = false
+    /// Feather…, Expand… or Contract…'s radius alert while it is open (PhotoWindow+Select.swift, AR-11).
+    @State var areaPrompt: AreaRadiusPrompt?
     @State var renameText = ""
     // v2 presentation flags (PV-0); each belongs to the area file named.
     /// A recovered document waiting for Restore or Discard (PhotoWindow+File.swift, PV-1).
@@ -77,13 +80,16 @@ struct PhotoWindow: View {
     @State var inspectorTab = PhotoInspectorTab.adjust
     /// File > New's sheet: Photo's presets and the clipboard image's size; nil while it is closed (document-setup DS-8).
     @State var newImageMode: NewDocumentMode?
+    /// The Filter sheet's choices while it is open (PhotoWindow+Filter.swift, AJ-9).
+    @State var filterDraft: FilterSheetDraft?
     /// The app's View > Rendering; nil in tests, which draw on the CPU.
     @Environment(\.photoRendering) private var rendering
 
     /// A sheet or the rename alert is up, so Select > All never selects the canvas.
     var isPresenting: Bool {
         model.isExportSheetOpen || isResizing || straightenDraft != nil || isRenaming || canvasSizeDraft != nil
-            || newImageMode != nil
+            || areaPrompt != nil || newImageMode != nil
+            || filterDraft != nil
     }
 
     /// The launch file opens in the first window only.
@@ -192,11 +198,12 @@ struct PhotoWindow: View {
             .modifier(PhotoEditArea(model: model, perform: perform))
             .modifier(PhotoCropArea(model: model, perform: perform))
             .modifier(PhotoHistoryArea(model: model, perform: perform, tab: inspectorTab))
-            .modifier(PhotoSelectArea(model: model, perform: perform))
+            .modifier(PhotoSelectArea(model: model, perform: perform, prompt: areaPrompt))
             .modifier(PhotoAdjustmentLayerArea(model: model, perform: perform))
             .modifier(PhotoTransformArea(model: model, perform: perform, canvasSize: canvasSizeDraft))
             .modifier(PhotoExportArea(model: model, perform: perform))
             .modifier(PhotoSampleArea(model: model, perform: perform))
+            .modifier(PhotoFilterArea(model: model, draft: filterDraft, perform: perform))
     }
 
     func perform(_ intent: PhotoIntent) {
@@ -207,7 +214,9 @@ struct PhotoWindow: View {
         }
         switch intent {
         case .newImage:
-            let clipboard = PhotoPasteboard.read().map { (width: $0.image.width, height: $0.image.height) }
+            // The clipboard's picture through the bridge, as Paste reads it; nil when Paste would refuse it.
+            let picture = try? photoPasteboardAdapter.paste(PasteboardBridge().offered(), canvas: nil)
+            let clipboard = picture.map { (width: $0.image.width, height: $0.image.height) }
             newImageMode = .new(presets: PhotoWorkspace.newImagePresets, clipboard: clipboard)
         case .open: chooseFile()
         case .openFile(let url): open(url)
@@ -233,8 +242,8 @@ struct PhotoWindow: View {
                 if samplePress(moves) { return }
                 // A Gradient drag's later samples move only its line, on LiveDragLine's copy.
                 if dragLine.drags(moves, on: model, zoom: zoom) { return }
-                // Free Transform's canvas drags run on the live transform, as its handles' do.
-                if model.transformDraft != nil { return runLiveDrag(moves) }
+                // Free Transform's canvas drags and the Move tool's run on the live transform, as the handles' do.
+                if model.dragRunsLive { return runLiveDrag(moves) }
                 guard let painted = liveStroke.drags(moves, on: model, zoom: zoom) else {
                     model.drags(moves, zoom: zoom)
                     return renderer.show(model)
@@ -285,6 +294,7 @@ struct PhotoWindow: View {
         case .transform(let intent): performTransform(intent)
         case .export(let intent): performExport(intent)
         case .sample(let intent): performSample(intent)
+        case .filter(let intent): performFilter(intent)
         case .place(let intent): performPlace(intent)
         case .text(let intent): performType(intent)
         case .tone(let intent): performTone(intent)
