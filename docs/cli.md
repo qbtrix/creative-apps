@@ -489,6 +489,16 @@ this section is what the code does once an app passes a channel.
   the tool error `Photo is not running; open it with a document, then list
   the tools again`; with no document open, `Photo has no document open; open
   one, then call again`.
+- **Seeing and painting (Photo).** `live.photo.document.read` lists the
+  canvas size, the layers top-first (id, name, kind, box, hidden, opacity)
+  and the selected ids. `live.photo.view.snapshot {maxSide, region?}`
+  returns `{png, width, height}`: the canvas, or one region of it, as the
+  window shows it, scaled so its longer side is at most `maxSide` (16 to
+  2048), base64 PNG. Both change nothing. `live.photo.paint.stroke
+  {points: [{x, y}], size, hardness, color: {r, g, b, a}, opacity}` paints
+  one brush stroke on the selected image layer as one undo step, "Brush
+  Stroke", with Photo's own brush; hardness, colour and opacity run 0 to 1,
+  and the person's brush and tool are left as they were.
 
 #### Approval
 
