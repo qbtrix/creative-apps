@@ -36,7 +36,7 @@ import Testing
         #expect(outline.layers.last?.box == Rect(minX: 0, minY: 0, maxX: 80, maxY: 60) && outline.layers.last?.kind == "pixels")
         #expect(outline.layers.allSatisfy { !$0.hidden && $0.opacity == 1 })
         #expect(outline.selected == w.selectedLayerIDs)
-        #expect(PhotoWorkspace.catalog.availability("document.read", on: PhotoWorkspace(services: .fake)) == .unavailable("Open or make an image first."))
+        #expect(PhotoWorkspace.catalog.availability("document.read", on: PhotoWorkspace(services: .fake)) == .unavailable("Open a document first."))
     }
 
     @Test func snapshotIsADownscaledPNGAndRecordsNothing() throws {
