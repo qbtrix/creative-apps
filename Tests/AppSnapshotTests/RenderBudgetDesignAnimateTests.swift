@@ -64,10 +64,8 @@ extension BodyCountSuites {
             #expect(PlaybackBudget.droppedFrames(in: frames, timelineFrames: seed.time.durationFrames) == 0)
             #expect(frames.first == 0 && frames.last == seed.time.durationFrames - 1, "play once from the rest pose ends on the last frame")
 
-            // Play once ended: its last frame is the playhead, with no undo step and no unsaved change.
+            // Play once ended on its last frame; stop goes back to the rest pose, with no undo step or unsaved change.
             try await w.settle(200)
-            let landed = try #require(DesignWindow.lastWorkspace ?? nil)
-            _ = landed
             perform(.stop)
             let after = try #require(DesignWindow.lastWorkspace)
             #expect(after.playhead == nil && live.playingFrame == nil)
