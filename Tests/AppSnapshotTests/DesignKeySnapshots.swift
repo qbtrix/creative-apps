@@ -1,7 +1,8 @@
 // DesignKeySnapshots.swift: Design's key buttons and Animate menu (one-document OD-13). The inspector with one layer
 // selected in the button's three states: idle (`cards`, no keys), animated (`animated(1)` at frame 60, between its
 // keys) and keyedHere (`animated(1)` at frame 0, on a key). The Animate menu's items in two columns: a still document
-// (Play/Pause, Stop and Remove Key off, saying "Set a key first.") and a keyed one with a layer selected, on a key. Light and
+// (Play/Pause, Stop and Remove Key off, saying "Set a key first.") and a keyed one with a layer selected, on a key
+// (Set Key off, since every row has one there). Light and
 // dark: design-key-{idle,animated,here}-{light,dark}.png and design-animate-menu-{light,dark}.png. `press` (render
 // budget) opens `animated(1)` at frame 60 with node-2 selected, clicks the X row's diamond and counts window and
 // editor bodies; the key lands at 60 with the value shown there, so the canvas paints the same page. macOS only.
@@ -47,7 +48,8 @@ import Testing
             #expect(why(menus[0], id) == "Set a key first.", "\(id) on a still document")
             #expect(why(menus[1], id) == nil, "\(id) on a keyed document")
         }
-        #expect(why(menus[0], "keyframe.set") == nil && why(menus[1], "keyframe.set") == nil)
+        #expect(why(menus[0], "keyframe.set") == nil, "Set Key on a still document starts its keys")
+        #expect(why(menus[1], "keyframe.set") != nil, "Set Key is off where every row already has a key")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(AnimateMenuStates(menus: menus), name: "design-animate-menu-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
