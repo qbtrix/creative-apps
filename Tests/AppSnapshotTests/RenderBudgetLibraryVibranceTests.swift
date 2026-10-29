@@ -3,7 +3,7 @@
 // loupe with the cell's "Open" action, switches to Develop and steps Vibrance 120 times at 120 Hz through the
 // row's adjustable action. Vibrance is core's `.color` family, which the loupe now draws on the GPU route in one
 // display pass, so a step runs no CPU develop: in release its p95 is gated at 16 ms (target 8 ms); debug only
-// prints it. Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
+// prints it. Disabled until Tests/perf-suites.txt lists it (the supervisor's file). Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import LibraryModel
@@ -14,7 +14,8 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetLibraryVibranceTests {
-        @Test(.timeLimit(.minutes(2))) func vibranceStepsInRealTime() async throws {
+        @Test(.disabled("report-only: enable once Tests/perf-suites.txt lists it"), .timeLimit(.minutes(2)))
+        func vibranceStepsInRealTime() async throws {
             let w = RenderBudgetWindow(LibraryWindow(arguments: ["Library", "-LibraryFixture", "shoot"]))
             defer { w.close() }
             try await w.settle(800)
