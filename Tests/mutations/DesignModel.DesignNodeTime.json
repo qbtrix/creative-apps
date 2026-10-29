@@ -1,0 +1,79 @@
+[
+  {
+    "label": "aSubtreeMovesByItsKeyedParentsDelta: children are no longer sampled, so a keyed child loses its own delta",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "if !children.isEmpty { node.children = children.map { $0.sampled(at: frame) } }",
+    "replace": "",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "aSubtreeMovesByItsKeyedParentsDelta: the parent moves alone and leaves its children behind",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "node.translate(by: DesignPoint(x: x - self.frame.x, y: y - self.frame.y))",
+    "replace": "(node.frame.x, node.frame.y) = (x, y)",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "eachPropertyReadsItsOwnTrack: a y-only track never moves the node",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "if x != self.frame.x || y != self.frame.y {",
+    "replace": "if x != self.frame.x {",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "eachPropertyReadsItsOwnTrack: y samples the x track",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "let y = time.value(of: .y, at: frame) ?? self.frame.y",
+    "replace": "let y = time.value(of: .x, at: frame) ?? self.frame.y",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "eachPropertyReadsItsOwnTrack: the opacity track is ignored",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "if let opacity = time.value(of: .opacity, at: frame) { node.opacity = opacity }",
+    "replace": "",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "easingApplies: keys are sampled without their easing, so every segment plays linear",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "FlareCore.Timeline.value(of: tracks[property] ?? [], at: frame)",
+    "replace": "FlareCore.Timeline.value(of: (tracks[property] ?? []).map { Keyframe(frame: $0.frame, value: $0.value) }, at: frame)",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "samplesAtBeforeBetweenAndPastKeys: past the last key the value runs back to the first key",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "FlareCore.Timeline.value(of: tracks[property] ?? [], at: frame)",
+    "replace": "FlareCore.Timeline.value(of: tracks[property] ?? [], at: frame > Double(tracks[property]?.last?.frame ?? 0) ? 0 : frame)",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "tracksAreSortedAndEmptyOnesDropped: an unsorted track is kept as given",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": ".mapValues { $0.sorted { $0.frame < $1.frame } }",
+    "replace": ".mapValues { $0 }",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "tracksAreSortedAndEmptyOnesDropped: an empty track counts as a key, so a keyless node is not still",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "self.tracks = tracks.filter { !$0.value.isEmpty }",
+    "replace": "self.tracks = tracks",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "decodingSortsATrack: decoding skips init(tracks:) and keeps a file's unsorted keys",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "self.init(tracks: try container.decode([DesignKeyProperty: [Keyframe]].self, forKey: .tracks))",
+    "replace": "self.tracks = try container.decode([DesignKeyProperty: [Keyframe]].self, forKey: .tracks)",
+    "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "aDocumentWithNoKeyedNodeIsStill: keys on children only leave the document still",
+    "file": "Sources/DesignModel/DesignNodeTime.swift",
+    "find": "public var isKeyed: Bool { time != nil || children.contains { $0.isKeyed } }",
+    "replace": "public var isKeyed: Bool { time != nil }",
+    "tests": "DesignNodeTimeTests"
+  }
+]

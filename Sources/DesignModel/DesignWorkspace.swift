@@ -87,6 +87,8 @@ public enum DesignTool: String, CaseIterable, Sendable {
 public struct DesignWorkspace: Sendable, Equatable {
     /// Pages of the open file; empty when no file is open.
     public internal(set) var pages: [DesignPage] = []
+    /// The document's frame rate and length (DesignNodeTime.swift); the default until a slice sets or loads it.
+    public internal(set) var time = DesignDocumentTime()
     public internal(set) var selectedPageID: String?
     /// The selected layers on the selected page: SuiteKernel's ordered selection (DesignSelection).
     var selection = Selection<String>()
