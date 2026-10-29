@@ -1,9 +1,7 @@
 {
   "version": 1,
   "app": "photo",
-  "why": "RJ-P04, pending FH-6 (suiteui/fill-heal): named .jobs.pending.json so the harness skips it, since the catalog has no retouch.spot-heal until FH-6 builds RetouchCommands and the folder has no input yet (the harness needs one). It is renamed to dust-spots.jobs.json when FH-6 lands, with input/sky.png (320 x 200, a smooth blue gradient with grain and 20 dark dust spots, each about 5 px across, at the coordinates below) and expected/sky-healed.png. The job: 20 spot-heal clicks, one per spot, then a PNG export. The trap: a heal leaves a soft grey smudge where the dust was. The assertion: every spot's 9 x 9 patch is within 4 levels of its ring's mean, and no spot's darkest pixel survives.",
-  "pending": "FH-6",
-  "waits_on": "FH-6",
+  "why": "RJ-P04: opens input/sky.png (320 x 200, a smooth blue gradient with grain of about 1.5 levels and 20 dark dust spots, each about 5 px across, at the coordinates below), heals each with one spot-heal click, then exports a PNG. The trap: a heal leaves a soft grey smudge where the dust was, or copies in another spot. The assertion, against expected/sky-healed.png: every spot's 9 x 9 patch is within about 4 levels of its ring's mean (the grain and gradient alone spread about 4), and no spot's darkest pixel survives.",
   "inputs": ["input/*.png"],
   "steps": [
     {"id": "retouch.spot-heal", "params": {"x": 140, "y": 93, "size": 12, "seed": 1}},
@@ -32,5 +30,5 @@
   "expect": {
     "out/sky-healed.png": {"pixels": {"tolerance": 4, "reference": "expected/sky-healed.png"}}
   },
-  "platforms": []
+  "platforms": ["linux", "macos"]
 }

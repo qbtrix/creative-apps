@@ -2,7 +2,7 @@
   "title": "Clipboard interop: Copy in every app also writes PNG (and SVG for vectors) beside the app's own type, Paste of a plain image or SVG makes a placed image, on one live SuiteModel coder and one SuiteShell bridge",
   "wave": "XK4",
   "order": 20,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 C2 (suite row 8, Design rows 5 and 6); feature map suiteui/clipboard-interop (new); real jobs RJ-X72, RJ-X73 (new), RJ-D10",

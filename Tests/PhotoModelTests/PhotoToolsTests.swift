@@ -62,13 +62,14 @@ private func stroke(_ workspace: inout PhotoWorkspace, from start: Mask.Point, t
 @Test(arguments: PhotoTool.allCases)
 func photoToolActsOnFakeServices(_ tool: PhotoTool) throws {
     var before = try PhotoWorkspace.fixture(.sample)
-    // The source is in the sky, the drag over the sun, so a stamp shows.
+    // The source is in the sky, the drag from the sun's edge into it, so a stamp
+    // shows and a spot heal at the press has an edge to rebuild.
     ready(&before, tool, source: Mask.Point(x: 300, y: 100))
     // A tool not built yet has its own help (not a service's) on every service: it is disabled, not dead.
     if tool != .eyedropper, let help = tool.unavailableHelp { return #expect(before.toolHelp(tool) == help) }
     #expect(before.toolHelp(tool) == nil, "\(tool) has help on .fake, where every service works")
     var after = before
-    stroke(&after, from: Mask.Point(x: 520, y: 180), to: Mask.Point(x: 600, y: 260))
+    stroke(&after, from: Mask.Point(x: 475, y: 220), to: Mask.Point(x: 600, y: 260))
     #expect(!after.isDragging, "\(tool)'s drag is still under way after endDrag")
     let changed = shows(tool, changeFrom: before, to: after)
     #expect(changed, "\(tool)'s drag on the sample changes nothing it shows on .fake")
@@ -78,9 +79,13 @@ func photoToolActsOnFakeServices(_ tool: PhotoTool) throws {
 func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     var before = PhotoWorkspace()
     try before.newCanvas(width: 64, height: 64)
-    // A black line on the white canvas gives clone and heal a texture to copy.
+    // A black line on the white canvas gives clone and heal a texture to copy; a
+    // black dot under the press gives spot heal and remove something to take away,
+    // and the bucket a region to fill red.
     before.selectTool(.brush)
     stroke(&before, from: Mask.Point(x: 4, y: 12), to: Mask.Point(x: 28, y: 12))
+    stroke(&before, from: Mask.Point(x: 30, y: 30), to: Mask.Point(x: 30, y: 30))
+    before.setToolOption(.color(red: 255, green: 0, blue: 0))
     ready(&before, tool, source: Mask.Point(x: 16, y: 8))
     var after = before
     stroke(&after, from: Mask.Point(x: 30, y: 30), to: Mask.Point(x: 50, y: 50))

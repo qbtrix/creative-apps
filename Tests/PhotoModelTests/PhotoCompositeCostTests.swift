@@ -44,7 +44,7 @@ import Testing
         var pixels = try PixelBuffer(width: 530, height: 400, fill: RGBA(r: 0.3, g: 0.05, b: 0.6, a: 0.7))
         try pixels.setPixel(x: 260, y: 150, RGBA(r: 0.9, g: 0.9, b: 0, a: 0.9))
         let content = LayerContent(layer: layer, pixels: TiledPixels(pixels))
-        let (adjusting, masking) = (LiveAdjustmentLayers.make(), LiveSelection.masking())
+        let (adjusting, masking) = (LiveAdjustmentLayers.make(), LiveEdit.masking())
         let flat = try PhotoLayerComposite.composite(
             content, onto: below, origin: (20, -10), adjusting: adjusting, masking: masking)
         let tiled = try PhotoLayerComposite.composite(
@@ -63,7 +63,7 @@ private func composite(_ strip: TiledPixels, onto picture: PixelBuffer) throws {
     let content = LayerContent(layer: PhotoLayer(id: "strip", name: "Strip"), pixels: strip)
     _ = try PhotoLayerComposite.composite(
         content, onto: picture, origin: (0, 0),
-        adjusting: LiveAdjustmentLayers.make(), masking: LiveSelection.masking())
+        adjusting: LiveAdjustmentLayers.make(), masking: LiveEdit.masking())
 }
 
 /// The fastest of `runs` timings of `work`, in milliseconds: noise only adds time.
