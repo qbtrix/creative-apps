@@ -337,3 +337,4 @@ Next: AK side ended (parked by the supervisor): #4427 and #4428 on dev; relaunch
 - 2026-10-29T07:47:53Z AK-photo blocked on SC-f #5262/#5265, both open
 - 2026-10-29T08:09:54Z AK-photo blocked on SC-f #5262/#5265, both open
 - 2026-10-29T08:31:09Z AK-photo blocked on SC-f #5262/#5265, both open
+- 2026-10-29T08:53:36Z AK-photo blocked on SC-f #5262/#5265, both open
