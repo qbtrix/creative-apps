@@ -177,9 +177,11 @@ extension DesignWorkspace {
         return frame.fill
     }
 
-    /// The SVG document of one planned item (a layer, or the page when `item.nodeID` is the page's id), the
-    /// page as it shows at `frame` (nil: the rest pose).
-    public func exportSVG(_ item: DesignExportItem, at frame: Int? = nil) throws(DesignRefusal) -> String {
+    /// The SVG document of one planned item (a layer, or the page when `item.nodeID` is the page's id), at the rest pose.
+    public func exportSVG(_ item: DesignExportItem) throws(DesignRefusal) -> String { try exportSVG(item, at: nil) }
+
+    /// The SVG of `item` with the page as it shows at `frame` (nil: the rest pose).
+    public func exportSVG(_ item: DesignExportItem, at frame: Int?) throws(DesignRefusal) -> String {
         guard let page = selectedPage?.shown(at: frame) else { throw .nothingToExport }
         if item.nodeID == page.id {
             let box = DesignRect(x: 0, y: 0, width: page.frameWidth, height: page.frameHeight)

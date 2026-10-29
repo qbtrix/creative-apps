@@ -58,8 +58,11 @@ extension DesignPage {
 }
 
 extension DesignWorkspace {
-    /// The raster of one planned item on the selected page as it shows at `frame`, nil the rest pose (see `DesignPage.raster`).
-    public func exportRaster(_ item: DesignExportItem, at frame: Int? = nil) throws(DesignRasterRefusal) -> DesignRaster {
+    /// The raster of one planned item on the selected page at the rest pose (see `DesignPage.raster`).
+    public func exportRaster(_ item: DesignExportItem) throws(DesignRasterRefusal) -> DesignRaster { try exportRaster(item, at: nil) }
+
+    /// The raster of `item` with the page as it shows at `frame` (nil: the rest pose).
+    public func exportRaster(_ item: DesignExportItem, at frame: Int?) throws(DesignRasterRefusal) -> DesignRaster {
         guard let page = selectedPage?.shown(at: frame) else { throw .unknownID(item.nodeID) }
         return try page.raster(item)
     }
