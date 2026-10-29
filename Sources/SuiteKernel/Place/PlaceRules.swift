@@ -12,6 +12,14 @@ public enum PlaceRules {
     /// The largest file Place takes (32 MB), and why a file of another kind or over it is refused.
     public static let maxBytes = 32 << 20
     public static let formatHelp = "Place takes PNG, JPEG or SVG files.", sizeHelp = "Place takes files up to 32 MB."
+    /// Why a file of another kind is refused by a target that takes `formats`, naming only those:
+    /// "Place takes PNG or JPEG files."; all three give `formatHelp`.
+    public static func formatHelp(for formats: Set<PlacedFormat>) -> String {
+        let names = PlacedFormat.allCases.filter(formats.contains).map { $0.rawValue.uppercased() }
+        guard let last = names.last else { return formatHelp }
+        let list = names.count == 1 ? last : names.dropLast().joined(separator: ", ") + " or " + last
+        return "Place takes \(list) files."
+    }
 
     /// PNG by its signature, JPEG by `FF D8 FF`, SVG by `<?xml` or `<svg` after a BOM and whitespace, with `<svg`
     /// in the first 4 KB; else nil.
