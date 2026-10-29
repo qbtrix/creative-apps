@@ -34,14 +34,15 @@ extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetDesignTimelineTests {
         @Test(.timeLimit(.minutes(2))) func slideIn() async throws {
             #if DEBUG
-            let w = RenderBudgetWindow(DesignWindow(seed: DesignFixtures.cards, live: DesignLiveDrag()))
+            let seed = DesignFixtures.cards
+            let w = RenderBudgetWindow(DesignWindow(seed: seed, live: DesignLiveDrag()))
             defer { w.close() }
             try await w.settle(800)
             try await w.settle(untilStable: { DesignWindow.bodyRuns })
             let perform = try #require(DesignWindow.lastPerform)
             let (window, strip) = (DesignWindow.bodyRuns, TimelineStrip<String>.bodyRuns)
-            let id = try #require(DesignWindow.lastWorkspace?.selectedPage?.nodes.first?.children.first?.id)
-            perform(.adoptLive(try #require(DesignWindow.lastWorkspace).keyed(id)))
+            let id = try #require(seed.selectedPage?.nodes.first?.children.first?.id)
+            perform(.adoptLive(seed.keyed(id)))
             try await w.settle(400)
             let ranWindow = DesignWindow.bodyRuns - window, ranStrip = TimelineStrip<String>.bodyRuns - strip
             print("BUDGET design timeline slide-in on cards: window bodies \(ranWindow) | strip bodies \(ranStrip)")
