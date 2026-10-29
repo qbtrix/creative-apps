@@ -83,6 +83,11 @@ Parsing is strict. Each form knows its own flags and nothing else:
 - `--out` to a file that exists is 73 (`<path> already exists; pass --force
   to replace it`). `--force` replaces it. `--in-place` writes back to `--in`
   and needs no `--force`.
+- `new` and a command save the app's native format, so their `--out` (or
+  the `--in` of `--in-place`) must end in the app's native extension
+  (`.flare`, `.ora`, ...), `--force` or not; anything else is 64. Use
+  `export` for another format. A Lottie `.json` or a PNG you opened is never
+  overwritten with the native format.
 - Everything is checked, and the command runs, before anything is written:
   a refused run writes nothing.
 - Writes are atomic: the data goes to a temp file beside the target, then
