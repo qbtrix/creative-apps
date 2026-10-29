@@ -9,7 +9,8 @@
 // ShapeTarget (shape-tools DS-6); select.pick, select.enter-group and select.exit-group are GroupPick's on its
 // GroupPickTarget (area-selection AR-14); the nine stroke.* are StrokeCommands on its StrokeTarget (stroke-style DK-6);
 // edit.copy-as and edit.paste-as-image are CopyAsCommands on DesignPasteboardAdapter's CopyAsTarget (clipboard-interop CB-6);
-// the five place.* are PlaceCommands on its PlacedImageTarget (placed-images PD-5).
+// the five place.* are PlaceCommands on its PlacedImageTarget (placed-images PD-5); the keyframe.* and time.* ids are
+// DesignKeyCommands' (one-document OD-8).
 // Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -33,13 +34,13 @@ extension DesignWorkspace {
     /// color.pick's params: the page point and where the colour goes ("fill" or "stroke").
     struct PickParams: Codable, Sendable { var x, y: Double; var to: String }
 
-    /// Every Design action as a command spec, in menu order, the History panel's two after the tools, then the View menu's.
+    /// Every Design action as a command spec, in menu order, the History panel's two after the tools, the key commands, then the View menu's.
     public static let commands: [CommandSpec<DesignWorkspace>] =
         fileSpecs + editSpecs + CopyAsCommands.specs(DesignWorkspace.self) + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
             + [pick] + groupSpecs + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + ShapeCommands.specs(DesignWorkspace.self)
             + StrokeCommands.specs(DesignWorkspace.self)
             + PlaceCommands.specs(DesignWorkspace.self)
-            + HistoryCommands.specs(DesignWorkspace.self) + viewSpecs
+            + HistoryCommands.specs(DesignWorkspace.self) + keySpecs + viewSpecs
 
     /// The specs as a catalog whose history is the workspace's own.
     public static let catalog: CommandCatalog<DesignWorkspace> =

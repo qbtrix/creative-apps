@@ -13,10 +13,10 @@ import Testing
     static func run(_ id: String, _ params: [String: JSONValue], on w: inout DesignWorkspace) throws -> CommandOutcome {
         try DesignWorkspace.catalog.run(id, params: .object(params), on: &w)
     }
-    static func key(_ property: String = "x", _ frame: Int, _ value: Double) -> [String: JSONValue] {
+    static func key(_ frame: Int, _ value: Double, _ property: String = "x") -> [String: JSONValue] {
         ["node": .string("node-2"), "property": .string(property), "frame": .number(Double(frame)), "value": .number(value)]
     }
-    static func at(_ property: String = "x", _ frame: Int) -> [String: JSONValue] {
+    static func at(_ frame: Int, _ property: String = "x") -> [String: JSONValue] {
         ["node": .string("node-2"), "property": .string(property), "frame": .number(Double(frame))]
     }
     /// time.sample's x, y and opacity for node-2 at `frame`.
@@ -80,10 +80,11 @@ import Testing
         var w = DesignFixtures.animated(50)
         let bytes = try w.fileData()
         let outcome = try Self.run("time.playhead", ["frame": .number(60)], on: &w)
-        #expect(w.playhead == 60 && outcome.undoStep == nil && !w.canUndo && (try w.fileData()) == bytes)
+        let after = try w.fileData()
+        #expect(w.playhead == 60 && outcome.undoStep == nil && !w.canUndo && after == bytes)
         try Self.run("time.playhead", ["frame": .number(100_000)], on: &w)
         #expect(w.playhead == w.time.durationFrames - 1, "past the end lands on the last frame")
-        try Self.run("time.playhead", ["frame": .null], on: &w)
+        try Self.run("time.playhead", [:], on: &w)
         #expect(w.playhead == nil)
     }
 
