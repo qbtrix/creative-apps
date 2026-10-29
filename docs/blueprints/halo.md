@@ -391,8 +391,8 @@ its span) does not hide children. A parent cycle can't be made
    rendered file is made from, and HF-1 holds the viewer to it.
 3. A viewer drag changes only `viewerDrag`; the viewer redraws
    `drawList.offsetting(layer, by: delta)`. Mouse-up commits once.
-4. Playback is driven by a display link in `HaloPlaybackDriver.swift` that
-   calls `model.tick(now:)`; the frame math is `PlaybackClock` (FlareCore's
+4. Playback is driven by the suite's display link, SuiteUI's
+   `SuitePlaybackDriver`, which `HaloTransport` runs to call `model.tick(now:)`; the frame math is `PlaybackClock` (FlareCore's
    `Timeline.playbackFrame` in the live type), tested on Linux.
 
 **Commands and availability.** `HaloCommand` (Model, W0) lists every

@@ -1,5 +1,5 @@
-// HaloPlaybackDriverTests.swift: VP-10's playback driver (viewer-playback
-// #37). The same target timestamps fired through HaloPlaybackDriver's link
+// HaloPlaybackDriverTests.swift: Halo on the suite's playback driver
+// (VP-10, OD-10). The same target timestamps fired through SuitePlaybackDriver's link
 // and sent straight into HaloProject.tick(now:) land on the same frames; the
 // frames follow the targets, not wall time; and a paused model stops the
 // link, the way HaloTransport follows `playback.playing`. Every test runs on
@@ -8,13 +8,14 @@
 #if canImport(AppKit)
 import AppKit
 import HaloModel
+import SuiteUI
 import Testing
 
 @testable import HaloApp
 
 /// A link the test fires by hand; after `invalidate()` it fires nothing.
 @MainActor
-final class HaloFakeLink: HaloRefreshLink {
+final class HaloFakeLink: SuiteRefreshLink {
     private let receive: @MainActor (Double) -> Void
     private(set) var invalidated = false
 
@@ -35,11 +36,12 @@ private final class HaloPlayer {
     var model: HaloProject
     private(set) var links: [HaloFakeLink] = []
     // Typed, so the closures' own `driver` doesn't make its inference circular.
-    lazy var driver: HaloPlaybackDriver = HaloPlaybackDriver(
+    lazy var driver: SuitePlaybackDriver = SuitePlaybackDriver(
         onTick: { [weak self] now in
-            guard let self else { return }
+            guard let self else { return false }
             self.model.tick(now: now)
             if !self.model.playback.playing { self.driver.stop() }
+            return true
         },
         makeLink: { [weak self] receive in
             let link = HaloFakeLink(receive)
@@ -109,26 +111,6 @@ private final class HaloPlayer {
         // An invalidated link fires nothing more.
         link.fire(5003)
         #expect(player.model.selectedComposition?.playheadFrame == frame)
-    }
-
-    @Test func startIsOnceAndStopIsSafe() throws {
-        let player = try HaloPlayer()
-        player.driver.stop()
-        #expect(!player.driver.isRunning)
-        player.driver.start()
-        player.driver.start()
-        #expect(player.links.count == 1)
-        player.driver.stop()
-        #expect(!player.driver.isRunning)
-        player.driver.start()
-        #expect(player.links.count == 2)
-        player.driver.stop()
-    }
-
-    @Test func nothingToRefreshOnLeavesTheDriverStopped() {
-        let driver = HaloPlaybackDriver(onTick: { _ in }, makeLink: { _ in nil })
-        driver.start()
-        #expect(!driver.isRunning)
     }
 }
 #endif
