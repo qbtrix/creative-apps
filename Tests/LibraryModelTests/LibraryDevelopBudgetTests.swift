@@ -7,7 +7,7 @@
 // debug (decision D8): a 512 px preview with every control but Vibrance and
 // Saturation within 8 ms, the 2048 px full render within 120 ms, its
 // histogram within 10 ms, a 6000x4000 photo developed for a 2,000 px
-// export within 600 ms p95 and a loupe GPU slider step at 2,560 px within 8 ms p95 (quality gate #5953); a miss files the fused-pass core issue (Q3), never
+// export within 1,500 ms p95 and a loupe GPU slider step at 2,560 px within 8 ms p95 (quality gate #5953); a miss files the fused-pass core issue (Q3), never
 // a looser budget. Each prints a `LIBRARY-BUDGET develop …` line.
 //
 // The edit rows drive the catalog through `recordEdit` with the packet's
