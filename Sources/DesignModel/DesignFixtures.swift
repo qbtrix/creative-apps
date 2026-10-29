@@ -5,7 +5,10 @@
 // state `open(_:at:)` leaves: first page selected, empty history, no location
 // (an unsaved file). Frames are absolute page points; children are listed back
 // to front. Ids follow the counters' "page-N" and "node-N", so the next minted
-// id is past every fixture id. Linux-safe.
+// id is past every fixture id. `animated(_:)` and `keyedCrowd` are the keyed documents the node-time tests
+// and budgets use; they stay off `names`. Linux-safe.
+
+import SuiteKernel
 
 public enum DesignFixtures {
     /// The fixture names a launch argument uses, in the blueprint's order.
@@ -64,6 +67,43 @@ public enum DesignFixtures {
                            children: children))
         }
         return opened([DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: frames)])
+    }
+
+    /// One 1440 × 1024 UI frame holding `count` 24 × 16 rectangles in rows of 25. Every rectangle's x, y and
+    /// opacity are keyed over 2 s (frames 0 and 120 at 60 fps) and the frame's x too, so sampling moves a subtree.
+    /// Not in `names`: no journey opens it.
+    public static func animated(_ count: Int) -> DesignWorkspace {
+        let cells = (0..<count).map { i in
+            keyed(DesignNode(id: "node-\(i + 2)", name: "Rectangle \(i + 1)", kind: .rectangle,
+                             frame: rect(30 + Double(i % 25) * 54, 30 + Double(i / 25) * 48, 24, 16)), dx: 24, dy: 20)
+        }
+        var frame = DesignNode(id: "node-1", name: "Frame 1", kind: .frame, frame: rect(10, 10, 1400, 1000),
+                               children: cells)
+        frame.time = DesignNodeTime(tracks: [.x: [Keyframe(frame: 0, value: 10), Keyframe(frame: 120, value: 20)]])
+        return opened([DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: [frame])])
+    }
+
+    /// `crowd` with every rectangle keyed as `animated`'s are; the frames and texts stay still. Not in `names`.
+    public static var keyedCrowd: DesignWorkspace {
+        var workspace = crowd
+        workspace.pages[0].nodes = workspace.pages[0].nodes.map { frame in
+            var frame = frame
+            frame.children = frame.children.map { $0.kind == .rectangle ? keyed($0, dx: 4, dy: 4) : $0 }
+            return frame
+        }
+        return workspace
+    }
+
+    /// `node` keyed from its rest pose at frame 0 to (+dx, +dy) and opacity 0.3 at frame 120.
+    private static func keyed(_ node: DesignNode, dx: Double, dy: Double) -> DesignNode {
+        var node = node
+        let (x, y) = (node.frame.x, node.frame.y)
+        node.time = DesignNodeTime(tracks: [
+            .x: [Keyframe(frame: 0, value: x), Keyframe(frame: 120, value: x + dx)],
+            .y: [Keyframe(frame: 0, value: y), Keyframe(frame: 120, value: y + dy)],
+            .opacity: [Keyframe(frame: 0, value: 1), Keyframe(frame: 120, value: 0.3)],
+        ])
+        return node
     }
 
     private static var cardsPage: DesignPage {
