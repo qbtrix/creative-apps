@@ -217,8 +217,9 @@ extension DesignWorkspace {
         case .move(let id):
             restorePages(current.before)
             current.guides = .empty
-            guard current.moved, let frame = selectedPage?.nodes.node(id)?.frame else { break }
-            // Snap first, whole points second (DesignWholePoints); a keyed axis keys at the playhead (LiveKeying).
+            guard current.moved, let frame = shownPage?.nodes.node(id)?.frame else { break }
+            // The box as it shows snaps first, whole points second (DesignWholePoints); a keyed axis keys at the
+            // playhead (LiveKeying).
             let moveBy = frame.wholeDelta(snapMove(delta, box: frame, modifiers: modifiers, current))
             _ = pages.update(id) { [playhead] in $0 = $0.moved(by: moveBy, at: playhead) }
             current.guides = landedGuides(frame, by: moveBy, modifiers: modifiers, current)
@@ -271,8 +272,10 @@ extension DesignWorkspace {
         current.guides = .empty
         guard current.moved, let page = selectedPage else { return }
         let transforming = services.transforming
-        // A move snaps the selection box, then lands its top-left on a whole point (DesignWholePoints).
-        let bounds = selectionBounds
+        // A move snaps the selection box as it shows, then lands its top-left on a whole point (DesignWholePoints);
+        // a resize keeps the rest box, as it writes the rest pose.
+        let resizing = if case .resizeSeveral = current.route { true } else { false }
+        let bounds = resizing ? selectionBounds : shownSelectionBounds
         let moveBy = bounds?.wholeDelta(snapMove(delta, box: bounds, modifiers: modifiers, current)) ?? delta
         do throws(DesignRefusal) {
             switch current.route {
@@ -311,7 +314,7 @@ extension DesignWorkspace {
         } catch {
             return
         }
-        current.guides = landedGuides(on: selectionBounds, modifiers: modifiers, current)
+        current.guides = landedGuides(on: resizing ? selectionBounds : shownSelectionBounds, modifiers: modifiers, current)
     }
 
     /// Turns every selected layer by `degrees` about its own centre as one "Rotate" step (#4224); a layer

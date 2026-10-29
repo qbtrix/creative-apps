@@ -39,8 +39,14 @@ extension DesignWorkspace {
     }
 
     /// The box around every selected layer the canvas shows (none hidden, itself or by a group), or nil.
-    public var selectionBounds: DesignRect? {
-        let frames = selectedNodes.filter { !isHiddenInTree($0.id) }.map(\.frame)
+    public var selectionBounds: DesignRect? { selectionBounds(on: selectedPage) }
+    /// The same box as the canvas shows it at the playhead (`shownPage`): what a move snaps.
+    var shownSelectionBounds: DesignRect? { selectionBounds(on: shownPage) }
+
+    /// The box around the selected layers' frames on `page`, less the hidden ones.
+    func selectionBounds(on page: DesignPage?) -> DesignRect? {
+        guard let page else { return nil }
+        let frames = selectedNodeIDs.compactMap { page.nodes.node($0) }.filter { !isHiddenInTree($0.id) }.map(\.frame)
         guard let first = frames.first else { return nil }
         let (minX, minY) = (frames.map(\.x).min() ?? first.x, frames.map(\.y).min() ?? first.y)
         let (maxX, maxY) = (frames.map(\.maxX).max() ?? first.maxX, frames.map(\.maxY).max() ?? first.maxY)

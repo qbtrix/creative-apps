@@ -2,7 +2,8 @@
 // canvas makes of the page (hit-test, the handle under the pointer, snap candidates, the marquee, Zoom to Selection)
 // sees the tree sampled at that frame (`shownPage`); with it nil each read is the rest pose, as before. The
 // playhead is shown state: setting it is no edit, no undo step, no unsaved change. On `animated(50)` at frame 60
-// node-2 shows at about x 47, y 40 (its rest frame is 30, 30, 24, 16). Runs on Linux and macOS.
+// node-2 shows at about x 47, y 40 (its rest frame is 30, 30, 24, 16). A move snaps the box the canvas shows, and
+// a load or New File puts the playhead back to the rest pose. Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -68,5 +69,38 @@ import Testing
     @Test func zoomToSelectionShowsTheSampledBounds() {
         #expect(Self.at(60, selecting: ["node-2"]).zoomToSelectionRect == Self.shown)
         #expect(Self.at(nil, selecting: ["node-2"]).zoomToSelectionRect == Self.rest)
+    }
+
+    /// node-2 as it shows at 60 after `workspace`'s gesture.
+    static func shownAt60(_ workspace: DesignWorkspace) -> DesignRect? { workspace.sampledNode("node-2", at: 60)?.frame }
+
+    @Test func aOneLayerMoveSnapsTheShownBox() {
+        // Shown at 47..71, +28 puts its right edge 2 from node-3's shown left (101): it snaps to 30. The rest box
+        // (30..54) would snap +1 in x and +2 in y to the shown lines instead.
+        var workspace = Self.at(60)
+        workspace.gesture(.move, pt(59, 48), pt(87, 48))
+        #expect(Self.shownAt60(workspace).map { [$0.x, $0.y] } == [77, 40])
+    }
+
+    @Test func aSeveralLayerMoveSnapsTheShownBox() {
+        // node-2 and node-3 shown span 47..125 by 40..56; +28 lands its centre 1 past node-28's (113): it snaps to 27.
+        var workspace = Self.at(60, selecting: ["node-2"])
+        workspace.toggleSelection("node-3")
+        workspace.gesture(.move, pt(59, 48), pt(87, 48))
+        #expect(Self.shownAt60(workspace).map { [$0.x, $0.y] } == [74, 40])
+    }
+
+    @Test func loadAndNewFileShowTheRestPose() throws {
+        var opened = Self.at(60)
+        opened.time.durationFrames = 600
+        let bytes = try opened.fileData()
+        opened.load(opened.pages)
+        #expect(opened.playhead == nil)
+        var fresh = Self.at(60)
+        fresh.time.durationFrames = 600
+        fresh.newFile()
+        #expect(fresh.playhead == nil && fresh.time == DesignDocumentTime())
+        fresh.undo()
+        #expect(try fresh.fileData() == bytes, "undoing New File brings back the file's rate and length")
     }
 }

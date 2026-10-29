@@ -40,5 +40,19 @@
     "find": "return selectedPage?.sampled(at: Double(playhead))",
     "replace": "return selectedPage",
     "tests": "DesignPlayheadTests"
+  },
+  {
+    "label": "newFileKeepsPlayhead: New File keeps the old file's playhead",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "(time, playhead) = (DesignDocumentTime(), nil)\n        if wasOpen",
+    "replace": "time = DesignDocumentTime()\n        if wasOpen",
+    "tests": "DesignPlayheadTests"
+  },
+  {
+    "label": "loadKeepsPlayhead: opening a file keeps the old playhead",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "self.pages = pages\n        (time, playhead) = (DesignDocumentTime(), nil)",
+    "replace": "self.pages = pages\n        time = DesignDocumentTime()",
+    "tests": "DesignPlayheadTests"
   }
 ]

@@ -40,5 +40,12 @@
     "find": "return documentSession.stateText",
     "replace": "return \"Saved\"",
     "tests": "DesignDirtyTests"
+  },
+  {
+    "label": "undoDropsTime: undo leaves the document's rate and length as they are",
+    "file": "Sources/DesignModel/DesignHistory.swift",
+    "find": "(pages, time) = (snapshot.pages, snapshot.time)\n        held.replace(with: snapshot.heldIDs)\n        (selectedPageID, selectedNodeIDs) =",
+    "replace": "pages = snapshot.pages\n        held.replace(with: snapshot.heldIDs)\n        (selectedPageID, selectedNodeIDs) =",
+    "tests": "DesignPlayheadTests"
   }
 ]
