@@ -5,7 +5,7 @@ Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhe
 Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
 Base: main fef52e66 (verified) / dev 5e4a0922
 Next: Belt-Slice-Done FH-photo and the #3778 contact sheet once a green full run containing b0e24d172 promotes main
-Polled: 2026-10-29T00:15Z · main 09cb3117 does not contain FH-10 b0e24d172 yet; full CI 40782400633 at b0e24d172: Linux and macOS compile green, macOS test shards running
+Polled: 2026-10-29T00:39Z · main 09cb3117 does not contain FH-10 b0e24d172 yet; full CI 40782400633 at b0e24d172: Linux, compile, shards 1/3 and 2/3 green, shard 3/3 running
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
@@ -64,3 +64,4 @@ Polled: 2026-10-29T00:15Z · main 09cb3117 does not contain FH-10 b0e24d172 yet;
 
 - 2026-10-27T06:02Z: dev-red #5818 is SuiteUI home/grid/tabs snapshots, not this feature; main holds at fef52e66. #4896 ready; #5245 (FH-u) conflicted with dev (tone commands), merging dev in now; #5107/#5108/#5129/#5109/#5251 stacked.
 - 2026-10-29T00:15Z heartbeat: main 09cb3117 does not contain FH-10 b0e24d172 yet; full CI 40782400633 at b0e24d172: Linux and macOS compile green, macOS test shards running
+- 2026-10-29T00:39Z heartbeat: main 09cb3117 does not contain FH-10 b0e24d172 yet; full CI 40782400633 at b0e24d172: Linux, compile, shards 1/3 and 2/3 green, shard 3/3 running
