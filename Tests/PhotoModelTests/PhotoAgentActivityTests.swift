@@ -1,5 +1,7 @@
 // PhotoAgentActivityTests.swift: Photo's AI-tab adapter: the eye as one undo
 // step, selection of exactly the live ids, and a step's layers from its payload.
+import Foundation
+import SuiteKernel
 import Testing
 
 @testable import PhotoModel
@@ -38,6 +40,24 @@ import Testing
         let added = try #require(model.layers.map(\.id).first { id in !before.contains { $0.id == id } })
         #expect(Set(touched) == [before[1].id, added])
         #expect(PhotoEdit.group([.tiles(layer: "a", [:]), .maskTiles(layer: "a", [:])]).layerIDs(now: []) == ["a"])
-        #expect(model.agentRequests.isEmpty, "no step has an agent origin before #6028")
+        #expect(model.agentRequests.isEmpty, "a user's steps listed as an agent's")
+    }
+
+    @Test func agentStepsBecomeOneRequestWithTheirLayers() throws {
+        var model = try PhotoWorkspace.fixture(.layered)
+        let first = try #require(model.layers.first?.id)
+        model.toggleVisibility(first)
+        StepOrigin.$current.withValue(.agent(client: "claude", request: nil)) {
+            _ = model.setHistoryRequest("Make a poster")
+            model.toggleVisibility(first)
+            model.addLayer()
+            _ = model.setHistoryRequest(nil)
+        }
+        let requests = model.agentRequests
+        #expect(requests.count == 1, "\(requests)")
+        let poster = try #require(requests.first)
+        #expect(poster.title == "Make a poster" && poster.client == "claude" && poster.isSpan)
+        #expect(poster.steps.count == 2 && poster.date > .distantPast)
+        #expect(poster.layers.contains(first) && poster.layers.count == 2)
     }
 }

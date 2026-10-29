@@ -8,17 +8,37 @@
 // (new ids were created, a differing value was changed). `setLayersHidden`
 // is the tab's eye, one "Hide Agent Layers"/"Show Agent Layers" step;
 // `selectLayers` picks exactly the live ones of the ids. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import SuiteKernel
 
 extension PhotoWorkspace {
     /// The agent's requests in this image, newest first.
     public var agentRequests: [AgentRequest] { AgentRequests.group(agentSteps) }
 
-    /// The applied agent steps, oldest first. Wire: agent-provenance (#6028) maps
-    /// `history.kernel.undoSteps` whose `origin` is `.agent(client:request:)` to records,
-    /// keyed by `idAfter`, with `payload.layerIDs(now: layers)` for their layers and the
-    /// time from a `[idAfter: Date]` the workspace stamps on record (History carries no date).
-    var agentSteps: [AgentStepRecord] { [] }
+    /// The applied agent steps, oldest first, each with its layers and record time.
+    var agentSteps: [AgentStepRecord] {
+        history.kernel.undoSteps.compactMap { step in
+            guard case .agent(let client, let request) = step.origin else { return nil }
+            return AgentStepRecord(id: step.idAfter, name: step.name, client: client, request: request,
+                                   date: history.agentDates[step.idAfter] ?? .distantPast,
+                                   layers: step.payload.layerIDs(now: layers))
+        }
+    }
+
+    /// Stamps the step just recorded when an agent made it; drops stamps of
+    /// steps the history no longer holds once they outnumber its limit twice.
+    mutating func stampAgentStep() {
+        guard case .agent = StepOrigin.current else { return }
+        history.agentDates[history.kernel.currentStepID] = Date()
+        if history.agentDates.count > 2 * PhotoHistory.limit {
+            let live = Set(history.kernel.undoSteps.map(\.idAfter) + history.kernel.redoSteps.map(\.idAfter))
+            history.agentDates = history.agentDates.filter { live.contains($0.key) }
+        }
+    }
 
     /// Hides or shows every live layer in `ids` as one step; nothing when none changes.
     public mutating func setLayersHidden(_ ids: [PhotoLayer.ID], hidden: Bool) {
