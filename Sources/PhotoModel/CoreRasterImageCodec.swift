@@ -30,7 +30,9 @@ public struct CoreRasterImageCodec: PhotoImageCodec {
         switch format {
         case .jpeg: return try JPEG.write(buffer, quality: Int((min(max(quality, 0), 1) * 100).rounded()))
         case .png:
-            do { return try PNG.write(buffer) } catch CodecError.unsupported { return try Self.writePNG(buffer) }
+            // Level 1 (greedy, 4-entry chains): core's level-6 search took 28 of 33 s on a scale-2 8064 x 6048 export
+            // (creative-core #728). The bytes stay lossless; only the file grows a little.
+            do { return try PNG.write(buffer, level: 1) } catch CodecError.unsupported { return try Self.writePNG(buffer) }
         }
     }
 
