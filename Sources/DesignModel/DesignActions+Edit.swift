@@ -98,7 +98,9 @@ extension DesignWorkspace {
     /// Moves layer `id` into `parentID` (nil: the top level) at `index`, as one "Move Layer" step.
     public mutating func moveLayer(_ id: String, into parentID: String?, at index: Int) throws(DesignRefusal) {
         guard let page = selectedPage, editingTextID == nil, gesture == nil else { throw .unchanged }
-        apply(try services.ordering.move(id, into: parentID, at: index, on: page))
+        var edit = try services.ordering.move(id, into: parentID, at: index, on: page)
+        edit.nodes = edit.nodes.rebased(from: page.nodes, at: playhead)
+        apply(edit)
     }
 
     /// Why the inspector's `property` row is off for the selection; nil when it can be set.
