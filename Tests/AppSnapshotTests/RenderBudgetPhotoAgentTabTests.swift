@@ -1,7 +1,7 @@
 // RenderBudgetPhotoAgentTabTests.swift (#6029, render budget row "open the
 // sidebar's AI tab: 0 window bodies, 0 canvas shows"): the real Photo window
 // on the `large` fixture, hosted on the render budget harness through
-// RenderBudgetPhotoFacetsTests' host. A click on the sidebar's AI segment
+// RenderBudgetPhotoFacetsTests' host. Picking the sidebar's AI segment (as its click does)
 // switches PhotoSidebarTabs' own state, so PhotoEditor's body runs 0 times
 // and the canvas view's `show` is called 0 times; the tab shows its empty
 // state. Opening a request row is the AI list's own state too; it is covered
@@ -21,10 +21,11 @@ import Testing
         let session = PhotoSession(try PhotoWorkspace.fixture(.large))
         let (w, tally, canvas, _) = try await RenderBudgetPhotoFacetsTests.host(session)
         defer { w.close() }
-        let ai = try #require(await w.element("photo.sidebar.tabs.ai"), "the sidebar shows no AI tab")
+        #expect(await w.element("photo.sidebar.tabs.ai") != nil, "the sidebar shows no AI tab")
         let shows = canvas.showCalls
         let step = try await w.measure("photo sidebar AI tab, large", bodies: RenderBudgetPhotoFacetsTests.editor(tally)) {
-            try await w.ticks(1) { _ in w.click(at: CGPoint(x: ai.midX, y: ai.midY)) }
+            // A synthetic click waits in NSSegmentedControl's tracking loop; pick the segment as its click would.
+            try await w.ticks(1) { _ in #expect(w.select(segment: "photo.sidebar.tabs.ai"), "no AI segment") }
         }
         try await w.settle()
         #expect(await w.element("suite.agent.empty") != nil, "the AI tab didn't open")
