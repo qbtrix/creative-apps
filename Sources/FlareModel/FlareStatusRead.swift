@@ -2,7 +2,7 @@
 // workspace so Linux tests cover them; FlareTransport only draws them in a ViewerStatusBar. The scene's aspect
 // ("16:9", reduced by the greatest common divisor), its size ("1080p" for a 16:9 or 9:16 scene, named by its short
 // side, else "550 × 400"), its rate ("24 fps"), and while playing the rate the screen actually shows: the display
-// link's ticks over the last second (`PlaybackDriver.measuredFPS`), capped at the document rate, since a 60 Hz link
+// link's ticks over the last second (`SuitePlaybackDriver.measuredFPS`), capped at the document rate, since a 60 Hz link
 // still shows each of 24 frames once. Under the document rate it is dropping (QB-L4, report-only). A scene with text
 // the stage can't draw says so: "Text not shown (1)", and so does one with masks or mattes: "Masks not shown (1)".
 // Under Direct Select, `pathHelp` says why no points can be edited ("Unlock Layer 1 to edit its points."). After a place,

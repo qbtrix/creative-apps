@@ -1,5 +1,5 @@
 // FlarePlaybackTicks.swift: the platform-neutral half of the playback driver (docs/blueprints/flare.md, 7.5, LA-2).
-// A display link (PlaybackDriver in FlareApp, on macOS) hands each refresh's target timestamp to
+// A display link (SuiteUI's SuitePlaybackDriver, run by FlareCanvas on macOS) hands each refresh's target timestamp to
 // `FlareWorkspace.tick(target:ticker:)`; `PlaybackTicker` turns consecutive targets into the elapsed seconds LM-7's
 // `advance(elapsed:)` takes. Using the link's target time, never wall time, keeps the playhead on the frame the
 // screen is about to show. The first tick after a start only sets the baseline, so a pause never counts as elapsed

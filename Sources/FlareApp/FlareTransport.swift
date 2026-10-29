@@ -15,7 +15,7 @@
 // suffix and `suite.controls` holds no duplicate. The row is only the
 // controls, so it fits the narrowest content column: the status pills (IT-9)
 // live in the stage's one ViewerStatusBar (FlareStage.statusPills), and the
-// PlaybackDriver lives in FlareCanvas. A second status bar here made the row
+// playback driver lives in FlareCanvas. A second status bar here made the row
 // wider than the column, so it overflowed both sides under the sidebar and
 // the inspector (#2101). It only reads `model`; TransportCapsule (#340)
 // replaces the row.

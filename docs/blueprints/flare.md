@@ -58,7 +58,7 @@ and the easing inspector (`FlareApp.swift`, `FlareCommands.swift`,
   methods (LM-0c3), and `FlareAssist.swift` will hold assist's (LM-0c4).
 - The display-link tick math is in the Model: `PlaybackTicker` and
   `FlareWorkspace.tick(target:ticker:)` in `FlarePlaybackTicks.swift`;
-  `Sources/FlareApp/PlaybackDriver.swift` only owns the link.
+  SuiteUI's `SuitePlaybackDriver`, which `FlareCanvas` runs, only owns the link.
 - The Ellipse tool works on the workspace itself in
   `Sources/FlareModel/FlareDrawing.swift`, a stopgap until LC-4's
   ellipse builder in `PathBuilders.swift` (qbtrix/creative-core#182). Machine refusal text sits in
@@ -401,8 +401,8 @@ tested, which is exactly where contracts and fakes belong.
   logic task (LA-0) with no SwiftUI.
 - Other platform files, built by the logic track with no SwiftUI:
   `StageRasterizer.swift` (CoreGraphics, a draw list to PNG at a pixel
-  scale) and `PlaybackDriver.swift` (a display link from
-  `NSScreen.displayLink(target:selector:)` that calls `advance(elapsed:)`).
+  scale); playback runs on SuiteUI's `SuitePlaybackDriver` (a display link
+  from `NSScreen.displayLink(target:selector:)`, its ticks into `advance(elapsed:)`).
   `FlareWindow` picks the rasterizer: `FakeRasterizer` when the services are
   `.fake`, `StageRasterizer` otherwise. It passes it to `export` as an
   argument, so `FlareServices` has no rasterizer member.
