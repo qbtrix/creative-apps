@@ -56,11 +56,7 @@ enum SnapshotAppearance: String, CaseIterable, Sendable {
 /// that size their layers by the window's scale rasterize at 2× on a 1× CI
 /// display too. SnapshotHostTests.hairline catches a blurred upscale.
 private final class ScaledSnapshotWindow: NSWindow {
-    /// Whether the window says it is key and main, so controls draw active.
-    var isFront = false
     override var backingScaleFactor: CGFloat { SnapshotHost.scale }
-    override var isKeyWindow: Bool { isFront || super.isKeyWindow }
-    override var isMainWindow: Bool { isFront || super.isMainWindow }
 }
 
 /// Renders views at scale 2 in one appearance.
@@ -91,7 +87,9 @@ struct SnapshotHost {
             .frame(width: size.width, height: size.height)
             .background(SuiteColor.windowBackground)
             .environment(\.suiteSnapshotRendering, true)
-            .environment(\._colorSchemeContrast, appearance.contrast))
+            .environment(\._colorSchemeContrast, appearance.contrast)
+            // An offscreen window is never key, so SwiftUI is told how active to draw.
+            .environment(\.appearsActive, key))
         // No colorScheme override: SwiftUI derives the scheme from the
         // effective NSAppearance, and forcing it made SwiftUI resolve NSColor
         // tokens against a plain aqua/darkAqua appearance, dropping the
@@ -102,7 +100,6 @@ struct SnapshotHost {
         let window = ScaledSnapshotWindow(
             contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
         window.appearance = named
-        window.isFront = key
         window.contentView = host
         // Two layout passes around a short run loop turn, so lists and scroll views settle.
         host.layoutSubtreeIfNeeded()
