@@ -3,21 +3,19 @@
 // steps). On sky.png (the 800 x 600 test photo): G picks the Paint Bucket,
 // Tool Options shows Tolerance, Contiguous and All Layers
 // (`photo.tool.tolerance`, `.contiguous`, `.all-layers`), a click in the sky
-// fills it and Command-Z takes it back; J picks Spot Heal with Size and
-// Hardness, a click heals a spot, Remove paints over the sun and Command-Z
-// restores it. Written in FH-3 and skipped until FH-8 wires the tools to
-// their commands (`live` turns them on). Shots `retouch-bucket-options`,
-// `retouch-bucket-filled`, `retouch-spot-heal`, `retouch-removed`.
+// fills it as one "Paint Bucket" step and Command-Z takes it back; J picks
+// Spot Heal with Size and Hardness, a click on the sun's edge heals it as one
+// "Spot Heal" step, Remove paints over the sun as one "Remove" step and
+// Command-Z restores it. Written in FH-3, on since FH-8 wired the tools to
+// their commands. Shift-J's cycle to Remove waits on #4890, so the palette
+// picks it. Shots `retouch-bucket-options`, `retouch-bucket-filled`,
+// `retouch-spot-heal`, `retouch-removed`.
 import CoreGraphics
 import XCTest
 
 final class PhotoRetouchJourneyTests: XCTestCase {
-    /// False until fill-heal FH-8 enables the tools.
-    private static let live = false
-
     /// PJ-FH1: G, Tolerance 32, click the sky, Undo once.
     @MainActor func testPaintBucket() throws {
-        try XCTSkipUnless(Self.live, "waits on fill-heal FH-8: the retouch tools are disabled until then")
         let photo = try openSky()
         photo.press(character: "g")
         let tool = photo.element("suite.tools").buttons["Paint Bucket"]
@@ -27,25 +25,36 @@ final class PhotoRetouchJourneyTests: XCTestCase {
         }
         photo.shot("retouch-bucket-options")
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.1, dy: 0.1), to: CGVector(dx: 0.1, dy: 0.1))
+        expectStep("Undo Paint Bucket", photo, "the click made no Paint Bucket step")
         photo.shot("retouch-bucket-filled")
         photo.press(character: "z", .command)
+        expectStep("Redo Paint Bucket", photo, "Command-Z didn't take the fill back in one step")
     }
 
     /// PJ-FH2: J, click a spot, Remove over the sun, Undo once.
     @MainActor func testSpotHealAndRemove() throws {
-        try XCTSkipUnless(Self.live, "waits on fill-heal FH-8: the retouch tools are disabled until then")
         let photo = try openSky()
         photo.press(character: "j")
         let spot = photo.element("suite.tools").buttons["Spot Heal"]
         XCTAssert(spot.waitForExistence(timeout: 5) && spot.isSelected, "J didn't pick Spot Heal")
         XCTAssert(photo.element("photo.tool.size").exists && photo.element("photo.tool.hardness").exists,
                   "Spot Heal shows no Size or Hardness")
-        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.3, dy: 0.3), to: CGVector(dx: 0.3, dy: 0.3))
+        // The sun's left edge, so the spot has something to heal.
+        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.6, dy: 0.37), to: CGVector(dx: 0.6, dy: 0.37))
+        expectStep("Undo Spot Heal", photo, "the click made no Spot Heal step")
         photo.shot("retouch-spot-heal")
         photo.element("suite.tools").buttons["Remove"].click()
-        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.62, dy: 0.5), to: CGVector(dx: 0.78, dy: 0.5))
+        photo.drag(on: "suite.canvas", from: CGVector(dx: 0.64, dy: 0.37), to: CGVector(dx: 0.76, dy: 0.37))
+        expectStep("Undo Remove", photo, "the stroke made no Remove step")
         photo.shot("retouch-removed")
         photo.press(character: "z", .command)
+        expectStep("Redo Remove", photo, "Command-Z didn't restore the sun in one step")
+        expectStep("Undo Spot Heal", photo, "the Remove stroke made more than one step")
+    }
+
+    /// Waits for the button titled `title`, such as the window toolbar's "Undo Remove".
+    @MainActor private func expectStep(_ title: String, _ photo: Journey, _ message: String) {
+        XCTAssert(photo.app.buttons[title].waitForExistence(timeout: 5), "\(message) (no \(title) button)")
     }
 
     @MainActor private func openSky() throws -> Journey {

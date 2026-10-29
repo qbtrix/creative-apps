@@ -17,7 +17,7 @@ public struct HaloTimelineRow: Identifiable, Sendable, Hashable {
     /// frame shown, the frame before the out point.
     public var bar: ClosedRange<Int> { span.lowerBound...max(span.lowerBound, span.upperBound - 1) }
     public let isSelected: Bool
-    /// Every frame any of the layer's tracks has a key on, ascending, once each.
+    /// Every frame any of the layer's animated tracks has a key on, ascending, once each.
     public let keyFrames: [Int]
 }
 
@@ -56,9 +56,11 @@ extension HaloComposition {
 }
 
 extension HaloLayer {
-    /// The union of its tracks' key frames, ascending, once each.
+    /// The union of its animated tracks' key frames, ascending, once each. A
+    /// track with one key is static (its value, not a key), so it draws no
+    /// diamond, as `compositionKeys` picks none (#5949).
     public var keyFrames: [Int] {
-        Set(tracks.values.flatMap { $0.map(\.frame) }).sorted()
+        Set(tracks.values.lazy.filter { $0.count >= 2 }.flatMap { $0.map(\.frame) }).sorted()
     }
 }
 

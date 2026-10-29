@@ -29,6 +29,15 @@ head (workers get 403), scoped to the apps its code touches (build_apps:
 main's scripts/test-scope build-apps; anything shared, unknown or
 unreadable builds every app), and batches check Linux only.
 
+CI's `macOS` gate job is red when the compile job, a test job or the bundles
+failed. When one of them was cancelled and none failed (the concurrency group
+replaced it, or no runner took it, as in run 40716958063) the gate is skipped,
+neither green nor red: Promote and Dev red skip with it, so that run opens no
+dev-red issue and moves no main. A job that hits its `timeout-minutes` can be
+reported as cancelled too, so the long steps (`scripts/ci --build-only`,
+`scripts/bundle-apps`, the test steps) each carry a step timeout 5 minutes
+under their job's, and an overrun fails the step and turns the gate red.
+
 ## Belt PRs without the label
 
 A crew PR into BASE_BRANCH with a `Belt-Lead:` body line and no `fast-lane`
@@ -138,11 +147,10 @@ A new `dev-red` issue is not red to the lane until its flake check is in
 red run and its culprit range the red sha; the lane reruns that run's failed
 jobs once at that sha (`gh run rerun <id> --failed`; fast-lane.yml has
 `actions: write`) and posts one comment on the issue naming the run, the
-failing jobs and the failing tests read from the red logs (red_tests, read
-then, since the rerun overwrites them), ending in `<!-- lane-rerun <sha7>
-started -->`. That mark is the record: a sha with one is never rerun again,
-whatever the issue body says later, and an issue whose comments can't be read
-is red as before, so nothing can rerun twice. While the rerun runs the sweep
+failing jobs and the failing tests read from the red run (red_tests, below),
+ending in `<!-- lane-rerun <sha7> started -->`. That mark is the record: a
+sha with one is never rerun again from scratch, whatever the issue body says
+later, and an issue whose comments can't be read is red as before. While the rerun runs the sweep
 returns before BASE_RED is set: nothing is held, bisected or reverted.
 
 A rerun that passes was a flake. The lane files one finding for a fixer
@@ -156,8 +164,26 @@ dev-red issue, usually before a sweep sees the pass, so a sweep that finds no
 open dev-red issue reads the last closed one (flake_closed): a `started` mark
 with no verdict whose run passed gets its finding and mark there. A rerun that
 fails too makes the red real: the issue gets `<!-- lane-rerun <sha7> red -->`
-and the sweep goes on exactly as below. An issue with no `- Run:` line is red
-at once. `--dry-run` reruns nothing.
+and the sweep goes on exactly as below. A rerun that ends `cancelled` (the
+concurrency group, or no runner took it) says nothing about the red and is
+never read as a failure: the lane reruns the failed jobs once more and posts
+`<!-- lane-rerun <sha7> again -->`; if that is cancelled too, the lane waits
+for the next dev run, with nothing held, bisected, reverted or quarantined
+meanwhile, so a sha is rerun at most twice. A closed issue's cancelled rerun
+gets no mark. An issue with no `- Run:` line is red at once. `--dry-run`
+reruns nothing.
+
+red_tests reads the dev-red issue's run, not the sha's newest checks (another
+run on the same sha, such as a scoped dispatch, can be newer, and a rerun's
+attempt hides the first one's checks): run_tests takes the run's jobs of every
+attempt, keeps the newest attempt with a failed job, so a cancelled rerun is
+skipped, and reads those jobs' failed logs (job ids, and their logs, are per
+attempt). From each log it takes only real failures (mac_log_ids): `✘ Test
+<name> recorded an issue ... at <File>.swift:` lines, `✘ Test <name>(...)
+failed after` lines for a test no such line named (placed by its `func`), and
+scripts/ci's TEST PROCESS DIED block. Known issues (`━ ... recorded a known
+issue`, `(including N known issue)`) never count. Without a run it reads the
+sha's newest red Linux and macOS checks as before.
 
 ### Holding, scoped to the red module
 
@@ -323,7 +349,9 @@ back as a red; a closed owner (the fix merged and its issue closed) gets its
 entries removed in one PR titled `test(quarantine): run <ids> again`
 (quarantine_expiry). Then, when the red is unresolved and the dev-red issue
 has no `<!-- lane-quarantine <red7> -->` mark yet, quarantine_add quarantines
-the failing tests: red_tests names them as `<File>.swift/<test>()`; each file
+the failing tests: red_tests names them as `<File>.swift/<test>()` from the
+red run's failed attempt (above; a run whose jobs or logs can't be read yet
+waits for the next sweep, with no note); each file
 is placed under Tests/<Target>/ in the tree (test_paths) and resolved to its
 perf-list id, `Target.Suite/test` or `Target.freeTest`, with
 `scripts/test-scope ids <Target> <file>`. It stops, with one note on the

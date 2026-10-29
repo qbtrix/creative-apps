@@ -386,8 +386,9 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   `Head:` line; the lane drops the label on the new head. When `dev` alone is
   red on every job the batch is red on, the batch lands on each PR's own proof
   so a fix can get through; a job red only with the batch is still bisected.
-  A new `dev-red` first gets its run's failed jobs rerun once at the same
-  sha (the lane's flake check): a pass is a flake, which files a `finding`
+  A new `dev-red` first gets its run's failed jobs rerun at the same sha
+  (the lane's flake check; a cancelled rerun is inconclusive and gets one more
+  try, then the lane waits): a pass is a flake, which files a `finding`
   labelled `flaky` for the test and holds nothing; a failure makes the red
   real. While a real `dev-red` issue names a job a batch would run (Linux
   always, macOS when the batch has code), ready PRs that touch the failing

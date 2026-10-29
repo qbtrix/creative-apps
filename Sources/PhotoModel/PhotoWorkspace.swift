@@ -29,19 +29,16 @@ import SuiteKernel
 public enum PhotoTool: String, CaseIterable, Sendable {
     case move, marquee, ellipse, lasso, polygon, wand, brush, eraser, clone
     /// Spot Heal (fill-heal): a click heals a spot from its surroundings. Before
-    /// Heal, so J picks it first once it works.
+    /// Heal, so J picks it first.
     case spotHeal = "spot-heal"
     case heal
     /// Remove (fill-heal): paint over an object; its area fills from around it.
     case remove
     case crop, eyedropper
     /// Paint Bucket (fill-heal): a click fills the seed's colour region. Before
-    /// Gradient, so G picks it first once it works.
+    /// Gradient, so G picks it first.
     case bucket
     case gradient, text, pen
-
-    /// The retouch tools' help until their commands reach Photo (fill-heal FH-7, FH-8).
-    public static let retouchHelp = "Fill and heal arrive with fill-heal FH-8."
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
@@ -50,7 +47,6 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     public var unavailableHelp: String? {
         switch self {
         case .eyedropper: "Not built yet (PV-9)."
-        case .bucket, .spotHeal, .remove: Self.retouchHelp
         default: nil
         }
     }
@@ -126,15 +122,17 @@ public struct PhotoWorkspace: Sendable {
     /// The use cases (PhotoServices); `.live` in the app, `.fake` under -PhotoFixture.
     public internal(set) var services: PhotoServices = .live
     /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
-    public internal(set) var selectionMask: Mask?
+    public internal(set) var selectionMask: Mask? {
+        didSet { if selectionMask != oldValue { maskOutline = Self.outline(selectionMask) } }
+    }
+    /// `selectionMask`'s outline, traced once per change for the ants (PhotoSelectionMask.swift).
+    var maskOutline: [[Point]] = []
     /// The selection's kernel recipe and Reselect's (PhotoArea+Kernel.swift).
     var area = PhotoArea()
     /// The area tools' mode, feather and wand options (PhotoAreaTool.swift).
     public internal(set) var areaOptions = PhotoAreaOptions()
     /// The Polygon Lasso's corners so far, before it closes (PhotoAreaTool.swift).
     var areaCorners: [Mask.Point] = []
-    /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
-    public internal(set) var selectionOptions = SelectionOptions()
     /// Each masked layer's mask, its own size, coverage as gray, alpha 1 (PhotoMask.swift).
     public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
     /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
@@ -424,7 +422,7 @@ extension PhotoWorkspace: Equatable {
             && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
             && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask && lhs.area == rhs.area
             && lhs.areaOptions == rhs.areaOptions && lhs.areaCorners == rhs.areaCorners
-            && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
+            && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
             && lhs.exportRun == rhs.exportRun && lhs.stylePanel == rhs.stylePanel

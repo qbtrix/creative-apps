@@ -55,8 +55,7 @@ import Testing
         }
     }
 
-    // Case 2, the Heal tool's stroke, joins once its release runs retouch.heal (FH-7, part 2).
-    @Test(arguments: [0, 1, 3])
+    @Test(arguments: 0..<4)
     func editsSelectedLayer(_ index: Int) throws {
         var workspace = try dotted()
         let layerID = try #require(workspace.selectedLayerID)
@@ -134,7 +133,7 @@ import Testing
         #expect(abs(paint.r - 1) < 1e-4 && paint.g == 0 && paint.b == 0 && paint.a == 1)
     }
 
-    @Test(arguments: ["bucket-background"])
+    @Test(arguments: ["bucket-background", "dust-spots"])
     func realJobPasses(job: String) throws {
         #expect(try PhotoJob.check(job) == [], "\(job)")
     }
