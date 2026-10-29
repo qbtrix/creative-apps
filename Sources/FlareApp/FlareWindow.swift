@@ -176,7 +176,7 @@ struct FlareCanvas: View {
     var onDismissNote: @MainActor () -> Void = {}
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
     /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
-    @State private var driver: PlaybackDriver?
+    @State private var driver: SuitePlaybackDriver?
 
     var body: some View {
         if model.document != nil {
@@ -206,15 +206,24 @@ struct FlareCanvas: View {
         }
     }
 
-    /// Runs the display link while playing and stops it otherwise.
+    /// Runs the display link while playing and stops it otherwise; each play gets a fresh driver, so its
+    /// ticker counts no paused time.
     private func follow(playing: Bool) {
-        guard playing else {
-            driver?.stop()
-            return
-        }
-        let tick = tick
-        let running = driver ?? PlaybackDriver(onTick: { target, ticker in tick(target, &ticker) })
+        driver?.stop()
+        guard playing else { return }
+        let running = Self.playbackDriver(tick)
         driver = running
         running.start()
+    }
+
+    /// The suite's display-link driver, its ticks advancing a PlaybackTicker of its own through `tick`, which
+    /// returns false to stop the link (paused, or the end of a play that doesn't loop).
+    static func playbackDriver(_ tick: @escaping @MainActor (Double, inout PlaybackTicker) -> Bool) -> SuitePlaybackDriver {
+        let state = TickerState()
+        return SuitePlaybackDriver(onTick: { target in tick(target, &state.ticker) })
+    }
+
+    @MainActor private final class TickerState {
+        var ticker = PlaybackTicker()
     }
 }

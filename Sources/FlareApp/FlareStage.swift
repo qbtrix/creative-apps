@@ -34,7 +34,7 @@ struct FlareStage: View {
     let help: @MainActor (FlareIntent) -> String?
     /// A key the stage doesn't take itself; the window passes `toolKey` (Escape, Return).
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
-    /// The rate playback measured, from FlareCanvas's PlaybackDriver; nil while paused.
+    /// The rate playback measured, from FlareCanvas's SuitePlaybackDriver; nil while paused.
     var measuredFPS: Double? = nil
     /// A guide drag to draw: `guideDrag` for the snapshots, `liveGuide` while one comes out of a ruler.
     var guideDrag: FlareGuideDrag? = nil

@@ -20,7 +20,6 @@ Sources/FlareApp/FlareStageSelection.swift
 Sources/FlareApp/FlareWindow+Export.swift
 Sources/FlareApp/FlareWindow+Layers.swift
 Sources/FlareApp/FlareWindow+Stage.swift
-Sources/FlareApp/PlaybackDriver.swift
 Sources/FlareApp/StageRasterizer.swift
 Sources/FlareModel/Contracts/ExportContracts.swift
 Sources/FlareModel/EasingEditing.swift
