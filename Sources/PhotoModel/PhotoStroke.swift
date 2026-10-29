@@ -82,6 +82,8 @@ struct PhotoStroke: Sendable, Equatable {
     var before: [Int: PixelBuffer] = [:]
     var coverage: [Int: [Float]] = [:]
     var samples: [StrokeSample] = []
+    /// Brush and eraser: the undo step's name when a command, not a drag, made the stroke ("Brush Stroke").
+    var stepName: String?
     /// Move: the layer list before the drag.
     var layersBefore: [PhotoLayer] = []
     /// Marquee: the modifier keys `selectionDrag` saw last (Shift adds,
@@ -102,8 +104,6 @@ struct PhotoStroke: Sendable, Equatable {
     /// Move: the drag runs as a body drag on an implied draft the compositor lifts (`moveDraft`), and the
     /// release lays its move into the layer's offsets (`endMove`).
     var movesLayer = false
-    /// Brush and eraser: the undo step's name when a command, not a drag, made the stroke ("Brush Stroke").
-    var stepName: String?
 }
 
 extension PhotoWorkspace {
