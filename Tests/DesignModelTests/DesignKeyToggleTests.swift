@@ -26,7 +26,7 @@ import Testing
     @Test func atThePlayheadAPressAddsThenRemovesTheKeyThere() throws {
         var w = DesignFixtures.cards
         let params: JSONValue = .object(["node": .string("node-2"), "property": .string("x"), "frame": .number(0), "value": .number(40)])
-        try DesignWorkspace.catalog.run("keyframe.set", params: params, on: &w)
+        _ = try DesignWorkspace.catalog.run("keyframe.set", params: params, on: &w)
         w.setPlayhead(60)
         #expect(w.keyState("node-2", .x) == .animated)
         #expect(try Self.press(&w) == "Set Key")
