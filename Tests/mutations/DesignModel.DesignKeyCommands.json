@@ -40,5 +40,47 @@
     "find": "playhead = frame.map { Swift.min(Swift.max($0, 0), Swift.max(time.durationFrames - 1, 0)) }",
     "replace": "playhead = frame",
     "tests": "DesignKeyCommandTests"
+  },
+  {
+    "label": "toggleAtFrameZero: the key button ignores the playhead",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "        let frame = playhead ?? 0\n",
+    "replace": "        let frame = 0\n",
+    "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "toggleNeverRemoves: a keyed-here press sets again",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "if state == .keyedHere { return (\"keyframe.remove\", .object(params)) }",
+    "replace": "if state == .notAnimated && false { return (\"keyframe.remove\", .object(params)) }",
+    "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "toggleKeysTheShownValue: the key takes the rest value under a track",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "node.time?.value(of: property, at: Double(frame)) ?? rest",
+    "replace": "rest",
+    "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "animateDropsTheLastKey: the stopwatch keys the playhead only",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "return Int(at) == last ? [first] : [first, (\"keyframe.set\", params(last, value))]",
+    "replace": "return [first]",
+    "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "stopAnimatingRemovesNothing: the stopwatch on an animated row keeps every key",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "return track.dropFirst().map {",
+    "replace": "return track.dropFirst(track.count).map {",
+    "tests": "DesignKeyToggleTests"
+  },
+  {
+    "label": "menuSetsKeyedRows: Set Key offers a row already keyed at the playhead",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "return keyed ? nil : command",
+    "replace": "return command",
+    "tests": "DesignKeyToggleTests"
   }
 ]

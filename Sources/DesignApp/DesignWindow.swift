@@ -230,6 +230,14 @@ struct DesignWindow: View, BodyCounted {
         case .stop: model.setPlayhead(player.halt(stopping: true, live: live))
         case .scrub(let frame): player.scrub(to: frame, live: live) { model.setPlayhead($0) }
         case .loop(let on): live.playLoops = on
+        case .keys(let commands):
+            var refusal: String?
+            for command in commands {
+                do { _ = try DesignWorkspace.catalog.run(command.id, params: command.params, on: &model) } catch {
+                    refusal = refusal ?? error.description
+                }
+            }
+            if let refusal { note = refusal }
         case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
         case .fit:
             fitting = true

@@ -55,6 +55,9 @@ import Testing
         for tool in DesignTool.allCases {
             #expect(all.contains(DesignControlID.tool(tool)), "tool \(tool) is unlisted")
         }
+        for property in DesignKeyProperty.allCases {
+            #expect(all.contains("design.inspector.key.\(property.rawValue)"), "the \(property) key button is unlisted")
+        }
     }
 
     /// File > Export…'s sheet (design-export DE-6), its buttons under SuiteExportSheet's prefix.
