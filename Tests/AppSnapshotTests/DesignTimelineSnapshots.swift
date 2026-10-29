@@ -16,7 +16,7 @@ import Testing
 @MainActor
 @Suite struct DesignTimelineSnapshots {
     @Test func slot() throws {
-        for (name, doc) in [("still", DesignFixtures.cards), ("one", .animated(1)), ("fifty", .animated(50))] {
+        for (name, doc) in [("still", DesignFixtures.cards), ("one", DesignFixtures.animated(1)), ("fifty", DesignFixtures.animated(50))] {
             #expect(doc.showsTimeline == (name != "still"))
             for scheme in [ColorScheme.light, .dark] {
                 try snapshot(DesignEditor(model: doc, zoom: 0.5),
