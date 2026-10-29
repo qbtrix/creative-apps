@@ -29,6 +29,13 @@ extension PhotoWorkspace: TextStyleTarget {
         services.text.families().first { $0.name == family }?.faces.map { ($0.weight, $0.italic) } ?? []
     }
 
+    /// The listed family `services.text` draws `family` in: an unknown or empty name, such as the standard
+    /// style's "System", is the service's system family; `family` itself when the service can't say.
+    public func textFamily(_ family: String) -> String {
+        let probe = TextSpan("A", fontFamily: family, fontSize: 12)
+        return (try? services.text.measure([probe]).first?.resolvedFamily) ?? family
+    }
+
     /// Restyles the selected text layer and redraws it as one step named `name`; steps under one `drag` fold.
     public mutating func setTextStyle(_ s: TextStyle, name: String, drag: String?) throws {
         guard let id = selectedLayerID, case .text(var text) = selectedLayer?.kind else {

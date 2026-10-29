@@ -51,6 +51,15 @@ check "SuiteKernel runs SuiteKernelTests and every Model's tests" \
 check "a kernel module file runs the same" \
   '^(AfterGlowCLITests|DesignModelTests|FlareModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteKernelTests)\.;' \
   "$(changed Sources/SuiteKernel/History/History.swift)"
+imaging=$(changed Sources/SuiteImaging/Adjust.swift)
+check "SuiteImaging runs the tests of what links it, directly or through another target" \
+  '^(AfterGlowCLITests|DesignModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteImagingTests|SuiteUITests)\.' "${imaging%%;*}"
+for a in Flare Design Photo Library Halo Suite; do  # every app's snapshot suites, SuiteUI's included
+  check "SuiteImaging runs $a's snapshot suites" 1 "$(grep -c "$a\[A-Za-z\]\*[|/]" <<<"${imaging#*;}")"
+done
+check "SuiteImaging leaves FlareModelTests and the kernel tests out" 0 "$(grep -cE 'FlareModelTests|SuiteKernelTests|SuiteModelTests' <<<"${imaging%%;*}")"
+check "--linux keeps SuiteImagingTests, which Linux builds" '^(AfterGlowCLITests|DesignModelTests|HaloModelTests|LibraryModelTests|PhotoModelTests|SuiteImagingTests)\.;' \
+  "$(changed --linux Sources/SuiteImaging/Adjust.swift)"
 check "SuiteUI runs SuiteUITests and its snapshot suites" \
   "^(SuiteUITests)\\.;$suiteui_snaps" "$(changed Sources/SuiteUI/Tokens.swift)"
 check "AfterGlow and SuiteShell run the suite scope" \
