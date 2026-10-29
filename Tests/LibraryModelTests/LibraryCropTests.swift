@@ -181,14 +181,17 @@ struct LibraryCropTests {
         #expect(stored(catalog, 1) == nil)
     }
 
-    @Test func theLoupeRendersTheWholeTurnedPhotoWhileCropping() throws {
+    /// The loupe turns the picture itself, so a straighten step asks for the same render.
+    @Test func theLoupeRendersTheWholeUnturnedPhotoWhileCropping() throws {
         var catalog = loupe()
         catalog.beginCrop()
         catalog.setCropAspect(.square)
+        let level = try #require(catalog.cropLoupeSettings)
         catalog.setCropAngle(5)
-        let angle = try #require(catalog.cropDraft?.angle)
+        #expect(catalog.cropDraft?.angle == 5)
         let settings = try #require(catalog.cropLoupeSettings)
-        #expect(settings.crop == CropSettings(angle: angle, rect: .full, aspect: .square))
+        #expect(settings.crop == CropSettings(angle: 0, rect: .full, aspect: .square))
+        #expect(settings == level)
         let asked = catalog.loupeRequest(longSide: 64, quality: .preview)
         let request = try #require(asked)
         #expect(request.settings == settings)

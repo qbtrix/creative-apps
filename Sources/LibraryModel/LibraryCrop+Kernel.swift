@@ -281,11 +281,13 @@ extension LibraryCatalog {
         cropFrame.map { "\($0.width) × \($0.height) at \($0.x), \($0.y)" }
     }
 
-    /// What the loupe renders while cropping: the photo's tone, the draft's
-    /// angle, the whole straightened photo. Nil when not cropping.
+    /// What the loupe renders while cropping: the photo's tone on the whole
+    /// photo, unturned. The loupe turns that picture by the draft's angle
+    /// itself (a compositor transform), so a straighten step renders nothing.
+    /// Nil when not cropping.
     public var cropLoupeSettings: DevelopSettings? {
         guard let draft = cropDraft, let photo = loupeItem else { return nil }
-        return photo.develop.setting(crop: CropSettings(angle: draft.angle, rect: .full, aspect: draft.aspect))
+        return photo.develop.setting(crop: CropSettings(angle: 0, rect: .full, aspect: draft.aspect))
     }
 
     /// `photo`'s size after its stored crop; its own size without one.
