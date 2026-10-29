@@ -1,7 +1,7 @@
 // Fakes/DesignArrangeFakes.swift: the fixture fakes for the arrange area
 // (duplicate, group and ungroup, the clipboard, stacking order, the inspector's
 // style rows) and an in-memory file codec, so views, snapshots and fake-mode
-// journeys build before the live types. Each keeps its protocol's undo case and
+// journeys build before the live types; the codec keeps a document's time. Each keeps its protocol's undo case and
 // the help law, acts anywhere in the tree and ignores locks and hidden layers.
 // Duplicate, group and ungroup run on SuiteKernel's LayerTree (DesignNode+Kernel);
 // move keeps its own remove and insert, since the kernel refuses a locked target.
@@ -186,15 +186,22 @@ public struct FakeStyling: StyleEditing {
     }
 }
 
-/// Keeps documents in memory as JSON; refuses bytes that don't decode.
+/// Keeps documents in memory as JSON; refuses bytes that don't decode. A still document is its pages array, as it
+/// always was; one with a set rate or length also writes that time beside the pages, so it reopens with it.
 public struct FakeFiling: DocumentFiling {
+    private struct Timed: Codable { var pages: [DesignPage]; var time: DesignDocumentTime }
+
     public init() {}
     public func encode(_ document: DesignDocument) throws(DesignFileError) -> Data {
-        do { return try JSONEncoder().encode(document.pages) } catch { throw .unreadable }
+        do {
+            if document.time == DesignDocumentTime() { return try JSONEncoder().encode(document.pages) }
+            return try JSONEncoder().encode(Timed(pages: document.pages, time: document.time))
+        } catch { throw .unreadable }
     }
     public func decode(_ data: Data) throws(DesignFileError) -> DesignDocument {
-        guard let pages = try? JSONDecoder().decode([DesignPage].self, from: data) else { throw .unreadable }
+        let timed = try? JSONDecoder().decode(Timed.self, from: data)
+        guard let pages = timed?.pages ?? (try? JSONDecoder().decode([DesignPage].self, from: data)) else { throw .unreadable }
         guard !pages.isEmpty else { throw .noPages }
-        return DesignDocument(pages: pages)
+        return DesignDocument(pages: pages, time: timed?.time ?? DesignDocumentTime())
     }
 }
