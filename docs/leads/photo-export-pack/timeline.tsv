@@ -417,3 +417,4 @@ utc	stage	event	ref	note
 2026-10-29T11:51Z	check-in	#5353 open (clean), PX-9 waits. dev-red #6030 still open, no new comments. Not Photo. No merges, no new findings (49 Photo open).
 2026-10-29T12:38Z	check-in	#5353 open (clean), PX-9 waits. dev green again at b0c081a (12:01), main promoted, dev-red #6030 closed. No merges, no new findings (49 Photo open).
 2026-10-29T13:13Z	check-in	#5353 open (clean), PX-9 waits. dev green, no dev-red. Merged: #6054 (ci, macOS shard timeout), not Photo. No new findings (49 Photo open).
+2026-10-29T13:56Z	check-in	#5353 open (clean), PX-9 waits. dev green. New finding #6058 (retouch removeStroke test timeouts) is retouch, not export/text: skipped (50 Photo open). Merged: #6049 (photo agent verbs), #6045 (suitekernel), not export/text.
