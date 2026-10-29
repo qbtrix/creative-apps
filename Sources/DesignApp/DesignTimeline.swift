@@ -19,7 +19,7 @@ struct DesignTimeline: View {
         VStack(spacing: 0) {
             Divider()
             HStack(spacing: SuiteSpacing.s) {
-                DesignTimelineTransport(model: model, perform: perform)
+                DesignTransportAdapter(model: model, perform: perform)
                 Spacer()
                 let title = collapsed ? "Show Timeline" : "Hide Timeline"
                 Button(title, systemImage: collapsed ? "chevron.up" : "chevron.down") { collapsed.toggle() }
@@ -37,7 +37,7 @@ struct DesignTimeline: View {
 
 /// The transport and its timecode. Like the lanes it reads only `isPlaying` while playing, so a tick runs the
 /// canvas alone; the timecode shows the playhead and catches up on pause.
-private struct DesignTimelineTransport: View {
+private struct DesignTransportAdapter: View {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live

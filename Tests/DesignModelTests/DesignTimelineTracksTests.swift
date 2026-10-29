@@ -13,20 +13,22 @@ import Testing
         #expect(DesignFixtures.animated(1).showsTimeline)
     }
 
-    @Test func everyKeyedLayerIsOneRowParentsFirst() {
+    @Test func everyKeyedLayerIsOneRowParentsFirst() throws {
         let rows = DesignFixtures.animated(50).timelineRows
-        #expect(rows.count == 51)
+        try #require(rows.count == 51)
         #expect(rows.first?.id == "node-1" && rows.first?.name == "Frame 1")
         #expect(rows[1].id == "node-2" && rows.last?.id == "node-51")
     }
 
-    @Test func keysOfEveryPropertyMergeByFrameAndShowTheirEasing() {
+    @Test func keysOfEveryPropertyMergeByFrameAndShowTheirEasing() throws {
         var doc = DesignFixtures.animated(1)
         doc.pages[0].nodes[0].children[0].time = DesignNodeTime(tracks: [
             .x: [Keyframe(frame: 0, value: 0, easing: .easeIn), Keyframe(frame: 120, value: 5)],
             .opacity: [Keyframe(frame: 0, value: 1), Keyframe(frame: 60, value: 0.5, easing: .hold)],
         ])
-        let row = doc.timelineRows[1]
+        let rows = doc.timelineRows
+        try #require(rows.count == 2, "the keyed child is its own row")
+        let row = rows[1]
         #expect(row.keys.map(\.frame) == [0, 60, 120])
         #expect(row.keys.map(\.shape) == [.eased, .hold, .linear], "x leads at frame 0; opacity alone keys 60")
     }
