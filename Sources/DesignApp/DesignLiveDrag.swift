@@ -11,7 +11,7 @@
 // draws the old workspace in between. `preview` and `land` do the same for an
 // inspector scrub, a style row's, the Rotation bar's or a fill editor drag. DesignWindow owns one and hands it down as the
 // `designLiveDrag` environment value; without one (a view hosted alone) the
-// canvas draws the workspace. `playingFrame` is the frame playback shows (DesignWindow+Playback.swift), read
+// canvas draws the workspace. `playingFrame` is the frame playback shows (DesignPlayer+Kernel.swift), read
 // by the canvas alone, so a tick never runs the window. Presentation state only.
 import DesignModel
 import Observation

@@ -4,7 +4,7 @@
 // on the last frame (play there starts over); loop wraps. Pause keeps the frame; stop drops it, back to the rest
 // pose. Shown state only, like the playhead: `DesignWorkspace.show(_:)` moves the playhead and nothing else, so
 // playing never reaches the history, autosave or the saved marker. The window ticks it on the canvas's live copy
-// (DesignWindow+Playback.swift), so a tick runs the canvas alone. Linux-safe.
+// (DesignPlayer+Kernel.swift), so a tick runs the canvas alone. Linux-safe.
 import SuiteKernel
 
 public struct DesignTransport: Sendable, Equatable {

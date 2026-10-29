@@ -67,7 +67,7 @@ struct DesignWindow: View, BodyCounted {
     @State private var model = DesignWorkspace()
     /// The drag or scrub shown on a copy until it ends; the canvas reads it from the environment.
     @State private var live = DesignLiveDrag()
-    /// Playback on the suite's display link; a tick changes nothing this body reads (DesignWindow+Playback.swift).
+    /// Playback on the suite's display link; a tick changes nothing this body reads (DesignPlayer+Kernel.swift).
     @State private var player = DesignPlayer()
     @Environment(\.designRefreshLink) private var makeLink
     /// A test's starting workspace: the window opens it as it is and skips the launch steps.

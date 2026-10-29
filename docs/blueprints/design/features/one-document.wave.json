@@ -91,7 +91,7 @@
     "Tests/SuiteUITests/SuitePlaybackDriverTests.swift",
     "Tests/canonical-baseline.txt",
     "Tests/mutations/SuiteUI.SuitePlaybackDriver.json",
-    "Sources/DesignApp/DesignWindow+Playback.swift",
+    "Sources/DesignApp/DesignPlayer+Kernel.swift",
     "Sources/DesignModel/DesignTransport.swift",
     "Tests/DesignModelTests/DesignPlaybackTests.swift",
     "Tests/AppSnapshotTests/RenderBudgetDesignAnimateTests.swift",
@@ -357,7 +357,7 @@
         "MJ-OD-11"
       ],
       "owned": [
-        "Sources/DesignApp/DesignWindow+Playback.swift",
+        "Sources/DesignApp/DesignPlayer+Kernel.swift",
         "Sources/DesignModel/DesignTransport.swift",
         "Tests/DesignModelTests/DesignPlaybackTests.swift",
         "Tests/AppSnapshotTests/RenderBudgetDesignAnimateTests.swift",
