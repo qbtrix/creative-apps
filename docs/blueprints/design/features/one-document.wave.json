@@ -1,0 +1,479 @@
+{
+  "title": "One document: make a UI in Design, animate it, play it, save it and reopen it, inside Design's window, on kernel-owned time",
+  "wave": 5,
+  "order": 1,
+  "depends": [
+    "autosave-history",
+    "canvas-basics",
+    "copy-group",
+    "design-contracts",
+    "design-export",
+    "design-seams",
+    "design-seams-2",
+    "export-pack",
+    "eyedropper",
+    "file-flow",
+    "files-history",
+    "gradient-fill",
+    "layer-styles",
+    "layers-panel",
+    "pen-paths",
+    "placed-images",
+    "select-several",
+    "shape-tools",
+    "snapping",
+    "stroke-style",
+    "style-rows",
+    "transform"
+  ],
+  "status": "building",
+  "feature_issue": "file when ready",
+  "covers": "the one-document staged hero, captain's decisions 2026-10-29 (Option B, Reading A); paw-workspace docs/design/drafts/2026-10-29-one-document-hero-tasks.md",
+  "waits_on": "none on dev: builds on the integration branch feat/one-document, which never lands on dev until the captain decides",
+  "branch": "feat/one-document",
+  "owned": [
+    "Sources/DesignModel/DesignNodeTime.swift",
+    "Sources/DesignModel/DesignNode.swift",
+    "Sources/DesignModel/DesignNodeExtras.swift",
+    "Sources/DesignModel/DesignFixtures.swift",
+    "Sources/DesignModel/DesignWorkspace.swift",
+    "Tests/DesignModelTests/DesignNodeTimeTests.swift",
+    "Tests/mutations/DesignModel.DesignNodeTime.json",
+    "Tests/mutations/DesignModel.DesignNode.json",
+    "Tests/mutations/DesignModel.DesignNodeExtras.json",
+    "Sources/DesignModel/Live/LiveFiling.swift",
+    "Sources/DesignModel/DesignRecoveryStore+Kernel.swift",
+    "Sources/DesignModel/DesignRecovery+Kernel.swift",
+    "Tests/DesignModelTests/LiveFilingVersionTests.swift",
+    "Tests/DesignModelTests/Fixtures/version-2-keyed.design",
+    "Tests/DesignModelTests/Fixtures/version-3.design",
+    "Tests/mutations/DesignModel.LiveFiling.json",
+    "Sources/DesignModel/DesignCanvasEditing.swift",
+    "Sources/DesignModel/Live/LiveMarquee.swift",
+    "Sources/DesignModel/DesignSnapGuides+Kernel.swift",
+    "Tests/DesignModelTests/DesignPlayheadReadTests.swift",
+    "Tests/mutations/DesignModel.DesignCanvasEditing.json",
+    "Tests/mutations/DesignModel.LiveMarquee.json",
+    "Tests/mutations/DesignModel.DesignSnapGuides.json",
+    "Sources/DesignModel/Live/LiveKeying.swift",
+    "Sources/DesignModel/Live/LiveTransforming.swift",
+    "Sources/DesignModel/Live/LiveStyling.swift",
+    "Sources/DesignModel/Live/LiveAligning.swift",
+    "Tests/DesignModelTests/DesignAutoKeyTests.swift",
+    "Tests/mutations/DesignModel.LiveKeying.json",
+    "Tests/mutations/DesignModel.LiveTransforming.json",
+    "Tests/mutations/DesignModel.LiveStyling.json",
+    "Tests/mutations/DesignModel.LiveAligning.json",
+    "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "Sources/DesignModel/Live/LiveClipboard.swift",
+    "Tests/DesignModelTests/DesignKeyedDuplicateTests.swift",
+    "Tests/mutations/DesignModel.LiveDuplicating.json",
+    "Tests/mutations/DesignModel.LiveClipboard.json",
+    "Sources/DesignModel/Live/LiveGrouping.swift",
+    "Sources/DesignModel/Live/LiveFraming.swift",
+    "Sources/DesignModel/Live/LiveOrdering.swift",
+    "Tests/DesignModelTests/DesignKeyedReparentTests.swift",
+    "Tests/mutations/DesignModel.LiveGrouping.json",
+    "Tests/mutations/DesignModel.LiveFraming.json",
+    "Sources/DesignModel/DesignCommandCatalog.swift",
+    "Sources/DesignModel/DesignHeadless.swift",
+    "Tests/command-ids/design.txt",
+    "Tests/RealJobs/design/animate-and-check/",
+    "docs/cli.md",
+    "Tests/mutations/DesignModel.DesignCommandCatalog.json",
+    "Sources/DesignModel/DesignExport+Kernel.swift",
+    "Sources/DesignModel/DesignExportOptions.swift",
+    "Sources/DesignApp/DesignRasterizer.swift",
+    "Tests/mutations/DesignModel.DesignExportOptions.json",
+    "Sources/SuiteUI/SuitePlaybackDriver.swift",
+    "Sources/FlareApp/PlaybackDriver.swift",
+    "Sources/HaloApp/HaloPlaybackDriver.swift",
+    "Tests/SuiteUITests/SuitePlaybackDriverTests.swift",
+    "Tests/canonical-baseline.txt",
+    "Tests/mutations/SuiteUI.SuitePlaybackDriver.json",
+    "Sources/DesignApp/DesignWindow+Playback.swift",
+    "Sources/DesignModel/DesignTransport.swift",
+    "Tests/DesignModelTests/DesignPlaybackTests.swift",
+    "Tests/AppSnapshotTests/RenderBudgetDesignAnimateTests.swift",
+    "Tests/mutations/DesignModel.DesignTransport.json",
+    "Sources/SuiteUI/EditorDetail.swift",
+    "Sources/DesignModel/DesignTimelineTracks.swift",
+    "Sources/DesignApp/DesignTimeline.swift",
+    "Tests/DesignModelTests/DesignTimelineTracksTests.swift",
+    "Tests/mutations/DesignModel.DesignTimelineTracks.json",
+    "Sources/DesignApp/DesignInspectorTransform+Kernel.swift",
+    "Sources/DesignApp/DesignInspectorStyle.swift",
+    "Sources/DesignApp/DesignAnimateMenu.swift",
+    "Tests/mutations/DesignModel.DesignIntent.json",
+    "UITests/DesignJourneyTests+Animate.swift",
+    "UITests/DesignJourneyTests+BadFiles.swift",
+    "Tests/AppSnapshotTests/DesignFileSnapshots.swift",
+    "UITests/DesignJourneyTests+Hero.swift",
+    "Tests/render-budgets.md"
+  ],
+  "journeys": [
+    "DesignJourneyTests.testFirstKeySlidesTimelineIn",
+    "DesignJourneyTests.testSaveReopenKeepsKeys",
+    "DesignJourneyTests.testOneDocumentHero"
+  ],
+  "render_budget_rows": [
+    "playback of animated(500): 0 window bodies per frame, at most 2 dropped frames in 5 s (QB-L4)",
+    "drag a keyed rectangle at playhead 60 on animated(500): within Design's drag row, 3 bodies and 6 ms p95",
+    "scrub the ruler 120 samples: canvas body only, 8.3 ms p95",
+    "first key slide-in: one window body",
+    "inspector toggle-key: at most the inspector's body"
+  ],
+  "slices": [
+    {
+      "id": "OD-2",
+      "behavior": "`DesignNodeTime` on `DesignNode`, sampled through `DesignPage.sampled(at:)` with easing, with fixtures and a conformance suite, and nothing else changed in the product.",
+      "tasks": [
+        "OD-2a",
+        "OD-2b"
+      ],
+      "journeys": [
+        "MJ-OD-2"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignNodeTime.swift",
+        "Sources/DesignModel/DesignNode.swift",
+        "Sources/DesignModel/DesignNodeExtras.swift",
+        "Sources/DesignModel/DesignFixtures.swift",
+        "Sources/DesignModel/DesignWorkspace.swift",
+        "Tests/DesignModelTests/DesignNodeTimeTests.swift",
+        "Tests/mutations/DesignModel.DesignNodeTime.json",
+        "Tests/mutations/DesignModel.DesignNode.json",
+        "Tests/mutations/DesignModel.DesignNodeExtras.json"
+      ],
+      "waits": {},
+      "ui": false
+    },
+    {
+      "id": "OD-3",
+      "behavior": "A document with time saves and reopens with its keys, a still document is unchanged on disk, and an old reader refuses the new file instead of losing keys.",
+      "tasks": [
+        "OD-3a",
+        "OD-3b"
+      ],
+      "journeys": [
+        "MJ-OD-3"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveFiling.swift",
+        "Sources/DesignModel/DesignRecoveryStore+Kernel.swift",
+        "Sources/DesignModel/DesignRecovery+Kernel.swift",
+        "Tests/DesignModelTests/LiveFilingVersionTests.swift",
+        "Tests/DesignModelTests/Fixtures/version-2-keyed.design",
+        "Tests/DesignModelTests/Fixtures/version-3.design",
+        "Tests/mutations/DesignModel.LiveFiling.json"
+      ],
+      "waits": {
+        "OD-2": [
+          "OD-3a"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OD-4",
+      "behavior": "With the workspace playhead set, every read of the page (paint, hit-test, handles, snapping, marquee, zoom-to-selection) sees the sampled tree.",
+      "tasks": [
+        "OD-4a",
+        "OD-4b"
+      ],
+      "journeys": [
+        "MJ-OD-4"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignCanvasEditing.swift",
+        "Sources/DesignModel/Live/LiveMarquee.swift",
+        "Sources/DesignModel/DesignSnapGuides+Kernel.swift",
+        "Tests/DesignModelTests/DesignPlayheadReadTests.swift",
+        "Tests/mutations/DesignModel.DesignCanvasEditing.json",
+        "Tests/mutations/DesignModel.LiveMarquee.json",
+        "Tests/mutations/DesignModel.DesignSnapGuides.json"
+      ],
+      "waits": {
+        "OD-2": [
+          "OD-4a"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OD-5",
+      "behavior": "At a non-zero playhead, moving, nudging, aligning or setting x, y or opacity on a keyed node writes a key at the playhead with the asked-for value.",
+      "tasks": [
+        "OD-5a",
+        "OD-5b"
+      ],
+      "journeys": [
+        "MJ-OD-5"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveKeying.swift",
+        "Sources/DesignModel/Live/LiveTransforming.swift",
+        "Sources/DesignModel/Live/LiveStyling.swift",
+        "Sources/DesignModel/Live/LiveAligning.swift",
+        "Tests/DesignModelTests/DesignAutoKeyTests.swift",
+        "Tests/mutations/DesignModel.LiveKeying.json",
+        "Tests/mutations/DesignModel.LiveTransforming.json",
+        "Tests/mutations/DesignModel.LiveStyling.json",
+        "Tests/mutations/DesignModel.LiveAligning.json"
+      ],
+      "waits": {
+        "OD-4": [
+          "OD-5a"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OD-6",
+      "behavior": "A duplicated or pasted keyed node lands where it was asked and keeps its animation, every x and y key shifted by the same offset.",
+      "tasks": [
+        "OD-6a",
+        "OD-6b"
+      ],
+      "journeys": [
+        "MJ-OD-6"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveDuplicating.swift",
+        "Sources/DesignModel/Live/LiveClipboard.swift",
+        "Tests/DesignModelTests/DesignKeyedDuplicateTests.swift",
+        "Tests/mutations/DesignModel.LiveDuplicating.json",
+        "Tests/mutations/DesignModel.LiveClipboard.json"
+      ],
+      "waits": {
+        "OD-5": [
+          "OD-6a"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OD-7",
+      "behavior": "Grouping, ungrouping, framing and reparenting a keyed node leaves it where it shows at the playhead, and its animation still plays.",
+      "tasks": [
+        "OD-7a",
+        "OD-7b"
+      ],
+      "journeys": [
+        "MJ-OD-7"
+      ],
+      "owned": [
+        "Sources/DesignModel/Live/LiveGrouping.swift",
+        "Sources/DesignModel/Live/LiveFraming.swift",
+        "Sources/DesignModel/Live/LiveOrdering.swift",
+        "Tests/DesignModelTests/DesignKeyedReparentTests.swift",
+        "Tests/mutations/DesignModel.LiveGrouping.json",
+        "Tests/mutations/DesignModel.LiveFraming.json"
+      ],
+      "waits": {
+        "OD-5": [
+          "OD-7a"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OD-8",
+      "behavior": "The keyframe and time commands work headless, from the CLI and as MCP tools, with their ids in the ledger.",
+      "tasks": [
+        "OD-8a",
+        "OD-8b"
+      ],
+      "journeys": [
+        "MJ-OD-8"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignCommandCatalog.swift",
+        "Sources/DesignModel/DesignHeadless.swift",
+        "Tests/command-ids/design.txt",
+        "Tests/RealJobs/design/animate-and-check/",
+        "docs/cli.md",
+        "Tests/mutations/DesignModel.DesignCommandCatalog.json"
+      ],
+      "waits": {
+        "OD-5": [
+          "OD-8a"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OD-9",
+      "behavior": "PNG and SVG export take an optional frame and write the page as it shows at that frame.",
+      "tasks": [
+        "OD-9a",
+        "OD-9b"
+      ],
+      "journeys": [
+        "MJ-OD-9"
+      ],
+      "owned": [
+        "Sources/DesignModel/DesignExport+Kernel.swift",
+        "Sources/DesignModel/DesignExportOptions.swift",
+        "Sources/DesignApp/DesignRasterizer.swift",
+        "Tests/mutations/DesignModel.DesignExportOptions.json"
+      ],
+      "waits": {
+        "OD-8": [
+          "OD-9a"
+        ]
+      },
+      "ui": false
+    },
+    {
+      "id": "OD-10",
+      "behavior": "One display-link driver in SuiteUI, which Flare and Halo adopt.",
+      "tasks": [
+        "OD-10a",
+        "OD-10b"
+      ],
+      "journeys": [
+        "MJ-OD-10"
+      ],
+      "owned": [
+        "Sources/SuiteUI/SuitePlaybackDriver.swift",
+        "Sources/FlareApp/PlaybackDriver.swift",
+        "Sources/HaloApp/HaloPlaybackDriver.swift",
+        "Tests/SuiteUITests/SuitePlaybackDriverTests.swift",
+        "Tests/canonical-baseline.txt",
+        "Tests/mutations/SuiteUI.SuitePlaybackDriver.json"
+      ],
+      "waits": {},
+      "ui": true
+    },
+    {
+      "id": "OD-11",
+      "behavior": "Space plays the document in Design's window on the one clock, with 0 window bodies per frame, and nothing is written to history or autosave.",
+      "tasks": [
+        "OD-11a",
+        "OD-11b"
+      ],
+      "journeys": [
+        "MJ-OD-11"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignWindow+Playback.swift",
+        "Sources/DesignModel/DesignTransport.swift",
+        "Tests/DesignModelTests/DesignPlaybackTests.swift",
+        "Tests/AppSnapshotTests/RenderBudgetDesignAnimateTests.swift",
+        "Tests/mutations/DesignModel.DesignTransport.json"
+      ],
+      "waits": {
+        "OD-10": [
+          "OD-11a"
+        ],
+        "OD-8": [
+          "OD-11a"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "OD-12",
+      "behavior": "The first key slides a timeline in at the bottom of Design's window, one lane per keyed node; scrubbing the ruler moves the playhead; a still document shows no timeline.",
+      "tasks": [
+        "OD-12a",
+        "OD-12b"
+      ],
+      "journeys": [
+        "MJ-OD-12"
+      ],
+      "owned": [
+        "Sources/SuiteUI/EditorDetail.swift",
+        "Sources/DesignModel/DesignTimelineTracks.swift",
+        "Sources/DesignApp/DesignTimeline.swift",
+        "Tests/DesignModelTests/DesignTimelineTracksTests.swift",
+        "Tests/mutations/DesignModel.DesignTimelineTracks.json"
+      ],
+      "waits": {
+        "OD-5": [
+          "OD-12a"
+        ],
+        "OD-11": [
+          "OD-12a"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "OD-13",
+      "behavior": "The X, Y and Opacity inspector rows carry KeyframeButton, an Animate menu lists play, pause, stop and the key commands with shortcuts, and the first key made this way slides the timeline in.",
+      "tasks": [
+        "OD-13a",
+        "OD-13b"
+      ],
+      "journeys": [
+        "DesignJourneyTests.testFirstKeySlidesTimelineIn"
+      ],
+      "owned": [
+        "Sources/DesignApp/DesignInspectorTransform+Kernel.swift",
+        "Sources/DesignApp/DesignInspectorStyle.swift",
+        "Sources/DesignApp/DesignAnimateMenu.swift",
+        "Tests/mutations/DesignModel.DesignIntent.json"
+      ],
+      "waits": {
+        "OD-12": [
+          "OD-13a"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "OD-14",
+      "behavior": "In the window, a keyed document saves, closes, reopens and recovers with its keys, and a newer file shows the refusal sentence.",
+      "tasks": [
+        "OD-14a",
+        "OD-14b"
+      ],
+      "journeys": [
+        "DesignJourneyTests.testSaveReopenKeepsKeys"
+      ],
+      "owned": [
+        "UITests/DesignJourneyTests+Animate.swift",
+        "UITests/DesignJourneyTests+BadFiles.swift",
+        "Tests/AppSnapshotTests/DesignFileSnapshots.swift"
+      ],
+      "waits": {
+        "OD-3": [
+          "OD-14a"
+        ],
+        "OD-13": [
+          "OD-14a"
+        ]
+      },
+      "ui": true
+    },
+    {
+      "id": "OD-15",
+      "behavior": "One journey does the whole hero (new document, draw, key two nodes, play, save, reopen, play again) and the five render-budget rows that hold it are measured and written.",
+      "tasks": [
+        "OD-15a",
+        "OD-15b"
+      ],
+      "journeys": [
+        "DesignJourneyTests.testOneDocumentHero"
+      ],
+      "owned": [
+        "UITests/DesignJourneyTests+Hero.swift",
+        "Tests/render-budgets.md"
+      ],
+      "waits": {
+        "OD-9": [
+          "OD-15a"
+        ],
+        "OD-11": [
+          "OD-15a"
+        ],
+        "OD-14": [
+          "OD-15a"
+        ]
+      },
+      "ui": true
+    }
+  ]
+}
