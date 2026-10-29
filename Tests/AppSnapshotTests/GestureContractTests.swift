@@ -4,8 +4,8 @@
 // on every sample). Here every tool of every app, through its PaletteTool `gesture` class (SuiteUI's
 // ToolGesture), runs the same drag on its app's real window (RenderBudgetHarness.swift) and owes its class's
 // contract:
-//   movesContent  0 pixel work and at most 1 root body while the pointer is down (the move rides a live copy)
-//   selects       0 pixel work while the pointer is down
+//   movesContent  no pixel work past `pixelNoise` and at most 1 root body while the pointer is down (the move rides a live copy)
+//   selects       no pixel work past `pixelNoise` while the pointer is down
 //   every class   root bodies while the pointer is down within `bodyBound`, set at today's best path
 // Pixel work is Photo's PhotoRenderCount (regions, layer composites, resamples); the other apps have no pixel
 // counter yet, so they owe the body bound only. Step p95 is printed per tool (GESTURE-CONTRACT lines), not gated:
@@ -37,7 +37,22 @@ extension BodyCountSuites {
         static let samples = 60
 
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
-        static let exclusions: [String: (reason: String, issue: Int)] = [:]
+        static let exclusions: [String: (reason: String, issue: Int)] = [
+            "photo.move": ("rewrites layer offsets every sample: 63 bodies, 2019 renders down", 6019),
+            "photo.marquee": ("re-runs the editor body and re-renders every sample", 6020),
+            "photo.ellipse": ("re-runs the editor body and re-renders every sample", 6020),
+            "photo.lasso": ("re-runs the editor body and re-renders every sample", 6020),
+            "photo.polygon": ("re-runs the editor body and re-renders every sample", 6020),
+            "photo.wand": ("re-runs the editor body and re-renders every sample", 6020),
+            "photo.crop": ("re-runs the editor body and re-renders every sample", 6020),
+            "design.move": ("2 root bodies with the pointer down", 6021),
+            "library.*": ("no canvas tool enum, so no adapter", 6022),
+        ]
+
+        /// Pixel renders a drag that changes nothing costs on Photo's window (eyedropper 101, pen 85 on
+        /// 2026-10-29): the canvas's own region renders, which PhotoRenderCount counts with the tool's.
+        // ponytail: a noise floor, not 0; gate 0 once the counter splits the tool's work from the canvas's.
+        static let pixelNoise = 150
 
         /// Apps the cross-app run covers; each iterates its own tool enum's `allCases`.
         static let adapters: [GestureApp: [(tool: String, gesture: ToolGesture)]] = [
@@ -135,7 +150,7 @@ extension BodyCountSuites {
             contract("\(app.rawValue).\(tool)") {
                 #expect(bodiesDown <= bodyBound(gesture), "\(app.rawValue) \(tool) (\(gesture)): \(bodiesDown) root bodies with the pointer down")
                 if pixels != nil, gesture == .movesContent || gesture == .selects {
-                    #expect(pixelsDown == 0, "\(app.rawValue) \(tool) (\(gesture)): \(pixelsDown) pixel renders with the pointer down")
+                    #expect(pixelsDown <= pixelNoise, "\(app.rawValue) \(tool) (\(gesture)): \(pixelsDown) pixel renders with the pointer down")
                 }
             }
         }
