@@ -41,6 +41,8 @@ enum DesignIntent {
     case editText(String)
     case textDraft(String), commitText, cancelText
     case zoomIn, zoomOut, fit
+    /// Playback on the one clock (DesignWindow+Playback.swift): shown state, never an edit.
+    case play, pause, stop, playPause
     /// A selection command (DesignCommand): duplicate, group, ungroup, delete, nudge, align,
     /// distribute or arrange; a refusal's help goes to the status line.
     case command(DesignCommand)

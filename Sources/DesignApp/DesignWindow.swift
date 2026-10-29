@@ -67,6 +67,9 @@ struct DesignWindow: View, BodyCounted {
     @State private var model = DesignWorkspace()
     /// The drag or scrub shown on a copy until it ends; the canvas reads it from the environment.
     @State private var live = DesignLiveDrag()
+    /// Playback on the suite's display link; a tick changes nothing this body reads (DesignWindow+Playback.swift).
+    @State private var player = DesignPlayer()
+    @Environment(\.designRefreshLink) private var makeLink
     /// A test's starting workspace: the window opens it as it is and skips the launch steps.
     private let seeded: Bool
     @State private var zoom = 1.0
@@ -104,6 +107,9 @@ struct DesignWindow: View, BodyCounted {
     /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
     // view-static: main-actor
     static var openExport: (@MainActor () -> Void)?
+    /// The last started window's intents; RenderBudgetDesignAnimateTests plays through it.
+    // view-static: main-actor
+    static var lastPerform: DesignPerform?
     #endif
 
     /// A window for `launch`; `seed` (tests) starts it on that workspace instead, and `live` is its drag box.
@@ -137,7 +143,12 @@ struct DesignWindow: View, BodyCounted {
         } message: { shown in
             Text(shown.message)
         }
-        .task { start() }
+        .task {
+            #if DEBUG
+            Self.lastPerform = perform
+            #endif
+            start()
+        }
         // The key window is the one live commands act on (EM-4).
         .suiteLiveWindow(DesignShell.front, read: { DesignHeadless(model) }, write: { perform(.adoptLive($0.workspace)) })
         // A file handed to Design (Finder, the home's Recent, Open In) opens here while the window is empty (#5200).
@@ -155,6 +166,11 @@ struct DesignWindow: View, BodyCounted {
         #if DEBUG
         defer { Self.lastWorkspace = model }
         #endif
+        // Anything but a transport intent pauses playback first, so it acts at the frame on screen.
+        switch intent {
+        case .play, .pause, .stop, .playPause: break
+        default: if player.isPlaying { model.setPlayhead(player.halt(stopping: false, live: live)) }
+        }
         // An open text edit ends, fitted to its text, before anything else acts (canvas-basics CB-6).
         switch intent {
         case .textDraft, .cancelText: break
@@ -205,6 +221,12 @@ struct DesignWindow: View, BodyCounted {
         case .commitText: break  // committed above
         case .cancelText: model.cancelTextEdit()
         case .zoomIn: userZoom(ZoomMath.zoomedIn(from: zoom))
+        case .playPause: perform(player.isPlaying ? .pause : .play)
+        case .play:
+            guard !model.isStill, !player.isPlaying else { break }
+            player.play(model, live: live, makeLink: makeLink) { model.setPlayhead($0) }
+        case .pause: if player.isPlaying { model.setPlayhead(player.halt(stopping: false, live: live)) }
+        case .stop: model.setPlayhead(player.halt(stopping: true, live: live))
         case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
         case .fit:
             fitting = true
