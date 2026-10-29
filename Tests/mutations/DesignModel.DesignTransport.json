@@ -1,0 +1,30 @@
+[
+  {
+    "label": "stopKeepsThePlayhead: stop leaves the frame on screen",
+    "file": "Sources/DesignModel/DesignTransport.swift",
+    "find": "(isPlaying, frame, elapsed) = (false, nil, 0)",
+    "replace": "isPlaying = false",
+    "tests": "DesignPlaybackTests"
+  },
+  {
+    "label": "tickDrifts: each tick counts from the start frame alone, not the total played",
+    "file": "Sources/DesignModel/DesignTransport.swift",
+    "find": "elapsed += seconds",
+    "replace": "elapsed = seconds",
+    "tests": "DesignPlaybackTests"
+  },
+  {
+    "label": "playOnceNeverEnds: the transport keeps playing past the last frame",
+    "file": "Sources/DesignModel/DesignTransport.swift",
+    "find": "if next.ended { isPlaying = false }",
+    "replace": "if next.ended { }",
+    "tests": "DesignPlaybackTests"
+  },
+  {
+    "label": "tickWritesTheDocument: showing a frame records an edit",
+    "file": "Sources/DesignModel/DesignTransport.swift",
+    "find": "public mutating func show(_ transport: DesignTransport) { setPlayhead(transport.frame) }",
+    "replace": "public mutating func show(_ transport: DesignTransport) { setPlayhead(transport.frame); try? editNode(selectedPage?.nodes.first?.id ?? \"\", named: \"Tick\") { $0.name += \"\" } }",
+    "tests": "DesignPlaybackTests"
+  }
+]
