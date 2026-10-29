@@ -52,7 +52,7 @@ Release build (`-O`, plus `-DDEBUG` for the body counter). The shared M2 Pro was
 | 50 nodes | 0.004 ms | 0.10 ms | 0.34 ms | 1.9 us |
 | 500 nodes | 0.042 ms | 0.48 ms | 2.22 ms | **1.0 us** |
 
-Sampling costs about 0.08 us per node. Hundreds of plain vector nodes fit inside one 120 Hz frame (8.3 ms) with about 8,000 nodes of headroom at this rate. Caveat: the fixtures are solid rounded rectangles. Text, gradients, strokes and placed pictures cost more and were not measured. `sample <pid> 20 1` of the 24 s playback: SAMPLE_PENDING
+Sampling costs about 0.08 us per node. Hundreds of plain vector nodes fit inside one 120 Hz frame (8.3 ms) with about 8,000 nodes of headroom at this rate. Caveat: the fixtures are solid rounded rectangles. Text, gradients, strokes and placed pictures cost more and were not measured. `sample <pid> 20 1` of the 24 s playback: **not captured.** Both tries attached to the wrong process: a log-line trigger lost to swift test's output buffering, and the `pgrep -f` pattern matched its own zsh. Next try: `sample $(pgrep -nx swiftpm-testing-helper) 20 1` about 10 s into `--filter playLongForSample`. The in-test timings above stand in for it: about 1 us per node, and 241.8 fps unthrottled on the 500-node fixture.
 
 ## (d) Big-document drag
 
