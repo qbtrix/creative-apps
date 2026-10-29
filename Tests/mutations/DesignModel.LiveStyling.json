@@ -61,5 +61,19 @@
     "find": "return style.fixedWidth == true ? true : nil",
     "replace": "return style.fixedWidth",
     "tests": "DesignTextLiveFitTests"
+  },
+  {
+    "label": "autokey: the X row measures the rest frame",
+    "file": "Sources/DesignModel/Live/LiveStyling.swift",
+    "find": "let frame = shown.nodes.node(node.id)?.frame ?? node.frame",
+    "replace": "let frame = node.frame",
+    "tests": "DesignAutoKeyTests"
+  },
+  {
+    "label": "autokey: opacity edits the rest pose at a playhead",
+    "file": "Sources/DesignModel/Live/LiveStyling.swift",
+    "find": "node = node.writing(.opacity, Swift.min(Swift.max(opacity, 0), 1), at: playhead)",
+    "replace": "node = node.writing(.opacity, Swift.min(Swift.max(opacity, 0), 1), at: nil)",
+    "tests": "DesignAutoKeyTests"
   }
 ]

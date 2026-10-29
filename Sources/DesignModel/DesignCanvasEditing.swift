@@ -175,7 +175,7 @@ extension DesignWorkspace {
         let step = Nudge.delta(direction.kernel, large: shift)
         let delta = DesignPoint(x: step.x, y: step.y)
         // A locked node is refused and stays put; the selection's id always exists.
-        try? editNode(id, named: "Nudge", coalescing: Nudge.runKey("nudge", [id])) { $0.translate(by: delta) }
+        try? editNode(id, named: "Nudge", coalescing: Nudge.runKey("nudge", [id])) { [playhead] in $0 = $0.moved(by: delta, at: playhead) }
     }
 
     /// Drags `handle` of a node's frame by `delta` (see DesignRect.resized). Children stay where
@@ -218,9 +218,9 @@ extension DesignWorkspace {
             restorePages(current.before)
             current.guides = .empty
             guard current.moved, let frame = selectedPage?.nodes.node(id)?.frame else { break }
-            // Snap first, whole points second (DesignWholePoints).
+            // Snap first, whole points second (DesignWholePoints); a keyed axis keys at the playhead (LiveKeying).
             let moveBy = frame.wholeDelta(snapMove(delta, box: frame, modifiers: modifiers, current))
-            _ = pages.update(id) { $0.translate(by: moveBy) }
+            _ = pages.update(id) { [playhead] in $0 = $0.moved(by: moveBy, at: playhead) }
             current.guides = landedGuides(frame, by: moveBy, modifiers: modifiers, current)
         case .resize(let id, let handle, let original):
             restorePages(current.before)
@@ -277,7 +277,7 @@ extension DesignWorkspace {
         do throws(DesignRefusal) {
             switch current.route {
             case .moveSeveral(let ids):
-                apply(try transforming.move(ids, by: moveBy, on: page))
+                apply(try transforming.move(ids, by: moveBy, on: page, at: playhead))
             case .resizeSeveral(let ids, let handle):
                 let snapped = snapResize(delta, box: bounds, handle: handle, modifiers: modifiers, current)
                 apply(try transforming.resize(ids, handle: handle, by: snapped, modifiers: modifiers, on: page))

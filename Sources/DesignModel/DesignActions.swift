@@ -89,8 +89,8 @@ extension DesignWorkspace {
         case .group: edit = try services.grouping.group(ids, on: page, mint: &mint)
         case .ungroup: edit = try services.grouping.ungroup(ids, on: page)
         case .delete: edit = try services.transforming.delete(ids, on: page)
-        case .nudge(let direction, let large): edit = try services.transforming.nudge(ids, direction, large: large, on: page)
-        case .align(let edge): edit = try services.aligning.align(edge, ids, on: page)
+        case .nudge(let direction, let large): edit = try services.transforming.nudge(ids, direction, large: large, on: page, at: playhead)
+        case .align(let edge): edit = try services.aligning.align(edge, ids, on: page, at: playhead)
         case .distribute(let axis): edit = try services.aligning.distribute(axis, ids, on: page)
         case .arrange(let step): edit = try services.ordering.arrange(step, ids, on: page)
         }

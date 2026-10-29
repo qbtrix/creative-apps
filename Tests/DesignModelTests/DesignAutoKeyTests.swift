@@ -5,6 +5,7 @@
 // workspace paths. On `animated(50)` at frame 60 node-2 shows x 47, y 40, opacity 0.65; its rest frame is 30, 30.
 // Runs on Linux and macOS.
 @testable import DesignModel
+import SuiteKernel
 import Testing
 
 @Suite struct DesignAutoKeyTests {
@@ -61,10 +62,13 @@ import Testing
     }
 
     @Test func alignLinesUpTheShownFramesAndLeavesFrameZero() throws {
-        let edit = try LiveAligning().align(.left, ["node-2", "node-30"], on: Self.page, at: 60)
+        // node-30 (rest x 192) travels +48, node-2 +24: rest and shown frames give different deltas.
+        var page = Self.page
+        _ = page.nodes.update("node-30") { $0.time?.tracks[.x] = [Keyframe(frame: 0, value: 192), Keyframe(frame: 120, value: 240)] }
+        let edit = try LiveAligning().align(.left, ["node-2", "node-30"], on: page, at: 60)
         #expect(Self.near(Self.shown(edit.nodes, "node-2", at: 60).frame.x, 47))
         #expect(Self.near(Self.shown(edit.nodes, "node-30", at: 60).frame.x, 47))
-        let before = Self.page.sampled(at: 0).nodes.node("node-30")!.frame
+        let before = page.sampled(at: 0).nodes.node("node-30")!.frame
         #expect(Self.shown(edit.nodes, "node-30", at: 0).frame == before)
         #expect(Self.restKept(edit.nodes, "node-30"))
     }

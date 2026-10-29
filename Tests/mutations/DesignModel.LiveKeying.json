@@ -1,0 +1,30 @@
+[
+  {
+    "label": "autokey: key written at frame 0 instead of the playhead",
+    "file": "Sources/DesignModel/Live/LiveKeying.swift",
+    "find": "_ = KeyRules.toggleKey(&track, at: playhead, value: value, leaving: .propertyGoesStatic)",
+    "replace": "_ = KeyRules.toggleKey(&track, at: 0, value: value, leaving: .propertyGoesStatic)",
+    "tests": "DesignAutoKeyTests"
+  },
+  {
+    "label": "autokey: rest pose changed as well as the key",
+    "file": "Sources/DesignModel/Live/LiveKeying.swift",
+    "find": "            node.time = time\n            return node\n",
+    "replace": "            node.time = time\n",
+    "tests": "DesignAutoKeyTests"
+  },
+  {
+    "label": "autokey: a key already at the playhead is not replaced",
+    "file": "Sources/DesignModel/Live/LiveKeying.swift",
+    "find": "track[index].value = value",
+    "replace": "_ = index",
+    "tests": "DesignAutoKeyTests"
+  },
+  {
+    "label": "autokey: own value ignores the keys",
+    "file": "Sources/DesignModel/Live/LiveKeying.swift",
+    "find": "return time?.value(of: property, at: Double(playhead)) ?? rest",
+    "replace": "return rest",
+    "tests": "DesignAutoKeyTests"
+  }
+]
