@@ -34,8 +34,8 @@ extension DesignNode {
         let (keyedX, keyedY) = (keys(.x, at: playhead), keys(.y, at: playhead))
         var node = self
         node.translate(by: DesignPoint(x: keyedX ? 0 : delta.x, y: keyedY ? 0 : delta.y))
-        if keyedX { node = node.writing(.x, ownValue(.x, at: playhead) + delta.x, at: playhead) }
-        if keyedY { node = node.writing(.y, ownValue(.y, at: playhead) + delta.y, at: playhead) }
+        if keyedX, delta.x != 0 { node = node.writing(.x, ownValue(.x, at: playhead) + delta.x, at: playhead) }
+        if keyedY, delta.y != 0 { node = node.writing(.y, ownValue(.y, at: playhead) + delta.y, at: playhead) }
         return node
     }
 
