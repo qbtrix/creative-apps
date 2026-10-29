@@ -63,6 +63,8 @@ struct ToolOptionsSection: View {
             case .crop:
                 // CropOptions draws the crop's one instruction line itself.
                 CropOptions(model: model, perform: perform)
+            case .select:
+                hint("Click a layer to select it, Shift-click to add or remove one, or drag on empty canvas to box several.")
             case .move:
                 hint(model.moveHint)
                 // An adjustment layer can't move: its rows would only sit there disabled.

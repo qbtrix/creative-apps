@@ -27,7 +27,10 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, ellipse, lasso, polygon, wand, brush, eraser, clone
+    case move
+    /// Select (#6012): a click picks the layer under it and moves nothing; a drag on empty canvas boxes layers.
+    case select
+    case marquee, ellipse, lasso, polygon, wand, brush, eraser, clone
     /// Spot Heal (fill-heal): a click heals a spot from its surroundings. Before
     /// Heal, so J picks it first.
     case spotHeal = "spot-heal"

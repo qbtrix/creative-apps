@@ -31,6 +31,8 @@ private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoW
         a.selection != b.selection || a.selectionMask != b.selectionMask || a.areaDraft != b.areaDraft
     case .crop:
         a.pendingCrop != b.pendingCrop
+    case .select:
+        a.selectedLayerIDs != b.selectedLayerIDs
     case .move:
         a.layers.map { [$0.offsetX, $0.offsetY] } != b.layers.map { [$0.offsetX, $0.offsetY] }
     case .eyedropper:
@@ -46,6 +48,8 @@ private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoW
 /// press at `source` and lifts the pointer, so the next drag stamps.
 private func ready(_ workspace: inout PhotoWorkspace, _ tool: PhotoTool, source: Mask.Point) {
     workspace.selectTool(tool)
+    // Select shows its pick by moving the selection off a new clear layer onto the painted one under the drag.
+    if tool == .select { workspace.addLayer() }
     guard tool == .clone || tool == .heal else { return }
     workspace.drag(from: source, to: source, modifiers: [.option])
     workspace.endDrag()

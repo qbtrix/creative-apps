@@ -89,6 +89,8 @@ struct PhotoStroke: Sendable, Equatable {
     var modifiers: DragModifiers = []
     /// Gradient: where the pointer is now; the gradient runs from `start` to here on release.
     var end: Mask.Point?
+    /// Shift at the press, for Select's toggle and box join.
+    var extending = false
     /// Area tools: the lasso's path, the last zoom, the Marquee's starting selection (PhotoAreaTool.swift).
     var points: [Mask.Point] = []
     var zoom: Double = 1
@@ -190,6 +192,9 @@ extension PhotoWorkspace {
             trace(&current, to: end)
         case .gradient, .pen:
             current.end = end
+        case .select:
+            if begun { current.extending = modifiers.contains(.shift) }
+            current.end = end
         case .text:
             break
         }
@@ -229,7 +234,7 @@ extension PhotoWorkspace {
     /// release draws (the Gradient tool's, and Remove's outline), so the window can keep its later
     /// samples off the workspace the panels read.
     public var dragShowsLineOnly: Bool {
-        (stroke?.tool == .gradient && transformDraft == nil) || stroke?.tool == .remove
+        (stroke?.tool == .gradient && transformDraft == nil) || stroke?.tool == .remove || stroke?.tool == .select
     }
 
     /// Becomes `live`: a copy of this workspace a stroke drew on
@@ -272,6 +277,8 @@ extension PhotoWorkspace {
             retouchRelease(done)
         case .crop, .eyedropper:
             break
+        case .select:
+            selectRelease(done)
         case .gradient:
             guard let end = done.end else { return }
             do { try drawGradient(from: done.start, to: end) } catch { statusMessage = "Couldn't draw the gradient." }
