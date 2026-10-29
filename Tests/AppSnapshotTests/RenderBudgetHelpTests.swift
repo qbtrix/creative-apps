@@ -3,11 +3,13 @@
 // on a fixed report. It checks every control carries its `suite.help.report.<control>` id, types five
 // characters into the note field's editor one per 1/120 s, then clicks Copy: the copied text is the
 // report's text with the typed note, and Copy reads Copied; ⌘C in the note field copies the same way and
-// Escape there closes the sheet. The sheet's own body is the window body: the note lives in its own field
+// Escape there closes the sheet. Over the Help menu's own report (ShellHelpProvider), Copy redacts this Mac's
+// home path typed into the note (#5836). The sheet's own body is the window body: the note lives in its own field
 // view, so a keystroke runs none (target 0). Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteModel
+import SuiteShell
 import SwiftUI
 import Testing
 
@@ -86,6 +88,27 @@ extension BodyCountSuites {
             #expect(w.window.performKeyEquivalent(with: key), "Escape found no control")
             try await w.settle(200)
             #expect(closed.texts == ["closed"], "Escape didn't close the sheet")
+        }
+
+        /// #5836: the sheet over the report the Help menu builds (ShellHelpProvider's, this Mac's) redacts this
+        /// Mac's home path typed into the note when Copy hands the text over.
+        @Test(.timeLimit(.minutes(2))) func copyRedactsTheHomePathInTheNote() async throws {
+            let copied = Copied()
+            let report = ShellHelpProvider().problemReport(app: "photo")
+            let sheet = ProblemReportSheet(report: report, onCopy: { copied.texts.append($0) }, onClose: {})
+            let w = RenderBudgetWindow(sheet, size: CGSize(width: 640, height: 560), keyCapable: true)
+            defer { w.close() }
+            try await w.settle(400)
+            let editor = try #require(try await Self.edit(ProblemReportSheet.identifier("note"), in: w), "the note field didn't start editing")
+            editor.insertText("The brush lagged in \(ThisMac.home)/Pictures.", replacementRange: editor.selectedRange())
+            let copy = try #require(await w.element(ProblemReportSheet.identifier("copy")), "no Copy")
+            w.window.makeFirstResponder(nil)
+            try await w.settle(200)
+            w.click(at: CGPoint(x: copy.midX, y: copy.midY))
+            try await w.settle(200)
+            let text = try #require(copied.texts.first, "Copy copied nothing")
+            #expect(text.hasPrefix("The brush lagged in ~/Pictures."), "the note's home path isn't redacted: \(text.prefix(80))")
+            #expect(!text.contains(ThisMac.home + "/"), "the copied text still holds \(ThisMac.home)")
         }
 
         /// The NSTextField under the element `identifier`, made first responder; its field editor.
