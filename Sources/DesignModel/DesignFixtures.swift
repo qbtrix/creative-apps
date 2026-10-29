@@ -7,6 +7,8 @@
 // to front. Ids follow the counters' "page-N" and "node-N", so the next minted
 // id is past every fixture id. Linux-safe.
 
+import SuiteKernel
+
 public enum DesignFixtures {
     /// The fixture names a launch argument uses, in the blueprint's order.
     public static let names = ["empty", "cards", "two-pages", "crowd"]
