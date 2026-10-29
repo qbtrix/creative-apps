@@ -9,7 +9,7 @@
 // `gradientDrag`; `photo.canvas.gradient-line`), Remove's outline while it
 // drags (SuiteUI's MotionPathMarks through its points, from the same live copy
 // or `removeStroke`; `photo.canvas.remove-stroke`), the Select tool's box while it drags (SuiteUI's
-// SelectBoxMark, from the same live copy or `selectBox`)
+// SelectBoxMark, from the same live copy or `selectBox`; `photo.canvas.select-box`)
 // and the Eyedropper's loupe (PhotoSampleLoupe, `suite.sample.loupe`), in
 // that order. SuiteUI's marks are hidden from
 // accessibility, so each visible mark also gets one probe (`probe(zoom:)`): a
@@ -67,9 +67,9 @@ struct PhotoCanvasOverlay: View {
                 MotionPathMarks(points: points.map { CGPoint(x: $0.x, y: $0.y) }, zoom: zoom)
                 mark.probe(zoom: zoom)
             }
-            if let box = liveLine?.box ?? model.selectBox {
-                SelectBoxMark(rect: CGRect(x: box.minX, y: box.minY, width: box.maxX - box.minX, height: box.maxY - box.minY),
-                              zoom: zoom)
+            if let box = selectBox {
+                SelectBoxMark(rect: box, zoom: zoom)
+                PhotoCanvasMark.selectBox(box).probe(zoom: zoom)
             }
             PhotoSampleLoupe(model: model, zoom: zoom, hover: hover)
         }
@@ -110,11 +110,16 @@ struct PhotoCanvasOverlay: View {
     /// The line a drag shows: the live copy's while one is live, else the workspace's.
     private var dragLine: (from: Mask.Point, to: Mask.Point)? { liveLine?.line ?? model.gradientDrag }
 
+    /// The Select tool's box while it drags, in canvas pixels: the live copy's while one is live, else the workspace's.
+    private var selectBox: CGRect? {
+        (liveLine?.box ?? model.selectBox).map { CGRect(x: $0.minX, y: $0.minY, width: $0.maxX - $0.minX, height: $0.maxY - $0.minY) }
+    }
+
     /// The accessibility elements the overlay shows, in drawing order.
     var marks: [PhotoCanvasMark] {
         [
             selection, CropOverlay(model: model, zoom: zoom).mark,
-            TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine, removeOutline,
+            TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine, removeOutline, selectBox.map(PhotoCanvasMark.selectBox),
         ].compactMap { $0 }
     }
 }
@@ -139,6 +144,7 @@ struct PhotoCanvasMark: Equatable {
     static func brushCursor(_ rect: CGRect) -> Self {
         Self(identifier: "photo.canvas.brush-cursor", label: "Brush size", rect: rect)
     }
+    static func selectBox(_ rect: CGRect) -> Self { Self(identifier: "photo.canvas.select-box", label: "Selection box", rect: rect) }
     static func gradientLine(_ rect: CGRect) -> Self {
         Self(identifier: "photo.canvas.gradient-line", label: "Gradient line", rect: rect)
     }

@@ -5,7 +5,6 @@
 # `A path::Name Concept`, `B path::Name signature`, `C path::Name ~ path::Name`.
 A Sources/AfterGlowApp/UpdateSheet.swift::UpdateSheet Sheet
 A Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark CanvasMark
-A Sources/DesignApp/DesignCanvasMarks.swift::DesignMarqueeMark CanvasMark
 A Sources/DesignApp/DesignLayersPanel.swift::DesignLayerRow LayerList
 A Sources/DesignApp/DesignLayersPanel.swift::DesignLayerTree LayerList
 A Sources/DesignApp/DesignLayersPanel.swift::DesignLayersPanel LayerList
@@ -32,7 +31,6 @@ B Sources/AfterGlowApp/HomeRunningStrip.swift::HomeRunningStrip caps-header
 B Sources/AfterGlowApp/OnboardingWindow.swift::OnboardingWindow sheet-buttons
 B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark accent-outline
 B Sources/DesignApp/DesignCanvasFeedback.swift::DesignHoverMark probe-element
-B Sources/DesignApp/DesignCanvasMarks.swift::DesignMarqueeMark accent-outline
 B Sources/DesignApp/DesignInspectorPage.swift::DesignPageSide pending-commit
 B Sources/DesignApp/DesignSelectionMarks.swift::DesignSelectionBox accent-outline
 B Sources/FlareApp/FlareEasingPopover.swift::FlareEasingPopover caps-header
