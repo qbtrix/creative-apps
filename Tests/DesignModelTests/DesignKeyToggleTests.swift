@@ -69,17 +69,20 @@ import Testing
         #expect(w.menuKeys(removing: false).isEmpty, "every row is keyed at this frame")
     }
 
+    /// The menu item's reason, read as the menu reads it: through its spec over the menu state.
+    static func why(_ state: DesignMenuState, _ id: String) -> String? { DesignMenuState.spec(id).availability(state).why }
+
     @Test func theAnimateMenuSaysWhyItIsOff() throws {
         var w = DesignFixtures.cards
         let still = DesignMenuState(workspace: w, hasWindow: true)
-        #expect(still.availability("animate.play-pause").why == "Set a key first.")
-        #expect(still.availability("animate.stop").why == "Set a key first.")
-        #expect(still.availability("keyframe.remove").why == "Set a key first.")
-        #expect(still.availability("keyframe.set").why == DesignRefusal.nothingSelected.help)
+        #expect(Self.why(still, "animate.play-pause") == "Set a key first.")
+        #expect(Self.why(still, "animate.stop") == "Set a key first.")
+        #expect(Self.why(still, "keyframe.remove") == "Set a key first.")
+        #expect(Self.why(still, "keyframe.set") == DesignRefusal.nothingSelected.help)
         w.selectItem("node-2")
         _ = try Self.run(&w, w.keyAnimate("node-2", .x))
         let keyed = DesignMenuState(workspace: w, hasWindow: true)
-        #expect(keyed.availability("animate.play-pause") == .available && keyed.availability("keyframe.remove") == .available)
-        #expect(keyed.availability("keyframe.set") == .available, "y and opacity have no key at frame 0")
+        #expect(Self.why(keyed, "animate.play-pause") == nil && Self.why(keyed, "keyframe.remove") == nil)
+        #expect(Self.why(keyed, "keyframe.set") == nil, "y and opacity have no key at frame 0")
     }
 }
