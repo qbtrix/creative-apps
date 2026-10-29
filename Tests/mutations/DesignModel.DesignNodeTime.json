@@ -65,8 +65,8 @@
   {
     "label": "decodingSortsATrack: decoding skips init(tracks:) and keeps a file's unsorted keys",
     "file": "Sources/DesignModel/DesignNodeTime.swift",
-    "find": "self.init(tracks: try container.decode([DesignKeyProperty: [Keyframe]].self, forKey: .tracks))",
-    "replace": "self.tracks = try container.decode([DesignKeyProperty: [Keyframe]].self, forKey: .tracks)",
+    "find": "self.init(tracks: try container.decode(Dictionary<DesignKeyProperty, [Keyframe]>.self, forKey: .tracks))",
+    "replace": "self.tracks = try container.decode(Dictionary<DesignKeyProperty, [Keyframe]>.self, forKey: .tracks)",
     "tests": "DesignNodeTimeTests"
   },
   {
