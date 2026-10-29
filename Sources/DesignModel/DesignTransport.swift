@@ -39,7 +39,7 @@ public struct DesignTransport: Sendable, Equatable {
 
     public mutating func pause() { isPlaying = false }
 
-    public mutating func stop() { (isPlaying, frame, elapsed) = (false, nil, 0) }
+    public mutating func stop() { isPlaying = false }
 }
 
 extension DesignWorkspace {

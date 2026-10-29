@@ -21,10 +21,10 @@
     "tests": "DesignPlaybackTests"
   },
   {
-    "label": "tickWritesTheDocument: showing a frame records an edit",
+    "label": "tickWritesTheDocument: showing a frame nudges a layer as an undoable edit",
     "file": "Sources/DesignModel/DesignTransport.swift",
     "find": "public mutating func show(_ transport: DesignTransport) { setPlayhead(transport.frame) }",
-    "replace": "public mutating func show(_ transport: DesignTransport) { setPlayhead(transport.frame); try? editNode(selectedPage?.nodes.first?.id ?? \"\", named: \"Tick\") { $0.name += \"\" } }",
+    "replace": "public mutating func show(_ transport: DesignTransport) { setPlayhead(transport.frame); try? editNode(selectedPage?.nodes.first?.id ?? \"\", named: \"Tick\") { $0.frame.x += 1 } }",
     "tests": "DesignPlaybackTests"
   }
 ]
