@@ -24,6 +24,8 @@ extension PhotoWorkspace: PlacedImageTarget {
     static let placeFormatHelp = "Photo places PNG, JPEG or SVG files.", cantPlace = "Can't place this image."
     /// Why `place.replace`, `place.reset-size`, `place.focus` and a fill can't run in Photo.
     static let placedBecomesPixels = "A placed image becomes pixels in Photo."
+    /// Why an SVG with nothing filled isn't placed: Photo draws an SVG's fills, not its strokes or text.
+    static let unfilledSVG = "Photo draws an SVG's filled shapes; this one has none (strokes and text aren't drawn yet)."
 
     /// Why nothing can be placed now; nil when it can: an image is open.
     public var placeHelp: String? {
@@ -63,9 +65,17 @@ extension PhotoWorkspace: PlacedImageTarget {
         let box = image.box
         let width = max(Int(box.width.rounded()), 1), height = max(Int(box.height.rounded()), 1)
         let scaled = Double(width) < asset.natural.width.rounded() || Double(height) < asset.natural.height.rounded()
-        let drawn = asset.format == .svg
-            ? try? TiledPixels(PlacedVectorPixels.pixels(PlaceRules.vector(asset.data, name: asset.name), width: width, height: height))
-            : try? Self.placedPixels(asset.data, codec: fileFlow.codec, width: width, height: height, scaled: scaled)
+        let drawn: TiledPixels?
+        if asset.format == .svg {
+            guard let vector = try? PlaceRules.vector(asset.data, name: asset.name) else { throw Self.placeFailed }
+            // Only fills are drawn, so art made of strokes alone would place as an empty layer.
+            guard vector.items.contains(where: { $0.fill != nil }) else {
+                throw CatalogError.unavailable(id: "place.image", why: Self.unfilledSVG)
+            }
+            drawn = try? TiledPixels(PlacedVectorPixels.pixels(vector, width: width, height: height))
+        } else {
+            drawn = try? Self.placedPixels(asset.data, codec: fileFlow.codec, width: width, height: height, scaled: scaled)
+        }
         guard let tiles = drawn else { throw Self.placeFailed }
         let id = insertPixelLayer(tiles, named: Self.placedLayerName(asset.name),
                                   x: Int(box.minX.rounded()), y: Int(box.minY.rounded()), step: name)

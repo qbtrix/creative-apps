@@ -117,6 +117,17 @@ private func place(_ asset: PlacedAsset, on workspace: inout PhotoWorkspace, at:
         #expect(workspace.layers.count == 1)
     }
 
+    /// An SVG drawn only with strokes would place as an empty layer, so it is refused, saying why.
+    @Test func aStrokeOnlySVGIsRefused() throws {
+        var workspace = try opened()
+        let svg = #"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><path d="M0 0 L40 20" fill="none" stroke="black"/></svg>"#
+        let params = PlaceIntent.place(name: "line.svg", data: Data(svg.utf8), at: nil).command.params
+        #expect(throws: CatalogError.unavailable(id: "place.image", why: PhotoWorkspace.unfilledSVG)) {
+            try PhotoWorkspace.catalog.run("place.image", params: params, on: &workspace)
+        }
+        #expect(workspace.layers.count == 1)
+    }
+
     /// An SVG becomes a pixel layer drawn at the size it is placed, centred, as one Place Image step (#6028).
     @Test func svgBecomesPixelsAtDocumentScale() throws {
         var workspace = try opened()

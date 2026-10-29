@@ -42,7 +42,7 @@ import Testing
 
     @Test func anSVGBecomesALayer() throws {
         var workspace = try opened()
-        let svg = Data(#"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"/>"#.utf8)
+        let svg = Data(##"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="240" height="80" fill="#00f"/></svg>"##.utf8)
         workspace.place([(name: "logo.svg", data: svg)], at: Point(x: 10, y: 10))
         #expect(workspace.layers.count == 2)
         #expect(workspace.canUndo)
