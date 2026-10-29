@@ -78,7 +78,7 @@ private struct DesignTimelineLanes: View {
         let height = SuiteSize.timelineRuler + SuiteSize.timelineLane * CGFloat(min(max(rows.count, 1), 5))
         return GeometryReader { proxy in
             TimelineStrip(
-                tracks: tracks, duration: last, frameWidth: max(proxy.size.width - 160, 1) / CGFloat(max(last, 1)),
+                tracks: tracks, duration: last, frameWidth: Self.laneWidth(proxy.size.width) / CGFloat(max(last, 1)),
                 playhead: frame, rate: model.time.rate,
                 onScrub: { perform(.scrub($0)) },
                 onSelectKeyframe: { id, _ in perform(.select(id)) },
@@ -86,5 +86,10 @@ private struct DesignTimelineLanes: View {
                 .environment(\.timelineIdentifierPrefix, "design.timeline")
         }
         .frame(height: height)
+    }
+
+    /// The lanes' width in a strip `width` wide: past the name column and its hairline, with Flare's trailing room.
+    static func laneWidth(_ width: CGFloat) -> CGFloat {
+        max(width - SuiteSize.timelineLabelColumn - 1 - SuiteSpacing.xl, 1)
     }
 }
