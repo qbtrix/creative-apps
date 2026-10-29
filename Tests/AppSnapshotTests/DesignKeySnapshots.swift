@@ -1,7 +1,7 @@
 // DesignKeySnapshots.swift: Design's key buttons and Animate menu (one-document OD-13). The inspector with one layer
 // selected in the button's three states: idle (`cards`, no keys), animated (`animated(1)` at frame 60, between its
 // keys) and keyedHere (`animated(1)` at frame 0, on a key). The Animate menu's items in two columns: a still document
-// (Play/Pause, Stop and Remove Key off, saying "Set a key first.") and a keyed one with a layer selected. Light and
+// (Play/Pause, Stop and Remove Key off, saying "Set a key first.") and a keyed one with a layer selected, on a key. Light and
 // dark: design-key-{idle,animated,here}-{light,dark}.png and design-animate-menu-{light,dark}.png. `press` (render
 // budget) opens `animated(1)` at frame 60 with node-2 selected, clicks the X row's diamond and counts window and
 // editor bodies; the key lands at 60 with the value shown there, so the canvas paints the same page. macOS only.
@@ -40,7 +40,7 @@ import Testing
     }
 
     @Test func animateMenu() throws {
-        let menus = [Self.selected(DesignFixtures.cards, at: nil), Self.selected(DesignFixtures.animated(1), at: 60)]
+        let menus = [Self.selected(DesignFixtures.cards, at: nil), Self.selected(DesignFixtures.animated(1), at: 0)]
             .map { DesignMenu(model: $0, perform: { _ in }) }
         let why = { (menu: DesignMenu, id: String) in DesignMenuState.spec(id).availability(menu.state()).why }
         for id in ["animate.play-pause", "animate.stop", "keyframe.remove"] {
@@ -65,7 +65,11 @@ extension BodyCountSuites {
             let bodies = { DesignWindow.bodyRuns + DesignEditor.bodyRuns }
             try await w.settle(untilStable: { bodies() })
             let diamond = try #require(await w.element(KeyframeButton.diamondID(DesignControlID.inspectorKey(.x))), "no X diamond")
-            let shown = seed.shownPage
+            /// What the canvas paints for each layer: its sampled frame and opacity.
+            func painted(_ w: DesignWorkspace) -> [String] {
+                (w.shownPage?.nodes ?? []).flatMap { [$0] + $0.children }.map { "\($0.id) \($0.frame) \($0.opacity)" }
+            }
+            let shown = painted(seed)
             let (window, editor) = (DesignWindow.bodyRuns, DesignEditor.bodyRuns)
             w.click(at: CGPoint(x: diamond.midX, y: diamond.midY))
             try await w.settle(400)
@@ -74,7 +78,7 @@ extension BodyCountSuites {
             let after = try #require(DesignWindow.lastWorkspace)
             print("BUDGET design key press, X diamond on animated(1) at 60: window bodies \(ranWindow) | editor bodies \(ranEditor)")
             #expect(after.keyState("node-2", .x) == .keyedHere, "the click didn't set a key at 60")
-            #expect(after.shownPage == shown, "the key changed what the canvas shows at 60")
+            #expect(painted(after) == shown, "the key changed what the canvas shows at 60")
             #expect(after.canUndo && after.isDirty)
             #expect(ranWindow <= 1, "one key press runs the window at most once: \(ranWindow)")
             #expect(ranEditor <= 1, "one key press runs the editor at most once: \(ranEditor)")
