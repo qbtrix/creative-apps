@@ -2,8 +2,9 @@
 // of the Model's raster (exportRaster) of an item its plan names: `cards`' Desktop frame is 1440 × 1024 px at 1x, 2880 × 2048
 // at 2x and 4320 × 3072 at 3x, and the `twoPages` Mobile page is 390 × 844; a layer's PNG is its
 // own box, its fill at the middle; on a page with one shape, the corner where nothing is drawn
-// has alpha 0 and the shape is opaque; and QD-V9, the 2x Desktop PNG against the canvas's own
-// artwork drawn by the golden host, is report-only until #331 and #332. DE-9: the Desktop PDF
+// has alpha 0 and the shape is opaque; a JPEG is the plan's pixel size flattened on the item's
+// background, so an empty corner reads white, not black; and QD-V9 gates the 2x Desktop PNG against
+// the canvas's own artwork drawn by the golden host. DE-9: the Desktop PDF
 // opens with CGPDFDocument as one page whose media box is 1440 × 1024 pt at any scale. One-document OD-9: an animated
 // page's PNG at frame 60 is not its frame-0 PNG (the first rectangle has moved off its rest corner), and a still
 // page's raster and pixels are the same at any frame. macOS only.
@@ -120,7 +121,26 @@ import Testing
         #expect(box.origin == .zero && box.width == 1440 && box.height == 1024, "media box \(box)")
     }
 
-    /// QD-V9: the 2x Desktop PNG is the canvas's artwork of that frame. Report-only until #331 and #332.
+    /// The JPEG chip writes a JPEG: the plan's pixel size, flattened on the item's background, so the
+    /// corners where nothing is drawn read the background (white here), never black.
+    @Test func jpegFlattensOnTheBackground() throws {
+        let shape = DesignNode(id: "r", name: "R", kind: .rectangle, frame: DesignRect(x: 50, y: 25, width: 100, height: 50))
+        let page = DesignPage(id: "p", name: "P", frameWidth: 200, frameHeight: 100, nodes: [shape])
+        let small = DesignExportItem(nodeID: "p", fileName: "P.jpg", width: 200, height: 100, pixelWidth: 400, pixelHeight: 200)
+        let jpeg = try DesignRasterizer.jpeg(try page.raster(small), background: .white)
+        #expect(jpeg.starts(with: [0xFF, 0xD8, 0xFF]), "a JPEG signature")
+        let read = try #require(readSize(jpeg))
+        #expect(read.width == 400 && read.height == 200, "the JPEG is \(read)")
+        let image = try #require(RGBAImage(png: jpeg))
+        #expect(near(pixel(image, x: 2, y: 2), [255, 255, 255, 255], within: 3), "a corner: \(pixel(image, x: 2, y: 2))")
+        #expect(near(pixel(image, x: 200, y: 100), [217, 217, 217, 255], within: 4), "the shape: \(pixel(image, x: 200, y: 100))")
+        let cards = DesignFixtures.cards
+        let desktop = try item(cards, DesignExportOptions(format: .jpeg, scale: 2, scope: .frame))
+        let full = try #require(readSize(try DesignRasterizer.jpeg(try cards.exportRaster(desktop), background: desktop.background ?? .white)))
+        #expect(full.width == 2880 && full.height == 2048, "2x Desktop JPEG is \(full)")
+    }
+
+    /// QD-V9: the 2x Desktop PNG is the canvas's artwork of that frame, within the standard tolerance.
     @Test func matchesCanvasGolden() throws {
         let cards = DesignFixtures.cards
         let page = try #require(cards.selectedPage)
@@ -130,11 +150,7 @@ import Testing
             DesignArtwork(painted: page.painted, zoom: 1), size: CGSize(width: 1440, height: 1024)))
         let result = GoldenImage().compare(png, to: canvas, tolerance: .standard)
         print("QD-V9 design-raster-desktop: \(result.differing) pixels differ, share \(result.share)")
-        if !result.passes {
-            withKnownIssue("QD-V9 is report-only until #331 and #332", isIntermittent: true) {
-                Issue.record("the 2x Desktop PNG differs from the canvas: \(result.differing) pixels, share \(result.share)")
-            }
-        }
+        #expect(result.passes, "the 2x Desktop PNG differs from the canvas: \(result.differing) pixels, share \(result.share)")
     }
 }
 #endif

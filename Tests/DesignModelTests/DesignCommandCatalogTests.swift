@@ -151,7 +151,7 @@ struct DesignCatalogDoc: HeadlessDocument {
                 let id = String(problem.prefix { $0 != ":" })
                 let off = DesignCatalogDoc.catalog.availability(id, on: doc).why != nil
                 // As today: an edit that would change nothing refuses though its help is clear (layers already spaced).
-                let noChange = problem.contains("exampleRuns") && problem.hasSuffix("failed: unchanged")
+                let noChange = problem.contains("exampleRuns") && problem.hasSuffix("failed: \(DesignRefusal.unchanged.help)")
                 // A one-layer delete names its step after the layer's kind ("Delete Rectangle"), as it did before.
                 let named = id == "edit.delete" && w.selectedNodeIDs.count == 1 && problem.contains("stepNamedTitle")
                 // A nudge right after a nudge joins its step, as the arrow keys do.

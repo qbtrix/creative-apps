@@ -13,6 +13,8 @@ import SwiftUI
 
 enum DesignIntent {
     case newFile, open, save, saveAs, export
+    /// A finished export's options, which the next Export sheet opens with (`rememberExport`).
+    case rememberExport(DesignExportOptions)
     case undo, redo
     case tool(DesignTool)
     case drag(CGPoint, CGPoint, DesignModifiers)
@@ -95,6 +97,15 @@ extension DesignToolbarItem {
 }
 
 extension DesignTool: PaletteTool {
+    public var gesture: ToolGesture {
+        switch self {
+        case .move: .movesContent
+        case .frame, .rectangle, .ellipse, .shape, .text: .creates
+        case .pen: .editsPoints
+        case .eyedropper: .inspects
+        }
+    }
+
     public var title: String {
         switch self {
         case .move: "Move"
