@@ -180,5 +180,26 @@
     "find": "        extras = node.extras",
     "replace": "        extras = node.extras; extras.value.time = nil",
     "tests": "DesignNodeTimeTests"
+  },
+  {
+    "label": "track offset: keys stay put when a node moves",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if carryingKeys, let time { self.time = time.translated(by: delta) }",
+    "replace": "",
+    "tests": "DesignTrackOffsetTests"
+  },
+  {
+    "label": "track offset: only the x keys move",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "[(DesignKeyProperty.x, delta.x), (.y, delta.y)]",
+    "replace": "[(DesignKeyProperty.x, delta.x)]",
+    "tests": "DesignTrackOffsetTests"
+  },
+  {
+    "label": "track offset: a child's keys stay put",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "children[index].translate(by: delta, carryingKeys: carryingKeys)",
+    "replace": "children[index].translate(by: delta)",
+    "tests": "DesignTrackOffsetTests"
   }
 ]

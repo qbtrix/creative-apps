@@ -1,5 +1,5 @@
 // DesignAutoKeyTests.swift: auto-key at the playhead (one-document OD-5, rule 1 of 4). An edit to a keyed property
-// at a playhead keys the asked-for value there and keeps the rest pose; no track or no playhead edits the rest pose.
+// at a playhead keys the asked-for value there and keeps the rest pose; no track or no playhead edits the rest pose, its keys with it.
 // Move, nudge, align, X/Y and opacity, live services and one-layer paths. On `animated(50)` at frame 60 node-2 shows
 // x 47, y 40, opacity 0.65; its rest frame is 30, 30. Runs on Linux and macOS.
 @testable import DesignModel
@@ -77,7 +77,7 @@ import Testing
         #expect(y.nodes.node("node-1")?.time == Self.page.nodes.node("node-1")?.time)
         let still = try LiveTransforming().move(["node-2"], by: DesignPoint(x: 100, y: 0), on: Self.page)
         #expect(still.nodes.node("node-2")?.frame.x == 130)
-        #expect(still.nodes.node("node-2")?.time == Self.page.nodes.node("node-2")?.time)
+        #expect(still.nodes.node("node-2")?.time?.tracks[.x]?.map(\.value) == [130, 154])
     }
 
     static func at(_ frame: Int?, selecting ids: [String]) -> DesignWorkspace {
