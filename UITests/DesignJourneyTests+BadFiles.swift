@@ -25,7 +25,7 @@ final class DesignBadFilesJourneyTests: XCTestCase {
     private static let badFiles: [(file: String, data: Data, reason: String)] = [
         ("NotJSON.design", Data("This is not JSON.".utf8), "It is not a Design file."),
         ("Newer.design", Data(#"{"pages":[],"version":99}"#.utf8),
-         "It was made by a newer version of Design (file version 99; this version opens up to 1)."
+         "It was made by a newer version of Design (file version 99; this version opens up to 2)."
             + " Update Design to open it."),
         ("NoPages.design", Data(#"{"pages":[],"version":1}"#.utf8), "It has no pages."),
         ("DuplicateID.design", Data((#"{"pages":[{"frameHeight":100,"frameWidth":100,"id":"page-1","name":"Page 1","nodes":["#
