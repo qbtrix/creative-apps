@@ -31,9 +31,9 @@ changed() {
   printf '%s\n' "$@" | python3 "$ts" changed ${flag[@]+"${flag[@]}"} | paste -sd';' -
 }
 
-design_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((RenderBudget)?Design[A-Za-z]*/|AppSnapshotTests/design\()'
-photo_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((RenderBudget)?Photo[A-Za-z]*/|AppSnapshotTests/photo\()'
-suiteui_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\()'
+design_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((RenderBudget)?Design[A-Za-z]*/|AppSnapshotTests/design\(|[A-Za-z]+/design[A-Z])'
+photo_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((RenderBudget)?Photo[A-Za-z]*/|AppSnapshotTests/photo\(|[A-Za-z]+/photo[A-Z])'
+suiteui_snaps='^AppSnapshotTests\.(BodyCountSuites/)?((Suite[A-Za-z]*|GoldenImageTests|SnapshotHostTests)/|(suite[A-Za-z]*|snapshotsDrawRealSlidersNotPlaceholders|theCapsuleDrawsOnlyBehindTheCurrentItem|aDisabledBarCommandDrawsDimmerThanAnEnabledOne)\(|AppSnapshotTests/suiteGallery\(|[A-Za-z]+/suite[A-Z])'
 
 # Changed paths to tests.
 check "a Design Model file runs DesignModelTests and the CLI's tests" \
@@ -119,6 +119,37 @@ check "scopes: SuiteUI and its tests" suiteui "$(scopes Sources/SuiteUI/A.swift 
 check "scopes: a fixture and the kernel's" design,suite "$(scopes Tests/DesignModelTests/Fixtures/a.svg Tests/SuiteKernelTests/Fixtures/place/a.json)"
 check "scopes: a golden PNG and Package.swift are all" all,all "$(scopes Tests/AppSnapshotTests/Golden/canvas/a.png),$(scopes Package.swift)"
 check "scopes: docs, scripts, journeys and real jobs are none" "" "$(scopes docs/a.md scripts/ci UITests/PhotoJourneyTests.swift Tests/RealJobs/photo/x/input/a.png)"
+
+# An app's snapshot scope takes its tests by name inside shared suites (IdleWorkTests), and a heavy
+# parent (BodyCountSuites) keeps the children the scope picks, in the heavy pass.
+snap_takes() {  # APP-PATH ID: whether the snapshot line of a changed path takes this swift test id
+  grep -qE "$(changed "$1" | cut -d';' -f2)" <<<"$2" && echo yes || echo no
+}
+idle='AppSnapshotTests.BodyCountSuites/IdleWorkTests/photoMoveSettlesAfterTheDrag()'
+check "a Photo change takes Photo's idle-work test in the shared suite" yes "$(snap_takes Sources/PhotoApp/PhotoWindow.swift "$idle")"
+check "a Photo change takes its nested render budget suite" yes \
+  "$(snap_takes Sources/PhotoApp/PhotoWindow.swift 'AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoLiveTransformTests/aMoveDragIsOneRender()')"
+check "a Design-only change leaves Photo's idle-work test out" no "$(snap_takes Sources/DesignApp/DesignWindow.swift "$idle")"
+check "a Design change takes Design's test in a shared suite" yes \
+  "$(snap_takes Sources/DesignApp/DesignWindow.swift 'AppSnapshotTests.RasterizerPNGTests/designPNGDecodesToTheSamePixels()')"
+check "a Photo change leaves Flare's idle-work test out" no \
+  "$(snap_takes Sources/PhotoApp/PhotoWindow.swift 'AppSnapshotTests.BodyCountSuites/IdleWorkTests/flareMarqueeSettlesAfterTheDrag()')"
+check "a Photo change leaves a shared suite's test no app names out" no \
+  "$(snap_takes Sources/PhotoApp/PhotoWindow.swift 'AppSnapshotTests.BodyCountSuites/IdleWorkTests/settles()')"
+printf '%s\n' '# heavy' 'suiteui AppSnapshotTests.BodyCountSuites' 'photo AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoPlaceTests' 'halo AppSnapshotTests.HaloMovieWriterTests' >"$tmp/heavy-parent.txt"
+parent_heavy() { HEAVY_SUITES="$tmp/heavy-parent.txt" python3 "$ts" heavy "$(changed "$1" | paste -sd'|' - | sed 's/^;//; s/;/|/')"; }
+heavy_parent=$(parent_heavy Sources/PhotoApp/PhotoWindow.swift)
+takes_hp() { grep -qE "$heavy_parent" <<<"$1" && echo yes || echo no; }
+check "heavy keeps a parent's children the filter picks: Photo's idle test" yes "$(takes_hp "$idle")"
+check "heavy keeps a parent's children the filter picks: Photo's new render budget suite" yes \
+  "$(takes_hp 'AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoLiveTransformTests/aMoveDragIsOneRender()')"
+check "heavy still takes a listed child of the parent" yes "$(takes_hp 'AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoPlaceTests/x()')"
+check "heavy leaves the parent's other children skipped" no "$(takes_hp 'AppSnapshotTests.BodyCountSuites/IdleWorkTests/flareMarqueeSettlesAfterTheDrag()')"
+check "heavy leaves a heavy suite the filter doesn't pick skipped" no "$(takes_hp 'AppSnapshotTests.HaloMovieWriterTests/x()')"
+check "heavy leaves the parent's Design children skipped on a Photo change" no \
+  "$(takes_hp 'AppSnapshotTests.BodyCountSuites/RenderBudgetDesignTests/x()')"
+check "heavy takes nothing beside the listed tests on a change that picks no snapshots" "" \
+  "$(HEAVY_SUITES="$tmp/heavy-parent.txt" python3 "$ts" heavy '^(SuiteModelTests)\.')"
 
 # Every perf and heavy list entry names a test that exists.
 missing=""
