@@ -2,7 +2,10 @@
 // property edited at a playhead gets a key there holding the asked-for value (replacing one already there), so the
 // canvas shows what was asked and other frames keep their keys; no track or no playhead edits the rest pose (the
 // first key is a deliberate act); a rest-pose move carries the subtree's x and y keys with it. Values are the node's own, what its keys hold; `moved(by:at:)` adds a shown delta
-// to them. The only file in DesignModel that knows the rule. Linux-safe.
+// to them. A keyed layer that changes parent at a playhead (Group, Ungroup, Move Layer) has its x and y keys rebased by
+// its old containers' shown offset minus its new ones', so it shows where it did there (`rebased(from:at:)`); a layer
+// with no keys on an axis is not rebased on it and jumps by that offset (keying it would be a hidden first key).
+// The only file in DesignModel that knows the rule. Linux-safe.
 import SuiteKernel
 
 extension DesignNode {
@@ -60,3 +63,43 @@ extension DesignPage {
     /// The page as it shows at `playhead`, or itself with none.
     func shown(at playhead: Int?) -> DesignPage { playhead.map { sampled(at: Double($0)) } ?? self }
 }
+
+extension [DesignNode] {
+    /// These nodes after a reparent of `old` at `playhead`: each keyed layer whose parent changed has its x and y keys
+    /// shifted by its old containers' shown offset at the playhead minus its new ones', so it shows where it did.
+    /// No playhead rebases nothing.
+    func rebased(from old: [DesignNode], at playhead: Int?) -> [DesignNode] {
+        guard let playhead else { return self }
+        let frame = Double(playhead)
+        var before: [String: (parent: String?, offset: DesignPoint)] = [:]
+        func record(_ nodes: [DesignNode], _ parent: String?, _ offset: DesignPoint) {
+            for node in nodes {
+                before[node.id] = (parent, offset)
+                record(node.children, node.id, offset + node.ownOffset(at: frame))
+            }
+        }
+        record(old, nil, DesignPoint(x: 0, y: 0))
+        func rebase(_ nodes: [DesignNode], _ parent: String?, _ offset: DesignPoint) -> [DesignNode] {
+            nodes.map { node in
+                var node = node
+                if let was = before[node.id], was.parent != parent, let time = node.time {
+                    node.time = time.translated(by: was.offset - offset)
+                }
+                node.children = rebase(node.children, node.id, offset + node.ownOffset(at: frame))
+                return node
+            }
+        }
+        return rebase(self, nil, DesignPoint(x: 0, y: 0))
+    }
+}
+
+extension DesignNode {
+    /// How far this node's own keys move it from its rest pose at `frame` (zero when still).
+    func ownOffset(at frame: Double) -> DesignPoint {
+        DesignPoint(x: (time?.value(of: .x, at: frame) ?? self.frame.x) - self.frame.x,
+                    y: (time?.value(of: .y, at: frame) ?? self.frame.y) - self.frame.y)
+    }
+}
+
+private func + (a: DesignPoint, b: DesignPoint) -> DesignPoint { DesignPoint(x: a.x + b.x, y: a.y + b.y) }
+private func - (a: DesignPoint, b: DesignPoint) -> DesignPoint { DesignPoint(x: a.x - b.x, y: a.y - b.y) }

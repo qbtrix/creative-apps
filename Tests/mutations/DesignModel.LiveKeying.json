@@ -40,5 +40,8 @@
     "find": "case .x: node.translate(by: DesignPoint(x: value - frame.x, y: 0), carryingKeys: true)",
     "replace": "case .x: node.translate(by: DesignPoint(x: value - frame.x, y: 0))",
     "tests": "DesignTrackOffsetTests"
-  }
+  },
+{"label": "rebase: a reparented layer's keys are not shifted", "file": "Sources/DesignModel/Live/LiveKeying.swift", "find": "node.time = time.translated(by: was.offset - offset)", "replace": "node.time = time", "tests": "DesignReparentRebaseTests"},
+{"label": "rebase: the shift's sign is flipped", "file": "Sources/DesignModel/Live/LiveKeying.swift", "find": "time.translated(by: was.offset - offset)", "replace": "time.translated(by: offset - was.offset)", "tests": "DesignReparentRebaseTests"},
+{"label": "rebase: the old containers' offset is ignored", "file": "Sources/DesignModel/Live/LiveKeying.swift", "find": "record(node.children, node.id, offset + node.ownOffset(at: frame))", "replace": "record(node.children, node.id, offset)", "tests": "DesignReparentRebaseTests"}
 ]
