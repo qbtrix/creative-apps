@@ -120,7 +120,7 @@ private func place(_ asset: PlacedAsset, on workspace: inout PhotoWorkspace, at:
     /// An SVG becomes a pixel layer drawn at the size it is placed, centred, as one Place Image step (#6028).
     @Test func svgBecomesPixelsAtDocumentScale() throws {
         var workspace = try opened()
-        let svg = #"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="#ff0000"/></svg>"#
+        let svg = ##"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="#ff0000"/></svg>"##
         let params = PlaceIntent.place(name: "flag.svg", data: Data(svg.utf8), at: nil).command.params
         let outcome = try PhotoWorkspace.catalog.run("place.image", params: params, on: &workspace)
         #expect(outcome.undoStep == "Place Image" && workspace.layers.map(\.name) == ["flag", "Background"])
