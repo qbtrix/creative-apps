@@ -1,4 +1,5 @@
-// PhotoTextColor.swift (#5951): `text.set-color`, the selected text layer's colour. The kernel's seven text
+// PhotoTextColor.swift (#5951): `text.set-color`, the selected text layer's colour, and `runTextColor`, the
+// inspector's colour row on it. The kernel's seven text
 // commands set face, size and paragraph but no colour, so `text.read` always said black; this one sets the
 // style's `rgba` and redraws the words through `setTextStyle`, one undo step "Text Color" per drag. Linux-safe.
 import SuiteKernel
@@ -14,6 +15,20 @@ extension PhotoWorkspace {
         guard rgba.count == 4 else { throw CatalogError.failed(id: "text.set-color", message: "A colour is four values, 0 to 255.") }
         style.rgba = rgba
         try setTextStyle(style, name: "Text Color", drag: drag)
+    }
+
+    /// The inspector's colour row: `text.set-color` through the catalog; a refusal's reason goes to the status line.
+    public mutating func runTextColor(_ rgba: [UInt8], drag: String?) {
+        var fields: [String: JSONValue] = ["rgba": .array(rgba.map { .number(Double($0)) })]
+        if let drag { fields["drag"] = .string(drag) }
+        do {
+            _ = try Self.catalog.run("text.set-color", params: .object(fields), on: &self)
+            statusMessage = nil
+        } catch CatalogError.unavailable(_, let why) {
+            statusMessage = textHelp ?? why
+        } catch {
+            statusMessage = textHelp ?? "Couldn't colour the text."
+        }
     }
 
     /// The `text.set-color` command; `textCommands` lists it.

@@ -58,6 +58,20 @@ private func setColor(_ workspace: inout PhotoWorkspace, _ rgba: [Double], drag:
         #expect(workspace.undoActionName == "Undo Add Text")
     }
 
+    /// The inspector's colour row: a run of picks under one drag is one step; with no text layer the status line says why.
+    @Test func theColourRowRunsTheCommand() throws {
+        var (workspace, _) = try withSale()
+        for red: UInt8 in [40, 90, 210] { workspace.runTextColor([red, 10, 10, 128], drag: "row") }
+        #expect(workspace.textStyle?.rgba == [210, 10, 10, 128])
+        #expect(workspace.undoActionName == "Undo Text Color")
+        workspace.undo()
+        #expect(workspace.undoActionName == "Undo Add Text")
+        var empty = PhotoWorkspace()
+        try empty.newCanvas(width: 80, height: 60)
+        empty.runTextColor([1, 2, 3, 255], drag: nil)
+        #expect(empty.statusMessage == "Select a text layer first.")
+    }
+
     @Test func needsATextLayer() throws {
         var workspace = PhotoWorkspace()
         #expect(PhotoWorkspace.catalog.availability("text.set-color", on: workspace) == .unavailable("Open an image first."))
