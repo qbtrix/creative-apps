@@ -18,7 +18,7 @@ private func threeInAFrame() throws -> DesignWorkspace {
     #expect(workspace.moveLift == nil)
     workspace.drag(from: pt(150, 150), to: pt(150, 150))
     #expect(workspace.moveLift == nil, "a press that hasn't moved lifts nothing")
-    workspace.drag(from: pt(150, 150), to: pt(170, 155))
+    workspace.drag(from: pt(150, 150), to: pt(170, 155), modifiers: .noSnap)
     let lift = try #require(workspace.moveLift)
     #expect(lift.page == before)
     #expect((lift.firstID, lift.lastID) == ("node-2", "node-2"))
@@ -31,7 +31,7 @@ private func threeInAFrame() throws -> DesignWorkspace {
 @Test func severalLayersInOneRunLiftTogether() throws {
     var workspace = try threeInAFrame()
     try workspace.select(["node-2", "node-3"])
-    workspace.drag(from: pt(150, 150), to: pt(160, 170))
+    workspace.drag(from: pt(150, 150), to: pt(160, 170), modifiers: .noSnap)
     let lift = try #require(workspace.moveLift)
     #expect((lift.firstID, lift.lastID) == ("node-2", "node-3"))
     #expect(lift.offset == pt(10, 20))
@@ -40,7 +40,7 @@ private func threeInAFrame() throws -> DesignWorkspace {
 @Test func layersSplitByAnotherInPaintOrderDoNotLift() throws {
     var workspace = try threeInAFrame()
     try workspace.select(["node-2", "node-4"])
-    workspace.drag(from: pt(150, 150), to: pt(160, 170))
+    workspace.drag(from: pt(150, 150), to: pt(160, 170), modifiers: .noSnap)
     #expect(workspace.frame("node-2") == rc(110, 120, 100, 100), "the move itself still happens")
     #expect(workspace.moveLift == nil)
 }
