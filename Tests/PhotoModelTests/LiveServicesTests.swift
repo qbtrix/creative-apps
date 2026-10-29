@@ -11,8 +11,8 @@ import Testing
         [
             ("archive", "PV-1", services.archive), ("recovery", "PV-1", services.recovery),
             ("clipboard", "PV-2", services.clipboard), ("merging", "PV-2", services.merging),
-            ("crop", "PV-3", services.crop), ("selection", "PV-5", services.selection),
-            ("masking", "PV-5", services.masking), ("adjustmentLayers", "PV-6", services.adjustmentLayers),
+            ("crop", "PV-3", services.crop), ("masking", "PV-5", services.masking),
+            ("adjustmentLayers", "PV-6", services.adjustmentLayers),
             ("transform", "PV-7", services.transform), ("exportSizing", "PV-8", services.exportSizing),
         ]
     }

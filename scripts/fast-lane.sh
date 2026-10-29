@@ -19,8 +19,9 @@
 # - The batch branch is the whole state: its merge commits (BATCH_SUBJECT_RE)
 #   name each PR and head, `<batch>-<i>` are its probes and `<batch>-red`
 #   marks a base that held dev's red commit (dropped once dev is green).
-# - A red's failed jobs are rerun at most once per sha (RERUN_MARK on the
-#   dev-red issue); until that rerun is judged, dev is not red to the lane.
+# - A red's failed jobs are rerun once per sha, and once more when that rerun
+#   is cancelled (RERUN_MARK on the dev-red issue); until a rerun passes or
+#   fails, dev is not red to the lane. A cancelled rerun never counts as red.
 # - While dev is red on a job a batch would run (red_holds), a PR touching
 #   the red module (BASE_RED_SCOPE) waits; with no module placed, no batch forms.
 # - A dropped batch never labels or comments on its PRs.
@@ -222,9 +223,9 @@ BUDGET_NEAR="0.15"          # a measured value at most this far past its budget 
 CLEF_MIN="0.80"             # a red-triage culprit guess at or above this is probed first
 BISECT_MARK="<!-- lane-bisect"  # the culprit comment's marker: "<!-- lane-bisect <red7> -->"
 BASE_RED_RUN=""  # the dev-red issue's "- Run:" URL
-# Flake check (flake_check): a red run's failed jobs are rerun once at the red
-# sha before dev counts as red; the dev-red issue carries one mark per sha:
-# "<!-- lane-rerun <sha7> started|flake|red -->".
+# Flake check (flake_check): a red run's failed jobs are rerun at the red
+# sha before dev counts as red (once more when the rerun is cancelled); the dev-red issue carries one mark per sha:
+# "<!-- lane-rerun <sha7> started|again|flake|red -->".
 RERUN_MARK="<!-- lane-rerun"
 FLAKY_LABEL="flaky"
 BASE_RED_SCOPE=""  # the red's module as a path regex (red_scope); a ready PR touching it waits, the rest batch. Empty: the whole queue waits.
@@ -973,16 +974,22 @@ died_file() {
 }
 
 # mac_log_ids <failed log>: the failing tests one log names, <File>.swift/<name>
-# per line: the `recorded an issue` lines, then scripts/ci's TEST PROCESS DIED
-# block (a test process that dies prints no issue lines), whose indented names
-# up to the first blank line are the tests that started and never finished.
-# They carry no file, so died_file places each one.
+# per line: swift-testing's `✘ Test <name> recorded an issue ... at <File>.swift:`
+# lines, then the `✘ Test <name>(...) failed after` lines of tests no such line
+# named, then scripts/ci's TEST PROCESS DIED block (a test process that dies
+# prints no issue lines), whose indented names up to the first blank line are
+# the tests that started and never finished. Only `✘` lines count: a known
+# issue (`━ ... recorded a known issue`, `(including N known issue)`) is no
+# failure. The last two carry no file, so died_file places each one.
 mac_log_ids() {
-  local n f
-  LC_ALL=C sed -nE 's/.* Test (.+) recorded an issue.* at ([^ :]+\.swift):[0-9].*/\2\/\1/p' <<<"$1"
+  local n f ids
+  ids=$(LC_ALL=C sed -nE 's/.*✘ Test (.+) recorded an issue.* at ([^ :]+\.swift):[0-9].*/\2\/\1/p' <<<"$1")
+  [[ -z "$ids" ]] || printf '%s\n' "$ids"
   while IFS= read -r n; do
+    [[ $'\n'"$ids"$'\n' != *"/$n"$'\n'* ]] || continue
     f=$(died_file "$n") && echo "$f/$n"
-  done < <(LC_ALL=C awk '{ s = $0; sub(/^[^\t]*\t[^\t]*\t[^ ]* ?/, "", s)
+  done < <(LC_ALL=C sed -nE 's/.*✘ Test ([^ "]+\([^)]*\))( with [0-9]+ test cases?)? failed after .*/\1/p' <<<"$1"
+    LC_ALL=C awk '{ s = $0; sub(/^[^\t]*\t[^\t]*\t[^ ]* ?/, "", s)
       if (s ~ /TEST PROCESS DIED/) { on = 1; next }
       if (on && s ~ /^[ \t]+[^ \t]/) { sub(/^[ \t]+/, "", s); sub(/[ \t\r]+$/, "", s); print s; next }
       on = 0 }' <<<"$1")
@@ -1541,17 +1548,19 @@ rerun_state() {
 # real, false when the lane must not treat it as red this sweep. A red sha not
 # yet checked gets the run's failed jobs rerun once (gh run rerun --failed) and
 # a RERUN_MARK <sha7> started comment naming the run and the failing tests
-# (red_tests, read now: the rerun overwrites the logs). A running rerun waits;
-# a passing one is a flake (flake_finding, mark flake); a failing one is real
-# (mark red). An issue with no run, or comments the lane can't read, is red as
-# before: that never reruns, so a sha is rerun at most once. A judged sha is
-# never rerun or read again.
+# (red_tests). A running rerun waits; a passing one is a flake (flake_finding,
+# mark flake); a failing one is real (mark red). A cancelled one (the
+# concurrency group, or no runner took it) says nothing: the failed jobs are
+# rerun once more (mark again), and cancelled again the lane waits for the
+# next dev run, never red meanwhile. An issue with no run, or comments the
+# lane can't read, is red as before: that never reruns, so a sha is rerun at
+# most twice. A judged sha is never rerun or read again.
 flake_check() {
   local issue="$1" url="$2" sha7="${3:0:7}" jobs="$4" id comments tests st
   id=$(mac_run_id "$url"); [[ -n "$id" && -n "$3" ]] || return 0
   comments=$(gh api "repos/$REPO/issues/$issue/comments" --paginate --jq '.[].body' 2>/dev/null) || return 0
   if ! grep -qF -- "$RERUN_MARK $sha7 " <<<"$comments"; then
-    tests=$(red_tests "$3")
+    tests=$(red_tests "$3" "$url" || true)
     if ! write gh run rerun "$id" -R "$REPO" --failed; then log "flake check: could not rerun the failed jobs of run $id; $BASE_BRANCH counts as red"; return 0; fi
     log "flake check: rerunning the failed jobs ($jobs) of run $id once at $sha7${tests:+ (failing $tests)}; $BASE_BRANCH is not held meanwhile"
     write gh issue comment "$issue" -R "$REPO" --body "Flake check: re-running the failed jobs ($jobs) of $url once at $sha7${tests:+; failing $tests}. A pass makes this red a flake (the lane files a finding for the test and holds nothing); a second failure makes it real. $RERUN_MARK $sha7 started -->" \
@@ -1563,6 +1572,15 @@ flake_check() {
   st=$(rerun_state "$id")
   case "$st" in
     success) flake_finding "$issue" "$sha7" "$url" "$comments"; return 1 ;;
+    "red|cancelled")
+      if grep -qF -- "$RERUN_MARK $sha7 again -->" <<<"$comments"; then
+        log "flake check: the rerun of run $id was cancelled again; waiting for the next $BASE_BRANCH run, $BASE_BRANCH is not held meanwhile"; return 1
+      fi
+      if ! write gh run rerun "$id" -R "$REPO" --failed; then log "flake check: run $id's rerun was cancelled and the lane could not rerun it again; the next sweep tries again"; return 1; fi
+      log "flake check: the rerun of run $id was cancelled, which says nothing; rerunning its failed jobs once more at $sha7"
+      write gh issue comment "$issue" -R "$REPO" --body "Flake check: the rerun of $url was cancelled, so it says nothing about this red; re-running the failed jobs once more at $sha7. $RERUN_MARK $sha7 again -->" \
+        || log "could not comment on #$issue"
+      return 1 ;;
     red*)
       log "flake check: the rerun of run $id failed too (${st#red|}); $BASE_BRANCH is red"
       write gh issue comment "$issue" -R "$REPO" --body "Flake check: the rerun of $url failed too (${st#red|}), so this red is real. $RERUN_MARK $sha7 red -->" || log "could not comment on #$issue"
@@ -1574,7 +1592,8 @@ flake_check() {
 # flake_closed: ci.yml's promote reruns with the passed jobs and closes the
 # dev-red issue, usually before a sweep sees the pass. With no open issue, the
 # last closed one is read: a started mark with no verdict whose rerun passed
-# gets its finding and mark there; one whose rerun failed gets the red mark.
+# gets its finding and mark there; one whose rerun failed gets the red mark,
+# and a cancelled one nothing.
 flake_closed() {
   local issue comments sha7 line url st
   issue=$(gh api "repos/$REPO/issues?labels=$RED_LABEL&state=closed&sort=updated&per_page=1" \
@@ -1588,6 +1607,7 @@ flake_closed() {
     st=$(rerun_state "$(mac_run_id "$url")")
     case "$st" in
       success) flake_finding "$issue" "$sha7" "$url" "$comments" ;;
+      "red|cancelled") ;;  # says nothing (flake_check); the issue is closed, so nothing waits on it
       red*) write gh issue comment "$issue" -R "$REPO" --body "Flake check: the rerun of $url failed too (${st#red|}), so that red was real. $RERUN_MARK $sha7 red -->" || log "could not comment on #$issue" ;;
     esac
   done
@@ -1658,7 +1678,7 @@ test_paths() {
 # target has no such Sources module (AppSnapshotTests, AppAuditTests).
 red_scope() {
   local tests paths f p target module re=""
-  tests=$(red_tests "$1"); [[ -n "$tests" ]] || return 0
+  tests=$(red_tests "$1" "$BASE_RED_RUN" || true); [[ -n "$tests" ]] || return 0
   paths=$(test_paths "$tests")
   while IFS= read -r f; do
     grep -qE "(^|/)${f//./\\.}\$" <<<"$paths" || return 0
@@ -1940,14 +1960,37 @@ revert_note() {
   write gh issue comment "$BASE_RED" -R "$REPO" --body "Auto-revert: $2. $REVERT_MARK $1 -->" || log "could not comment on #$BASE_RED"
 }
 
-# red_tests <sha>: the tests failing in <sha>'s red Linux and macOS logs
-# (mac_tests), joined by ", "; nothing when no log names one.
+# red_tests <sha> [<red run url>]: the failing tests, joined by ", ";
+# nothing when no log names one. With the dev-red issue's run: that run's
+# failed attempt (run_tests), never a cancelled rerun's attempt or another run
+# on the sha, and non-zero when it can't be read yet. Without one: <sha>'s
+# newest red Linux and macOS checks (mac_tests).
 red_tests() {
-  local v t=""
-  for v in "$(check_verdict "$1")" "$(mac_verdict "$1")"; do
-    [[ "$v" != red* ]] || t+="$(mac_tests "$v" || true)"$'\n'
-  done
+  local v t="" id
+  id=$(mac_run_id "${2:-}")
+  if [[ -n "$id" ]]; then
+    t=$(run_tests "$id") || return 1
+  else
+    for v in "$(check_verdict "$1")" "$(mac_verdict "$1")"; do
+      [[ "$v" != red* ]] || t+="$(mac_tests "$v" || true)"$'\n'
+    done
+  fi
   grep . <<<"$t" | LC_ALL=C sort -u | paste -sd, - | sed 's/,/, /g' || true
+}
+
+# run_tests <run id>: the failing tests (mac_log_ids) in the failed jobs' logs
+# of the run's newest attempt with a failed job, one per line. A rerun that was
+# cancelled has none, so the attempt that failed is still read after it: job
+# ids, and their logs, are per attempt. Non-zero when the jobs or a log can't
+# be read.
+run_tests() {
+  local jobs j log
+  jobs=$(gh api "repos/$REPO/actions/runs/$1/jobs?per_page=100&filter=all" \
+    --jq '[.jobs[] | select(.conclusion == "failure")] | (map(.run_attempt) | max) as $a | .[] | select(.run_attempt == $a) | .id' 2>/dev/null) || return 1
+  for j in $jobs; do
+    log=$(failure_log "red|/job/$j"); [[ -n "$log" ]] || return 1
+    mac_log_ids "$log"
+  done
 }
 
 # revert_open <sha> <PR n> <subject> <how>: `git revert` of the culprit's
@@ -1977,7 +2020,7 @@ revert_open() {
   if ! git -C "$d" push -q -f origin "HEAD:refs/heads/$br" 2>/dev/null; then
     revert_note "${c:0:7}" "#$n (${c:0:7}) is the culprit ($how), but the lane could not push its revert to $br, so a human reverts it"; return 0
   fi
-  tests=$(red_tests "$BASE_RED_SHA")
+  tests=$(red_tests "$BASE_RED_SHA" "$BASE_RED_RUN" || true)
   why="$BASE_BRANCH went red on ${BASE_RED_JOBS#*: } at ${BASE_RED_SHA:0:7} (dev-red #$BASE_RED, run ${BASE_RED_RUN:-not named})${tests:+, failing $tests}"
   write gh label create "$REVERT_LABEL" -R "$REPO" --color b60205 --force --description "The fast lane's revert of a red dev's culprit" >/dev/null 2>&1 || true
   if ! url=$(gh pr create -R "$REPO" --base "$BASE_BRANCH" --head "$br" --label "$REVERT_LABEL" --label p0 --title "Revert \"$subj\"" \
@@ -2105,7 +2148,7 @@ quarantine_add() {
   local ids=()
   comments=$(gh api "repos/$REPO/issues/$BASE_RED/comments" --paginate --jq '.[].body' 2>/dev/null) || { log "auto-quarantine: could not read dev-red #$BASE_RED's comments"; return 0; }
   ! grep -qF -- "$QUAR_MARK $red7 -->" <<<"$comments" || return 0
-  tests=$(red_tests "$BASE_RED_SHA")
+  tests=$(red_tests "$BASE_RED_SHA" "$BASE_RED_RUN") || { log "auto-quarantine: dev-red #$BASE_RED: run ${BASE_RED_RUN}'s failed jobs can't be read yet; the next sweep looks again"; return 0; }
   [[ -n "$tests" ]] || { quarantine_note "$red7" "no failing test is named in the red logs at $red7 (a build error or a crash), so nothing is quarantined and the red stays with today's handling"; return 0; }
   n=$(tr ',' '\n' <<<"$tests" | grep -c .)
   if (( n > QUAR_MAX )); then

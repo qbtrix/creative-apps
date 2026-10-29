@@ -36,7 +36,7 @@ extension DesignWorkspace: TransformTarget {
         if let help = transformHelp { throw DesignRefusal.notYet(help) }
         guard let current = transformSelection else { throw DesignRefusal.nothingSelected }
         let roots = transformRoots
-        let key = drag.map { DesignEdit.runKey("transform-\($0)", roots.map(\.id)) }
+        let key = drag.map { CoalesceKey.key("transform", on: roots.map(\.id), drag: $0) }
         let one = roots.count == 1
         let before = snapshot
         for root in roots { _ = pages.update(root.id) { $0.place(one ? t : Self.share(of: root.transformBox, from: current, to: t)) } }

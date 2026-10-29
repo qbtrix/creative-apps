@@ -1,6 +1,7 @@
 // PhotoCanvasOverlay.swift: what PhotoCanvas draws over the picture, inside
-// CanvasViewport's overlay at the canvas zoom: the selection
-// (SelectionOverlay.swift), a pending crop (CropOverlay.swift), Free
+// CanvasViewport's overlay at the canvas zoom: the selection's ants and an
+// area tool's outline in progress (SuiteUI's AreaAnts on the workspace's
+// `areaOutline` and `areaDraft`; `photo.canvas.selection`), a pending crop (CropOverlay.swift), Free
 // Transform's box (TransformOverlay.swift) and the brush cursor at `hover`
 // (SuiteUI's BrushCursorMark, the brush's size; `photo.canvas.brush-cursor`),
 // the Gradient tool's line while it drags (SuiteUI's PathMarks from the press
@@ -19,6 +20,7 @@
 // re-runs nothing above it; without a session (tests) the workspace it was given.
 import CoreRaster
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -43,7 +45,8 @@ struct PhotoCanvasOverlay: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            SelectionOverlay(model: model, zoom: zoom)
+            AreaAnts(outline: model.areaOutline, draft: model.areaDraft, zoom: zoom)
+            if let mark = selection { mark.probe(zoom: zoom) }
             CropOverlay(model: model, zoom: zoom)
             TransformOverlay(model: model, zoom: zoom, perform: perform)
             if let diameter = model.brushCursorDiameter {
@@ -66,6 +69,9 @@ struct PhotoCanvasOverlay: View {
             PhotoSampleLoupe(model: model, zoom: zoom, hover: hover)
         }
     }
+
+    /// The selection's element: its bounds, in document pixels; nil without one.
+    var selection: PhotoCanvasMark? { model.selection.map { PhotoCanvasMark.selection($0.cgRect) } }
 
     /// The brush cursor's element: a box the brush's size centred on `hover`,
     /// in document pixels; nil off the canvas or with a tool that doesn't paint.
@@ -102,7 +108,7 @@ struct PhotoCanvasOverlay: View {
     /// The accessibility elements the overlay shows, in drawing order.
     var marks: [PhotoCanvasMark] {
         [
-            SelectionOverlay(model: model, zoom: zoom).mark, CropOverlay(model: model, zoom: zoom).mark,
+            selection, CropOverlay(model: model, zoom: zoom).mark,
             TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine, removeOutline,
         ].compactMap { $0 }
     }
