@@ -91,14 +91,13 @@ enum HandPass: CaseIterable {
 }
 
 extension LiveDevelop.Pass {
-    /// The hand list's name for this pass; nil for `.color` (DV-12) and the shared hue/saturation step.
+    /// The hand list's name for this pass; nil for vibrance (DV-12) and the shared hue/saturation step.
     /// A levels step with gamma 1 moving only the white or only the black point is Whites or Blacks.
     var hand: HandPass? {
         switch self {
         case .shared(.whiteBalance): .whiteBalance
         case .shared(.contrast): .contrast
         case .shared(.highlightsShadows): .highlightsShadows
-        case .color: nil
         case .shared(.exposure): .exposure
         case .shared(.levels(let inBlack, let inWhite, let gamma, let outBlack, let outWhite, _)):
             gamma != 1 ? .levels : inBlack == 0 && outBlack == 0 ? .whites : inWhite == 1 && outWhite == 1 ? .blacks : .levels
@@ -206,21 +205,12 @@ func handHistogram(_ buffer: PixelBuffer) throws -> HistogramBins {
         #expect(try blacker.pixel(x: 0, y: 0).g < dark.pixel(x: 0, y: 0).g)
     }
 
-    /// DV-6 compares the message with `LiveDevelop.waiting[slider]`; Saturation
-    /// renders since suite-imaging IM-10b; DV-12 turns this into "every control set".
-    @Test func vibranceThrowsItsWaitingReason() throws {
-        let gradient = try developGradient()
-        for slider in [DevelopSlider.vibrance] {
-            let error = #expect(throws: LibraryError.self) {
-                try live.render(gradient, settings: DevelopSettings.neutral.setting(slider, to: 20))
-            }
-            guard case .renderFailed(let why)? = error else {
-                Issue.record("\(slider) didn't fail with renderFailed")
-                continue
-            }
-            #expect(why.contains("creative-core"))
-            #expect(why == LiveDevelop.waiting[slider])
-        }
+    /// DV-12: every control set renders, Vibrance and Saturation included, and nothing waits.
+    @Test func everyControlSetRenders() throws {
+        let all = everyControlButColor().setting(.vibrance, to: 20).setting(.saturation, to: -10)
+        let rendered = try live.render(try developGradient(), settings: all)
+        #expect(try rendered.rgba8() != (try live.render(try developGradient(), settings: everyControlButColor())).rgba8())
+        #expect(LiveDevelop.waiting.isEmpty)
     }
 
     @Test func histogramIsCoreRasterOfTheRenderedBuffer() throws {
