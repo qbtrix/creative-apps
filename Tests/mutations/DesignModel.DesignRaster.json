@@ -33,5 +33,12 @@
     "find": "return DesignRaster(artwork: artwork, pixelWidth: item.pixelWidth, pixelHeight: item.pixelHeight, scale: scale)",
     "replace": "return DesignRaster(artwork: artwork, pixelWidth: w, pixelHeight: h, scale: scale)",
     "tests": "DesignRasterTests"
+  },
+  {
+    "label": "rasterFrameIgnored: a PNG or PDF export draws the rest pose at any frame",
+    "file": "Sources/DesignModel/DesignRaster.swift",
+    "find": "guard let page = selectedPage?.shown(at: frame) else { throw .unknownID(item.nodeID) }",
+    "replace": "guard let page = selectedPage else { throw .unknownID(item.nodeID) }",
+    "tests": "DesignExportFrameTests"
   }
 ]

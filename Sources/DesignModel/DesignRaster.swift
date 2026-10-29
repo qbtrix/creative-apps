@@ -6,7 +6,7 @@
 // as a page the item's whole-point size, which the canvas's own painter draws. A layer drawn
 // alone loses its ancestors' opacity and backdrop, as its SVG does. A size of less than one
 // point, pixels that are not the whole points times one scale, or a side over `maxSide`
-// pixels is refused. Linux-safe.
+// pixels is refused. `exportRaster(_:at:)` draws the page as it shows at a frame (one-document OD-9). Linux-safe.
 
 /// The artwork and bitmap size of one planned raster item.
 public struct DesignRaster: Sendable, Equatable {
@@ -58,9 +58,12 @@ extension DesignPage {
 }
 
 extension DesignWorkspace {
-    /// The raster of one planned item on the selected page (see `DesignPage.raster`).
-    public func exportRaster(_ item: DesignExportItem) throws(DesignRasterRefusal) -> DesignRaster {
-        guard let page = selectedPage else { throw .unknownID(item.nodeID) }
+    /// The raster of one planned item on the selected page at the rest pose (see `DesignPage.raster`).
+    public func exportRaster(_ item: DesignExportItem) throws(DesignRasterRefusal) -> DesignRaster { try exportRaster(item, at: nil) }
+
+    /// The raster of `item` with the page as it shows at `frame` (nil: the rest pose).
+    public func exportRaster(_ item: DesignExportItem, at frame: Int?) throws(DesignRasterRefusal) -> DesignRaster {
+        guard let page = selectedPage?.shown(at: frame) else { throw .unknownID(item.nodeID) }
         return try page.raster(item)
     }
 }

@@ -80,8 +80,8 @@ extension DesignWorkspace {
         export,
     ]
 
-    /// file.export's params: the sheet's format, whole scale and scope; its result, the files the run would write.
-    struct ExportParams: Codable, Sendable { var format: String; var scale: Int; var scope: String }
+    /// file.export's params: the sheet's format, whole scale, scope and optional frame; its result, the files the run would write.
+    struct ExportParams: Codable, Sendable { var format: String; var scale: Int; var scope: String; var frame: Int? }
     struct ExportedFiles: Encodable, Sendable { var files: [ExportedName] }
     struct ExportedName: Encodable, Sendable { var name: String; var width: Int; var height: Int }
 
@@ -94,7 +94,8 @@ extension DesignWorkspace {
         kind: .file, params: ExportParams.self,
         schema: .object(["format": .string("The file type.", oneOf: DesignExportFormat.allCases.map(\.rawValue)),
                          "scale": .integer("PNG and JPEG's whole scale; vectors take 1.", minimum: 1, maximum: 3),
-                         "scope": .string("What it writes.", oneOf: DesignExportScope.allCases.map(\.rawValue))],
+                         "scope": .string("What it writes.", oneOf: DesignExportScope.allCases.map(\.rawValue)),
+                         "frame": .integer("The frame an animated file is written at; left out, the rest pose.", minimum: 0)],
                         required: ["format", "scale", "scope"]),
         result: .object(["files": .array(of: .object(["name": .string("The file's name."), "width": .integer("Pixels wide."),
                                                       "height": .integer("Pixels high.")], required: ["name", "width", "height"]))],
@@ -103,7 +104,9 @@ extension DesignWorkspace {
     ) { w, p in
         guard let format = DesignExportFormat(rawValue: p.format), let scope = DesignExportScope(rawValue: p.scope)
         else { throw DesignRefusal.unchanged }
-        let plan = try w.exportPlan(DesignExportOptions(format: format, scale: p.scale, scope: scope), existing: [])
+        var options = DesignExportOptions(format: format, scale: p.scale, scope: scope)
+        options.frame = p.frame
+        let plan = try w.exportPlan(options, existing: [])
         return ExportedFiles(files: plan.map { ExportedName(name: $0.fileName, width: $0.pixelWidth, height: $0.pixelHeight) })
     }
 

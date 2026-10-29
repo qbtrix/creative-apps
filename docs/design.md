@@ -684,6 +684,8 @@ the feature that builds each one.
   Undo, Redo, Copy, Paste, Select All, Find, Settings, Close, Quit). Add custom
   shortcuts only for the most frequent app commands.
 - Export lives at File > Export, opening a sheet on the document window.
+  In Design, a document with keys adds a Frame field to the sheet: the files
+  show that moment. A still document never shows it.
 
 ## Color, type, spacing
 
