@@ -6,7 +6,7 @@
 // artwork drawn by the golden host, is report-only until #331 and #332. DE-9: the Desktop PDF
 // opens with CGPDFDocument as one page whose media box is 1440 × 1024 pt at any scale. One-document OD-9: an animated
 // page's PNG at frame 60 is not its frame-0 PNG (the first rectangle has moved off its rest corner), and a still
-// page's PNG bytes are the same at any frame. macOS only.
+// page's raster and pixels are the same at any frame. macOS only.
 #if canImport(AppKit)
 import AppKit
 import ImageIO
@@ -100,7 +100,10 @@ import Testing
         #expect(pixel(restImage, x: 31, y: 31) != pixel(movedImage, x: 31, y: 31), "the rest corner of Rectangle 1")
         let cards = DesignFixtures.cards
         let desktop = try item(cards, DesignExportOptions(format: .png, scale: 1, scope: .frame))
-        #expect(try DesignRasterizer.png(try cards.exportRaster(desktop, at: 60)) == DesignRasterizer.png(try cards.exportRaster(desktop)))
+        #expect(try cards.exportRaster(desktop, at: 60) == cards.exportRaster(desktop))
+        let still = try #require(RGBAImage(png: try DesignRasterizer.png(try cards.exportRaster(desktop, at: 60))))
+        let restCards = try #require(RGBAImage(png: try DesignRasterizer.png(try cards.exportRaster(desktop))))
+        #expect(still.bytes == restCards.bytes, "a still page's pixels are the same at any frame")
     }
 
     /// DE-9: the Desktop frame's PDF is one page, its media box the frame in points, never scaled.
