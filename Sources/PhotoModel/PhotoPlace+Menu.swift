@@ -41,10 +41,10 @@ extension PhotoWorkspace {
     }
 
     /// A refusal in the status line's words: the reason alone, not the command's id. The kernel's format
-    /// refusal names every format it knows; Photo's names the two it places.
+    /// refusal names the two formats Photo places; the status line says it in Photo's words.
     static func placeRefusal(_ error: CatalogError) -> String {
         switch error {
-        case .unavailable(_, let why) where why == PlaceRules.formatHelp: placeFormatHelp
+        case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: placesFormats): placeFormatHelp
         case .unavailable(_, let why): why
         case .failed(_, let message): message
         default: error.description

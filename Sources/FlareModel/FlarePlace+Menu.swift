@@ -40,10 +40,10 @@ extension FlareWorkspace {
     }
 
     /// A refusal in the status line's words: the reason alone, not the command's id. The kernel's format refusal
-    /// names every format it knows; Flare's names the one it places.
+    /// names the one format Flare places; the status line says it in Flare's words.
     static func placeRefusal(_ error: CatalogError) -> String {
         switch error {
-        case .unavailable(_, let why) where why == PlaceRules.formatHelp: placeFormatHelp
+        case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: [.svg]): placeFormatHelp
         case .unavailable(_, let why): why
         case .failed(_, let message): message
         default: error.description

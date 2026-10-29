@@ -11,6 +11,7 @@ private enum KeyTool: String, PaletteTool, CaseIterable {
     case move, brush, eraser, hand
     var title: String { rawValue.capitalized }
     var systemImage: String { "circle" }
+    var gesture: ToolGesture { .none }
     var unavailableHelp: String? { self == .eraser ? "Open a layer to erase." : nil }
     var shortcut: Character? {
         switch self {
