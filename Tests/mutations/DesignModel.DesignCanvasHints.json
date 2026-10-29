@@ -185,7 +185,7 @@
     "label": "the inspector samples frame 0 whatever the playhead (OD-15)",
     "file": "Sources/DesignModel/DesignCanvasHints.swift",
     "find": "node.sampled(at: Double($0))",
-    "replace": "node.sampled(at: 0)",
+    "replace": "node.sampled(at: Double($0 / 2))",
     "tests": "DesignShownValueTests"
   }
 ]
