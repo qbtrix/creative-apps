@@ -2,35 +2,36 @@
 
 Issue: #3778 (#4513 closed as duplicate) · Packet: docs/blueprints/suiteui/features/fill-heal.md
 Run: act-1a17bed1eba-upw1 (line lead: area-selection, fill-heal, adjust-everywhere; resumed 2026-10-27T05:58Z on main fef52e66) · earlier: act-1a1786024b0-c5o9 (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26T13:26Z) · earlier: act-1a175f7cb67-l7rh (line lead: clipboard-interop, area-selection, fill-heal; resumed 2026-10-26) · earlier: act-1a1702c56e8-b6cq (line lead: shared-raw, area-selection, fill-heal) · Session: claude/suiteui-feature-lead-run-8ka39r · Started: 2026-10-24T22:40Z (earlier act-1a16cae7989-hj12, act-1a16cae79dd-mtf2)
-Stage: 3 wave 2 (wave-2 PRs open, gated; stacks in the lane)
-Base: main fef52e66 (verified) / dev 5e4a0922
-Next: #4889 (FH-u) re-integrated at 5a1a54b2 (merged origin/dev, scripts/ci --changed PASS, Head moved); waiting on the lane batch. When it merges retarget #4896 (add fast-lane) and #5245 to dev, then the FH-7 chain, #5109, #5251; FH-c waits on fix PRs #5121, #5129, #5137.
-Polled: 2026-10-29T00:47Z · all slices done; contact sheets posted on #3752, #3753, #3778
+Stage: done (all slices Belt-Slice-Done; Belt-Contact-Sheet posted)
+Base: main b0e24d17 (verified, full CI 40782400633 green)
+Next: none
+Polled: 2026-10-29T00:57Z · main b0e24d17 contains FH-10; Belt-Slice-Done FH-photo, Belt-Contact-Sheet and its addendum posted on #3778
 
 ## Slices
 | slice | behavior | tasks | journeys | waits on | ui | rounds | state | run | mac finish |
 |---|---|---|---|---|---|---|---|---|---|
 | FH-a | rules, commands and dab coverage as stubs, checks disabled | FH-1, FH-2 | MJ-FH | suite-imaging:IM-a, brush-keys:BK-m (FH-1 only) | false | 0 | done (Belt-Slice-Done posted) | 39957675362 | – |
-| FH-u | palette Paint Bucket, Spot Heal, Remove on the stubs | FH-3, FH-4 | PJ-FH1 | FH-a, AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo | true | 0 | lane (FH-3 #4889 head ccf9d81; FH-4 #4896 stacked on FH-3) | – | – |
+| FH-u | palette Paint Bucket, Spot Heal, Remove on the stubs | FH-3, FH-4 | PJ-FH1 | FH-a, AB-photo, AL-photo, AX-photo, AU-photo, AC-colour, BK-photo | true | 0 | done (Belt-Slice-Done 40630829588) | 40630829588 | – |
 | FH-r | bucket and heal bodies over core | FH-5b, FH-5h | MJ-FH | FH-a | false | 0 | done (Belt-Slice-Done posted) | 40005632479 | – |
-| FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | lane (#4577 base dev, head 7d32ede) | – | – |
-| FH-photo | Photo adopts live, old tone-match heal gone, jobs pass | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u, AJ-photo, BK-photo | true | 0 | waiting | – | – |
+| FH-c | dab coverage body, commands one undo step | FH-5k, FH-6 | MJ-FH | FH-a, FH-r | false | 0 | done (Belt-Slice-Done 40630829588) | 40630829588 | – |
+| FH-photo | Photo adopts live, old tone-match heal gone, jobs pass | FH-7, FH-8, FH-9, FH-10 | PJ-FH1, PJ-FH2, MJ-FH-photo, MJ-FH | FH-c, FH-u, AJ-photo, BK-photo | true | 0 | done (#5251 FH-10 b0e24d17; Belt-Slice-Done 40782400633) | 40782400633 | – |
 
 ## Tasks
 | id | slice | wave | behavior | files | test | PR | state |
 |---|---|---|---|---|---|---|---|
 | FH-1 | FH-a | 2+ | stubs + disabled checks | Sources/SuiteImaging/Retouch/*, Sources/SuiteKernel/Stroke/DabCoverage.swift, tests, C4 parts | suites compile, disabled | #4556 | merged (in green full run 39957675362) |
 | FH-2 | FH-a | 1 | RJ-P51 folder, RJ-P04/P07 re-pointed, disabled waits_on FH-6 | Tests/RealJobs/photo/{bucket-background,dust-spots,remove-passerby}/* | RealJobs decode check | #3845 | merged (in green dev Linux run 39808732641) |
-| FH-3 | FH-u | 3 | palette Paint Bucket, Spot Heal, Remove disabled with help; bucket options | Sources/PhotoModel/*, Sources/PhotoApp/*, Tests/PhotoModelTests/PhotoRetouchToolsTests.swift, UITests/PhotoJourneyTests+Retouch.swift | PhotoRetouchToolsTests, photo.list-commands golden | #4889 | lane (6ad2a444, base dev) |
-| FH-7 | FH-photo | 4 | PhotoWorkspace: RetouchTarget, heal via retouch.heal, toneShift gone, RJ-P51 on | Sources/PhotoModel/PhotoRetouch*.swift, PhotoStroke, catalog, ids, mutations | PhotoRetouchKernelTests, Mutate 4/4 | #5245 (7a), #5107 (7b) | stacked on #4889 |
-| FH-7j | FH-photo | 4 | RJ-P04 dust-spots on (split from FH-7 for the 15-file cap) | Tests/RealJobs/photo/dust-spots/* | RealJobs | #5108 | stacked on #5107 |
-| FH-8..FH-10 | FH-photo | later | see packet | see packet | see packet | – | waiting |
+| FH-3 | FH-u | 3 | palette Paint Bucket, Spot Heal, Remove disabled with help; bucket options | Sources/PhotoModel/*, Sources/PhotoApp/*, Tests/PhotoModelTests/PhotoRetouchToolsTests.swift, UITests/PhotoJourneyTests+Retouch.swift | PhotoRetouchToolsTests, photo.list-commands golden | #4889 | merged |
+| FH-7 | FH-photo | 4 | PhotoWorkspace: RetouchTarget, heal via retouch.heal, toneShift gone, RJ-P51 on | Sources/PhotoModel/PhotoRetouch*.swift, PhotoStroke, catalog, ids, mutations | PhotoRetouchKernelTests, Mutate 4/4 | #5245 (7a), #5107 (7b) | merged |
+| FH-7j | FH-photo | 4 | RJ-P04 dust-spots on (split from FH-7 for the 15-file cap) | Tests/RealJobs/photo/dust-spots/* | RealJobs | #5108 | merged |
+| FH-8..FH-10 | FH-photo | 4 | see packet | see packet | see packet | #5129, #5109 (e149c784), #5253, #5251 (b0e24d17) | merged |
 
 ## Reviews
 | slice | run | commit | lenses | filed | after round |
 |---|---|---|---|---|---|
 
 ## Decisions
+- 2026-10-29T00:57Z: main promoted to b0e24d17 by green full run 40782400633 (contains FH-10 #5251). Belt-Slice-Done FH-photo and the Belt-Contact-Sheet are on #3778; the addendum adds journeys (40796222683 running), audit counts, 0 open findings, needs-ui #4890/#4895. Feature done.
 - 2026-10-26T02:14Z: Run act-1a175f7cb67-l7rh resumed. #4889 got needs-rebase (photo.list-commands.json conflict); fixing by merging origin/dev and regenerating the golden.
 - 2026-10-25T04:45Z: #4889 needs-rebase: merged origin/dev, union-merged photo.list-commands golden by id (matches command-ids ledger), scripts/ci --changed PASS, pushed 7ebd2bcf1, Head moved.
 - 2026-10-25T01:45Z: FH-9 opened as #5253 (docs-only C4, on dev, head 2f2b89ff) and FH-10 as #5251 (feature-done, on FH-8, head 2043f944), both CI: PASS.
@@ -49,7 +50,7 @@ Polled: 2026-10-29T00:47Z · all slices done; contact sheets posted on #3752, #3
 - 2026-10-22T16:40Z: FH-a, FH-r and FH-c go to one builder, stacked (lead/fill-heal-FH-a -> -FH-r -> -FH-c); each child PR bases on its parent branch and retargets to dev when the parent merges.
 
 ## Wire
-- [ ] Wire: brush-keys:BK-photo (built on its fakes in FH-3/FH-4; swap in when it merges)
+- [ ] Wire: brush-keys:BK-photo (built on its fakes in FH-3/FH-4; no Belt-Slice-Done for BK-photo on #3758 as of the close, so it stays open for brush-keys to swap in)
 
 ## Open
 - 2026-10-24T07:55Z: findings filed from FH-7's build: #5093 (bucket edge tint), #5094 (feathered coverage squared), #5095 (heal throws off-canvas). Open findings: 3. RJ-P07 stays disabled (needs select.lasso).
