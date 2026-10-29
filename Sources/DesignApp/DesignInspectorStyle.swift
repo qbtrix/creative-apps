@@ -83,7 +83,8 @@ struct DesignOpacityRow: View {
 
     var body: some View {
         let send = DesignStyleSend(model: model, live: live, perform: perform)
-        let opacity = (live?.workspace ?? model).sharedValue(\.opacity)
+        let shown = live?.workspace ?? model
+        let opacity = shown.sharedValue { shown.shown($0).opacity }
         let help = model.styleHelp(.opacity)
         HStack(spacing: SuiteSpacing.xs) {
             InspectorSliderRow(
@@ -93,7 +94,7 @@ struct DesignOpacityRow: View {
             .disabled(help != nil)
             .help(help ?? "")
             .suiteControl(id: DesignControlID.inspectorOpacity, enabled: help == nil, reason: help)
-            if !model.hasMultipleSelection { DesignKeyButton(model: model, property: .opacity, help: help, perform: perform) }
+            if !model.hasMultipleSelection { DesignKeyControl(model: model, property: .opacity, help: help, perform: perform) }
         }
     }
 }

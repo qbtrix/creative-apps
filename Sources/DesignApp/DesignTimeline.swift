@@ -87,7 +87,7 @@ private struct DesignTimelineLanes: View {
     }
 
     /// The lanes' width in a strip `width` wide: past the name column and its hairline, with Flare's trailing room.
-    static func laneWidth(_ width: CGFloat) -> CGFloat {
+    nonisolated static func laneWidth(_ width: CGFloat) -> CGFloat {
         max(width - SuiteSize.timelineLabelColumn - 1 - SuiteSpacing.xl, 1)
     }
 }

@@ -52,7 +52,7 @@ struct DesignCanvas: View {
     }
 
     /// `workspace` at the frame playback shows; itself when nothing plays.
-    private static func shown(_ workspace: DesignWorkspace, at frame: Int?) -> DesignWorkspace {
+    nonisolated private static func shown(_ workspace: DesignWorkspace, at frame: Int?) -> DesignWorkspace {
         guard let frame else { return workspace }
         var copy = workspace
         copy.setPlayhead(frame)

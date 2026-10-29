@@ -218,6 +218,7 @@ struct FlareCanvas: View {
 
     /// The suite's display-link driver, its ticks advancing a PlaybackTicker of its own through `tick`, which
     /// returns false to stop the link (paused, or the end of a play that doesn't loop).
+    // view-static: main-actor
     static func playbackDriver(_ tick: @escaping @MainActor (Double, inout PlaybackTicker) -> Bool) -> SuitePlaybackDriver {
         let state = TickerState()
         return SuitePlaybackDriver(onTick: { target in tick(target, &state.ticker) })
