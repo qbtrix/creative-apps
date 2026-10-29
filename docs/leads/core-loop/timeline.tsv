@@ -302,3 +302,4 @@ utc	stage	event	ref	note
 2026-10-29T15:01Z	3	check-in	no new results	full 40869919369 timed out in Photo, 0 Halo cases; #4283/#4282 open
 2026-10-29T17:04Z	3	check-in	pending	halo 40913947455 queued; blockers #4283 #4282 open
 2026-10-29T18:36Z	3	check-in	pending	halo 40913947455 + full 40925450024 waiting; blockers open
+2026-10-29T20:10Z	3	check-in	pending	halo job 123677820626 running; full 40925450024 waiting; blockers open
