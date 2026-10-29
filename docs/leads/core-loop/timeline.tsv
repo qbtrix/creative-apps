@@ -295,3 +295,4 @@ utc	stage	event	ref	note
 2026-10-29T01:00Z	3	check-in	H-J12 line-531 repeat	halo 40753193824 92 cases; PlayHittable pass; no dim; #4283/#4282 open
 2026-10-29T03:02Z	3	check-in	no new results	full 40796222683 cancelled 0 cases; 40807484082 waiting; #4283/#4282 open
 2026-10-29T05:05Z	3	check-in	no new results	full 40807484082 running 0 Halo cases; halo 40820144320 waiting; #4283/#4282 open
+2026-10-29T06:40Z	3	check-in	H-J12 back to line 613	halo 40820144320 43 cases so far; #5891 commented; #4283/#4282 open
