@@ -14,48 +14,63 @@ Measured on a release build (`-c release -Xswiftc -enable-testing -Xswiftc -DDEB
 
 ## (a) Edit at a non-zero playhead
 
-The runnable check is `Tests/DesignModelTests/SpikeEditAtPlayheadTests.swift`. It prints what each edit shows at 1 s against what was asked for. Its run is in the same queued release job (see (b)). The table below comes from reading the code, and the test confirms the same behaviour.
+Measured: release build, `SpikeEditAtPlayheadTests`, the keyed 50-node fixture at frame 60 (1 s). node-2 shows x 47, y 40, opacity 0.65. Its rest x is 30.
 
-Survey of all 11 `Sources/DesignModel/Live` editors, by reading. "Write-back" means the editor writes the rest pose (`frame`, `opacity`) on an axis a key overrides, so it needs a rule: write the key at the playhead (auto-key), or offset the whole track.
-
-| Editor | What it does at playhead 1 s today | Needs |
+| Edit at 1 s | Asked for | Shown after the edit |
 |---|---|---|
-| LiveTransforming (move, nudge, resize, delete) | `move` and `nudge` translate the rest frame, and the x and y keys win when sampled, so the node does not move on screen. `resize` builds its box from the rest frame, not the shown one, so it anchors to where the node was at rest. Width and height are not keyed, so they change. | write-back (x, y), plus reading the sampled box for resize |
-| LiveAligning (align, distribute) | Reads the rest frames, computes the targets and translates the rest frames, so it aligns the rest poses and the shown nodes stay unaligned. | write-back, plus reading the sampled frames |
-| LiveDuplicating | The copy goes through `layerTree.duplicate` and `init(id:copying:)` (see the time-kept line above). The offset translates the rest frame only. The absolute keys are copied unchanged, so the copy plays on top of the original. | write-back: offset the copied tracks |
-| LiveClipboard (copy, paste) | Copy is Codable, so time survives. Paste offsets by +10,+10 through `translate` with the same flaw as duplicate. Pasting into another frame keeps absolute keys against a new parent delta. | write-back: offset the tracks, and rebase them on reparent |
-| LiveGrouping (group, ungroup) | The new group's frame is the union of the rest boxes, so the group's bounds and handles are wrong at the playhead. The group has no time, which is correct. | sampled read for the box (and a rule for keying a group) |
-| LiveStyling (frame fields, opacity, fill, radius, stroke, text) | `setFrame` x and y translate the rest frame, and the key wins. `setOpacity` writes rest opacity, and the key wins. Width, height, fill, radius, stroke and text are not keyed, so they work. | write-back (x, y, opacity) |
-| LiveOrdering (reorder, reparent) | Reorder is fine. Reparenting into a frame whose x is keyed puts the node under a new parent delta, so it jumps by that delta. | write-back: rebase the tracks on reparent |
-| LiveMarquee | Hits the rest frames, so it selects what was there at rest. | sampled read only |
-| LiveFraming (zoom to selection) | Frames the rest boxes. | sampled read only |
-| LiveFiling | Saves and reads `time` (see the file line above). Version 1, not bumped: an older build drops `time` on resave without a word. | format rule (version bump) |
-| DesignSVG | Exports the rest pose unless it is fed `page.sampled(at:)`. | sampled read only |
-
-Non-editor paths: snapping (`DesignSnapping+Kernel`) snaps to the rest frames of the other nodes. `handle(at:)` and the selection box use the rest frame, so handles and hit-testing disagree with the drawn node. The canvas live drag (`DesignLiveDrag`) writes `translate` on the live copy, so a drag of a keyed node does not move on screen.
-
-**Count: 7 of 11 editors need a write-back rule** (Transforming, Aligning, Duplicating, Clipboard, Grouping, Styling, Ordering). 3 need only a sampled read (Marquee, Framing, SVG), and 1 needs a format rule (Filing). Snapping, handle hit-testing and the live drag add **3 more non-editor paths**. Rules shared by several editors: (1) auto-key x, y or opacity at the playhead when the axis is keyed, otherwise write the rest pose; (2) offset whole tracks on duplicate and paste; (3) rebase tracks on reparent; (4) read the sampled tree for boxes, snapping and handles.
+| LiveTransforming.move | +100 x | **+0** (key wins) |
+| LiveTransforming.nudge right, large | +10 x | **+0** |
+| LiveTransforming.resize bottom-right | +20 w, +20 h | w 24 to 44, origin unchanged (works, because size is not keyed) |
+| LiveAligning.align left (node-2, node-30) | both at x 47 | **47 and 209**, unchanged |
+| LiveDuplicating | copy at +10, +10 | **copy exactly on top of the original (+0, +0)**. The copy keeps its time (true). |
+| LiveStyling.setFrame x | 500 | **47** |
+| LiveStyling.setOpacity | 0.9 | **0.65** |
+| hitTest through the sampled tree | | node-2 at (52, 40); the sampled path works |
+| LiveFiling round trip | | 1,159 bytes for 1 keyed node; reopen keeps time (true) |
 
 ## (b) Playback
 
-**Not measured yet.** The release build sat in the counted gate pool for 64 min at LOW priority behind 8 holders (the bug-fix lanes, mac-finish lanes, kiln and supfix), and never started. A detached runner, `.build/spike/run.sh` in the worktree, keeps re-queuing it. Progress goes to `.build/spike/progress.log`, and the SPIKE lines go to `.build/spike/results.txt`. The tests that produce the numbers are committed: `Tests/AppSnapshotTests/SpikeOneDocumentTests.swift`.
+Release build (`-O`, plus `-DDEBUG` for the body counter). The shared M2 Pro was loaded by about 8 other gate jobs. `playback()` runs 242 frames, each one PlaybackTiming tick per document frame, with layout and display forced per frame. There is no QB-L4 row in render-budgets.md, so a dropped frame here is a frame over budget.
 
-Method: `playback()` runs 242 frames, each one PlaybackTiming tick per document frame, then layout and display forced (RenderBudgetWindow.timed's method). A dropped frame is a step over 8.3 ms at 120 Hz, and over 16.7 ms at 60 Hz. Body counts come from `DesignWindow.bodyRuns`. That runs for the painter, then for one pre-rastered lift of the whole frame on `CanvasHostView.showLiveLayer` / `moveLiveLayer`. There is no QB-L4 row in `Tests/render-budgets.md`, so this copies the Halo play-row method.
+| SwiftUI painter playback | p50 | p95 | max | over 8.3 ms (120 Hz) | over 16.7 ms (60 Hz) | window bodies |
+|---|---|---|---|---|---|---|
+| 50 nodes | 0.94 ms | 13.91 ms | 43.4 ms | 19 / 242 (7.9%) | 8 / 242 (3.3%) | **0** |
+| 500 nodes | 1.49 ms | 13.07 ms | 70.5 ms | 22 / 242 (9.1%) | 8 / 242 (3.3%) | **0** |
 
-Already known from the code: `CanvasHostView` holds **one** lift (`lifted`). A per-node lift of 500 nodes is not possible on today's API. A compositor-deferred hero can only lift a whole pre-rastered frame, or a selection, as one layer. Per-node layers are H6 work.
+- **Window bodies are 0 per frame.** Only the canvas observes the clock, so the audit's "0 bodies per frame" bar is met for free. That is better than Halo's 24 bodies/s precedent.
+- p50 grows only 0.55 ms from 50 to 500 nodes, so per-node cost is not the issue. The p95 and max tail is the same at 50 and 500 nodes, which points at machine load (8 gate holders), not node count. It needs a quiet-machine rerun before it is read as a fidelity problem.
+- 24 s of unthrottled playback of the 500-node fixture ran **241.8 fps** (about 4.1 ms per full frame, including the forced display).
+- **No CanvasLiveLayer comparison was possible:** `SPIKE lift: no CanvasHostView in the Design window`. Design's canvas (CanvasViewport) is not hosted on SuiteUI's `CanvasHostView`, so Design has no live layer at all today. A lift needs Design moved onto CanvasHostView first (part of H6/H8). On top of that, CanvasHostView holds one lift (`lifted`), so per-node lifts would be new work.
+- **Compositor deferral:** at 500 rect nodes, the painter meets 60 Hz at p50 with 0 window bodies, so the compositor can be deferred for a hero of this size.
 
 ## (c) Raster cost
 
-Pending, with the same runner. `rasterCost()` times the sampled 50- and 500-node trees through DesignArtwork with ImageRenderer at 2x, and reports per-node microseconds plus the sampling cost on its own. `playLongForSample()` plays the 500-node fixture for 24 s while the runner takes `sample <pid> 20 1` into `.build/spike/sample.txt`.
+`rasterCost()`, release, ImageRenderer of the sampled tree through DesignArtwork at 2x, 31 frames:
+
+| Fixture | Sample the tree only | Sample plus raster p50 | p95 | p50 per node |
+|---|---|---|---|---|
+| 50 nodes | 0.004 ms | 0.10 ms | 0.34 ms | 1.9 us |
+| 500 nodes | 0.042 ms | 0.48 ms | 2.22 ms | **1.0 us** |
+
+Sampling costs about 0.08 us per node. Hundreds of plain vector nodes fit inside one 120 Hz frame (8.3 ms) with about 8,000 nodes of headroom at this rate. Caveat: the fixtures are solid rounded rectangles. Text, gradients, strokes and placed pictures cost more and were not measured. `sample <pid> 20 1` of the 24 s playback: SAMPLE_PENDING
 
 ## (d) Big-document drag
 
-Pending, with the same runner. `crowdDrag()` runs RenderBudgetDesignTests' 120-sample drag on the plain crowd, then on `keyedCrowd` sampled at 1 s, in the same session. The baseline is today's 4.1 ms p95 / 6 ms budget, 3 bodies (render-budgets.md). The audit's 57-63 ms is not from this harness: #4479 is the design-seams packet issue and carries no number. Expect the sampled run to cost at least one full `page.sampled` tree copy of 2k nodes per sample. The sampler walks and copies the whole tree on every body.
+`crowdDrag()`, release, the 120-sample RenderBudgetDesignTests drag on the 2k crowd, both runs in the same session:
+
+| Run | step p50 | step p95 | window bodies | layout passes |
+|---|---|---|---|---|
+| plain crowd, no sampler | 35.5 ms | **80.0 ms** | 2 | 128 (857 ms) |
+| keyed crowd, sampled at 1 s | 35.3 ms | **68.4 ms** | 2 | 127 (478 ms) |
+
+- **The sampler adds nothing measurable.** The keyed run was even a little faster, which is within the noise of a loaded machine.
+- Under today's load, both runs sit at about 11-13x the 6 ms budget. That matches the audit's "about 10x over" (57-63 ms). render-budgets.md's 4.1 ms p95 came from a quiet machine. H19's cost is the existing crowd-drag problem (the 2k-node painter and layout), not time.
 
 ## Verdict
 
-Provisional. Only (a) has evidence; (b)-(d) wait on the queued run.
-
-- **Hero range:** (a) supports the **low half of H4+H4b+H5 (about 22-30 h)** as long as time stays top-level with no full interleave. That is 7 editors plus 3 paths, but only 4 shared rules (auto-key at the playhead, track offset on copy, track rebase on reparent, sampled reads), so the cost doesn't grow per editor. Keep the hero at **140-290 h** until (b)-(d) land. Nothing yet moves H6-H9.
-- **Staged (compositor-deferred) hero:** not decided. One known limit: CanvasLiveLayer lifts one layer, so staging means painter playback, or one whole-frame lift, which only fits playback that never edits.
-- **Surprises:** (1) Dragging a keyed node at a non-zero playhead does nothing on screen. The key overrides the rest pose that the live drag writes, so auto-key is hero-critical, not polish. (2) Absolute frames force subtree translation at sample time, and they make reparenting jump a node by the new parent's delta, so the track-rebase rule is needed even for the hero. (3) The read side is cheap only for draw and export. Hit-testing is a Model function with no playhead, and handles, snapping, marquee and framing all read rest frames, so the "page.painted de-risks reads" claim misses interaction.
+- **Hero range: about 140-230 h**, down from 140-290. The audit's high case on two axes doesn't hold. (a) confirms 7 write-back editors but only 4 shared rules, so H4+H4b+H5 sits near the low case (about 22-30 h, not 43 h) as long as time stays top-level. (b) and (c) show that painter playback of 500 rect nodes costs 0 window bodies and about 1 us per node, so H6-H9 can stage at about 34 h, not 67 h. H19 does not grow because of time. The crowd drag is over budget with or without the sampler.
+- **The staged, compositor-deferred hero is viable** for UI-scale documents (hundreds of plain vector nodes) on the SwiftUI painter. Two conditions: the 60 Hz tail (3.3% of frames over 16.7 ms, under load) needs a quiet-machine rerun, and text, gradient and stroke nodes still need costing. The compositor is not just deferred but further away than the audit assumed. Design isn't on CanvasHostView at all, so H6 starts with moving Design's canvas onto it.
+- **Surprises:**
+  1. Every rest-pose edit on a keyed axis does nothing on screen: move, nudge, set x, set opacity, align, and duplicate's offset (the copy lands exactly on the original). Auto-key at the playhead is hero-critical. It is not polish.
+  2. The sampler is free: 0.04 ms for 500 nodes, and no change to the 2k drag p95. Time costs nothing on the read side. All the cost sits in edit semantics.
+  3. Design has no CanvasHostView, so no live layer exists to defer to. Also, the crowd drag measures 68-80 ms p95 under load against the doc's 4.1 ms, so render-budgets.md's Design row reflects a quiet machine only.
