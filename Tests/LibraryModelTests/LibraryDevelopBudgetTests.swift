@@ -109,6 +109,14 @@ private let judgesRenders = true
         }
         #expect(out?.width == 2000 && out?.height == 1333)
         #expect(!judgesRenders || cost.p95 <= 1500, "export of 24 MP at 2,000 px took \(cost.p95) ms (p95), over 1,500 ms")
+        guard judgesRenders else { return }
+        // The bug was "develop at full size, then resize": the same photo developed at full size, timed under the
+        // same load, must cost well over twice the export (release on the shared Mac: 6.3 s against 1.1 s).
+        let full = Budget.measure("develop full-size-24mp", runs: 1) {
+            _ = try? LiveDevelop().render(buffer, settings: settings)
+        }
+        #expect(cost.median <= 0.4 * full.median,
+                "export at 2,000 px took \(cost.median) ms, over 40% of a full-size develop (\(full.median) ms)")
     }
 
     @Test func histogram() throws {
