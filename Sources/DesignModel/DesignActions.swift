@@ -110,7 +110,7 @@ extension DesignWorkspace {
 
     /// What View > Zoom to Selection shows; nil with nothing selected (the command is then off).
     public var zoomToSelectionRect: DesignRect? {
-        guard let page = selectedPage, !selectedNodeIDs.isEmpty else { return nil }
+        guard let page = shownPage, !selectedNodeIDs.isEmpty else { return nil }
         return services.framing.rectToShow(selectedNodeIDs, on: page)
     }
 

@@ -10,6 +10,7 @@
 // - `held` holds exactly the page and node ids on the pages; every change that
 //   adds or removes an id updates it, so minting never walks the tree (#433).
 // - Every node frame is absolute page points, children included (DesignNode).
+// - `playhead` is shown state: reads of the screen go through `shownPage`, edits write the rest pose.
 // - Every document edit records exactly one named undo step (DesignHistory). A
 //   refused call (it throws, names an unknown id, hits a locked node, or changes
 //   nothing) records nothing and leaves the workspace as it was.
@@ -153,6 +154,18 @@ public struct DesignWorkspace: Sendable, Equatable {
     }
 
     public var selectedNode: DesignNode? { selectedNodeID.flatMap { selectedPage?.nodes.node($0) } }
+
+    /// The frame the canvas shows, or nil for the rest pose. Shown state, like the zoom: outside the document,
+    /// its history and its save, so moving it is never an edit.
+    public internal(set) var playhead: Int?
+
+    /// The selected page as the canvas shows it: sampled at the playhead when one is set (DesignNodeTime.swift),
+    /// else the page itself. Every read of what is on screen (paint, hit-test, handles, snapping, the marquee,
+    /// Zoom to Selection) goes through it; edits still write the rest pose.
+    public var shownPage: DesignPage? {
+        guard let playhead else { return selectedPage }
+        return selectedPage?.sampled(at: Double(playhead))
+    }
 
     /// The selected page's tree as rows under the current expanded set, as the Layers panel shows it.
     public var layerRows: [DesignRow] { selectedPage?.visibleRows(expanded: expandedNodeIDs) ?? [] }

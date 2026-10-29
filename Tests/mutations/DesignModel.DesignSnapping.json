@@ -68,5 +68,12 @@
     "find": "gaps: gaps.gaps(around: box.snapRect)",
     "replace": "gaps: []",
     "tests": "DesignSnapMoveTests"
+  },
+  {
+    "label": "snapCandidates: the rest frames under a playhead",
+    "file": "Sources/DesignModel/DesignSnapping+Kernel.swift",
+    "find": "guard let page = shownPage else { return [] }",
+    "replace": "guard let page = selectedPage else { return [] }",
+    "tests": "DesignPlayheadTests"
   }
 ]
