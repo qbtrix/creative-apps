@@ -116,8 +116,11 @@ view.actual-size
 view.fit
 view.zoom-in
 view.zoom-out
+history.begin
+history.end
 history.jump
 history.read
+history.undo-request
 tool.pen
 path.read
 path.draw
