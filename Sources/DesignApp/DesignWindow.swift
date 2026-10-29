@@ -154,7 +154,7 @@ struct DesignWindow: View, BodyCounted {
         // A file handed to Design (Finder, the home's Recent, Open In) opens here while the window is empty (#5200).
         .suiteOpenQueue(DesignShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
-        .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
+        .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }, remember: { perform(.rememberExport($0)) }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
@@ -173,7 +173,7 @@ struct DesignWindow: View, BodyCounted {
         }
         // An open text edit ends, fitted to its text, before anything else acts (canvas-basics CB-6).
         switch intent {
-        case .textDraft, .cancelText: break
+        case .textDraft, .cancelText, .rememberExport: break
         default: commitText()
         }
         switch intent {
@@ -182,6 +182,7 @@ struct DesignWindow: View, BodyCounted {
         case .save: save()
         case .saveAs: saveAs()
         case .export: exportRequest += 1
+        case .rememberExport(let options): model.rememberExport(options)
         case .undo: model.undo()
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
