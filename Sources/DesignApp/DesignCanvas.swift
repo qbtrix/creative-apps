@@ -38,7 +38,7 @@ struct DesignCanvas: View {
 
     var body: some View {
         let shown = live?.workspace ?? model
-        if let page = shown.selectedPage {
+        if let page = shown.shownPage {
             canvas(page, shown: shown)
         } else {
             EmptyStateView(

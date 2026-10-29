@@ -109,9 +109,9 @@ struct DesignGesture: Sendable, Equatable {
 }
 
 extension DesignWorkspace {
-    /// The topmost visible, unlocked node on the selected page under `point`.
+    /// The topmost visible, unlocked node on the shown page (`shownPage`) under `point`.
     public func hitTest(_ point: DesignPoint) -> String? {
-        selectedPage?.nodes.hit(at: point)
+        shownPage?.nodes.hit(at: point)
     }
 
     /// The handle of the selected node outside any lock and any hidden group (the canvas draws no
@@ -121,7 +121,8 @@ extension DesignWorkspace {
     /// a handle: its handles sit outside it, so the press moves it. `point` is taken into the node's
     /// unturned frame first, so a turned node's handles, knob included, hit where they show.
     public func handle(at point: DesignPoint) -> DesignHandle? {
-        guard !hasMultipleSelection, let node = selectedNode, !isLockedInTree(node.id), !isHiddenInTree(node.id)
+        guard !hasMultipleSelection, let id = selectedNodeID, let node = shownPage?.nodes.node(id),
+            !isLockedInTree(node.id), !isHiddenInTree(node.id)
         else { return nil }
         let local = TransformRules.local(Point(x: point.x, y: point.y), in: node.transformBox)
         return handle(on: node.frame, at: DesignPoint(x: local.x, y: local.y))
@@ -235,7 +236,7 @@ extension DesignWorkspace {
             _ = pages.update(id) { $0.frame = frame }
             current.guides = landedGuides(on: frame, modifiers: modifiers, current)
         case .marquee(let parent):
-            guard current.moved, let page = selectedPage else { break }
+            guard current.moved, let page = shownPage else { break }
             let box = Marquee.rect(enclosing: Point(x: current.start.x, y: current.start.y), Point(x: end.x, y: end.y))
             let rect = DesignRect(x: box.minX, y: box.minY, width: box.maxX - box.minX, height: box.maxY - box.minY)
             marquee = rect

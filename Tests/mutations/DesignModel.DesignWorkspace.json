@@ -33,5 +33,12 @@
     "find": "return String(name[first...last])",
     "replace": "return String(name[first...])",
     "tests": "DesignRenameTests.swift"
+  },
+  {
+    "label": "shownPage: the playhead ignored, so the canvas shows the rest pose",
+    "file": "Sources/DesignModel/DesignWorkspace.swift",
+    "find": "return selectedPage?.sampled(at: Double(playhead))",
+    "replace": "return selectedPage",
+    "tests": "DesignPlayheadTests"
   }
 ]
