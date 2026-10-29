@@ -411,3 +411,4 @@ utc	stage	event	ref	note
 2026-10-29T08:32Z	check-in	#5353 open (clean), PX-9 waits. Lane un-quarantined the two tests (#6042, 08:32); dev-red #6030 still open. Not export/text. No new findings (49 Photo open).
 2026-10-29T09:06Z	check-in	#5353 open (clean), PX-9 waits. dev-red #6030 still open: the dev run after #6042 went red on macOS again, lane re-running it once at 0498d39. Not this lead's. No merges, no new findings (49 Photo open).
 2026-10-29T09:37Z	check-in	#5353 open (clean), PX-9 waits. dev-red #6030 still open; lane quarantined Library export-fidelity pipeline tests in #6044 (09:13). Not Photo export/text. No new findings (49 Photo open).
+2026-10-29T10:09Z	check-in	#5353 open (clean), PX-9 waits. dev-red #6030 still open: next dev run went red on macOS, lane re-running it once at 71ee349 (09:48). Not this lead's. No merges, no new findings (49 Photo open).
