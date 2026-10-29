@@ -12,7 +12,9 @@ import CoreRaster
 
 /// PNG and JPEG through CoreRaster.
 public struct CoreRasterImageCodec: PhotoImageCodec {
-    public init() {}
+    /// Core's deflate level for PNG writes. Saves keep 6, so a saved file stays byte for byte; exports pass 1.
+    public let pngLevel: Int
+    public init(pngLevel: Int = 6) { self.pngLevel = pngLevel }
 
     public func decode(_ data: Data, longestSide: Int?) throws -> DecodedImage {
         var buffer = try Self.read(data)
@@ -30,9 +32,7 @@ public struct CoreRasterImageCodec: PhotoImageCodec {
         switch format {
         case .jpeg: return try JPEG.write(buffer, quality: Int((min(max(quality, 0), 1) * 100).rounded()))
         case .png:
-            // Level 1 (greedy, 4-entry chains): core's level-6 search took 28 of 33 s on a scale-2 8064 x 6048 export
-            // (creative-core #728). The bytes stay lossless; only the file grows a little.
-            do { return try PNG.write(buffer, level: 1) } catch CodecError.unsupported { return try Self.writePNG(buffer) }
+            do { return try PNG.write(buffer, level: pngLevel) } catch CodecError.unsupported { return try Self.writePNG(buffer) }
         }
     }
 
