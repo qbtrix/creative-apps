@@ -144,9 +144,11 @@ private let judgesRenders = true
         var costs: [Double] = []
         for step in 1...(judgesRenders ? 60 : 5) {
             let settings = edit.setting(.vibrance, to: Double(step))
+            var frame: LoupeGPUFrame?
             let d = try await clock.measure {
-                #expect(try await loupe.gpuFrame(shot, settings: settings, longSide: 2560, preferGPU: true) != nil)
+                frame = try await loupe.gpuFrame(shot, settings: settings, longSide: 2560, preferGPU: true)
             }
+            #expect(frame != nil)
             costs.append(Double(d.components.attoseconds) / 1e15 + Double(d.components.seconds) * 1_000)
         }
         costs.sort()

@@ -101,7 +101,7 @@ import CoreRender
     /// Quality gate #5953: a slider step on the GPU route develops no pixel on the CPU. Twenty steps of Vibrance on a
     /// cached screen-size decode call the develop renderer zero times; only the histogram, taken after, does.
     @Test func sliderStepsDevelopNothingOnTheCPU() async throws {
-        let counter = CountingDevelop()
+        let counter = RenderCountingDevelop()
         let loupe = LiveLoupeImaging(decoder: FakeDecoder(photos: [Self.shot]), develop: counter)
         for step in 1...20 {
             let settings = Self.edit.setting(.vibrance, to: Double(step * 4))
@@ -114,7 +114,7 @@ import CoreRender
 }
 
 /// LiveDevelop that counts its CPU renders.
-final class CountingDevelop: DevelopRendering {
+private final class RenderCountingDevelop: DevelopRendering {
     let renders = Mutex(0)
     func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer {
         renders.withLock { $0 += 1 }
