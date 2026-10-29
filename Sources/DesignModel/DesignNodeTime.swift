@@ -24,7 +24,7 @@ public struct DesignNodeTime: Codable, Sendable, Hashable {
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.init(tracks: try container.decode([DesignKeyProperty: [Keyframe]].self, forKey: .tracks))
+        self.init(tracks: try container.decode(Dictionary<DesignKeyProperty, [Keyframe]>.self, forKey: .tracks))
     }
 
     /// True with no keys at all: a node with such a time is still.
