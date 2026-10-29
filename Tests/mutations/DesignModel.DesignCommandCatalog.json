@@ -54,5 +54,12 @@
     "find": "+ TransformCommands.specs(DesignWorkspace.self) ",
     "replace": "",
     "tests": "DesignCommandCatalogTests"
+  },
+  {
+    "label": "keySpecsListed: the key commands are left out of the catalog",
+    "file": "Sources/DesignModel/DesignCommandCatalog.swift",
+    "find": " + keySpecs + viewSpecs",
+    "replace": " + viewSpecs",
+    "tests": "DesignKeyCommandTests"
   }
 ]

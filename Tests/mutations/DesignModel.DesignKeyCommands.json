@@ -1,0 +1,44 @@
+[
+  {
+    "label": "setWritesAtFrameZero: keyframe.set puts every key at frame 0",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "track.append(Keyframe(frame: frame, value: value, easing: easing))",
+    "replace": "track.append(Keyframe(frame: 0, value: value, easing: easing))",
+    "tests": "DesignKeyCommandTests"
+  },
+  {
+    "label": "removeLeavesTheKey: keyframe.remove changes nothing",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "KeyRules.removeKeys(&track, [frame], leaving: .singleStays)",
+    "replace": "KeyRules.removeKeys(&track, [], leaving: .singleStays)",
+    "tests": "DesignKeyCommandTests"
+  },
+  {
+    "label": "sampleReadsTheRestPose: time.sample skips the sampling",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "pages.first { $0.nodes.node(id) != nil }?.sampled(at: Double(frame)).nodes.node(id)",
+    "replace": "pages.first { $0.nodes.node(id) != nil }?.nodes.node(id)",
+    "tests": "DesignKeyCommandTests"
+  },
+  {
+    "label": "easingIgnored: keyframe.set-easing keeps the old easing",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "track[index].easing = easing",
+    "replace": "track[index].easing = track[index].easing",
+    "tests": "DesignKeyCommandTests"
+  },
+  {
+    "label": "keyEditsOnAStillFile: remove, move and set-easing stay on with no keys",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "(w.isStill ? \"Set a key first.\" : nil)",
+    "replace": "nil",
+    "tests": "DesignKeyCommandTests"
+  },
+  {
+    "label": "playheadUnclamped: time.playhead past the end stays past it",
+    "file": "Sources/DesignModel/DesignKeyCommands.swift",
+    "find": "playhead = frame.map { Swift.min(Swift.max($0, 0), Swift.max(time.durationFrames - 1, 0)) }",
+    "replace": "playhead = frame",
+    "tests": "DesignKeyCommandTests"
+  }
+]

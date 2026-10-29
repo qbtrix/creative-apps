@@ -397,6 +397,25 @@ handle table, a dead handle, a file that exists. Only an unknown tool and
 **Rate limit:** at most 50 calls a second. One more is the tool error
 `slow down: at most 50 calls a second`, and it runs nothing.
 
+### Design's key commands
+
+Design keys a layer's `x`, `y` and `opacity` with these ids, so a script or a
+model can animate a file without the window, for example
+`afterglow design keyframe.set --in ui.design --in-place --json '{"node":"node-2","property":"x","frame":60,"value":47}'`;
+over MCP the tool is `design.keyframe.set`.
+Every key edit is one undo step named its title, and the three that edit a
+key are off with `Set a key first.` on a file with no keys. Easing names are
+`linear`, `ease`, `easeIn`, `easeOut`, `easeInOut` and `hold`.
+
+| id | does |
+|---|---|
+| `keyframe.set` | sets a key on `property` at `frame` to `value`, replacing one there; the rest pose stays |
+| `keyframe.remove` | removes the key at `frame`; the other keys stay |
+| `keyframe.move` | moves the key at `frame` to `to`; refused when a key is there |
+| `keyframe.set-easing` | sets the easing from the key at `frame` to the next one |
+| `time.sample` | returns `{x, y, opacity}` of `node` as the canvas shows it at `frame`, its containers' keys included |
+| `time.playhead` | shows the file at `frame` (left out: the rest pose); no undo step, the file is unchanged |
+
 ### Handles
 
 `<app>.open` and `<app>.new` hold the document in the server and return

@@ -79,3 +79,9 @@ view.fit
 view.zoom-in
 view.zoom-out
 view.zoom-to-selection
+keyframe.move
+keyframe.remove
+keyframe.set
+keyframe.set-easing
+time.playhead
+time.sample

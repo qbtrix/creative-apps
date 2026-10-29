@@ -27,7 +27,8 @@ struct DesignCatalogDoc: HeadlessDocument {
 
 @Suite struct DesignCommandCatalogTests {
     /// Design's states: no file, nothing selected, one layer, a locked and a hidden layer, a group, several layers,
-    /// two pages, an edit to undo, an undone edit, mid-drag, mid text edit, a gradient, a stroke and an entered group.
+    /// two pages, an edit to undo, an undone edit, mid-drag, mid text edit, a gradient, a stroke, an entered group, a
+    /// placed picture and a keyed layer.
     static var states: [(String, DesignWorkspace)] {
         let cards = DesignFixtures.cards
         func with(_ base: DesignWorkspace = cards, _ change: (inout DesignWorkspace) -> Void) -> DesignWorkspace {
@@ -47,6 +48,7 @@ struct DesignCatalogDoc: HeadlessDocument {
             ("stroked", with(one) { try? $0.setStyle(.stroke(.default)) }),
             ("entered group", with { $0.selectItem("node-6"); $0.enterGroup() }),
             ("picture", with(one) { _ = try? DesignWorkspace.catalog.run("place.image", params: pictureParams, on: &$0) }),
+            ("keyed", DesignFixtures.animated(1)),
         ]
     }
 
@@ -93,6 +95,10 @@ struct DesignCatalogDoc: HeadlessDocument {
         // Copy As and Paste as Image (clipboard-interop CB-6): Copy's reason; Paste's, with no file first.
         case "edit.copy-as": .some(w.copyHelp())
         case "edit.paste-as-image": .some(w.addPageHelp ?? (w.editingTextID == nil ? nil : w.pasteHelp(nil)))
+        // The key commands (one-document OD-8): reads need an open file, edits Rename Page's reason, key edits a key too.
+        case "time.sample", "time.playhead": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
+        case "keyframe.set": .some(noPage)
+        case "keyframe.remove", "keyframe.move", "keyframe.set-easing": .some(noPage ?? (w.isStill ? "Set a key first." : nil))
         // The transform rows' and Object items' reason (transform DT-6): the workspace's own transformHelp.
         default: id.hasPrefix("transform.") ? .some(w.transformHelp) : nil
         }
@@ -241,6 +247,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         "place.replace | Replace Image | Select a placed image first.", "place.reset-size | Reset Size | Select a placed image first.",
         "place.focus | Move Inside | Select a placed image first.",
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
+        "keyframe.set | Set Key | on", "keyframe.remove | Remove Key | Set a key first.", "keyframe.move | Move Key | Set a key first.",
+        "keyframe.set-easing | Set Easing | Set a key first.", "time.sample | Sample | on", "time.playhead | Playhead | on",
         "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
         "view.zoom-to-selection | Zoom to Selection | on",
     ]
