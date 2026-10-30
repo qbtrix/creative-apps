@@ -4,10 +4,13 @@
 // track names (a fixed left column) and, to their right, a horizontal scroll
 // view of one lane per track (TimelineLaneRow: the lane and its input). Both
 // stacks are lazy, but the lanes' sits in a horizontal scroll view, so it
-// builds every row, not only those in view (#5804). A row
-// compares only its track and mapping; the playhead and closures a press needs
-// sit in one unobserved TimelineLaneContext the body rewrites, so a frame
-// change runs the playhead layer and no lane (#5804). The strip's ideal height is the
+// builds every row, not only those in view (#5804). Each stack sits behind one
+// `.equatable()` (TimelineNameRows, TimelineLaneRows) over the tracks and the
+// mapping, and a row compares only its track and mapping; the playhead and the
+// closures a press needs sit in one unobserved TimelineLaneContext the body
+// rewrites. So a frame change runs the playhead layer and never re-evaluates a
+// ForEach or a lane, even when layout runs ahead of SwiftUI's flush under load
+// (#5804). The strip's ideal height is the
 // toolbar row (when on), the ruler and every lane: a host inside its own
 // vertical ScrollView sees every lane, and one that offers less gets lanes
 // scrolling under the ruler. TimelineStripLayout holds that arithmetic. The
@@ -326,10 +329,67 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     }
 
     private var names: some View {
+        TimelineNameRows(tracks: tracks, idPrefix: idPrefix, context: laneContext).equatable()
+            .frame(width: SuiteSize.timelineLabelColumn)
+    }
+
+    private func lanes(width: CGFloat) -> some View {
+        TimelineLaneRows(tracks: tracks, mapping: mapping, context: laneContext, width: width).equatable()
+            // Only the lanes' access modifiers read it, so a scroll re-runs those, never a lane's Canvas.
+            .environment(\.timelineVisibleX, snapshot ? nil : visibleX)
+            .simultaneousGesture(pinchGesture, isEnabled: !snapshot)
+    }
+}
+
+/// The lane rows, one per track, behind one `.equatable()`: Equatable over the
+/// tracks, the mapping and the width, so a frame change never re-evaluates the
+/// ForEach. A re-evaluated ForEach is not free even when every row compares
+/// equal: when the hosting view lays out before SwiftUI's own flush (a frame
+/// tick right before AppKit's layout, which a loaded Mac makes common), the
+/// stack's layout measures each row by pushing its element into the row, which
+/// skips the row's `==` and runs every lane and lane input (#5804).
+struct TimelineLaneRows<ID: Hashable & Sendable>: View, Equatable {
+    let tracks: [TimelineTrack<ID>]
+    let mapping: FrameMapping
+    let context: TimelineLaneContext<ID>
+    let width: CGFloat
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
+
+    var body: some View {
+        #if DEBUG
+        bodyTally.ran(TimelineLaneRowsBodies.self)
+        #endif
+        return LazyVStack(alignment: .leading, spacing: 0) {
+            ForEach(tracks) { track in
+                TimelineLaneRow(track: track, mapping: mapping, context: context).equatable()
+            }
+        }
+        .frame(width: width, alignment: .leading)
+    }
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.tracks == rhs.tracks && lhs.mapping == rhs.mapping && lhs.context === rhs.context && lhs.width == rhs.width
+    }
+}
+
+/// The key TimelineLaneRows counts its body runs under in BodyTally, over every ID type: the play-tick
+/// test reads it, since a frame change must never re-evaluate the lanes' ForEach.
+enum TimelineLaneRowsBodies {}
+
+/// The track names, one per track, behind one `.equatable()` for the reason
+/// TimelineLaneRows gives; a name's press reads `onSelectTrack` from the context.
+struct TimelineNameRows<ID: Hashable & Sendable>: View, Equatable {
+    let tracks: [TimelineTrack<ID>]
+    let idPrefix: String?
+    let context: TimelineLaneContext<ID>
+
+    var body: some View {
         LazyVStack(alignment: .leading, spacing: 0) {
             ForEach(tracks) { track in
                 let nameID = TimelineLaneSpeech.identifier(idPrefix, "name", track.id)
-                Button { onSelectTrack(track.id) } label: {
+                Button { context.actions.onSelectTrack(track.id) } label: {
                     Text(track.name)
                         .font(track.isSelected ? SuiteFont.headline : SuiteFont.body)
                         .lineLimit(1)
@@ -343,19 +403,10 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 .accessibilityIdentifier(nameID ?? "", isEnabled: nameID != nil)
             }
         }
-        .frame(width: SuiteSize.timelineLabelColumn)
     }
 
-    private func lanes(width: CGFloat) -> some View {
-        LazyVStack(alignment: .leading, spacing: 0) {
-            ForEach(tracks) { track in
-                TimelineLaneRow(track: track, mapping: mapping, context: laneContext).equatable()
-            }
-        }
-        .frame(width: width, alignment: .leading)
-        // Only the lanes' access modifiers read it, so a scroll re-runs those, never a lane's Canvas.
-        .environment(\.timelineVisibleX, snapshot ? nil : visibleX)
-        .simultaneousGesture(pinchGesture, isEnabled: !snapshot)
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.tracks == rhs.tracks && lhs.idPrefix == rhs.idPrefix && lhs.context === rhs.context
     }
 }
 
