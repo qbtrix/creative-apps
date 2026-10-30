@@ -1,5 +1,6 @@
 // HaloLiveEdit.swift: the project a drag shows while it lasts, out of the
-// window's State. Every write to the window's HaloProject re-runs HaloWindow
+// window's State. A viewer drag of a liftable layer (HaloDrawLift) also
+// keeps its `lift` here, so its samples only move the lifted layer. Every write to the window's HaloProject re-runs HaloWindow
 // and lays out the whole window (sidebar, menus, every lane and row), so a
 // viewer drag or an inspector scrub that wrote the project per mouse sample
 // ran the window per sample. Instead each sample puts the window's current
@@ -25,6 +26,10 @@ import SwiftUI
     /// The window's project with the live drag's latest sample applied; nil
     /// with no drag live.
     var project: HaloProject?
+    /// The live viewer drag's frame, drawn once around the dragged layer
+    /// (HaloDrawLift), which moves by `project`'s drag delta; nil with no
+    /// lifted drag. HaloViewerGestures sets it at the drag's first move.
+    var lift: HaloDrawLift?
     /// The window's project now; HaloWindow sets it once it appears.
     @ObservationIgnored var current: @MainActor () -> HaloProject? = { nil }
     /// The window's project ticked to the frame playing now, or scrubbed to

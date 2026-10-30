@@ -1,0 +1,5 @@
+[
+{"label":"a layer over the lift with another blend mode still lifts","file":"Sources/HaloModel/HaloDrawLift.swift","find":"items[i...].allSatisfy","replace":"items[i...i].allSatisfy","tests":"HaloDrawLiftTests"},
+{"label":"the lifted layer is left in the backdrop under it","file":"Sources/HaloModel/HaloDrawLift.swift","find":"below: part(items[..<i])","replace":"below: part(items[...i])","tests":"HaloDrawLiftTests"},
+{"label":"the lift takes the drag's offset list, so it moves twice","file":"Sources/HaloModel/HaloDrawLift.swift","find":"services.drawing.drawList(comp, at: comp.playheadFrame).lift(drag.layerID)","replace":"(viewerDrawList ?? services.drawing.drawList(comp, at: comp.playheadFrame)).lift(drag.layerID)","tests":"HaloDrawLiftTests"}
+]

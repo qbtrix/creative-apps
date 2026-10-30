@@ -5,8 +5,11 @@
 // at the artboard's own size. A drag (minimum distance 0) sends
 // `beginViewerDrag` at its start, which hits and selects. Its moves go to the
 // window's HaloLiveEdit as the window's project with that move applied
-// (`moveViewerDrag` on a copy, HaloLiveEdit.show), so only the drawn layers re-run per sample,
-// at most once per display refresh (HaloViewerPace, #4276; the latest move wins);
+// (`moveViewerDrag` on a copy, HaloLiveEdit.show), at most once per display
+// refresh (HaloViewerPace, #4276; the latest move wins). Its first move also
+// lifts the dragged layer (`viewerLift` into HaloLiveEdit.lift), so a sample
+// only moves the lifted layer and redraws none (render contract rule 3); a
+// layer that can't be lifted redraws the drawn layers per sample;
 // the release sends the last `moveViewerDrag` and `endViewerDrag`, and the
 // Model records one "Move". Hosted without a HaloLiveEdit, each move is sent
 // as it comes. A click focuses it, so Escape sends `cancelViewerDrag` and
@@ -67,6 +70,7 @@ struct HaloViewerGestures: View {
                 start = nil
                 pace.cancel()
                 live?.project = nil
+                live?.lift = nil
                 perform(.cancelViewerDrag)
             }
             .accessibilityHidden(true)
@@ -95,6 +99,7 @@ struct HaloViewerGestures: View {
                 let first = pace.isFresh
                 // A press over empty space started no drag; there is nothing to preview.
                 guard model.viewerDrag != nil || live.project == nil else { return }
+                if first { live.lift = Self.lift(live.current() ?? model, at: start) }
                 pace.move(to: now, probe: probe) { point in
                     live.show { shown in
                         // The window may not have drawn the begin yet; the copy takes it too.
@@ -113,7 +118,16 @@ struct HaloViewerGestures: View {
                 perform(.endViewerDrag)
                 (dragging, start) = (false, nil)
                 live?.project = nil
+                live?.lift = nil
             }
+    }
+
+    /// The lift of a drag pressed at `start` on `project`; nil when the
+    /// press hits nothing or the layer can't be lifted.
+    nonisolated static func lift(_ project: HaloProject, at start: HaloPoint) -> HaloDrawLift? {
+        var begun = project
+        if begun.viewerDrag == nil { begun.beginViewerDrag(at: start) }
+        return begun.viewerLift
     }
 
     /// The modifiers held now: Shift squares a shape, Option grows it from the centre.
