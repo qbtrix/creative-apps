@@ -177,7 +177,7 @@ extension DesignWorkspace {
         held.replace(with: snapshot.heldIDs)
         (selectedPageID, selectedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs)
         (pageCount, nodeCount) = (Swift.max(pageCount, snapshot.pageCount), Swift.max(nodeCount, snapshot.nodeCount))
-        if let page = selectedPage { for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) } }
+        if let page = selectedPage { expandAncestors(of: selectedNodeIDs, in: page.nodes) }
     }
 
     /// A gesture or discarded text edit: the document goes back to `snapshot` exactly, counters
