@@ -10,7 +10,11 @@
 // `History.agentSteps` keeps only steps whose origin is `.agent` (#6028), with
 // each one's record time from AgentStepDates (History keeps no date), which an
 // app's history stamps after every record. An app adapter adds only how a
-// step's undo payload names its layers. Linux-safe.
+// step's undo payload names its layers. AgentWork is what the "AI is
+// working" marks read (SuiteUI AgentWorking): the open span's name and the
+// newest applied step when an agent made it, O(1) from History, with the
+// rule for when a change wakes the marks and how long they linger
+// (`linger`, 0.6 s) so a burst of sub-second steps never flickers. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -107,5 +111,36 @@ extension History {
             return AgentStepRecord(id: step.idAfter, name: step.name, client: client, request: request,
                                    date: dates.dates[step.idAfter] ?? .distantPast, layers: layers(step, after))
         }
+    }
+}
+
+/// What the "AI is working" marks read: the open request span and the newest applied step when an agent made it.
+public struct AgentWork: Hashable, Sendable {
+    /// The open span's name (`history.begin`), nil when none is open.
+    public var request: String?
+    /// The id (`idAfter`) of the last applied step when an agent made it, nil when a person did or there is none.
+    public var lastStep: Int?
+
+    public init(request: String? = nil, lastStep: Int? = nil) { (self.request, self.lastStep) = (request, lastStep) }
+
+    /// How long the marks stay after the last step or the span's end, so a burst of fast steps never flickers.
+    public static let linger: Double = 0.6
+
+    /// The work to show for `linger` after the change from `old` to `new`, nil when the change is no agent
+    /// activity. `seen` is the newest agent step already shown: an undo or redo back to an older one wakes nothing.
+    /// An ended span keeps its name while it lingers.
+    public static func wake(from old: AgentWork, to new: AgentWork, seen: Int) -> AgentWork? {
+        if old.request != nil, new.request == nil { return old }
+        if new.request != old.request { return new }
+        if let step = new.lastStep, step > seen { return new }
+        return nil
+    }
+}
+
+extension History {
+    /// The open span and the newest applied step if an agent made it: O(1), safe to read in any body.
+    public var agentWork: AgentWork {
+        guard let last = undoSteps.last, case .agent = last.origin else { return AgentWork(request: openRequest) }
+        return AgentWork(request: openRequest, lastStep: last.idAfter)
     }
 }
