@@ -309,3 +309,4 @@ utc	stage	event	ref	note
 2026-10-30T02:51Z	3	check-in	pending	halo 40984055894 running; full 40972666404 cancelled; blockers open
 2026-10-30T04:23Z	3	check-in	ok	halo 40984055894: H-J12 :613 known, PlayHittable pass, no disabled-dim; blockers open
 2026-10-30T06:28Z	3	check-in	quiet	full 40985710179 0 Halo cases (Photo timeout); full 41010462552 waiting; blockers open
+2026-10-30T08:30Z	3	check-in	quiet	full 41010462552 cancelled; halo 41023214868 + full 41026647690 waiting; blockers open
