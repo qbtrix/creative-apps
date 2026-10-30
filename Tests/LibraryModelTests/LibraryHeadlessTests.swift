@@ -66,6 +66,25 @@ import Testing
         #expect(!LibraryHeadless.plainWords(CancellationError()).contains("("))
     }
 
+    /// A `.library` re-zipped with compression (Finder's Compress, `zip` without `-0`) holds deflated entries, which
+    /// core's stored-only `ZipStore` refuses: open says so in words, never the `compressedEntry(...)` case dump.
+    @Test func openingADeflatedLibrarySaysWhyInPlainWords() throws {
+        var bytes = [UInt8](try Self.input("import-rate-export"))
+        let central = try #require((0..<bytes.count - 3).first { i in bytes[i..<(i + 4)] == [0x50, 0x4B, 0x01, 0x02] })
+        bytes[central + 10] = 8  // the first entry's method: deflate
+        let name = String(decoding: bytes[(central + 46)..<(central + 46 + Int(bytes[central + 28]))], as: UTF8.self)
+        #expect(throws: CatalogError.failed(id: "open", message: "Couldn't open d.library: \(name) is compressed inside "
+            + "it, and Library reads only uncompressed .library files. Zip it again with no compression (zip -0).")) {
+            try LibraryHeadless.open(Data(bytes), name: "d.library")
+        }
+        #expect(throws: CatalogError.failed(id: "open", message: "x.library isn't a Library file.")) {
+            try LibraryHeadless.open(Data("not a zip".utf8), name: "x.library")
+        }
+        #expect(LibraryHeadless.openWords(CodecError.damaged("CRC of a"), name: "a.library")
+            == "a.library is damaged and can't be opened.")
+        #expect(!LibraryHeadless.openWords(CancellationError(), name: "a.library").contains("("))
+    }
+
     @Test func newAndSummary() throws {
         let doc = try LibraryHeadless.new(.object([:]))
         #expect(doc.library.items.isEmpty && doc.images.isEmpty)
