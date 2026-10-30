@@ -6,8 +6,11 @@
 // (DV-12), then levels, the curve and saturation, `ImagingProgram`'s, run on
 // CoreRender's CPU backend as Photo runs them, on one surface. A control at its neutral value runs no step, so neutral
 // settings return the input untouched.
-// The histogram is CoreRaster's, 256 bins over the sRGB values of the buffer
-// it is given (the rendered one). A slider in `waiting` throws
+// Every step works pixel by pixel, so the steps run on the buffer's 256 px
+// tiles across the cores (`LiveParallel`) and the tiles go back in place: the
+// same pixels as one pass over the whole buffer, a fraction of the time.
+// The histogram is CoreRaster's counts, 256 bins over the sRGB values of the
+// buffer it is given (the rendered one), counted by `LiveHistogram`. A slider in `waiting` throws
 // `.renderFailed` with its reason; none waits today. After
 // the tone, a crop (crop CR-4) turns the buffer by its angle and cuts
 // `LiveCrop`'s frame for the buffer's own size out of the turned pixels.
@@ -75,8 +78,24 @@ public struct LiveDevelop: DevelopRendering {
         }
     }
 
-    /// `steps` on `b` through CoreRender's CPU backend, on one surface read once; none returns `b` untouched.
+    /// `steps` on `b`, tile by tile across the cores; none returns `b` untouched.
     static func run(_ steps: [ToneAdjustment], on b: PixelBuffer) throws -> PixelBuffer {
+        guard !steps.isEmpty else { return b }
+        let columns = b.tileColumns
+        do {
+            let tiles = try LiveParallel.run(columns * b.tileRows) { i in
+                try serial(steps, on: try b.tile(column: i % columns, row: i / columns))
+            }
+            var out = b
+            for (i, tile) in tiles.enumerated() { try out.replaceTile(column: i % columns, row: i / columns, with: tile) }
+            return out
+        } catch {
+            throw LibraryError.renderFailed("the renderer couldn't apply its develop settings")
+        }
+    }
+
+    /// `steps` on `b` through CoreRender's CPU backend, on one surface read once; none returns `b` untouched.
+    static func serial(_ steps: [ToneAdjustment], on b: PixelBuffer) throws -> PixelBuffer {
         guard !steps.isEmpty else { return b }
         do {
             let cpu = CPUBackend()
@@ -94,8 +113,6 @@ public struct LiveDevelop: DevelopRendering {
     }
 
     public func histogram(of buffer: PixelBuffer) throws -> HistogramBins {
-        let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .sRGB)
-        return HistogramBins(red: h.red, green: h.green, blue: h.blue,
-                             shadowClipped: h.shadowClipped, highlightClipped: h.highlightClipped)
+        try LiveHistogram.histogram(of: buffer)
     }
 }
