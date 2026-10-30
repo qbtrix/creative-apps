@@ -124,7 +124,7 @@ struct HaloViewerGestures: View {
 
     /// The lift of a drag pressed at `start` on `project`; nil when the
     /// press hits nothing or the layer can't be lifted.
-    static func lift(_ project: HaloProject, at start: HaloPoint) -> HaloDrawLift? {
+    nonisolated static func lift(_ project: HaloProject, at start: HaloPoint) -> HaloDrawLift? {
         var begun = project
         if begun.viewerDrag == nil { begun.beginViewerDrag(at: start) }
         return begun.viewerLift
