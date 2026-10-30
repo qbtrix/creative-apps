@@ -53,14 +53,16 @@ struct DesignPainted: Identifiable, Sendable {
 extension DesignPage {
     /// The nodes the canvas paints, back to front: depth first, skipping every hidden subtree.
     var painted: [DesignPainted] {
-        func walk(_ nodes: [DesignNode], backdrop: DesignColor?, opacity: Double) -> [DesignPainted] {
-            nodes.filter { !$0.isHidden }.flatMap { node in
+        var out: [DesignPainted] = []
+        func walk(_ nodes: [DesignNode], backdrop: DesignColor?, opacity: Double) {
+            for node in nodes where !node.isHidden {
                 let faded = opacity * drawnOpacity(node.opacity)
-                return [DesignPainted(node: node, backdrop: backdrop, opacity: faded)]
-                    + walk(node.children, backdrop: node.kind == .frame ? node.fill : backdrop, opacity: faded)
+                out.append(DesignPainted(node: node, backdrop: backdrop, opacity: faded))
+                walk(node.children, backdrop: node.kind == .frame ? node.fill : backdrop, opacity: faded)
             }
         }
-        return walk(nodes, backdrop: nil, opacity: 1)
+        walk(nodes, backdrop: nil, opacity: 1)
+        return out
     }
 }
 
@@ -188,6 +190,59 @@ struct DesignArtwork: View {
         Canvas { context, _ in paintArtwork(painted, in: context, scale: scale, editing: editing) }
             .allowsHitTesting(false)
             .accessibilityHidden(true)
+    }
+}
+
+/// The page's artwork on the canvas, compared by its inputs (`.equatable()`), so a step that leaves
+/// the page as it was (a marquee, a hover) repaints nothing. During a move drag (`lift`) it draws
+/// the page as it was at the press in three parts: the nodes under the moved run, the run, and
+/// the nodes over it. Each part is its own DesignArtwork with unchanged inputs, so a step only
+/// moves the run's view by the drag's offset and paints no node (render contract rule 3).
+struct DesignPageArtwork: View, Equatable {
+    let page: DesignPage
+    let zoom: Double
+    var editingTextID: String?
+    var lift: DesignMoveLift?
+
+    var body: some View {
+        if let lift {
+            let scale = usable(zoom)
+            ForEach([DesignLiftPart.Part.under, .run, .over], id: \.self) { part in
+                DesignLiftPart(page: lift.page, firstID: lift.firstID, lastID: lift.lastID, part: part, zoom: zoom,
+                               editingTextID: editingTextID)
+                .equatable()
+                .offset(x: part == .run ? lift.offset.x * scale : 0, y: part == .run ? lift.offset.y * scale : 0)
+            }
+        } else {
+            DesignArtwork(painted: page.painted, zoom: zoom, editingTextID: editingTextID)
+        }
+    }
+}
+
+/// One part of a lifted page (DesignPageArtwork): the painted nodes before, in, or after the moved run.
+struct DesignLiftPart: View, Equatable {
+    enum Part { case under, run, over }
+    let page: DesignPage
+    let firstID, lastID: String
+    let part: Part
+    let zoom: Double
+    var editingTextID: String?
+
+    var body: some View {
+        DesignArtwork(painted: Self.slice(page.painted, part, from: firstID, to: lastID),
+                      zoom: zoom, editingTextID: editingTextID)
+    }
+
+    /// `part` of `painted`, the run being `first` through `last`; the run's own ids missing, all of it under.
+    nonisolated static func slice(_ painted: [DesignPainted], _ part: Part, from first: String, to last: String) -> [DesignPainted] {
+        guard let i = painted.firstIndex(where: { $0.id == first }),
+              let j = painted[i...].firstIndex(where: { $0.id == last })
+        else { return part == .under ? painted : [] }
+        switch part {
+        case .under: return Array(painted[..<i])
+        case .run: return Array(painted[i...j])
+        case .over: return Array(painted[(j + 1)...])
+        }
     }
 }
 
