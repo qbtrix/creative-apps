@@ -104,7 +104,10 @@ struct PhotoWindow: View {
     }
 
     /// A window on `model`: the launch workspace in the app, a test's own in tests, at `zoom`.
+    /// The workspace reads placed and dropped images through ImageIO from the start, so a drop takes what it offers.
     init(model: PhotoWorkspace = PhotoWindow.launchWorkspace(), zoom: Double = 1) {
+        var model = model
+        model.readImages(with: ImageIOCodec())
         self.init(session: PhotoSession(model), zoom: zoom)
     }
 
@@ -276,6 +279,10 @@ struct PhotoWindow: View {
         case .pickLayer(let id, let pick): model.pickLayer(id, pick)
         case .selectAllLayers: model.selectAllLayers()
         case .toggleVisibility(let id): model.toggleVisibility(id)
+        case .agent(.setHidden(let ids, let hidden)): model.setLayersHidden(ids, hidden: hidden)
+        case .agent(.select(let ids)): model.selectLayers(ids)
+        case .agent(.undoRequest(let title)):
+            _ = run("history.undo-request", ["name": .string(title)], failing: "The agent's request can't be undone.")
         case .opacity(let id, let percent): model.setOpacity(id, percent: percent)
         case .blendMode(let id, let mode): model.setBlendMode(id, mode)
         case .moveLayers(let from, let to): model.moveLayers(fromOffsets: Array(from), toOffset: to)

@@ -6,7 +6,8 @@
 // newest undo entry reads its `coalesceKey`. `undo` and `redo` are the kernel's
 // stacks projected as `HaloHistoryEntry` arrays, newest last, as before; the
 // live and fake `ProjectHistory` both go through `record`, `endRun` and `step`
-// here. Linux-safe.
+// here, so `record` stamps each agent step's time for the AI tab
+// (`agentDates`, HaloAgentActivity+Kernel.swift). Linux-safe.
 import SuiteKernel
 
 /// Undo and redo stacks, newest last, read from the kernel history. Only a
@@ -18,6 +19,8 @@ public struct HaloHistory: Sendable, Hashable {
     var kernel = History<HaloDocumentState>(limit: HaloHistory.limit)
     /// The open run's key, as the kernel keeps it; nil once the run ends.
     var runKey: String?
+    /// When each agent step was recorded (the AI tab's time; the kernel keeps no date).
+    var agentDates = AgentStepDates()
 
     public init(undo: [HaloHistoryEntry] = [], redo: [HaloHistoryEntry] = []) {
         rebuild(undo: undo, redo: redo)
@@ -56,6 +59,7 @@ public struct HaloHistory: Sendable, Hashable {
     mutating func record(_ name: String, before: HaloDocumentState, coalesceKey: String?) {
         kernel.record(name, before, key: coalesceKey)
         runKey = coalesceKey
+        agentDates.stamp(kernel, limit: HaloHistory.limit)
     }
 
     /// Ends the open run, so the next record is its own step.
@@ -94,5 +98,7 @@ public struct HaloHistory: Sendable, Hashable {
         for entry in redo.reversed() { fresh.record(entry.name, entry.before) }
         for entry in redo { _ = fresh.undo { _ in entry.before } }
         kernel = fresh
+        // A HaloHistoryEntry carries no origin, so rebuilt steps are no agent's and the old ids' stamps go.
+        agentDates = AgentStepDates()
     }
 }

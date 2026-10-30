@@ -3,7 +3,7 @@
 // none, else "Design"), the toolbar's nine commands (DesignToolbarItem: New,
 // Open and Save beside the title; Undo, Redo, History and the zoom commands
 // trailing, History toggling the window's panel, DesignHistoryArea),
-// the pages and layer tree in the sidebar (DesignLayersPanel), the canvas in
+// the sidebar's Layers and AI tabs (DesignSidebarTabs), the canvas in
 // EditorDetail with the floating tool palette over its leading edge while a
 // file is open and the status line under it (zoom, "Page 1440 × 1024 pt", the last
 // message, "2 Layers" with a selection, the save state's slot
@@ -56,7 +56,7 @@ struct DesignEditor: View, BodyCounted {
             actions: Self.trailingItems.map { action($0) },
             inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
         ) {
-            DesignLayersPanel(model: model, perform: perform)
+            DesignSidebarTabs(model: model, perform: perform)
         } content: {
             EditorDetail {
                 DesignCanvas(model: model, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform)

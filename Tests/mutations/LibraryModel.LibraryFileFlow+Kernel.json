@@ -2,8 +2,8 @@
   {
     "label": ".oneImportStep: a drop records one undo step per file",
     "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
-    "find": "history.kernel.record(\"Import\", CatalogChange(photos: [], removing: fresh))",
-    "replace": "for photo in fresh { history.kernel.record(\"Import\", CatalogChange(photos: [], removing: [photo])) }",
+    "find": "history.record(\"Import\", CatalogChange(photos: [], removing: fresh))",
+    "replace": "for photo in fresh { history.record(\"Import\", CatalogChange(photos: [], removing: [photo])) }",
     "tests": "LibraryFileFlowTests.swift"
   },
   {

@@ -40,6 +40,8 @@ enum PhotoIntent {
     /// A Layers row click with its mode (Shift extends, Command toggles); Select > All Layers picks every layer.
     case pickLayer(PhotoLayer.ID, Pick), selectAllLayers
     case toggleVisibility(PhotoLayer.ID)
+    /// A gesture in the sidebar's AI tab (SuiteUI AgentActivityList).
+    case agent(AgentActivityAction)
     case opacity(PhotoLayer.ID, Double)
     case blendMode(PhotoLayer.ID, CoreRaster.BlendMode)
     case moveLayers(IndexSet, Int)

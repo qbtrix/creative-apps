@@ -242,7 +242,7 @@ extension DesignWorkspace {
             marquee = rect
             let found = services.marquee.layers(touching: rect, in: parent, on: page)
             selectedNodeIDs = SelectTool.box(selection, found: found, extending: false).ordered
-            for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) }
+            expandAncestors(of: selectedNodeIDs, in: page.nodes)
         case .moveSeveral, .resizeSeveral, .optionCopy, .turn:
             applyStep(&current, delta: delta, modifiers: modifiers)
         case .draw(let kind):

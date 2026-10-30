@@ -60,10 +60,10 @@ struct DesignCanvas: View {
             onDrag: model.tool == .eyedropper ? nil : { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
             onKey: model.editingTextID == nil ? { key($0) } : nil, onPointer: feedback.onPointer
         ) {
-            DesignArtwork(painted: painted, zoom: zoom, editingTextID: model.editingTextID)
+            DesignPageArtwork(page: page, zoom: zoom, editingTextID: model.editingTextID, lift: shown.moveLift).equatable()
         } overlay: {
             DesignPastEdge(page: page, painted: painted, zoom: zoom, editingTextID: model.editingTextID)
-            DesignFrameLabels(painted: painted, zoom: zoom)
+            DesignFrameLabels(labels: DesignFrameLabel.labels(on: page), zoom: zoom)
             DesignSelectionMarks(model: shown, painted: painted, zoom: zoom)
             if let marquee = shown.marquee { SelectBoxMark(rect: marquee.cgRect, zoom: zoom) }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
