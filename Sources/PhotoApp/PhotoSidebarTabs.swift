@@ -1,41 +1,23 @@
-// PhotoSidebarTabs.swift: Photo's sidebar, SuiteUI's SegmentedTabs over two
-// tabs: Layers (PhotoLayerList) and AI (SuiteUI AgentActivityList over the
-// workspace's `agentRequests`, #6029). The picked tab is this view's own
-// state and the AI tab reads the PhotoSession's `document` facet itself, so
-// switching tabs or opening a request row runs no window body and no canvas
-// render. Values in, intents out: AI gestures leave as `.agent(...)`.
+// PhotoSidebarTabs.swift: Photo's sidebar, SuiteUI's AgentSidebarTabs over
+// Layers (PhotoLayerList) and AI (SuiteUI AgentActivityList over the
+// workspace's `agentRequests`, #6029). The AI tab reads the PhotoSession's
+// `document` facet itself, so switching tabs or opening a request row runs
+// no window body and no canvas render. Values in, intents out: AI gestures
+// leave as `.agent(...)`.
 import PhotoModel
 import SuiteUI
 import SwiftUI
 
-enum PhotoSidebarTab: Hashable, Sendable {
-    case layers, ai
-}
-
 struct PhotoSidebarTabs: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
-    @State var tab: PhotoSidebarTab
-
-    init(model: PhotoWorkspace, perform: @escaping PhotoPerform, tab: PhotoSidebarTab = .layers) {
-        (self.model, self.perform) = (model, perform)
-        _tab = State(initialValue: tab)
-    }
-
-    static let tabs = [
-        InspectorOption(id: PhotoSidebarTab.layers, title: "Layers"),
-        InspectorOption(id: PhotoSidebarTab.ai, title: "AI"),
-    ]
+    var tab: AgentSidebarTab = .primary
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SegmentedTabs("Sidebar", tabs: Self.tabs, selection: tab, id: "photo.sidebar.tabs", onChange: { tab = $0 })
-                .padding(.horizontal, SuiteSpacing.s)
-                .padding(.vertical, SuiteSpacing.xs)
-            switch tab {
-            case .layers: PhotoLayerList(model: model, perform: perform)
-            case .ai: PhotoAgentTab(model: model, perform: perform)
-            }
+        AgentSidebarTabs("Layers", id: "photo.sidebar.tabs", tab: tab) {
+            PhotoLayerList(model: model, perform: perform)
+        } ai: {
+            PhotoAgentTab(model: model, perform: perform)
         }
     }
 }

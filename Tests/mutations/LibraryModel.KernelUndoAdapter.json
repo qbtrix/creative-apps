@@ -16,8 +16,8 @@
   {
     "label": "edits record without their coalesce key, so a drag is many steps",
     "file": "Sources/LibraryModel/LibraryUndoAdapter.swift",
-    "find": "history.kernel.record(name, CatalogChange(photos: before), key: coalesceKey)",
-    "replace": "history.kernel.record(name, CatalogChange(photos: before))",
+    "find": "history.record(name, CatalogChange(photos: before), key: coalesceKey)",
+    "replace": "history.record(name, CatalogChange(photos: before))",
     "tests": "LibraryHistoryTests"
   },
   {
