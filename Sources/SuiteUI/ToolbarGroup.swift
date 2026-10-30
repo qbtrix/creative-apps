@@ -89,11 +89,12 @@ public protocol PaletteTool: Hashable {
 
 /// A tool's canvas gesture by behaviour class. Two tools of one class owe the same budget, in any app.
 public enum ToolGesture: String, CaseIterable, Sendable {
-    /// Drags pixels or objects that already exist (Move, Select).
+    /// Drags pixels or objects that already exist (a Move tool, Flare's select arrow).
     case movesContent
     /// Lays down or changes pixels along the pointer (Brush, Eraser, Clone, Bucket, Gradient).
     case paints
-    /// Picks an area or the objects in it (Marquee, Lasso, Wand, a crop frame).
+    /// Picks an area or the objects in it (Marquee, Lasso, Wand, a crop frame), or Select (V): a click picks, a drag
+    /// pressed on an object moves it, a drag on empty canvas boxes.
     case selects
     /// Places a new object or draws a new shape (Rectangle, Frame, Text).
     case creates
