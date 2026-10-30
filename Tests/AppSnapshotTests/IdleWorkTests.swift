@@ -193,7 +193,7 @@ extension BodyCountSuites {
         {
             var model = PhotoWorkspace(services: PhotoRenderBudgetTests.services)
             try model.openStress(width: 1024, height: 576, layers: 60)
-            model.selectTool(.move)
+            model.selectTool(.select)
             let rendering = PhotoRendering(preference: FakeRenderingPreference(choice: choice))
             let opened = photoCounts()
             let w = RenderBudgetWindow(AnyView(PhotoWindow(model: model).environment(\.photoRendering, rendering)))
@@ -351,7 +351,7 @@ extension BodyCountSuites {
             }
             let above = 4
             model.selectLayer(model.layers[above].id)
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
             let canvas = try #require(model.canvas)
             let tiles = PhotoRenderer.tiles(of: canvas, in: .all)

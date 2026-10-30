@@ -41,8 +41,9 @@ import Testing
             model.selectTool(tool)
             model.drag(from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 200, y: 160), modifiers: [])
             #expect(model.removeStroke == nil, "\(tool)")
-            // Gradient's line, and the area, Crop and Select tools' selection, crop or select box, ride the live drag line.
-            let overlayOnly: Set<PhotoTool> = [.gradient, .marquee, .ellipse, .lasso, .polygon, .wand, .crop, .select]
+            // Gradient's line, and the area and Crop tools' selection or crop box, ride the live drag line. Select
+            // pressed here lands on the picture, so its drag is a move, not a box.
+            let overlayOnly: Set<PhotoTool> = [.gradient, .marquee, .ellipse, .lasso, .polygon, .wand, .crop]
             #expect(model.dragShowsLineOnly == overlayOnly.contains(tool), "\(tool)")
         }
     }

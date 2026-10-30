@@ -13,7 +13,7 @@
 // layout and display it forces, has a p95 of at most 4 ms on a release build with testing and DEBUG on
 // (Tests/render-budgets.md). `PixelMover` runs both measurements over every drag that moves a layer's
 // existing pixels (each PhotoTool but the paint, area, crop, pick, type and path tools, plus Free Transform's
-// body drag), so a Move-tool drag meets the same budget and a new pixel-moving tool fails until it uses the
+// body drag), so a Select drag pressed on a layer (the Move it folds in) meets the same budget and a new pixel-moving tool fails until it uses the
 // lift. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -131,7 +131,7 @@ extension BodyCountSuites {
         static func draft() throws -> RenderBudgetPhotoTransformTests.Draft {
             var model = PhotoWorkspace()
             try model.newImage(DocumentSetup(width: 400, height: 300))
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
             return RenderBudgetPhotoTransformTests.Draft(model: model, before: try #require(model.transformSelection))
         }
@@ -184,7 +184,7 @@ extension BodyCountSuites {
         @Test(.timeLimit(.minutes(3))) func rotateDragStepIsUnder4MillisecondsOn24Megapixels() async throws {
             var model = PhotoWorkspace()
             try model.newImage(DocumentSetup(width: 6000, height: 4000))
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
             let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
             defer { w.close() }
@@ -260,7 +260,7 @@ enum PixelMover: CustomStringConvertible, Sendable {
         switch self {
         case .tool(let tool): model.selectTool(tool)
         case .freeTransform:
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
         }
         return model

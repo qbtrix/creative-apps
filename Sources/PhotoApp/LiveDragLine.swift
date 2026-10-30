@@ -30,9 +30,11 @@ import SwiftUI
     private(set) var shown: PhotoWorkspace?
 
     /// `moves` run on the copy, made from `model` at the first, when `model`
-    /// holds a line-only drag; false when it doesn't, for the window to apply them.
+    /// holds a line-only drag pressed where the first move starts, or the copy
+    /// is live already (a later sample's `from` is the last sample, not the
+    /// press); false otherwise, for the window to apply them.
     func drags(_ moves: [PhotoStrokeMove], on model: PhotoWorkspace, zoom: Double) -> Bool {
-        guard model.dragShowsLineOnly else { return false }
+        guard let press = moves.first, copy.shown != nil || model.dragShowsLineOnly(pressAt: press.from) else { return false }
         var live = copy.take() ?? model
         live.drags(moves, zoom: zoom)
         copy.begin(live)

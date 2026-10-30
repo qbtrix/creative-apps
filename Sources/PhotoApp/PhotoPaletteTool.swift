@@ -24,7 +24,6 @@ extension PhotoTool {
     /// The tool's behaviour class (SuiteUI's ToolGesture), which the gesture contract holds it to.
     public var gesture: ToolGesture {
         switch self {
-        case .move: .movesContent
         case .select, .marquee, .ellipse, .lasso, .polygon, .wand, .crop: .selects
         case .brush, .eraser, .clone, .spotHeal, .heal, .remove, .bucket, .gradient: .paints
         case .text: .creates

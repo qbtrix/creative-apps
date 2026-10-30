@@ -1,10 +1,11 @@
 // RenderBudgetPhotoSelectTests.swift: the Select tool on the real Photo window does no work while the pointer is
 // down (#6012). It hosts PhotoWindow on a 24 MP image (6000 x 4000: an opaque background under a layer painted
-// only near its top-left) and sends the window's drag intents: a click, then a 120-sample box drag. The whole
-// gesture, its press too, runs on LiveDragLine's copy, so with the pointer down the editor body runs 0 times and
-// the canvas composites 0 regions (PhotoRenderCount, debug only); the box shows on the overlay. The release picks:
-// the click the background, the box both layers. For comparison it prints what the same click costs with the Move
-// tool, the only pointer tool Photo had before. Nested in BodyCountSuites: it reads process-wide counters. macOS only.
+// only near its top-left) and sends the window's drag intents: a click on the background, then a 120-sample box
+// drag from off the canvas (the background is opaque, so a press on it would move it). The click runs on the live
+// transform (a press on a layer is a move that went nowhere), the box's whole gesture, its press too, on
+// LiveDragLine's copy, so with the pointer down the editor body runs 0 times and the canvas composites 0 regions
+// (PhotoRenderCount, debug only); the box shows on the overlay. The release picks: the click the background, the
+// box both layers. Nested in BodyCountSuites: it reads process-wide counters. macOS only.
 #if canImport(AppKit)
 import AppKit
 import CoreRaster
@@ -39,11 +40,11 @@ extension BodyCountSuites {
             #expect(down.regions == 0, "a Select press composited \(down.regions) regions")
             #endif
 
-            // A box from the corner across both layers, one sample per tick.
+            // A box from off the corner across both layers, one sample per tick.
             down = try await Self.whileDown(w) {
-                send(.drag(CGPoint(x: 0, y: 0), CGPoint(x: 0, y: 0)))
+                send(.drag(CGPoint(x: -20, y: -10), CGPoint(x: -20, y: -10)))
                 for i in 1...Self.samples {
-                    let (a, b) = (Double(i - 1) * 10, Double(i) * 10)
+                    let (a, b) = (Double(i - 1) * 10 - 20, Double(i) * 10 - 20)
                     send(.drag(CGPoint(x: a, y: a / 2), CGPoint(x: b, y: b / 2)))
                 }
             }
@@ -58,17 +59,6 @@ extension BodyCountSuites {
             #expect(down.bodies == 0, "the box drag ran the editor body \(down.bodies) times over \(Self.samples) samples")
             #expect(down.regions == 0, "the box drag composited \(down.regions) regions")
             #endif
-        }
-
-        /// The baseline: the same click with the Move tool, printed, not checked (Move is another branch's work).
-        @Test(.timeLimit(.minutes(3))) func moveClickBaseline() async throws {
-            let (model, _, _) = try Self.document(.move)
-            let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
-            defer { w.close() }
-            let (_, send) = try await Self.open(w)
-            let down = try await Self.whileDown(w) { send(.drag(CGPoint(x: 3000, y: 2000), CGPoint(x: 3000, y: 2000))) }
-            send(.endDrag)
-            print("RENDER-BUDGET photo move click (baseline), 24 MP: \(down.bodies) editor bodies, \(down.regions) regions with the pointer down")
         }
 
         /// The 24 MP image with `tool` picked and the clear top layer selected: a background, and a top layer
