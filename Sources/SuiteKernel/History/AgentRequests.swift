@@ -6,8 +6,11 @@
 // in one span form one request named by the span; steps outside a span from
 // one client, each within `gap` (60 s) of the one before, form one request
 // named by its first step. Requests come out newest first, each with its
-// steps in order and its layers once each. User steps never come in: the app
-// adapter keeps only steps whose origin is `.agent` (#6028). Linux-safe.
+// steps in order and its layers once each. User steps never come in:
+// `History.agentSteps` keeps only steps whose origin is `.agent` (#6028), with
+// each one's record time from AgentStepDates (History keeps no date), which an
+// app's history stamps after every record. An app adapter adds only how a
+// step's undo payload names its layers. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -72,5 +75,37 @@ public enum AgentRequests {
         guard step.client == request.client, let prev = request.steps.last else { return false }
         if let title = step.request { return request.isSpan && title == request.title && prev.request == title }
         return !request.isSpan && step.date.timeIntervalSince(prev.date) <= gap
+    }
+}
+
+/// When each agent step was recorded, by its `idAfter` (History keeps no date): the AI tab's time.
+public struct AgentStepDates: Sendable, Hashable {
+    public private(set) var dates: [Int: Date] = [:]
+
+    public init() {}
+
+    /// Stamps the step `history` just recorded when an agent made it; once the
+    /// stamps outnumber twice `limit`, drops those of steps it no longer holds.
+    public mutating func stamp<Payload>(_ history: History<Payload>, limit: Int) {
+        guard let last = history.undoSteps.last, case .agent = last.origin else { return }
+        dates[last.idAfter] = Date()
+        if dates.count > 2 * limit {
+            let live = Set(history.undoSteps.map(\.idAfter) + history.redoSteps.map(\.idAfter))
+            dates = dates.filter { live.contains($0.key) }
+        }
+    }
+}
+
+extension History {
+    /// The applied agent steps, oldest first, timed by `dates`. `layers` reads each step's layers from the step
+    /// and the applied step after it (nil for the newest: the document now), so a later edit, an agent's or a
+    /// person's, never joins an older step's layers.
+    public func agentSteps(dates: AgentStepDates, layers: (Step, Step?) -> [String] = { _, _ in [] }) -> [AgentStepRecord] {
+        let next = undoSteps.dropFirst().map(Optional.some) + [nil]
+        return zip(undoSteps, next).compactMap { step, after in
+            guard case .agent(let client, let request) = step.origin else { return nil }
+            return AgentStepRecord(id: step.idAfter, name: step.name, client: client, request: request,
+                                   date: dates.dates[step.idAfter] ?? .distantPast, layers: layers(step, after))
+        }
     }
 }
