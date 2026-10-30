@@ -3,8 +3,9 @@
 // keyed layer (DesignWorkspace.timelineRows). DesignEditor shows it only while the document has keys
 // (`showsTimeline`), sliding it in from the bottom on the first key. Collapsed or open is the user's and stays
 // (SceneStorage). Values in, intents out: a scrub, step or end sends `.scrub`, play and loop their intents, a lane
-// name or key press selects that layer. A scrub's frame shows at once from the live drag box's `playingFrame`;
-// while playing, the slot reads only `isPlaying`, so a tick runs the canvas alone and the slot catches up on pause. Content, not chrome: no glass.
+// name or key press selects that layer. The slot follows the live drag box's `landingFrame` (a scrub's frame, or
+// play once's last frame, until it lands as the playhead) and never `playingFrame`, so a tick runs the canvas
+// alone and the lanes catch up on pause; only the transport reads `isPlaying`, for its Play/Pause glyph. Content, not chrome: no glass.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -35,8 +36,8 @@ struct DesignTimeline: View {
     }
 }
 
-/// The transport and its timecode. Like the lanes it reads only `isPlaying` while playing, so a tick runs the
-/// canvas alone; the timecode shows the playhead and catches up on pause.
+/// The transport and its timecode. It reads `isPlaying` for its glyph and never the playing frame, so a tick
+/// runs the canvas alone; the timecode shows the playhead, or a frame about to land, and catches up on pause.
 private struct DesignTransportAdapter: View {
     let model: DesignWorkspace
     let perform: DesignPerform
@@ -45,7 +46,7 @@ private struct DesignTransportAdapter: View {
     var body: some View {
         let last = model.timelineLastFrame
         // ponytail: a ticking timecode cost ~1.5 ms a frame (QB-L4 went red); a Text-only leaf for it is the upgrade.
-        let frame = (live?.isPlaying == true ? nil : live?.playingFrame) ?? model.playhead ?? 0
+        let frame = live?.landingFrame ?? model.playhead ?? 0
         TransportCapsule(
                     state: TransportState(frame: frame, frameCount: last + 1, fps: model.time.rate.nominal,
                                           isPlaying: live?.isPlaying ?? false,
@@ -57,8 +58,9 @@ private struct DesignTransportAdapter: View {
     }
 }
 
-/// The lanes. While playing they read only `isPlaying`, never the frame, so a tick doesn't rebuild 500 lanes:
-/// the strip's playhead parks at the playhead and catches up on pause. A scrub's frame shows at once.
+/// The lanes. They read neither `isPlaying` nor the playing frame, so a tick, play starting and play ending
+/// never rebuild them (500 rows cost a body ~5 ms): the strip's playhead parks at the playhead and catches up
+/// on pause. A scrub's frame, and play once's last frame, show at once through `landingFrame`.
 private struct DesignTimelineLanes: View {
     let model: DesignWorkspace
     let perform: DesignPerform
@@ -67,7 +69,7 @@ private struct DesignTimelineLanes: View {
     var body: some View {
         let last = model.timelineLastFrame, rows = model.timelineRows
         // ponytail: the strip's playhead parks during play; a playhead-only overlay leaf in TimelineStrip would let it follow.
-        let frame = (live?.isPlaying == true ? nil : live?.playingFrame) ?? model.playhead ?? 0
+        let frame = live?.landingFrame ?? model.playhead ?? 0
         let tracks = rows.map { row in
             TimelineTrack(id: row.id, name: row.name, keys: row.keys.map { TimelineKey(frame: $0.frame, shape: TimelineKeyShape(rawValue: $0.shape.rawValue) ?? .linear) },
                           isSelected: model.selectedNodeIDs.contains(row.id))

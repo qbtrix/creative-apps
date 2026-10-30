@@ -73,6 +73,19 @@ import Testing
         #expect(layout.lanesWidth(contentWidth: 40_000, offered: -1, snapshot: true) == 0)
     }
 
+    /// The lanes sit in a sideways scroll laid out at every lane's height, so their lazy stack built every row;
+    /// the strip slices them to the rows the vertical scroll shows, half a row of margin each side, and the
+    /// range is not clamped (the strip clamps to tracks that may have grown since the report).
+    @Test func lanesShownAreTheRowsInViewWithHalfARowOfMargin() {
+        let lane = Double(SuiteSize.timelineLane)
+        #expect(TimelineStripLayout.lanesShown(visibleY: 0...lane * 5) == 0..<6)
+        #expect(TimelineStripLayout.lanesShown(visibleY: lane * 2...lane * 7) == 1..<8)
+        // Jitter of a fraction of a point around a row boundary leaves the range alone.
+        #expect(TimelineStripLayout.lanesShown(visibleY: 0.3...lane * 5 + 0.3) == 0..<6)
+        #expect(TimelineStripLayout.lanesShown(visibleY: -0.13...lane * 5 - 0.13) == 0..<6)
+        #expect(TimelineStripLayout.lanesShown(visibleY: lane * 200...lane * 205) == 199..<206)
+    }
+
     @Test func theLaneAndNameStacksAreLazy() throws {
         let file = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().appending(path: "Sources/SuiteUI/TimelineStrip.swift")
