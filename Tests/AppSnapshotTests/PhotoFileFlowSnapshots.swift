@@ -47,7 +47,7 @@ extension BodyCountSuites {
             #expect(file.contains("SuiteFileCommands(app: .photo"), "File has no suite Open Recent and Open In")
         }
 
-        static let detailSize = CGSize(width: 900, height: 600)
+        static let detailSize = CGSize(width: 960, height: 800)
 
         /// Sunset.png, 640 x 400 of warm gradient, opened as the window opens a file.
         static func opened() throws -> PhotoWorkspace {
