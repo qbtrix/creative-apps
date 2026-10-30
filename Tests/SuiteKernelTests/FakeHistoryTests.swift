@@ -19,7 +19,7 @@ import SuiteKernel
 
     @Test func theFakeListsTheHistoryCommands() {
         let history = HistoryCommands.specs(FakeCanvasDocument.self).map(\.id)
-        #expect(history == ["history.read", "history.jump"] && history.allSatisfy(catalog.ids.contains))
+        #expect(history == ["history.read", "history.jump", "history.begin", "history.end", "history.undo-request"] && history.allSatisfy(catalog.ids.contains))
     }
 
     @Test func theBaseRowIsOpenAndReadListsEveryStep() throws {

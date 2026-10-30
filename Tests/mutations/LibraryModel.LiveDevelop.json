@@ -23,8 +23,8 @@
   {
     "label": "Exposure runs twice: in the sliders' list and the shared list",
     "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "        adjust.exposure = 0\n        return ImagingProgram",
-    "replace": "        return ImagingProgram",
+    "find": "        adjust.exposure = 0\n        var tone",
+    "replace": "        var tone",
     "tests": "LibraryDevelopRenderTests"
   },
   {
@@ -42,11 +42,25 @@
     "tests": "LibraryCropRenderTests"
   },
   {
-    "label": "Saturation still waits on creative-core",
+    "label": "Vibrance is dropped: the slider moves and the picture doesn't",
     "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "        .vibrance: \"Vibrance waits on creative-core (CoreRaster vibrance)\",\n",
-    "replace": "        .vibrance: \"Vibrance waits on creative-core (CoreRaster vibrance)\",\n        .saturation: \"Saturation waits on creative-core (CoreRaster saturation)\",\n",
-    "tests": "LibraryImagingTests"
+    "find": "if s.vibrance != 0 { tone.append(.vibrance(Float(s.vibrance))) }",
+    "replace": "",
+    "tests": "LibraryDevelopColorTests"
+  },
+  {
+    "label": "Vibrance still waits on creative-core",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "public static let waiting: [DevelopSlider: String] = [:]",
+    "replace": "public static let waiting: [DevelopSlider: String] = [.vibrance: \"waits\"]",
+    "tests": "LibraryDevelopColorTests"
+  },
+  {
+    "label": "Vibrance runs after the curve, not before levels",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "return ImagingProgram.adjustments(adjust, tone: tone)",
+    "replace": "return ImagingProgram.adjustments(adjust, tone: ToneRules.adjustments(s.tone.setting(.saturation, to: 0))) + (s.vibrance != 0 ? [.vibrance(Float(s.vibrance))] : [])",
+    "tests": "LibraryDevelopColorTests"
   },
   {
     "label": "the turned crop turns the other way",

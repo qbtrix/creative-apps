@@ -6,7 +6,8 @@
 // release), one step. The render rows are release only and report-only in
 // debug (decision D8): a 512 px preview with every control but Vibrance and
 // Saturation within 8 ms, the 2048 px full render within 120 ms, its
-// histogram within 10 ms; a miss files the fused-pass core issue (Q3), never
+// histogram within 10 ms, a 6000x4000 photo developed for a 2,000 px
+// export within 1,500 ms p95 and a loupe GPU slider step at 2,560 px within 8 ms p95 (quality gate #5953); a miss files the fused-pass core issue (Q3), never
 // a looser budget. Each prints a `LIBRARY-BUDGET develop …` line.
 //
 // The edit rows drive the catalog through `recordEdit` with the packet's
@@ -14,7 +15,9 @@
 // when this was written; once DV-3 and DV-4 land, the enabling PR calls
 // those methods instead. Runs on Linux and macOS.
 @testable import LibraryModel
+import CoreColor
 import CoreRaster
+import Foundation
 import Testing
 
 #if DEBUG
@@ -92,6 +95,30 @@ private let judgesRenders = true
         #expect(!judgesRenders || cost.median <= 120)
     }
 
+    /// Quality gate #5953: a developed 6000x4000 photo (every control, Vibrance and Saturation included) exported
+    /// at a 2,000 px long side shrinks before develop, so it costs about a 2,000 px render, not a 24 MP one.
+    /// Release on the shared Mac: median 1,064 ms, p95 1,209 ms; developing at full size took 6.3 s.
+    @Test func realSizeExportAtTwoThousand() throws {
+        let buffer = try developGradient(width: 6000, height: 4000)
+        let settings = everyControlButColor().setting(.vibrance, to: 40).setting(.saturation, to: 20)
+        let shot = PhotoItem(name: "real", captureDate: Date(timeIntervalSince1970: 0), color: Color3(0.5, 0.5, 0.5),
+                             path: "/shoot/real.png", pixelSize: PixelSize(width: 6000, height: 4000), develop: settings)
+        var out: PixelBuffer?
+        let cost = Budget.measure("develop export-24mp-at-2000", runs: judgesRenders ? 5 : 1) {
+            out = try? LiveExporter.developed(buffer, photo: shot, longSide: 2000, develop: LiveDevelop())
+        }
+        #expect(out?.width == 2000 && out?.height == 1333)
+        #expect(!judgesRenders || cost.p95 <= 1500, "export of 24 MP at 2,000 px took \(cost.p95) ms (p95), over 1,500 ms")
+        guard judgesRenders else { return }
+        // The bug was "develop at full size, then resize": the same photo developed at full size, timed under the
+        // same load, must cost well over twice the export (release on the shared Mac: 6.3 s against 1.1 s).
+        let full = Budget.measure("develop full-size-24mp", runs: 1) {
+            _ = try? LiveDevelop().render(buffer, settings: settings)
+        }
+        #expect(cost.median <= 0.4 * full.median,
+                "export at 2,000 px took \(cost.median) ms, over 40% of a full-size develop (\(full.median) ms)")
+    }
+
     @Test func histogram() throws {
         let buffer = try developGradient(width: 2048, height: 1365)
         let live = LiveDevelop()
@@ -101,4 +128,33 @@ private let judgesRenders = true
         #expect(try live.histogram(of: buffer) == handHistogram(buffer))
         #expect(!judgesRenders || cost.median <= 10)
     }
+
+    /// Quality gate #5953: one loupe slider step on the GPU route at real size (a 6000x4000 photo decoded for a
+    /// 2,560 px loupe, cached): the frame, its program and the route check, every control on, Vibrance stepping.
+    /// Within 8 ms p95 in release (16 ms is the hard limit); report-only in debug.
+    @Test func loupeSliderStepOnTheGPURoute() async throws {
+        let shot = PhotoItem(name: "IMG_24MP", captureDate: Date(timeIntervalSince1970: 1), color: Color3(0.6, 0.4, 0.2),
+                             path: "/shoot/IMG_24MP.jpg", pixelSize: PixelSize(width: 6000, height: 4000))
+        let loupe = LiveLoupeImaging(decoder: FakeDecoder(photos: [shot]), develop: LiveDevelop())
+        let edit = DevelopSettings.neutral.setting(.temperature, to: 20).setting(.exposure, to: 0.7)
+            .setting(.contrast, to: 30).setting(.highlights, to: -40).setting(.shadows, to: 30).setting(.whites, to: 25)
+            .setting(.saturation, to: 20).setting(kinds: [.invert])
+        _ = try await loupe.gpuFrame(shot, settings: edit, longSide: 2560, preferGPU: true)
+        let clock = ContinuousClock()
+        var costs: [Double] = []
+        for step in 1...(judgesRenders ? 60 : 5) {
+            let settings = edit.setting(.vibrance, to: Double(step))
+            var frame: LoupeGPUFrame?
+            let d = try await clock.measure {
+                frame = try await loupe.gpuFrame(shot, settings: settings, longSide: 2560, preferGPU: true)
+            }
+            #expect(frame != nil)
+            costs.append(Double(d.components.attoseconds) / 1e15 + Double(d.components.seconds) * 1_000)
+        }
+        costs.sort()
+        let p95 = costs[min(costs.count - 1, (costs.count * 95 + 99) / 100 - 1)]
+        print("LIBRARY-BUDGET develop loupe-gpu-step-2560 median=\(costs[(costs.count - 1) / 2]) p95=\(p95)")
+        #expect(!judgesRenders || p95 <= 8, "a loupe slider step took \(p95) ms (p95), over 8 ms")
+    }
 }
+

@@ -15,10 +15,11 @@ public enum CatalogLaw: String, CaseIterable, Sendable {
 
 /// The conformance suite any `HeadlessDocument`'s catalog runs.
 public enum CatalogConformance {
-    /// The history commands: view commands that move the history, so they change save() bytes by design. They are
-    /// exempt from the query-and-view law, and on a fixture with nothing to undo their refused example is fine;
+    /// The history commands: view commands that move the history (or close a request span), so they may change save()
+    /// bytes by design. They are exempt from the query-and-view law, and on a fixture with nothing to undo (or no
+    /// request) their refused example is fine;
     /// each edit's undo and redo checks them instead.
-    public static let historyIDs: Set<String> = ["edit.undo", "edit.redo"]
+    public static let historyIDs: Set<String> = ["edit.undo", "edit.redo", "history.end", "history.undo-request"]
 
     /// The id rule, the same as `CommandCatalog`'s (CC-7): 1 to 64 characters of a-z, 0-9, "." and "-", starting
     /// with a letter, with no empty dot-separated part. Digits are allowed anywhere after the first character.

@@ -4,7 +4,7 @@
 // of the Desktop frame (2880 × 2048 px) is planned by the Model (exportRaster) and drawn and
 // encoded by DesignRasterizer. The window body runs 0 times during the write: the raster is
 // drawn off the window and reads no window state. `write` gates the body count; `writeTiming`
-// reports the wall time against its 1 s budget and gates only at 3 times that. `writeTiming` is on the perf list
+// gates the wall time on its 1 s budget, failing over it. `writeTiming` is on the perf list
 // (Tests/perf-suites.txt). Nested in
 // BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
@@ -23,11 +23,11 @@ extension BodyCountSuites {
             expectBodies(step, atMost: 0, target: 0)
         }
 
-        /// QD-S12: 2x PNG of 1440 × 1024 written in at most 1 s wall; reported, gated at 3x.
+        /// QD-S12: 2x PNG of 1440 × 1024 written in at most 1 s wall; fails over it.
         @Test(.timeLimit(.minutes(2))) func writeTiming() async throws {
             let (step, _) = try await Self.run()
             print("RENDER-BUDGET design write a 2x PNG: \(String(format: "%.1f", step.p95)) ms (budget 1000 ms)")
-            #expect(step.p95 <= 3000, "\(step) (budget 1000 ms)")
+            #expect(step.p95 <= 1000, "\(step) (budget 1000 ms)")
         }
 
         static func run() async throws -> (step: RenderStep, png: Data?) {

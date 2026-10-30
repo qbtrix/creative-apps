@@ -100,9 +100,9 @@ struct LibraryLoupe: View {
     /// either way, carrying `loupeValue` (`preview`, `full`, `loading`, …) and the help.
     private var picture: some View {
         Group {
-            if let render = model.loupeRender, let steps = model.loupeSteps, let gpu {
+            if let render = model.loupeRender, let program = model.loupeSteps, let gpu {
                 EmbeddedCanvasHost(rendering: gpu.preference) {
-                    gpu.draw(render.image, steps: steps, token: model.loupeShownToken, photoID: model.loupeItem?.id, into: $0)
+                    gpu.draw(render.image, program: program, token: model.loupeShownToken, photoID: model.loupeItem?.id, into: $0)
                 }
             } else if let render = model.loupeRender {
                 Image(display: render.image).resizable()

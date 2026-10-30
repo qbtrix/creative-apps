@@ -1,14 +1,14 @@
 // Live/LiveDevelop.swift: the live develop renderer (develop packet DV-6).
 // A photo's settings become the CoreRender steps they need, in one fixed
 // order: white balance, exposure, contrast, highlights and shadows, whites,
-// blacks, levels, the tone curve, saturation. Every step is SuiteImaging's
-// (suite-imaging IM-13): the sliders are `ToneRules`' list, levels, the curve
-// and saturation `ImagingProgram`'s after it, run on CoreRender's CPU backend
-// as Photo runs them. A control at its neutral value runs no step, so neutral
+// blacks, vibrance, levels, the tone curve, saturation. Every step is
+// CoreRender's: the sliders are `ToneRules`' list, then CoreRaster's vibrance
+// (DV-12), then levels, the curve and saturation, `ImagingProgram`'s, run on
+// CoreRender's CPU backend as Photo runs them, on one surface. A control at its neutral value runs no step, so neutral
 // settings return the input untouched.
 // The histogram is CoreRaster's, 256 bins over the sRGB values of the buffer
-// it is given (the rendered one). Vibrance waits on creative-core (`waiting`):
-// a render that needs it throws `.renderFailed` with that reason. After
+// it is given (the rendered one). A slider in `waiting` throws
+// `.renderFailed` with its reason; none waits today. After
 // the tone, a crop (crop CR-4) cuts `LiveCrop`'s frame for the buffer's own
 // size out of the pixels turned by its angle; a turned frame samples only its
 // own pixels, across the cores (`turnedCrop`, LiveCropRender.swift).
@@ -27,77 +27,70 @@ import SuiteImaging
 
 public struct LiveDevelop: DevelopRendering {
     public static let unavailable: String? = nil
-    /// Sliders the live renderer can't draw yet, with the reason the row shows.
-    /// DV-12 empties it once CoreRaster's vibrance reaches `dev`.
-    public static let waiting: [DevelopSlider: String] = [
-        .vibrance: "Vibrance waits on creative-core (CoreRaster vibrance)",
-    ]
+    /// Sliders the live renderer can't draw yet, with the reason the row shows; empty since DV-12.
+    public static let waiting: [DevelopSlider: String] = [:]
 
     /// The steps `settings` needs, in render order; empty when neutral.
     public enum Pass: Equatable, Sendable {
-        case color(vibrance: Float, saturation: Float)                  // DV-12
-        /// One of SuiteImaging's steps.
+        /// One CoreRender step.
         case shared(ToneAdjustment)
     }
 
     public init() {}
 
     /// `ToneRules`' slider steps (Saturation left to the shared list, so it
-    /// runs after the curve), then `ImagingProgram`'s levels, curve and saturation.
+    /// runs after the curve), vibrance, then `ImagingProgram`'s levels, curve and saturation.
     public static func passes(for s: DevelopSettings) -> [Pass] {
-        var adjust = s.adjustSettings
-        adjust.exposure = 0
-        return ImagingProgram.adjustments(adjust, tone: ToneRules.adjustments(s.tone.setting(.saturation, to: 0))).map(Pass.shared)
+        steps(for: s).map(Pass.shared)
     }
 
-    /// `passes(for:)` as the steps the loupe's GPU route writes, in the same
-    /// order (suite-imaging IM-11); nil while a pass has no step (Vibrance).
-    public static func steps(for s: DevelopSettings) -> [ToneAdjustment]? {
-        var steps: [ToneAdjustment] = []
-        for pass in passes(for: s) {
-            switch pass {
-            case .color: return nil
-            case .shared(let step): steps.append(step)
-            }
-        }
-        return steps
+    /// `passes(for:)` as the steps the loupe's GPU route writes, in the same order (suite-imaging IM-11).
+    public static func steps(for s: DevelopSettings) -> [ToneAdjustment] {
+        var adjust = s.adjustSettings
+        adjust.exposure = 0
+        var tone = ToneRules.adjustments(s.tone.setting(.saturation, to: 0))
+        // ToneRules still holds vibrance back for Photo; CoreRender draws it on both backends.
+        if s.vibrance != 0 { tone.append(.vibrance(Float(s.vibrance))) }
+        return ImagingProgram.adjustments(adjust, tone: tone)
+    }
+
+    /// What the loupe's GPU route writes in one display pass: `steps`, then the kinds (Black & White, Invert) as
+    /// `AdjustKinds.program`, the GPU twin of the CPU steps `render` appends.
+    public static func program(for s: DevelopSettings) -> [ToneProgram.Operation] {
+        steps(for: s).map(ToneProgram.Operation.adjustment) + AdjustKinds.program(s.kinds)
     }
 
     public func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer {
         for slider in DevelopSlider.allCases where settings.value(slider) != 0 {
             if let why = Self.waiting[slider] { throw LibraryError.renderFailed(why) }
         }
-        var b = buffer
-        let cpu = CPUBackend()
-        for pass in Self.passes(for: settings) {
-            do { b = try Self.run(pass, on: b, cpu: cpu) } catch let error as RasterError {
-                throw LibraryError.renderFailed("\(error)")
-            } catch let error as RenderError {
-                throw LibraryError.renderFailed("\(error)")
-            }
-        }
-        b = try Self.kinds(settings.kinds, on: b)
+        var b = try Self.run(Self.steps(for: settings) + AdjustKinds.adjustments(settings.kinds), on: buffer)
         b = b.oriented(settings.orientation)
         guard let crop = settings.crop else { return b }
         do {
             let f = try LiveCrop().frame(crop, photo: PixelSize(width: b.width, height: b.height))
             if crop.angle == 0 { return try b.cropped(x: f.x, y: f.y, width: f.width, height: f.height) }
             return try Self.turnedCrop(b, degrees: crop.angle, frame: f)
-        } catch let error as RasterError {
-            throw LibraryError.renderFailed("\(error)")
+        } catch is RasterError {
+            throw LibraryError.renderFailed("the crop doesn't fit the photo")
         }
     }
 
-    /// `kinds` on `b` through CoreRender's CPU backend; none returns `b` untouched.
-    static func kinds(_ kinds: [ImagingKind], on b: PixelBuffer) throws -> PixelBuffer {
-        guard !kinds.isEmpty else { return b }
+    /// `steps` on `b` through CoreRender's CPU backend, on one surface read once; none returns `b` untouched.
+    static func run(_ steps: [ToneAdjustment], on b: PixelBuffer) throws -> PixelBuffer {
+        guard !steps.isEmpty else { return b }
         do {
             let cpu = CPUBackend()
             var s = try cpu.surface(b)
-            for step in AdjustKinds.adjustments(kinds) { s = try cpu.adjusted(s, step) }
+            for step in steps {
+                let next = try cpu.adjusted(s, step)
+                cpu.release(s)
+                s = next
+            }
+            defer { cpu.release(s) }
             return try cpu.read(s)
         } catch {
-            throw LibraryError.renderFailed("\(error)")
+            throw LibraryError.renderFailed("the renderer couldn't apply its develop settings")
         }
     }
 
@@ -105,18 +98,5 @@ public struct LiveDevelop: DevelopRendering {
         let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .sRGB)
         return HistogramBins(red: h.red, green: h.green, blue: h.blue,
                              shadowClipped: h.shadowClipped, highlightClipped: h.highlightClipped)
-    }
-
-    /// `pass` run on `cpu`, as the shared list's CPU route runs it.
-    private static func run(_ pass: Pass, on b: PixelBuffer, cpu: CPUBackend) throws -> PixelBuffer {
-        switch pass {
-        case .color: throw LibraryError.renderFailed(waiting[.vibrance] ?? "Vibrance isn't built yet")
-        case .shared(let step):
-            let input = try cpu.surface(b)
-            defer { cpu.release(input) }
-            let output = try cpu.adjusted(input, step)
-            defer { cpu.release(output) }
-            return try cpu.read(output)
-        }
     }
 }
