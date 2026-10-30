@@ -47,7 +47,7 @@ Trap: the folder drop imports nothing (folders not expanded), or each file is it
 
 ## Screens and states
 
-`library-open-recent` (light and dark), `library-drop-mark`.
+`library-open-recent` (light and dark), `library-drop-mark` (light and dark).
 
 ## Contract slice
 

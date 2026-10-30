@@ -3,9 +3,9 @@
 // gives them for `.library` with no document handed in: Library is one catalog with no recent files of its
 // own, so "No Recent Files" is disabled, and Open In is off with "Open a document first.". AppKit can't
 // draw an open NSMenu offscreen, so the image lays out what SuiteFileMenu gives the menu under its titles.
-// library-drop-mark: the suite drop mark (SF-3) over the Library window on the samples fixture, saying what
-// Library's drop rule makes of three dropped JPEGs, at the window's bottom as SuiteFileDropModifier puts
-// it. The window bumps LibraryWindow.bodyRuns, so the suite nests in BodyCountSuites. macOS only.
+// library-drop-mark (light) and library-drop-mark-dark: the suite drop mark (SF-3) over the Library window
+// on the samples fixture, saying what Library's drop rule makes of three dropped JPEGs, at the window's
+// bottom as SuiteFileDropModifier puts it. The window bumps LibraryWindow.bodyRuns, so the suite nests in BodyCountSuites. macOS only.
 #if os(macOS)
 import AppKit
 import Foundation
@@ -52,10 +52,12 @@ extension BodyCountSuites {
             let folder = try packageRoot().appending(path: ".build/snapshots")
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             let size = CGSize(width: 1440, height: 900)
-            let image = try #require(SnapshotHost(appearance: .light).render(window, size: size))
-            #expect(image.pixelsWide == Int(size.width * SnapshotHost.scale))
-            let png = try #require(image.representation(using: .png, properties: [:]))
-            try png.write(to: folder.appending(path: "library-drop-mark.png"))
+            for (appearance, name) in [(SnapshotAppearance.light, "library-drop-mark"), (.dark, "library-drop-mark-dark")] {
+                let image = try #require(SnapshotHost(appearance: appearance).render(window, size: size))
+                #expect(image.pixelsWide == Int(size.width * SnapshotHost.scale))
+                let png = try #require(image.representation(using: .png, properties: [:]))
+                try png.write(to: folder.appending(path: "\(name).png"))
+            }
         }
     }
 }
