@@ -43,4 +43,13 @@ import Testing
         model.selectLayers(["gone"])
         #expect(model.selectedLayerID == "comp-2-layer-2", "an all-gone pick dropped the selection")
     }
+
+    @Test func aLaterUserEditStaysOutOfAnOlderRequest() throws {
+        var model = try project()
+        StepOrigin.$current.withValue(.agent(client: "claude", request: nil)) {
+            model.renameLayer("comp-1-layer-3", to: "Logo")
+        }
+        model.renameLayer("comp-1-layer-2", to: "Backdrop")
+        #expect(model.agentRequests.first?.layers == ["comp-1-layer-3"], "\(model.agentRequests)")
+    }
 }

@@ -52,9 +52,9 @@ import Testing
             dates.stamp(history, limit: 2)
         }
         #expect(dates.dates.count == 1, "a user step was stamped")
-        let steps = history.agentSteps(dates: dates) { ["layer.\($0.payload)"] }
+        let steps = history.agentSteps(dates: dates) { step, next in ["layer.\(step.payload)", next == nil ? "now" : "next"] }
         #expect(steps.map(\.name) == ["Blur"] && steps.first?.client == "claude")
-        #expect(steps.first?.layers == ["layer.1"] && steps.first?.date ?? .distantPast > .distantPast)
+        #expect(steps.first?.layers == ["layer.1", "now"] && steps.first?.date ?? .distantPast > .distantPast)
         StepOrigin.$current.withValue(.agent(client: "claude", request: nil)) {
             for i in 2..<8 { history.record("Step \(i)", i); dates.stamp(history, limit: 2) }
         }

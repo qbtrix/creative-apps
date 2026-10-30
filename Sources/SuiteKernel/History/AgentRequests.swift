@@ -97,12 +97,15 @@ public struct AgentStepDates: Sendable, Hashable {
 }
 
 extension History {
-    /// The applied agent steps, oldest first, timed by `dates`, each with the layers `layers` reads from it.
-    public func agentSteps(dates: AgentStepDates, layers: (Step) -> [String] = { _ in [] }) -> [AgentStepRecord] {
-        undoSteps.compactMap { step in
+    /// The applied agent steps, oldest first, timed by `dates`. `layers` reads each step's layers from the step
+    /// and the applied step after it (nil for the newest: the document now), so a later edit, an agent's or a
+    /// person's, never joins an older step's layers.
+    public func agentSteps(dates: AgentStepDates, layers: (Step, Step?) -> [String] = { _, _ in [] }) -> [AgentStepRecord] {
+        let next = undoSteps.dropFirst().map(Optional.some) + [nil]
+        return zip(undoSteps, next).compactMap { step, after in
             guard case .agent(let client, let request) = step.origin else { return nil }
             return AgentStepRecord(id: step.idAfter, name: step.name, client: client, request: request,
-                                   date: dates.dates[step.idAfter] ?? .distantPast, layers: layers(step))
+                                   date: dates.dates[step.idAfter] ?? .distantPast, layers: layers(step, after))
         }
     }
 }

@@ -2,8 +2,9 @@
 // adapter onto SuiteKernel's AgentRequests, as Photo's is. `agentRequests`
 // groups the agent steps of this project's history (`History.agentSteps`,
 // timed by HaloHistory's `agentDates`). A step's layers come from its undo
-// state: every layer of every composition is compared by id with the layer
-// now (a new id was created, a differing value changed). Halo layers have no
+// state against the next step's (the document now for the newest): every
+// layer of every composition is compared by id (a new id was created, a
+// differing value changed), so a later edit never joins an older request. Halo layers have no
 // visibility, so the tab has no eye; `selectLayers` picks one layer, as
 // Halo's selection holds one: the first live id in the selected composition,
 // else in the first composition that holds one (switching to it).
@@ -14,11 +15,11 @@ import SuiteKernel
 extension HaloProject {
     /// The agent's requests in this project, newest first.
     public var agentRequests: [AgentRequest] {
-        let now = document.compositions.flatMap(\.layers)
-        return AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step in
+        AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step, next in
             let before = Dictionary(step.payload.compositions.flatMap(\.layers).map { ($0.id, $0) },
                                     uniquingKeysWith: { a, _ in a })
-            return now.filter { before[$0.id] != $0 }.map(\.id)
+            let after = (next?.payload ?? document).compositions.flatMap(\.layers)
+            return after.filter { before[$0.id] != $0 }.map(\.id)
         })
     }
 

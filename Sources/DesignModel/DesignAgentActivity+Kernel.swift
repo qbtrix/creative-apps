@@ -2,9 +2,10 @@
 // adapter onto SuiteKernel's AgentRequests, as Photo's is. `agentRequests`
 // groups the agent steps of this document's history (`History.agentSteps`,
 // timed by DesignHistory's `agentDates`). A step's layers come from its undo
-// snapshot: every node on every page, each without its children, is compared
-// by id with the node now (a new id was created, a differing value changed),
-// so a child's edit doesn't list its group. `setLayersHidden` is the tab's
+// snapshot against the next step's (the document now for the newest): every
+// node on every page, each without its children, is compared by id (a new id
+// was created, a differing value changed), so neither a later edit nor a
+// child's edit lists a node. `setLayersHidden` is the tab's
 // eye, one "Hide Agent Layers"/"Show Agent Layers" step; `selectLayers` picks
 // the live ids on one page: the selected page when it holds any, else the
 // first page that does (switching to it); a hidden or locked one past the
@@ -14,11 +15,10 @@ import SuiteKernel
 extension DesignWorkspace {
     /// The agent's requests in this document, newest first.
     public var agentRequests: [AgentRequest] {
-        let now = Self.bareNodes(pages)
-        return AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step in
+        AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step, next in
             let before = Dictionary(Self.bareNodes(step.payload.snapshot.pages).map { ($0.id, $0) },
                                     uniquingKeysWith: { a, _ in a })
-            return now.filter { before[$0.id] != $0 }.map(\.id)
+            return Self.bareNodes(next?.payload.snapshot.pages ?? pages).filter { before[$0.id] != $0 }.map(\.id)
         })
     }
 

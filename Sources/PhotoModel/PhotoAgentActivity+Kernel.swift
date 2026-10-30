@@ -17,7 +17,7 @@ import SuiteKernel
 extension PhotoWorkspace {
     /// The agent's requests in this image, newest first.
     public var agentRequests: [AgentRequest] {
-        AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { $0.payload.layerIDs(now: layers) })
+        AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step, _ in step.payload.layerIDs(now: layers) })
     }
 
     /// Hides or shows every live layer in `ids` as one step; nothing when none changes.
@@ -42,7 +42,9 @@ extension PhotoWorkspace {
 extension PhotoEdit {
     /// The layers the step that recorded this undo payload created or changed.
     // ponytail: list and stack edits diff against the layers now, not the step's own after-state, so a
-    // later edit to the same layer also counts; a per-step after-list in History fixes it if it matters.
+    // later edit to any layer also counts. Design and Halo diff against the next step's payload
+    // (History.agentSteps hands it over), but Photo's next payload is a tile or list diff, not the
+    // layer list; a per-step after-list in PhotoHistory fixes it if it matters.
     func layerIDs(now: [PhotoLayer]) -> [PhotoLayer.ID] {
         switch self {
         case .tiles(let layer, _), .maskTiles(let layer, _): [layer]

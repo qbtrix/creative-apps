@@ -49,4 +49,13 @@ import Testing
         model.selectLayers(["gone"])
         #expect(model.selectedNodeIDs == ["node-11"], "an all-gone pick dropped the selection")
     }
+
+    @Test func aLaterUserEditStaysOutOfAnOlderRequest() throws {
+        var model = DesignFixtures.cards
+        try StepOrigin.$current.withValue(.agent(client: "claude", request: nil)) {
+            try model.setNodeHidden("node-2", true)
+        }
+        try model.setNodeHidden("node-3", true)
+        #expect(model.agentRequests.first?.layers == ["node-2"], "\(model.agentRequests)")
+    }
 }
