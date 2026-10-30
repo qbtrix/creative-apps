@@ -28,7 +28,11 @@ public struct CoreRasterImageCodec: PhotoImageCodec {
     }
 
     public func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data {
-        let buffer = try PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height)
+        try encode(buffer: PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height), as: format, quality: quality)
+    }
+
+    /// `buffer` as `format`, straight to core's encoder: no 8-bit round trip on the way in.
+    public func encode(buffer: PixelBuffer, as format: ImageFormat, quality: Double) throws -> Data {
         switch format {
         case .jpeg: return try JPEG.write(buffer, quality: Int((min(max(quality, 0), 1) * 100).rounded()))
         case .png:

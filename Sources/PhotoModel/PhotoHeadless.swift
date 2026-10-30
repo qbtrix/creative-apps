@@ -70,7 +70,7 @@ public struct PhotoHeadless: HeadlessDocument {
 
     /// The flattened image as "png" or "jpeg" on the suite's export options (`SuiteExportOptions(json:)`: `size`,
     /// `quality`, ...; `format` names the file, whatever the options say), through the sheet's own
-    /// `exportPixels(_:)`. The older `{"longSide": n}` form still resizes a copy with `image.resize`.
+    /// `exportBuffer(_:)`, handed to the encoder as is. The older `{"longSide": n}` form still resizes a copy with `image.resize`.
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         guard let kind = ImageFormat(rawValue: format) else {
             throw CatalogError.unavailable(id: "export", why: "Photo exports png and jpeg.")
@@ -78,7 +78,7 @@ public struct PhotoHeadless: HeadlessDocument {
         guard case .object(let keys) = options, keys["longSide"] != nil else {
             var o = try SuiteExportOptions(json: options, defaults: workspace.exportOptionsDefault())
             o.format = format
-            let data = try Self.exportCodec.encode(workspace.exportPixels(o), as: kind, quality: o.quality)
+            let data = try Self.exportCodec.encode(buffer: workspace.exportBuffer(o), as: kind, quality: o.quality)
             return [ExportedFile(suggestedName: workspace.fileName(for: kind), format: format, data: data)]
         }
         let o = try options.decode(ExportOptions.self)
