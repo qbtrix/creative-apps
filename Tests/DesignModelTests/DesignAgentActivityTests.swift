@@ -59,3 +59,19 @@ import Testing
         #expect(model.agentRequests.first?.layers == ["node-2"], "\(model.agentRequests)")
     }
 }
+
+@Suite struct DesignAgentWorkTests {
+    @Test func newestAgentLayersNameOnlyTheLastAgentStep() throws {
+        var model = DesignFixtures.cards
+        #expect(model.newestAgentLayers.isEmpty && model.agentWork == AgentWork())
+        try StepOrigin.$current.withValue(.agent(client: "claude", request: nil)) {
+            _ = model.setHistoryRequest("Make cards")
+            try model.setNodeHidden("node-2", true)
+            try model.setNodeHidden("node-3", true)
+        }
+        #expect(model.newestAgentLayers == ["node-3"], "\(model.newestAgentLayers)")
+        #expect(model.agentWork.request == "Make cards" && model.agentWork.lastStep != nil)
+        try model.setNodeHidden("node-4", true)
+        #expect(model.newestAgentLayers.isEmpty, "a person's step lit as the agent's")
+    }
+}

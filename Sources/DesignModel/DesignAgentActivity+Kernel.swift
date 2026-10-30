@@ -9,17 +9,33 @@
 // eye, one "Hide Agent Layers"/"Show Agent Layers" step; `selectLayers` picks
 // the live ids on one page: the selected page when it holds any, else the
 // first page that does (switching to it); a hidden or locked one past the
-// first stays out, as Shift-click refuses it. Linux-safe.
+// first stays out, as Shift-click refuses it. `agentWork` feeds the tab's
+// working marks, and `newestAgentLayers` the canvas's glow: the nodes the
+// last applied step touched when an agent made it, diffed for that one step
+// only (the canvas asks once per new step, never per render). Linux-safe.
 import SuiteKernel
 
 extension DesignWorkspace {
     /// The agent's requests in this document, newest first.
     public var agentRequests: [AgentRequest] {
         AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step, next in
-            let before = Dictionary(Self.bareNodes(step.payload.snapshot.pages).map { ($0.id, $0) },
-                                    uniquingKeysWith: { a, _ in a })
-            return Self.bareNodes(next?.payload.snapshot.pages ?? pages).filter { before[$0.id] != $0 }.map(\.id)
+            Self.touched(step.payload.snapshot.pages, next?.payload.snapshot.pages ?? pages)
         })
+    }
+
+    /// The open request and the newest agent step: what the AI tab's working marks read (SuiteUI AgentWorking).
+    public var agentWork: AgentWork { history.kernel.agentWork }
+
+    /// The nodes the last applied step created or changed when an agent made it; empty otherwise.
+    public var newestAgentLayers: [String] {
+        guard let last = history.kernel.undoSteps.last, case .agent = last.origin else { return [] }
+        return Self.touched(last.payload.snapshot.pages, pages)
+    }
+
+    /// The nodes of `after` that `before` lacks or holds with another value, each without its children.
+    static func touched(_ before: [DesignPage], _ after: [DesignPage]) -> [String] {
+        let old = Dictionary(bareNodes(before).map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        return bareNodes(after).filter { old[$0.id] != $0 }.map(\.id)
     }
 
     /// Every node's name by id, on every page: the AI tab's layer rows.

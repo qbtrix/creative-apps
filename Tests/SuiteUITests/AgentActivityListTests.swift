@@ -1,6 +1,7 @@
 // AgentActivityListTests.swift: the AI tab's rows over LayerTreeList: a closed
 // request is one row, an open one lists its steps then its layers one level in,
-// the eye state and the caption.
+// the eye state and the caption; which request reads live while an agent
+// works, and the working mark's VoiceOver label.
 import Foundation
 import SuiteKernel
 import Testing
@@ -48,5 +49,24 @@ import Testing
         #expect(AgentActivityList.undoHelp(open, newest: false) == "Undo the newer requests first.")
         #expect(AgentActivityList.undoHelp(loose, newest: true)?.contains("history.begin") == true)
         #expect(AgentActivityList.undoHelp(open, newest: true, app: "No.") == "No.")
+    }
+
+    @Test func liveRequestIsTheNewestWhileItWorks() {
+        let spanFirst = AgentRequests.group([
+            AgentStepRecord(id: 3, name: "Blur", client: "cursor", date: Date(timeIntervalSince1970: 0)),
+            AgentStepRecord(id: 4, name: "Add Layer", client: "claude", request: "Poster", date: Date(timeIntervalSince1970: 9)),
+        ])
+        #expect(AgentActivityList.liveRequest(spanFirst, shown: nil) == nil, "idle read live")
+        #expect(AgentActivityList.liveRequest(spanFirst, shown: AgentWork(request: "Poster", lastStep: 4)) == "agent.4")
+        #expect(AgentActivityList.liveRequest(spanFirst, shown: AgentWork(request: "Other")) == nil, "another span read live")
+        #expect(AgentActivityList.liveRequest(Self.requests, shown: AgentWork(lastStep: 3)) == "agent.3", "a loose step's request")
+        #expect(AgentActivityList.liveRequest(Self.requests, shown: AgentWork(lastStep: 9)) == nil, "a step it lacks")
+        let live = AgentActivityList.decorations(spanFirst, timeZone: .gmt, live: "agent.4")
+        #expect(live["agent.4"]?.live == true && live["agent.3"]?.live == false)
+    }
+
+    @Test func markSaysWhatTheAgentIsDoing() {
+        #expect(AgentWorkingMark.label(AgentWork(request: "AI: Birds")) == "AI is working: AI: Birds")
+        #expect(AgentWorkingMark.label(AgentWork(lastStep: 2)) == "AI is working")
     }
 }
