@@ -11,8 +11,14 @@
 // ("New Image", "Open", or the newest step the 50-step limit dropped), the
 // open run's key it needs to tell a fold from a drop, and the mid-drag guards.
 // `isDirty` compares the kernel's `currentStepID` with the step last saved,
-// opened or created.
+// opened or created. An agent step's record time is kept by its id for the
+// AI tab (PhotoAgentActivity+Kernel.swift).
 // Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import CoreRaster
 import SuiteKernel
 
@@ -62,6 +68,8 @@ struct PhotoHistory: Sendable {
     /// The open run's key, as the kernel keeps it: a record under it folds
     /// instead of adding a step, so it drops nothing at the limit.
     var runKey: String?
+    /// When each agent step was recorded, by its `idAfter` (the AI tab's time; History keeps no date).
+    var agentDates: [Int: Date] = [:]
 }
 
 extension PhotoHistory: Equatable {
@@ -153,6 +161,7 @@ extension PhotoWorkspace {
         }
         history.kernel.record(name, edit, key: coalescing)
         history.runKey = coalescing
+        stampAgentStep()
     }
 
     /// Records the layer list as it is, before a property or order change.
