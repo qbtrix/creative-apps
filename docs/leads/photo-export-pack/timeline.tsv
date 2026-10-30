@@ -442,3 +442,4 @@ utc	stage	event	ref	note
 2026-10-30T02:15Z	check-in	#5353 open (clean), PX-9 waits. dev green, no dev-red. No merges, no new findings (50 Photo open).
 2026-10-30T02:46Z	check-in	#5353 open (clean), PX-9 waits. dev green, no dev-red. Merged: #6039 (photo selection/crop drag line), not export/text. No new findings (50 Photo open).
 2026-10-30T03:18Z	check-in	#5353 open (clean), PX-9 waits. dev green, no dev-red. No merges, no new findings (50 Photo open).
+2026-10-30T03:50Z	check-in	#5353 open (clean), PX-9 waits. dev green, no dev-red. No merges. New finding #6082 (crop drag render budget, from #6039) skipped: not export/text (51 Photo open).
