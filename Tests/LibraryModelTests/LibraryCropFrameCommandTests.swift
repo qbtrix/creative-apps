@@ -2,9 +2,12 @@
 // photo's pixels and says so (#5954). On the live crop with `IMG_0001`
 // (6000 × 4000): the schema names pixels and a 16 px floor, the example is
 // not a 1 px crop, a unit-square guess (x 0.5, w 0.4) is refused and leaves
-// the photo as it was, and a pixel frame at 10° is stored as asked.
-// Runs on Linux and macOS.
+// the photo as it was, and a pixel frame at 10° is stored as asked, in the
+// window's catalog and in the CLI's headless one (whose export cuts with the
+// live crop). Runs on Linux and macOS.
+import Foundation
 @testable import LibraryModel
+import CoreColor
 import SuiteKernel
 import Testing
 
@@ -64,6 +67,22 @@ struct LibraryCropFrameCommandTests {
         let stored = try #require(photo.develop.crop)
         #expect(stored.angle == 10)
         let size = library.croppedSize(photo)
+        #expect(abs(size.width - 2400) <= 1 && abs(size.height - 2000) <= 1)
+    }
+
+    /// The CLI and MCP drive `LibraryHeadless`; its export cuts with `LiveCrop`, so set-frame must read
+    /// pixels the same way, or 2400 × 2000 at 10° of 6000 × 4000 exports 1925 × 1604 (#5954).
+    @Test func theHeadlessCatalogStoresAPixelFrameAtTenDegreesAsAsked() throws {
+        let photo = PhotoItem(id: "big", name: "big", captureDate: Date(timeIntervalSince1970: 0), color: Color3(0.5, 0.5, 0.5),
+                              pixelSize: PixelSize(width: 6000, height: 4000))
+        var doc = LibraryHeadless(photos: [photo], images: [:], stem: "shoot")
+        _ = try LibraryHeadless.catalog.run("edit.select", params: .object(["ids": .array([.string("big")])]), on: &doc)
+        _ = try LibraryHeadless.catalog.run("view.loupe", params: .object([:]), on: &doc)
+        let frame = JSONValue.object(["x": .number(600), "y": .number(400), "w": .number(2400), "h": .number(2000),
+                                      "angle": .number(10)])
+        _ = try LibraryHeadless.catalog.run("crop.set-frame", params: frame, on: &doc)
+        let stored = try #require(doc.library.items.first)
+        let size = LiveExporter.croppedSize(stored)
         #expect(abs(size.width - 2400) <= 1 && abs(size.height - 2000) <= 1)
     }
 }
