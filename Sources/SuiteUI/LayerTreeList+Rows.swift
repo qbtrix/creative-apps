@@ -11,6 +11,8 @@
 // SidebarRow.doubleClickRenames / keyRenames / renameActionName gate the
 // double-click on the title, Return on the focused row and the "Rename"
 // accessibility action. App panels (#3194): `.app` naming, LayerTreeOptions, LayerRowDecoration.
+// A `live` decoration shimmers the name (AgentWorking.swift) and its caption
+// ticks as a number when it changes under an animation.
 // LayerRowLook picks a row's state fill: drop target, selected, hover, rest.
 // LayerRowJoin names the edges a selected row shares with a selected neighbour.
 import SuiteKernel
@@ -132,7 +134,8 @@ enum LayerRowLook: Equatable {
 /// What one row draws beyond its name, as plain data the app keys by layer
 /// id (#3194): a thumbnail, a leading SF Symbol with its label and id (by
 /// default the naming's `<id>.symbol`), a caption line under the name, and
-/// the row's tooltip and accessibility value.
+/// the row's tooltip and accessibility value, and `live` for a row an agent is
+/// working on now (its name shimmers, `.agentShimmer`).
 public struct LayerRowDecoration: Equatable, Sendable {
     public var thumbnail: Image?
     public var symbol: String?
@@ -141,9 +144,10 @@ public struct LayerRowDecoration: Equatable, Sendable {
     public var caption: String?
     public var help: String?
     public var value: String?
+    public var live: Bool
 
     public init(thumbnail: Image? = nil, symbol: String? = nil, symbolLabel: String? = nil, symbolID: String? = nil,
-                caption: String? = nil, help: String? = nil, value: String? = nil) {
+                caption: String? = nil, help: String? = nil, value: String? = nil, live: Bool = false) {
         self.thumbnail = thumbnail
         self.symbol = symbol
         self.symbolLabel = symbolLabel
@@ -151,6 +155,7 @@ public struct LayerRowDecoration: Equatable, Sendable {
         self.caption = caption
         self.help = help
         self.value = value
+        self.live = live
     }
 }
 
@@ -185,6 +190,7 @@ extension LayerTreeRow {
             VStack(alignment: .leading, spacing: 0) {
                 name
                 Text(caption)
+                    .contentTransition(.numericText())
                     .font(SuiteFont.inspectorMeta)
                     .lineLimit(1)
                     .foregroundStyle(SuiteColor.secondaryText)
@@ -206,6 +212,7 @@ extension LayerTreeRow {
         Text(row.name)
             .lineLimit(1)
             .foregroundStyle(options.dims(row) ? SuiteColor.secondaryText : Color.primary)
+            .agentShimmer(decoration?.live == true)
             .contentShape(.rect)
             .simultaneousGesture(TapGesture(count: 2).onEnded { openRename(on: .title) })
     }
