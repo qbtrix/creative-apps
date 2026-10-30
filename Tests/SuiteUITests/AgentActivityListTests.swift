@@ -41,4 +41,12 @@ import Testing
         #expect(caption.hasPrefix("claude · ") && caption.hasSuffix(" · 2 steps"))
         #expect(AgentActivityList.decorations(Self.requests, timeZone: utc)["agent.3"]?.caption?.hasSuffix("1 step") == true)
     }
+
+    @Test func undoHelpSaysWhyOrNothing() {
+        let (open, loose) = (Self.requests[1], Self.requests[0])
+        #expect(AgentActivityList.undoHelp(open, newest: true) == nil)
+        #expect(AgentActivityList.undoHelp(open, newest: false) == "Undo the newer requests first.")
+        #expect(AgentActivityList.undoHelp(loose, newest: true)?.contains("history.begin") == true)
+        #expect(AgentActivityList.undoHelp(open, newest: true, app: "No.") == "No.")
+    }
 }
