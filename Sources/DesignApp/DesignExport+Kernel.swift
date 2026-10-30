@@ -265,3 +265,13 @@ struct DesignExportRows: View {
         .accessibilityIdentifier(identifier)
     }
 }
+
+/// File > Export…'s request, the one thing DesignWindow and DesignExportArea share: a reference the
+/// window holds but never reads, so a bump re-runs only the area (which watches `count`), never the
+/// window's body (that re-run cost the sheet's open ~40 ms on the 2,000-layer page).
+@MainActor @Observable final class DesignExportRequest {
+    /// Bumped once per File > Export…; each change opens the sheet.
+    private(set) var count = 0
+
+    func bump() { count += 1 }
+}
