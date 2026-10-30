@@ -64,7 +64,7 @@ struct HaloWindow: View, BodyCounted {
         }
         scenes(
             SuiteWindow(title: fileWindowTitle, actions: [newComposition], inspectorWidth: Self.inspectorWidth) {
-                AgentSidebarTabs("Compositions", id: HaloProject.sidebarTabsControl) {
+                AgentSidebarTabs("Compositions", id: HaloProject.sidebarTabsControl, work: { model.agentWork }) {
                     SuiteSidebarList(
                         sections: [SidebarSection(
                             id: "compositions", title: "Compositions",
@@ -76,7 +76,7 @@ struct HaloWindow: View, BodyCounted {
                 } ai: {
                     // Halo layers can't hide yet, so the list has no eye.
                     AgentActivityList(requests: model.agentRequests, layerNames: model.layerNamesByID, hidden: [],
-                                      showsEye: false, onAction: agentPerform)
+                                      showsEye: false, work: model.agentWork, onAction: agentPerform)
                 }
             } content: {
                 HaloViewer(model: model, perform: perform, onShapeIntent: { intent in
