@@ -393,12 +393,28 @@ public struct DesignRow: Identifiable, Sendable, Hashable {
 }
 
 /// Why a tree or page edit was refused.
-public enum DesignTreeError: Error, Equatable, Sendable {
+public enum DesignTreeError: Error, Equatable, Sendable, CustomStringConvertible {
     case unknownID(String), notAContainer(String), intoItself(String)
     case emptyName, lastPage, alreadyExists(String)
     case locked(String), notText(String), emptyText
     /// The node's kind has no corners to round (DesignCorners).
     case noCorners(String)
+
+    /// Plain words for a command catalog's refusal (the CLI, MCP), never the case name.
+    public var description: String {
+        switch self {
+        case .unknownID(let id): DesignRefusal.unknownID(id).help
+        case .notAContainer(let id): DesignRefusal.notAContainer(id).help
+        case .intoItself(let id): DesignRefusal.intoItself(id).help
+        case .emptyName: DesignRefusal.emptyName.help
+        case .lastPage: "A file keeps at least one page."
+        case .alreadyExists(let id): "\(id) is already in this file."
+        case .locked(let id): DesignRefusal.locked(id).help
+        case .notText(let id): DesignRefusal.notText(id).help
+        case .emptyText: "Text can't be empty."
+        case .noCorners(let id): DesignRefusal.noCorners(id).help
+        }
+    }
 }
 
 /// Modifier keys that change a drag: Shift constrains (square, aspect), Option works from the center.
@@ -456,6 +472,16 @@ extension [DesignNode] {
         return nil
     }
 
+    /// Whether `id` or a node enclosing it passes `test`, in one walk that copies nothing; nil when
+    /// `id` is not in the tree. The lock and hide cascades read it on every drag step.
+    func onPath(to id: String, where test: (DesignNode) -> Bool) -> Bool? {
+        for node in self {
+            if node.id == id { return test(node) }
+            if let found = node.children.onPath(to: id, where: test) { return found || test(node) }
+        }
+        return nil
+    }
+
     /// The ids of the nodes enclosing `id`, outermost first; nil when `id` is not in the tree.
     func ancestors(of id: String) -> [String]? {
         for node in self {
@@ -463,6 +489,23 @@ extension [DesignNode] {
             if let path = node.children.ancestors(of: id) { return [node.id] + path }
         }
         return nil
+    }
+
+    /// The ids of every node that encloses any of `ids`, in one walk of the tree, however many
+    /// ids there are (a marquee or a duplicate of thousands of layers asks for them all at once).
+    func ancestors(ofAny ids: Set<String>) -> Set<String> {
+        var found = Set<String>(), path: [String] = []
+        func walk(_ nodes: [DesignNode]) {
+            for node in nodes {
+                if ids.contains(node.id) { found.formUnion(path) }
+                guard !node.children.isEmpty else { continue }
+                path.append(node.id)
+                walk(node.children)
+                path.removeLast()
+            }
+        }
+        walk(self)
+        return found
     }
 
     /// Applies `change` to the node with `id`; returns whether it was found.
