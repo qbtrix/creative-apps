@@ -1,0 +1,80 @@
+// PhotoAgentActivity+Kernel.swift: Photo's side of the AI tab (#6029), an
+// adapter onto SuiteKernel's AgentRequests. `agentRequests` groups the agent
+// steps of this image's history; until History records each step's origin
+// (#6028, `StepOrigin.agent(client:request:)`) there are none, so the tab
+// shows its empty state. A step's layers come from its undo payload, which
+// is cheap and needs no extra state: a tile or mask edit names its layer; a
+// layer-list or whole-stack edit is diffed by id against the layers now
+// (new ids were created, a differing value was changed). `setLayersHidden`
+// is the tab's eye, one "Hide Agent Layers"/"Show Agent Layers" step;
+// `selectLayers` picks exactly the live ones of the ids. Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
+import SuiteKernel
+
+extension PhotoWorkspace {
+    /// The agent's requests in this image, newest first.
+    public var agentRequests: [AgentRequest] { AgentRequests.group(agentSteps) }
+
+    /// The applied agent steps, oldest first, each with its layers and record time.
+    var agentSteps: [AgentStepRecord] {
+        history.kernel.undoSteps.compactMap { step in
+            guard case .agent(let client, let request) = step.origin else { return nil }
+            return AgentStepRecord(id: step.idAfter, name: step.name, client: client, request: request,
+                                   date: history.agentDates[step.idAfter] ?? .distantPast,
+                                   layers: step.payload.layerIDs(now: layers))
+        }
+    }
+
+    /// Stamps the step just recorded when an agent made it; drops stamps of
+    /// steps the history no longer holds once they outnumber its limit twice.
+    mutating func stampAgentStep() {
+        guard case .agent = StepOrigin.current else { return }
+        history.agentDates[history.kernel.currentStepID] = Date()
+        if history.agentDates.count > 2 * PhotoHistory.limit {
+            let live = Set(history.kernel.undoSteps.map(\.idAfter) + history.kernel.redoSteps.map(\.idAfter))
+            history.agentDates = history.agentDates.filter { live.contains($0.key) }
+        }
+    }
+
+    /// Hides or shows every live layer in `ids` as one step; nothing when none changes.
+    public mutating func setLayersHidden(_ ids: [PhotoLayer.ID], hidden: Bool) {
+        let targets = layers.filter { ids.contains($0.id) && $0.isVisible == hidden }.map(\.id)
+        guard !targets.isEmpty else { return }
+        commitKernelLayers(
+            Self.kernelEdited(layers) { tree in
+                for target in targets { _ = tree.update(target) { $0.isHidden = hidden } }
+            },
+            named: hidden ? "Hide Agent Layers" : "Show Agent Layers")
+    }
+
+    /// Picks exactly the live layers among `ids`; nothing when none is live.
+    public mutating func selectLayers(_ ids: [PhotoLayer.ID]) {
+        let live = layers.map(\.id).filter(ids.contains)
+        guard !live.isEmpty else { return }
+        layerSelection.replace(live)
+    }
+}
+
+extension PhotoEdit {
+    /// The layers the step that recorded this undo payload created or changed.
+    // ponytail: list and stack edits diff against the layers now, not the step's own after-state, so a
+    // later edit to the same layer also counts; a per-step after-list in History fixes it if it matters.
+    func layerIDs(now: [PhotoLayer]) -> [PhotoLayer.ID] {
+        switch self {
+        case .tiles(let layer, _), .maskTiles(let layer, _): [layer]
+        case .layers(let before, _): Self.diff(before, now)
+        case .stack(let stack): Self.diff(stack.layers, now)
+        case .group(let edits):
+            edits.flatMap { $0.layerIDs(now: now) }.reduce(into: []) { if !$0.contains($1) { $0.append($1) } }
+        case .adjustments, .selection, .draft, .paths, .area: []
+        }
+    }
+
+    private static func diff(_ before: [PhotoLayer], _ now: [PhotoLayer]) -> [PhotoLayer.ID] {
+        now.filter { layer in before.first { $0.id == layer.id } != layer }.map(\.id)
+    }
+}
