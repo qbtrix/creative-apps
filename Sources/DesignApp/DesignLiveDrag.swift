@@ -9,7 +9,11 @@
 // window changes once and records one step; the window writes that workspace
 // and `clearAfterLanding()` drops the copy a turn later, so the canvas never
 // draws the old workspace in between. `preview` and `land` do the same for an
-// inspector scrub, a style row's, the Rotation bar's or a fill editor drag. DesignWindow owns one and hands it down as the
+// inspector scrub, a style row's, the Rotation bar's or a fill editor drag; only those
+// set `previewed`, which the Opacity, Corners, Stroke and Fill rows read in place of
+// `workspace`: a canvas drag can't change them, so its samples don't rerun them
+// (each walks every layer for its lock help, 2,000 on `crowd`).
+// DesignWindow owns one and hands it down as the
 // `designLiveDrag` environment value; without one (a view hosted alone) the
 // canvas draws the workspace. Presentation state only.
 import DesignModel
@@ -24,6 +28,9 @@ import SwiftUI
 
     /// The copy the canvas draws while a drag or scrub lasts; nil with none live.
     var workspace: DesignWorkspace? { edit.workspace }
+    /// The copy while an inspector value previews on it; nil through a canvas drag, so a row that reads only
+    /// this doesn't run per pointer sample.
+    private(set) var previewed: DesignWorkspace?
     /// A drag or scrub is under way: the next sample or value goes to the copy, not a new `begin`.
     var isLive: Bool { workspace != nil && !isLanding }
 
@@ -31,6 +38,7 @@ import SwiftUI
     func begin(from model: DesignWorkspace) {
         isLanding = false
         edit.begin(from: model)
+        if previewed != nil { previewed = nil }
     }
 
     /// One pointer sample, run on the copy only.
@@ -39,13 +47,22 @@ import SwiftUI
     }
 
     /// One value of an inspector scrub, shown on the copy only.
-    func preview(_ change: DesignStyleChange) { edit.preview(change) }
+    func preview(_ change: DesignStyleChange) {
+        edit.preview(change)
+        previewed = edit.workspace
+    }
 
     /// One fill editor intent of a drag, run on the copy only.
-    func preview(_ intent: GradientIntent) { edit.preview(intent) }
+    func preview(_ intent: GradientIntent) {
+        edit.preview(intent)
+        previewed = edit.workspace
+    }
 
     /// One value of a transform scrub, shown on the copy only.
-    func preview(_ intent: TransformIntent) { edit.preview(intent) }
+    func preview(_ intent: TransformIntent) {
+        edit.preview(intent)
+        previewed = edit.workspace
+    }
 
     /// Replays the last sample or value into `model` as one step; a refused value's reason. The
     /// copy stays shown until `clear()` or `clearAfterLanding()`.
@@ -59,6 +76,8 @@ import SwiftUI
     func clear() {
         isLanding = false
         edit = DesignLiveEdit()
+        // Only a preview set it, so a canvas drag's clear doesn't wake the rows that read it.
+        if previewed != nil { previewed = nil }
     }
 
     /// Stops showing the copy on the next main-actor turn, once the window has passed the canvas

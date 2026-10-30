@@ -28,7 +28,7 @@ struct DesignInspectorFill: View, BodyCounted {
         let _ = bodyTally.ran(Self.self)
         #endif
         let help = model.fillHelp
-        let shown = live?.workspace ?? model
+        let shown = live?.previewed ?? model
         let type = shown.fillSelection.map { GradientRules.type(of: $0.fill) } ?? .solid
         VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             if let selection = shown.fillSelection, type != .solid {

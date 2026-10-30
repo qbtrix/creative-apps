@@ -89,7 +89,7 @@ struct DesignOpacityRow: View, BodyCounted {
         let _ = bodyTally.ran(Self.self)
         #endif
         let send = DesignStyleSend(model: model, live: live, perform: perform)
-        let opacity = (live?.workspace ?? model).sharedValue(\.opacity)
+        let opacity = (live?.previewed ?? model).sharedValue(\.opacity)
         let help = model.styleHelp(.opacity)
         InspectorSliderRow(
             "Opacity", value: (opacity ?? 1) * 100, in: 0...100, step: 1, unit: "%", decimals: 0, mixed: opacity == nil,
@@ -115,7 +115,7 @@ struct DesignCornersSection: View, BodyCounted {
         let _ = bodyTally.ran(Self.self)
         #endif
         let send = DesignStyleSend(model: model, live: live, perform: perform)
-        let shown = live?.workspace ?? model
+        let shown = live?.previewed ?? model
         let radiusHelp = model.styleHelp(.cornerRadius)
         let radius = shown.sharedValue(\.cornerRadius)
         let most = model.selectedNodes.map(\.maxCornerRadius).max() ?? 0
@@ -152,7 +152,7 @@ struct DesignInspectorStyle: View, BodyCounted {
         let _ = bodyTally.ran(Self.self)
         #endif
         InspectorSection("Stroke") {
-            strokeRows(live?.workspace ?? model, send: DesignStyleSend(model: model, live: live, perform: perform))
+            strokeRows(live?.previewed ?? model, send: DesignStyleSend(model: model, live: live, perform: perform))
         }
     }
 
