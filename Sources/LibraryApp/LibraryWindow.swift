@@ -1,5 +1,6 @@
 // LibraryWindow.swift: the Library window. It is SuiteWindow with the
-// collections in the sidebar, LibraryBrowser as content (with LibraryStatusBar
+// sidebar's Library and AI tabs (LibrarySidebarTabs: the collections list,
+// and the agent's requests), LibraryBrowser as content (with LibraryStatusBar
 // under it in the loupe and on preview data), LibraryInspector in the inspector, and
 // LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
@@ -73,11 +74,6 @@ struct LibraryWindow: View, BodyCounted {
         let filters = filtersMenu
         SuiteWindow(
             title: "Library",
-            sections: sidebarSections(filters),
-            selection: model.sidebarSelection,
-            // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
-            onSelect: { model.selectSidebarRow($0) },
-            onRename: filters.renameCollection,
             contextActions: { id in
                 guard LibraryFolders.isRowID(id) else { return [] }
                 return LibraryFoldersSection.actions(
@@ -85,6 +81,15 @@ struct LibraryWindow: View, BodyCounted {
                     toggleSubfolders: { model.toggleFolderSubfolders(row: id) })
             }
         ) {
+            LibrarySidebarTabs(model: model) {
+                SuiteSidebarList(
+                    sections: sidebarSections(filters),
+                    selection: model.sidebarSelection,
+                    // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
+                    onSelect: { model.selectSidebarRow($0) },
+                    onRename: filters.renameCollection)
+            }
+        } content: {
             VStack(spacing: 0) {
                 LibraryFilterBar(
                     filter: model.activeFilter, value: model.filterValue, caption: model.filterCaption, menu: filters)
