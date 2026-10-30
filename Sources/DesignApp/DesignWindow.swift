@@ -25,8 +25,8 @@
 // unknown name leaves it empty and says so on the status line) and
 // `-DesignWindowSize WxH` (the first window's content size).
 //
-// File > Export… (⇧⌘E) bumps `exportRequest`; DesignExportArea opens its sheet
-// on each change and hands its notes to the status line. DesignHistoryArea holds the
+// File > Export… (⇧⌘E) bumps `exportRequest` (DesignExportRequest, which the body never reads);
+// DesignExportArea opens its sheet on each change and hands its notes to the status line. DesignHistoryArea holds the
 // History panel (View > Show History) and the autosave hooks; a jump and a restore come
 // back here as workspace methods.
 //
@@ -78,8 +78,8 @@ struct DesignWindow: View, BodyCounted {
     @State private var note: String?
     @State private var problem: DesignFileProblem?
     @State private var started = false
-    /// Bumped by File > Export…; DesignExportArea opens its sheet on each change.
-    @State private var exportRequest = 0
+    /// Bumped by File > Export…; DesignExportArea opens its sheet on each change, the window never runs.
+    @State private var exportRequest = DesignExportRequest()
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
@@ -165,7 +165,7 @@ struct DesignWindow: View, BodyCounted {
         case .open: chooseFile()
         case .save: save()
         case .saveAs: saveAs()
-        case .export: exportRequest += 1
+        case .export: exportRequest.bump()
         case .rememberExport(let options): model.rememberExport(options)
         case .undo: model.undo()
         case .redo: model.redo()
