@@ -40,12 +40,6 @@ extension BodyCountSuites {
 
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
         static let exclusions: [String: (reason: String, issue: Int)] = [
-            "photo.marquee": ("re-runs the editor body and re-renders every sample", 6020),
-            "photo.ellipse": ("re-runs the editor body and re-renders every sample", 6020),
-            "photo.lasso": ("re-runs the editor body and re-renders every sample", 6020),
-            "photo.polygon": ("re-runs the editor body and re-renders every sample", 6020),
-            "photo.wand": ("re-runs the editor body and re-renders every sample", 6020),
-            "photo.crop": ("re-runs the editor body and re-renders every sample", 6020),
             "design.move": ("2 root bodies with the pointer down", 6021),
             "library.*": ("no canvas tool enum, so no adapter", 6022),
         ]
