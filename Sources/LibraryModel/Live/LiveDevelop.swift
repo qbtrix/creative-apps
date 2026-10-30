@@ -9,8 +9,9 @@
 // The histogram is CoreRaster's, 256 bins over the sRGB values of the buffer
 // it is given (the rendered one). A slider in `waiting` throws
 // `.renderFailed` with its reason; none waits today. After
-// the tone, a crop (crop CR-4) turns the buffer by its angle and cuts
-// `LiveCrop`'s frame for the buffer's own size out of the turned pixels.
+// the tone, a crop (crop CR-4) cuts `LiveCrop`'s frame for the buffer's own
+// size out of the pixels turned by its angle; a turned frame samples only its
+// own pixels, across the cores (`turnedCrop`, LiveDevelop+Kernel.swift).
 // Between them the kinds (adjust-everywhere AJ-11): Black & White, then
 // Invert, SuiteImaging's CPU steps, so the grid, loupe and export all show them.
 // The photo's orientation (orientation-crop OC-8) then faces the pixels, so
@@ -67,9 +68,9 @@ public struct LiveDevelop: DevelopRendering {
         b = b.oriented(settings.orientation)
         guard let crop = settings.crop else { return b }
         do {
-            let turned = crop.angle == 0 ? b : try b.rotated(degrees: crop.angle, filter: .lanczos3)
             let f = try LiveCrop().frame(crop, photo: PixelSize(width: b.width, height: b.height))
-            return try turned.cropped(x: f.x, y: f.y, width: f.width, height: f.height)
+            if crop.angle == 0 { return try b.cropped(x: f.x, y: f.y, width: f.width, height: f.height) }
+            return try Self.turnedCrop(b, degrees: crop.angle, frame: f)
         } catch is RasterError {
             throw LibraryError.renderFailed("the crop doesn't fit the photo")
         }
