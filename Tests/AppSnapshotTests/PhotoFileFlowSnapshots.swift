@@ -1,13 +1,12 @@
-// PhotoFileFlowSnapshots.swift (file-flow PF-2's test, PF-5's file): Photo's File menu as the suite renders
-// it for Photo. photo-open-recent-{light,dark}: Open Recent ▸ and Open In ▸ as SuiteFileCommands gives them
-// for `.photo` with Sunset.png open and in the suite's recents: the file listed, Clear Menu under it, and
-// Open In offering Library. AppKit can't draw an open NSMenu offscreen, so the image lays out what
-// SuiteFileMenu gives the menu under its titles; the open menu itself is proved by PhotoJourneyTests'
-// screenshot. Both images compare against goldens in Golden/photo/ (`assertGolden`; a missing baseline is
-// recorded from CI's artifact, per Golden/README.md). `menu` also fails when Photo's own Open Recent menu is
-// still in its File menu beside the suite's, so File shows one Open Recent. photo-drop-mark (PF-5): the
-// suite drop mark over the editor with Sunset.png open, saying a dropped Logo.png is placed in it. Nests in
-// BodyCountSuites, as the drop mark renders the editor (PhotoEditor.bodyRuns). macOS only.
+// PhotoFileFlowSnapshots.swift (file-flow PF-2's test, PF-5's file): Photo's file flow, checked against goldens
+// in Golden/photo/. `menu`: Open Recent ▸ and Open In ▸ as SuiteFileCommands gives them for `.photo` with
+// Sunset.png open and in the suite's recents (the file listed, Open In offering Library), and no second Open
+// Recent of Photo's own in its File menu. AppKit can't draw an open NSMenu offscreen and a hand-drawn panel only
+// golds a look-alike, so the open menu's picture is PhotoJourneyTests' screenshot, not a golden here.
+// photo-opened-detail (light, dark): an opened photo on the canvas, with the palette and status line.
+// photo-drop-mark: the suite drop mark over that column with Sunset.png open, saying a dropped Logo.png is
+// placed in it. Both draw PhotoEditorDetail through SnapshotHost at 2x, since the split view (SuiteWindow) draws
+// its sidebar and inspector blank offscreen. Nests in BodyCountSuites, as these render editor views. macOS only.
 #if os(macOS)
 import AppKit
 import CoreRaster
@@ -46,14 +45,12 @@ extension BodyCountSuites {
             let file = try String(contentsOf: packageRoot().appending(path: "Sources/PhotoApp/PhotoCommands+File.swift"), encoding: .utf8)
             #expect(!file.contains("Menu(\"Open Recent\")"), "Photo's own Open Recent shows beside the suite's")
             #expect(file.contains("SuiteFileCommands(app: .photo"), "File has no suite Open Recent and Open In")
-            for scheme in [ColorScheme.light, .dark] {
-                assertGolden(PhotoFileMenuPanel(menu: menu), name: "photo-open-recent", area: "photo", scheme: scheme)
-            }
         }
 
-        /// photo-drop-mark: Logo.png hovering over the window with Sunset.png open. Photo's drop rule places
-        /// it, and the mark at the window's bottom names the open image, as SuiteFileDropModifier puts it.
-        @Test func dropMark() throws {
+        static let detailSize = CGSize(width: 900, height: 600)
+
+        /// Sunset.png, 640 x 400 of warm gradient, opened as the window opens a file.
+        static func opened() throws -> PhotoWorkspace {
             var model = PhotoWorkspace()
             let (w, h) = (640, 400)
             var bytes = [UInt8](repeating: 255, count: w * h * 4)
@@ -65,6 +62,22 @@ extension BodyCountSuites {
                 }
             }
             try model.open(rgba8: bytes, width: w, height: h, name: "Sunset.png")
+            return model
+        }
+
+        /// photo-opened-detail: the opened photo on the canvas, as the window's middle column draws it.
+        @Test func openedDetail() throws {
+            let model = try Self.opened()
+            for appearance in [SnapshotAppearance.light, .dark] {
+                assertGolden(PhotoEditorDetail(model: model, tiles: try photoTiles(model), renderMilliseconds: 8),
+                             size: Self.detailSize, name: "photo-opened-detail", area: "photo", appearance: appearance)
+            }
+        }
+
+        /// photo-drop-mark: Logo.png hovering over the window with Sunset.png open. Photo's drop rule places
+        /// it, and the mark at the window's bottom names the open image, as SuiteFileDropModifier puts it.
+        @Test func dropMark() throws {
+            let model = try Self.opened()
             let actions = DropPlan.plan(
                 ["/tmp/PhotoFileFlowSnapshots/Logo.png"], into: SuiteApp.photo.rawValue, hasDocument: model.hasDocument,
                 places: model.placesExtensions,
@@ -72,43 +85,15 @@ extension BodyCountSuites {
             #expect(actions == [.place(path: "/tmp/PhotoFileFlowSnapshots/Logo.png")], "Photo doesn't place a dropped PNG")
             let sentence = try #require(SuiteDropMark.sentence(for: actions, app: .photo, documentName: model.documentName))
             #expect(sentence == "Place in Sunset.png")
-            let view = PhotoEditor(model: model, tiles: try photoTiles(model), renderMilliseconds: 8, zoom: 1)
+            let view = PhotoEditorDetail(model: model, tiles: try photoTiles(model), renderMilliseconds: 8)
                 .overlay(alignment: .bottom) {
                     SuiteDropMarkView(sentence: sentence, refused: false)
                         .padding(SuiteSpacing.l)
                         .allowsHitTesting(false)
                 }
-            assertGolden(view, name: "photo-drop-mark", area: "photo", scheme: .light)
+            assertGolden(view, size: Self.detailSize, name: "photo-drop-mark", area: "photo", appearance: .light)
         }
     }
 }
 
-/// File's Open Recent ▸ and Open In ▸ for Photo: each title with its submenu's rows, on a panel at the top
-/// left of the frame.
-private struct PhotoFileMenuPanel: View {
-    let menu: SuiteFileMenu
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.m) {
-            Text("Open Recent").font(SuiteFont.headline)
-            ForEach(menu.recents, id: \.fileID) { file in
-                Button(file.name) {}.buttonStyle(.borderless)
-            }
-            Button("Clear Menu") {}.buttonStyle(.borderless).disabled(menu.recentsEmpty)
-            Divider()
-            Text("Open In").font(SuiteFont.headline)
-            ForEach(menu.openInTargets, id: \.self) { app in
-                Button(app.displayName) {}.buttonStyle(.borderless)
-            }
-            if let help = menu.openInHelp {
-                Text(help).font(SuiteFont.caption).foregroundStyle(.secondary)
-            }
-        }
-        .padding(SuiteSpacing.l)
-        .fixedSize()
-        .background(SuiteColor.panel)
-        .padding(SuiteSpacing.xxl)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-}
 #endif
