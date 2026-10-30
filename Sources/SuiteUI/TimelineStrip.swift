@@ -3,7 +3,8 @@
 // shifted by the sideways scroll; under it a vertical scroll view holds the
 // track names (a fixed left column) and, to their right, a horizontal scroll
 // view of one lane per track (TimelineLaneRow: the lane and its input). Both
-// stacks are lazy, so a long track list builds only the rows in view. A row
+// stacks are lazy, but the lanes' sits in a horizontal scroll view, so it
+// builds every row, not only those in view (#5804). A row
 // compares only its track and mapping; the playhead and closures a press needs
 // sit in one unobserved TimelineLaneContext the body rewrites, so a frame
 // change runs the playhead layer and no lane (#5804). The strip's ideal height is the
