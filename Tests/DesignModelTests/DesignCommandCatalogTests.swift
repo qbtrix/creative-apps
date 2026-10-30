@@ -81,6 +81,11 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "color.sample": .some(w.sampleHelp)
         case "color.pick": .some(w.sampleHelp ?? w.fillHelp)
         case "history.jump": .some(w.historyListing.steps.isEmpty ? "There are no steps yet." : nil)
+        // The kernel's request spans (#6028): end needs an open request, undo-request an applied step in one.
+        case "history.begin": .some(nil)
+        case "history.end": .some(w.historyListing.openRequest == nil ? "No request is open." : nil)
+        case "history.undo-request":
+            .some(w.historyListing.origins.prefix(w.historyListing.index).contains { $0.request != nil } ? nil : "No applied step belongs to a request.")
         // The shape tool's two (DS-6): the workspace's own shapeHelp, which needs an open file.
         case "shape.draw", "tool.shape": .some(w.shapeHelp)
         // The place commands (placed-images PD-5): placing needs an open file, the rest a picture selected.
@@ -168,6 +173,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         }
         let empty = DesignWorkspace()
         ran.insert("stroke.trim") // Design has no trim paths: its help says they are for animation (stroke-style).
+        // The kernel's request spans need an open request or a step made in one; HistoryCommandsTests runs them (#6028).
+        ran.formUnion(["history.end", "history.undo-request"])
         ran.formUnion(DesignWorkspace.catalog.ids.filter {
             let why = DesignWorkspace.catalog.availability($0, on: empty).why
             return why == nil || why?.hasSuffix("isn't built yet.") == true
@@ -241,6 +248,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         "place.replace | Replace Image | Select a placed image first.", "place.reset-size | Reset Size | Select a placed image first.",
         "place.focus | Move Inside | Select a placed image first.",
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
+        "history.begin | Begin Request | on", "history.end | End Request | No request is open.",
+        "history.undo-request | Undo Request | No applied step belongs to a request.",
         "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
         "view.zoom-to-selection | Zoom to Selection | on",
     ]

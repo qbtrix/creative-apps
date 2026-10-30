@@ -717,6 +717,7 @@
                   "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
                   "Sources/SuiteImaging/Color/",
                   "Sources/SuiteImaging/RasterSize.swift",
+                  "Sources/SuiteImaging/PlacedVectorPixels.swift",
                   "Sources/SuiteImaging/SuiteImaging.swift"
                 ]
               },

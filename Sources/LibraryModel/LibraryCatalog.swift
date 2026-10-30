@@ -88,8 +88,10 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var loupeRenderToken = 0
     /// The token the shown `loupeRender` landed under (the focus change's for the held thumbnail).
     public internal(set) var loupeShownToken = 0
-    /// The develop steps the loupe's view writes over `loupeRender` on the GPU route (suite-imaging IM-11); nil when it is plain pixels.
-    public internal(set) var loupeSteps: [ToneAdjustment]?
+    /// The develop program the loupe's view writes over `loupeRender` on the GPU route (suite-imaging IM-11); nil when it is plain pixels.
+    public internal(set) var loupeSteps: [ToneProgram.Operation]?
+    /// The token of the GPU frame whose histogram `loupeRender` shows (`showLoupeHistogram`).
+    public internal(set) var loupeHistogramToken = 0
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
@@ -136,6 +138,7 @@ public struct LibraryCatalog: Sendable, Equatable {
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
             && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
             && lhs.loupeError == rhs.loupeError && lhs.loupeSteps == rhs.loupeSteps
+            && lhs.loupeHistogramToken == rhs.loupeHistogramToken
             && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft && lhs.originalPhotoID == rhs.originalPhotoID
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError

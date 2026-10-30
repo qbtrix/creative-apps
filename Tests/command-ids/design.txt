@@ -22,8 +22,11 @@ fill.stop-color
 fill.stop-move
 fill.stop-remove
 fill.type
+history.begin
+history.end
 history.jump
 history.read
+history.undo-request
 object.align-bottom
 object.align-center
 object.align-left

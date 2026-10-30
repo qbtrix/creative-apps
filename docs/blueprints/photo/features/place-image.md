@@ -31,8 +31,11 @@ is the one Paste already uses, lifted out of `paste` into one internal
 `insertPixelLayer(_:named:x:y:step:)` that both call, so Place and Paste can't
 drift. Photo keeps no picture after a place (it becomes pixels), so
 `place.replace`, `place.reset-size`, `place.focus` and `fill` are unavailable
-with "A placed image becomes pixels in Photo." SVG is refused with "Photo
-places PNG or JPEG files." (rasterizing SVG into Photo is a follow-up).
+with "A placed image becomes pixels in Photo." An SVG is drawn into pixels
+at its placed size by SuiteImaging's `PlacedVectorPixels` (#6028): fills only,
+a gradient as its middle colour, no strokes or text, and an SVG with no fill
+is refused saying so. Any other file is refused with "Photo places PNG, JPEG
+or SVG files."
 
 **Render path.** None new: the layer is pixels, composited by Photo's
 existing route.
@@ -59,8 +62,8 @@ Model walk in `PhotoPlaceTests` (Linux).
 3. Place `photo-4000x3000.jpg`: a layer at 800 × 600 (fitted, never larger
    than the canvas); the status line reads "Placed at 20%."
 4. Undo: the photo layer goes in one step; the logo stays.
-5. Place `logo.svg`: nothing is added; the status line reads "Photo places
-   PNG or JPEG files."
+5. Place `notes.txt`: nothing is added; the status line reads "Photo places
+   PNG, JPEG or SVG files."
 
 ## Jobs
 
@@ -160,6 +163,6 @@ Linux job; PP-u's feel gate and `Mac-Finish:`; PP-z's journey on live. Then
 ## Not in this packet
 
 Placing as a smart object that keeps its source and rescales without loss
-(needs a non-destructive layer kind), SVG in Photo (rasterize through
-`PlacedVector`; a follow-up), Free Transform right after a place (S7's
+(needs a non-destructive layer kind), SVG strokes, gradients and text in Photo
+(fills place today), Free Transform right after a place (S7's
 transform pack), HEIC and TIFF (see the shared packet).
