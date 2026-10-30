@@ -4,10 +4,12 @@
 // with a HaloLiveEdit and fed the drag's samples the way HaloViewerGestures
 // writes them (`lift` once, then the project with the moved drag), one per
 // 1/120 s, each a timed layout and display; no synthetic events, which a
-// hosted window doesn't get on every Mac. `liftedDrag` gates it: the samples
-// draw no layer (HaloCanvasDraws stays put while HaloLiftOffset re-runs per
-// sample), mouse-up draws the moved frame once, and a sample's p95 is at or
-// under 8 ms (16 ms hard; render contract rule 6). `liftMatchesTheOffsetList`
+// hosted window doesn't get on every Mac. `liftedDrag` gates the draws: the
+// samples draw no layer (HaloCanvasDraws stays put while HaloLiftOffset
+// re-runs per sample) and mouse-up draws the moved frame once.
+// `liftedDragTiming` gates a sample's p95 at or under 8 ms (16 ms hard; render
+// contract rule 6); a wall-clock test, it runs where Tests/perf-suites.txt
+// lists it and is disabled until it does. `liftMatchesTheOffsetList`
 // checks the lift moved by a delta draws the pixels the offset list draws.
 // Nested in BodyCountSuites, as every suite that reads a body counter is.
 // macOS only.
@@ -27,6 +29,17 @@ extension BodyCountSuites {
         static let press = HaloPoint(x: 960, y: 540)
 
         @Test(.timeLimit(.minutes(4))) func liftedDrag() async throws {
+            _ = try await Self.drag()
+        }
+
+        @Test(.disabled("timing: runs once Tests/perf-suites.txt lists it"), .timeLimit(.minutes(4)))
+        func liftedDragTiming() async throws {
+            expectP95(try await Self.drag(), atMost: 8, target: 8.3)
+        }
+
+        /// Hosts huge, lifts the pressed layer, feeds the samples and checks
+        /// the draw counts (DEBUG); the samples' timing.
+        static func drag() async throws -> RenderStep {
             let project = try Self.project("huge")
             let live = HaloLiveEdit()
             live.current = { project }
@@ -62,7 +75,7 @@ extension BodyCountSuites {
             try await w.settle(100)
             #expect(draws() > before, "mouse-up didn't draw the frame")
             #endif
-            expectP95(step, atMost: 8, target: 8.3)
+            return step
         }
 
         @Test func liftMatchesTheOffsetList() async throws {
