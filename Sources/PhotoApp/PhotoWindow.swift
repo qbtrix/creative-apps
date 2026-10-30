@@ -240,7 +240,8 @@ struct PhotoWindow: View {
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
             pacer.add(move) { moves in
                 if samplePress(moves) { return }
-                // A Gradient drag's later samples move only its line, on LiveDragLine's copy.
+                // A drag that only moves an overlay mark (a Gradient line, an area tool's selection, a crop
+                // box) runs on LiveDragLine's copy, and the overlay alone redraws.
                 if dragLine.drags(moves, on: model, zoom: zoom) { return }
                 // Free Transform's canvas drags and the Move tool's run on the live transform, as the handles' do.
                 if model.dragRunsLive { return runLiveDrag(moves) }
@@ -271,6 +272,10 @@ struct PhotoWindow: View {
         case .pickLayer(let id, let pick): model.pickLayer(id, pick)
         case .selectAllLayers: model.selectAllLayers()
         case .toggleVisibility(let id): model.toggleVisibility(id)
+        case .agent(.setHidden(let ids, let hidden)): model.setLayersHidden(ids, hidden: hidden)
+        case .agent(.select(let ids)): model.selectLayers(ids)
+        case .agent(.undoRequest(let title)):
+            _ = run("history.undo-request", ["name": .string(title)], failing: "The agent's request can't be undone.")
         case .opacity(let id, let percent): model.setOpacity(id, percent: percent)
         case .blendMode(let id, let mode): model.setBlendMode(id, mode)
         case .moveLayers(let from, let to): model.moveLayers(fromOffsets: Array(from), toOffset: to)
