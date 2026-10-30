@@ -1,4 +1,4 @@
-// Live/LiveCropRender.swift: a straightened crop's pixels (crop CR-4, #3619).
+// Live/LiveDevelop+Kernel.swift: the adapter onto CoreRaster for a straightened crop's pixels (crop CR-4, #3619).
 // `turnedCrop` gives what `rotated(degrees:filter: .lanczos3)` followed by
 // `cropped` gives, without turning the whole photo: one CoreRaster affine
 // pass samples only the frame's pixels, and the frame's rows are split into

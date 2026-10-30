@@ -64,21 +64,21 @@
   },
   {
     "label": "the turned crop turns the other way",
-    "file": "Sources/LibraryModel/Live/LiveCropRender.swift",
+    "file": "Sources/LibraryModel/Live/LiveDevelop+Kernel.swift",
     "find": "AffineMatrix(a: c, b: s, c: -s, d: c,",
     "replace": "AffineMatrix(a: c, b: -s, c: s, d: c,",
     "tests": "LibraryCropRenderTests"
   },
   {
     "label": "every band reads the frame's top rows",
-    "file": "Sources/LibraryModel/Live/LiveCropRender.swift",
+    "file": "Sources/LibraryModel/Live/LiveDevelop+Kernel.swift",
     "find": "ty: ty - Double(y0))",
     "replace": "ty: ty)",
     "tests": "LibraryCropRenderTests"
   },
   {
     "label": "the frame's origin is dropped: the turned crop reads the canvas's top left",
-    "file": "Sources/LibraryModel/Live/LiveCropRender.swift",
+    "file": "Sources/LibraryModel/Live/LiveDevelop+Kernel.swift",
     "find": "turnedW / 2 - Double(f.x) -",
     "replace": "turnedW / 2 -",
     "tests": "LibraryCropRenderTests"

@@ -11,7 +11,7 @@
 // `.renderFailed` with its reason; none waits today. After
 // the tone, a crop (crop CR-4) cuts `LiveCrop`'s frame for the buffer's own
 // size out of the pixels turned by its angle; a turned frame samples only its
-// own pixels, across the cores (`turnedCrop`, LiveCropRender.swift).
+// own pixels, across the cores (`turnedCrop`, LiveDevelop+Kernel.swift).
 // Between them the kinds (adjust-everywhere AJ-11): Black & White, then
 // Invert, SuiteImaging's CPU steps, so the grid, loupe and export all show them.
 // The photo's orientation (orientation-crop OC-8) then faces the pixels, so
