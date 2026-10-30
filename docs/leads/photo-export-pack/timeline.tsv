@@ -449,3 +449,4 @@ utc	stage	event	ref	note
 2026-10-30T05:56Z	check-in	#5353 open (clean), PX-9 waits. dev green, no dev-red. No merges, no new findings (51 Photo open).
 2026-10-30T06:28Z	check-in	#5353 open (clean), PX-9 waits. dev green, no dev-red. No merges, no new findings (51 Photo open).
 2026-10-30T07:01Z	check-in	#5353 open (clean), PX-9 waits. dev green, no dev-red. Merged: #6079 (AI tab in Design/Halo/Library), #6081 (ci quarantine), not export/text. No new findings (51 Photo open).
+2026-10-30T07:33Z	check-in	#5353 open (clean), PX-9 waits. dev green, no dev-red. Merged: #5882 (captain's photo mac finish, file flow), not export/text. No new findings (51 Photo open).
