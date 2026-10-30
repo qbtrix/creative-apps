@@ -2,8 +2,11 @@
 // ruler (TimelineRuler) is pinned along the top, outside both scroll views and
 // shifted by the sideways scroll; under it a vertical scroll view holds the
 // track names (a fixed left column) and, to their right, a horizontal scroll
-// view of one lane per track (TimelineLane). Both stacks are lazy, so a long
-// track list builds only the rows in view. The strip's ideal height is the
+// view of one lane per track (TimelineLaneRow: the lane and its input). Both
+// stacks are lazy, so a long track list builds only the rows in view. A row
+// compares only its track and mapping; the playhead and closures a press needs
+// sit in one unobserved TimelineLaneContext the body rewrites, so a frame
+// change runs the playhead layer and no lane (#5804). The strip's ideal height is the
 // toolbar row (when on), the ruler and every lane: a host inside its own
 // vertical ScrollView sees every lane, and one that offers less gets lanes
 // scrolling under the ruler. TimelineStripLayout holds that arithmetic. The
@@ -78,6 +81,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     @State private var position = ScrollPosition()
     /// The content x a zoom scrolls to once the lanes take their new width.
     @State private var pendingScrollX: Double?
+    /// The playhead and closures a lane press reads; written each body, never observed (#5804).
+    @State private var laneContext = TimelineLaneContext<ID>()
     /// The strip or a control in it has focus: the zoom shortcuts are live.
     @FocusState private var focused: Bool
     #if DEBUG
@@ -139,6 +144,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         let _ = bodyTally.ran(TimelineStripBodies.self)
         #endif
         let layout = TimelineStripLayout(trackCount: tracks.count, toolbar: toolbar)
+        let _ = updateLaneContext()
         VStack(alignment: .leading, spacing: 0) {
             if toolbar {
                 TimelineToolbar(
@@ -226,6 +232,15 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         }
         .onKeyPress(phases: [.down, .repeat]) { press in zoomKey(press) }
         .onChange(of: playhead) { _, frame in follow(frame) }
+    }
+
+    /// Hands the lanes' presses this body's playhead and closures, without re-running a lane.
+    private func updateLaneContext() {
+        laneContext.playhead = playhead
+        laneContext.actions = TimelineLaneActions(
+            onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe,
+            onMoveKeyframes: onMoveKeyframes, onEndKeyDrag: onEndKeyDrag, onTrim: onTrim, onEndTrim: onEndTrim,
+            onSlide: onSlide)
     }
 
     /// The host's mapping at the strip's zoom.
@@ -333,10 +348,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private func lanes(width: CGFloat) -> some View {
         LazyVStack(alignment: .leading, spacing: 0) {
             ForEach(tracks) { track in
-                // The strip owns the tap so no closure sits in what `.equatable()` compares.
-                TimelineLane(track: track, mapping: mapping).equatable()
-                    .contentShape(Rectangle())
-                    .modifier(TimelineLaneInput(track: track, mapping: mapping, playhead: playhead, actions: TimelineLaneActions(onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe, onMoveKeyframes: onMoveKeyframes, onEndKeyDrag: onEndKeyDrag, onTrim: onTrim, onEndTrim: onEndTrim, onSlide: onSlide)))
+                TimelineLaneRow(track: track, mapping: mapping, context: laneContext).equatable()
             }
         }
         .frame(width: width, alignment: .leading)
@@ -483,6 +495,26 @@ struct TimelineNameStyle: ButtonStyle {
             case .selected: SuiteColor.accent.opacity(0.15)
             }
         }
+    }
+}
+
+/// One lane with its input: Equatable over the track and the mapping (the
+/// context is the strip's one box), so on a frame change the strip's
+/// `.equatable()` skips the row and neither the lane nor its input re-runs.
+/// No closure sits in what it compares: the lane's presses read the context.
+struct TimelineLaneRow<ID: Hashable & Sendable>: View, Equatable {
+    let track: TimelineTrack<ID>
+    let mapping: FrameMapping
+    let context: TimelineLaneContext<ID>
+
+    var body: some View {
+        TimelineLane(track: track, mapping: mapping).equatable()
+            .contentShape(Rectangle())
+            .modifier(TimelineLaneInput(track: track, mapping: mapping, context: context))
+    }
+
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.track == rhs.track && lhs.mapping == rhs.mapping && lhs.context === rhs.context
     }
 }
 
