@@ -210,8 +210,10 @@ final class HaloJourneyTests: XCTestCase {
                 XCTAssertFalse((entry.reason ?? "").isEmpty, "\(entry.id) is disabled and doesn't say why")
                 continue
             }
-            // A segment already selected (its container's click picked it) has nothing to change.
-            guard entry.selected != true else { continue }
+            // A segment already selected (its container's click picked it) has nothing to change; a toggle that is
+            // simply on still gets its click. A segment is an entry whose parent id is also listed.
+            let parent = String(entry.id[..<(entry.id.lastIndex(of: ".") ?? entry.id.startIndex)])
+            guard !(entry.selected == true && entries[parent] != nil) else { continue }
             let control = halo.element(entry.id)
             XCTAssert(control.waitForExistence(timeout: 5), "\(entry.id) is listed but not on screen")
             let before = halo.app.windows.firstMatch.screenshot().pngRepresentation
