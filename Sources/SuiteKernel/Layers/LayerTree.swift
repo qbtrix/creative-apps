@@ -66,6 +66,13 @@ public struct LayerRow: Hashable, Sendable {
     /// True when the row is open, showing its children below it.
     public var isExpanded: Bool
 
+    /// A row built outside a tree, for a list that reads like layers (the AI tab's requests).
+    public init(id: String, name: String, depth: Int, isHidden: Bool, isLocked: Bool, inheritsHidden: Bool,
+                inheritsLocked: Bool, holdsChildren: Bool, isExpanded: Bool) {
+        (self.id, self.name, self.depth, self.isHidden, self.isLocked) = (id, name, depth, isHidden, isLocked)
+        (self.inheritsHidden, self.inheritsLocked) = (inheritsHidden, inheritsLocked)
+        (self.holdsChildren, self.isExpanded) = (holdsChildren, isExpanded)
+    }
 }
 
 /// One arrange command on layers among their siblings.
