@@ -1,6 +1,11 @@
 // History.swift: the one undo history every app keeps: named steps, a run
 // under one key folded into one step, ids that never repeat, dirty read
 // exactly as saved-vs-current, a limit that rolls old steps into the base.
+// Each step records who made it (`StepOrigin`): `record` reads the ambient
+// `StepOrigin.current`, `.user` unless a live call set `.agent`, so no record
+// site names an origin. An agent step made while a request span is open
+// (`beginRequest`) carries that request's name. A run folds only across steps
+// of one origin, so a user drag never folds into an agent's step.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -20,6 +25,48 @@ public protocol HistoryReading: Sendable {
     var redoName: String? { get }
     /// True when the current step is not the saved one.
     var isDirty: Bool { get }
+    /// Who made each step, in `History.steps` order (undone ones included); empty when the reader doesn't track it.
+    var stepOrigins: [StepOrigin] { get }
+}
+
+extension HistoryReading {
+    /// A history that doesn't track origins (an engine's own undo) lists none.
+    public var stepOrigins: [StepOrigin] { [] }
+}
+
+/// Who made a history step: the person at the app, or an agent over a live call, inside a named request or not.
+public enum StepOrigin: Sendable, Hashable, Codable {
+    case user
+    case agent(client: String, request: String?)
+
+    /// The origin the next recorded step takes: `.user`, unless a live call runs the command under `.agent`.
+    @TaskLocal public static var current: StepOrigin = .user
+
+    /// The request this step belongs to; nil for a user step or an agent step outside a request.
+    public var request: String? { if case .agent(_, let request) = self { request } else { nil } }
+
+    private enum Key: String, CodingKey { case kind, client, request }
+
+    /// Flat JSON: `{"kind": "user"}` or `{"kind": "agent", "client": "...", "request": "..."}`, request omitted when nil.
+    public func encode(to encoder: any Encoder) throws {
+        var c = encoder.container(keyedBy: Key.self)
+        switch self {
+        case .user: try c.encode("user", forKey: .kind)
+        case .agent(let client, let request):
+            try c.encode("agent", forKey: .kind)
+            try c.encode(client, forKey: .client)
+            try c.encodeIfPresent(request, forKey: .request)
+        }
+    }
+
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: Key.self)
+        switch try c.decode(String.self, forKey: .kind) {
+        case "user": self = .user
+        case "agent": self = .agent(client: try c.decode(String.self, forKey: .client), request: try c.decodeIfPresent(String.self, forKey: .request))
+        case let kind: throw DecodingError.dataCorruptedError(forKey: .kind, in: c, debugDescription: "no step origin \(kind)")
+        }
+    }
 }
 
 /// An undo history of named steps, each holding the `Payload` that reverts it.
@@ -31,6 +78,8 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
         public internal(set) var payload: Payload
         public internal(set) var idBefore: Int
         public internal(set) var idAfter: Int
+        /// Who made the step; `.user` unless a live call recorded it.
+        public internal(set) var origin: StepOrigin = .user
     }
 
     /// The most steps kept; older ones roll into the base and can't be undone.
@@ -43,6 +92,8 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
     private var openKey: String?
     /// The last id handed out. It never rewinds, so ids never repeat.
     private var lastIssuedID = 0
+    /// The open request span's name: agent steps recorded now carry it. Nil when none is open.
+    public private(set) var openRequest: String?
     /// The id of the step the document is at now. Ids never repeat.
     public private(set) var currentStepID: Int = 0
     /// The id of the step last saved; the document is clean when it equals `currentStepID`.
@@ -71,6 +122,8 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
     public var steps: [String] { done.map(\.name) + undone.reversed().map(\.name) }
     /// How many of `steps` are applied: the place `jump(to:)` moves.
     public var index: Int { done.count }
+    /// Who made each of `steps`, oldest first, undone ones included.
+    public var stepOrigins: [StepOrigin] { done.map(\.origin) + undone.reversed().map(\.origin) }
 
     /// Hands out the next id; the counter never rewinds.
     private mutating func nextID() -> Int {
@@ -78,11 +131,15 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
         return lastIssuedID
     }
 
-    /// Records a step named `name` whose `undo` payload reverts it. A `key`
-    /// equal to the open run's key folds into that step instead of adding one;
-    /// the folded step keeps the payload of the run's first edit.
+    /// Records a step named `name` whose `undo` payload reverts it, made by
+    /// `StepOrigin.current` (an agent's step inside an open request carries it).
+    /// A `key` equal to the open run's key folds into that step instead of
+    /// adding one when the origin matches; the folded step keeps the payload of
+    /// the run's first edit.
     public mutating func record(_ name: String, _ undo: Payload, key: String? = nil) {
-        if let key, key == openKey, !done.isEmpty {
+        var origin = StepOrigin.current
+        if case .agent(let client, _) = origin { origin = .agent(client: client, request: openRequest) }
+        if let key, key == openKey, done.last?.origin == origin {
             let folded = nextID()
             done[done.count - 1].idAfter = folded
             currentStepID = folded
@@ -90,7 +147,7 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
         }
         let before = currentStepID
         let after = nextID()
-        done.append(Step(name: name, payload: undo, idBefore: before, idAfter: after))
+        done.append(Step(name: name, payload: undo, idBefore: before, idAfter: after, origin: origin))
         undone.removeAll()
         while done.count > limit { done.removeFirst() }
         openKey = key
@@ -132,6 +189,23 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
         while done.count < target, redo(apply) {}
     }
 
+    /// Opens a request span named `name`, ending the open run so no step folds across its edge.
+    /// False, and nothing changes, while another request is open.
+    public mutating func beginRequest(_ name: String) -> Bool {
+        guard openRequest == nil else { return false }
+        openKey = nil
+        openRequest = name
+        return true
+    }
+
+    /// Closes the open request span, ending the open run; false when none is open.
+    public mutating func endRequest() -> Bool {
+        guard openRequest != nil else { return false }
+        openKey = nil
+        openRequest = nil
+        return true
+    }
+
     /// Marks the step the document is at now as the saved one.
     public mutating func markSaved() {
         savedStepID = currentStepID
@@ -150,6 +224,7 @@ extension History: Hashable where Payload: Hashable {
         hasher.combine(done)
         hasher.combine(undone)
         hasher.combine(openKey)
+        hasher.combine(openRequest)
         hasher.combine(lastIssuedID)
         hasher.combine(currentStepID)
         hasher.combine(savedStepID)

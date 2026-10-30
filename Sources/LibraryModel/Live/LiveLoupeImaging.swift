@@ -7,8 +7,10 @@
 // drawn from `SampleImage`, never decoded or cached. Neutral settings hand
 // the decode back unchanged; develop only takes the histogram. On the GPU
 // route (`gpuFrame`, suite-imaging IM-11) the view draws the decoded base
-// through `LiveDevelop.steps` itself; the actor still decodes and takes the
-// histogram, from the preview decode developed on the CPU.
+// through `LiveDevelop.program` itself, so a frame runs no CPU pixel pass: a
+// slider step costs a cache hit. Its histogram comes after, from `histogram`
+// (the preview decode developed on the CPU, outside the actor, so a running
+// histogram never holds up the next frame).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -18,13 +20,11 @@ import CoreRaster
 import CoreRender
 import SuiteImaging
 
-/// The loupe's picture on the GPU route: the undeveloped decode, the develop
-/// steps the view writes over it (with the display steps last), and the
-/// developed picture's histogram.
+/// The loupe's picture on the GPU route: the undeveloped decode and the
+/// develop program the view writes over it (with the display steps last).
 public struct LoupeGPUFrame: Equatable, Sendable {
     public var base: DisplayImage
-    public var steps: [ToneAdjustment]
-    public var histogram: HistogramBins
+    public var program: [ToneProgram.Operation]
 }
 
 public actor LiveLoupeImaging: LoupeImaging {
@@ -78,20 +78,33 @@ public actor LiveLoupeImaging: LoupeImaging {
 
     /// The GPU route's frame for `photo` at `longSide`; nil keeps the CPU
     /// route (`render`): the View > Rendering choice is CPU (`preferGPU`
-    /// false), the settings carry a crop, or a step isn't on Metal yet. The
-    /// histogram is the 512 px preview's, developed on the CPU, so a step
-    /// never reads the GPU picture back. A waiting slider throws its reason.
+    /// false), the settings carry a crop, or the display pass has no step for
+    /// one (`ImagingRoute.choose(preferGPU:program:)`). No pixel is developed
+    /// here; `histogram` takes the developed histogram. A waiting slider throws its reason.
     public func gpuFrame(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
                          preferGPU: Bool) async throws -> LoupeGPUFrame? {
         guard settings.crop == nil else { return nil }
         for slider in DevelopSlider.allCases where settings.value(slider) != 0 {
             if let why = LiveDevelop.waiting[slider] { throw LibraryError.renderFailed(why) }
         }
-        let steps = LiveDevelop.steps(for: settings)
-        guard ImagingRoute.choose(preferGPU: preferGPU, steps: steps) == .gpu else { return nil }
-        let base = try await decoded(photo, longSide: longSide, quality: .full)
-        let developed = try await render(photo, settings: settings, longSide: longSide, quality: .preview)
-        return LoupeGPUFrame(base: base, steps: steps, histogram: developed.histogram)
+        let program = LiveDevelop.program(for: settings)
+        guard ImagingRoute.choose(preferGPU: preferGPU, program: program) == .gpu else { return nil }
+        return LoupeGPUFrame(base: try await decoded(photo, longSide: longSide, quality: .full), program: program)
+    }
+
+    /// The histogram of `photo` developed with `settings`, from the 512 px
+    /// preview decode on the CPU. Only the decode runs on the actor; the
+    /// develop runs off it, so a GPU frame asked meanwhile isn't held up.
+    public nonisolated func histogram(_ photo: PhotoItem, settings: DevelopSettings) async throws -> HistogramBins {
+        let base = try await decoded(photo, longSide: Self.previewLongSide, quality: .preview)
+        do {
+            let buffer = try PixelBuffer(rgba8: base.rgba8, width: base.size.width, height: base.size.height)
+            return try develop.histogram(of: settings.isNeutral ? buffer : develop.render(buffer, settings: settings))
+        } catch let error as LibraryError {
+            throw error
+        } catch {
+            throw LibraryError.renderFailed("the histogram couldn't be taken")
+        }
     }
 
     public func prefetch(_ photos: [PhotoItem], longSide: Int) async {

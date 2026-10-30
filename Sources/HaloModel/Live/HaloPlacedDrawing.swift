@@ -1,9 +1,8 @@
 // Live/HaloPlacedDrawing.swift: placed-images PH-5, a solid's picture as pixels on the frame. A PNG or JPEG is
 // decoded once per asset id (`decodes` counts real decodes, however many layers show it) and drawn through
 // the layer's matrix with CoreRaster's affine composite into PlaceRules.drawnRect, the cover crop of its box.
-// An SVG goes through PlaceRules.vector: each item's contours make one even-odd Mask.polygon, filled in
-// linear light. LiveFrameRendering clips the result to the solid's outline. `shared` is the process-wide
-// cache, behind a Mutex so it stays Sendable under Swift 6; it empties itself past `budget` pixels. Linux-safe.
+// An SVG goes through PlaceRules.vector, each item filled by SuiteImaging's PlacedVectorPixels.
+// LiveFrameRendering clips the result to the solid's outline. `shared` is the process-wide cache, behind a Mutex so it stays Sendable under Swift 6; it empties itself past `budget` pixels. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -11,6 +10,7 @@ import Foundation
 #endif
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
 import Synchronization
 
@@ -73,22 +73,9 @@ struct HaloPlacedDrawing: Sendable {
         return vector
     }
 
-    /// `item`'s fill over its contours mapped through `m`, even-odd: the contours are joined into one polygon
-    /// by bridges back to each start, which cross twice and so cancel. A nil fill paints nothing.
+    /// `item`'s fill over its contours mapped through `m`: SuiteImaging's shared vector fill.
     static func fill(_ item: PlacedVector.Item, through m: HaloMatrix, onto out: inout PixelBuffer) throws {
-        guard let fill = item.fill else { return }
-        let points = item.contours.flatMap { $0 + $0.prefix(1) }.map { p in
-            let w = m.apply(p)
-            return Mask.Point(x: w.x, y: w.y)
-        }
-        let c = GradientRules.color(of: fill, at: 0.5)
-        guard points.count >= 3, let opaque = HaloLayerColor(red: c.r, green: c.g, blue: c.b).linearPixel() else { return }
-        let alpha = c.a * item.opacity
-        let a = Float(alpha.isFinite ? min(max(alpha, 0), 1) : 1)
-        let color = RGBA(r: opaque.r * a, g: opaque.g * a, b: opaque.b * a, a: a)
-        let mask = try Mask.polygon(width: out.width, height: out.height, points: points)
-        let paint = try PixelBuffer(width: out.width, height: out.height, fill: color)
-        try out.composite(paint, x: 0, y: 0, mode: .normal, opacity: 1, mask: mask, maskX: 0, maskY: 0)
+        try PlacedVectorPixels.fill(item, map: { m.apply($0) }, onto: &out)
     }
 }
 
