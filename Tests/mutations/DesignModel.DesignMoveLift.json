@@ -1,0 +1,23 @@
+[
+  {
+    "label": "a split selection still lifts",
+    "file": "Sources/DesignModel/DesignMoveLift.swift",
+    "find": "if ended { broken = true }",
+    "replace": "if ended { broken = false }",
+    "tests": "DesignMoveLiftTests.swift"
+  },
+  {
+    "label": "a frame lifts without its children",
+    "file": "Sources/DesignModel/DesignMoveLift.swift",
+    "find": "let lifted = inside || roots.contains(node.id)",
+    "replace": "let lifted = roots.contains(node.id)",
+    "tests": "DesignMoveLiftTests.swift"
+  },
+  {
+    "label": "the offset is measured the wrong way",
+    "file": "Sources/DesignModel/DesignMoveLift.swift",
+    "find": "offset: DesignPoint(x: now.x - was.x, y: now.y - was.y)",
+    "replace": "offset: DesignPoint(x: was.x - now.x, y: was.y - now.y)",
+    "tests": "DesignMoveLiftTests.swift"
+  }
+]
