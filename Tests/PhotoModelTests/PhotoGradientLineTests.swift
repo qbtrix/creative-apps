@@ -51,7 +51,8 @@ struct PhotoGradientLineTests {
             workspace.drag(from: point(4, 5), to: point(4, 5))
             workspace.drag(from: point(4, 5), to: point(20, 30))
             #expect(workspace.gradientDrag == nil, "\(tool) drew a gradient line")
-            #expect(!workspace.dragShowsLineOnly, "\(tool)'s drag isn't line-only")
+            // The marquee's selection and the crop box are overlay marks too, so those drags share the line's copy.
+            #expect(workspace.dragShowsLineOnly == [.marquee, .crop].contains(tool), "\(tool)'s drag isn't line-only")
             workspace.endDrag()
         }
     }

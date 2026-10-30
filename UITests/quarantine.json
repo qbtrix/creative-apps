@@ -102,5 +102,12 @@
     "reason": "Same stroke and runner time limit as removeStrokeTiming (run 40873585545). Owned by #6058; 24 h.",
     "expires": "2026-10-31",
     "scope": "all"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoOverlayDragTests/overlayDraggerDoesNoPixelWorkUntilTheRelease",
+    "owner": "#6075",
+    "reason": "New with #6039. On GitHub's GPU-less macOS runner every tool's case waits out its 300 s limit in the shared PixelMover settle and idle wait, the same wait #6075 owns, so the shard hits its 75 min timeout (run 40951412671). The marquee and lasso drags stay covered by GestureContractTests' photo rows. Owned by #6075; 24 h.",
+    "expires": "2026-10-31",
+    "scope": "all"
   }
 ]
