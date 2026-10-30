@@ -6,9 +6,11 @@
 // black photo. The outline is ToneCurveEditor's `histogramPoints`, the one
 // path both draw. It counts nothing: the host hands it a ToneHistogram it
 // counted off the main actor (SuiteModel's ToneHistogram from the engine's
-// counts). One accessibility element, "Histogram", valued with its clipping
-// reading (`reading`) after the host's own `value` when it passes one,
-// identified `id`.
+// counts). One accessibility element identified `id`. XCUITest reads SwiftUI
+// values as empty strings (#262), so when the host passes a `value` the label
+// carries the readout, that value then the clipping reading (`label`), and the
+// value stays empty so VoiceOver says it once; without one the label is
+// "Histogram" and the value its clipping reading (`reading`).
 import SuiteModel
 import SwiftUI
 
@@ -18,7 +20,7 @@ public struct HistogramView: View {
     private let value: String?
     private let id: String
 
-    /// `value` leads the accessibility value, before the clipping reading (Library keeps its mean there).
+    /// `value` leads the accessibility label, before the clipping reading (Library keeps its mean there).
     public init(
         _ histogram: ToneHistogram, emptyMessage: String = "No histogram", value: String? = nil,
         id: String = "suite.histogram"
@@ -40,8 +42,8 @@ public struct HistogramView: View {
                 }
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Histogram")
-            .accessibilityValue(Text(verbatim: [value, Self.reading(histogram, empty: emptyMessage)].compactMap { $0 }.joined(separator: "  ·  ")))
+            .accessibilityLabel(Text(verbatim: Self.label(histogram, value: value, empty: emptyMessage)))
+            .accessibilityValue(Text(verbatim: value == nil ? Self.reading(histogram, empty: emptyMessage) : ""))
             .accessibilityIdentifier(id)
     }
 
@@ -67,6 +69,11 @@ public struct HistogramView: View {
             corner.closeSubpath()
             context.fill(corner, with: .color(clips ? SuiteColor.stateWarning : SuiteColor.tick))
         }
+    }
+
+    /// The host's value then the clipping reading when it passes one (UI tests read the label, #262), else "Histogram".
+    nonisolated static func label(_ histogram: ToneHistogram, value: String?, empty: String) -> String {
+        value.map { "\($0)  ·  \(reading(histogram, empty: empty))" } ?? "Histogram"
     }
 
     /// "Shadows clipped, Highlights clipped", "No clipping", or `empty` with no bins.
