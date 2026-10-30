@@ -1,0 +1,16 @@
+[
+  {
+    "label": "the export's shrink always runs the horizontal pass first, not core's smaller-intermediate pass",
+    "file": "Sources/LibraryModel/Live/LiveResize.swift",
+    "find": "if width * b.height <= b.width * height {",
+    "replace": "if true {",
+    "tests": "LibraryDevelopTilesTests"
+  },
+  {
+    "label": "every band of the horizontal pass puts its first tile back in each column",
+    "file": "Sources/LibraryModel/Live/LiveResize.swift",
+    "find": "with: band.tile(column: c, row: 0)",
+    "replace": "with: band.tile(column: 0, row: 0)",
+    "tests": "LibraryDevelopTilesTests"
+  }
+]
