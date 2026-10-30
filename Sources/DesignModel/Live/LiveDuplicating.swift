@@ -4,9 +4,10 @@
 // copy goes directly above its original in the same parent, moved by `offset`.
 // DesignCanvasEditing routes Option-drag here with a zero offset and moves the
 // copies itself, so both gestures share this one duplicate. `copySubtree` is the
-// id-refreshing copy the clipboard reuses (C-3). An adapter over SuiteKernel's
-// LayerTree (DesignNode+Kernel): the kernel copies and places each layer; this
-// file picks the outermost layers, then offsets and unlocks the copies.
+// id-refreshing copy the clipboard reuses (C-3). The whole duplicate is two walks
+// of the tree however many layers are selected: one finds the outermost selected
+// layers, one rebuilds the tree with each copy placed above its original. A
+// per-layer tree walk made 1,500 layers take seconds (#5838).
 //
 // Invariants:
 // - No id repeats: every copied node takes the mint's next id.
@@ -16,8 +17,6 @@
 // - Nothing selected throws `.nothingSelected` and changes nothing.
 // - Each help is nil exactly when its write succeeds (the help law).
 // Linux-safe.
-
-import SuiteKernel
 
 public struct LiveDuplicating: LayerDuplicating {
     public init() {}
@@ -32,17 +31,28 @@ public struct LiveDuplicating: LayerDuplicating {
     /// One "Duplicate" step: each copy right above its original, moved by `offset`, unlocked; the copies selected.
     public func duplicate(_ ids: [String], offset: DesignPoint, on page: DesignPage,
                           mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
-        var tree = page.nodes.layerTree
-        let copies = tree.duplicate(outermost(ids, in: page.nodes), mint: { mint.nextNodeID() })
-        guard !copies.isEmpty else { throw .nothingSelected }
-        var nodes = tree.designNodes
-        for id in copies {
-            _ = nodes.update(id) { copy in
-                copy.translate(by: offset)
-                copy.isLocked = false
-            }
+        let byID = outermost(ids, in: page.nodes)
+        var copies: [String: DesignNode] = [:], selection: [String] = []
+        for id in ids {
+            guard let original = byID[id], copies[id] == nil else { continue }
+            var copy = copySubtree(original, mint: &mint)
+            copy.translate(by: offset)
+            copy.isLocked = false
+            copies[id] = copy
+            selection.append(copy.id)
         }
-        return DesignEdit(name: "Duplicate", nodes: nodes, selection: copies)
+        guard !selection.isEmpty else { throw .nothingSelected }
+        func placed(_ nodes: [DesignNode]) -> [DesignNode] {
+            var out: [DesignNode] = []
+            out.reserveCapacity(nodes.count)
+            for var node in nodes {
+                if !node.children.isEmpty { node.children = placed(node.children) }
+                out.append(node)
+                if let copy = copies[node.id] { out.append(copy) }
+            }
+            return out
+        }
+        return DesignEdit(name: "Duplicate", nodes: placed(page.nodes), selection: selection)
     }
 
     /// `node` and its subtree, parent before children, each with the mint's next id.
@@ -53,17 +63,16 @@ public struct LiveDuplicating: LayerDuplicating {
         return copy
     }
 
-    /// The selected layers that are on the page and have no selected ancestor, once each, in
-    /// selection order.
-    private func outermost(_ ids: [String], in nodes: [DesignNode]) -> [String] {
+    /// The selected layers that are on the page and have no selected ancestor, by id, in one walk.
+    private func outermost(_ ids: [String], in nodes: [DesignNode]) -> [String: DesignNode] {
         let wanted = Set(ids)
-        var seen: Set<String> = []
-        var out: [String] = []
-        for id in ids where seen.insert(id).inserted {
-            guard let path = nodes.ancestors(of: id) else { continue }
-            guard !path.contains(where: wanted.contains) else { continue }
-            out.append(id)
+        var out: [String: DesignNode] = [:]
+        func walk(_ nodes: [DesignNode]) {
+            for node in nodes {
+                if wanted.contains(node.id) { out[node.id] = node } else { walk(node.children) }
+            }
         }
+        walk(nodes)
         return out
     }
 }
