@@ -4,7 +4,8 @@
 // wrote the workspace per pointer sample ran the window per sample. Instead the
 // press goes to the workspace (the selection shows at once) and the later
 // samples go here, to a copy of it (DesignLiveEdit) that only DesignCanvas
-// reads: `live.workspace ?? model`. Mouse-up (`land(into:)`) replays the last
+// reads: `live.workspace ?? model`. The inspector reads `scrubbed`, the copy
+// only a scrub's values set, so a canvas drag never lays it out per sample. Mouse-up (`land(into:)`) replays the last
 // sample into the workspace through its own methods, then `endDrag`, so the
 // window changes once and records one step; the window writes that workspace
 // and `clearAfterLanding()` drops the copy a turn later, so the canvas never
@@ -24,12 +25,16 @@ import SwiftUI
 
     /// The copy the canvas draws while a drag or scrub lasts; nil with none live.
     var workspace: DesignWorkspace? { edit.workspace }
+    /// The copy the inspector shows: a scrub's alone. A canvas sample never sets it, so a drag doesn't run
+    /// and lay out the inspector per pointer sample (the rows show the workspace until mouse-up).
+    private(set) var scrubbed: DesignWorkspace?
     /// A drag or scrub is under way: the next sample or value goes to the copy, not a new `begin`.
     var isLive: Bool { workspace != nil && !isLanding }
 
     /// Starts showing a copy of `model`, after the press went to it.
     func begin(from model: DesignWorkspace) {
         isLanding = false
+        scrubbed = nil
         edit.begin(from: model)
     }
 
@@ -39,13 +44,22 @@ import SwiftUI
     }
 
     /// One value of an inspector scrub, shown on the copy only.
-    func preview(_ change: DesignStyleChange) { edit.preview(change) }
+    func preview(_ change: DesignStyleChange) {
+        edit.preview(change)
+        scrubbed = edit.workspace
+    }
 
     /// One fill editor intent of a drag, run on the copy only.
-    func preview(_ intent: GradientIntent) { edit.preview(intent) }
+    func preview(_ intent: GradientIntent) {
+        edit.preview(intent)
+        scrubbed = edit.workspace
+    }
 
     /// One value of a transform scrub, shown on the copy only.
-    func preview(_ intent: TransformIntent) { edit.preview(intent) }
+    func preview(_ intent: TransformIntent) {
+        edit.preview(intent)
+        scrubbed = edit.workspace
+    }
 
     /// Replays the last sample or value into `model` as one step; a refused value's reason. The
     /// copy stays shown until `clear()` or `clearAfterLanding()`.
@@ -58,6 +72,7 @@ import SwiftUI
     /// Stops showing the copy.
     func clear() {
         isLanding = false
+        scrubbed = nil
         edit = DesignLiveEdit()
     }
 
