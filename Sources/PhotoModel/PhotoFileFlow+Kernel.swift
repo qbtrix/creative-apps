@@ -164,13 +164,15 @@ extension PhotoWorkspace: FileFlowTarget {
     }
 
     /// A dropped file's pixels, fitted inside the canvas by contain and never upscaled (`PlaceRules.fitted`), and
-    /// the percent it was scaled to when smaller. A PNG or JPEG is read straight at the fitted size from its header's
-    /// size; another file is read whole, then resampled down.
+    /// the percent it was scaled to when smaller. A file whose size its header gives (PNG, JPEG, and on macOS HEIC,
+    /// TIFF and PSD) is read straight at the fitted size; another is read whole, then resampled down.
     func droppedPixels(_ data: Data) throws -> (tiles: TiledPixels, percent: Int?) {
         let codec = fileFlow.codec
         var whole: DecodedImage?
         let natural: Size
-        if let size = SuiteImaging.rasterSize(of: data) { natural = size } else {
+        if let size = SuiteImaging.rasterSize(of: data) { natural = size } else if let size = SystemImageDecoder.size(of: data) {
+            natural = Size(width: Double(size.width), height: Double(size.height))
+        } else {
             let image = try codec.decode(data, longestSide: nil)
             (whole, natural) = (image, Size(width: Double(image.width), height: Double(image.height)))
         }
