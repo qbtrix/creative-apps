@@ -1,10 +1,10 @@
 [
   {
     "label": "the histogram counts linear values, not the sRGB values of the buffer it is given",
-    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .sRGB)",
-    "replace": "let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .linear)",
-    "tests": "LibraryDevelopRenderTests"
+    "file": "Sources/LibraryModel/Live/LiveHistogram.swift",
+    "find": "Int(Float(TransferCurve.encode(Double(value))) * Float(bins))",
+    "replace": "Int(value * Float(bins))",
+    "tests": "LibraryDevelopTilesTests"
   },
   {
     "label": "the turn is skipped: a straightened crop cuts the upright pixels",

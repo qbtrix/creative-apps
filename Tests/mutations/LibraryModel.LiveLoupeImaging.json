@@ -9,8 +9,8 @@
   {
     "label": "the route ignores the View > Rendering CPU choice",
     "file": "Sources/LibraryModel/Live/LiveLoupeImaging.swift",
-    "find": "ImagingRoute.choose(preferGPU: preferGPU, program: program) == .gpu",
-    "replace": "ImagingRoute.choose(preferGPU: true, program: program) == .gpu",
+    "find": "guard preferGPU, Self.onGPU(program, known: &gpuOperations)",
+    "replace": "guard Self.onGPU(program, known: &gpuOperations)",
     "tests": "LibraryLoupeGPURouteTests"
   },
   {
