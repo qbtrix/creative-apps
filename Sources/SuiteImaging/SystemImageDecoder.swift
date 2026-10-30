@@ -1,8 +1,11 @@
-// SystemImageDecoder.swift: reads the image files the PNG and JPEG readers don't (HEIC, HEIF, TIFF, a PSD's
-// composite) with Core Image's `CIImage(data:options:)`, for Photo's headless document and the CLI on macOS. It
-// applies the file's orientation, scales down with Lanczos when asked for a longest side (never up), and renders
-// straight-alpha 8-bit sRGB rows, top row first, through one shared `CIContext`. It imports no ImageIO
-// (ImageIOImportRatchetTests). On Linux `extensions` is empty and `decode` returns nil, so callers stay Linux-safe.
+// SystemImageDecoder.swift: reads image files with Core Image's `CIImage(data:options:)`, for Photo's headless
+// document and the CLI on macOS: the files the PNG and JPEG readers don't (HEIC, HEIF, TIFF, a PSD's composite),
+// colour matched to sRGB, and PNGs `asStored` (no colour management, float working format, so an 8-bit pixel with
+// any alpha above 0 comes back as the file holds it), which is many times faster than the pure-Swift PNG reader on
+// a camera-size layer. It applies the file's orientation, scales down with Lanczos when asked for a longest side
+// (never up) to whole pixels, and renders straight-alpha 8-bit rows, top row first. `size(of:)` reads the pixel
+// size without decoding. It imports no ImageIO (ImageIOImportRatchetTests). On Linux `extensions` is empty and
+// `decode` and `size` return nil, so callers stay Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -25,24 +28,46 @@ public enum SystemImageDecoder {
     public static let extensions: Set<String> = []
     #endif
 
-    /// `data` as width x height x 4 straight-alpha sRGB bytes, at most `longestSide` on its longer side; nil when this
-    /// platform has no reader or the bytes don't decode.
-    public static func decode(_ data: Data, longestSide: Int?) -> (rgba8: [UInt8], width: Int, height: Int)? {
+    /// `data` as width x height x 4 straight-alpha bytes, at most `longestSide` on its longer side: sRGB, or the
+    /// file's own values when `asStored`; nil when this platform has no reader or the bytes don't decode.
+    public static func decode(_ data: Data, longestSide: Int?,
+                              asStored: Bool = false) -> (rgba8: [UInt8], width: Int, height: Int)? {
         #if canImport(CoreImage)
-        guard var image = CIImage(data: data, options: [.applyOrientationProperty: true]), !image.extent.isInfinite,
-              let space = CGColorSpace(name: CGColorSpace.sRGB) else { return nil }
+        var options: [CIImageOption: Any] = [.applyOrientationProperty: true]
+        if asStored { options[.colorSpace] = NSNull() }
+        // nil renders in the context's output space: none for `asStored`.
+        let space = asStored ? nil : CGColorSpace(name: CGColorSpace.sRGB)
+        guard var image = CIImage(data: data, options: options), !image.extent.isInfinite,
+              asStored || space != nil else { return nil }
         let longest = max(image.extent.width, image.extent.height)
         if let side = longestSide, side > 0, CGFloat(side) < longest {
             image = image.applyingFilter("CILanczosScaleTransform",
                                          parameters: [kCIInputScaleKey: CGFloat(side) / longest, kCIInputAspectRatioKey: 1])
+            // Lanczos leaves a fractional extent; stretch it to whole pixels at the origin so no edge row is lost.
+            let extent = image.extent
+            let (w, h) = (max(extent.width.rounded(), 1), max(extent.height.rounded(), 1))
+            image = image.transformed(by: CGAffineTransform(translationX: -extent.minX, y: -extent.minY))
+                .transformed(by: CGAffineTransform(scaleX: w / extent.width, y: h / extent.height))
         }
         let width = Int(image.extent.width.rounded(.down)), height = Int(image.extent.height.rounded(.down))
         guard width > 0, height > 0 else { return nil }
         let bounds = CGRect(x: image.extent.minX, y: image.extent.minY, width: CGFloat(width), height: CGFloat(height))
         var bytes = [UInt8](repeating: 0, count: width * height * 4)
-        context.render(image.unpremultiplyingAlpha(), toBitmap: &bytes, rowBytes: width * 4, bounds: bounds,
-                       format: .RGBA8, colorSpace: space)
+        (asStored ? storedContext : context).render(image.unpremultiplyingAlpha(), toBitmap: &bytes, rowBytes: width * 4,
+                                                    bounds: bounds, format: .RGBA8, colorSpace: space)
         return (bytes, width, height)
+        #else
+        return nil
+        #endif
+    }
+
+    /// The pixel size `decode` would give at full size (orientation applied), read from the header; nil when this
+    /// platform has no reader or the bytes aren't an image it knows.
+    public static func size(of data: Data) -> (width: Int, height: Int)? {
+        #if canImport(CoreImage)
+        guard let image = CIImage(data: data, options: [.applyOrientationProperty: true]), !image.extent.isInfinite,
+              image.extent.width >= 1, image.extent.height >= 1 else { return nil }
+        return (Int(image.extent.width.rounded(.down)), Int(image.extent.height.rounded(.down)))
         #else
         return nil
         #endif
@@ -51,5 +76,9 @@ public enum SystemImageDecoder {
     #if canImport(CoreImage)
     /// One context for every decode: building one per call costs more than the decode of a small file.
     private static let context = CIContext()
+    /// The `asStored` context: no colour management, and premultiplying in 32-bit float, so it is undone exactly.
+    private static let storedContext = CIContext(options: [
+        .workingColorSpace: NSNull(), .outputColorSpace: NSNull(), .workingFormat: CIFormat.RGBAf,
+    ])
     #endif
 }
