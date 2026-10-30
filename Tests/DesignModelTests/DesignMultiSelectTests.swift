@@ -113,6 +113,14 @@ private func threeRectangles() -> DesignWorkspace {
     #expect(workspace.selectionBounds == rc(100, 100, 800, 200))
 }
 
+@Test func aSelectedLayerHiddenAfterwardsLeavesTheBounds() throws {
+    var workspace = threeRectangles()
+    workspace.toggleSelection("node-2")
+    workspace.toggleSelection("node-4")
+    try workspace.setNodeHidden("node-4", true)
+    #expect(workspace.selectionBounds == rc(100, 100, 200, 200))
+}
+
 /// Nudge and Delete act on several layers (#2463, DesignCanvasTests); Align to the page stays one layer's.
 @Test func severalSelectedLayersShowNoHandlesAndRefuseSingleLayerAlign() {
     var workspace = threeRectangles()

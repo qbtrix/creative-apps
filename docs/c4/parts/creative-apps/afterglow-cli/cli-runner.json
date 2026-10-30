@@ -10,7 +10,8 @@
     "Sources/AfterGlowCLICore/LiveIO.swift",
     "Sources/AfterGlowCLICore/Apps.swift",
     "Sources/AfterGlowCLICore/Arguments.swift",
-    "Sources/AfterGlowCLICore/Output.swift"
+    "Sources/AfterGlowCLICore/Output.swift",
+    "Sources/AfterGlowCLICore/DropFiles.swift"
   ],
   "order": 10
 }

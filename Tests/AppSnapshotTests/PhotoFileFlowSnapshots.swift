@@ -2,7 +2,9 @@
 // it for Photo. photo-open-recent-{light,dark}: Open Recent ▸ and Open In ▸ as SuiteFileCommands gives them
 // for `.photo` with Sunset.png open and in the suite's recents: the file listed, Clear Menu under it, and
 // Open In offering Library. AppKit can't draw an open NSMenu offscreen, so the image lays out what
-// SuiteFileMenu gives the menu under its titles. `menu` also fails when Photo's own Open Recent menu is
+// SuiteFileMenu gives the menu under its titles; the open menu itself is proved by PhotoJourneyTests'
+// screenshot. Both images compare against goldens in Golden/photo/ (`assertGolden`; a missing baseline is
+// recorded from CI's artifact, per Golden/README.md). `menu` also fails when Photo's own Open Recent menu is
 // still in its File menu beside the suite's, so File shows one Open Recent. photo-drop-mark (PF-5): the
 // suite drop mark over the editor with Sunset.png open, saying a dropped Logo.png is placed in it. Nests in
 // BodyCountSuites, as the drop mark renders the editor (PhotoEditor.bodyRuns). macOS only.
@@ -45,7 +47,7 @@ extension BodyCountSuites {
             #expect(!file.contains("Menu(\"Open Recent\")"), "Photo's own Open Recent shows beside the suite's")
             #expect(file.contains("SuiteFileCommands(app: .photo"), "File has no suite Open Recent and Open In")
             for scheme in [ColorScheme.light, .dark] {
-                try snapshot(PhotoFileMenuPanel(menu: menu), name: "photo-open-recent-\(scheme.name)", scheme: scheme)
+                assertGolden(PhotoFileMenuPanel(menu: menu), name: "photo-open-recent", area: "photo", scheme: scheme)
             }
         }
 
@@ -76,7 +78,7 @@ extension BodyCountSuites {
                         .padding(SuiteSpacing.l)
                         .allowsHitTesting(false)
                 }
-            try snapshot(view, name: "photo-drop-mark", scheme: .light)
+            assertGolden(view, name: "photo-drop-mark", area: "photo", scheme: .light)
         }
     }
 }

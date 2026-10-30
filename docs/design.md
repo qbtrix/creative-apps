@@ -210,7 +210,7 @@ controls").
 | `SuiteSize.preset` | 24 | 28 | Preset buttons (2 pt hit inset each side) |
 | `SuiteSize.actionButton` | 32 | 32 | Full-width outlined action |
 | `SuiteSize.pill` | 20 | 24 | Status pills |
-| `SuiteSize.transportButton` | 32, play 36 | same | Transport capsule |
+| `SuiteSize.transportButton` | 32, play 36 | same | Large round transport buttons (the transport itself uses `pillHit`) |
 | `SuiteSize.swatch` | 24 × 16 | the row | Swatch inside a color row |
 | `SuiteSize.selectionHandle` | 8 | 12 | Stage selection handles |
 | `SuiteSize.anchor` | 6 | 12 | Pen and direct-select anchors and handle ends |
@@ -382,10 +382,12 @@ in `stateError` with a triangle.
 Toggle pills take the `stateSelected` tint with `accentText` when on;
 warning pills take the warning tint, color and triangle; error pills (a
 failed save or render) the `stateError` tint and color with an exclamation
-circle. Transport: a `row`
-capsule of round icon buttons (`textSecondary`, hover `rowHover`) and a
-larger round play button in `accentFill` with a white glyph. Timecode in
-`timecode`: the current value `textPrimary`, the total `textSecondary`.
+circle. Transport (one look in every app, Halo's): plain icon-only
+buttons, each at least a `pillHit` square, edge to edge, in `textSecondary`
+(`textTertiary` while disabled, `accent` for Loop while on), Play swapping
+to pause while playing, Loop a button-style toggle, in a status pill (or
+bare inside a bar that already gives the pill). Timecode in `pill` type:
+the current value `textPrimary`, the total `textSecondary`.
 
 **Tabs and the tool rail.** Segmented tabs (`SegmentedTabs`): the stock
 macOS segmented control exactly as the HIG and AppKit's `NSSegmentedControl`
