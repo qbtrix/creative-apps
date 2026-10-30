@@ -29,7 +29,7 @@ struct DesignSidebarTabs: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SegmentedTabs("Sidebar", tabs: Self.tabs, selection: tab, id: "design.sidebar.tabs", onChange: { tab = $0 })
+            SegmentedTabs("Sidebar", tabs: Self.tabs, selection: tab, id: DesignControlID.sidebarTabs, onChange: { tab = $0 })
                 .padding(.horizontal, SuiteSpacing.s)
                 .padding(.vertical, SuiteSpacing.xs)
             switch tab {
