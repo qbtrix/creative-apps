@@ -36,7 +36,7 @@ extension HaloProject: HeadlessDocument {
         let shapes = ShapeCommands.specs(HaloProject.self).map(\.id)  // HS-6: the kernel's shape commands follow
         let fills = GradientCommands.specs(HaloProject.self).map(\.id)  // HG-7: then its fill commands
         let strokes = StrokeCommands.specs(HaloProject.self).map(\.id)  // HK-6: then its stroke commands
-        let history = ["history.read", "history.jump"]  // HA-6: then the History panel's two
+        let history = HistoryCommands.specs(HaloProject.self).map(\.id)  // then the kernel history commands
         let transforms = TransformCommands.specs(HaloProject.self).map(\.id)  // HT-6: then the six transform commands
         let rates = ["composition.set-frame-rate"]  // FR-8b: the composition's rate
         let places = ["place.read", "place.image", "place.replace", "place.reset-size", "place.focus"]  // PH-6: the five place commands

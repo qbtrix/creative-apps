@@ -53,6 +53,12 @@ public struct LiveDevelop: DevelopRendering {
         return ImagingProgram.adjustments(adjust, tone: tone)
     }
 
+    /// What the loupe's GPU route writes in one display pass: `steps`, then the kinds (Black & White, Invert) as
+    /// `AdjustKinds.program`, the GPU twin of the CPU steps `render` appends.
+    public static func program(for s: DevelopSettings) -> [ToneProgram.Operation] {
+        steps(for: s).map(ToneProgram.Operation.adjustment) + AdjustKinds.program(s.kinds)
+    }
+
     public func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer {
         for slider in DevelopSlider.allCases where settings.value(slider) != 0 {
             if let why = Self.waiting[slider] { throw LibraryError.renderFailed(why) }

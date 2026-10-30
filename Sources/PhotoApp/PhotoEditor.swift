@@ -2,8 +2,8 @@
 // SuiteWindow: the title (the file's name, "Untitled" for an image with none,
 // else "Photo") with the save state as its subtitle, the toolbar's eight
 // commands (PhotoToolbarItem: Open, Save and Export beside the title; Undo,
-// Redo and the zoom commands trailing), the layer list in the sidebar
-// (PhotoLayerList), the canvas with its rulers in EditorDetail with the
+// Redo and the zoom commands trailing), the sidebar's Layers and AI tabs
+// (PhotoSidebarTabs), the canvas with its rulers in EditorDetail with the
 // floating tool palette over its leading edge while an image is open (each
 // tool a PhotoPaletteTool carrying the workspace's `toolHelp`) and the status
 // line under it (PhotoStatusLine, with the save status `photo.bar.saved`
@@ -64,7 +64,7 @@ struct PhotoEditor: View, BodyCounted {
             actions: Self.trailingItems.map { action($0) },
             inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
         ) {
-            PhotoLayerList(model: model, perform: perform)
+            PhotoSidebarTabs(model: model, perform: perform)
         } content: {
             EditorDetail {
                 PhotoCanvas(

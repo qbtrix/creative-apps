@@ -43,6 +43,9 @@ extension DesignWorkspace: HistoryJumping {
         for _ in index..<max(index, listing.index) { undo() }
         for _ in listing.index..<max(listing.index, index) { redo() }
     }
+
+    /// Opens the request span `name` (nil closes it) on the kernel history.
+    public mutating func setHistoryRequest(_ name: String?) -> Bool { history.kernel.setRequest(name) }
 }
 
 extension DesignWorkspace {

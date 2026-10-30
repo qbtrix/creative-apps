@@ -36,6 +36,14 @@ import SuiteKernel
                 == [.open(path: "/w/Edit.photo")])
     }
 
+    /// A type the suite lists nowhere but the app's codec reads (.psd in Photo) is placed into an open
+    /// document; with none open it is still refused.
+    @Test func anUnlistedTypeTheAppPlacesIsPlacedIntoAnOpenDocument() {
+        #expect(plan(["/w/Art.psd"], into: "photo", hasDocument: true, places: ["png", "psd"]) == [.place(path: "/w/Art.psd")])
+        #expect(plan(["/w/Art.psd"], into: "photo", hasDocument: false, places: ["png", "psd"])
+                    == [.refuse(path: "/w/Art.psd", reason: "AfterGlow can't open .psd files.")])
+    }
+
     @Test func anUnknownTypeIsRefusedInWords() {
         #expect(plan(["/w/notes.xyz"], into: "design") == [.refuse(path: "/w/notes.xyz", reason: "AfterGlow can't open .xyz files.")])
     }
