@@ -1,5 +1,12 @@
 [
   {
+    "label": "unlistedRefused: a type no row lists is refused even when the app places it into an open document",
+    "file": "Sources/SuiteKernel/Files/DropPlan.swift",
+    "find": "if places.contains(ext) && hasDocument { return .place(path: path) }",
+    "replace": "if false { return .place(path: path) }",
+    "tests": "DropRoutingTests"
+  },
+  {
     "label": "ownTypePlaced: a type only this app reads is placed into an open document instead of opening",
     "file": "Sources/SuiteKernel/Files/DropPlan.swift",
     "find": "if apps == [app] { return .open(path: path) }",

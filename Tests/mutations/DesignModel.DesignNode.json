@@ -201,5 +201,19 @@
     "find": "children[index].translate(by: delta, carryingKeys: carryingKeys)",
     "replace": "children[index].translate(by: delta)",
     "tests": "DesignTrackOffsetTests"
+  },
+  {
+    "label": "onPath ignores an enclosing group: a layer in a locked group edits",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "return found || test(node)",
+    "replace": "return found",
+    "tests": "DesignSubtreeLockTests"
+  },
+  {
+    "label": "onPath never reads the layer itself: a locked layer edits",
+    "file": "Sources/DesignModel/DesignNode.swift",
+    "find": "if node.id == id { return test(node) }",
+    "replace": "if node.id == id { return false }",
+    "tests": "DesignInspectorLockTests"
   }
 ]

@@ -1,6 +1,6 @@
 // LibraryLoupeGPU.swift: the loupe's GPU route (suite-imaging IM-11). A
 // GPU frame's decoded base is uploaded once per photo and size and kept on
-// the GPU; each develop step then writes the base through the frame's steps
+// the GPU; each develop step then writes the base through the frame's program
 // and the screen's display step straight into the canvas host's resident
 // texture (`ImagingGPU.display`): no CPU pass, no readback. View > Rendering
 // set to CPU, no GPU, pipelines still compiling or a failed write keep the CPU
@@ -40,8 +40,8 @@ import SwiftUI
         return gpu.isHealthy && gpu.isReady
     }
 
-    /// `image` through `steps` into `view`'s resident texture, once per token.
-    func draw(_ image: DisplayImage, steps: [ToneAdjustment], token: Int, photoID: String?, into view: CanvasHostView) {
+    /// `image` through `program` into `view`'s resident texture, once per token.
+    func draw(_ image: DisplayImage, program: [ToneProgram.Operation], token: Int, photoID: String?, into view: CanvasHostView) {
         guard self.view !== view || drawn != token else { return }
         (self.view, drawn) = (view, token)
         let width = image.size.width, height = image.size.height
@@ -56,7 +56,7 @@ import SwiftUI
                 resident = (key, try gpu.upload(PixelBuffer(rgba8: image.rgba8, width: width, height: height)))
             }
             guard let surface = resident?.surface else { return }
-            try ImagingGPU.display(surface, into: texture, program: steps.map(ToneProgram.Operation.adjustment),
+            try ImagingGPU.display(surface, into: texture, program: program,
                                    displaySteps: ImagingColor.displaySteps(to: .sRGB))
             view.show(Shown(width: width, height: height))
         } catch {

@@ -129,6 +129,7 @@ Sources/PhotoModel/PhotoLevelsFormat.swift
 Sources/PhotoModel/PhotoLiveTone.swift
 Sources/PhotoModel/PhotoRecovery.swift
 Sources/PhotoModel/PhotoRenderRoute.swift
+Sources/PhotoModel/PhotoReusingCodec.swift
 Sources/PhotoModel/PhotoSaveStatusHelp.swift
 Sources/PhotoModel/PhotoSelection.swift
 Sources/PhotoModel/PhotoSelectionMask.swift

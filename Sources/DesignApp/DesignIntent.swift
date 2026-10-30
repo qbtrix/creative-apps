@@ -40,6 +40,8 @@ enum DesignIntent {
     case endEditRun
     case setHidden(String, Bool), setLocked(String, Bool)
     case toggleFlag(String, DesignLayerFlag)
+    /// A gesture in the sidebar's AI tab (SuiteUI AgentActivityList).
+    case agent(AgentActivityAction)
     case editText(String)
     case textDraft(String), commitText, cancelText
     case zoomIn, zoomOut, fit

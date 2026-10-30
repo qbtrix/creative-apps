@@ -58,7 +58,7 @@ struct DesignFrameScrub: View {
 
     var body: some View {
         let send = DesignStyleSend(model: model, live: live, perform: perform)
-        let value = live?.workspace?.sharedValue(read) ?? model.sharedValue(read) ?? 0
+        let value = live?.scrubbed?.sharedValue(read) ?? model.sharedValue(read) ?? 0
         ScrubField(name, value: value, in: range, step: 1, unit: "pt", decimals: 1) { new in
             dragging ? send.preview(.frame(field, new)) : send.commit(.frame(field, new))
         }
@@ -76,14 +76,20 @@ struct DesignFrameScrub: View {
 }
 
 /// The Layer section's Opacity bar, in percent ("Mixed" when the selected layers differ), with one layer's key button.
-struct DesignOpacityRow: View {
+struct DesignOpacityRow: View, BodyCounted {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
 
     var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
         let send = DesignStyleSend(model: model, live: live, perform: perform)
-        let shown = live?.workspace ?? model
+        let shown = live?.scrubbed ?? model
         let opacity = shown.sharedValue { shown.shown($0).opacity }
         let help = model.styleHelp(.opacity)
         HStack(spacing: SuiteSpacing.xs) {
@@ -107,7 +113,7 @@ struct DesignCornersSection: View {
 
     var body: some View {
         let send = DesignStyleSend(model: model, live: live, perform: perform)
-        let shown = live?.workspace ?? model
+        let shown = live?.scrubbed ?? model
         let radiusHelp = model.styleHelp(.cornerRadius)
         let radius = shown.sharedValue(\.cornerRadius)
         let most = model.selectedNodes.map(\.maxCornerRadius).max() ?? 0
@@ -138,7 +144,7 @@ struct DesignInspectorStyle: View {
 
     var body: some View {
         InspectorSection("Stroke") {
-            strokeRows(live?.workspace ?? model, send: DesignStyleSend(model: model, live: live, perform: perform))
+            strokeRows(live?.scrubbed ?? model, send: DesignStyleSend(model: model, live: live, perform: perform))
         }
     }
 

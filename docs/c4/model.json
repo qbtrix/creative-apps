@@ -717,6 +717,8 @@
                   "Sources/SuiteImaging/Adjust/ImagingProgram.swift",
                   "Sources/SuiteImaging/Color/",
                   "Sources/SuiteImaging/RasterSize.swift",
+                  "Sources/SuiteImaging/PlacedVectorPixels.swift",
+                  "Sources/SuiteImaging/SystemImageDecoder.swift",
                   "Sources/SuiteImaging/SuiteImaging.swift"
                 ]
               },
@@ -1056,7 +1058,8 @@
                   "Sources/AfterGlowCLICore/LiveIO.swift",
                   "Sources/AfterGlowCLICore/Apps.swift",
                   "Sources/AfterGlowCLICore/Arguments.swift",
-                  "Sources/AfterGlowCLICore/Output.swift"
+                  "Sources/AfterGlowCLICore/Output.swift",
+                  "Sources/AfterGlowCLICore/DropFiles.swift"
                 ]
               },
               {

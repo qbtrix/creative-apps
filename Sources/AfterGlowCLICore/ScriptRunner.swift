@@ -4,7 +4,8 @@
 // before anything is written: the script (Script.parse, Script.check), every
 // input pattern, and every planned output (two inputs on one path, or a file
 // already there without --force, is 73). Each input then runs through the
-// catalog's runBatch, all or none when atomic, and one report prints.
+// catalog's runBatch, all or none when atomic, and one report prints. A
+// `file.drop` step's paths are read relative to the script (DropFiles).
 // Files are reached only through CLIIO.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -42,7 +43,7 @@ public enum ScriptRunner {
 
     /// A checked script: its app, its steps and an output path for every input, sorted by input.
     struct Plan {
-        let script: Script, app: HeadlessApp, format: String, items: [Item]
+        let script: Script, app: HeadlessApp, format: String, dir: String, items: [Item]
 
         init(_ path: String, apps: [HeadlessApp], io: any CLIIO) throws(Script.Problem) {
             let data: Data
@@ -50,6 +51,7 @@ public enum ScriptRunner {
             let script = try Script.parse(data, path: path), app = try script.check(in: apps), format = script.format(of: app)
             (self.script, self.app, self.format) = (script, app, format)
             let dir = path.split(separator: "/", omittingEmptySubsequences: false).dropLast().joined(separator: "/")
+            self.dir = dir
             var found: [String] = []
             for pattern in script.inputs {
                 let matches: [String]
@@ -102,7 +104,17 @@ public enum ScriptRunner {
                 report.refused += 1; code = max(code, CLI.Exit.failed)
                 continue
             }
-            let batch = session.runBatch(plan.script.steps, atomic: atomic)
+            let steps: [CommandEnvelope]
+            do {
+                let dropped = try DropFiles.attach(plan.script.steps, dir: plan.dir, io: io)
+                session.receiveDropped(dropped.files)
+                steps = dropped.steps
+            } catch {
+                entry.error = "can't read a dropped file: \(error)"
+                report.refused += 1; code = max(code, CLI.Exit.failed)
+                continue
+            }
+            let batch = session.runBatch(steps, atomic: atomic)
             entry.steps = batch.steps
             if let stopped = batch.stoppedAt, batch.steps.indices.contains(stopped) {
                 entry.error = batch.steps[stopped].error ?? "\(batch.steps[stopped].id) refused"

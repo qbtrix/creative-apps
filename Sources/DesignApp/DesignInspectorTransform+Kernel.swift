@@ -20,7 +20,7 @@ struct DesignInspectorTransform: View {
 
     var body: some View {
         let help = model.turnHelp
-        let rotation = (live?.workspace ?? model).sharedValue(\.rotation)
+        let rotation = (live?.scrubbed ?? model).sharedValue(\.rotation)
         InspectorSection("Transform") {
             InspectorSliderRow(
                 "Rotation", value: rotation ?? 0, in: -180...180, step: 1, unit: "°", decimals: 0, mixed: rotation == nil,

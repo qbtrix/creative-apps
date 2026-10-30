@@ -4,7 +4,8 @@
 // which `selectedNodeID` and `selectedNodes` read, so single-selection callers
 // keep working. A plain click (selectItem) replaces the list, Shift-click
 // (toggleSelection) is the kernel's `.toggle` pick, and deselect (Escape, a
-// click on empty canvas) clears it. Every change goes through `adopt`, which
+// click on empty canvas) clears it; `select` (edit.select) takes a whole list,
+// checked in one walk of the page. Every change goes through `adopt`, which
 // ends the edit run (DesignHistory), so nudging A, then selecting B and nudging
 // it, is two undo steps; a pick the kernel refuses changes nothing.
 //
@@ -43,14 +44,20 @@ extension DesignWorkspace {
     /// The same box as the canvas shows it at the playhead (`shownPage`): what a move snaps.
     var shownSelectionBounds: DesignRect? { selectionBounds(on: shownPage) }
 
-    /// The box around the selected layers' frames on `page`, less the hidden ones.
+    /// The box around the selected layers' frames on `page`, less the hidden ones: one walk of the page that
+    /// skips hidden subtrees, however many layers are selected (the canvas reads it several times per drag sample).
     func selectionBounds(on page: DesignPage?) -> DesignRect? {
-        guard let page else { return nil }
-        let frames = selectedNodeIDs.compactMap { page.nodes.node($0) }.filter { !isHiddenInTree($0.id) }.map(\.frame)
-        guard let first = frames.first else { return nil }
-        let (minX, minY) = (frames.map(\.x).min() ?? first.x, frames.map(\.y).min() ?? first.y)
-        let (maxX, maxY) = (frames.map(\.maxX).max() ?? first.maxX, frames.map(\.maxY).max() ?? first.maxY)
-        return DesignRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+        guard let page, !selectedNodeIDs.isEmpty else { return nil }
+        let wanted = Set(selectedNodeIDs)
+        var frames: [DesignRect] = []
+        func walk(_ nodes: [DesignNode]) {
+            for node in nodes where !node.isHidden {
+                if wanted.contains(node.id) { frames.append(node.frame) }
+                walk(node.children)
+            }
+        }
+        walk(page.nodes)
+        return DesignRect.union(frames)
     }
 
     /// Whether Shift-click can add node `id`: it is on the selected page and neither it nor a
@@ -69,6 +76,38 @@ extension DesignWorkspace {
         guard next.pick(id, .toggle, canAdd: canAddToSelection) else { return }
         adopt(next)
         if next.contains(id), let page = selectedPage { expandAncestors(of: id, in: page.nodes) }
+    }
+
+    /// Selects `ids` in order, the last one primary, as one change (edit.select): the first may be
+    /// any layer in the file, as a click picks it, and switches to its page; each later one must be
+    /// one Shift-click could add there (`canAddToSelection`). One walk of the page however many
+    /// ids. A bad id refuses, naming it, and changes nothing.
+    public mutating func select(_ ids: [String]) throws(DesignRefusal) {
+        guard let first = ids.first else { throw .nothingSelected }
+        guard let page = pages.first(where: { $0.nodes.node(first) != nil }) else { throw .unknownID(first) }
+        var flags: [String: (name: String, locked: Bool, hidden: Bool)] = [:]
+        func walk(_ nodes: [DesignNode], locked: Bool, hidden: Bool) {
+            for node in nodes {
+                let (lock, hide) = (locked || node.isLocked, hidden || node.isHidden)
+                flags[node.id] = (node.name, lock, hide)
+                walk(node.children, locked: lock, hidden: hide)
+            }
+        }
+        walk(page.nodes, locked: false, hidden: false)
+        var seen: Set<String> = []
+        for (index, id) in ids.enumerated() {
+            guard let flag = flags[id] else { throw .unknownID(id) }
+            guard seen.insert(id).inserted else { throw .notYet("\(id) is listed twice.") }
+            guard index > 0 else { continue }
+            if flag.locked { throw .locked(flag.name) }
+            if flag.hidden { throw .hidden(flag.name) }
+        }
+        commitTextEdit()
+        selectedPageID = page.id
+        var next = Selection<String>()
+        next.replace(ids)
+        adopt(next)
+        expandAncestors(of: ids, in: page.nodes)
     }
 
     /// Makes `next` the selection and ends the edit run: a run never spans two selections.

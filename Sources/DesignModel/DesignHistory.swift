@@ -25,7 +25,8 @@
 // kernel DocumentSession on those step ids (DesignSession+Kernel.swift), and ends
 // the edit run; a New File swap marks its own step, as an untouched new file is
 // clean. isDirty, the save state's word and the close prompt read it
-// (DocumentSession.stateText, UnsavedPrompt), shared with the other apps.
+// (DocumentSession.stateText, UnsavedPrompt), shared with the other apps. An
+// agent step's record time is kept by its id for the AI tab (AgentStepDates).
 // undoTarget routes Edit > Undo to a focused text field's own undo.
 // ponytail: one whole-document snapshot per step (copy-on-write, so edits share
 // the nodes they didn't touch); switch to per-node diffs if files get large.
@@ -68,6 +69,8 @@ struct DesignHistory: Sendable, Equatable {
     var undo: [History<Revert>.Step] { kernel.undoSteps }
     /// The steps Redo reapplies, the next one last.
     var redo: [History<Revert>.Step] { kernel.redoSteps }
+    /// When each agent step was recorded (the AI tab's time, DesignAgentActivity+Kernel.swift).
+    var agentDates = AgentStepDates()
 }
 
 /// Where Edit > Undo and Redo go.
@@ -142,6 +145,7 @@ extension DesignWorkspace {
         history.kernel.record(
             name, DesignHistory.Revert(snapshot: before, swapsDocument: swapsDocument, documentURL: documentURL),
             key: coalescing)
+        history.agentDates.stamp(history.kernel, limit: DesignHistory.limit)
         if swapsDocument { history.kernel.markSaved() }
     }
 
@@ -175,7 +179,7 @@ extension DesignWorkspace {
         held.replace(with: snapshot.heldIDs)
         (selectedPageID, selectedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs)
         (pageCount, nodeCount) = (Swift.max(pageCount, snapshot.pageCount), Swift.max(nodeCount, snapshot.nodeCount))
-        if let page = selectedPage { for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) } }
+        if let page = selectedPage { expandAncestors(of: selectedNodeIDs, in: page.nodes) }
     }
 
     /// A gesture or discarded text edit: the document goes back to `snapshot` exactly, counters

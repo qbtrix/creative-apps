@@ -112,7 +112,10 @@ journeys measure them).
 
 ## Today's baseline (the next fixes)
 
-- Design `DesignArtwork` draws the page's nodes in a SwiftUI `Canvas`.
+- Design `DesignArtwork` draws the page's nodes in a SwiftUI `Canvas`. Until it
+  moves onto `CanvasHostView`, a move drag lifts the moved run into its own
+  `Canvas` drawn from the page at the press (`DesignPageArtwork`,
+  `DesignWorkspace.moveLift`), so a step only offsets that view.
 - Flare `FlareStageArt` draws the committed art in a `Canvas` under
   `.drawingGroup()` on the viewport.
 - Halo `HaloDrawnLayers` draws the viewer in a `Canvas` under
