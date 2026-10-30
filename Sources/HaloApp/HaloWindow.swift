@@ -1,5 +1,6 @@
 // HaloWindow.swift: Halo's window and command router. It is SuiteWindow with
-// the project's compositions in the sidebar, HaloViewer as content and
+// the sidebar's Compositions and AI tabs (HaloSidebarTabs; the AI tab's
+// routes are HaloWindow+Agent.swift), HaloViewer as content and
 // HaloCompositionInspector (settings and layers) in the inspector, a column
 // `inspectorWidth` wide whatever it shows. Every
 // action a view, a menu or a key takes is a HaloCommand sent to
@@ -63,14 +64,16 @@ struct HaloWindow: View, BodyCounted {
         }
         scenes(
             SuiteWindow(title: fileWindowTitle, actions: [newComposition], inspectorWidth: Self.inspectorWidth) {
-                SuiteSidebarList(
-                    sections: [SidebarSection(
-                        id: "compositions", title: "Compositions",
-                        items: model.compositions.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "rectangle.stack") },
-                        addAction: newComposition)],
-                    selection: model.selectedCompositionID,
-                    onSelect: { perform(.selectComposition($0)) },
-                    onRename: { perform(.renameComposition($0, $1)) })
+                HaloSidebarTabs(model: model, onAgent: agentPerform) {
+                    SuiteSidebarList(
+                        sections: [SidebarSection(
+                            id: "compositions", title: "Compositions",
+                            items: model.compositions.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "rectangle.stack") },
+                            addAction: newComposition)],
+                        selection: model.selectedCompositionID,
+                        onSelect: { perform(.selectComposition($0)) },
+                        onRename: { perform(.renameComposition($0, $1)) })
+                }
             } content: {
                 HaloViewer(model: model, perform: perform, onShapeIntent: { intent in
                     shapes.isOn = true
