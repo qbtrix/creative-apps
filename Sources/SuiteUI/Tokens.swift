@@ -236,10 +236,16 @@ public enum SuiteFont {
 }
 
 /// Hover and state changes fade background, color and border over 0.14 s;
-/// under Reduce Motion they change at once. The one other motion is a refused
-/// rename's field shaking once (#3462), none under Reduce Motion.
+/// under Reduce Motion they change at once. A refused rename's field shakes
+/// once (#3462). While an agent works (AgentWorking.swift) its mark pulses,
+/// its request's title shimmers and the layers it touched glow, then fade
+/// over 0.5 s; none moves under Reduce Motion.
 public enum SuiteMotion {
     public static let state = Animation.easeInOut(duration: 0.14)
+    /// An agent's highlight fading out once its work lingered (AgentWork.linger).
+    public static let agentFade = Animation.easeInOut(duration: 0.5)
+    /// One sweep of the shimmer across a working request's title, in seconds.
+    public static let shimmerSweep: Double = 1.2
     /// How far a refused field swings each way, in points.
     public static let shakeOffset: CGFloat = 6
     /// The shortest beat of the shake, in seconds; the whole shake is six.
