@@ -1,7 +1,7 @@
 // PhotoPlaceTests.swift (place-image PP-1 written, PP-5 turns on): MJ-PP, the Model walk of File > Place…
 // in Photo. A placed PNG or JPEG becomes a pixel layer above the selection, fitted inside the canvas by the
-// kernel's `PlaceRules.fitted` and centred or at the drop point, in one undo step; SVG is refused, the catalog's
-// refusal naming only PNG and JPEG (#6027). The stub
+// kernel's `PlaceRules.fitted` and centred or at the drop point, in one undo step; an SVG is drawn into pixels at its
+// placed size (#6028), and the catalog's refusal names only the formats Photo takes (#6027). The stub
 // contract and the walk run now (PP-5 built PhotoPlace+Kernel's bodies). Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -38,9 +38,9 @@ private func place(_ asset: PlacedAsset, on workspace: inout PhotoWorkspace, at:
 @Suite struct PhotoPlaceTests {
     // The stub contract: what PP-5 keeps.
 
-    @Test func takesPNGAndJPEGAndKeepsNoPicture() throws {
+    @Test func takesPNGJPEGAndSVGAndKeepsNoPicture() throws {
         let workspace = try opened()
-        #expect(workspace.placeFormats == [.png, .jpeg])
+        #expect(workspace.placeFormats == [.png, .jpeg, .svg])
         #expect(workspace.placeFillBox == nil)
         #expect(workspace.placedSelection == nil)
     }
@@ -102,23 +102,43 @@ private func place(_ asset: PlacedAsset, on workspace: inout PhotoWorkspace, at:
         #expect(workspace.layers.map(\.name) == ["Background"])
     }
 
-    @Test(arguments: [
-        ("logo.svg", #"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"/>"#),
-        ("notes.txt", "not an image"),
-    ])
-    func svgAndTextRefused(_ name: String, _ text: String) throws {
+    @Test func textRefused() throws {
         var workspace = try opened()
-        let params = PlaceIntent.place(name: name, data: Data(text.utf8), at: nil).command.params
-        let refusal = CatalogError.unavailable(id: "place.image", why: "Place takes PNG or JPEG files.")
+        let params = PlaceIntent.place(name: "notes.txt", data: Data("not an image".utf8), at: nil).command.params
+        let refusal = CatalogError.unavailable(id: "place.image", why: "Place takes PNG, JPEG or SVG files.")
         #expect(throws: refusal) { try PhotoWorkspace.catalog.run("place.image", params: params, on: &workspace) }
         #expect(workspace.layers.count == 1)
     }
 
-    @Test func svgRefusalNamesPhotosFormats() throws {
+    @Test func refusalNamesPhotosFormats() throws {
         var workspace = try opened()
-        workspace.place([(name: "logo.svg", data: Data(#"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"/>"#.utf8))], at: nil)
-        #expect(workspace.statusMessage == "Photo places PNG or JPEG files.")
+        workspace.place([(name: "notes.txt", data: Data("not an image".utf8))], at: nil)
+        #expect(workspace.statusMessage == "Photo places PNG, JPEG or SVG files.")
         #expect(workspace.layers.count == 1)
+    }
+
+    /// An SVG drawn only with strokes would place as an empty layer, so it is refused, saying why.
+    @Test func aStrokeOnlySVGIsRefused() throws {
+        var workspace = try opened()
+        let svg = #"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><path d="M0 0 L40 20" fill="none" stroke="black"/></svg>"#
+        let params = PlaceIntent.place(name: "line.svg", data: Data(svg.utf8), at: nil).command.params
+        #expect(throws: CatalogError.unavailable(id: "place.image", why: PhotoWorkspace.unfilledSVG)) {
+            try PhotoWorkspace.catalog.run("place.image", params: params, on: &workspace)
+        }
+        #expect(workspace.layers.count == 1)
+    }
+
+    /// An SVG becomes a pixel layer drawn at the size it is placed, centred, as one Place Image step (#6028).
+    @Test func svgBecomesPixelsAtDocumentScale() throws {
+        var workspace = try opened()
+        let svg = ##"<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="#ff0000"/></svg>"##
+        let params = PlaceIntent.place(name: "flag.svg", data: Data(svg.utf8), at: nil).command.params
+        let outcome = try PhotoWorkspace.catalog.run("place.image", params: params, on: &workspace)
+        #expect(outcome.undoStep == "Place Image" && workspace.layers.map(\.name) == ["flag", "Background"])
+        let layer = try #require(workspace.layers.first)
+        #expect(workspace.bounds(of: layer) == PixelRect(x: 380, y: 290, width: 40, height: 20))
+        let inside = try workspace.composite().pixel(x: 400, y: 300), outside = try workspace.composite().pixel(x: 400, y: 280)
+        #expect(inside.r > 0.99 && inside.g < 0.01 && outside.g > 0.99, "\(inside) \(outside)")
     }
 
     @Test func placesThroughPhotosCatalog() throws {

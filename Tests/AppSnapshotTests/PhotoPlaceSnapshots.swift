@@ -1,10 +1,10 @@
 // PhotoPlaceSnapshots.swift (place-image PP-4): the Photo window (PhotoEditor) after File > Place…, in the
 // packet's two screens (docs/blueprints/photo/features/place-image.md, Screens and states): `logo`, a 200 x 100
 // PNG placed on an 800 x 600 white image, its layer `logo` centred above Background in the Layers panel; and
-// `refused`, an SVG placed, nothing added and the reason in the status line. The place runs the way the menu
+// `refused`, a text file placed, nothing added and the reason in the status line. The place runs the way the menu
 // and the drop run it (`PhotoWorkspace.place(_:at:)`). `logo` waits on PP-5, which builds the place bodies on
-// the PP-1 stubs; `refused` holds on the stubs too (their reason, then PP-5's "Photo places PNG or JPEG
-// files."). Writes photo-place-logo-light/-dark.png and photo-place-refused-light/-dark.png. macOS only.
+// the PP-1 stubs; `refused` shows Photo's reason, "Photo places PNG, JPEG or SVG
+// files.". Writes photo-place-logo-light/-dark.png and photo-place-refused-light/-dark.png. macOS only.
 import CoreRaster
 import PhotoModel
 import SuiteUI
@@ -47,11 +47,10 @@ import Testing
 
     @Test func refused() throws {
         var model = try opened()
-        let svg = Data(#"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"/>"#.utf8)
-        model.place([(name: "logo.svg", data: svg)], at: nil)
-        #expect(model.statusMessage?.isEmpty == false, "an SVG place left no reason in the status line")
-        #expect(model.layers.count == 1, "an SVG place added a layer")
-        #expect(!model.canUndo, "an SVG place made an undo step")
+        model.place([(name: "notes.txt", data: Data("not an image".utf8))], at: nil)
+        #expect(model.statusMessage == "Photo places PNG, JPEG or SVG files.", "a text place left no reason in the status line")
+        #expect(model.layers.count == 1, "a text place added a layer")
+        #expect(!model.canUndo, "a text place made an undo step")
         try shoot("refused", model)
     }
 }

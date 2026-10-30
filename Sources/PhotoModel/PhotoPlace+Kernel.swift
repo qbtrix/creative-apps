@@ -1,6 +1,7 @@
 // PhotoPlace+Kernel.swift (place-image PP-1 stubs, PP-5 bodies): Photo's workspace is a kernel
-// `PlacedImageTarget`, so the place commands in `PlaceCommands` put a PNG or JPEG into an open image the
-// way the other apps place theirs. A placed image becomes pixels in Photo: `insertPlaced` adds a pixel
+// `PlacedImageTarget`, so the place commands in `PlaceCommands` put a PNG, JPEG or SVG into an open image the
+// way the other apps place theirs. An SVG is drawn at the fitted box's pixel size by SuiteImaging's
+// `PlacedVectorPixels` (fills only; strokes and text are not drawn), so it is sharp at document scale. A placed image becomes pixels in Photo: `insertPlaced` adds a pixel
 // layer above the selection, and nothing keeps the picture after it, so `placedSelection` is always nil
 // and `placeFillBox` refuses a fill. The size comes from the file's header (`SuiteImaging.rasterSize(of:)`),
 // the pixels from the workspace's image codec (`readImages(with:)`; the window's is ImageIO),
@@ -19,10 +20,12 @@ import SuiteKernel
 extension PhotoWorkspace: PlacedImageTarget {
     /// Why nothing can be placed: no image open.
     static let noPlaceImage = "Open or make an image to place into."
-    /// Why a file that isn't a PNG or JPEG isn't placed, and why one that doesn't decode isn't.
-    static let placeFormatHelp = "Photo places PNG or JPEG files.", cantPlace = "Can't place this image."
+    /// Why a file that isn't a PNG, JPEG or SVG isn't placed, and why one that doesn't decode isn't.
+    static let placeFormatHelp = "Photo places PNG, JPEG or SVG files.", cantPlace = "Can't place this image."
     /// Why `place.replace`, `place.reset-size`, `place.focus` and a fill can't run in Photo.
     static let placedBecomesPixels = "A placed image becomes pixels in Photo."
+    /// Why an SVG with nothing filled isn't placed: Photo draws an SVG's fills, not its strokes or text.
+    static let unfilledSVG = "Photo draws an SVG's filled shapes; this one has none (strokes and text aren't drawn yet)."
 
     /// Why nothing can be placed now; nil when it can: an image is open.
     public var placeHelp: String? {
@@ -38,17 +41,17 @@ extension PhotoWorkspace: PlacedImageTarget {
     /// Always nil: a Photo layer holds pixels, never a box a picture fills.
     public var placeFillBox: Rect? { nil }
 
-    /// PNG and JPEG; Photo doesn't rasterize SVG yet.
+    /// PNG, JPEG and SVG, which becomes pixels at the size it is placed.
     public var placeFormats: Set<PlacedFormat> { Self.placesFormats }
     /// The formats Photo places, which its status line and the kernel's refusal both name.
-    static let placesFormats: Set<PlacedFormat> = [.png, .jpeg]
+    static let placesFormats: Set<PlacedFormat> = Set(PlacedFormat.allCases)
 
     /// Always nil: a placed image becomes pixels, so no layer keeps its picture.
     public var placedSelection: (id: String, image: PlacedImage, asset: PlacedAsset)? { nil }
 
-    /// A PNG's or JPEG's pixel size from its header, without decoding the pixels; SVG is refused.
+    /// A PNG's or JPEG's pixel size from its header, without decoding the pixels; an SVG's from its flattening.
     public func rasterSize(_ data: Data, format: PlacedFormat) throws -> Size {
-        guard format != .svg else { throw CatalogError.unavailable(id: "place.image", why: Self.placeFormatHelp) }
+        if format == .svg { return try PlaceRules.vector(data, name: "").size }
         guard let size = SuiteImaging.rasterSize(of: data) else { throw Self.placeFailed }
         return size
     }
@@ -64,12 +67,22 @@ extension PhotoWorkspace: PlacedImageTarget {
         let box = image.box
         let width = max(Int(box.width.rounded()), 1), height = max(Int(box.height.rounded()), 1)
         let scaled = Double(width) < asset.natural.width.rounded() || Double(height) < asset.natural.height.rounded()
-        guard let tiles = try? Self.placedPixels(asset.data, codec: fileFlow.codec, width: width, height: height, scaled: scaled)
-        else { throw Self.placeFailed }
+        let drawn: TiledPixels?
+        if asset.format == .svg {
+            guard let vector = try? PlaceRules.vector(asset.data, name: asset.name) else { throw Self.placeFailed }
+            // Only fills are drawn, so art made of strokes alone would place as an empty layer.
+            guard vector.items.contains(where: { $0.fill != nil }) else {
+                throw CatalogError.unavailable(id: "place.image", why: Self.unfilledSVG)
+            }
+            drawn = try? TiledPixels(PlacedVectorPixels.pixels(vector, width: width, height: height))
+        } else {
+            drawn = try? Self.placedPixels(asset.data, codec: fileFlow.codec, width: width, height: height, scaled: scaled)
+        }
+        guard let tiles = drawn else { throw Self.placeFailed }
         let id = insertPixelLayer(tiles, named: Self.placedLayerName(asset.name),
                                   x: Int(box.minX.rounded()), y: Int(box.minY.rounded()), step: name)
         let natural = max(asset.natural.width, 1)
-        statusMessage = scaled ? "Placed at \(Int((box.width / natural * 100).rounded()))%." : nil
+        statusMessage = scaled && asset.format != .svg ? "Placed at \(Int((box.width / natural * 100).rounded()))%." : nil
         return id
     }
 
