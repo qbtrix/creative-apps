@@ -23,11 +23,19 @@ public struct DesignRaster: Sendable, Equatable {
 }
 
 /// Why an item can't be rasterized.
-public enum DesignRasterRefusal: Error, Equatable, Sendable {
+public enum DesignRasterRefusal: Error, Equatable, Sendable, CustomStringConvertible {
     /// The item's node is not on the page.
     case unknownID(String)
     /// The size is under a point, the pixels aren't whole points times one scale, or a side is over `maxSide`.
     case invalidSize
+
+    /// Plain words for a command catalog's refusal (the CLI, MCP), never the case name.
+    public var description: String {
+        switch self {
+        case .unknownID(let id): DesignRefusal.unknownID(id).help
+        case .invalidSize: "That size can't be drawn: use whole points, at most \(DesignRaster.maxSide) pixels a side."
+        }
+    }
 }
 
 extension DesignPage {

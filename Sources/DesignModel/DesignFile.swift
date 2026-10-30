@@ -17,7 +17,7 @@ import FoundationEssentials
 import Foundation
 #endif
 
-public enum DesignFileError: Error, Equatable, Sendable {
+public enum DesignFileError: Error, Equatable, Sendable, CustomStringConvertible {
     /// Nothing is open to write.
     case noFile
     /// The bytes are not a Design file.
@@ -47,6 +47,8 @@ public enum DesignFileError: Error, Equatable, Sendable {
         case .invalidNumber(let id): "One of its layers has a size or position that can't be drawn (\(id))."
         }
     }
+    /// The reason, so a command catalog's refusal (the CLI, MCP) reads as plain words.
+    public var description: String { reason }
 }
 
 /// The alert for a file that can't be opened or saved: a short title naming the file and the

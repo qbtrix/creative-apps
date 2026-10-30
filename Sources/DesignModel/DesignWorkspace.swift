@@ -270,6 +270,11 @@ public struct DesignWorkspace: Sendable, Equatable {
         expandedNodeIDs.formUnion(nodes.ancestors(of: id) ?? [])
     }
 
+    /// Expands every node that encloses any of `ids` in `nodes`, walking the tree once.
+    mutating func expandAncestors(of ids: some Sequence<String>, in nodes: [DesignNode]) {
+        expandedNodeIDs.formUnion(nodes.ancestors(ofAny: Set(ids)))
+    }
+
     /// Whether `id`'s Layers row shows its children.
     public func isExpanded(_ id: String) -> Bool { expandedNodeIDs.contains(id) }
 

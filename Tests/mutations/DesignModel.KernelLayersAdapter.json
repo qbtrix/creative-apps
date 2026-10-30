@@ -7,16 +7,16 @@
     "tests": "DesignTreeTests|DesignTreeEdgeTests"
   },
   {
-    "label": "the lock check drops the kernel's cascade",
+    "label": "the lock check drops the group cascade",
     "file": "Sources/DesignModel/DesignLocking.swift",
-    "find": "$0.nodes.layerTree.isEffectivelyLocked(id)",
-    "replace": "$0.nodes.layerTree.node(id)?.isLocked == true",
+    "find": "anyInTree(id) { $0.isLocked }",
+    "replace": "findNode(id)?.isLocked == true",
     "tests": "DesignSubtreeLockTests|DesignInspectorLockTests|DesignTextLockTests|DesignLayerTogglesTests"
   },
   {
     "label": "duplicate takes the kernel's empty result as success",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
-    "find": "guard !copies.isEmpty else { throw .nothingSelected }",
+    "find": "guard !selection.isEmpty else { throw .nothingSelected }",
     "replace": "",
     "tests": "DesignDuplicateTests|DesignContractLawTests"
   },

@@ -22,7 +22,7 @@ struct DesignInspectorFill: View {
 
     var body: some View {
         let help = model.fillHelp
-        let shown = live?.workspace ?? model
+        let shown = live?.scrubbed ?? model
         let type = shown.fillSelection.map { GradientRules.type(of: $0.fill) } ?? .solid
         VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             if let selection = shown.fillSelection, type != .solid {

@@ -1,4 +1,5 @@
-// HeadlessDocument.swift (command-catalog CC-1, protocol only): a document driven with no window.
+// HeadlessDocument.swift (command-catalog CC-1, protocol only): a document driven with no window, and the drop-reader
+// seam a host uses to hand `file.drop` its files.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -30,4 +31,11 @@ public protocol HeadlessDocument: Sendable {
     func export(_ format: String, options: JSONValue) throws -> [ExportedFile]
     /// What `afterglow <app> open` prints.
     func summary() -> JSONValue
+}
+
+/// A headless document that takes `file.drop`: the host reads the dropped files through its own IO and hands their
+/// bytes over, keyed by the path the step names, before the step runs; the document never reads the disk itself.
+public protocol HeadlessDropReceiver: HeadlessDocument {
+    /// The dropped files' bytes by path, for the next `file.drop` steps.
+    mutating func receiveDropped(_ files: [String: Data])
 }
