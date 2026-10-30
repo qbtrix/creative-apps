@@ -76,12 +76,18 @@ struct DesignFrameScrub: View {
 }
 
 /// The Layer section's Opacity bar, in percent: "Mixed" when the selected layers differ.
-struct DesignOpacityRow: View {
+struct DesignOpacityRow: View, BodyCounted {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
 
     var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
         let send = DesignStyleSend(model: model, live: live, perform: perform)
         let opacity = (live?.workspace ?? model).sharedValue(\.opacity)
         let help = model.styleHelp(.opacity)
@@ -96,12 +102,18 @@ struct DesignOpacityRow: View {
 }
 
 /// The Corners section over the selection: the Radius bar, off with its reason on a kind with no corners.
-struct DesignCornersSection: View {
+struct DesignCornersSection: View, BodyCounted {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
 
     var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
         let send = DesignStyleSend(model: model, live: live, perform: perform)
         let shown = live?.workspace ?? model
         let radiusHelp = model.styleHelp(.cornerRadius)
@@ -120,10 +132,13 @@ struct DesignCornersSection: View {
 }
 
 /// The Stroke section over the selection, after Fill: paint reads fill, then stroke (#3871).
-struct DesignInspectorStyle: View {
+struct DesignInspectorStyle: View, BodyCounted {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
     /// A stroke scrub's run is open: its samples preview until it lands.
     @State private var strokeRun = false
     /// A mouse button is down in the stroke editor, so a resting scrub is still one gesture.
@@ -133,6 +148,9 @@ struct DesignInspectorStyle: View {
     private static let settleDelay = Duration.milliseconds(400)
 
     var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
         InspectorSection("Stroke") {
             strokeRows(live?.workspace ?? model, send: DesignStyleSend(model: model, live: live, perform: perform))
         }

@@ -13,14 +13,20 @@ import SuiteKernel
 import SuiteUI
 import SwiftUI
 
-struct DesignInspectorFill: View {
+struct DesignInspectorFill: View, BodyCounted {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
     /// The mouse is down in the editor: its intents preview until mouse-up.
     @State private var pressing = false
 
     var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
         let help = model.fillHelp
         let shown = live?.workspace ?? model
         let type = shown.fillSelection.map { GradientRules.type(of: $0.fill) } ?? .solid
