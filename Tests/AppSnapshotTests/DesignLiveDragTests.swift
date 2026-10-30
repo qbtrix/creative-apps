@@ -5,7 +5,8 @@
 // change only the copy and its end commits one Change Opacity step. A landed
 // drag's copy stays shown, not live, for one main-actor turn, so the canvas
 // never draws the window's old workspace before the landed one reaches it, and
-// a press in that turn keeps its new copy. The window
+// a press in that turn keeps its new copy. A canvas drag's samples leave the
+// inspector alone: its rows read only a scrub's copy. The window
 // is hosted off screen through the render-budget harness; it reads
 // DesignWindow.lastWorkspace, a static, so it is nested in BodyCountSuites,
 // which runs those suites one at a time. On `cards`, A is node-2 at
@@ -60,6 +61,29 @@ extension BodyCountSuites {
             after.undo()
             #expect(!after.canUndo)
             #expect(live.workspace == nil)
+            #endif
+        }
+
+        @Test(.timeLimit(.minutes(2))) func aCanvasDragLeavesTheInspectorAlone() async throws {
+            #if DEBUG
+            let w = RenderBudgetWindow(DesignWindow(seed: Self.cards(), live: DesignLiveDrag()))
+            defer { w.close() }
+            try await w.settle(800)
+            let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
+            let page = CGSize(width: 1440, height: 1024)
+            // The press selects A, which shows its inspector; the later samples move only the canvas's copy.
+            try await w.drag(from: w.point(CGPoint(x: 150, y: 140), on: page, in: board), release: false) {
+                w.point(CGPoint(x: 150 + Double($0) / 10, y: 140), on: page, in: board)
+            }
+            try await w.settle(100)
+            let before = DesignOpacityRow.bodyRuns
+            #expect(before >= 1, "the inspector never showed A")
+            try await w.ticks(120) {
+                w.send(.leftMouseDragged, at: w.point(CGPoint(x: 162 + Double($0), y: 140 + Double($0) / 2), on: page, in: board))
+            }
+            try await w.settle(100)
+            #expect(DesignOpacityRow.bodyRuns - before <= 2, "a canvas sample ran the inspector: \(DesignOpacityRow.bodyRuns - before) runs")
+            w.send(.leftMouseUp, at: w.point(CGPoint(x: 282, y: 200), on: page, in: board))
             #endif
         }
 

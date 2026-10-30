@@ -2,8 +2,8 @@
   {
     "label": "the copies are not selected",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
-    "find": "return DesignEdit(name: \"Duplicate\", nodes: nodes, selection: copies)",
-    "replace": "return DesignEdit(name: \"Duplicate\", nodes: nodes, selection: [])",
+    "find": "return DesignEdit(name: \"Duplicate\", nodes: placed(page.nodes), selection: selection)",
+    "replace": "return DesignEdit(name: \"Duplicate\", nodes: placed(page.nodes), selection: [])",
     "tests": "DesignDuplicateTests"
   },
   {
@@ -17,7 +17,7 @@
     "label": "the copy keeps the lock",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
     "find": "copy.isLocked = false",
-    "replace": "copy.isLocked = copy.isLocked",
+    "replace": "copy.isLocked = original.isLocked",
     "tests": "DesignDuplicateTests"
   },
   {
@@ -30,8 +30,8 @@
   {
     "label": "a selected child is copied twice",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
-    "find": "guard !path.contains(where: wanted.contains) else { continue }",
-    "replace": "",
+    "find": "if wanted.contains(node.id) { out[node.id] = node } else { walk(node.children) }",
+    "replace": "if wanted.contains(node.id) { out[node.id] = node }; walk(node.children)",
     "tests": "DesignDuplicateTests"
   }
 ]
