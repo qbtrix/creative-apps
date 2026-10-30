@@ -54,8 +54,14 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     @Environment(\.suiteReduceMotion) private var reduceMotion
     @Environment(\.timelineFadeMark) private var fadeMark
     @Environment(\.timelineFocusClaim) private var focusClaim
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
 
     func body(content: Content) -> some View {
+        #if DEBUG
+        bodyTally.ran(TimelineLaneInputBodies.self)
+        #endif
         pointer.configure(
             track: track, mapping: mapping, playhead: playhead, actions: actions,
             extras: TimelineLanePointerExtras(focus: focusClaim, pill: $pillFrame, mark: fadeMark))
@@ -129,6 +135,9 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
         }
     }
 }
+
+/// The key every TimelineLaneInput<ID> counts its body runs under in BodyTally.
+enum TimelineLaneInputBodies {}
 
 /// The key a press or the pointer at lane x `x` lands on, with no view.
 enum TimelineLaneHit {
