@@ -52,13 +52,15 @@ struct DesignSelectionMarks: View {
 /// `handles` its resize handles, white squares with an
 /// accent edge, and with `knob` too the rotate knob, a white circle on an accent stem from the top
 /// handle (SuiteUI's `SelectionHandles.marks` and `stem`), all turned `degrees` about the box's centre the way the artwork turns. Shapes, not a Canvas, so marks past the page's edge still draw: CanvasViewport
-/// doesn't clip its overlay. Frames and handles stay one size at any zoom.
+/// doesn't clip its overlay. Frames and handles stay one size at any zoom; `lineWidth` widens the outline
+/// (DesignAgentGlow's 2 pt).
 struct DesignSelectionBox: View {
     let rect: DesignRect
     let zoom: Double
     var handles = true
     var degrees: Double = 0
     var knob = false
+    var lineWidth: CGFloat = 1
 
     var body: some View {
         let scale = usable(zoom)
@@ -79,7 +81,7 @@ struct DesignSelectionBox: View {
         }
         let turn = TransformBox(box: Rect(minX: rect.x, minY: rect.y, maxX: rect.maxX, maxY: rect.maxY), degrees: degrees)
         ZStack(alignment: .topLeading) {
-            Path(box).stroke(SuiteColor.accent, lineWidth: 1)
+            Path(box).stroke(SuiteColor.accent, lineWidth: lineWidth)
             squares.fill(SuiteColor.overlayPaper)
             squares.stroke(SuiteColor.accent, lineWidth: 1)
             if let knobMark {

@@ -6,7 +6,8 @@
 // `.endDrag`; the workspace decides what a press hits and which tool acts. The
 // pointer and the pointer handler come from DesignCanvasFeedback. The overlay
 // (not clipped to the page) is, bottom to top: the layers past the page's edge,
-// dimmed (DesignPastEdge), the frame names (DesignFrameLabels), the selection's marks (DesignSelectionMarks), the marquee
+// dimmed (DesignPastEdge), the frame names (DesignFrameLabels), the glow on what the newest agent step
+// touched (DesignAgentGlow), the selection's marks (DesignSelectionMarks), the marquee
 // under way (DesignMarqueeMark), DesignTextOverlay, the inline text editor, and
 // DesignCanvasFeedback's marks. `show` is the rect View > Zoom to Selection asks
 // for, kept until CanvasViewport can scroll to a rect. Keys reach the
@@ -64,6 +65,11 @@ struct DesignCanvas: View {
         } overlay: {
             DesignPastEdge(page: page, painted: painted, zoom: zoom, editingTextID: model.editingTextID)
             DesignFrameLabels(painted: painted, zoom: zoom)
+            DesignAgentGlow(step: shown.agentWork.lastStep, zoom: zoom) {
+                let ids = Set(shown.newestAgentLayers)
+                return painted.map(\.node).filter { ids.contains($0.id) }
+            }
+            .equatable()
             DesignSelectionMarks(model: shown, painted: painted, zoom: zoom)
             if let marquee = shown.marquee { DesignMarqueeMark(rect: marquee, zoom: zoom) }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
