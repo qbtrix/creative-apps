@@ -1,6 +1,7 @@
 // LibraryDevelopTilesTests.swift: the fast develop paths give core's pixels
 // and counts exactly (quality gate #5953, #6061). The tiled develop
-// (`LiveDevelop.run`) equals one pass over the whole buffer (`serial`) with
+// (`LiveDevelop.run`) and the banded one for small buffers (`banded`) equal
+// one pass over the whole buffer (`serial`) with
 // every control and Invert on, partial edge tiles and translucent pixels
 // included; `LiveHistogram` equals CoreRaster's sRGB histogram on renders,
 // on seeded noise with transparent, translucent and out-of-range pixels, and
@@ -47,6 +48,9 @@ private func noise(width: Int, height: Int, seed: UInt64) throws -> PixelBuffer 
             let tiled = try LiveDevelop.run(steps, on: buffer)
             #expect(tiled == (try LiveDevelop.serial(steps, on: buffer)), "\(buffer.width)x\(buffer.height)")
             #expect(tiled != buffer)
+            for bands in [3, 7, 12] {
+                #expect(try LiveDevelop.banded(steps, on: buffer, bands: bands) == tiled, "\(bands) bands")
+            }
         }
     }
 
