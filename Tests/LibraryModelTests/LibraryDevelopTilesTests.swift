@@ -6,6 +6,7 @@
 // included; `LiveHistogram` equals CoreRaster's sRGB histogram on renders,
 // on seeded noise with transparent, translucent and out-of-range pixels, and
 // bin for bin on every float of each table run that straddles two bins.
+// The export's parallel shrink (`LiveResize`) equals CoreRaster's `resized`.
 // Runs on Linux and macOS.
 @testable import LibraryModel
 import CoreRaster
@@ -51,6 +52,21 @@ private func noise(width: Int, height: Int, seed: UInt64) throws -> PixelBuffer 
             for bands in [3, 7, 12] {
                 #expect(try LiveDevelop.banded(steps, on: buffer, bands: bands) == tiled, "\(bands) bands")
             }
+        }
+    }
+
+    /// The export's shrink (`LiveResize`) is core's `resized`, pixel for pixel: shrinks that run either pass
+    /// first, a grow, one side only, sizes off the 256 px grid and translucent noise.
+    @Test func theParallelResizeIsCoresResize() throws {
+        let cases: [(PixelBuffer, Int, Int)] = [
+            (try noise(width: 700, height: 530, seed: 11), 233, 177), (try noise(width: 530, height: 700, seed: 12), 177, 233),
+            (try developGradient(width: 900, height: 600), 300, 199), (try noise(width: 300, height: 200, seed: 13), 613, 401),
+            (try noise(width: 520, height: 260, seed: 14), 257, 260), (try noise(width: 260, height: 520, seed: 15), 260, 255),
+            (try noise(width: 40, height: 30, seed: 16), 40, 30)]
+        for (buffer, width, height) in cases {
+            let core = try buffer.resized(width: width, height: height, filter: .lanczos3)
+            #expect(try LiveResize.resized(buffer, width: width, height: height) == core,
+                    "\(buffer.width)x\(buffer.height) to \(width)x\(height)")
         }
     }
 
