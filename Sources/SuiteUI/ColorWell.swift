@@ -213,11 +213,8 @@ public struct InspectorColorRow: View {
                 .font(SuiteFont.inspectorValue)
                 .multilineTextAlignment(.trailing)
                 .focused($isTyping)
-                // Return commits and gives the keys back, so the next ⌘Z undoes the edit, not the field's typing.
-                .onSubmit {
-                    commit()
-                    isTyping = false
-                }
+                // Return gives the keys back (the focus change commits, once), so ⌘Z undoes the edit, not the typing.
+                .onSubmit { isTyping = false }
                 .onChange(of: isTyping) { _, typing in if !typing { commit() } }
                 .frame(width: SuiteSize.hexField)
                 .background {
