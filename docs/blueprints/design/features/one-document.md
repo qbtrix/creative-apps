@@ -114,6 +114,32 @@ Measured in `RenderBudgetDesignAnimateTests` and written to `Tests/render-budget
 4. first key slide-in: one window body
 5. inspector toggle-key: at most the inspector's body
 
+## Quiet rerun (2026-10-31)
+
+OD-16 reran OD-11's playback budget (`RenderBudgetDesignAnimateTests.playback`, now run on both `animated(500)` and `animated(50)`) on a release build (`swift test -c release -Xswiftc -enable-testing -Xswiftc -DDEBUG --no-parallel`). Each run plays the fixture once: 600 refreshes of a hand-fired 120 Hz link, with layout and display forced on each. Before every run the script waited for the 1-minute load to drop under 20. The gate had no holders. Load is the 1-minute average just before and just after each run. No run went over 20, so none was marked not quiet or rerun.
+
+| Run | Fixture | p50 | p95 | max | over 8.3 ms | over 16.7 ms | window bodies | load before / after |
+|---|---|---|---|---|---|---|---|---|
+| 1 | animated(500) | 2.09 ms | 3.91 ms | 124.1 ms | 2 / 600 | 2 / 600 | 0 | 19.0 / 17.3 |
+| 1 | animated(50) | 0.95 ms | 1.58 ms | 35.2 ms | 2 / 600 | 1 / 600 | 0 | 19.0 / 17.3 |
+| 2 | animated(500) | 2.05 ms | 3.55 ms | 113.4 ms | 2 / 600 | 2 / 600 | 0 | 17.4 / 17.4 |
+| 2 | animated(50) | 0.99 ms | 1.58 ms | 34.9 ms | 2 / 600 | 1 / 600 | 0 | 17.4 / 17.4 |
+| 3 | animated(500) | 2.10 ms | 3.67 ms | 120.1 ms | 2 / 600 | 2 / 600 | 0 | 17.4 / 18.4 |
+| 3 | animated(50) | 0.96 ms | 1.49 ms | 38.0 ms | 2 / 600 | 1 / 600 | 0 | 17.4 / 18.4 |
+| 4 (late refreshes named) | animated(500) | 2.19 ms | 3.93 ms | 118.3 ms | 2 / 600 | 2 / 600 (refreshes 1 and 600) | 0 | 17.7 / 15.9 |
+| 4 (late refreshes named) | animated(50) | 0.98 ms | 1.69 ms | 35.6 ms | 1 / 600 | 1 / 600 (refresh 600) | 0 | 17.7 / 15.9 |
+
+- The late frames are the same every run and sit at the ends, not in the middle. On `animated(500)` they are refresh 1, the first frame after play, and refresh 600, which ends play once and lands the last frame as the playhead (the one window run the test allows). On `animated(50)` only refresh 600 is late. All 598 refreshes in between stay under 16.7 ms, and their p95 is under 4 ms. The 3.3% tail in the spike, and the 40 to 106 late refreshes OD-11 and OD-12 saw at load 70 to 105, were load.
+- `animated(500)` has 2 late refreshes against a limit of 2. Both are start and end costs, so the margin on QB-L4 is zero. A cold first frame or a heavier landing would turn the row red without any change to steady playback.
+
+Sample: `playLongForSample` loops `animated(500)` for 24 s (it runs only when DESIGN_PLAY_LONG=1 is set). `sample` ran for 20 s at 1 ms intervals, starting about 4 s in, at load 17.8, and caught 13,459 main-thread samples. About 12,100 of those (90%) are SwiftUI's render pass and AttributeGraph updates under `NSHostingView.layout()`. The three heaviest frames from our code:
+
+1. `DesignPageArtwork ==` (with `DesignPage ==` and `DesignNode ==` under it): 661 samples, 4.9%. SwiftUI compares the 500-node page each refresh to decide whether the artwork changed.
+2. `closure #1 in CanvasViewport.body` (SuiteUI): 625 samples, 4.6%. This is the viewport's stack and scroller rebuild.
+3. `DesignPage.sampled(at:)` / `DesignNode.sampled(at:)` from `DesignCanvas.body` (DesignCanvas.swift:43): 413 samples, 3.1%. The Canvas draw (`DesignArtwork.body` into `paintArtwork`) follows close behind at 374.
+
+**Decision: the tail was load; QB-L4 stands as the gate.** At most 2 frames go over 16.7 ms in 5 s on a quiet machine, so OD-15's row can gate. The 2 frames are play start and play end on `animated(500)`, so the row has no headroom.
+
 ## Node costing (OD-17)
 
 The per-kind raster cost the compositor trigger is read from, measured by
