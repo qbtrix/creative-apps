@@ -121,7 +121,7 @@ The per-kind raster cost the compositor trigger is read from, measured by
 frames at 2x through `DesignArtwork`). The rule: **a kind's compositor trigger is the node count
 at which its sampled raster passes 8.3 ms at p95; below it the SwiftUI painter stays.** The trigger
 is floor(8.3 ms / per-node p95), a linear extrapolation that errs low. The numbers were measured
-under load (1-minute load 40), so treat them as upper bounds until OD-16's quiet rerun.
+under load (1-minute load 40), so treat them as upper bounds until a quiet-machine rerun.
 
 | Kind (`DesignFixtures.animated(_:kinds:)`) | Nodes | Raster p50 / p95 | Per node p50 / p95 | Compositor trigger | Load (1 min) |
 |---|---|---|---|---|---|
