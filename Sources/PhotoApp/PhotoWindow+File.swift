@@ -2,7 +2,7 @@
 // PV-1): its intents, its route, its hook on the window, the services the
 // window runs on, and open, Save, Save As and the writes they share. New
 // Image, Open, Save and Save As route through PhotoWindow.perform to the
-// helpers here; Keep layers?' choices and Clear Menu are FileIntents. Save
+// helpers here; Keep layers?' choices are FileIntents. Save
 // goes where `model.saveAction` says: a document is written over its `.ora`
 // (PhotoPackageIO, the snapshot taken off the main actor), a flat image over
 // its file, a flat file whose image has layers asks "Keep layers?" (Save as
@@ -18,9 +18,11 @@
 // Open reads an `.ora` and decodes its PNGs off the main actor, then opens
 // the snapshot; a bad document shows its ArchiveError message and the window
 // keeps what it had. Flat files open through `openImage`, so Save knows
-// their kind. Each successful open and save is noted in Open Recent and,
-// through SuiteDocumentsBridge (file-flow PF-4), in the suite's shared
-// recents: `.opened` or `.saved`, once each, with the file's suite type.
+// their kind. Each successful open and save is noted in the suite's shared
+// recents through SuiteDocumentsBridge (file-flow PF-4), which File > Open
+// Recent lists: `.opened` or `.saved`, once each, with the file's suite type.
+// The first note hands over Photo's old saved list ("PhotoRecentFiles") once
+// and removes its key.
 // A document save that lands first publishes the file's thumbnail, off the
 // main actor, to the previews the bridge holds (shared-thumbnails ST-7).
 // `-PhotoOpenFile <path>` opens a file at launch; `-PhotoRecoveryDir
@@ -55,8 +57,6 @@ enum FileIntent {
     case saveDocument
     /// Keep layers?: Flatten into the open file's format.
     case flatten(ImageFormat)
-    /// Open Recent > Clear Menu.
-    case clearRecent
     /// The launch offer: Restore its image into the window.
     case restore(RecoveryOffer)
     /// The launch offer: Discard what the crash left behind.
@@ -88,8 +88,6 @@ final class PhotoFileSession {
     var working: PhotoFileWork?
     /// Saves that landed, so the unsaved prompt's Save knows it did.
     var saves = 0
-    /// Open Recent's files, newest first.
-    private(set) var recentFiles: [URL] = PhotoFileSession.storedRecent()
     /// The window's autosave, made on its workspace's recovery store when the window appears.
     private(set) var autosave: PhotoAutosave?
     /// The launch's restore offer while it waits for Restore or Discard.
@@ -130,35 +128,24 @@ final class PhotoFileSession {
         }.value
     }
 
-    /// Notes `url` in Open Recent: the system's list, Photo's own (an app with
-    /// no declared document types may not get the system's), and the suite's
-    /// shared recents as `event`, when the suite knows the file's type.
+    /// Notes `url` in the suite's shared recents as `event`, when the suite knows the file's type. The first note
+    /// also hands over Photo's old saved list, oldest first, and removes its key, so it is imported once.
     func noteRecent(_ url: URL, _ event: RecentEvent) {
-        NSDocumentController.shared.noteNewRecentDocumentURL(url)
-        store(Array(([url] + recentFiles.filter { $0 != url }).prefix(10)))
         let bridge = self.bridge ?? Self.suiteBridge
+        var stored = UserDefaults.standard.stringArray(forKey: Self.oldRecentKey)
+        if stored != nil {
+            let path = url.path(percentEncoded: false)
+            for ref in PhotoWorkspace.takeOldRecents(&stored, registry: bridge.registry) where ref.path != path { bridge.noted(ref, .opened) }
+            UserDefaults.standard.removeObject(forKey: Self.oldRecentKey)
+        }
         guard let type = bridge.registry.type(forExtension: url.pathExtension)?.id else { return }
         let path = url.path(percentEncoded: false)
         bridge.noted(SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: .photo,
                                       type: type, displayName: url.lastPathComponent), event)
     }
 
-    func clearRecent() {
-        NSDocumentController.shared.clearRecentDocuments(nil)
-        store([])
-    }
-
-    private nonisolated static let recentKey = "PhotoRecentFiles"
-
-    /// The saved list; Open Recent reads it with no window open.
-    nonisolated static func storedRecent() -> [URL] {
-        (UserDefaults.standard.stringArray(forKey: recentKey) ?? []).map { URL(fileURLWithPath: $0) }
-    }
-
-    private func store(_ urls: [URL]) {
-        recentFiles = urls
-        UserDefaults.standard.set(urls.map(\.path), forKey: Self.recentKey)
-    }
+    /// Where Photo kept its own Open Recent list before the suite's shared recents.
+    private static let oldRecentKey = "PhotoRecentFiles"
 }
 
 extension PhotoWindow {
@@ -197,7 +184,6 @@ extension PhotoWindow {
             files.keepLayers = nil
             guard let url = documentURL else { return saveAs() }
             write(to: url, as: format, quality: model.exportOptions.quality, saving: true)
-        case .clearRecent: files.clearRecent()
         case .restore(let offer):
             files.recoveryOffer = nil
             restore(offer)
@@ -237,7 +223,7 @@ extension PhotoWindow {
 
     func chooseFile() {
         let panel = NSOpenPanel()
-        panel.allowedContentTypes = Self.documentTypes + [.png, .jpeg, .heic]
+        panel.allowedContentTypes = Self.documentTypes + ImageIOCodec().readExtensions.sorted().compactMap { UTType(filenameExtension: $0) }
         panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let url = panel.url else { return }
         open(url)
@@ -414,7 +400,6 @@ struct PhotoFileArea: ViewModifier {
                     BusyNote(work.note, identifier: work.identifier, delay: .milliseconds(100))
                 }
             }
-            .focusedSceneValue(\.photoRecentFiles, files.recentFiles)
             // Keep layers? as a sheet on the window; Cancel (or no window) just closes it.
             .task(id: files.keepLayers) {
                 guard let format = files.keepLayers else { return }
@@ -598,17 +583,4 @@ final class PhotoWindowEditedView: NSView, PhotoUnsavedWindow {
     func save() async -> Bool { await Self.save(files: files, perform: send) }
 
     func discardChanges() { files?.autosave?.discard() }
-}
-
-extension FocusedValues {
-    /// The focused Photo window's Open Recent files, newest first.
-    var photoRecentFiles: [URL]? {
-        get { self[PhotoRecentFilesKey.self] }
-        set { self[PhotoRecentFilesKey.self] = newValue }
-    }
-}
-
-/// A plain key rather than `@Entry`, as PhotoMenuKey.
-private struct PhotoRecentFilesKey: FocusedValueKey {
-    typealias Value = [URL]
 }

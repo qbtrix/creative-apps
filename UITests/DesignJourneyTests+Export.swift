@@ -14,7 +14,8 @@
 // file back; J18 exports PNG 1x twice ("Desktop 2.png" beside an unchanged
 // "Desktop.png"), Escape and Cancel write nothing, and a read-only folder
 // ends the run on the failed line with the system's reason (its curly apostrophe,
-// "You don’t have permission", as Foundation words it). Every opening
+// "You don’t have permission", as Foundation words it), closed with Done as every
+// line is. Every opening
 // clicks File > Export…; ⇧⌘E (J19's last opening) and Escape (J18) are each
 // checked once, as the keyboard twins. Each live run is shot on its finished
 // line before Done, and J19 shoots the window after Done and after Cancel.
@@ -109,8 +110,10 @@ final class DesignExportJourneyTests: XCTestCase {
             "the read-only folder didn't fail on Desktop 3.png with the system's reason")
         design.shot("export-failed")
         XCTAssert(design.element("suite.canvas").exists, "the window lost its document")
-        design.element(Self.cancelID).click()
-        XCTAssert(sheet.waitForNonExistence(timeout: 5), "Cancel left the failed sheet open")
+        // A failed run shows its line, so the sheet's close button reads Done, not Cancel (SuiteExportSheet).
+        XCTAssertFalse(design.element(Self.cancelID).exists, "the failed sheet still offers Cancel")
+        design.element(Self.doneID).click()
+        XCTAssert(sheet.waitForNonExistence(timeout: 5), "Done left the failed sheet open")
         XCTAssertEqual(try Self.listing(folder).count, 2, "the failed run left a file")
     }
 
