@@ -29,7 +29,10 @@ import Testing
     @Test func empty() throws {
         var model = LibraryCatalog()
         model.load(LibraryFixtures.photos(named: "shoot"))
-        try snapshots(LibrarySidebarTabs(model: model, tab: .ai) { EmptyView() }, name: "library-ai-tab-empty")
+        try snapshots(
+            AgentSidebarTabs("Library", id: "library.sidebar.tabs", tab: .ai) { EmptyView() } ai: {
+                AgentActivityList(requests: model.agentRequests, layerNames: [:], hidden: [], showsEye: false) { _ in }
+            }, name: "library-ai-tab-empty")
     }
 
     private func snapshots(_ view: some View, name: String) throws {

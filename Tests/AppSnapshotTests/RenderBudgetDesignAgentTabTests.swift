@@ -1,7 +1,7 @@
 // RenderBudgetDesignAgentTabTests.swift (render budget row "open the
 // sidebar's AI tab: 0 window bodies"): the real Design window seeded with the
 // `crowd` fixture (2,000 layers), on the render budget harness. Picking the
-// sidebar's AI segment (as its click does) switches DesignSidebarTabs' own
+// sidebar's AI segment (as its click does) switches AgentSidebarTabs' own
 // state, so DesignWindow's and DesignEditor's bodies run 0 times, and with
 // them the canvas; the tab shows its empty state. Nested in BodyCountSuites:
 // it reads global body counters. Debug builds only. macOS only.

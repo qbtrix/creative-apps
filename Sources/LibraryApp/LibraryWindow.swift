@@ -1,6 +1,6 @@
 // LibraryWindow.swift: the Library window. It is SuiteWindow with the
-// sidebar's Library and AI tabs (LibrarySidebarTabs: the collections list,
-// and the agent's requests), LibraryBrowser as content (with LibraryStatusBar
+// sidebar's Library and AI tabs (SuiteUI AgentSidebarTabs: the collections
+// list, and the agent's requests, list only), LibraryBrowser as content (with LibraryStatusBar
 // under it in the loupe and on preview data), LibraryInspector in the inspector, and
 // LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
@@ -81,13 +81,16 @@ struct LibraryWindow: View, BodyCounted {
                     toggleSubfolders: { model.toggleFolderSubfolders(row: id) })
             }
         ) {
-            LibrarySidebarTabs(model: model) {
+            AgentSidebarTabs("Library", id: "library.sidebar.tabs") {
                 SuiteSidebarList(
                     sections: sidebarSections(filters),
                     selection: model.sidebarSelection,
                     // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
                     onSelect: { model.selectSidebarRow($0) },
                     onRename: filters.renameCollection)
+            } ai: {
+                // List only: a catalog has no layer to show, hide or select, and no span to undo.
+                AgentActivityList(requests: model.agentRequests, layerNames: [:], hidden: [], showsEye: false) { _ in }
             }
         } content: {
             VStack(spacing: 0) {

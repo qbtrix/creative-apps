@@ -1,6 +1,6 @@
 // HaloWindow.swift: Halo's window and command router. It is SuiteWindow with
-// the sidebar's Compositions and AI tabs (HaloSidebarTabs; the AI tab's
-// routes are HaloWindow+Agent.swift), HaloViewer as content and
+// the sidebar's Compositions and AI tabs (SuiteUI AgentSidebarTabs; the AI
+// tab's routes are HaloWindow+Agent.swift), HaloViewer as content and
 // HaloCompositionInspector (settings and layers) in the inspector, a column
 // `inspectorWidth` wide whatever it shows. Every
 // action a view, a menu or a key takes is a HaloCommand sent to
@@ -64,7 +64,7 @@ struct HaloWindow: View, BodyCounted {
         }
         scenes(
             SuiteWindow(title: fileWindowTitle, actions: [newComposition], inspectorWidth: Self.inspectorWidth) {
-                HaloSidebarTabs(model: model, onAgent: agentPerform) {
+                AgentSidebarTabs("Compositions", id: "halo.sidebar.tabs") {
                     SuiteSidebarList(
                         sections: [SidebarSection(
                             id: "compositions", title: "Compositions",
@@ -73,6 +73,10 @@ struct HaloWindow: View, BodyCounted {
                         selection: model.selectedCompositionID,
                         onSelect: { perform(.selectComposition($0)) },
                         onRename: { perform(.renameComposition($0, $1)) })
+                } ai: {
+                    // Halo layers can't hide yet, so the list has no eye.
+                    AgentActivityList(requests: model.agentRequests, layerNames: model.layerNamesByID, hidden: [],
+                                      showsEye: false, onAction: agentPerform)
                 }
             } content: {
                 HaloViewer(model: model, perform: perform, onShapeIntent: { intent in

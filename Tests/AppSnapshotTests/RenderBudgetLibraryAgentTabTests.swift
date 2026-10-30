@@ -2,7 +2,7 @@
 // sidebar's AI tab: 0 window bodies, 0 grid bodies"): the real Library window
 // at 10,000 photos (the `large` fixture), on the render budget harness.
 // Picking the sidebar's AI segment (as its click does) switches
-// LibrarySidebarTabs' own state, so LibraryWindow's and LibraryBrowser's
+// AgentSidebarTabs' own state, so LibraryWindow's and LibraryBrowser's
 // bodies run 0 times; the tab shows its empty state. Nested in
 // BodyCountSuites: it reads global body counters. Debug builds only. macOS only.
 #if canImport(AppKit)

@@ -1,7 +1,7 @@
 // RenderBudgetHaloAgentTabTests.swift (render budget row "open the sidebar's
 // AI tab: 0 window bodies"): the real Halo window on the `crowd` fixture, on
 // the render budget harness. Picking the sidebar's AI segment (as its click
-// does) switches HaloSidebarTabs' own state, so HaloWindow's body, and with
+// does) switches AgentSidebarTabs' own state, so HaloWindow's body, and with
 // it the viewer and timeline, runs 0 times; the tab shows its
 // empty state. Nested in BodyCountSuites: it reads global body counters.
 // Debug builds only. macOS only.
