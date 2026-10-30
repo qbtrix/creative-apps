@@ -240,7 +240,8 @@ struct PhotoWindow: View {
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
             pacer.add(move) { moves in
                 if samplePress(moves) { return }
-                // A Gradient drag's later samples move only its line, on LiveDragLine's copy.
+                // A drag that only moves an overlay mark (a Gradient line, an area tool's selection, a crop
+                // box) runs on LiveDragLine's copy, and the overlay alone redraws.
                 if dragLine.drags(moves, on: model, zoom: zoom) { return }
                 // Free Transform's canvas drags and the Move tool's run on the live transform, as the handles' do.
                 if model.dragRunsLive { return runLiveDrag(moves) }
