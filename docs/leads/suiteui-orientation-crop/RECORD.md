@@ -294,3 +294,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-30T02:12:39Z critic panel waits on #5913 (no fix PR yet)
 - 2026-10-30T02:34:26Z critic panel waits on #5913 (no fix PR yet)
 - 2026-10-30T02:55:46Z critic panel waits on #5913 (no fix PR yet)
+- 2026-10-30T03:16:46Z critic panel waits on #5913 (no fix PR yet)
