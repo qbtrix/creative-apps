@@ -69,7 +69,6 @@ struct DesignWindow: View, BodyCounted {
     @State private var live = DesignLiveDrag()
     /// Playback on the suite's display link; a tick changes nothing this body reads (DesignPlayer+Kernel.swift).
     @State private var player = DesignPlayer()
-    @Environment(\.designRefreshLink) private var makeLink
     /// A test's starting workspace: the window opens it as it is and skips the launch steps.
     private let seeded: Bool
     @State private var zoom = 1.0
@@ -157,6 +156,7 @@ struct DesignWindow: View, BodyCounted {
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }, remember: { perform(.rememberExport($0)) }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
+        .modifier(RefreshLinkHandoff(player: player))
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
         // SuiteWindow's inner one then adds nothing, so the menus' and alert's hosts share one inventory.
         .suiteProbes()
@@ -230,7 +230,7 @@ struct DesignWindow: View, BodyCounted {
         case .play:
             guard !model.isStill, !player.isPlaying else { break }
             if player.isActive { model.setPlayhead(player.halt(stopping: false, live: live)) }
-            player.play(model, live: live, makeLink: makeLink) { model.setPlayhead($0) }
+            player.play(model, live: live) { model.setPlayhead($0) }
         case .pause: if player.isPlaying { model.setPlayhead(player.halt(stopping: false, live: live)) }
         case .stop: model.setPlayhead(player.halt(stopping: true, live: live))
         case .scrub(let frame): player.scrub(to: frame, live: live) { model.setPlayhead($0) }
@@ -519,5 +519,17 @@ struct DesignWindow: View, BodyCounted {
 
     private static func reason(_ error: Error) -> String {
         (error as? DesignFileError)?.reason ?? error.localizedDescription
+    }
+}
+
+/// Hands the window's `designRefreshLink` to `player` once it appears. Only this modifier's body reads the
+/// closure, so an environment change (a sheet opening) re-runs it, not DesignWindow's body
+/// (RenderBudgetDesignExportTests' sheet budget).
+private struct RefreshLinkHandoff: ViewModifier {
+    let player: DesignPlayer
+    @Environment(\.designRefreshLink) private var makeLink
+
+    func body(content: Content) -> some View {
+        content.onAppear { player.makeLink = makeLink }
     }
 }
