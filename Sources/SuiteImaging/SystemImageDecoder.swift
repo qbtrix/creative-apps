@@ -41,13 +41,18 @@ public enum SystemImageDecoder {
               asStored || space != nil else { return nil }
         let longest = max(image.extent.width, image.extent.height)
         if let side = longestSide, side > 0, CGFloat(side) < longest {
-            image = image.applyingFilter("CILanczosScaleTransform",
-                                         parameters: [kCIInputScaleKey: CGFloat(side) / longest, kCIInputAspectRatioKey: 1])
-            // Lanczos leaves a fractional extent; stretch it to whole pixels at the origin so no edge row is lost.
-            let extent = image.extent
-            let (w, h) = (max(extent.width.rounded(), 1), max(extent.height.rounded(), 1))
-            image = image.transformed(by: CGAffineTransform(translationX: -extent.minX, y: -extent.minY))
-                .transformed(by: CGAffineTransform(scaleX: w / extent.width, y: h / extent.height))
+            let scale = CGFloat(side) / longest, source = image.extent
+            // Lanczos spreads past the scaled rect and fades the edges, so scale the clamped image, crop the
+            // scaled rect, and stretch that to whole pixels at the origin so no edge row is lost or clear.
+            let nominal = CGRect(x: source.minX * scale, y: source.minY * scale,
+                                 width: source.width * scale, height: source.height * scale)
+            let (w, h) = (max(nominal.width.rounded(), 1), max(nominal.height.rounded(), 1))
+            image = image.clampedToExtent()
+                .applyingFilter("CILanczosScaleTransform", parameters: [kCIInputScaleKey: scale, kCIInputAspectRatioKey: 1])
+                .cropped(to: nominal)
+                .transformed(by: CGAffineTransform(translationX: -nominal.minX, y: -nominal.minY))
+                .transformed(by: CGAffineTransform(scaleX: w / nominal.width, y: h / nominal.height))
+                .cropped(to: CGRect(x: 0, y: 0, width: w, height: h))
         }
         let width = Int(image.extent.width.rounded(.down)), height = Int(image.extent.height.rounded(.down))
         guard width > 0, height > 0 else { return nil }

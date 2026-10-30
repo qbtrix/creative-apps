@@ -76,7 +76,8 @@ import Testing
     }
 
     @Test func aScaledReadIsWholePixels() throws {
-        let rgba = [UInt8](repeating: 200, count: 3000 * 7 * 4)
+        // Opaque grey: a scaled read keeps every edge pixel opaque.
+        let rgba: [UInt8] = Array([[UInt8]](repeating: [200, 200, 200, 255], count: 3000 * 7).joined())
         let image = try #require(SystemImageDecoder.decode(Self.png(rgba, 3000, 7), longestSide: 1000, asStored: true))
         #expect(image.width == 1000 && image.height == 2, "\(image.width) x \(image.height)")
         #expect(image.rgba8[(image.width * image.height - 1) * 4 + 3] == 255, "the last pixel is clear")
