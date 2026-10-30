@@ -33,5 +33,26 @@
     "find": "            let frameID = nextID()\n",
     "replace": "            number = index\n            let frameID = nextID()\n",
     "tests": "DesignFixturesTests"
+  },
+  {
+    "label": "strokes all solid",
+    "file": "Sources/DesignModel/DesignFixtures.swift",
+    "find": "stroke: $0.isMultiple(of: 2) ? solid : dashed)",
+    "replace": "stroke: solid)",
+    "tests": "DesignFixturesTests"
+  },
+  {
+    "label": "realUI header loses its gradient",
+    "file": "Sources/DesignModel/DesignFixtures.swift",
+    "find": "cornerRadius: 12, gradient: blueToWhite)]",
+    "replace": "cornerRadius: 12)]",
+    "tests": "DesignFixturesTests"
+  },
+  {
+    "label": "kind variants not keyed",
+    "file": "Sources/DesignModel/DesignFixtures.swift",
+    "find": "keyed(DesignNode(id: \"node-\\(i + 2)\", copying: leaf), dx: 24, dy: 20)",
+    "replace": "DesignNode(id: \"node-\\(i + 2)\", copying: leaf)",
+    "tests": "DesignFixturesTests"
   }
 ]

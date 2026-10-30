@@ -5,7 +5,11 @@
 // encoded by DesignRasterizer. The window body runs 0 times during the write: the raster is
 // drawn off the window and reads no window state. `write` gates the body count; `writeTiming`
 // gates the wall time on its 1 s budget, failing over it. `writeTiming` is on the perf list
-// (Tests/perf-suites.txt). Nested in
+// (Tests/perf-suites.txt). `nodeCost` (OD-17) is recorded, not gated: per node kind
+// (`DesignFixtures.animated(_:kinds:)`) it rasters the tree sampled at 31 frames through
+// DesignArtwork at 2x, the canvas painter off the window, and prints p50 and p95 per node, the
+// kind's compositor trigger (the node count whose p95 passes 8.3 ms, extrapolated linearly) and
+// the 1-minute load; its only checks are the node counts. Measure it on a release build. Nested in
 // BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -28,6 +32,36 @@ extension BodyCountSuites {
             let (step, _) = try await Self.run()
             print("RENDER-BUDGET design write a 2x PNG: \(String(format: "%.1f", step.p95)) ms (budget 1000 ms)")
             #expect(step.p95 <= 1000, "\(step) (budget 1000 ms)")
+        }
+
+        /// OD-17: the painter's raster cost per node kind, printed, not gated (the rows in Tests/render-budgets.md).
+        @Test(.timeLimit(.minutes(5))) func nodeCost() throws {
+            for kinds in DesignFixtures.AnimatedKinds.allCases {
+                let count = kinds == .realUI ? 200 : 500
+                let page = try #require(DesignFixtures.animated(count, kinds: kinds).selectedPage)
+                func nodes(_ list: [DesignNode]) -> Int { list.reduce(list.count) { $0 + nodes($1.children) } }
+                let total = nodes(page.nodes)
+                #expect(total == (kinds == .realUI ? 197 : 501), "\(kinds)")
+                func raster(_ frame: Double) {
+                    let renderer = ImageRenderer(content: DesignArtwork(painted: page.sampled(at: frame).painted, zoom: 1)
+                        .frame(width: page.frameWidth, height: page.frameHeight))
+                    renderer.scale = 2
+                    _ = renderer.cgImage
+                }
+                raster(0)  // warm-up: the first text render loads its fonts
+                var times: [Double] = []
+                for frame in stride(from: 0, through: 120, by: 4) {
+                    let clock = ContinuousClock(), began = clock.now
+                    raster(Double(frame))
+                    times.append(Double((clock.now - began) / .microseconds(1)) / 1000)
+                }
+                let sorted = times.sorted(), p50 = sorted[sorted.count / 2], p95 = sorted[Int(Double(sorted.count) * 0.95)]
+                var load = [0.0, 0, 0]
+                getloadavg(&load, 3)
+                print(String(format: "RENDER-BUDGET design raster %@ (%d nodes) at 2x, %d frames: p50 %.2f p95 %.2f ms | per node p50 %.2f p95 %.2f us | trigger %d nodes | load %.0f",
+                             kinds.rawValue, total, sorted.count, p50, p95, p50 * 1000 / Double(total), p95 * 1000 / Double(total),
+                             Int(8.3 * Double(total) / p95), load[0]))
+            }
         }
 
         static func run() async throws -> (step: RenderStep, png: Data?) {

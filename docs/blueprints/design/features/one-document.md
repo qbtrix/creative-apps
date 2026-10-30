@@ -114,6 +114,27 @@ Measured in `RenderBudgetDesignAnimateTests` and written to `Tests/render-budget
 4. first key slide-in: one window body
 5. inspector toggle-key: at most the inspector's body
 
+## Node costing (OD-17)
+
+The per-kind raster cost the compositor trigger is read from, measured by
+`RenderBudgetDesignRasterTests.nodeCost` on `DesignFixtures.animated(_:kinds:)` (release, 31
+frames at 2x through `DesignArtwork`). The rule: **a kind's compositor trigger is the node count
+at which its sampled raster passes 8.3 ms at p95; below it the SwiftUI painter stays.** The trigger
+is floor(8.3 ms / per-node p95), a linear extrapolation that errs low. The numbers were measured
+under load (1-minute load 40), so treat them as upper bounds until a quiet-machine rerun.
+
+| Kind (`DesignFixtures.animated(_:kinds:)`) | Nodes | Raster p50 / p95 | Per node p50 / p95 | Compositor trigger | Load (1 min) |
+|---|---|---|---|---|---|
+| rectangles (control, `animated(500)`) | 501 | 0.53 / 0.77 ms | 1.07 / 1.54 us | 5,399 nodes | 40, under load |
+| texts, "Label" in 48 x 20 | 501 | 11.65 / 17.92 ms | 23.25 / 35.76 us | 232 nodes | 40, under load |
+| gradients, linear blue to white | 501 | 0.68 / 0.98 ms | 1.35 / 1.97 us | 4,223 nodes | 40, under load |
+| strokes, 1 pt, solid and dashed (4, 2) by turns | 501 | 1.83 / 2.85 ms | 3.65 / 5.68 us | 1,460 nodes | 40, under load |
+| realUI: gradient header, 39 cards (stroked card, title, body, dashed chip, label) | 197 | 4.59 / 10.73 ms | 23.32 / 54.49 us | 152 nodes | 40, under load |
+
+Reading: the painter holds for rectangle, gradient and stroke pages into the thousands of nodes.
+Text sets the limit. A page of about 150 mixed UI nodes, or 230 text nodes, is where the future
+compositor packet starts, or where text gets cached as a raster per node.
+
 ## Done check
 
 Per slice: its PR merged into `feat/one-document` on a green Linux `scripts/ci --changed`, its mutations all caught (`Mutate:` line in the body), and for a `"ui": true` slice its Mac proof (snapshots, budget row, feel gate). The feature is done when the hero journey reports green twice in a row on a quiet Mac and the five budget rows are within budget. Landing on `dev` is a separate captain decision.
