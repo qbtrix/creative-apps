@@ -13,6 +13,7 @@ struct GalleryHistoryDocument: HistoryJumping {
     var history = History<Int>()
 
     var historyListing: HistoryListing { history.listing(base: "Open") }
+    mutating func setHistoryRequest(_ name: String?) -> Bool { history.setRequest(name) }
 
     /// The one-line conformance an app writes: `History.jumpEndingRun(to:)` over its undo adapter.
     mutating func jumpHistory(to index: Int) throws {
