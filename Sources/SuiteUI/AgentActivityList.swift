@@ -12,7 +12,11 @@
 // closes the row. Which rows are open is this view's own state, so opening
 // the tab or a row runs no app body and no canvas render. The list mutates
 // nothing: every gesture goes out through `onAction`. With no requests it
-// shows "No agent actions yet." and the `afterglow mcp --live` hint. Ids:
+// shows "No agent actions yet." and the `afterglow mcp --live` hint. While
+// an agent works (`work`, through AgentWorkWatch's linger) its request reads
+// as live: it opens once, its title shimmers, its step count ticks and each
+// new step eases in; when the work ends the shimmer fades into the plain row
+// in place. `liveRequest` is the rule for which row that is. Ids:
 // `suite.agent`, rows `suite.agent.row.<id>`, eyes `suite.agent.<id>.eye`.
 import SuiteKernel
 import SwiftUI
@@ -34,8 +38,10 @@ public struct AgentActivityList: View {
     private let timeZone: TimeZone
     private let showsEye: Bool
     private let undoHelp: String?
+    private let work: AgentWork
     private let onAction: @MainActor (AgentActivityAction) -> Void
     @State private var expanded: Set<String>
+    @Environment(\.suiteReduceMotion) private var reduceMotion
 
     public static let naming = LayerTreeNaming.app(
         LayerTreeIDs(container: "suite.agent", row: "suite.agent.row.", control: "suite.agent."))
@@ -44,13 +50,15 @@ public struct AgentActivityList: View {
 
     /// `layerNames` names each layer id (a gone layer shows its id); `hidden` holds the hidden layers' ids.
     /// `showsEye` false drops the eyes, for an app whose layers can't hide. `undoHelp` disables Undo Request
-    /// on every request with that reason, for an app that can't undo a request as one.
+    /// on every request with that reason, for an app that can't undo a request as one. `work` is the
+    /// document's AgentWork, which marks the request under way live.
     public init(requests: [AgentRequest], layerNames: [String: String], hidden: Set<String>,
                 expanded: Set<String> = [], timeZone: TimeZone = .current, showsEye: Bool = true,
-                undoHelp: String? = nil, onAction: @escaping @MainActor (AgentActivityAction) -> Void) {
+                undoHelp: String? = nil, work: AgentWork = AgentWork(),
+                onAction: @escaping @MainActor (AgentActivityAction) -> Void) {
         (self.requests, self.layerNames, self.hidden, self.timeZone, self.showsEye, self.onAction)
             = (requests, layerNames, hidden, timeZone, showsEye, onAction)
-        self.undoHelp = undoHelp
+        (self.undoHelp, self.work) = (undoHelp, work)
         _expanded = State(initialValue: expanded)
     }
 
@@ -59,14 +67,21 @@ public struct AgentActivityList: View {
             EmptyStateView(Self.emptyTitle, systemImage: "sparkles", message: Self.emptyHint)
                 .accessibilityIdentifier("suite.agent.empty")
         } else {
-            LayerTreeList(
-                rows: Self.rows(requests, expanded: expanded, names: layerNames, hidden: hidden),
-                childCount: { id in requests.first { $0.id == id }.map { $0.steps.count + $0.layers.count } ?? 0 },
-                naming: Self.naming, options: LayerTreeOptions(showsEye: showsEye, showsLock: false),
-                decorations: Self.decorations(requests, timeZone: timeZone),
-                onSelect: { onAction(.select(layers(of: $0))) },
-                contextActions: { menu(for: $0) },
-                onAction: handle)
+            AgentWorkWatch(work) { shown in
+                let live = Self.liveRequest(requests, shown: shown)
+                LayerTreeList(
+                    rows: Self.rows(requests, expanded: expanded, names: layerNames, hidden: hidden),
+                    childCount: { id in requests.first { $0.id == id }.map { $0.steps.count + $0.layers.count } ?? 0 },
+                    naming: Self.naming, options: LayerTreeOptions(showsEye: showsEye, showsLock: false),
+                    decorations: Self.decorations(requests, timeZone: timeZone, live: live),
+                    onSelect: { onAction(.select(layers(of: $0))) },
+                    contextActions: { menu(for: $0) },
+                    onAction: handle)
+                // A new step of the live request eases in and its count ticks; nothing moves otherwise.
+                .animation(SuiteMotion.state(reduceMotion: reduceMotion),
+                           value: requests.first { $0.id == live }?.steps.count ?? 0)
+                .onChange(of: live, initial: true) { _, id in if let id { expanded.insert(id) } }
+            }
         }
     }
 
@@ -102,6 +117,14 @@ public struct AgentActivityList: View {
         if let app { return app }
         if !newest { return "Undo the newer requests first." }
         return request.isSpan ? nil : "Only a named request (history.begin) can be undone as one."
+    }
+
+    /// The request under way while `shown` (AgentWorkWatch's work) is: the newest, when it is the shown span,
+    /// or outside a span when it holds the shown step; nil when idle.
+    nonisolated public static func liveRequest(_ requests: [AgentRequest], shown: AgentWork?) -> String? {
+        guard let shown, let newest = requests.first else { return nil }
+        if let title = shown.request { return newest.isSpan && newest.title == title ? newest.id : nil }
+        return !newest.isSpan && newest.steps.last?.id == shown.lastStep ? newest.id : nil
     }
 
     /// The layers row `id` stands for: a request's, a step's or the one layer.
@@ -144,14 +167,16 @@ public struct AgentActivityList: View {
                  inheritsLocked: false, holdsChildren: false, isExpanded: false)
     }
 
-    /// Each request row's caption ("claude · 2:14 PM · 3 steps") and each child's kind symbol.
-    nonisolated public static func decorations(_ requests: [AgentRequest], timeZone: TimeZone) -> [String: LayerRowDecoration] {
+    /// Each request row's caption ("claude · 2:14 PM · 3 steps") and each child's kind symbol; the `live`
+    /// request's row shimmers.
+    nonisolated public static func decorations(_ requests: [AgentRequest], timeZone: TimeZone,
+                                               live: String? = nil) -> [String: LayerRowDecoration] {
         var out: [String: LayerRowDecoration] = [:]
         var style = Date.FormatStyle(date: .omitted, time: .shortened)
         style.timeZone = timeZone
         for request in requests {
             out[request.id] = LayerRowDecoration(symbol: "sparkles", symbolLabel: "Agent request",
-                                                 caption: caption(request, style: style))
+                                                 caption: caption(request, style: style), live: request.id == live)
             for step in request.steps {
                 out[stepID(request, step)] = LayerRowDecoration(symbol: "arrow.turn.down.right", symbolLabel: "Step")
             }

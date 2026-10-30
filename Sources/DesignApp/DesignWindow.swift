@@ -104,6 +104,11 @@ struct DesignWindow: View, BodyCounted {
     /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
     // view-static: main-actor
     static var openExport: (@MainActor () -> Void)?
+    /// Reads the last started window's workspace and adopts one as a live command's result would
+    /// (`.adoptLive`); RenderBudgetDesignAgentWorkingTests drives agent steps through it (the off-screen
+    /// window never becomes active, so it never joins DesignShell.front).
+    // view-static: main-actor
+    static var liveAdopt: (read: @MainActor () -> DesignWorkspace, write: @MainActor (DesignWorkspace) -> Void)?
     #endif
 
     /// A window for `launch`; `seed` (tests) starts it on that workspace instead, and `live` is its drag box.
@@ -381,6 +386,7 @@ struct DesignWindow: View, BodyCounted {
         started = true
         #if DEBUG
         Self.openExport = { perform(.export) }
+        Self.liveAdopt = (read: { model }, write: { perform(.adoptLive($0)) })
         #endif
         if seeded {
             fitting = true
