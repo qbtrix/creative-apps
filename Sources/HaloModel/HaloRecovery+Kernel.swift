@@ -43,6 +43,9 @@ extension HaloProject: HistoryJumping {
         restore(history.jump(to: index, from: document))
         file.unsaved = history.isDirty
     }
+
+    /// Opens the request span `name` (nil closes it) on the kernel history.
+    public mutating func setHistoryRequest(_ name: String?) -> Bool { history.kernel.setRequest(name) }
 }
 
 extension HaloProject {

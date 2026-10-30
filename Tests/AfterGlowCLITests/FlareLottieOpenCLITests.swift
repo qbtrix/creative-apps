@@ -1,7 +1,8 @@
 // FlareLottieOpenCLITests.swift (lottie-open LO-3h, docs/blueprints/flare/features/lottie-open.md): the afterglow
 // CLI opens a Lottie .json as an untitled Flare animation. `flare open` reads it and names its layers, a command run
-// on it writes a .flare and leaves the JSON's bytes as they were, `--in-place` and an MCP save with no path refuse
-// rather than write a .flare over the JSON, a script's Lottie output is named .json (the extension Flare opens, not
+// on it writes a .flare and leaves the JSON's bytes as they were, a save of the native format to anything but a .flare
+// (`--in-place`, `--out <name>.json` with or without `--force`, `new`, an MCP save) refuses rather than write a .flare
+// into a .json, a script's Lottie output is named .json (the extension Flare opens, not
 // the format id) and opens again, and a file that isn't Lottie is refused. The bounce fixture is FlareModelTests'
 // hand-written one. In process, on a FakeIO; runs on Linux and macOS.
 import AfterGlowCLICore
@@ -56,6 +57,36 @@ import Testing
         #expect(code == CLI.Exit.usage, "in-place on a Lottie exited \(code)")
         #expect(io.files["copy.json"] == input, "a .flare was written over the JSON")
         #expect(io.stderr.joined().contains("--out"), "\(io.stderr)")
+    }
+
+    @Test func anOutThatIsNotFlareIsRefusedEvenWithForce() throws {
+        let input = try Self.bounce()
+        let io = FakeIO(files: ["copy.json": input])
+        let fresh = CLI.run(["flare", "animate.go-to-end", "--in", "copy.json", "--out", "copy-2.json"], io: io)
+        #expect(fresh == CLI.Exit.usage, "--out <name>.json exited \(fresh)")
+        #expect(io.files["copy-2.json"] == nil, "a .flare was written into a .json")
+        let over = CLI.run(["flare", "animate.go-to-end", "--in", "copy.json", "--out", "copy.json", "--force"], io: io)
+        #expect(over == CLI.Exit.usage, "--out <input>.json --force exited \(over)")
+        #expect(io.files["copy.json"] == input, "a .flare was written over the JSON")
+        #expect(io.stderr.joined().contains(".flare"), "\(io.stderr)")
+        let made = CLI.run(["flare", "new", "--out", "new.json"], io: io)
+        #expect(made == CLI.Exit.usage && io.files["new.json"] == nil, "new --out <name>.json exited \(made)")
+    }
+
+    @Test func anMCPSaveToAJSONPathIsRefused() throws {
+        let input = try Self.bounce()
+        let io = FakeIO(files: ["/tmp/mcp/bounce.json": input])
+        var sessions = MCPSessions(MCPOptions(apps: Apps.all, roots: ["/tmp/mcp"]), io: io)
+        let opened = sessions.call(.open(app: "flare"), .object(["path": .string("/tmp/mcp/bounce.json")]), now: 0)
+        guard case .object(let fields) = opened.structured, let doc = fields["doc"] else {
+            Issue.record("open failed: \(opened.text)")
+            return
+        }
+        let over = sessions.call(.save, .object(["doc": doc, "path": .string("/tmp/mcp/bounce.json"), "force": .bool(true)]), now: 0)
+        #expect(over.isError, "save wrote a .flare over the JSON: \(over.text)")
+        #expect(io.files["/tmp/mcp/bounce.json"] == input)
+        let saved = sessions.call(.save, .object(["doc": doc, "path": .string("/tmp/mcp/bounce.flare")]), now: 0)
+        #expect(!saved.isError, "a .flare save refused: \(saved.text)")
     }
 
     @Test func anMCPSaveWithNoPathNeverWritesTheJSON() throws {

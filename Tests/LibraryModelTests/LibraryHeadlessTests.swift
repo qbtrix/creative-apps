@@ -50,6 +50,41 @@ import Testing
         #expect(throws: CatalogError.self) { try doc.export("tiff", options: .object([:])) }
     }
 
+    /// Quality gate #5953: a failed export says what went wrong in plain words, never an enum dump.
+    @Test func failedExportSaysWhyInPlainWords() throws {
+        var doc = try LibraryHeadless.open(Self.input("import-rate-export"), name: "shoot.library")
+        let header = try #require(doc.images["images/meadow.png"]).prefix(33)
+        try doc.importImage(Data(header), name: "torn.png")
+        _ = try LibraryHeadless.catalog.run("edit.select", params: .object(["ids": .array([.string("torn")])]), on: &doc)
+        _ = try LibraryHeadless.catalog.run("metadata.pick", params: .object([:]), on: &doc)
+        #expect(throws: CatalogError.failed(id: "export.png", message: "Couldn't export torn: its image file is damaged.")) {
+            try doc.export("png", options: .object([:]))
+        }
+        #expect(LibraryHeadless.plainWords(LibraryError.renderFailed("the crop doesn't fit the photo"))
+            == "Couldn't render this photo: the crop doesn't fit the photo.")
+        #expect(LibraryHeadless.plainWords(CodecError.tooLarge("x")) == "its image is too large to write.")
+        #expect(!LibraryHeadless.plainWords(CancellationError()).contains("("))
+    }
+
+    /// A `.library` re-zipped with compression (Finder's Compress, `zip` without `-0`) holds deflated entries, which
+    /// core's stored-only `ZipStore` refuses: open says so in words, never the `compressedEntry(...)` case dump.
+    @Test func openingADeflatedLibrarySaysWhyInPlainWords() throws {
+        var bytes = [UInt8](try Self.input("import-rate-export"))
+        let central = try #require((0..<bytes.count - 3).first { i in bytes[i..<(i + 4)] == [0x50, 0x4B, 0x01, 0x02] })
+        bytes[central + 10] = 8  // the first entry's method: deflate
+        let name = String(decoding: bytes[(central + 46)..<(central + 46 + Int(bytes[central + 28]))], as: UTF8.self)
+        #expect(throws: CatalogError.failed(id: "open", message: "Couldn't open d.library: \(name) is compressed inside "
+            + "it, and Library reads only uncompressed .library files. Zip it again with no compression (zip -0).")) {
+            try LibraryHeadless.open(Data(bytes), name: "d.library")
+        }
+        #expect(throws: CatalogError.failed(id: "open", message: "x.library isn't a Library file.")) {
+            try LibraryHeadless.open(Data("not a zip".utf8), name: "x.library")
+        }
+        #expect(LibraryHeadless.openWords(CodecError.damaged("CRC of a"), name: "a.library")
+            == "a.library is damaged and can't be opened.")
+        #expect(!LibraryHeadless.openWords(CancellationError(), name: "a.library").contains("("))
+    }
+
     @Test func newAndSummary() throws {
         let doc = try LibraryHeadless.new(.object([:]))
         #expect(doc.library.items.isEmpty && doc.images.isEmpty)

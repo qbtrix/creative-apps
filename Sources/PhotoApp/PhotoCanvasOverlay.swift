@@ -1,7 +1,8 @@
 // PhotoCanvasOverlay.swift: what PhotoCanvas draws over the picture, inside
 // CanvasViewport's overlay at the canvas zoom: the selection's ants and an
 // area tool's outline in progress (SuiteUI's AreaAnts on the workspace's
-// `areaOutline` and `areaDraft`; `photo.canvas.selection`), a pending crop (CropOverlay.swift), Free
+// `areaOutline` and `areaDraft`; `photo.canvas.selection`; while an area or
+// Crop drag runs on the window's LiveDragLine, its copy's), a pending crop (CropOverlay.swift), Free
 // Transform's box (TransformOverlay.swift) and the brush cursor at `hover`
 // (SuiteUI's BrushCursorMark, the brush's size; `photo.canvas.brush-cursor`),
 // the Gradient tool's line while it drags (SuiteUI's PathMarks from the press
@@ -41,8 +42,10 @@ struct PhotoCanvasOverlay: View {
         (given, self.zoom, self.hover, self.perform, self.liveLine) = (model, zoom, hover, perform, liveLine)
     }
 
-    /// The window's workspace now, read through the `toolOptions` facet; the given one outside a window.
-    private var model: PhotoWorkspace { session?.workspace(reading: .toolOptions) ?? given }
+    /// The workspace the marks draw: the live drag line's copy while an area or Crop drag runs on it (its
+    /// selection in progress and crop box, #6020), else the window's, read through the `toolOptions` facet; the
+    /// given one outside a window.
+    private var model: PhotoWorkspace { liveLine?.shown ?? session?.workspace(reading: .toolOptions) ?? given }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -110,9 +113,9 @@ struct PhotoCanvasOverlay: View {
     /// The line a drag shows: the live copy's while one is live, else the workspace's.
     private var dragLine: (from: Mask.Point, to: Mask.Point)? { liveLine?.line ?? model.gradientDrag }
 
-    /// The Select tool's box while it drags, in canvas pixels: the live copy's while one is live, else the workspace's.
+    /// The Select tool's box while it drags, in canvas pixels, from `model` (the live copy while one is live).
     private var selectBox: CGRect? {
-        (liveLine?.box ?? model.selectBox).map { CGRect(x: $0.minX, y: $0.minY, width: $0.maxX - $0.minX, height: $0.maxY - $0.minY) }
+        model.selectBox.map { CGRect(x: $0.minX, y: $0.minY, width: $0.maxX - $0.minX, height: $0.maxY - $0.minY) }
     }
 
     /// The accessibility elements the overlay shows, in drawing order.

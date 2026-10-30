@@ -1,0 +1,4 @@
+[
+{"label": "batch delete keeps a track left with one key animated", "file": "Sources/HaloModel/Live/HaloKeyRules.swift", "find": "if left.count >= 2 { c.layers[i].tracks[p.rawValue] = left; continue }", "replace": "if left.count >= 1 { c.layers[i].tracks[p.rawValue] = left; continue }", "tests": "HaloKeyDeleteBatchTests"},
+{"label": "batch delete of a whole track keeps its last key, not its first", "file": "Sources/HaloModel/Live/HaloKeyRules.swift", "find": "let first = left.first ?? track.min { $0.frame < $1.frame }", "replace": "let first = left.first ?? track.max { $0.frame < $1.frame }", "tests": "HaloKeyDeleteBatchTests"}
+]

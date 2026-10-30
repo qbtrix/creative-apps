@@ -5,13 +5,14 @@ import Testing
 import SuiteKernel
 
 @Suite struct CommandFakeTests {
-    /// The six commands, undo and redo, the five file-flow commands, the eight fill commands, the two history commands, the nine stroke commands, the six transform commands, `color.sample`, the five place commands and the two shape commands, sorted, each with its kind and an example on the fixture.
+    /// The six commands, undo and redo, the five file-flow commands, the eight fill commands, the five history commands, the nine stroke commands, the six transform commands, `color.sample`, the five place commands and the two shape commands, sorted, each with its kind and an example on the fixture.
     @Test func fakeListsItsCommands() throws {
         let catalog = FakeCanvasDocument.catalog
         #expect(catalog.app == "fake")
         #expect(catalog.ids == ["color.sample", "doc.export-json", "edit.redo", "edit.undo", "file.clear-recent", "file.drop", "file.open-in",
                               "file.open-recent", "file.recent", "fill.angle", "fill.gradient", "fill.read", "fill.stop-add",
-                              "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.jump", "history.read",
+                              "fill.stop-color", "fill.stop-move", "fill.stop-remove", "fill.type", "history.begin", "history.end", "history.jump", "history.read",
+                              "history.undo-request",
                               "place.focus", "place.image", "place.read", "place.replace", "place.reset-size", "rect.add", "rect.list", "rect.move", "rect.remove", "rect.select",
                               "shape.draw", "stroke.add", "stroke.cap", "stroke.color", "stroke.dash", "stroke.join", "stroke.read", "stroke.remove", "stroke.trim", "stroke.width",
                               "tool.shape", "transform.flip", "transform.read", "transform.reset", "transform.rotate", "transform.scale", "transform.set"])
@@ -19,7 +20,7 @@ import SuiteKernel
         #expect(kinds == ["rect.add": .edit, "rect.move": .edit, "rect.remove": .edit, "rect.select": .view, "rect.list": .query,
                           "doc.export-json": .file, "edit.undo": .view, "edit.redo": .view, "file.recent": .query,
                           "file.open-recent": .file, "file.clear-recent": .view, "file.open-in": .file, "file.drop": .file, "fill.read": .query,
-                          "history.read": .query, "history.jump": .view, "stroke.read": .query, "color.sample": .query, "shape.draw": .edit, "tool.shape": .view]
+                          "history.read": .query, "history.jump": .view, "history.begin": .view, "history.end": .view, "history.undo-request": .view, "stroke.read": .query, "color.sample": .query, "shape.draw": .edit, "tool.shape": .view]
                           .merging(GradientCommands.specs(FakeCanvasDocument.self).filter { $0.id != "fill.read" }.map { ($0.id, .edit) }) { $1 }
                           .merging(StrokeCommands.specs(FakeCanvasDocument.self).filter { $0.id != "stroke.read" }.map { ($0.id, .edit) }) { $1 }
                           .merging(TransformCommands.specs(FakeCanvasDocument.self).map { ($0.id, $0.id == "transform.read" ? .query : .edit) }) { $1 }

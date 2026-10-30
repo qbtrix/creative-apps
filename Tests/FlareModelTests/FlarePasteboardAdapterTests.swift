@@ -125,7 +125,7 @@ private let logo = """
         FlarePasteboardAdapter(rasterizer: Echo()).paste(.vector(svg: logo, name: "logo"), into: &workspace)
         let added = layerNames(workspace).count - before.count
         let refusal = workspace.layerError?.message
-        #expect(refusal != PlaceRules.formatHelp, "the SVG reached place.image as a picture")
+        #expect(refusal != PlaceRules.formatHelp(for: [.svg]), "the SVG reached place.image as a picture")
         #expect(added == 2 || refusal?.contains("svg-place") == true,
                 "the paste neither added the logo's layers nor reached svg-place's place path: \(String(describing: refusal))")
     }
@@ -137,7 +137,7 @@ private let logo = """
         let png = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
         FlarePasteboardAdapter(rasterizer: Echo()).paste(.image(png: png, pixelWidth: 1, pixelHeight: 1), into: &workspace)
         #expect(layerNames(workspace) == before)
-        #expect(workspace.layerError?.message == PlaceRules.formatHelp)
+        #expect(workspace.layerError?.message == PlaceRules.formatHelp(for: [.svg]))
     }
 
     /// Copy As in the catalog: SVG is the playhead's frame, own is Edit > Copy's bytes, PNG refuses without a window.

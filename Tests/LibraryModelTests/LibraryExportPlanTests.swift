@@ -1,7 +1,7 @@
 // LibraryExportPlanTests.swift: EX-2, the live exporter. The plan fits the
 // long edge and never enlarges; render decodes at full size, develops with
-// the photo's settings, resizes to the plan, draws samples without a decode
-// and passes decode errors through. EX-14: a cropped photo plans at its crop.
+// the photo's settings on the source shrunk to the smallest size whose crop
+// covers the plan, resizes to exactly the plan, draws samples without a decode and passes decode errors through. EX-14: a cropped photo plans at its crop.
 import CoreColor
 import CoreRaster
 import Foundation
@@ -29,13 +29,15 @@ private actor FlatDecoder: PhotoDecoding {
     }
 }
 
-/// Records the settings it renders with and hands the buffer back.
+/// Records the settings and buffer sizes it renders with and hands the buffer back.
 private final class DevelopSpy: DevelopRendering, @unchecked Sendable {
     private let lock = NSLock()
     private var seen: [DevelopSettings] = []
+    private var shapes: [PixelSize] = []
     var settings: [DevelopSettings] { lock.withLock { seen } }
+    var sizes: [PixelSize] { lock.withLock { shapes } }
     func render(_ buffer: PixelBuffer, settings: DevelopSettings) throws -> PixelBuffer {
-        lock.withLock { seen.append(settings) }
+        lock.withLock { seen.append(settings); shapes.append(PixelSize(width: buffer.width, height: buffer.height)) }
         return buffer
     }
     func histogram(of buffer: PixelBuffer) throws -> HistogramBins { .empty }
@@ -107,6 +109,51 @@ private func photo(_ id: String, _ size: PixelSize, file: Bool = true,
         #expect(image.rgba8.count == 100 * 75 * 4)
         #expect(await decoder.asked == [nil])
         #expect(spy.settings == [settings])
+    }
+
+    /// Quality gate #5953: develop runs on the export's pixels, shrunk before develop by the crop's scale.
+    @Test func developRunsOnTheExportsPixelsNotTheCameras() async throws {
+        let full = PixelSize(width: 600, height: 400)
+        let spy = DevelopSpy()
+        let exporter = LiveExporter(decoder: FlatDecoder(size: full), develop: spy)
+        let plain = photo("a", full)
+        let item = try #require(exporter.plan([plain], options: ExportOptions(longEdge: 200, folder: "/out"),
+                                              existingNames: []).items.first)
+        #expect(try await exporter.render(item, photo: plain).size == PixelSize(width: 200, height: 133))
+        #expect(spy.sizes == [PixelSize(width: 200, height: 133)])
+        // A square crop plans at 400 px, so the 600 px source shrinks by 200/400, not 200/600.
+        let square = try LiveCrop().initial(aspect: .square, angle: 0, photo: full)
+        let cropped = photo("b", full, develop: DevelopSettings.neutral.setting(crop: square))
+        let cut = try #require(exporter.plan([cropped], options: ExportOptions(longEdge: 200, folder: "/out"),
+                                             existingNames: []).items.first)
+        _ = try await exporter.render(cut, photo: cropped)
+        #expect(cut.size == PixelSize(width: 200, height: 200))
+        #expect(spy.sizes.last == PixelSize(width: 300, height: 200))
+    }
+
+    /// #6043: a cropped photo (3:2, straightened 2°) shrinks to the smallest size whose crop covers the plan,
+    /// and the export is the plan's size exactly. The crop rounds on the shrunk grid, so the plan's scale alone
+    /// falls short (1022 × 682 for 1024 × 683 on 1440 × 1080). 1600 × 1200 at 512 grows an odd 5 px past the
+    /// plan's scale (538 to 543), so a shrink that steps 2 px lands on 544, not the smallest.
+    @Test(arguments: [(1440, 1080, 1024, nil), (1600, 1200, 512, 543)] as [(Int, Int, Int, Int?)])
+    func aCroppedShrinkIsTheSmallestWhoseCropCoversThePlan(_ width: Int, _ height: Int, _ edge: Int,
+                                                           _ side: Int?) async throws {
+        let full = PixelSize(width: width, height: height)
+        let crop = try LiveCrop().initial(aspect: .threeTwo, angle: 2, photo: full)
+        let spy = DevelopSpy()
+        let exporter = LiveExporter(decoder: FlatDecoder(size: full), develop: spy)
+        let shot = photo("c", full, develop: DevelopSettings.neutral.setting(crop: crop))
+        let item = try #require(exporter.plan([shot], options: ExportOptions(longEdge: edge, folder: "/out"),
+                                              existingNames: []).items.first)
+        #expect(item.size.longSide == edge)
+        #expect(try await exporter.render(item, photo: shot).size == item.size)
+        let shrunk = try #require(spy.sizes.last)
+        let cut = try LiveCrop().frame(crop, photo: shrunk)
+        #expect(cut.width >= item.size.width && cut.height >= item.size.height,
+                "the crop of \(shrunk) is \(cut.width) × \(cut.height), short of \(item.size)")
+        let less = try LiveCrop().frame(crop, photo: full.fitting(longSide: shrunk.longSide - 1))
+        #expect(less.width < item.size.width || less.height < item.size.height, "\(shrunk) isn't the smallest that covers")
+        if let side { #expect(shrunk.longSide == side) }
     }
 
     @Test func sampleRendersFromSampleImageWithNoDecode() async throws {
