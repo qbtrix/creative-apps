@@ -8,7 +8,9 @@
 // the decode back unchanged; develop only takes the histogram. On the GPU
 // route (`gpuFrame`, suite-imaging IM-11) the view draws the decoded base
 // through `LiveDevelop.program` itself, so a frame runs no CPU pixel pass: a
-// slider step costs a cache hit. Its histogram comes after, from `histogram`
+// slider step costs a cache hit. The route check validates each program
+// operation once (`onGPU`): core checks operations one by one, so a slider
+// step re-checks only the operation it moved. Its histogram comes after, from `histogram`
 // (the preview decode developed on the CPU, outside the actor, so a running
 // histogram never holds up the next frame).
 #if canImport(FoundationEssentials)
@@ -46,6 +48,9 @@ public actor LiveLoupeImaging: LoupeImaging {
     /// Least recently used first; at most `cachedPhotos`.
     private var order: [String] = []
     private var cache: [String: Decodes] = [:]
+    /// Operations core's display program takes, newest last; at most `knownOperations`.
+    private var gpuOperations: [ToneProgram.Operation] = []
+    static let knownOperations = 64
 
     public init(decoder: any PhotoDecoding, develop: any DevelopRendering) {
         self.decoder = decoder; self.develop = develop
@@ -88,7 +93,7 @@ public actor LiveLoupeImaging: LoupeImaging {
             if let why = LiveDevelop.waiting[slider] { throw LibraryError.renderFailed(why) }
         }
         let program = LiveDevelop.program(for: settings)
-        guard ImagingRoute.choose(preferGPU: preferGPU, program: program) == .gpu else { return nil }
+        guard preferGPU, Self.onGPU(program, known: &gpuOperations) else { return nil }
         return LoupeGPUFrame(base: try await decoded(photo, longSide: longSide, quality: .full), program: program)
     }
 
@@ -105,6 +110,17 @@ public actor LiveLoupeImaging: LoupeImaging {
         } catch {
             throw LibraryError.renderFailed("the histogram couldn't be taken")
         }
+    }
+
+    /// `ImagingRoute.choose(preferGPU: true, program:)`, asking only about operations not in `known`
+    /// (core's `ToneProgram` validates each operation alone); the ones it takes join `known`.
+    static func onGPU(_ program: [ToneProgram.Operation], known: inout [ToneProgram.Operation]) -> Bool {
+        for operation in program where !known.contains(operation) {
+            guard ImagingRoute.choose(preferGPU: true, program: [operation]) == .gpu else { return false }
+            known.append(operation)
+            if known.count > knownOperations { known.removeFirst() }
+        }
+        return true
     }
 
     public func prefetch(_ photos: [PhotoItem], longSide: Int) async {
