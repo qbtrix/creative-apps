@@ -470,3 +470,4 @@ utc	stage	event	ref	note
 2026-10-30T17:51Z	check-in	#5353 open (clean), PX-9 waits. dev green, no new dev-red. No new merges, no new findings (53 Photo open).
 2026-10-30T18:23Z	check-in	#5353 open (clean), PX-9 waits. dev green, no new dev-red. No merges. New finding #6108 (tile render not cancelled on window close): canvas render, not export or text, skipped (54 Photo open).
 2026-10-30T18:55Z	check-in	#5353 open (clean), PX-9 waits. New dev-red #6109 (18:34, macos; range #6091 suiteui, #6105 library; lane flake re-run at 3d4c647): not this lead's, not fixed here. No merges, no new findings (54 Photo open).
+2026-10-30T19:27Z	check-in	#5353 open (clean), PX-9 waits. dev-red #6109 still open (macos; flake re-run pending, no verdict): not this lead's. No merges, no new findings (54 Photo open).
