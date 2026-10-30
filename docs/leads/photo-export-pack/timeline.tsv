@@ -468,3 +468,4 @@ utc	stage	event	ref	note
 2026-10-30T16:46Z	check-in	#5353 open (clean), PX-9 waits. dev green, no new dev-red. No merges, no new findings (53 Photo open).
 2026-10-30T17:19Z	check-in	#5353 open (clean), PX-9 waits. dev green, no new dev-red. Merged: #6105 (library test), #6091 (suiteui), not Photo. No new findings (53 Photo open).
 2026-10-30T17:51Z	check-in	#5353 open (clean), PX-9 waits. dev green, no new dev-red. No new merges, no new findings (53 Photo open).
+2026-10-30T18:23Z	check-in	#5353 open (clean), PX-9 waits. dev green, no new dev-red. No merges. New finding #6108 (tile render not cancelled on window close): canvas render, not export or text, skipped (54 Photo open).
