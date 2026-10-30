@@ -6,7 +6,9 @@
 // edit acts at the frame on screen; stop lands nil, the rest pose; play once ending lands its last frame. A
 // timeline scrub shows its frame the same way and lands it once the drag rests (`scrub`).
 // A reference type, so the window's body reads nothing that a tick changes. The link comes from the
-// `designRefreshLink` environment: the screen's display link, or one a test fires by hand.
+// `designRefreshLink` environment (the screen's display link, or one a test fires by hand), which
+// DesignWindow's RefreshLinkHandoff sets as `makeLink` once it appears: the window body never reads that
+// closure, since SwiftUI can't compare closures and every environment change (a sheet opening) would re-run it.
 import DesignModel
 import SuiteKernel
 import SuiteUI
@@ -19,14 +21,15 @@ import SwiftUI
     /// A scrub's frame until it lands as the playhead.
     private var scrubbed: Int?
     private var settle: Task<Void, Never>?
+    /// The window's `designRefreshLink`, set by DesignWindow's RefreshLinkHandoff once it appears.
+    var makeLink: SuitePlaybackDriver.LinkMaker = SuiteScreenLink.make
 
     var isPlaying: Bool { transport.isPlaying }
     /// Playing, or a scrub not landed yet: an edit lands the frame first.
     var isActive: Bool { transport.isPlaying || scrubbed != nil }
 
     /// Plays `model` from its playhead on `live`'s canvas; `ended` gets the frame when play once ends.
-    func play(_ model: DesignWorkspace, live: DesignLiveDrag, makeLink: @escaping SuitePlaybackDriver.LinkMaker,
-              ended: @escaping @MainActor (Int?) -> Void) {
+    func play(_ model: DesignWorkspace, live: DesignLiveDrag, ended: @escaping @MainActor (Int?) -> Void) {
         driver?.stop()
         let time = model.time
         transport.loops = live.playLoops
