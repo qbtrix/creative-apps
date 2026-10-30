@@ -1,0 +1,4 @@
+[
+{"label": "Return in the hex field keeps the keys", "file": "Sources/SuiteUI/ColorWell.swift", "find": "                    isTyping = false\n", "replace": "", "tests": "ColorRowReturnTests"},
+{"label": "Return in the hex field leaves without committing", "file": "Sources/SuiteUI/ColorWell.swift", "find": "                    commit()\n                    isTyping = false\n", "replace": "                    draft = nil\n                    isTyping = false\n", "tests": "ColorRowReturnTests"}
+]
