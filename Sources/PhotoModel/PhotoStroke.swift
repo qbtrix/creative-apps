@@ -355,13 +355,21 @@ extension PhotoWorkspace {
         return PixelRect(from: a, to: b).intersection(canvas.rect)
     }
 
-    /// The draft a Select move runs on: the one picked image layer's whole
-    /// bounds, when the compositor can lift it (`liftKey`). Nil for several
-    /// picked layers, a text layer or a layer the lift can't draw (one under a
+    /// The draft a Select move runs on: the one picked image layer's painted
+    /// pixels, as Free Transform's box is, so a sparse layer lifts only what it
+    /// shows (a stroke on a 24 MP layer lifts the stroke, not 96 MB), when the
+    /// compositor can lift it (`liftKey`). Nil for several picked layers, a
+    /// text or clear layer, or a layer the lift can't draw (one under a
     /// visible layer, masked, styled, blended): those move by offsets.
+    /// ponytail: `movePrepared` reads this on every canvas show; clear tiles
+    /// that share no buffer are each read in full (`paintedBounds`), cache the
+    /// box per layer revision if that shows up.
     private func moveDraft() -> TransformDraft? {
         let targets = movableSelectedLayers
-        guard targets.count == 1, let at = targets.first, let box = bounds(of: layers[at]) else { return nil }
+        guard targets.count == 1, let at = targets.first, let tiles = pixels[layers[at].id],
+            let painted = try? tiles.paintedBounds()
+        else { return nil }
+        let box = painted.offsetBy(layers[at].offsetX, layers[at].offsetY)
         var probe = self
         probe.transformDraft = TransformDraft(layerID: layers[at].id, box: box)
         return probe.liftKey == nil ? nil : probe.transformDraft

@@ -165,11 +165,19 @@ extension BodyCountSuites {
         /// Every resample of Free Transform's layer in the process so far (debug only).
         static func resamples() -> Int { PhotoRenderCount.resamples.withLock { $0 } }
 
-        /// Waits up to 60 s for the window's canvas renders and its live-layer pixels to finish.
+        /// Waits up to 60 s of wall clock for the window's canvas renders and its live-layer pixels to finish;
+        /// past that it prints what is still busy and goes on, so a slow runner shows the cause, not a time limit.
         static func idle<V: View>(_ w: RenderBudgetWindow<V>) async throws {
             // This window's renderer only: windows of suites running alongside keep the process-wide count busy.
             let renderer = canvas(in: w.host).flatMap(CanvasRenderer.rendering(into:))
-            for _ in 0..<3000 where renderer?.isSettled == false || (renderer == nil && CanvasRenderer.inFlight != 0) {
+            let deadline = ContinuousClock.now + .seconds(60)
+            while renderer?.isSettled == false || (renderer == nil && CanvasRenderer.inFlight != 0) {
+                guard ContinuousClock.now < deadline else {
+                    let busy = renderer == nil ? "\(CanvasRenderer.inFlight) renders in the process"
+                        : renderer?.isIdle == false ? "a canvas render" : "the live layer's pixels (a lift sprite)"
+                    print("RENDER-BUDGET idle: still busy after 60 s: \(busy)")
+                    break
+                }
                 try await Task.sleep(for: .milliseconds(20))
             }
             try await w.settle(100)

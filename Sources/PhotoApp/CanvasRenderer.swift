@@ -323,8 +323,8 @@ final class CanvasRenderer {
     /// Makes the live layer's pixels for `shown`'s draft off the main thread when its Free Transform first
     /// shows, or for the draft a Select move of the picks begins, so the first drag only renders the picture
     /// under them; drops them once neither is up.
-    /// ponytail: the Select tool holds one RGBA copy of its layer while it is up (96 MB at 24 MP); drop it on an
-    /// idle timer if memory matters.
+    /// ponytail: the Select tool holds one RGBA copy of its layer's painted pixels while it is up (96 MB for a
+    /// full 24 MP layer); drop it on an idle timer if memory matters.
     private func prepareSprite(for shown: PhotoWorkspace) {
         let workspace = shown.movePrepared ?? shown
         guard let wanted = workspace.liftSprite else {
