@@ -3,15 +3,19 @@
 // SuiteDocumentHost the shell hands every hand-off to, and the FileFlowTarget
 // the shared Open Recent, Clear Menu, Open In and drop commands run on.
 // It accepts open, new and place hand-offs, places dropped images as layers
-// in one "Place" step, leaves what only the window can do as
-// `PhotoFileRequest`s, and turns the old saved recents into refs for PF-2's one-time import.
-// Linux-safe.
+// in one "Place" step, each fitted inside the canvas (never upscaled) and
+// centred, leaves what only the window can do as `PhotoFileRequest`s, and
+// turns the old saved recents into refs for the window's one-time import. A
+// drop takes exactly the extensions the workspace's codec reads. The window
+// reads dropped files from disk; the headless document reads only the bytes
+// its host handed over (`receiveDropped`). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
 import SuiteKernel
 import SuiteModel
 
@@ -31,6 +35,8 @@ public struct PhotoFileFlowState: Sendable {
     public internal(set) var documentPath: String?
     /// What the window still has to do (oldest first), who reads each type, and the codec a placed image is read with.
     var requests: [PhotoFileRequest] = [], registry = SuiteTypeRegistry.standard, codec: any PhotoImageCodec = CoreRasterImageCodec()
+    /// Dropped files' bytes by path, handed over by a host with no shared disk; nil reads the disk (the window).
+    var dropped: [String: Data]?
     public init() {}
 }
 
@@ -55,8 +61,8 @@ extension PhotoWorkspace: FileFlowTarget {
 
     public var hasDocument: Bool { canvas != nil }
 
-    /// The image types Photo takes into an open document as a layer.
-    public var placesExtensions: Set<String> { ["png", "jpg", "jpeg", "heic", "tiff", "psd"] }
+    /// The image types Photo takes into an open document as a layer: the ones its codec reads.
+    public var placesExtensions: Set<String> { fileFlow.codec.readExtensions }
 
     public var openInApps: [String] {
         guard canvas != nil, let name = fileFlow.documentPath ?? documentName else { return [] }
@@ -106,16 +112,24 @@ extension PhotoWorkspace: FileFlowTarget {
     }
 
     /// Reads every image to place first, so a bad file changes nothing; then one "Place" step adds a layer per
-    /// image, named after its file and centred on the canvas. Opens and hand-offs become requests; a refusal
-    /// shows on the status line.
+    /// image, named after its file, fitted inside the canvas and centred; "Placed at <n>%." shows when one was
+    /// scaled down. Opens and hand-offs become requests; a refusal shows on the status line.
     public mutating func perform(_ actions: [DropAction]) throws {
         let placing = actions.compactMap { action -> String? in if case .place(let path) = action { path } else { nil } }
-        var placed: [(name: String, tiles: TiledPixels)] = []
+        var placed: [(name: String, tiles: TiledPixels)] = [], percent: Int?
         for path in placing {
             let name = path.split(separator: "/").last.map(String.init) ?? path
             do {
-                let image = try fileFlow.codec.decode(Data(contentsOf: URL(fileURLWithPath: path)), longestSide: nil)
-                placed.append((Self.stem(name), try Self.pastedPixels(image).0))
+                let data: Data
+                if let dropped = fileFlow.dropped {
+                    guard let bytes = dropped[path] else { throw CatalogError.failed(id: "file.drop", message: path) }
+                    data = bytes
+                } else {
+                    data = try Data(contentsOf: URL(fileURLWithPath: path))
+                }
+                let fitted = try droppedPixels(data)
+                placed.append((Self.stem(name), fitted.tiles))
+                percent = fitted.percent ?? percent
             } catch {
                 throw CatalogError.failed(id: "file.drop", message: "Can't place \(name).")
             }
@@ -131,6 +145,7 @@ extension PhotoWorkspace: FileFlowTarget {
                 if let at = index(of: id) { (layers[at].offsetX, layers[at].offsetY) = (rect.x, rect.y) }
                 selectedLayerID = id
             }
+            statusMessage = percent.map { "Placed at \($0)%." }
             touch(.all)
         }
         for action in actions {
@@ -141,6 +156,33 @@ extension PhotoWorkspace: FileFlowTarget {
             case .place: continue
             }
         }
+    }
+
+    /// Hands the next drops their files' bytes by path; from then on a drop never reads the disk.
+    public mutating func receiveDropped(_ files: [String: Data]) {
+        fileFlow.dropped = (fileFlow.dropped ?? [:]).merging(files) { $1 }
+    }
+
+    /// A dropped file's pixels, fitted inside the canvas by contain and never upscaled (`PlaceRules.fitted`), and
+    /// the percent it was scaled to when smaller. A PNG or JPEG is read straight at the fitted size from its header's
+    /// size; another file is read whole, then resampled down.
+    func droppedPixels(_ data: Data) throws -> (tiles: TiledPixels, percent: Int?) {
+        let codec = fileFlow.codec
+        var whole: DecodedImage?
+        let natural: Size
+        if let size = SuiteImaging.rasterSize(of: data) { natural = size } else {
+            let image = try codec.decode(data, longestSide: nil)
+            (whole, natural) = (image, Size(width: Double(image.width), height: Double(image.height)))
+        }
+        let box = PlaceRules.fitted(natural: natural, in: placeCanvas, at: nil)
+        let width = max(Int(box.width.rounded()), 1), height = max(Int(box.height.rounded()), 1)
+        guard Double(width) < natural.width.rounded() || Double(height) < natural.height.rounded() else {
+            return (try Self.decoded(whole ?? codec.decode(data, longestSide: nil)), nil)
+        }
+        let percent = Int((box.width / max(natural.width, 1) * 100).rounded())
+        guard let whole else { return (try Self.placedPixels(data, codec: codec, width: width, height: height, scaled: true), percent) }
+        let buffer = try PixelBuffer(rgba8: whole.rgba8, width: whole.width, height: whole.height)
+        return (TiledPixels(try buffer.resized(width: width, height: height, filter: .lanczos3)), percent)
     }
 
     /// The open image as the suite names it, for File > Open In ▸: nil with no image, before it has a path on disk,

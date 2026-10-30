@@ -82,6 +82,8 @@ struct PhotoStroke: Sendable, Equatable {
     var before: [Int: PixelBuffer] = [:]
     var coverage: [Int: [Float]] = [:]
     var samples: [StrokeSample] = []
+    /// Brush and eraser: the undo step's name when a command, not a drag, made the stroke ("Brush Stroke").
+    var stepName: String?
     /// Move: the layer list before the drag.
     var layersBefore: [PhotoLayer] = []
     /// Marquee: the modifier keys `selectionDrag` saw last (Shift adds,
@@ -245,12 +247,18 @@ extension PhotoWorkspace {
         return (stroke.start, end)
     }
 
-    /// Whether the drag under way only moves a line over the canvas until its
-    /// release draws (the Gradient tool's, and Remove's outline), so the window can keep its later
-    /// samples off the workspace the panels read.
+    /// Whether the drag under way only moves an overlay mark over the canvas until its release
+    /// (the Gradient tool's line, Remove's outline, and the area and Crop tools' selection or crop
+    /// box), so the window can keep its samples off the workspace the panels read. An area or Crop
+    /// tool's whole gesture, the press too, changes nothing the panels show until the release lands
+    /// its one step, so it is true for those tools before the press (#6020).
     public var dragShowsLineOnly: Bool {
         (stroke?.tool == .gradient && transformDraft == nil) || stroke?.tool == .remove
+            || (transformDraft == nil && Self.overlayDragTools.contains(tool))
     }
+
+    /// The tools whose drag draws a selection or a crop box: the area tools and Crop.
+    static let overlayDragTools: Set<PhotoTool> = [.marquee, .ellipse, .lasso, .polygon, .wand, .crop]
 
     /// Becomes `live`: a copy of this workspace a stroke drew on
     /// (`dragPaintsOnly`). Ignored when `live` is another image (another
@@ -280,7 +288,7 @@ extension PhotoWorkspace {
         case .brush, .eraser:
             paint(&done, adding: nil, pressure: 1)
             guard let id = done.layerID, !done.before.isEmpty else { return }
-            record(.tiles(layer: id, done.before), named: done.tool == .brush ? "Paint" : "Erase")
+            record(.tiles(layer: id, done.before), named: done.stepName ?? (done.tool == .brush ? "Paint" : "Erase"))
         case .clone:
             guard let id = done.layerID, !done.before.isEmpty else { return }
             record(.tiles(layer: id, done.before), named: "Clone")

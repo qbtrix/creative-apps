@@ -2,19 +2,33 @@
 // codecs, for the headless document and Linux. Pixels cross as CoreRaster's premultiplied linear PixelBuffer, as
 // core's codecs take them. Until core's PNG lands (IC-4/IC-5 at the pinned commit) a PNG falls back to the small
 // reader and writer here (W3C PNG: 8-bit RGB or RGBA, no interlace, the five filters; zlib through core's
-// Deflate and Inflate); JPEG refuses with core's reason until IC-jpeg. Linux-safe.
+// Deflate and Inflate); JPEG refuses with core's reason until IC-jpeg. Any other file (HEIC, TIFF, a PSD's composite)
+// goes to SuiteImaging's SystemImageDecoder, which reads them on macOS and nothing on Linux; `readExtensions` says
+// which this platform reads. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 import CoreRaster
+import SuiteImaging
+import SuiteModel
 
-/// PNG and JPEG through CoreRaster.
+/// PNG and JPEG through CoreRaster; HEIC, TIFF and PSD through the system on macOS.
 public struct CoreRasterImageCodec: PhotoImageCodec {
     public init() {}
 
+    /// The files CoreRaster reads itself.
+    static let rasterExtensions = SuiteImageFormat.png.extensions
+        + SuiteImageFormat.jpeg.extensions
+
+    public var readExtensions: Set<String> { Set(Self.rasterExtensions).union(SystemImageDecoder.extensions) }
+
     public func decode(_ data: Data, longestSide: Int?) throws -> DecodedImage {
+        if !data.starts(with: Self.signature), !data.starts(with: [0xFF, 0xD8, 0xFF]),
+           let image = SystemImageDecoder.decode(data, longestSide: longestSide) {
+            return DecodedImage(rgba8: image.rgba8, width: image.width, height: image.height)
+        }
         var buffer = try Self.read(data)
         let longest = max(buffer.width, buffer.height)
         if let side = longestSide, side > 0, longest > side {

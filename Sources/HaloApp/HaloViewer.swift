@@ -2,7 +2,7 @@
 // button (HaloShapeTool, shape-tools HS-2) at its top trailing corner and the
 // History panel (HaloHistoryOverlay) at its bottom trailing one, the Model's
 // `viewerNotice` captioned under it while layers can't be drawn, a status bar
-// with HaloTransport and the History button beside it, HaloTimelineView and a refusal's caption, or the empty
+// with HaloTransportAdapter and the History button beside it, HaloTimelineView and a refusal's caption, or the empty
 // state. The status bar's tooltips (HaloStatusText) say what the timecode's
 // four parts count and that the pills are zoom and pixel size. A narrow
 // column takes HaloStatusRow's shapes in turn: it drops the layer count,
@@ -119,7 +119,7 @@ struct HaloViewer: View {
             statusBar(comp, artboard: artboard, row)
         } else {
             HStack(spacing: 0) {
-                HaloTransport(model: model, perform: perform)
+                HaloTransportAdapter(model: model, perform: perform)
                 if row.history { HaloHistoryControl() }
                 statusBar(comp, artboard: artboard, row)
             }
@@ -151,7 +151,7 @@ struct HaloViewer: View {
             }
             if row.layers { Text(comp.layerSummary).help("Layers in this composition.") }
             if row.transportInBar {
-                HaloTransport(model: model, perform: perform)
+                HaloTransportAdapter(model: model, perform: perform)
                 if row.history { HaloHistoryControl() }
             }
         }

@@ -67,6 +67,16 @@ import Testing
         }
     }
 
+    /// A refusal reaches the CLI and MCP in words: Selection with nothing selected says "Select a layer first.",
+    /// not the refusal's case name.
+    @Test func aRefusalFailsInWords() {
+        var w = DesignFixtures.cards
+        let params = JSONValue.object(["format": .string("pdf"), "scale": .number(1), "scope": .string("selection")])
+        #expect(throws: CatalogError.failed(id: "file.export", message: "Select a layer first.")) {
+            _ = try DesignWorkspace.catalog.run("file.export", params: params, on: &w)
+        }
+    }
+
     /// Zoom to Selection reports the rect it would show: the selection's framing.
     @Test func zoomToSelectionReportsItsRect() throws {
         var w = Self.oneLayer

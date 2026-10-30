@@ -2,98 +2,112 @@
   {
     "test": "HaloJourneyTests/HaloFilesJourneyTests/testSaveAndReopen",
     "owner": "#1262",
-    "reason": "H-J10 step 5 opens the 2,000-layer fixture: the UI query times out (HaloJourneyTests+Files.swift:107) because every layer row is in the accessibility tree, and in run 38835566584 the opening screen adds 2 contrast hits. #1262 says it stays red until the layer list and timeline rows go lazy. Steps 1 to 4 pass. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31"
+    "reason": "H-J10 step 5 opens the 2,000-layer fixture: the UI query times out (HaloJourneyTests+Files.swift:107) because every layer row is in the accessibility tree, and in run 38835566584 the opening screen adds 2 contrast hits. #1262 says it stays red until the layer list and timeline rows go lazy. Steps 1 to 4 pass. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02"
   },
   {
     "test": "HaloJourneyTests/HaloJourneyTests/testDragLayerToKeyPosition",
     "owner": "#1283",
-    "reason": "H-J5: a 100 px drag on Ball in the viewer leaves Position X at 560, not 660 (HaloJourneyTests+Drag.swift:49, scoped run 38857364213 on the tree dev holds now). The press doesn't reach HaloViewerGestures under XCUITest; #1283 is open on it. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31",
+    "reason": "H-J5: a 100 px drag on Ball in the viewer leaves Position X at 560, not 660 (HaloJourneyTests+Drag.swift:49, scoped run 38857364213 on the tree dev holds now). The press doesn't reach HaloViewerGestures under XCUITest; #1283 is open on it. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02",
     "scope": "full"
   },
   {
     "test": "HaloJourneyTests/HaloJourneyTests/testEveryControlActsOrSaysWhy",
     "owner": "#3318",
-    "reason": "H-J13: the History panel covers its own button and the timeline end, so the playhead pill reads 1.00:1 (run 40263528127); fix needs the lead's layout call (#3318). Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31",
+    "reason": "H-J13: the History panel covers its own button and the timeline end, so the playhead pill reads 1.00:1 (run 40263528127); fix needs the lead's layout call (#3318). Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02",
     "scope": "full"
   },
   {
     "test": "PhotoJourneyTests/PhotoEditJourneyTests/testCopyPasteAsNewLayer",
     "owner": "#1520",
-    "reason": "PJ-5: Edit > Paste's reason read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since (the brush test stops them), so it is unproven; the scoped photo run decides. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31",
+    "reason": "PJ-5: Edit > Paste's reason read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since (the brush test stops them), so it is unproven; the scoped photo run decides. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02",
     "scope": "full"
   },
   {
     "test": "PhotoJourneyTests/PhotoEditJourneyTests/testPasteFromAnotherApp",
     "owner": "#1520",
-    "reason": "PJ-6: the pasted 200 x 100 layer's place read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31",
+    "reason": "PJ-6: the pasted 200 x 100 layer's place read failed in full run 38841439320, the last that reached the journeys. #1281 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02",
     "scope": "full"
   },
   {
     "test": "PhotoJourneyTests/PhotoLayerOpsJourneyTests/testDuplicateMergeAndFlatten",
     "owner": "#1520",
-    "reason": "PJ-7: Layer > Merge Down's reason read failed in full run 38841439320, the last that reached the journeys. #1284 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31",
+    "reason": "PJ-7: Layer > Merge Down's reason read failed in full run 38841439320, the last that reached the journeys. #1284 changed the read after that run and no run has reached Photo's journeys since, so it is unproven; the scoped photo run decides. Renewed 10-27 to 10-29: owner still open, beta quality audit in progress. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02",
     "scope": "full"
   },
   {
     "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryTests/rotateInLoupe",
     "owner": "#5807",
-    "reason": "Dev macOS shard 1/3 (run 40357785665) reads 3 bodies against a budget of 2 since the heavy tests moved into one heavy-pass process (#5781). #5807 finds the third body. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31"
+    "reason": "Dev macOS shard 1/3 (run 40357785665) reads 3 bodies against a budget of 2 since the heavy tests moved into one heavy-pass process (#5781). #5807 finds the third body. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02"
   },
   {
     "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetLibraryLevelsTests/bodies",
     "owner": "#5924",
-    "reason": "121 window bodies against 120 on dev macOS under load (runs 40394212348, 40564904343), then the process died in it; #5924 owns the fix (split Library's window state). Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31"
+    "reason": "121 window bodies against 120 on dev macOS under load (runs 40394212348, 40564904343), then the process died in it; #5924 owns the fix (split Library's window state). Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02"
   },
   {
     "test": "AppSnapshotTests.BodyCountSuites/SuiteTimelineScrubWindowTests/aScrubRedrawsOnlyThePlayhead",
     "owner": "#5804",
-    "reason": "The test counts its own window and still sees about 18,000 lane redraws per scrub on CI (run 40661826310); #5804 owns the lane re-render. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31"
+    "reason": "The test counts its own window and still sees about 18,000 lane redraws per scrub on CI (run 40661826310); #5804 owns the lane re-render. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02"
   },
   {
     "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoRapidRotateTests/rapidRotationsThenReturnApplyOneCommit",
     "owner": "#5978",
-    "reason": "Fails on hasLiveLayer after rapid rotations on CI (run 40661826310), not on a counter; #5978 owns it. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31"
+    "reason": "Fails on hasLiveLayer after rapid rotations on CI (run 40661826310), not on a counter; #5978 owns it. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02"
   },
   {
     "test": "AppSnapshotTests.BodyCountSuites/HaloWindowLiveDragTests/aViewerDragRunsTheWindowAtMostThreeTimes",
     "owner": "#5979",
-    "reason": "A draw is skipped on the CI runner (run 40661826310), not counter bleed; #5979 owns it. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31"
+    "reason": "A draw is skipped on the CI runner (run 40661826310), not counter bleed; #5979 owns it. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02"
   },
   {
     "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoLiveTransformTests/canvasBodyDragResamplesOnlyAtTheRelease",
     "owner": "#5994",
-    "reason": "Exceeds its 120 s limit on the CI macOS runner (run 40703460275, dev-red #5983); passes in 2.5 s locally at the same commit. #5994 owns it. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress.",
-    "expires": "2026-10-31"
+    "reason": "Exceeds its 120 s limit on the CI macOS runner (run 40703460275, dev-red #5983); passes in 2.5 s locally at the same commit. #5994 owns it. Renewed 10-28 to 10-31: owner still open; beta-cut fixes in progress. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02"
   },
   {
     "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetSuiteTimelineRateTests/scrubAt2997",
     "owner": "#5804",
-    "reason": "Exceeded its 120 s limit on the CI runner (run 40761742332, dev-red #6001). Same family as the scrub lane re-render #5804 owns: a scrub redraws every lane, which at 29.97 fps blows the limit.",
-    "expires": "2026-10-30"
+    "reason": "Exceeded its 120 s limit on the CI runner (run 40761742332, dev-red #6001). Same family as the scrub lane re-render #5804 owns: a scrub redraws every lane, which at 29.97 fps blows the limit. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
+    "expires": "2026-11-02"
   },
   {
-    "test": "AppSnapshotTests.LibraryExportFidelityTests/renderEqualsTheHandMadePipeline",
-    "owner": "#6043",
-    "reason": "#5992's lanczos3 pre-shrink (LiveExporter.swift:73-90) runs develop on the shrunk grid and sizes a cropped export by the uncropped long side, so the export no longer matches the hand-made pipeline (a cropped export is 1022x682, planned 1024x683). Real bug, owned by #6043; quarantined 24 h so trunk keeps moving while the fix lands.",
-    "expires": "2026-10-30",
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoLiveTransformTests/pixelMoverDragResamplesOnlyAtTheRelease",
+    "owner": "#6075",
+    "reason": "On GitHub's GPU-less macOS runner the free-transform case waits out its 120 s limit: the harness's idle wait includes liftWaiting, and the lift doesn't settle there. Locally both cases pass in 13 s. It blocks every PR's macOS gate (runs 40918195370, 40932148873). Photo Move is still covered by GestureContractTests' photo.move row. Owned by #6075; 24 h.",
+    "expires": "2026-10-31",
     "scope": "all"
   },
   {
-    "test": "AppSnapshotTests.LibraryExportFidelityTests/croppedRenderEqualsTheHandMadePipeline",
-    "owner": "#6043",
-    "reason": "#5992's lanczos3 pre-shrink (LiveExporter.swift:73-90) runs develop on the shrunk grid and sizes a cropped export by the uncropped long side, so the export no longer matches the hand-made pipeline (a cropped export is 1022x682, planned 1024x683). Real bug, owned by #6043; quarantined 24 h so trunk keeps moving while the fix lands.",
-    "expires": "2026-10-30",
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetRetouchTests/removeStrokeTiming",
+    "owner": "#6058",
+    "reason": "A Remove stroke on the fixture runs past 120 s on the GitHub runner; it passed in dev's green run. It fails PRs that never touch retouch (runs 40873585545, 40918195370). Owned by #6058; 24 h.",
+    "expires": "2026-10-31",
+    "scope": "all"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetRetouchTests/removeStrokeInThreeBodies",
+    "owner": "#6058",
+    "reason": "Same stroke and runner time limit as removeStrokeTiming (run 40873585545). Owned by #6058; 24 h.",
+    "expires": "2026-10-31",
+    "scope": "all"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoOverlayDragTests/overlayDraggerDoesNoPixelWorkUntilTheRelease",
+    "owner": "#6075",
+    "reason": "New with #6039. On GitHub's GPU-less macOS runner every tool's case waits out its 300 s limit in the shared PixelMover settle and idle wait, the same wait #6075 owns, so the shard hits its 75 min timeout (run 40951412671). The marquee and lasso drags stay covered by GestureContractTests' photo rows. Owned by #6075; 24 h.",
+    "expires": "2026-10-31",
     "scope": "all"
   }
 ]

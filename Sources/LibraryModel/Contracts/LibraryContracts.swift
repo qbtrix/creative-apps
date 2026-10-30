@@ -136,11 +136,18 @@ public protocol LoupeImaging: Sendable {
     /// for the CPU route; a loupe with no GPU route (the default) hands back nil.
     func gpuFrame(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
                   preferGPU: Bool) async throws -> LoupeGPUFrame?
+    /// The developed histogram a GPU frame shows, taken after the frame lands
+    /// so a slider step never waits on it; by default the `.preview` render's.
+    func histogram(_ photo: PhotoItem, settings: DevelopSettings) async throws -> HistogramBins
 }
 
 extension LoupeImaging {
     public func gpuFrame(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
                          preferGPU: Bool) async throws -> LoupeGPUFrame? { nil }
+
+    public func histogram(_ photo: PhotoItem, settings: DevelopSettings) async throws -> HistogramBins {
+        try await render(photo, settings: settings, longSide: 512, quality: .preview).histogram
+    }
 }
 
 /// J5, J7. Develop settings to pixels. Live: `LiveDevelop` over CoreRaster:

@@ -104,6 +104,11 @@ struct DesignWindow: View, BodyCounted {
     /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
     // view-static: main-actor
     static var openExport: (@MainActor () -> Void)?
+    /// Reads the last started window's workspace and adopts one as a live command's result would
+    /// (`.adoptLive`); RenderBudgetDesignAgentWorkingTests drives agent steps through it (the off-screen
+    /// window never becomes active, so it never joins DesignShell.front).
+    // view-static: main-actor
+    static var liveAdopt: (read: @MainActor () -> DesignWorkspace, write: @MainActor (DesignWorkspace) -> Void)?
     #endif
 
     /// A window for `launch`; `seed` (tests) starts it on that workspace instead, and `live` is its drag box.
@@ -143,7 +148,7 @@ struct DesignWindow: View, BodyCounted {
         // A file handed to Design (Finder, the home's Recent, Open In) opens here while the window is empty (#5200).
         .suiteOpenQueue(DesignShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
-        .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
+        .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }, remember: { perform(.rememberExport($0)) }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
@@ -157,7 +162,7 @@ struct DesignWindow: View, BodyCounted {
         #endif
         // An open text edit ends, fitted to its text, before anything else acts (canvas-basics CB-6).
         switch intent {
-        case .textDraft, .cancelText: break
+        case .textDraft, .cancelText, .rememberExport: break
         default: commitText()
         }
         switch intent {
@@ -166,6 +171,7 @@ struct DesignWindow: View, BodyCounted {
         case .save: save()
         case .saveAs: saveAs()
         case .export: exportRequest += 1
+        case .rememberExport(let options): model.rememberExport(options)
         case .undo: model.undo()
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
@@ -200,6 +206,10 @@ struct DesignWindow: View, BodyCounted {
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
         case .setLocked(let id, let locked): try? model.setNodeLocked(id, locked)
         case .toggleFlag(let id, let flag): try? model.toggleNodeFlag(id, flag)
+        case .agent(.setHidden(let ids, let hidden)): model.setLayersHidden(ids, hidden: hidden)
+        case .agent(.select(let ids)): model.selectLayers(ids)
+        case .agent(.undoRequest(let title)):
+            do { _ = try DesignWorkspace.catalog.run("history.undo-request", params: .object(["name": .string(title)]), on: &model) } catch { note = error.description }
         case .editText(let id): try? model.beginTextEdit(id)
         case .textDraft(let text): model.setTextDraft(text)
         case .commitText: break  // committed above
@@ -376,6 +386,7 @@ struct DesignWindow: View, BodyCounted {
         started = true
         #if DEBUG
         Self.openExport = { perform(.export) }
+        Self.liveAdopt = (read: { model }, write: { perform(.adoptLive($0)) })
         #endif
         if seeded {
             fitting = true
