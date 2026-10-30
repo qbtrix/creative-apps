@@ -105,6 +105,8 @@ public enum DesignControlID {
     /// so it is left out of `all`.
     public static let layers = "design.layers"
     public static let pageAdd = "design.page.add"
+    /// The sidebar's Layers | AI switch (DesignSidebarTabs); each segment is `<id>.<tab>`.
+    public static let sidebarTabs = "design.sidebar.tabs"
     public static let pageDelete = "design.page.delete"
     public static let inspectorHeader = "design.inspector.header"
     public static let inspectorFill = "design.inspector.fill"
@@ -160,6 +162,7 @@ public enum DesignControlID {
     public static let all: [String] = [
         canvas, canvasSelection, canvasHover, canvasBadge, canvasGuides, canvasMarquee,
         statusTool, statusSave, statusSelection, statusNote, pageAdd, pageDelete,
+        sidebarTabs, sidebarTabs + ".layers", sidebarTabs + ".ai",
         inspectorHeader, inspectorFill, inspectorFillType, inspectorCornerRadius, inspectorOpacity,
         inspectorStrokeColor, inspectorStrokeWidth, inspectorStrokeAdd, inspectorStrokeRemove,
         inspectorTextFamily, inspectorTextSize,

@@ -12,5 +12,19 @@
     "find": "        marquee == nil && transformHelp == nil\n",
     "replace": "        marquee == nil\n",
     "tests": "DesignMarqueeMarksTests.swift"
+  },
+  {
+    "label": "a hidden layer widens the selection's bounds",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "for node in nodes where !node.isHidden {",
+    "replace": "for node in nodes {",
+    "tests": "DesignMultiSelectTests.swift"
+  },
+  {
+    "label": "a selected layer inside another is left out of the bounds",
+    "file": "Sources/DesignModel/DesignSelection.swift",
+    "find": "                walk(node.children)\n            }\n        }\n        walk(page.nodes)",
+    "replace": "            }\n        }\n        walk(page.nodes)",
+    "tests": "DesignMultiSelectTests.swift"
   }
 ]

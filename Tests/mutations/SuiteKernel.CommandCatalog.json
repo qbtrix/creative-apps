@@ -40,5 +40,19 @@
     "find": "                break\n",
     "replace": "",
     "tests": "CommandBatchTests"
+  },
+  {
+    "label": "a run under an origin drops it, so a live call's steps read as the user's",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "StepOrigin.$current.withValue(origin)",
+    "replace": "StepOrigin.$current.withValue(.user)",
+    "tests": "SuiteKernelTests.HistoryCommandsTests/aRunUnderAnAgentOriginMarksItsSteps"
+  },
+  {
+    "label": "a run under an origin never commits, so the live call changes nothing",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "        let done = try outcome.get()\n        target = copy",
+    "replace": "        let done = try outcome.get()",
+    "tests": "SuiteKernelTests.HistoryCommandsTests/aRunUnderAnAgentOriginMarksItsSteps"
   }
 ]

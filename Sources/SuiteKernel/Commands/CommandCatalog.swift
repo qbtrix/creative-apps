@@ -101,6 +101,17 @@ public struct CommandCatalog<Target>: Sendable {
         target = copy
         return CommandOutcome(result: result, undoStep: spec.undoable ? history(target).undoName : nil)
     }
+    /// Runs `id` as `run(_:params:on:)` does, with every step it records made by `origin`: the one place a live
+    /// call marks its steps as an agent's.
+    public func run(_ id: String, params: JSONValue, on target: inout Target, origin: StepOrigin) throws(CatalogError) -> CommandOutcome {
+        var copy = target
+        let outcome = StepOrigin.$current.withValue(origin) { () -> Result<CommandOutcome, CatalogError> in
+            do throws(CatalogError) { return .success(try run(id, params: params, on: &copy)) } catch { return .failure(error) }
+        }
+        let done = try outcome.get()
+        target = copy
+        return done
+    }
     /// `spec`'s run on `target`; a `CatalogError` passes through, any other error becomes `failed` in its words.
     private static func perform(_ spec: CommandSpec<Target>, _ params: JSONValue, on target: inout Target) throws(CatalogError) -> JSONValue {
         do { return try spec.run(&target, params) }

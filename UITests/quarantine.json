@@ -81,5 +81,33 @@
     "owner": "#5804",
     "reason": "Exceeded its 120 s limit on the CI runner (run 40761742332, dev-red #6001). Same family as the scrub lane re-render #5804 owns: a scrub redraws every lane, which at 29.97 fps blows the limit. Renewed 10-30 to 11-02: owner still open; beta-cut fixes in progress.",
     "expires": "2026-11-02"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoLiveTransformTests/pixelMoverDragResamplesOnlyAtTheRelease",
+    "owner": "#6075",
+    "reason": "On GitHub's GPU-less macOS runner the free-transform case waits out its 120 s limit: the harness's idle wait includes liftWaiting, and the lift doesn't settle there. Locally both cases pass in 13 s. It blocks every PR's macOS gate (runs 40918195370, 40932148873). Photo Move is still covered by GestureContractTests' photo.move row. Owned by #6075; 24 h.",
+    "expires": "2026-10-31",
+    "scope": "all"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetRetouchTests/removeStrokeTiming",
+    "owner": "#6058",
+    "reason": "A Remove stroke on the fixture runs past 120 s on the GitHub runner; it passed in dev's green run. It fails PRs that never touch retouch (runs 40873585545, 40918195370). Owned by #6058; 24 h.",
+    "expires": "2026-10-31",
+    "scope": "all"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetRetouchTests/removeStrokeInThreeBodies",
+    "owner": "#6058",
+    "reason": "Same stroke and runner time limit as removeStrokeTiming (run 40873585545). Owned by #6058; 24 h.",
+    "expires": "2026-10-31",
+    "scope": "all"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/RenderBudgetPhotoOverlayDragTests/overlayDraggerDoesNoPixelWorkUntilTheRelease",
+    "owner": "#6075",
+    "reason": "New with #6039. On GitHub's GPU-less macOS runner every tool's case waits out its 300 s limit in the shared PixelMover settle and idle wait, the same wait #6075 owns, so the shard hits its 75 min timeout (run 40951412671). The marquee and lasso drags stay covered by GestureContractTests' photo rows. Owned by #6075; 24 h.",
+    "expires": "2026-10-31",
+    "scope": "all"
   }
 ]

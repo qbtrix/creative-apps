@@ -514,6 +514,17 @@ this section is what the code does once an app passes a channel.
   the tool error `Photo is not running; open it with a document, then list
   the tools again`; with no document open, `Photo has no document open; open
   one, then call again`.
+- **Who made a step.** Every undo step a live call records is the
+  agent's: `history.read` lists `origins` beside `steps`, each
+  `{"kind": "user"}` or `{"kind": "agent", "client": "<clientInfo.name>",
+  "request": "<name>"}`, plus the `openRequest`. Flare's engine history
+  doesn't track origins yet.
+- **Requests.** `history.begin {name}` opens a named request ("AI:
+  Birds") and `history.end` closes it; each step an agent records in
+  between keeps its own entry and carries the name.
+  `history.undo-request {name}` undoes the request's steps in one call. It
+  is refused when any later step follows them, by the person or anyone
+  else, so undo those first.
 - **Seeing and painting (Photo).** `live.photo.document.read` lists the
   canvas size, the layers top-first (id, name, kind, box, hidden, opacity)
   and the selected ids. `live.photo.view.snapshot {maxSide, region?}`

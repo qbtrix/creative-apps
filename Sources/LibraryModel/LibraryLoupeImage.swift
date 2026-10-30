@@ -8,8 +8,10 @@
 // token. A failure keeps the last picture and says why, for the current token
 // only. The loupe's neighbours are decoded ahead so stepping is quick. A GPU
 // frame (suite-imaging IM-11) lands under the same rules as a full render,
-// keeping its develop steps for the view; a CPU render or a focus change
-// drops them.
+// keeping its develop program for the view; a CPU render or a focus change
+// drops it. The frame keeps the shown histogram until its own lands
+// (`showLoupeHistogram`): one of a shown token newer than the last, so a
+// drag's histograms follow it, and never one from before a focus change.
 // Linux-safe.
 
 /// One render the loupe needs: which photo, with which settings, at what
@@ -41,6 +43,7 @@ extension LibraryCatalog {
         loupeRender = held.map { RenderedPhoto(image: $0, histogram: .empty, quality: .preview) }
         loupeSteps = nil
         loupeShownToken = loupeRenderToken
+        loupeHistogramToken = loupeRenderToken
     }
 
     /// The render the loupe needs now at `longSide`, under a new token; nil outside the loupe.
@@ -62,14 +65,22 @@ extension LibraryCatalog {
         loupeError = nil
     }
 
-    /// `frame`'s base as a `.full` render with its histogram, and its steps for the view to write;
+    /// `frame`'s base as a `.full` render keeping the shown histogram, and its program for the view to write;
     /// under `showLoupeRender`'s token rules.
     public mutating func showLoupeFrame(_ frame: LoupeGPUFrame, token: Int) {
         guard token >= loupeShownToken, token <= loupeRenderToken else { return }
-        loupeRender = RenderedPhoto(image: frame.base, histogram: frame.histogram, quality: .full)
-        loupeSteps = frame.steps
+        loupeRender = RenderedPhoto(image: frame.base, histogram: loupeRender?.histogram ?? .empty, quality: .full)
+        loupeSteps = frame.program
         loupeShownToken = token
         loupeError = nil
+    }
+
+    /// The developed histogram of the GPU frame shown under `token` or an older one, when newer than the last
+    /// histogram shown and asked after the last focus change.
+    public mutating func showLoupeHistogram(_ histogram: HistogramBins, token: Int) {
+        guard loupeSteps != nil, token <= loupeShownToken, token > loupeHistogramToken, let render = loupeRender else { return }
+        loupeRender = RenderedPhoto(image: render.image, histogram: histogram, quality: render.quality)
+        loupeHistogramToken = token
     }
 
     /// Keeps the last picture; sets `loupeError` for the current token only.

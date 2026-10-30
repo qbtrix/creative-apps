@@ -149,8 +149,7 @@ extension DesignWorkspace {
                schema: .object(["ids": .array(of: .string("A layer's id."), minItems: 1)], required: ["ids"]),
                example: .object(["ids": .array([.string("node-1")])]), availability: { reason($0.addPageHelp) }
         ) { w, p in
-            for (index, id) in p.ids.enumerated() { if index == 0 { w.selectItem(id) } else { w.toggleSelection(id) } }
-            guard w.selectedNodeIDs == p.ids else { throw DesignRefusal.unknownID(p.ids.joined(separator: ", ")) }
+            try w.select(p.ids)
             return JSONValue.object([:])
         },
         plain("edit.select-all", "Select All", "Selects every visible, unlocked layer at the selection's level.", .view,

@@ -75,7 +75,7 @@ extension LibraryCatalog {
             return
         }
         takeOutTrashed(moved)
-        history.kernel.record("Delete Rejects", CatalogChange(photos: [], trashed: moved))
+        history.record("Delete Rejects", CatalogChange(photos: [], trashed: moved))
         history.open = false
         let count = moved.count == 1 ? "Moved 1 photo to the Trash." : "Moved \(moved.count) photos to the Trash."
         cullError = failed.isEmpty ? nil : ([count] + failed).joined(separator: " ")

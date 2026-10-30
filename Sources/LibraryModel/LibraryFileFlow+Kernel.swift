@@ -43,7 +43,7 @@ extension LibraryCatalog {
             }
         guard !fresh.isEmpty else { return }
         appendImported(fresh)
-        history.kernel.record("Import", CatalogChange(photos: [], removing: fresh))
+        history.record("Import", CatalogChange(photos: [], removing: fresh))
         history.open = false
         select(Set(fresh.map(\.id)))
     }

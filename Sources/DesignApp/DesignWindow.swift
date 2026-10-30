@@ -217,6 +217,10 @@ struct DesignWindow: View, BodyCounted {
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
         case .setLocked(let id, let locked): try? model.setNodeLocked(id, locked)
         case .toggleFlag(let id, let flag): try? model.toggleNodeFlag(id, flag)
+        case .agent(.setHidden(let ids, let hidden)): model.setLayersHidden(ids, hidden: hidden)
+        case .agent(.select(let ids)): model.selectLayers(ids)
+        case .agent(.undoRequest(let title)):
+            do { _ = try DesignWorkspace.catalog.run("history.undo-request", params: .object(["name": .string(title)]), on: &model) } catch { note = error.description }
         case .editText(let id): try? model.beginTextEdit(id)
         case .textDraft(let text): model.setTextDraft(text)
         case .commitText: break  // committed above

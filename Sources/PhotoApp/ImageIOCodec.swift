@@ -13,6 +13,9 @@ import PhotoModel
 import UniformTypeIdentifiers
 
 struct ImageIOCodec: PhotoImageCodec {
+    /// What Photo opens and places through ImageIO.
+    var readExtensions: Set<String> { ["png", "jpg", "jpeg", "heic", "heif", "tif", "tiff", "psd"] }
+
     enum Failure: Error, CustomStringConvertible {
         case unreadable, unwritable
 

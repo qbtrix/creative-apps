@@ -67,7 +67,22 @@ public struct LibraryHeadless: HeadlessDocument {
             }
             return LibraryHeadless(photos: photos, images: images, stem: fileStem(name))
         } catch let error as CatalogError { throw error } catch {
-            throw CatalogError.failed(id: "open", message: "\(name) isn't a Library file: \(error)")
+            throw CatalogError.failed(id: "open", message: openWords(error, name: name))
+        }
+    }
+
+    /// Why `name` didn't open, in words a person reads, never an error's case dump. Core's `ZipStore` reads stored
+    /// entries only, so a re-zipped (deflated) library is refused with the way to fix it.
+    static func openWords(_ error: any Error, name: String) -> String {
+        switch error {
+        case CodecError.compressedEntry(let entry):
+            "Couldn't open \(name): \(entry) is compressed inside it, and Library reads only uncompressed .library "
+                + "files. Zip it again with no compression (zip -0)."
+        case CodecError.notThisFormat: "\(name) isn't a Library file."
+        case CodecError.unsupported: "\(name) holds an encrypted file, which Library can't open."
+        case CodecError.tooLarge: "\(name) is too large to open."
+        case is LibraryError, is DecodingError: "Couldn't open \(name): its catalog can't be read."
+        default: "\(name) is damaged and can't be opened."
         }
     }
 
