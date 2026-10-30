@@ -313,3 +313,4 @@ utc	stage	event	ref	note
 2026-10-30T10:03Z	3	check-in	quiet	halo 41023214868 running; full 41026647690 cancelled; full 41031060071 waiting; blockers open
 2026-10-30T11:37Z	3	check-in	scanned	halo 41023214868: 92 cases, H-J12 :407 (=:402 moved), PlayHittable pass; full 41031060071 waiting
 2026-10-30T13:40Z	3	check-in	quiet	fulls 41031060071/41050160017 cancelled; full 41061405046 waiting; no halo run; blockers open
+2026-10-30T16:07Z	3	check-in	quiet	three d68c3caa fulls cancelled (0 Halo); halo 41075925204 + full 41081347076 waiting; blockers open
