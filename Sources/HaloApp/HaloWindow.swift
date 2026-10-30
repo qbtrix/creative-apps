@@ -64,7 +64,7 @@ struct HaloWindow: View, BodyCounted {
         }
         scenes(
             SuiteWindow(title: fileWindowTitle, actions: [newComposition], inspectorWidth: Self.inspectorWidth) {
-                AgentSidebarTabs("Compositions", id: "halo.sidebar.tabs") {
+                AgentSidebarTabs("Compositions", id: HaloProject.sidebarTabsControl) {
                     SuiteSidebarList(
                         sections: [SidebarSection(
                             id: "compositions", title: "Compositions",

@@ -4,7 +4,8 @@
 // its title with "client · time · N steps" as its caption; it opens to its
 // steps (by name) and the layers they created or changed. Each row's eye
 // shows or hides that row's layers (`setHidden`, one undo step in the app;
-// `showsEye: false` drops the eyes for an app whose layers can't hide);
+// `showsEye: false` drops the eyes for an app whose layers can't hide, and
+// `undoHelp` disables Undo Request with the app's reason);
 // a click selects them; the context menu holds Select Layers, Undo Request
 // (the newest named request only, as `history.undo-request {title}` refuses
 // any other) and Keep, which only
@@ -32,6 +33,7 @@ public struct AgentActivityList: View {
     private let hidden: Set<String>
     private let timeZone: TimeZone
     private let showsEye: Bool
+    private let undoHelp: String?
     private let onAction: @MainActor (AgentActivityAction) -> Void
     @State private var expanded: Set<String>
 
@@ -41,12 +43,14 @@ public struct AgentActivityList: View {
     public static let emptyHint = "Connect an agent with afterglow mcp --live and its edits show up here."
 
     /// `layerNames` names each layer id (a gone layer shows its id); `hidden` holds the hidden layers' ids.
-    /// `showsEye` false drops the eyes, for an app whose layers can't hide.
+    /// `showsEye` false drops the eyes, for an app whose layers can't hide. `undoHelp` disables Undo Request
+    /// on every request with that reason, for an app that can't undo a request as one.
     public init(requests: [AgentRequest], layerNames: [String: String], hidden: Set<String>,
                 expanded: Set<String> = [], timeZone: TimeZone = .current, showsEye: Bool = true,
-                onAction: @escaping @MainActor (AgentActivityAction) -> Void) {
+                undoHelp: String? = nil, onAction: @escaping @MainActor (AgentActivityAction) -> Void) {
         (self.requests, self.layerNames, self.hidden, self.timeZone, self.showsEye, self.onAction)
             = (requests, layerNames, hidden, timeZone, showsEye, onAction)
+        self.undoHelp = undoHelp
         _expanded = State(initialValue: expanded)
     }
 
@@ -83,10 +87,8 @@ public struct AgentActivityList: View {
                                    unavailableHelp: layers(of: id).isEmpty ? "These steps changed no layer." : nil,
                                    identifier: Self.naming.control(id, "select")) { onAction(.select(layers(of: id))) }]
         guard let request = requests.first(where: { $0.id == id }) else { return items }
-        // history.undo-request refuses a request whose steps aren't the applied tail: only the newest one.
-        let tail = requests.first?.id == id && request.isSpan
         items.append(ToolbarAction("Undo Request", systemImage: "arrow.uturn.backward",
-                                   unavailableHelp: tail ? nil : Self.undoHelp(request, newest: requests.first?.id == id),
+                                   unavailableHelp: Self.undoHelp(request, newest: requests.first?.id == id, app: undoHelp),
                                    identifier: Self.naming.control(id, "undo")) { onAction(.undoRequest(request.title)) })
         items.append(ToolbarAction("Keep", systemImage: "checkmark", identifier: Self.naming.control(id, "keep")) {
             expanded.remove(id)
@@ -94,9 +96,12 @@ public struct AgentActivityList: View {
         return items
     }
 
-    /// Why Undo Request can't run on `request`: not the newest, or not a named request.
-    nonisolated static func undoHelp(_ request: AgentRequest, newest: Bool) -> String {
-        newest ? "Only a named request (history.begin) can be undone as one." : "Undo the newer requests first."
+    /// Why Undo Request can't run on `request`, nil when it can: the app's own reason (`app`) first, then
+    /// not the newest (history.undo-request refuses all but the applied tail), then not a named request.
+    nonisolated static func undoHelp(_ request: AgentRequest, newest: Bool, app: String? = nil) -> String? {
+        if let app { return app }
+        if !newest { return "Undo the newer requests first." }
+        return request.isSpan ? nil : "Only a named request (history.begin) can be undone as one."
     }
 
     /// The layers row `id` stands for: a request's, a step's or the one layer.

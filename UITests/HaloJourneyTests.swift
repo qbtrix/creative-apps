@@ -204,11 +204,14 @@ final class HaloJourneyTests: XCTestCase {
             // playhead back on frame 0: a play-once pass started on the last
             // frame ends there again before XCUITest's idle wait returns. Still
             // judge each control as the probe lists it now, not at launch.
-            let entry = Self.decode(halo.element("halo.controls"))?.controls.first { $0.id == listed.id } ?? listed
+            let probe = Self.decode(halo.element("halo.controls"))?.controls.first { $0.id == listed.id }
+            let entry = probe ?? Self.decode(halo.element("suite.controls"))?.controls.first { $0.id == listed.id } ?? listed
             guard entry.enabled else {
                 XCTAssertFalse((entry.reason ?? "").isEmpty, "\(entry.id) is disabled and doesn't say why")
                 continue
             }
+            // A segment already selected (its container's click picked it) has nothing to change.
+            guard entry.selected != true else { continue }
             let control = halo.element(entry.id)
             XCTAssert(control.waitForExistence(timeout: 5), "\(entry.id) is listed but not on screen")
             let before = halo.app.windows.firstMatch.screenshot().pngRepresentation

@@ -98,5 +98,7 @@ public struct HaloHistory: Sendable, Hashable {
         for entry in redo.reversed() { fresh.record(entry.name, entry.before) }
         for entry in redo { _ = fresh.undo { _ in entry.before } }
         kernel = fresh
+        // A HaloHistoryEntry carries no origin, so rebuilt steps are no agent's and the old ids' stamps go.
+        agentDates = AgentStepDates()
     }
 }

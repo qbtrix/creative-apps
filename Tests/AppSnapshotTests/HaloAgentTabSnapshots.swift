@@ -38,7 +38,7 @@ import Testing
 
     @Test func empty() throws {
         try snapshots(
-            AgentSidebarTabs("Compositions", id: "halo.sidebar.tabs", tab: .ai) { EmptyView() } ai: {
+            AgentSidebarTabs("Compositions", id: HaloProject.sidebarTabsControl, tab: .ai) { EmptyView() } ai: {
                 AgentActivityList(requests: [], layerNames: [:], hidden: [], showsEye: false) { _ in }
             }, name: "halo-ai-tab-empty")
     }

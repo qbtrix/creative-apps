@@ -13,6 +13,9 @@
 import SuiteKernel
 
 extension HaloProject {
+    /// The sidebar's Compositions | AI switch; each segment is `<id>.<tab>` (SuiteUI AgentSidebarTabs).
+    public static let sidebarTabsControl = "halo.sidebar.tabs"
+
     /// The agent's requests in this project, newest first.
     public var agentRequests: [AgentRequest] {
         AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step, next in

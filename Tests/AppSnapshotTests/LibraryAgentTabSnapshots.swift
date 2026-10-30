@@ -30,7 +30,7 @@ import Testing
         var model = LibraryCatalog()
         model.load(LibraryFixtures.photos(named: "shoot"))
         try snapshots(
-            AgentSidebarTabs("Library", id: "library.sidebar.tabs", tab: .ai) { EmptyView() } ai: {
+            AgentSidebarTabs("Library", id: LibraryCatalog.sidebarTabsID, tab: .ai) { EmptyView() } ai: {
                 AgentActivityList(requests: model.agentRequests, layerNames: [:], hidden: [], showsEye: false) { _ in }
             }, name: "library-ai-tab-empty")
     }

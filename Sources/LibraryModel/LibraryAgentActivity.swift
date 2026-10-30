@@ -8,6 +8,11 @@
 import SuiteKernel
 
 extension LibraryCatalog {
+    /// The sidebar's Library | AI switch; each segment is `<id>.<tab>` (SuiteUI AgentSidebarTabs).
+    public static let sidebarTabsID = "library.sidebar.tabs"
+    /// Why the AI tab's Undo Request never runs here: Library has no request spans.
+    public static let agentUndoHelp = "Library can't undo a request as one."
+
     /// The agent's requests in this catalog, newest first.
     public var agentRequests: [AgentRequest] { AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates)) }
 }

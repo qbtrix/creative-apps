@@ -35,6 +35,8 @@ final class DesignEveryControlJourneyTests: XCTestCase {
                 XCTAssertFalse((entry.reason ?? "").isEmpty, "\(id) is disabled and doesn't say why")
                 continue
             }
+            // A segment already selected (its container's click picked it) has nothing to change.
+            guard entry.selected != true else { continue }
             let control = Self.onScreen(id, design)
             XCTAssert(control.waitForExistence(timeout: 5), "\(id) is listed but not on screen")
             if id.hasPrefix("design.status.") {
