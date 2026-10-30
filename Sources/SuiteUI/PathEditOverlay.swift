@@ -90,7 +90,7 @@ public struct PathEditOverlay: View {
                 if tracker.pressed == nil {
                     hasFocus = true
                     send(tracker.press(at: value.startLocation, hit: hitTest(value.startLocation), modifiers: held,
-                                       token: UUID().uuidString, in: context))
+                                       token: CoalesceKey.token(nil), in: context))
                 }
                 pointer = value.location
                 send(tracker.drag(to: value.location, modifiers: held))
