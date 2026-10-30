@@ -84,7 +84,9 @@ public enum CLI {
             try refuseForeign(target, as: app, inPlace: output == nil)
             if output != nil { try refuseExisting([target], force: force, io: io) }
             if let why = session.availability(step.id).why { throw CatalogError.unavailable(id: step.id, why: why) }
-            let outcome = try session.run(step)
+            let dropped = try DropFiles.attach([step], dir: "", io: io)
+            session.receiveDropped(dropped.files)
+            let outcome = try session.run(dropped.steps.first ?? step)
             try write(try session.save(), to: target, replace: force || output == nil, io: io)
             return ["command": .string(step.id), "output": .string(target), "result": outcome.result,
                     "undoStep": outcome.undoStep.map(JSONValue.string) ?? .null]
