@@ -457,3 +457,4 @@ utc	stage	event	ref	note
 2026-10-30T10:18Z	check-in	#5353 open (clean), PX-9 waits. dev green, no new dev-red. Merged: #6086 (captain's design mac finish), not Photo. No new findings (51 Photo open).
 2026-10-30T10:50Z	check-in	#5353 open (clean), PX-9 waits. dev green, no new dev-red. No new merges, no new findings (51 Photo open).
 2026-10-30T11:25Z	check-in	#5353 open (clean), PX-9 waits. dev green, no new dev-red. No merges, no new findings (51 Photo open).
+2026-10-30T12:00Z	check-in	#5353 open (clean), PX-9 waits. New dev-red #6095 (11:43, macos; range #5882 captain's photo mac finish, #6081, #6086): not this lead's, not fixed here. No merges, no new findings (51 Photo open).
