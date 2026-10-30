@@ -1,5 +1,6 @@
 // AgentRequestsTests.swift: AgentRequests.group, the AI tab's request rule:
-// spans group by title, loose steps by client within 60 s, newest first.
+// spans group by title, loose steps by client within 60 s, newest first; and
+// History.agentSteps with AgentStepDates, the agent steps an app's history holds.
 import Foundation
 import SuiteKernel
 import Testing
@@ -39,5 +40,24 @@ import Testing
         ])
         #expect(requests.map(\.title) == ["Poster", "Blur", "Poster"])
         #expect(AgentRequests.group([]).isEmpty)
+    }
+
+    @Test func historyListsOnlyAgentStepsWithTheirStamps() {
+        var history = History<Int>(limit: 2)
+        var dates = AgentStepDates()
+        history.record("Paint", 0)
+        dates.stamp(history, limit: 2)
+        StepOrigin.$current.withValue(.agent(client: "claude", request: nil)) {
+            history.record("Blur", 1)
+            dates.stamp(history, limit: 2)
+        }
+        #expect(dates.dates.count == 1, "a user step was stamped")
+        let steps = history.agentSteps(dates: dates) { ["layer.\($0.payload)"] }
+        #expect(steps.map(\.name) == ["Blur"] && steps.first?.client == "claude")
+        #expect(steps.first?.layers == ["layer.1"] && steps.first?.date ?? .distantPast > .distantPast)
+        StepOrigin.$current.withValue(.agent(client: "claude", request: nil)) {
+            for i in 2..<8 { history.record("Step \(i)", i); dates.stamp(history, limit: 2) }
+        }
+        #expect(dates.dates.count <= 4, "stamps of dropped steps piled up")
     }
 }

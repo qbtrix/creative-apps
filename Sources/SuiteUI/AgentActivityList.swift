@@ -3,7 +3,8 @@
 // looks and behaves like a layer group. A request row (newest first) shows
 // its title with "client · time · N steps" as its caption; it opens to its
 // steps (by name) and the layers they created or changed. Each row's eye
-// shows or hides that row's layers (`setHidden`, one undo step in the app);
+// shows or hides that row's layers (`setHidden`, one undo step in the app;
+// `showsEye: false` drops the eyes for an app whose layers can't hide);
 // a click selects them; the context menu holds Select Layers, Undo Request
 // (the newest named request only, as `history.undo-request {title}` refuses
 // any other) and Keep, which only
@@ -30,6 +31,7 @@ public struct AgentActivityList: View {
     private let layerNames: [String: String]
     private let hidden: Set<String>
     private let timeZone: TimeZone
+    private let showsEye: Bool
     private let onAction: @MainActor (AgentActivityAction) -> Void
     @State private var expanded: Set<String>
 
@@ -39,11 +41,12 @@ public struct AgentActivityList: View {
     public static let emptyHint = "Connect an agent with afterglow mcp --live and its edits show up here."
 
     /// `layerNames` names each layer id (a gone layer shows its id); `hidden` holds the hidden layers' ids.
+    /// `showsEye` false drops the eyes, for an app whose layers can't hide.
     public init(requests: [AgentRequest], layerNames: [String: String], hidden: Set<String>,
-                expanded: Set<String> = [], timeZone: TimeZone = .current,
+                expanded: Set<String> = [], timeZone: TimeZone = .current, showsEye: Bool = true,
                 onAction: @escaping @MainActor (AgentActivityAction) -> Void) {
-        (self.requests, self.layerNames, self.hidden, self.timeZone, self.onAction)
-            = (requests, layerNames, hidden, timeZone, onAction)
+        (self.requests, self.layerNames, self.hidden, self.timeZone, self.showsEye, self.onAction)
+            = (requests, layerNames, hidden, timeZone, showsEye, onAction)
         _expanded = State(initialValue: expanded)
     }
 
@@ -55,7 +58,7 @@ public struct AgentActivityList: View {
             LayerTreeList(
                 rows: Self.rows(requests, expanded: expanded, names: layerNames, hidden: hidden),
                 childCount: { id in requests.first { $0.id == id }.map { $0.steps.count + $0.layers.count } ?? 0 },
-                naming: Self.naming, options: LayerTreeOptions(showsLock: false),
+                naming: Self.naming, options: LayerTreeOptions(showsEye: showsEye, showsLock: false),
                 decorations: Self.decorations(requests, timeZone: timeZone),
                 onSelect: { onAction(.select(layers(of: $0))) },
                 contextActions: { menu(for: $0) },

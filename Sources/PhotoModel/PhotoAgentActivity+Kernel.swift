@@ -1,8 +1,7 @@
 // PhotoAgentActivity+Kernel.swift: Photo's side of the AI tab (#6029), an
 // adapter onto SuiteKernel's AgentRequests. `agentRequests` groups the agent
-// steps of this image's history; until History records each step's origin
-// (#6028, `StepOrigin.agent(client:request:)`) there are none, so the tab
-// shows its empty state. A step's layers come from its undo payload, which
+// steps of this image's history (`History.agentSteps`, timed by PhotoHistory's
+// `agentDates`); with none the tab shows its empty state. A step's layers come from its undo payload, which
 // is cheap and needs no extra state: a tile or mask edit names its layer; a
 // layer-list or whole-stack edit is diffed by id against the layers now
 // (new ids were created, a differing value was changed). `setLayersHidden`
@@ -17,27 +16,8 @@ import SuiteKernel
 
 extension PhotoWorkspace {
     /// The agent's requests in this image, newest first.
-    public var agentRequests: [AgentRequest] { AgentRequests.group(agentSteps) }
-
-    /// The applied agent steps, oldest first, each with its layers and record time.
-    var agentSteps: [AgentStepRecord] {
-        history.kernel.undoSteps.compactMap { step in
-            guard case .agent(let client, let request) = step.origin else { return nil }
-            return AgentStepRecord(id: step.idAfter, name: step.name, client: client, request: request,
-                                   date: history.agentDates[step.idAfter] ?? .distantPast,
-                                   layers: step.payload.layerIDs(now: layers))
-        }
-    }
-
-    /// Stamps the step just recorded when an agent made it; drops stamps of
-    /// steps the history no longer holds once they outnumber its limit twice.
-    mutating func stampAgentStep() {
-        guard case .agent = StepOrigin.current else { return }
-        history.agentDates[history.kernel.currentStepID] = Date()
-        if history.agentDates.count > 2 * PhotoHistory.limit {
-            let live = Set(history.kernel.undoSteps.map(\.idAfter) + history.kernel.redoSteps.map(\.idAfter))
-            history.agentDates = history.agentDates.filter { live.contains($0.key) }
-        }
+    public var agentRequests: [AgentRequest] {
+        AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { $0.payload.layerIDs(now: layers) })
     }
 
     /// Hides or shows every live layer in `ids` as one step; nothing when none changes.
