@@ -183,3 +183,4 @@ Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (r
 - 2026-10-31T14:24:22Z question 6543538342 unanswered; #5262 needs-split
 - 2026-10-31T14:55:31Z question 6543538342 unanswered; #5262 needs-split
 - 2026-10-31T15:27:19Z question 6543538342 unanswered; #5262 needs-split
+- 2026-10-31T16:29:47Z AK-photo waits on SC-photo #5262 (needs-split); AK-z waits on SC-library replacement; question 6543538342 unanswered
