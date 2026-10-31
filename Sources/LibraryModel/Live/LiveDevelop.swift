@@ -11,7 +11,7 @@
 // same pixels as one pass over the whole buffer, a fraction of the time. A
 // buffer with fewer tiles than cores (the 512 px preview has four) runs in one
 // band of rows per core instead (each band pays the steps' setup again, so no
-// more), copied out and back pixel by pixel.
+// more), cut out whole rows at a time and copied back pixel by pixel.
 // The histogram is CoreRaster's counts, 256 bins over the sRGB values of the
 // buffer it is given (the rendered one), counted by `LiveHistogram`. A slider in `waiting` throws
 // `.renderFailed` with its reason; none waits today. After
@@ -103,9 +103,7 @@ public struct LiveDevelop: DevelopRendering {
         let rows = (b.height + bands - 1) / max(bands, 1), width = b.width
         let parts = try LiveParallel.run((b.height + rows - 1) / rows) { i in
             let top = i * rows, height = min(rows, b.height - top)
-            var band = try PixelBuffer(width: width, height: height)
-            for y in 0..<height { for x in 0..<width { try band.setPixel(x: x, y: y, b.pixel(x: x, y: top + y)) } }
-            return try serial(steps, on: band)
+            return try serial(steps, on: try b.cropped(x: 0, y: top, width: width, height: height))
         }
         var out = b
         for (i, band) in parts.enumerated() {
