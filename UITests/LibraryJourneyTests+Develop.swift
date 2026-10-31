@@ -4,7 +4,7 @@
 // fixture's fakes (F); the live pass (L) runs steps 1 to 10 on the 24 JPEGs
 // `LibraryFiles.writeShoot` writes, imported on launch, its shots ending
 // `-live`. Every launch passes `-LibraryTestValues`, so the loupe photo's
-// value (`library.loupe.photo`, "full 2048×1365 3f9a… 100% No stars") carries
+// value (repeated as the label of `library.loupe.value`, "full 2048×1365 3f9a… 100% No stars") carries
 // the render's checksum, 16 hex digits. Rows are `library.develop.<slider>`
 // (`library.develop.exposure`), the histogram readout
 // `library.develop.histogram` with "mean 0.…" in its value.
@@ -273,9 +273,9 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         tab.click()
     }
 
-    /// The loupe render's quality, the first word of the loupe photo's value ("full", "preview").
+    /// The loupe render's quality, the first word of the loupe value probe's label ("full", "preview").
     @MainActor private func loupeQuality(_ library: Journey) -> String {
-        ((library.element("library.loupe.photo").value as? String) ?? "").split(separator: " ").first.map(String.init) ?? ""
+        library.element("library.loupe.value").label.split(separator: " ").first.map(String.init) ?? ""
     }
 
     /// The Exposure `catalog.json` in `catalog` holds for the photo named `name`; 0 when its develop is
@@ -341,9 +341,9 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         library.press(.escape)
     }
 
-    /// The loupe render's checksum: the 16 hex digits in the loupe photo's value.
+    /// The loupe render's checksum: the 16 hex digits in the loupe value probe's label.
     @MainActor private func checksum(_ library: Journey) throws -> String {
-        let value = (library.element("library.loupe.photo").value as? String) ?? ""
+        let value = library.element("library.loupe.value").label
         let words = value.split(separator: " ").map(String.init)
         return try XCTUnwrap(words.first { $0.count == 16 && $0.allSatisfy(\.isHexDigit) },
                              "the loupe photo's value \"\(value)\" has no checksum")
