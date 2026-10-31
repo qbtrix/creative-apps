@@ -1,6 +1,7 @@
 // DesignExport+Kernel.swift: File > Export…'s sheet (design-export DE-6) on SuiteUI's
 // SuiteExportSheet. DesignExportArea keeps the run (DesignExportRun) as its own state, so editing
-// the sheet never runs the window's body; each change of `request` opens it on the Model's
+// the sheet never runs the window's body; each change of `request.count` (DesignExportRequest, read
+// only here, so File > Export… doesn't run the window either) opens it on the Model's
 // `exportSheetDefaults`, which a finished run updates through `remember` (the window's
 // `rememberExport` intent, so the Model itself keeps them). Ids hang off
 // `design.export`: Format (no Size row: Scale is the one scale control), then DesignExportRows'
@@ -24,8 +25,8 @@ import SwiftUI
 
 struct DesignExportArea: ViewModifier {
     let model: DesignWorkspace
-    /// Bumped by File > Export…; each change opens the sheet.
-    let request: Int
+    /// Bumped by File > Export…; each change opens the sheet. Read here only, so the window never runs.
+    let request: DesignExportRequest
     let onNote: @MainActor (String) -> Void
     /// A finished run's options, for the Model to open the next sheet with.
     let remember: @MainActor (DesignExportOptions) -> Void
@@ -47,7 +48,7 @@ struct DesignExportArea: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .onChange(of: request) { open() }
+            .onChange(of: request.count) { open() }
             .sheet(isPresented: Binding(get: { run != .idle }, set: { if !$0 { close() } })) {
                 Self.sheet(model: model, run: run, edit: { _ = run.begin($0) }, export: export, close: close, finished: finishedLine)
             }
@@ -263,4 +264,14 @@ struct DesignExportRows: View {
         .accessibilityLabel(label)
         .accessibilityIdentifier(identifier)
     }
+}
+
+/// File > Export…'s request, the one thing DesignWindow and DesignExportArea share: a reference the
+/// window holds but never reads, so a bump re-runs only the area (which watches `count`), never the
+/// window's body (that re-run cost the sheet's open ~40 ms on the 2,000-layer page).
+@MainActor @Observable final class DesignExportRequest {
+    /// Bumped once per File > Export…; each change opens the sheet.
+    private(set) var count = 0
+
+    func bump() { count += 1 }
 }

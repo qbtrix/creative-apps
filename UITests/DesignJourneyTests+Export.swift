@@ -1,4 +1,4 @@
-// DesignJourneyTests+Export.swift: J19, File > Export… on the fakes
+// DesignJourneyTests+Export.swift: J17 to J20, File > Export… (J19 on the fakes)
 // (design-export DE-6, DE-7; docs/blueprints/design/features/design-export.md,
 // Journeys). On `-DesignServices fake -DesignFixture cards` at 1024 × 768:
 // Desktop's row is clicked, File > Export… opens the export sheet
@@ -15,7 +15,9 @@
 // "Desktop.png"), Escape and Cancel write nothing, and a read-only folder
 // ends the run on the failed line with the system's reason (its curly apostrophe,
 // "You don’t have permission", as Foundation words it), closed with Done as every
-// line is. Every opening
+// line is. J20 writes Desktop as JPEG 2x and reads it back, reopens the sheet
+// on JPEG 2x (the finished run's options), then with nothing selected picks
+// Selection and finds Export disabled. Every opening
 // clicks File > Export…; ⇧⌘E (J19's last opening) and Escape (J18) are each
 // checked once, as the keyboard twins. Each live run is shot on its finished
 // line before Done, and J19 shoots the window after Done and after Cancel.
@@ -115,6 +117,51 @@ final class DesignExportJourneyTests: XCTestCase {
         design.element(Self.doneID).click()
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "Done left the failed sheet open")
         XCTAssertEqual(try Self.listing(folder).count, 2, "the failed run left a file")
+    }
+
+    /// J20: the JPEG chip writes a 2x JPEG, the next sheet opens on the options that run used,
+    /// and Scope Selection with nothing selected leaves Export disabled.
+    @MainActor func testExportJPEGRemembersAndRefuses() throws {
+        let folder = try Self.makeFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let design = launch(Self.live(folder))
+        design.clickDesignLayer(Self.desktopRow)
+
+        // 1. JPEG at 2x: Desktop.jpg is a JPEG of 2880 × 2048.
+        openExportFromMenu(design, "JPEG")
+        let sheet = design.element(Self.sheetID)
+        design.element("design.export.format.jpeg").click()
+        design.element("design.export.scale.2x").click()
+        design.element(Self.startID).click()
+        XCTAssert(Self.waitUntil(timeout: 10) { self.reads(sheet, "Exported 1 file to") }, "the JPEG run never finished")
+        design.shot("export-live-jpeg")
+        let data = try Data(contentsOf: folder.appendingPathComponent("Desktop.jpg"))
+        let source = CGImageSourceCreateWithData(data as CFData, nil)
+        XCTAssertEqual(source.flatMap { CGImageSourceGetType($0) } as String?, "public.jpeg", "Desktop.jpg isn't a JPEG")
+        let image = source.flatMap { CGImageSourceCreateImageAtIndex($0, 0, nil) }
+        XCTAssertEqual(image?.width, 2880, "Desktop.jpg isn't 2880 px wide")
+        XCTAssertEqual(image?.height, 2048, "Desktop.jpg isn't 2048 px high")
+        design.element(Self.doneID).click()
+        XCTAssert(sheet.waitForNonExistence(timeout: 5), "Done left the JPEG sheet open")
+
+        // 2. The next sheet opens on JPEG 2x, the options the finished run used.
+        openExportFromMenu(design, "remembered")
+        XCTAssert(design.element("design.export.format.jpeg").isSelected, "the next sheet didn't open on JPEG")
+        XCTAssert(design.element("design.export.scale.2x").isSelected, "the next sheet didn't open on 2x")
+        design.shot("export-remembered")
+        design.element(Self.cancelID).click()
+        XCTAssert(sheet.waitForNonExistence(timeout: 5), "Cancel left the sheet open")
+
+        // 3. Nothing selected, Scope Selection: Export is disabled and nothing is written.
+        design.element("suite.canvas").coordinate(withNormalizedOffset: CGVector(dx: 0.98, dy: 0.98)).click()
+        openExportFromMenu(design, "refused")
+        design.element("design.export.scope.selection").click()
+        let start = design.element(Self.startID)
+        XCTAssert(Self.waitUntil { !start.isEnabled }, "Export stays enabled on a refused plan")
+        design.shot("export-refused")
+        design.element(Self.cancelID).click()
+        XCTAssert(sheet.waitForNonExistence(timeout: 5), "Cancel left the refused sheet open")
+        XCTAssertEqual(try Self.listing(folder), ["Desktop.jpg"], "the refused plan wrote a file")
     }
 
     /// J19: ⇧⌘E opens the sheet on Desktop at PNG 1x; 2x doubles the pixels; Export finishes on the fakes.
