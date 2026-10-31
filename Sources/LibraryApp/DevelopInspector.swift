@@ -19,7 +19,7 @@
 // Settings with the copied settings named under it. Each row and action
 // carries its `library.develop.*` identifier and is off, saying why, while
 // its LibraryMenu closure is nil. Values in, closures out; it never writes
-// LibraryCatalog.
+// LibraryCatalog. It shows no scroller (wheel, trackpad and keys still scroll).
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -55,6 +55,9 @@ struct DevelopInspector: View {
                 }
                 .accessibilityElement(children: .contain)
             }
+            // No scroller: a legacy scroller's page area is an unnamed button
+            // with no identifier to the app audit, as in LayerTreeList.
+            .scrollIndicators(.never)
         }
     }
 
