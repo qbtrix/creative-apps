@@ -5,8 +5,10 @@
 // transform (a press on a layer is a move that went nowhere), the box's whole gesture, its press too, on
 // LiveDragLine's copy, so with the pointer down the editor body runs 0 times and the canvas composites 0 regions
 // (PhotoRenderCount, debug only); the box shows on the overlay. The release picks: the click the background, the
-// box both layers. The counts start once the first picture has landed (`idle` must settle; it can take over a
-// minute on a loaded runner). Nested in BodyCountSuites: it reads process-wide counters. macOS only.
+// box both layers. The counts start once the first picture has landed (`idle` must settle). The window draws on
+// the app's default route, Metal with resident tiles (`photoRendering`, as the live transform tests set it): hosted
+// without one the canvas draws 24 MP on the CPU, about 35 s on a debug build and past 150 s on a loaded runner.
+// Nested in BodyCountSuites: it reads process-wide counters. macOS only.
 #if canImport(AppKit)
 import AppKit
 import CoreRaster
@@ -24,7 +26,8 @@ extension BodyCountSuites {
 
         @Test(.timeLimit(.minutes(3))) func selectClickAndBoxRunNoBodyAndNoPixelWorkWhileDown() async throws {
             let (model, top, bottom) = try Self.document(.select)
-            let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
+            let w = RenderBudgetWindow(AnyView(PhotoWindow(model: model).allowsWindowActivationEvents()
+                .environment(\.photoRendering, RenderBudgetPhotoLiveTransformTests.rendering(.gpu))))
             defer { w.close() }
             let (opened, regions) = (ContinuousClock.now, Self.regions())
             let (edited, send) = try await Self.open(w)
@@ -82,8 +85,8 @@ extension BodyCountSuites {
         static func open<V: View>(_ w: RenderBudgetWindow<V>) async throws -> (PhotoWindowEditedView, PhotoPerform) {
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
             try await w.settle(untilStable: RenderBudgetPhotoTransformTests.bodies)
-            // The first 24 MP picture runs past a minute on a loaded runner; a press measured before it lands
-            // counts its last regions as the press's, so the counts start only from a settled canvas.
+            // A press measured before the first picture lands counts its last regions as the press's, so the
+            // counts start only from a settled canvas.
             try #require(await RenderBudgetPhotoLiveTransformTests.idle(w, limit: .seconds(150)), "the first picture never landed")
             return (edited, try #require(edited.send))
         }
