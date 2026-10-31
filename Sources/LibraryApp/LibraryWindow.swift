@@ -81,7 +81,7 @@ struct LibraryWindow: View, BodyCounted {
                     toggleSubfolders: { model.toggleFolderSubfolders(row: id) })
             }
         ) {
-            AgentSidebarTabs("Library", id: LibraryCatalog.sidebarTabsID) {
+            AgentSidebarTabs("Library", id: LibraryCatalog.sidebarTabsID, work: { model.agentWork }) {
                 SuiteSidebarList(
                     sections: sidebarSections(filters),
                     selection: model.sidebarSelection,
@@ -91,7 +91,7 @@ struct LibraryWindow: View, BodyCounted {
             } ai: {
                 // List only: a catalog has no layer to show, hide or select, and no span to undo.
                 AgentActivityList(requests: model.agentRequests, layerNames: [:], hidden: [], showsEye: false,
-                                  undoHelp: LibraryCatalog.agentUndoHelp) { _ in }
+                                  undoHelp: LibraryCatalog.agentUndoHelp, work: model.agentWork) { _ in }
             }
         } content: {
             VStack(spacing: 0) {
