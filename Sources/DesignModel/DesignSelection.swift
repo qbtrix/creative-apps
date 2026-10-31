@@ -68,8 +68,8 @@ extension DesignWorkspace {
     public mutating func toggleSelection(_ id: String) {
         // Committing first: a blank placed text node goes away with its edit.
         commitTextEdit()
-        var next = selection
-        guard next.pick(id, .toggle, canAdd: canAddToSelection) else { return }
+        let next = SelectTool.click(selection, hit: id, extending: true, canAdd: canAddToSelection)
+        guard next != selection else { return }
         adopt(next)
         if next.contains(id), let page = selectedPage { expandAncestors(of: id, in: page.nodes) }
     }
