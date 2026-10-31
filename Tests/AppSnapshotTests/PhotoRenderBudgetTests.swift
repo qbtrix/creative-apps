@@ -16,13 +16,17 @@
 // .build/snapshots/photo-render-budget.txt. The document autosaves into a temp
 // folder, never the user's. In Tests/perf-suites.txt, so the merge gate skips
 // it. PhotoFlipCanvasBudgetTests (OC-14, in BodyCountSuites): Flip Canvas on an
-// 8K two-layer window takes at most 2 window bodies. macOS only.
+// 8K two-layer window takes at most 2 window bodies. Its window draws on the
+// app's default route, Metal with resident tiles (`photoRendering`): on the CPU
+// its 8K renders outlive the window by over 30 s and starve the next hosted
+// window's first picture (PhotoWindowStrokeTests). macOS only.
 import CoreRaster
 import CoreRender
 import CoreRenderMetal
 import Foundation
 import Metal
 import PhotoModel
+import SwiftUI
 import Testing
 
 @testable import PhotoApp
@@ -138,7 +142,8 @@ extension BodyCountSuites {
     @MainActor @Suite struct PhotoFlipCanvasBudgetTests {
         /// Image > Flip Canvas Horizontal on an 8K two-layer image: one undo step, at most 2 window bodies.
         @Test(.timeLimit(.minutes(2))) func flipCanvasInOneBody() async throws {
-            let w = RenderBudgetWindow(PhotoWindow(model: try Self.document()))
+            let w = RenderBudgetWindow(AnyView(PhotoWindow(model: try Self.document())
+                .environment(\.photoRendering, RenderBudgetPhotoLiveTransformTests.rendering(.gpu))))
             defer { w.close() }
             let bodies = { BodyCountSuites.PhotoWindowStrokeTests.editorBodies() }
             try await w.settle(1000)
