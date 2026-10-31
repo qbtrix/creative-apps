@@ -22,7 +22,8 @@
 // scale), the viewport also zooms itself through SuiteKernel's zoom model,
 // clamped to 10% to 3200%: pinch, landing on 100% when it passes near it, and
 // Command-plus, Command-minus, Command-0 (fit) and Command-1 (100%) while it
-// has focus. A host that takes `.fit` keeps the picture fitted as the window
+// has focus, Command-plus and Command-minus over `zoomSteps` (the suite's
+// stops unless the app keeps its own table). A host that takes `.fit` keeps the picture fitted as the window
 // resizes (ZoomMath.scale); `onZoom` gets the fit as a scale, from the
 // environment's `canvasFitScale` (EditorDetail's palette-clear fit) when set.
 // `showsRulers: false` drops the rulers and their corner; the canvas keeps
@@ -51,6 +52,7 @@
 // series `canvas-drag` (CanvasProbe, SP2).
 import enum SuiteKernel.ZoomKey
 import enum SuiteKernel.ZoomLevel
+import struct SuiteKernel.ZoomSteps
 import SwiftUI
 
 /// Where the artboard sits in the scrollable canvas, in points.
@@ -189,6 +191,8 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     private let onSize: @MainActor (CGSize) -> Void
     private let onZoom: (@MainActor (Double) -> Void)?
     private let onZoomLevel: (@MainActor (ZoomLevel) -> Void)?
+    /// The stops Command-plus and Command-minus step: the suite's, unless the app keeps its own table.
+    private let zoomSteps: ZoomSteps
     private let onDrag: (@MainActor (CGPoint, CGPoint) -> Void)?
     private let onDragEnd: (@MainActor () -> Void)?
     private let onKey: (@MainActor (KeyPress) -> KeyPress.Result)?
@@ -222,6 +226,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         onSize: @escaping @MainActor (CGSize) -> Void = { _ in },
         onZoom: (@MainActor (Double) -> Void)? = nil,
         onZoomLevel: (@MainActor (ZoomLevel) -> Void)? = nil,
+        zoomSteps: ZoomSteps = ZoomMath.steps,
         onDrag: (@MainActor (CGPoint, CGPoint) -> Void)? = nil,
         onDragEnd: (@MainActor () -> Void)? = nil,
         onKey: (@MainActor (KeyPress) -> KeyPress.Result)? = nil,
@@ -239,6 +244,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         self.onSize = onSize
         self.onZoom = onZoom
         self.onZoomLevel = onZoomLevel
+        self.zoomSteps = zoomSteps
         self.onDrag = onDrag
         self.onDragEnd = onDragEnd
         self.onKey = onKey
@@ -385,7 +391,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 press.key.character, command: press.modifiers.contains(.command),
                 option: press.modifiers.contains(.option), control: press.modifiers.contains(.control))
         else { return nil }
-        return key.level(from: zoom, steps: ZoomMath.steps)
+        return key.level(from: zoom, steps: zoomSteps)
     }
 
     /// Hands `level` to the host: as it is through `onZoomLevel`, else as a scale through `onZoom`,
@@ -454,7 +460,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
                 let start = pinchStart ?? (zoom, layout, offset,
                     CGPoint(x: value.startLocation.x - offset.x, y: value.startLocation.y - offset.y))
                 pinchStart = start
-                let next = ZoomMath.steps.snapped(start.zoom * value.magnification)
+                let next = zoomSteps.snapped(start.zoom * value.magnification)
                 // Held at the clamp or the 100% snap: no zoom, so no scroll either.
                 guard next != zoom else { return }
                 zoomTo(ZoomLevel(scale: next), layout)
