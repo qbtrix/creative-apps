@@ -77,12 +77,15 @@ import Testing
         let file = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
             .deletingLastPathComponent().appending(path: "Sources/SuiteUI/TimelineStrip.swift")
         let source = try String(contentsOf: file, encoding: .utf8)
-        for function in ["private func lanes(", "private var names:"] {
-            let start = try #require(source.range(of: function), "\(function) moved; point this test at it")
-            let body = source[start.upperBound...]
-            let open = try #require(body.firstIndex(of: "{"))
-            let first = body[body.index(after: open)...].trimmingCharacters(in: .whitespacesAndNewlines)
-            #expect(first.hasPrefix("LazyVStack("), "\(function) builds every row up front")
+        for view in ["struct TimelineLaneRows<", "struct TimelineNameRows<"] {
+            let start = try #require(source.range(of: view), "\(view) moved; point this test at it")
+            let rest = source[start.upperBound...]
+            let body = try #require(rest.range(of: "var body: some View {"))
+            let end = try #require(rest.range(of: "static func ==", range: body.upperBound..<rest.endIndex))
+            let stack = rest[body.upperBound..<end.lowerBound].split(separator: "\n")
+                .map { $0.trimmingCharacters(in: .whitespaces) }.first { $0.contains("VStack(") }
+            #expect(stack.map { $0.hasPrefix("LazyVStack(") || $0.hasPrefix("return LazyVStack(") } == true,
+                    "\(view) builds every row up front: \(stack ?? "no stack")")
         }
     }
 }
