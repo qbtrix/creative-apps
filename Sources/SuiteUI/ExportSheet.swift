@@ -1,10 +1,11 @@
 // ExportSheet.swift: SuiteExportSheet (EK-30), drawn over ExportSheetRows, a
 // readout of the kernel's ExportRun: Format chips (one row of equal chips up
-// to four formats, else rows of three: formatColumns), Size (unless the host draws
+// to four formats, else rows of three: formatColumns), Size (a multiplier, "1.00×"; unless the host draws
 // its own scale), (when the format takes one) Quality and (when the host passes
 // a policy) Metadata rows, 8 pt apart, then the host's own options rows (the slot, #1989),
 // a progress bar while running, the finished or failed line after, and the
-// actions that state offers (ExportSheetAction). Every control's identifier
+// actions that state offers (ExportSheetAction); Export is disabled, its help
+// saying why, while the run is under way or the host's `blocked` reason holds. Every control's identifier
 // hangs off the host's prefix (ExportSheetIDs, "suite.export" by default) and
 // registers in `suite.controls`. When the progress row appears it marks
 // `progress-shown` on the prefix's series in the window's `suite.perf`
@@ -53,6 +54,8 @@ public struct ExportSheetRows: Hashable, Sendable {
         /// The kernel's size on an artwork `source` pixels big at 1x (XP-3 placeholder; XP-4 the modes).
         case pixels(SuiteExportSize, source: Int, Int)
         case metadata(ExportMetadata)
+        /// The unit its value reads with: Size is a multiplier ("1.00×"), Quality a plain 0...1.
+        public var unit: String { if case .size = self { "×" } else { "" } }
     }
     public enum Line: Hashable, Sendable { case finished(String), failed(String) }
     /// The modes the Size chips offer, in drawing order.
@@ -72,6 +75,10 @@ public struct ExportSheetRows: Hashable, Sendable {
         if case .finished = line, canReveal { shown.append(.reveal) }
         return shown + [line == nil ? .cancel : .dismiss, .start]
     }
+
+    /// Why Export can't run now, nil when it can: the run is under way or done, or the host's `blocked` reason
+    /// for the pick as it stands ("Select a layer first.").
+    public func startHelp(blocked: String?) -> String? { editable ? blocked : "The export is already under way or done." }
 
     /// Columns for the Format chips: up to four formats fill one row (no empty column, no orphan chip), more wrap by three.
     public static func formatColumns(_ count: Int) -> Int { count <= 4 ? max(count, 1) : 3 }
@@ -210,23 +217,25 @@ public struct SuiteExportSheet<Options: View>: View {
     let onExport: @MainActor () -> Void, onClose: @MainActor () -> Void
     let onTryAgain: (@MainActor () -> Void)?, onReveal: (@MainActor () -> Void)?
     let onSize: (@MainActor (SuiteExportSize) -> Void)?, onMetadata: (@MainActor (ExportMetadata) -> Void)?
+    let blocked: String?
     @Environment(\.suiteProbeRecorder) private var recorder
 
     /// `options` are the host's rows, drawn under the sheet's own and disabled with them; Try Again and Reveal
     /// show only when the host handles them. The Size and Metadata rows' controls are disabled, saying why,
-    /// unless the host passes `onSize` and `onMetadata`.
+    /// unless the host passes `onSize` and `onMetadata`. `blocked` is the host's reason the pick can't export
+    /// ("Select a layer first."): Export is disabled with it as its help.
     public init(
         _ readout: ExportSheetRows, formats: [FormatChoice], idPrefix: String = "suite.export",
         onFormat: @escaping @MainActor (String) -> Void, onScale: @escaping @MainActor (Double) -> Void,
         onQuality: @escaping @MainActor (Double) -> Void, onExport: @escaping @MainActor () -> Void,
         onClose: @escaping @MainActor () -> Void, onTryAgain: (@MainActor () -> Void)? = nil,
         onReveal: (@MainActor () -> Void)? = nil, onSize: (@MainActor (SuiteExportSize) -> Void)? = nil,
-        onMetadata: (@MainActor (ExportMetadata) -> Void)? = nil, @ViewBuilder options: () -> Options
+        onMetadata: (@MainActor (ExportMetadata) -> Void)? = nil, blocked: String? = nil, @ViewBuilder options: () -> Options
     ) {
         (self.readout, self.formats, self.ids, self.options) = (readout, formats, ExportSheetIDs(idPrefix), options())
         (self.onFormat, self.onScale, self.onQuality) = (onFormat, onScale, onQuality)
         (self.onExport, self.onClose, self.onTryAgain, self.onReveal) = (onExport, onClose, onTryAgain, onReveal)
-        (self.onSize, self.onMetadata) = (onSize, onMetadata)
+        (self.onSize, self.onMetadata, self.blocked) = (onSize, onMetadata, blocked)
     }
 
     public var body: some View {
@@ -262,7 +271,7 @@ public struct SuiteExportSheet<Options: View>: View {
             Button(action == .cancel ? "Cancel" : "Done", action: onClose)
                 .keyboardShortcut(.cancelAction).suiteControl(id: ids.id(action), enabled: true, reason: nil)
         case .start:
-            let help = readout.editable ? nil : "The export is already under way or done."
+            let help = readout.startHelp(blocked: blocked)
             Button("Export", action: onExport)
                 .keyboardShortcut(.defaultAction).disabled(help != nil).help(help ?? "Export with these settings")
                 .suiteControl(id: ids.start, enabled: help == nil, reason: help, role: "primary")
@@ -281,7 +290,8 @@ public struct SuiteExportSheet<Options: View>: View {
                     .accessibilityLabel("Format")
                     .suiteControl(id: ids.formats, enabled: readout.editable, reason: readout.editable ? nil : "The export is under way or done.")
             }
-        case .size(let scale): StudioScrubRow(label: "Size", value: scale, range: 0.25...4, step: 0.25, onChange: onScale)
+        case .size(let scale):
+            StudioScrubRow(label: "Size", value: scale, range: 0.25...4, step: 0.25, unit: row.unit, onChange: onScale)
         case .quality(let q): StudioScrubRow(label: "Quality", value: q, range: 0...1, step: 0.05, onChange: onQuality)
         case .pixels(let size, let w, let h): sizeRow(size, source: (w, h))
         case .metadata(let policy):
@@ -317,7 +327,7 @@ public struct SuiteExportSheet<Options: View>: View {
                 .suiteControl(id: ids.size, enabled: enabled, reason: reason)
             switch size {
             case .scale(let s):
-                StudioScrubRow(label: "Scale", value: s, range: 0.25...4, step: 0.25, onChange: { send(.scale($0)) })
+                StudioScrubRow(label: "Scale", value: s, range: 0.25...4, step: 0.25, unit: ExportSheetRows.Row.size(s).unit, onChange: { send(.scale($0)) })
                     .suiteControl(id: ids.size(.scale), enabled: enabled, reason: reason)
             case .pixels(let w, let h, let stretch):
                 InspectorRow("Width") {
@@ -357,11 +367,11 @@ extension SuiteExportSheet where Options == EmptyView {
         onQuality: @escaping @MainActor (Double) -> Void, onExport: @escaping @MainActor () -> Void,
         onClose: @escaping @MainActor () -> Void, onTryAgain: (@MainActor () -> Void)? = nil,
         onReveal: (@MainActor () -> Void)? = nil, onSize: (@MainActor (SuiteExportSize) -> Void)? = nil,
-        onMetadata: (@MainActor (ExportMetadata) -> Void)? = nil
+        onMetadata: (@MainActor (ExportMetadata) -> Void)? = nil, blocked: String? = nil
     ) {
         self.init(
             readout, formats: formats, idPrefix: idPrefix, onFormat: onFormat, onScale: onScale, onQuality: onQuality,
             onExport: onExport, onClose: onClose, onTryAgain: onTryAgain, onReveal: onReveal, onSize: onSize,
-            onMetadata: onMetadata) { EmptyView() }
+            onMetadata: onMetadata, blocked: blocked) { EmptyView() }
     }
 }

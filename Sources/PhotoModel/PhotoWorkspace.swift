@@ -27,21 +27,21 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, brush, eraser, clone
+    /// Select (V, #6012), Move folded in: a click picks the layer under it and moves nothing, a drag pressed on a
+    /// layer moves it (and the other picks with it), and a drag on empty canvas boxes layers.
+    case select
+    case marquee, ellipse, lasso, polygon, wand, brush, eraser, clone
     /// Spot Heal (fill-heal): a click heals a spot from its surroundings. Before
-    /// Heal, so J picks it first once it works.
+    /// Heal, so J picks it first.
     case spotHeal = "spot-heal"
     case heal
     /// Remove (fill-heal): paint over an object; its area fills from around it.
     case remove
     case crop, eyedropper
     /// Paint Bucket (fill-heal): a click fills the seed's colour region. Before
-    /// Gradient, so G picks it first once it works.
+    /// Gradient, so G picks it first.
     case bucket
     case gradient, text, pen
-
-    /// The retouch tools' help until their commands reach Photo (fill-heal FH-7, FH-8).
-    public static let retouchHelp = "Fill and heal arrive with fill-heal FH-8."
 
     /// Why the palette shows this tool disabled, as its tooltip; nil once the
     /// tool works. Every other tool works: the canvas sends its drags to
@@ -50,7 +50,6 @@ public enum PhotoTool: String, CaseIterable, Sendable {
     public var unavailableHelp: String? {
         switch self {
         case .eyedropper: "Not built yet (PV-9)."
-        case .bucket, .spotHeal, .remove: Self.retouchHelp
         default: nil
         }
     }
@@ -74,6 +73,8 @@ public struct CanvasSize: Sendable, Hashable {
 public struct PhotoWorkspace: Sendable {
     /// The open image's size; nil with no image open.
     public internal(set) var canvas: CanvasSize?
+    /// Pixels per inch: what File > New asked for (document-setup DS-8), 72 for anything else.
+    public internal(set) var resolution = 72.0
     /// The open file's name ("beach.jpg"); nil for a new image.
     public internal(set) var documentName: String?
     /// The layer stack, top first.
@@ -82,7 +83,7 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var pixels: [PhotoLayer.ID: TiledPixels] = [:]
     /// The picked layers, primary last, on the kernel's Selection (PhotoLayerSelection+Kernel.swift).
     var layerSelection = Selection<PhotoLayer.ID>()
-    /// The layer the inspector, the brush and the Move tool act on: the
+    /// The layer the inspector, the brush and a Select move act on: the
     /// selection's primary. Setting it makes that layer the whole selection;
     /// nil clears it.
     public internal(set) var selectedLayerID: PhotoLayer.ID? {
@@ -91,7 +92,7 @@ public struct PhotoWorkspace: Sendable {
             if let newValue { layerSelection.replace([newValue]) } else { layerSelection.clear() }
         }
     }
-    public private(set) var tool: PhotoTool = .move
+    public private(set) var tool: PhotoTool = .select
     /// The brush's options; its color is also the marquee's Fill color.
     public private(set) var brushOptions = ToolOptions()
     /// The eraser's own size, hardness and opacity; it has no color.
@@ -124,11 +125,17 @@ public struct PhotoWorkspace: Sendable {
     /// The use cases (PhotoServices); `.live` in the app, `.fake` under -PhotoFixture.
     public internal(set) var services: PhotoServices = .live
     /// The selection's coverage when it isn't an exact rectangle (PhotoSelectionMask.swift).
-    public internal(set) var selectionMask: Mask?
+    public internal(set) var selectionMask: Mask? {
+        didSet { if selectionMask != oldValue { maskOutline = Self.outline(selectionMask) } }
+    }
+    /// `selectionMask`'s outline, traced once per change for the ants (PhotoSelectionMask.swift).
+    var maskOutline: [[Point]] = []
     /// The selection's kernel recipe and Reselect's (PhotoArea+Kernel.swift).
     var area = PhotoArea()
-    /// The Marquee tool's shape and feather (PhotoSelectionMask.swift).
-    public internal(set) var selectionOptions = SelectionOptions()
+    /// The area tools' mode, feather and wand options (PhotoAreaTool.swift).
+    public internal(set) var areaOptions = PhotoAreaOptions()
+    /// The Polygon Lasso's corners so far, before it closes (PhotoAreaTool.swift).
+    var areaCorners: [Mask.Point] = []
     /// Each masked layer's mask, its own size, coverage as gray, alpha 1 (PhotoMask.swift).
     public internal(set) var masks: [PhotoLayer.ID: TiledPixels] = [:]
     /// Brush and eraser paint on the selected layer's mask (PhotoMask.swift).
@@ -137,6 +144,9 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var cropAspect = CropAspect.free
     /// Free Transform in progress (PhotoTransform.swift).
     public internal(set) var transformDraft: TransformDraft?
+    /// A drag frame: the routes draw the draft's layer through its matrix at composite time instead of its
+    /// resample (`transformPreview(live:)`, PhotoTransform+Kernel.swift). Set on a render's copy, never the document.
+    var liveDraft = false
     /// The eyedropper's sample size (PhotoSample+Kernel.swift).
     public internal(set) var sampleSize = SampleSize.point
     /// The Export sheet's last choices (PhotoExportOptions.swift).
@@ -207,6 +217,7 @@ public struct PhotoWorkspace: Sendable {
     /// Replaces the open image with `background` as its one layer.
     mutating func start(with background: TiledPixels, name: String?) {
         canvas = CanvasSize(width: background.width, height: background.height)
+        resolution = 72
         documentName = name
         layers = []
         pixels = [:]
@@ -217,6 +228,7 @@ public struct PhotoWorkspace: Sendable {
         stroke = nil
         selectionMask = nil
         area = PhotoArea()
+        areaCorners = []
         masks = [:]
         editsMask = false
         transformDraft = nil
@@ -241,6 +253,7 @@ public struct PhotoWorkspace: Sendable {
         endDrag()
         if tool != .text { commitTextBox() }
         self.tool = tool
+        areaCorners = []
         if tool != .crop, pendingCrop != nil { pendingCrop = nil }
     }
 
@@ -249,10 +262,10 @@ public struct PhotoWorkspace: Sendable {
     public var toolOptions: ToolOptions { tool == .eraser ? eraserOptions : brushOptions }
 
     /// The brush cursor's diameter in canvas pixels: the size of the selected
-    /// brush, eraser, clone stamp or heal. Nil with no image open or another tool
+    /// brush, eraser, clone stamp, heal, spot heal or remove. Nil with no image open or another tool
     /// selected.
     public var brushCursorDiameter: Double? {
-        guard canvas != nil, [.brush, .eraser, .clone, .heal].contains(tool) else { return nil }
+        guard canvas != nil, [.brush, .eraser, .clone, .heal, .spotHeal, .remove].contains(tool) else { return nil }
         return toolOptions.size
     }
 
@@ -411,7 +424,8 @@ extension PhotoWorkspace: Equatable {
             && lhs.selection == rhs.selection && lhs.pendingCrop == rhs.pendingCrop
             && lhs.cloneSource == rhs.cloneSource && lhs.stroke == rhs.stroke
             && lhs.history == rhs.history && lhs.selectionMask == rhs.selectionMask && lhs.area == rhs.area
-            && lhs.selectionOptions == rhs.selectionOptions && lhs.editsMask == rhs.editsMask
+            && lhs.areaOptions == rhs.areaOptions && lhs.areaCorners == rhs.areaCorners
+            && lhs.editsMask == rhs.editsMask
             && lhs.cropAspect == rhs.cropAspect && lhs.transformDraft == rhs.transformDraft
             && lhs.sampleSize == rhs.sampleSize && lhs.exportOptions == rhs.exportOptions
             && lhs.exportRun == rhs.exportRun && lhs.stylePanel == rhs.stylePanel
@@ -451,6 +465,8 @@ extension AdjustmentKind {
         case .curves: "Curves"
         case .blur: "Blur"
         case .hueSaturation: "Hue/Saturation"
+        case .blackAndWhite: "Black & White"
+        case .invert: "Invert"
         }
     }
 }

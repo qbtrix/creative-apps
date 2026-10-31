@@ -34,8 +34,13 @@ enum HaloKeyRules {
     /// Layer space to composition space, parents applied outermost last,
     /// through the kernel's `worldPlacement`. The walk stops at a parent it
     /// has already seen (a cycle) or an unknown one. Nil for an unknown id.
+    /// A layer that follows nothing is its own local matrix, the walk's
+    /// answer for a root, without building the tree: a frame's draw list
+    /// asks for every layer, so a tree per layer cost layers squared (#5844).
     static func worldMatrix(of id: String, in c: HaloComposition, at f: Int) -> HaloMatrix? {
-        guard layer(id, in: c) != nil else { return nil }
+        guard let layer = layer(id, in: c) else { return nil }
+        // ponytail: a followed layer still builds the tree per call; build one per draw list if parented comps grow.
+        guard layer.parentID != nil else { return localMatrix(of: layer, in: c, at: f) }
         return c.layerTree.worldPlacement(of: id) { localMatrix(of: $0.payload, in: c, at: f) }
     }
 
@@ -52,10 +57,10 @@ enum HaloKeyRules {
     }
 
     /// The TRANSFORM rows of layer `id` at `f`, in `HaloProperty.allCases`
-    /// order; [] for an unknown id.
+    /// order, then its style rows (layer-styles HY-5); [] for an unknown id.
     static func rows(for id: String, in c: HaloComposition, at f: Int) -> [HaloPropertyRow] {
         guard let layer = layer(id, in: c) else { return [] }
-        return HaloProperty.allCases.map { p in
+        return (HaloProperty.allCases + layer.styleProperties).map { p in
             let v = value(p, of: layer, in: c, at: f)
             return HaloPropertyRow(
                 property: p, value: v, text: p.text(v), keyState: keyState(layer.tracks[p.rawValue] ?? [], at: f))
@@ -103,6 +108,26 @@ enum HaloKeyRules {
         }
     }
 
+    /// Delete Keyframes in one pass over the layers: each track drops its
+    /// picked frames at once, so 5,000 keys cost one walk, not 5,000 toggles
+    /// (#5988). The result matches `toggleKey` on each key: a track left with
+    /// one key goes static at it, one left with none at its first key.
+    static func deleteKeys(_ keys: Set<HaloKeyRef>, in c: inout HaloComposition) {
+        let byLayer = Dictionary(grouping: keys, by: \.layerID)
+        for i in c.layers.indices {
+            guard let refs = byLayer[c.layers[i].id] else { continue }
+            for (p, picked) in Dictionary(grouping: refs, by: \.property) {
+                guard let track = c.layers[i].tracks[p.rawValue] else { continue }
+                let frames = Set(picked.map(\.frame))
+                let left = track.filter { !frames.contains($0.frame) }
+                guard left.count < track.count else { continue }
+                if left.count >= 2 { c.layers[i].tracks[p.rawValue] = left; continue }
+                let first = left.first ?? track.min { $0.frame < $1.frame }
+                if let first { setStatic(first.value, p, of: &c.layers[i]) }
+            }
+        }
+    }
+
     /// The parent picker: layer `id` follows `pid` (nil clears it) through
     /// the kernel's `setFollow(keepingPlace:)` and keeps its anchor's place on
     /// screen at `f`, its x and y rewritten in the new parent's space through
@@ -129,10 +154,14 @@ enum HaloKeyRules {
         c = copy
     }
 
-    /// The not-animated home of a value: `opacity` on the layer with no
-    /// track, every other property a one-key track at frame 0.
+    /// The not-animated home of a value: `opacity` on the layer and a style
+    /// property in the layer's style, each with no track; every other
+    /// property a one-key track at frame 0.
     private static func setStatic(_ v: Double, _ p: HaloProperty, of layer: inout HaloLayer) {
-        if p == .opacity {
+        if p.styleKind != nil {
+            layer.setStyleValue(v, p)
+            layer.tracks[p.rawValue] = nil
+        } else if p == .opacity {
             layer.opacity = v
             layer.tracks[p.rawValue] = nil
         } else {

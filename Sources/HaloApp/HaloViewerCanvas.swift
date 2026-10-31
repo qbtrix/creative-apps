@@ -9,7 +9,8 @@
 // picture, SuiteUI's drawPlaced without strokes, PH-3), a shape the ellipse in it, a text layer
 // is a resolved Text on the pinned baseline rule (its line box's top-left at
 // bounds.origin, its first baseline at bounds.y + ascent). The selected
-// layer's world box gets SuiteUI's SelectionOutline. The frame Render Frame
+// layer's world box gets SuiteUI's SelectionOutline only when
+// HaloViewerHandles isn't drawing it (no transformSelection). The frame Render Frame
 // shows (HaloRenderedFrameView) and the viewer's gestures (HaloViewerGestures,
 // with ⌥-drag panning a placed picture, HaloPlaceFocusDrag) sit over it. The artboard's value is `viewerSummary` ("Frame 30:
 // Background, Badge, Title: Hello Halo"); its child `halo.viewer.canvas` reads
@@ -58,27 +59,32 @@ struct HaloViewerCanvas: View {
 /// The drawn layers over the artboard: the live drag's project while one
 /// lasts (HaloLiveEdit), else the playing frame, else the window's. Only this view reads the live
 /// project, so a drag sample re-runs it and nothing around it.
-struct HaloLiveLayers: View {
+struct HaloLiveLayers: View, BodyCounted {
     let model: HaloProject
     let artboard: CGSize
     @Environment(\.haloLiveEdit) private var live
 
     #if DEBUG
-    /// How many times the drawn layers' body ran; HaloWindowLiveDragTests counts a drag's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         let shown = live?.shown(model) ?? model
         if let list = shown.viewerDrawList {
-            HaloDrawnLayers(list: list, selectedLayerID: shown.selectedLayerID)
+            HaloDrawnLayers(list: list, selectedLayerID: Self.outlinedLayer(shown))
                 .aspectRatio(artboard, contentMode: .fit)
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)
                 .padding(SuiteSize.canvasInset)
         }
+    }
+
+    /// The layer the canvas outlines: none while HaloViewerHandles draws the
+    /// selection, whose turned box an upright outline would double.
+    nonisolated static func outlinedLayer(_ shown: HaloProject) -> String? {
+        shown.transformSelection == nil ? shown.selectedLayerID : nil
     }
 }
 
@@ -95,8 +101,9 @@ struct HaloDrawnLayers: View {
         // before the linear drawing group ever sees it (HF-1 keyed-6, #1161).
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: false) { context, size in
             let fit = HaloCanvasFit.transform(HaloCanvasFit.layout(list: list, size: size))
+            var ascents: [CGFloat: CGFloat] = [:]
             for item in list.items {
-                drawItem(item, in: context, fit: fit)
+                drawItem(item, in: context, fit: fit, ascents: &ascents)
             }
         }
         .drawingGroup(opaque: false, colorMode: .linear)
@@ -117,8 +124,9 @@ struct HaloDrawnLayers: View {
     }
 }
 
-/// Draws one item bottom first into its own copy of `context`.
-private func drawItem(_ item: HaloDrawItem, in context: GraphicsContext, fit: CGAffineTransform) {
+/// Draws one item bottom first into its own copy of `context`; `ascents` keeps
+/// each font size's ascent for the frame, so Core Text makes one font per size.
+private func drawItem(_ item: HaloDrawItem, in context: GraphicsContext, fit: CGAffineTransform, ascents: inout [CGFloat: CGFloat]) {
     var g = context
     let m = item.matrix
     g.concatenate(CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty).concatenating(fit))
@@ -140,7 +148,8 @@ private func drawItem(_ item: HaloDrawItem, in context: GraphicsContext, fit: CG
         let size = CGFloat(content.fontSize)
         let resolved = g.resolve(Text(content.string).font(.system(size: size)).foregroundStyle(color))
         let box = CGSize(width: max(rect.width, 1), height: max(rect.height, 1))
-        let ascent = HaloCanvasFit.ascent(fontSize: size)
+        let ascent = ascents[size] ?? HaloCanvasFit.ascent(fontSize: size)
+        ascents[size] = ascent
         let at = CGPoint(x: rect.minX, y: rect.minY + ascent - resolved.firstBaseline(in: box))
         g.draw(resolved, at: at, anchor: .topLeading)
     case .null: break

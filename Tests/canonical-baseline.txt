@@ -4,7 +4,6 @@
 # SuiteModel, delete the app copy, and drop its line in the same PR.
 Sources/DesignApp/DesignClosePrompt.swift
 Sources/DesignApp/DesignLayersPanel.swift
-Sources/DesignApp/DesignPasteboardBridge.swift
 Sources/DesignApp/DesignRasterizer.swift
 Sources/DesignApp/DesignSaveStatus.swift
 Sources/DesignApp/DesignSelectionMarks.swift
@@ -17,7 +16,6 @@ Sources/DesignModel/Live/LiveFiling.swift
 Sources/DesignModel/Live/LiveMarquee.swift
 Sources/DesignModel/Live/LiveTransforming.swift
 Sources/FlareApp/FlareEasingPopover.swift
-Sources/FlareApp/FlarePasteboard.swift
 Sources/FlareApp/FlareStageSelection.swift
 Sources/FlareApp/FlareWindow+Export.swift
 Sources/FlareApp/FlareWindow+Layers.swift
@@ -101,13 +99,11 @@ Sources/PhotoApp/CropOverlay.swift
 Sources/PhotoApp/ImageIOCodec.swift
 Sources/PhotoApp/PhotoAutosave.swift
 Sources/PhotoApp/PhotoHistoryTab.swift
-Sources/PhotoApp/PhotoPasteboard.swift
 Sources/PhotoApp/PhotoSaveStatusLabel.swift
 Sources/PhotoApp/PhotoWindow+Crop.swift
 Sources/PhotoApp/PhotoWindow+Export.swift
 Sources/PhotoApp/PhotoWindow+History.swift
 Sources/PhotoApp/PhotoWindow+Transform.swift
-Sources/PhotoApp/SelectionOverlay.swift
 Sources/PhotoApp/StraightenSheet.swift
 Sources/PhotoApp/TransformOptions.swift
 Sources/PhotoApp/TransformOverlay.swift
@@ -115,7 +111,6 @@ Sources/PhotoModel/AdjustmentSettings.swift
 Sources/PhotoModel/Contracts/CropContracts.swift
 Sources/PhotoModel/Contracts/EditContracts.swift
 Sources/PhotoModel/Contracts/OutputContracts.swift
-Sources/PhotoModel/Contracts/SelectionContracts.swift
 Sources/PhotoModel/CoreRasterImageCodec.swift
 Sources/PhotoModel/Fakes/FakeEdit.swift
 Sources/PhotoModel/Fakes/FakeGeometry.swift
@@ -136,6 +131,7 @@ Sources/PhotoModel/PhotoLevelsFormat.swift
 Sources/PhotoModel/PhotoLiveTone.swift
 Sources/PhotoModel/PhotoRecovery.swift
 Sources/PhotoModel/PhotoRenderRoute.swift
+Sources/PhotoModel/PhotoReusingCodec.swift
 Sources/PhotoModel/PhotoSaveStatusHelp.swift
 Sources/PhotoModel/PhotoSelection.swift
 Sources/PhotoModel/PhotoSelectionMask.swift

@@ -102,10 +102,9 @@ struct GalleryTimelineFixture {
 }
 
 /// One timeline page: the switches, the strip over the page's state, the log.
-struct GalleryTimelinePage: View {
+struct GalleryTimelinePage: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     let fixture: GalleryTimelineFixture
     @Environment(\.galleryRequest) private var request
@@ -150,7 +149,7 @@ struct GalleryTimelinePage: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         // Read here, so a change to any of them runs this body; the playhead is read only by the readers.
         let tracks = tracks, rate = rate, unit = unit, workArea = workArea, toolbar = toolbar

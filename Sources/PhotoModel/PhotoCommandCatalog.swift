@@ -16,6 +16,8 @@ extension PhotoWorkspace {
     public struct CanvasSizeParams: Codable, Sendable { public var width, height: Int; public var anchor: BoxAnchor }
     public struct NameParams: Codable, Sendable { public var name: String }
     public struct ImageParams: Codable, Sendable { public var name: String?; public var width, height: Int; public var rgba8: [UInt8] }
+    /// edit.paste-as-image's: a file's name and its bytes in base64, as the shared Paste as Image takes them.
+    public struct PasteFileParams: Codable, Sendable { public var name, base64: String }
     public struct StraightenParams: Codable, Sendable { public var degrees: Double; public var cropToFit: Bool }
     /// Export's sheet values: the format and, for JPEG, the quality (0.1...1; the last choice when left out).
     public struct ExportParams: Codable, Sendable { public var format: String; public var quality: Double? }
@@ -38,6 +40,8 @@ extension PhotoWorkspace {
 
     /// The reasons menu items give that the Model has no help property for.
     static let noImage = "Open an image first.", noLayer = "Select a layer first."
+    /// Paste as Image's reason on an open image until Photo's pasteboard adapter (clipboard-interop CB-13) reads vector art.
+    public static let pasteAsImageHelp = "Paste as image arrives with Photo's pasteboard adapter."
     static let atTop = "The selected layer is already at the top.", atBottom = "The selected layer is already at the bottom."
 
     /// The catalog of `commands`; empty only if an id broke the id rule.
@@ -58,11 +62,12 @@ extension PhotoWorkspace {
         "edit.fill-selection": "Fill Selection", "image.resize": "Image Size…", "image.canvas-size": "Canvas Size…", "image.rotate-cw": "Rotate 90° Clockwise",
         "image.rotate-ccw": "Rotate 90° Counterclockwise", "image.rotate-180": "Rotate 180°", "image.straighten": "Straighten…",
         "layer.rename": "Rename Layer…", "layer.bring-forward": "Bring Forward", "layer.send-backward": "Send Backward",
+        "select.invert": "Invert", "select.feather": "Feather…", "select.expand": "Expand…", "select.contract": "Contract…",
     ]
     /// The tooltip of the menu item for `id`: what clicking it does, where the catalog's summary describes the agent call.
     public static func menuSummary(_ id: String) -> String { menuSummaries[id] ?? catalog.spec(id)?.summary ?? id }
     static let menuSummaries = [
-        "file.new": "Opens a new white 1920 × 1080 image.", "file.open": "Opens an image file.",
+        "file.new": "Opens a new image at the size, resolution and background you choose.", "file.open": "Opens an image file.",
         "file.save": "Saves the image to its file.", "file.save-as": "Saves the image to a new file.",
         "file.export": "Exports a flattened copy of the image.", "image.resize": "Changes the image's size.",
         "image.canvas-size": "Grows or crops the canvas around an anchor without scaling the image.",
@@ -99,7 +104,11 @@ extension PhotoWorkspace {
     static let imageSchema = ParamSchema.object(
         ["name": .optional(.string("The file's name.", maxLength: 255)), "width": .integer(minimum: 1), "height": .integer(minimum: 1),
          "rgba8": .array(of: .integer(minimum: 0, maximum: 255))], required: ["name", "width", "height", "rgba8"])
+    static let pasteFileSchema = ParamSchema.object(["name": .string("The file's name, \"art.svg\".", maxLength: 255),
+                                                     "base64": .string("The file's bytes, base64: SVG.")], required: ["name", "base64"])
     static let sizeExample = JSONValue.object(["width": .number(24), "height": .number(18)])
+    static let newExample = JSONValue.object(["width": .number(4), "height": .number(6), "unit": .string("in"),
+                                              "resolution": .number(300), "background": .string("transparent")])
     static let canvasSizeSchema = ParamSchema.object(
         ["width": .integer("Width in pixels.", minimum: 1), "height": .integer("Height in pixels.", minimum: 1),
          "anchor": .string("The point the image keeps its place by.", oneOf: BoxAnchor.allCases.map(\.rawValue))],
@@ -116,10 +125,15 @@ extension PhotoWorkspace {
         }
         + HistoryCommands.specs(PhotoWorkspace.self) + SampleCommands.specs(PhotoWorkspace.self) + textCommands + pathCommands
         + ToneCommands.specs(PhotoWorkspace.self)
+        + RetouchCommands.specs(PhotoWorkspace.self)
+        + AdjustCommands.specs(PhotoWorkspace.self)
+        + agentCommands
 
     static let fileCommands: [CommandSpec<PhotoWorkspace>] = [
-        .typed("file.new", title: "New Image", summary: "Opens a new white image of the given size.", kind: .file,
-               params: SizeParams.self, schema: sizeSchema, example: sizeExample) { w, p in try w.newCanvas(width: p.width, height: p.height); return JSONValue.object([:]) },
+        .typed("file.new", title: "New Image", summary: "Opens a new image at a size, unit, resolution and background.", kind: .file,
+               params: DocumentSetup.self, schema: DocumentSetupCommands.setupSchema, example: newExample) { w, p in
+            try w.newImage(p); return JSONValue.object([:])
+        },
         .typed("file.open", title: "Open", summary: "Opens an image from straight-alpha RGBA bytes.", kind: .file, params: ImageParams.self,
                schema: imageSchema, example: .object(["name": .string("dot.png"), "width": .number(1), "height": .number(1), "rgba8": .array([0, 0, 0, 255].map(JSONValue.number))]),
                availability: bar(.open)) { w, p in try w.open(rgba8: p.rgba8, width: p.width, height: p.height, name: p.name ?? "Untitled.png"); return JSONValue.object([:]) },
@@ -163,6 +177,12 @@ extension PhotoWorkspace {
             let center = Mask.Point(x: Double(w.canvas?.width ?? 0) / 2, y: Double(w.canvas?.height ?? 0) / 2)
             w.paste(ClipboardImage(image: DecodedImage(rgba8: p.rgba8, width: p.width, height: p.height), source: nil), viewCenter: center)
             return JSONValue.object([:])
+        },
+        .typed("edit.paste-as-image", title: "Paste as Image", summary: "Pastes vector art by name as pixels on a new layer, rasterized at the canvas size.",
+               kind: .edit, params: PasteFileParams.self, schema: pasteFileSchema,
+               example: .object(["name": .string("art.svg"), "base64": .string("PHN2Zy8+")]),
+               availability: menu { _ in pasteAsImageHelp }) { _, _ -> JSONValue in
+            throw CatalogError.unavailable(id: "edit.paste-as-image", why: pasteAsImageHelp)
         },
         act("edit.select-all", "Select All", "Selects the whole image.", .view, gate { $0.canSelectAll ? nil : noImage }) { $0.selectAll() },
         act("edit.delete-selection", "Delete", "Clears the selected pixels of the selected layer.", .edit, menu(selectionHelp)) { $0.deleteSelection() },

@@ -2,41 +2,40 @@
 // Radial, over the selection's kernel fill. It reads `fillSelection` and `fillHelp` from the Model and
 // sends every pick as a `GradientIntent` through `.fill`, which DesignWindow hands to `runFill`. While
 // `fillHelp` says why (nothing selected, a locked layer, or gradients not built yet) the switch is off
-// and that reason is its tooltip. A gradient shows SuiteUI's GradientEditor under the switch (its stops,
-// colour and angle; GF-3 landed it, gradient-fill DG-u). While the mouse is down in the editor (a stop
-// drag, an angle scrub) its intents preview on the window's live box (DesignLiveDrag), which this section
-// and the canvas read, and mouse-up lands them as one step (`.endEditRun`), so the window doesn't run per
-// sample; a click, key or picked colour goes straight to `.fill`. Values in, intents out.
+// and that reason is its tooltip and a note under it. The switch is SuiteUI's: a gradient shows its
+// GradientEditor (the switch, its stops, colour and angle; GF-3 landed it, gradient-fill DG-u), a solid
+// its `GradientTypeSwitch` alone, both under `design.inspector.fill-type`. While the mouse is down in the
+// editor (a stop drag, an angle scrub) its intents preview on the window's live box (DesignLiveDrag), which
+// this section and the canvas read, and mouse-up lands them as one step (`.endEditRun`), so the window
+// doesn't run per sample; a click, key or picked colour goes straight to `.fill`. Values in, intents out.
 import DesignModel
 import SuiteKernel
 import SuiteUI
 import SwiftUI
 
-struct DesignInspectorFill: View {
+struct DesignInspectorFill: View, BodyCounted {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
     /// The mouse is down in the editor: its intents preview until mouse-up.
     @State private var pressing = false
 
-    nonisolated static let options = FillType.allCases.map {
-        InspectorOption(
-            id: $0, title: $0.rawValue.capitalized, identifier: "\(DesignControlID.inspectorFillType).\($0.rawValue)")
-    }
-
     var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
         let help = model.fillHelp
-        let shown = live?.workspace ?? model
+        let shown = live?.scrubbed ?? model
         let type = shown.fillSelection.map { GradientRules.type(of: $0.fill) } ?? .solid
         VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
-            ChoiceChips(options: Self.options, selected: type) { perform(.fill(.type($0))) }
-                .disabled(help != nil)
-                .help(help ?? "Fill type")
-                .suiteControl(id: DesignControlID.inspectorFillType, enabled: help == nil, reason: help, identifies: false)
             if let selection = shown.fillSelection, type != .solid {
-                // SuiteUI's editor without its own switch (the chips above are it): the stop bar, the stop's
-                // colour and, for a linear fill, the angle, each gesture an intent to `runFill`.
-                GradientEditor(fill: selection.fill, box: selection.box, types: [type]) { send($0) }
+                // SuiteUI's editor with its switch: the stop bar, the stop's colour and location and, for a
+                // linear fill, the angle, each gesture an intent to `runFill`.
+                GradientEditor(fill: selection.fill, box: selection.box, typeID: DesignControlID.inspectorFillType,
+                               typeHelp: help) { send($0) }
                     .disabled(help != nil)
                     .help(help ?? "Gradient stops and angle")
                     .simultaneousGesture(
@@ -46,6 +45,10 @@ struct DesignInspectorFill: View {
                                 pressing = false
                                 perform(.endEditRun)
                             })
+            } else {
+                GradientTypeSwitch(type: type, typeID: DesignControlID.inspectorFillType, help: help) {
+                    perform(.fill(.type($0)))
+                }
             }
         }
     }

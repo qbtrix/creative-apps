@@ -112,10 +112,13 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     // `onKeyPress` and `accessibilityActions` (LL-7) start a rename from Return
     // on the focused row or the "Rename" action through `requestRename`, the
     // `Button` being the action itself and `nil` its `if onRename != nil`: no
-    // pointer, so no toggle or blank space.
+    // pointer, so no toggle or blank space. `onChange` (LF-2) watches
+    // `renameAsk`, which only the context menu's Rename item bumps, and calls
+    // `requestRename`: no gesture or hit area either.
     let modifiers: Set = [
         "toggleStyle", "buttonStyle", "labelStyle", "foregroundStyle", "disabled", "help", "accessibilityLabel",
         "accessibilityIdentifier", "identifier", "badge", "selectionDisabled", "onKeyPress", "accessibilityActions",
+        "onChange",
     ]
     let calls: Set = [
         "View", "HStack", "Spacer", "ForEach", "Toggle", "Binding", "Label", "Text", "SidebarToggleIcon",
@@ -144,14 +147,18 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     // in the label's chain: `isOpen`, `type`, `cancel` and `message` read or
     // change the rename field, `font`, `foregroundStyle` and
     // `accessibilityIdentifier` style and name the field and its message, and
-    // `loseFocus` commits or drops the draft. None can start a rename.
+    // `loseFocus` commits or drops the draft. `refusalShake` (reading
+    // `refusals`) only moves the field sideways, and `SidebarRenameMessage`
+    // draws the reason (#3462). None can start a rename.
     let modifiers: Set = [
         "focused", "onSubmit", "onExitCommand", "onChange", "contentShape", "simultaneousGesture", "onEnded",
         "modifier", "isOpen", "type", "cancel", "message", "font", "foregroundStyle", "accessibilityIdentifier",
+        "refusalShake", "refusals",
     ]
     let calls: Set = [
         "View", "nil", "else", "focused", "TextField", "Binding", "commitRename", "Label", "Rectangle", "TapGesture",
         "beginRename", "Text", "SidebarRowIcon", "SidebarRowDimming", "SidebarRowLook", "VStack", "loseFocus",
+        "SidebarRenameMessage",
     ]
     #expect(
         names.modifiers.subtracting(modifiers).isEmpty,

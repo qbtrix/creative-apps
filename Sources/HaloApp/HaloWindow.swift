@@ -1,5 +1,6 @@
 // HaloWindow.swift: Halo's window and command router. It is SuiteWindow with
-// the project's compositions in the sidebar, HaloViewer as content and
+// the sidebar's Compositions and AI tabs (SuiteUI AgentSidebarTabs; the AI
+// tab's routes are HaloWindow+Agent.swift), HaloViewer as content and
 // HaloCompositionInspector (settings and layers) in the inspector, a column
 // `inspectorWidth` wide whatever it shows. Every
 // action a view, a menu or a key takes is a HaloCommand sent to
@@ -31,7 +32,7 @@ extension FocusedValues {
     @Entry var haloPerform: (@MainActor (HaloCommand) -> Void)?
 }
 
-struct HaloWindow: View {
+struct HaloWindow: View, BodyCounted {
     @State var model = HaloLaunch.project
     @State var showsNewComposition = false
     /// The dialog an area's route asked for; its area's hook shows it and sets it back to nil.
@@ -48,15 +49,14 @@ struct HaloWindow: View {
     static let inspectorWidth = SuiteSize.inspectorWidth.ideal
 
     #if DEBUG
-    /// How many times a window's body ran; HaloWindowPlaybackTests counts playback's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     /// The project the last body ran on, for the hosted-window tests to read back.
     static var shownProject: HaloProject?
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         let _ = Self.shownProject = model
         #endif
         let newComposition = ToolbarAction("New Composition…", systemImage: "plus", identifier: "halo.composition.new") {
@@ -64,14 +64,20 @@ struct HaloWindow: View {
         }
         scenes(
             SuiteWindow(title: fileWindowTitle, actions: [newComposition], inspectorWidth: Self.inspectorWidth) {
-                SuiteSidebarList(
-                    sections: [SidebarSection(
-                        id: "compositions", title: "Compositions",
-                        items: model.compositions.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "rectangle.stack") },
-                        addAction: newComposition)],
-                    selection: model.selectedCompositionID,
-                    onSelect: { perform(.selectComposition($0)) },
-                    onRename: { perform(.renameComposition($0, $1)) })
+                AgentSidebarTabs("Compositions", id: HaloProject.sidebarTabsControl, work: { model.agentWork }) {
+                    SuiteSidebarList(
+                        sections: [SidebarSection(
+                            id: "compositions", title: "Compositions",
+                            items: model.compositions.map { SidebarItem(id: $0.id, title: $0.name, systemImage: "rectangle.stack") },
+                            addAction: newComposition)],
+                        selection: model.selectedCompositionID,
+                        onSelect: { perform(.selectComposition($0)) },
+                        onRename: { perform(.renameComposition($0, $1)) })
+                } ai: {
+                    // Halo layers can't hide yet, so the list has no eye.
+                    AgentActivityList(requests: model.agentRequests, layerNames: model.layerNamesByID, hidden: [],
+                                      showsEye: false, work: model.agentWork, onAction: agentPerform)
+                }
             } content: {
                 HaloViewer(model: model, perform: perform, onShapeIntent: { intent in
                     shapes.isOn = true
@@ -142,7 +148,7 @@ struct HaloWindow: View {
 
     /// Every area's hook over `content`, in a fixed order.
     private func scenes(_ content: some View) -> some View {
-        historyScene(textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content))))))))))
+        stylingScene(historyScene(textScene(renderScene(easingScene(fileScene(editScene(layersScene(keysScene(playbackScene(viewerScene(content)))))))))))
     }
 }
 

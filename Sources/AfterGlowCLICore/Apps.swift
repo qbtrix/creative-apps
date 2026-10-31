@@ -37,6 +37,13 @@ public struct HeadlessApp: Sendable {
         make = { options in HeadlessSession(app: D.app, box: TypedSession(document: try new(options))) }
     }
 
+    /// Whether a save may land on `path`: its extension is the app's native one. A file opened as an import (a
+    /// Lottie .json, a PNG) never gets the native format written over it.
+    public func savesNatively(to path: String) -> Bool {
+        let file = path.split(separator: "/").last.map(String.init) ?? path
+        return file.lastIndex(of: ".").map { file[file.index(after: $0)...].lowercased() } == openExtensions.first
+    }
+
     /// Every command the app runs, by id.
     public func describeAll() -> [CommandDescription] { describe() }
 
@@ -60,6 +67,8 @@ public struct HeadlessSession: Sendable {
     public mutating func run(_ step: CommandEnvelope) throws(CatalogError) -> CommandOutcome { try box.run(step) }
     /// Runs `steps` in order, stopping at the first refusal; `atomic` puts the document back when one stops it.
     public mutating func runBatch(_ steps: [CommandEnvelope], atomic: Bool) -> BatchReport { box.runBatch(steps, atomic: atomic) }
+    /// Hands `file.drop` the dropped files' bytes by path; a document that takes no drops ignores them.
+    public mutating func receiveDropped(_ files: [String: Data]) { box.receiveDropped(files) }
     /// The document in its app's native format.
     public func save() throws -> Data { try box.save() }
     /// The document exported as `format` with `options`.
@@ -73,6 +82,7 @@ protocol SessionBox: Sendable {
     func availability(_ id: String) -> Availability
     mutating func run(_ step: CommandEnvelope) throws(CatalogError) -> CommandOutcome
     mutating func runBatch(_ steps: [CommandEnvelope], atomic: Bool) -> BatchReport
+    mutating func receiveDropped(_ files: [String: Data])
     func save() throws -> Data
     func export(_ format: String, options: JSONValue) throws -> [ExportedFile]
     func summary() -> JSONValue
@@ -84,6 +94,11 @@ struct TypedSession<D: HeadlessDocument>: SessionBox {
     func availability(_ id: String) -> Availability { D.catalog.availability(id, on: document) }
     mutating func run(_ step: CommandEnvelope) throws(CatalogError) -> CommandOutcome { try D.catalog.run(step, on: &document) }
     mutating func runBatch(_ steps: [CommandEnvelope], atomic: Bool) -> BatchReport { D.catalog.runBatch(steps, on: &document, atomic: atomic) }
+    mutating func receiveDropped(_ files: [String: Data]) {
+        guard !files.isEmpty, var receiver = document as? any HeadlessDropReceiver else { return }
+        receiver.receiveDropped(files)
+        if let received = receiver as? D { document = received }
+    }
     func save() throws -> Data { try document.save() }
     func export(_ format: String, options: JSONValue) throws -> [ExportedFile] { try document.export(format, options: options) }
     func summary() -> JSONValue { document.summary() }

@@ -1,7 +1,8 @@
 // ExportSheetTests.swift: ExportSheetRows follows the kernel's ExportRun, and
 // the gallery's fake run climbs to 10 of 10 and finishes (EK-30). The sheet's
 // controls take the host's prefix (#1989): format chips, the actions each run
-// state offers, and a host-supplied options view, all registered in
+// state offers (Export disabled, saying why, while the host refuses the pick),
+// and a host-supplied options view, all registered in
 // `suite.controls` once hosted. macOS only.
 import AppKit
 import SuiteKernel
@@ -48,6 +49,13 @@ import Testing
         #expect([0, 1, 2, 3, 4, 5, 8].map(ExportSheetRows.formatColumns) == [1, 1, 2, 3, 4, 3, 3])
     }
 
+    /// Size is a multiplier, so its row reads "1.00×", not a bare "1.00"; Quality stays a plain 0...1.
+    @Test func sizeReadsAsAMultiplier() {
+        let size = ExportSheetRows.Row.size(0.5), quality = ExportSheetRows.Row.quality(0.9)
+        #expect(size.unit == "×" && quality.unit.isEmpty)
+        #expect(NumericInput.text(0.5, unit: size.unit) == "0.50×" && NumericInput.spoken(1, unit: size.unit) == "1 times")
+    }
+
     @Test func idsTakeTheHostPrefix() {
         let ids = ExportSheetIDs("flare.export")
         let formats = ["svgFrame", "lottie", "pngSequence"].map(ids.format)
@@ -65,6 +73,15 @@ import Testing
         #expect(rows(.finished(png, ["a.png"])).actions(canTryAgain: true, canReveal: false) == [.dismiss, .start])
         #expect(rows(.failed(png, "No.")).actions(canTryAgain: true, canReveal: true) == [.tryAgain, .dismiss, .start])
         #expect(rows(.failed(png, "No.")).actions(canTryAgain: false, canReveal: true) == [.dismiss, .start])
+    }
+
+    /// Export is disabled, saying why, while the run is under way or done, or while the host refuses the pick.
+    @Test func startHelpSaysWhyExportCantRun() {
+        let png = ExportPick(format: "png")
+        #expect(rows(.editing(png)).startHelp(blocked: nil) == nil)
+        #expect(rows(.editing(png)).startHelp(blocked: "Select a layer first.") == "Select a layer first.")
+        #expect(rows(.running(png, done: 1, total: 3)).startHelp(blocked: nil) == "The export is already under way or done.")
+        #expect(rows(.finished(png, ["a.png"])).startHelp(blocked: "Select a layer first.") == "The export is already under way or done.")
     }
 
     /// A sheet with prefix `flare.export` registers its chips' group, its actions and the host's options row.

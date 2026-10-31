@@ -355,7 +355,7 @@ private struct ThumbnailCell<ID: Hashable>: View {
                     .accessibilityLabel(Text(verbatim: marks.rating == 1 ? "1 star" : "\(marks.rating) stars"))
                 }
                 if marks.dimmed { Image(systemName: "xmark.circle.fill").accessibilityLabel("Rejected") }
-                if marks.isFlagged { Image(systemName: "flag.fill").accessibilityLabel("Flagged") }
+                if marks.isFlagged { Image(systemName: "flag.fill").accessibilityLabel("Picked") }
                 if let label = marks.colorLabel {
                     Image(systemName: "circle.fill").foregroundStyle(label.color).accessibilityLabel(label.name)
                 }

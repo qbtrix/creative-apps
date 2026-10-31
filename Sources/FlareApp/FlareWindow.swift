@@ -19,9 +19,10 @@
 // the export sheet is FlareExportSheetAdapter's, shown while the Model's run
 // isn't idle.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
-// `help` for every section 3.4 item, the Undo and Redo step names, the recent
-// files, Loop and the selection's Edit reasons, and File > Place…'s reason and
-// action; the window takes SVG drops (FlarePlace.swift).
+// `help` for every section 3.4 item, the Undo and Redo step names, Loop and
+// the selection's Edit reasons, and File > Place…'s reason and action; the
+// window takes SVG drops (FlarePlace.swift). The model's file flow follows the
+// suite's recents (the bridge's list, the only one Open Recent reads; #5126).
 // Unsaved changes: SuiteUI's `.unsavedChangesGuard` sits on the root with
 // Flare's hooks (`unsavedHooks`, buttons `flare.close.*`), so File > Close
 // (Command-W) and the close button ask Save, Don't Save or Cancel over an
@@ -31,11 +32,12 @@
 // a cancelled Save panel or a failed write keeps the animation.
 import AppKit
 import FlareModel
+import SuiteModel
 import SuiteShell
 import SuiteUI
 import SwiftUI
 
-struct FlareWindow: View {
+struct FlareWindow: View, BodyCounted {
     @State var model = FlareWorkspace(launch: FlareLaunch(arguments: ProcessInfo.processInfo.arguments))
     /// nil fits the stage; set once the user zooms.
     @State var zoom: Double? = nil
@@ -55,8 +57,7 @@ struct FlareWindow: View {
     var launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
 
     #if DEBUG
-    /// How many times a window's body ran; RenderBudgetFlareTests counts an interaction's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     /// The model the last body ran on, for the hosted-window tests to read back.
     static var shownModel: FlareWorkspace?
     /// The last body's place (FlarePlace.swift), for RenderBudgetFlarePlaceTests to send the menu's place.
@@ -73,14 +74,15 @@ struct FlareWindow: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         let _ = Self.shownModel = model
         let _ = Self.placeProbe = { _ = place($0) }
         let _ = Self.shownPerform = { perform($0) }
         #endif
         SuiteWindow(
             title: model.document == nil ? "Flare" : model.title, actions: toolbar,
-            inspectorWidth: Self.inspectorWidth
+            inspectorWidth: Self.inspectorWidth,
+            contextActions: { FlareRowMenu.actions(model.sceneRowMenu($0), perform: { perform(.layers($0)) }) }
         ) {
             VStack(spacing: 0) {
                 SuiteSidebarList(
@@ -116,6 +118,7 @@ struct FlareWindow: View {
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
+        .onChange(of: Self.bridge.recents(for: .flare), initial: true) { model.updateFileFlow(recents: $1) }
         .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: model) }, write: { model.takeLive($0) })
         .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .focusedSceneValue(
@@ -123,7 +126,7 @@ struct FlareWindow: View {
             FlareMenu(
                 perform: { menuPerform($0) }, help: { menuHelp($0) },
                 undoTitle: model.undoActionName ?? "Undo", redoTitle: model.redoActionName ?? "Redo",
-                recent: model.recent, loops: model.loops, editHelps: model.editHelps,
+                loops: model.loops, editHelps: model.editHelps,
                 selectionHelps: [model.deleteHelp, model.orderHelp(forward: true), model.orderHelp(forward: false)],
                 placeHelp: model.placeMenuHelp, place: { choosePlace() },
                 document: model.suiteDocument, documentSettings: { presented = .settings },

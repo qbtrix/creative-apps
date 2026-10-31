@@ -2,8 +2,8 @@
   {
     "label": "pngRefusesInFlaresWords: a PNG's refusal names every format the kernel knows, not Flare's SVG",
     "file": "Sources/FlareModel/FlarePlace+Menu.swift",
-    "find": "case .unavailable(_, let why) where why == PlaceRules.formatHelp: placeFormatHelp",
-    "replace": "case .unavailable(_, let why) where why == PlaceRules.formatHelp: why",
+    "find": "case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: [.svg]): placeFormatHelp",
+    "replace": "case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: [.svg]): why",
     "tests": "FlarePlaceMenuTests"
   },
   {

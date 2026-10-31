@@ -3,7 +3,7 @@
 // none, else "Design"), the toolbar's nine commands (DesignToolbarItem: New,
 // Open and Save beside the title; Undo, Redo, History and the zoom commands
 // trailing, History toggling the window's panel, DesignHistoryArea),
-// the pages and layer tree in the sidebar (DesignLayersPanel), the canvas in
+// the sidebar's Layers and AI tabs (DesignSidebarTabs), the canvas in
 // EditorDetail with the floating tool palette over its leading edge while a
 // file is open and the status line under it (zoom, "Page 1440 × 1024 pt", the last
 // message, "2 Layers" with a selection, the save state's slot
@@ -18,13 +18,14 @@
 // in the floating tool box (`design.tool.*`) and the status line's note,
 // selection count and tool carry their DesignControlID and list themselves in
 // `suite.controls` (.suiteControl), which DesignWindow's `.suiteProbes()`
-// publishes. In debug builds `bodyRuns` counts its body's runs, so
+// publishes. The note keeps to one line, cut in the middle, and shows its
+// whole text as help. In debug builds `bodyRuns` counts its body's runs, so
 // DesignWindowDragTests can prove a canvas drag leaves the editor still.
 import DesignModel
 import SuiteUI
 import SwiftUI
 
-struct DesignEditor: View {
+struct DesignEditor: View, BodyCounted {
     let model: DesignWorkspace
     var documentName: String?
     var note: String?
@@ -40,13 +41,12 @@ struct DesignEditor: View {
     private static let trailingItems: [DesignToolbarItem] = [.undo, .redo, .history, .zoomOut, .fit, .zoomIn]
 
     #if DEBUG
-    /// How many times an editor's body ran; DesignWindowDragTests counts a drag's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         SuiteWindow(
             title: documentName ?? (model.isOpen ? "Untitled" : "Design"),
@@ -56,7 +56,7 @@ struct DesignEditor: View {
             actions: Self.trailingItems.map { action($0) },
             inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
         ) {
-            DesignLayersPanel(model: model, perform: perform)
+            DesignSidebarTabs(model: model, perform: perform)
         } content: {
             EditorDetail {
                 DesignCanvas(model: model, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform)
@@ -68,6 +68,9 @@ struct DesignEditor: View {
                 ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.statusSizeText) {
                     if let note {
                         Text(note)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .help(note)
                             .suiteControl(id: DesignControlID.statusNote, enabled: true, reason: nil)
                     }
                     if let count = model.selectionCountText {

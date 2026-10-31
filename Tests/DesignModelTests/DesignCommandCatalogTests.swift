@@ -46,8 +46,13 @@ struct DesignCatalogDoc: HeadlessDocument {
             ("gradient", with(one) { $0.runFill(.type(.linear)); $0.runFill(.add(offset: 0.5)) }),
             ("stroked", with(one) { try? $0.setStyle(.stroke(.default)) }),
             ("entered group", with { $0.selectItem("node-6"); $0.enterGroup() }),
+            ("picture", with(one) { _ = try? DesignWorkspace.catalog.run("place.image", params: pictureParams, on: &$0) }),
         ]
     }
+
+    /// place.image's params filling the selected layer with a 3:1 SVG (placed-images PD-5).
+    static let pictureParams = JSONValue.object(["name": .string("logo.svg"), "fill": .bool(true), "base64": .string(Data(
+        #"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="240" height="80"/></svg>"#.utf8).base64EncodedString())])
 
     /// The help each id showed before the catalog: the selection commands' `help(_:)`, the toolbar's, the pages'
     /// and the palette's. The three rules the window had no help for are spelled out.
@@ -76,10 +81,23 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "color.sample": .some(w.sampleHelp)
         case "color.pick": .some(w.sampleHelp ?? w.fillHelp)
         case "history.jump": .some(w.historyListing.steps.isEmpty ? "There are no steps yet." : nil)
+        // The kernel's request spans (#6028): end needs an open request, undo-request an applied step in one.
+        case "history.begin": .some(nil)
+        case "history.end": .some(w.historyListing.openRequest == nil ? "No request is open." : nil)
+        case "history.undo-request":
+            .some(w.historyListing.origins.prefix(w.historyListing.index).contains { $0.request != nil } ? nil : "No applied step belongs to a request.")
         // The shape tool's two (DS-6): the workspace's own shapeHelp, which needs an open file.
         case "shape.draw", "tool.shape": .some(w.shapeHelp)
+        // The place commands (placed-images PD-5): placing needs an open file, the rest a picture selected.
+        case "place.image": .some(w.placeHelp)
+        case "place.read": .some(w.placedSelection == nil ? "Select a placed image first." : nil)
+        case "place.replace", "place.reset-size", "place.focus":
+            .some(w.placeHelp ?? (w.placedSelection == nil ? "Select a placed image first." : nil))
         case "file.export", "view.zoom-in", "view.zoom-out", "view.fit": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
         case "view.zoom-to-selection": .some(w.zoomToSelectionHelp)
+        // Copy As and Paste as Image (clipboard-interop CB-6): Copy's reason; Paste's, with no file first.
+        case "edit.copy-as": .some(w.copyHelp())
+        case "edit.paste-as-image": .some(w.addPageHelp ?? (w.editingTextID == nil ? nil : w.pasteHelp(nil)))
         // The transform rows' and Object items' reason (transform DT-6): the workspace's own transformHelp.
         default: id.hasPrefix("transform.") ? .some(w.transformHelp) : nil
         }
@@ -132,7 +150,7 @@ struct DesignCatalogDoc: HeadlessDocument {
                 let id = String(problem.prefix { $0 != ":" })
                 let off = DesignCatalogDoc.catalog.availability(id, on: doc).why != nil
                 // As today: an edit that would change nothing refuses though its help is clear (layers already spaced).
-                let noChange = problem.contains("exampleRuns") && problem.hasSuffix("failed: unchanged")
+                let noChange = problem.contains("exampleRuns") && problem.hasSuffix("failed: \(DesignRefusal.unchanged.help)")
                 // A one-layer delete names its step after the layer's kind ("Delete Rectangle"), as it did before.
                 let named = id == "edit.delete" && w.selectedNodeIDs.count == 1 && problem.contains("stepNamedTitle")
                 // A nudge right after a nudge joins its step, as the arrow keys do.
@@ -155,6 +173,8 @@ struct DesignCatalogDoc: HeadlessDocument {
         }
         let empty = DesignWorkspace()
         ran.insert("stroke.trim") // Design has no trim paths: its help says they are for animation (stroke-style).
+        // The kernel's request spans need an open request or a step made in one; HistoryCommandsTests runs them (#6028).
+        ran.formUnion(["history.end", "history.undo-request"])
         ran.formUnion(DesignWorkspace.catalog.ids.filter {
             let why = DesignWorkspace.catalog.availability($0, on: empty).why
             return why == nil || why?.hasSuffix("isn't built yet.") == true
@@ -195,6 +215,7 @@ struct DesignCatalogDoc: HeadlessDocument {
         "edit.undo | Undo | Nothing to undo.", "edit.redo | Redo | Nothing to redo.",
         "edit.select | Select | on", "edit.select-all | Select All | on",
         "edit.duplicate | Duplicate | on", "edit.delete | Delete | on",
+        "edit.copy-as | Copy As | on", "edit.paste-as-image | Paste as Image | on",
         "object.group | Group | on", "object.ungroup | Ungroup | A isn't a group.",
         "object.bring-to-front | Bring to Front | on", "object.bring-forward | Bring Forward | on",
         "object.send-backward | Send Backward | Nothing would change.", "object.send-to-back | Send to Back | Nothing would change.",
@@ -223,7 +244,12 @@ struct DesignCatalogDoc: HeadlessDocument {
         "stroke.join | Stroke Join | Add a stroke first.", "stroke.cap | Stroke Cap | Add a stroke first.",
         "stroke.dash | Stroke Dash | Add a stroke first.",
         "stroke.trim | Trim Path | Trim paths are for animation, in Flare and Halo.",
+        "place.read | Read Placed Image | Select a placed image first.", "place.image | Place Image | on",
+        "place.replace | Replace Image | Select a placed image first.", "place.reset-size | Reset Size | Select a placed image first.",
+        "place.focus | Move Inside | Select a placed image first.",
         "history.read | Read History | on", "history.jump | Jump in History | There are no steps yet.",
+        "history.begin | Begin Request | on", "history.end | End Request | No request is open.",
+        "history.undo-request | Undo Request | No applied step belongs to a request.",
         "view.zoom-in | Zoom In | on", "view.zoom-out | Zoom Out | on", "view.fit | Fit Page | on",
         "view.zoom-to-selection | Zoom to Selection | on",
     ]

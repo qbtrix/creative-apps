@@ -3,7 +3,9 @@
 // the roots. `<app>.open` and `<app>.new` give a handle (a UUID) and the
 // summary; `<app>.<id>` runs one command through the app's catalog and
 // returns `{result, undoStep?}`; `afterglow.save` and `afterglow.export`
-// write `{path}` and never replace a file without `force`; `afterglow.close`
+// write `{path}` and never replace a file without `force` (a file opened as an
+// import opens untitled, so a save names its path, and a save lands only on
+// the app's native extension); `afterglow.close`
 // drops a handle. Every refusal is a tool error the model can act on: a
 // why-not, each schema issue as "/path: message", a path outside the roots,
 // the open cap, a dead handle. A path is placed against the first root,
@@ -77,7 +79,8 @@ public struct MCPSessions: Sendable {
     mutating func open(_ name: String, _ args: [String: JSONValue], now: Double) throws(Refused) -> MCPToolResult {
         let app = try app(name), path = try place(try string(args, "path"))
         try roomForOne()
-        do { return keep(try app.session(reading: path, io: io), path: path, now: now) }
+        // An imported file opens untitled, so a save with no path never writes the native format over it.
+        do { return keep(try app.session(reading: path, io: io), path: app.savesNatively(to: path) ? path : nil, now: now) }
         catch CLIIOError.missing(_) { throw Refused("there is no file at \(path)") }
         catch { throw Refused("\(path) could not be opened as a \(name) document: \(error)") }
     }
@@ -127,6 +130,10 @@ public struct MCPSessions: Sendable {
         let given: String? = if case .string(let path)? = args["path"] { path } else { open.path }
         guard let given else { throw Refused("this document has no file yet; give a path inside the allowed roots") }
         let target = try place(given)
+        let saving = try app(open.session.app)
+        if !saving.savesNatively(to: target), let native = saving.openExtensions.first {
+            throw Refused("\(target) would get a .\(native) document; save to <file>.\(native), or export another format")
+        }
         let data: Data
         do { data = try open.session.save() } catch { throw Refused("could not save the document: \(error)") }
         try write([(data, target)], force: Self.force(args))
@@ -193,7 +200,7 @@ public struct MCPSessions: Sendable {
     /// real location (every symlink resolved) is not inside the real location of a root.
     func place(_ path: String) throws(Refused) -> String {
         let roots = options.roots.map { Self.fold($0.hasPrefix("/") ? $0 : Self.cwd() + "/" + $0) }
-        guard let base = roots.first else { throw Refused("this server has no allowed roots") }
+        guard let base = roots.first else { throw Refused("this server has no allowed roots; start afterglow mcp with --root <dir> to use files") }
         let lexical = Self.fold(path.hasPrefix("/") ? path : base + "/" + path)
         let real = Self.real(lexical)
         guard roots.map(Self.real).contains(where: { Self.inside(real, $0) }) else {

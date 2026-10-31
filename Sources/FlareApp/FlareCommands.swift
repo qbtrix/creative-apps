@@ -31,7 +31,6 @@ struct FlareMenu {
     var help: @MainActor (FlareIntent) -> String? = { _ in "Open a Flare window first." }
     var undoTitle = "Undo"
     var redoTitle = "Redo"
-    var recent: [String] = []
     var loops = false
     /// The selection's Edit reasons as values (#2618). `help` is a closure, which never reads as a changed menu,
     /// so without these a LAYERS pick left Edit > Copy disabled with its launch reason until something else
@@ -61,6 +60,12 @@ extension FocusedValues {
         get { self[FlareMenuKey.self] }
         set { self[FlareMenuKey.self] = newValue }
     }
+
+    /// The system pasteboard's change count as the focused Flare window last saw it (FlareStageContextMenu).
+    var flarePasteboardChange: Int? {
+        get { self[FlarePasteboardChangeKey.self] }
+        set { self[FlarePasteboardChangeKey.self] = newValue }
+    }
 }
 
 /// A plain key rather than `@Entry`, so FlareApp builds without the SwiftUI
@@ -69,9 +74,14 @@ private struct FlareMenuKey: FocusedValueKey {
     typealias Value = FlareMenu
 }
 
+/// A plain key rather than `@Entry`, as FlareMenuKey.
+private struct FlarePasteboardChangeKey: FocusedValueKey {
+    typealias Value = Int
+}
+
 struct FlareCommands: Commands {
     @FocusedValue(\.flareMenu) private var focused
-    /// Read so a pasteboard change re-runs the body and Paste's reason (FlarePasteboard.swift).
+    /// Read so a pasteboard change re-runs the body and Paste's reason (FlareStageContextMenu publishes it).
     @FocusedValue(\.flarePasteboardChange) private var pasteboardChange
     /// The focused timeline strip's Select All Keys; nil unless the strip has focus.
     @FocusedValue(\.timelineSelectAll) private var timelineSelectAll

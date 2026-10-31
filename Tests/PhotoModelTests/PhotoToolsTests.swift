@@ -20,19 +20,19 @@ import SuiteKernel
 import Testing
 
 /// Whether `tool` visibly changed from `a` to `b`: the pixels for the
-/// painting tools, the selection for marquee, the pending crop for crop, the
+/// painting tools, the selection or the drawn outline for the area tools, the pending crop for crop, the
 /// layers' offsets for move, the brush color for the eyedropper, the open
 /// box for the Type tool and the draft or paths for the Pen.
 private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoWorkspace) -> Bool {
     switch tool {
     case .brush, .eraser, .clone, .heal, .gradient, .bucket, .spotHeal, .remove:
         a.pixels != b.pixels
-    case .marquee:
-        a.selection != b.selection || a.selectionMask != b.selectionMask
+    case .marquee, .ellipse, .lasso, .polygon, .wand:
+        a.selection != b.selection || a.selectionMask != b.selectionMask || a.areaDraft != b.areaDraft
     case .crop:
         a.pendingCrop != b.pendingCrop
-    case .move:
-        a.layers.map { [$0.offsetX, $0.offsetY] } != b.layers.map { [$0.offsetX, $0.offsetY] }
+    case .select:
+        a.selectedLayerIDs != b.selectedLayerIDs || a.layers.map { [$0.offsetX, $0.offsetY] } != b.layers.map { [$0.offsetX, $0.offsetY] }
     case .eyedropper:
         a.brushOptions != b.brushOptions
     case .text:
@@ -46,13 +46,17 @@ private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoW
 /// press at `source` and lifts the pointer, so the next drag stamps.
 private func ready(_ workspace: inout PhotoWorkspace, _ tool: PhotoTool, source: Mask.Point) {
     workspace.selectTool(tool)
+    // Select shows its pick by moving the selection off a new clear layer onto the painted one under the drag.
+    if tool == .select { workspace.addLayer() }
     guard tool == .clone || tool == .heal else { return }
     workspace.drag(from: source, to: source, modifiers: [.option])
     workspace.endDrag()
 }
 
-/// One whole drag: press at `start`, move to `end`, lift.
+/// One whole drag: press at `start`, move to `end`, lift. The lasso bends
+/// through (`end.x`, `start.y`) on the way, so its path has an area.
 private func stroke(_ workspace: inout PhotoWorkspace, from start: Mask.Point, to end: Mask.Point) {
+    if workspace.tool == .lasso { workspace.drag(from: start, to: Mask.Point(x: end.x, y: start.y), modifiers: []) }
     workspace.drag(from: start, to: end, modifiers: [])
     workspace.endDrag()
 }
@@ -60,13 +64,14 @@ private func stroke(_ workspace: inout PhotoWorkspace, from start: Mask.Point, t
 @Test(arguments: PhotoTool.allCases)
 func photoToolActsOnFakeServices(_ tool: PhotoTool) throws {
     var before = try PhotoWorkspace.fixture(.sample)
-    // The source is in the sky, the drag over the sun, so a stamp shows.
+    // The source is in the sky, the drag from the sun's edge into it, so a stamp
+    // shows and a spot heal at the press has an edge to rebuild.
     ready(&before, tool, source: Mask.Point(x: 300, y: 100))
     // A tool not built yet has its own help (not a service's) on every service: it is disabled, not dead.
     if tool != .eyedropper, let help = tool.unavailableHelp { return #expect(before.toolHelp(tool) == help) }
     #expect(before.toolHelp(tool) == nil, "\(tool) has help on .fake, where every service works")
     var after = before
-    stroke(&after, from: Mask.Point(x: 520, y: 180), to: Mask.Point(x: 600, y: 260))
+    stroke(&after, from: Mask.Point(x: 475, y: 220), to: Mask.Point(x: 600, y: 260))
     #expect(!after.isDragging, "\(tool)'s drag is still under way after endDrag")
     let changed = shows(tool, changeFrom: before, to: after)
     #expect(changed, "\(tool)'s drag on the sample changes nothing it shows on .fake")
@@ -76,9 +81,13 @@ func photoToolActsOnFakeServices(_ tool: PhotoTool) throws {
 func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     var before = PhotoWorkspace()
     try before.newCanvas(width: 64, height: 64)
-    // A black line on the white canvas gives clone and heal a texture to copy.
+    // A black line on the white canvas gives clone and heal a texture to copy; a
+    // black dot under the press gives spot heal and remove something to take away,
+    // and the bucket a region to fill red.
     before.selectTool(.brush)
     stroke(&before, from: Mask.Point(x: 4, y: 12), to: Mask.Point(x: 28, y: 12))
+    stroke(&before, from: Mask.Point(x: 30, y: 30), to: Mask.Point(x: 30, y: 30))
+    before.setToolOption(.color(red: 255, green: 0, blue: 0))
     ready(&before, tool, source: Mask.Point(x: 16, y: 8))
     var after = before
     stroke(&after, from: Mask.Point(x: 30, y: 30), to: Mask.Point(x: 50, y: 50))
@@ -125,12 +134,12 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     #expect(options.settings == ToolOptions().settings && options.red == 0)
 }
 
-/// The Move tool's transform rows show only while a picked layer can move:
+/// The Select tool's transform rows show only while a picked layer can move:
 /// on an adjustment layer they would sit disabled under the refusal, their
 /// labels too faint to read (#2593). A picked image layer beside it still moves.
 @Test func moveOptionsShowOnlyForAMovableSelection() throws {
     var workspace = try PhotoWorkspace.fixture(.layered)
-    workspace.selectTool(.move)
+    workspace.selectTool(.select)
     let background = try #require(workspace.layers.first { $0.name == "Background" })
     let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
     workspace.selectLayer(background.id)
@@ -140,25 +149,30 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     #expect(workspace.moveHint == "Select an image layer in the sidebar to move it.")
     workspace.pickLayer(background.id, .toggle)
     #expect(workspace.canMoveSelection)
-    #expect(workspace.moveHint == "Drag over the image to move the selected layer.")
+    #expect(workspace.moveHint == PhotoWorkspace.selectHint)
 }
 
-/// Move refuses an adjustment layer, which has no origin on the canvas, and
-/// says why in the status and in its hint (#1630); an image layer moves.
+/// A move refuses an adjustment layer, which has no origin on the canvas, and
+/// says why in the status and in its hint (#1630); an image layer moves. A
+/// Select drag on the canvas lands on an image layer's pixels, so it picks and
+/// moves that layer and the adjustment layer stays put.
 @Test func moveRefusesAnAdjustmentLayerAndSaysWhy() throws {
     var workspace = try PhotoWorkspace.fixture(.layered)
-    workspace.selectTool(.move)
+    workspace.selectTool(.select)
     let background = try #require(workspace.layers.first { $0.name == "Background" })
     workspace.selectLayer(background.id)
-    #expect(workspace.moveHint == "Drag over the image to move the selected layer.")
+    #expect(workspace.moveHint == PhotoWorkspace.selectHint)
     let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
     workspace.selectLayer(curves.id)
     #expect(workspace.moveHint == "Select an image layer in the sidebar to move it.")
     let steps = workspace.historySteps.count
+    workspace.moveSelectedLayers(dx: 50, dy: 50)
+    #expect(workspace.historySteps.count == steps)
+    #expect(workspace.statusMessage == "Select an image layer in the sidebar to move it.")
     stroke(&workspace, from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 150, y: 150))
     let after = try #require(workspace.layers.first { $0.id == curves.id })
     #expect(after.offsetX == curves.offsetX)
     #expect(after.offsetY == curves.offsetY)
-    #expect(workspace.historySteps.count == steps)
-    #expect(workspace.statusMessage == "Select an image layer in the sidebar to move it.")
+    #expect(!workspace.selectedLayerIDs.contains(curves.id), "the press picked the image layer under it")
+    #expect(workspace.historySteps.count == steps + 1)
 }

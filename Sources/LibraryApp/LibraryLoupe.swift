@@ -47,7 +47,7 @@ struct LibraryLoupe: View {
         let fit = ZoomMath.fit(document: document, in: viewport)
         let zoom = model.loupeZoom.scale(fit: fit)
         CanvasViewport(
-            documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false,
+            documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false, holdsRulerBand: false,
             onSize: { viewport = $0 }, onZoom: menu.view.zoomTo,
             // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
             onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key
@@ -89,9 +89,9 @@ struct LibraryLoupe: View {
     /// either way, carrying `loupeValue` (`preview`, `full`, `loading`, …) and the help.
     private var picture: some View {
         Group {
-            if let render = model.loupeRender, let steps = model.loupeSteps, let gpu {
+            if let render = model.loupeRender, let program = model.loupeSteps, let gpu {
                 EmbeddedCanvasHost(rendering: gpu.preference) {
-                    gpu.draw(render.image, steps: steps, token: model.loupeShownToken, photoID: model.loupeItem?.id, into: $0)
+                    gpu.draw(render.image, program: program, token: model.loupeShownToken, photoID: model.loupeItem?.id, into: $0)
                 }
             } else if let render = model.loupeRender {
                 Image(display: render.image).resizable()

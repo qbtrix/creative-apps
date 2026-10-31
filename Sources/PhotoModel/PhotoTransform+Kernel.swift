@@ -7,12 +7,16 @@
 // Availability reads only `transformArea` (layer and selection, no pixel scan).
 // A scale, turn or move edits the draft as one step whose undo puts the
 // previous draft back (a drag's steps fold under its token). The canvas shows
-// the draft live: each render draws `transformPreview`, the workspace with the
-// draft's layer resampled (`draftPlaced`), and commit lays that same resample
-// as one "Free Transform" step, so Return shows nothing new; a box on part of
-// the layer keeps the layer's extent, so later strokes outside it still land. A flip mirrors
-// the layer's pixels in place at once, never a draft. Canvas Size is PhotoImageOps'.
-// Linux-safe.
+// the draft live: a still frame draws `transformPreview`, the workspace with
+// the draft's layer resampled (`draftPlaced`), and commit lays that same
+// resample as one "Free Transform" step, so Return shows nothing new; a box on
+// part of the layer keeps the layer's extent, so later strokes outside it still
+// land. A drag whose layer lifts (PhotoTransformLift+Kernel.swift) draws no frames:
+// the compositor moves the layer's pixels. Any other drag's frames
+// (`transformPreview(live:)`) draw the layer through the draft's matrix region
+// by region (PhotoRenderRoute.swift, bilinear); the exact frame follows at the release.
+// A flip mirrors the layer's pixels in place at once, never a draft. Canvas
+// Size is PhotoImageOps'. Linux-safe.
 import CoreRaster
 import SuiteKernel
 
@@ -66,7 +70,7 @@ extension PhotoWorkspace: TransformTarget {
             scaleX: b.width / Double(box.width), scaleY: b.height / Double(box.height),
             degrees: t.degrees, dx: b.minX - Double(box.x), dy: b.minY - Double(box.y))
         guard draft != previous else { return }
-        record(.draft(previous), named: name, coalescing: drag)
+        record(.draft(previous), named: name, coalescing: drag.map { CoalesceKey.key("transform", on: [id], drag: $0) })
         transformDraft = draft
         touch(.all)
     }
@@ -162,6 +166,7 @@ extension PhotoWorkspace {
             let tiles = pixels[draft.layerID]
         else { return nil }
         let content = PlacedPixels(pixels: tiles, x: layers[at].offsetX, y: layers[at].offsetY)
+        PhotoRenderCount.resample()
         return (at, try services.transform.applied(draft, to: content))
     }
 
@@ -169,8 +174,6 @@ extension PhotoWorkspace {
     /// `draftPlaced()`, so every route draws the draft and Return lays the same pixels. The revision and
     /// history stay as they are. Self with no draft, and when the resample fails (the layer shows as it is,
     /// and Return reports the failure).
-    /// ponytail: one full-layer resample per render (renders coalesce to the newest); a GPU affine composite
-    /// in CoreRender is the upgrade if a 12 MP layer drags too slowly.
     var transformPreview: PhotoWorkspace {
         guard let done = (try? draftPlaced()) ?? nil else { return self }
         let (at, placed) = done
@@ -180,4 +183,22 @@ extension PhotoWorkspace {
         shown.layers[at].offsetY = placed.y
         return shown
     }
+
+    /// `transformPreview` for a still frame; for a drag frame (`live`), self with `liveDraft` set, so every route
+    /// draws the draft's layer through its matrix on each region and nothing resamples (the exact frame comes
+    /// with the next still one). A masked layer, the identity and a layer without pixels take the still frame.
+    /// A layer that lifts (`liftKey`) never comes here mid-drag: the compositor moves its pixels.
+    /// ponytail: a drag frame resamples the layer in 256 px chunks on the CPU (bilinear, the chunks across the cores); a
+    /// Metal `.affine` kernel is the upgrade for the layers that can't lift.
+    func transformPreview(live: Bool) -> PhotoWorkspace {
+        guard live, let draft = transformDraft, draft.transform != .identity, let at = index(of: draft.layerID),
+            pixels[draft.layerID] != nil, shownMask(of: layers[at]) == nil
+        else { return transformPreview }
+        var shown = self
+        shown.liveDraft = true
+        return shown
+    }
+
+    /// The layer a drag frame draws through the draft's matrix; nil outside a drag frame.
+    var liveDraftLayer: PhotoLayer.ID? { liveDraft ? transformDraft?.layerID : nil }
 }

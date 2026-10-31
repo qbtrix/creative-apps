@@ -45,12 +45,12 @@ public struct HaloKeySegment: Identifiable, Sendable, Hashable {
 public enum HaloEasingHandle: Sendable { case first, second }
 
 extension HaloProject {
-    /// The selected layer's segments, in `HaloProperty.allCases` order, then
+    /// The selected layer's segments, in `HaloProperty.keyable` order, then
     /// by frame; empty with no selected layer.
     public var keySegments: [HaloKeySegment] {
         guard let layer = selectedLayer else { return [] }
         var segments: [HaloKeySegment] = []
-        for property in HaloProperty.allCases {
+        for property in HaloProperty.keyable {
             guard let track = layer.tracks[property.rawValue], track.count >= 2 else { continue }
             let sorted = track.sorted { $0.frame < $1.frame }
             for (key, next) in zip(sorted, sorted.dropFirst()) {
@@ -147,26 +147,17 @@ extension HaloProject {
     }
 
     /// Deletes the picked keys as one "Delete Keyframes" step through the
-    /// keying service's key toggle, so a track left with one key goes static
-    /// at its value, then picks nothing. Each track's keys go last frame
-    /// first, so deleting a whole track leaves its first key's value. Nothing
-    /// with nothing picked.
+    /// keying service's batch delete, so a track left with one key goes
+    /// static at its value and a whole track at its first key's, then picks
+    /// nothing. Nothing with nothing picked.
     public mutating func deleteKeys() {
-        let keys = pickedKeyframes.sorted {
-            $0.property == $1.property ? $0.frame > $1.frame : $0.property.rawValue < $1.property.rawValue
-        }
+        let keys = pickedKeyframes
         guard !keys.isEmpty else { return }
         let keying = services.keying
         let deleted = edit("Delete Keyframes", control: "halo.timeline") { doc in
             guard let c = doc.compositions.firstIndex(where: { $0.id == doc.selectedCompositionID })
             else { throw HaloEditError.noComposition }
-            for key in keys {
-                let layer = doc.compositions[c].layers.first { $0.id == key.layerID }
-                // A static track keeps one key at 0; toggling a key that's gone would add it back.
-                guard layer?.tracks[key.property.rawValue]?.contains(where: { $0.frame == key.frame }) == true
-                else { continue }
-                try keying.toggleKey(key.property, of: key.layerID, at: key.frame, in: &doc.compositions[c])
-            }
+            try keying.deleteKeys(keys, in: &doc.compositions[c])
         }
         if deleted { keySelection.clear() }
     }

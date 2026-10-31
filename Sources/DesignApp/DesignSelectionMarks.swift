@@ -7,7 +7,7 @@
 // with the box's handles, but no knob, while the Model's `showsSelectionHandles` holds; a lock or
 // hidden layer in the selection leaves none. While a marquee is live only each hit
 // layer's outline draws: no box, no handles until the drag ends. Dashes are the live marquee's alone
-// (DesignMarqueeMark), so a committed selection never reads as one in progress.
+// (SuiteUI's SelectBoxMark), so a committed selection never reads as one in progress.
 // A turned layer's outline and handles turn with it. The text node being edited shows its editor's box instead. The box carries the
 // one accessibility element, `design.canvas.selection` ("Selection"): a clear
 // rectangle at the box's frame, an image, never a control. Takes no clicks; the
@@ -52,13 +52,15 @@ struct DesignSelectionMarks: View {
 /// `handles` its resize handles, white squares with an
 /// accent edge, and with `knob` too the rotate knob, a white circle on an accent stem from the top
 /// handle (SuiteUI's `SelectionHandles.marks` and `stem`), all turned `degrees` about the box's centre the way the artwork turns. Shapes, not a Canvas, so marks past the page's edge still draw: CanvasViewport
-/// doesn't clip its overlay. Frames and handles stay one size at any zoom.
+/// doesn't clip its overlay. Frames and handles stay one size at any zoom; `lineWidth` widens the outline
+/// (DesignAgentGlow's 2 pt).
 struct DesignSelectionBox: View {
     let rect: DesignRect
     let zoom: Double
     var handles = true
     var degrees: Double = 0
     var knob = false
+    var lineWidth: CGFloat = 1
 
     var body: some View {
         let scale = usable(zoom)
@@ -79,7 +81,7 @@ struct DesignSelectionBox: View {
         }
         let turn = TransformBox(box: Rect(minX: rect.x, minY: rect.y, maxX: rect.maxX, maxY: rect.maxY), degrees: degrees)
         ZStack(alignment: .topLeading) {
-            Path(box).stroke(SuiteColor.accent, lineWidth: 1)
+            Path(box).stroke(SuiteColor.accent, lineWidth: lineWidth)
             squares.fill(SuiteColor.overlayPaper)
             squares.stroke(SuiteColor.accent, lineWidth: 1)
             if let knobMark {

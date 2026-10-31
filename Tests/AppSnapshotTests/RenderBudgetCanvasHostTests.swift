@@ -56,17 +56,12 @@ extension BodyCountSuites {
 }
 
 /// A page under test, counting its own bodies: the window bodies the budget counts.
-private struct CanvasHostBudgetHost<Page: View>: View {
-    @MainActor static var bodyRuns: Int { CanvasHostBudgetCounter.runs[ObjectIdentifier(Page.self), default: 0] }
+private struct CanvasHostBudgetHost<Page: View>: View, BodyCounted {
     let page: () -> Page
+    @Environment(\.bodyTally) private var bodyTally
 
     var body: some View {
-        let _ = CanvasHostBudgetCounter.runs[ObjectIdentifier(Page.self), default: 0] += 1
+        let _ = bodyTally.ran(Self.self)
         page()
     }
-}
-
-/// Body runs per page type (a generic type can't hold its own static stored property).
-@MainActor private enum CanvasHostBudgetCounter {
-    static var runs: [ObjectIdentifier: Int] = [:]
 }

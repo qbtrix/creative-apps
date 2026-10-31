@@ -1,8 +1,8 @@
 // PhotoWindow+Text.swift: the Type tool's area of a Photo window (text-layers TX-3): its intents, their
 // route, and PhotoTextBoxOverlay, the field over the canvas while the Type tool has a box open. A click
 // with the Type tool opens the box (PhotoWorkspace.endDrag); the field sends what is typed as `.type`,
-// Return and losing focus `.commit`, Escape `.cancel`. Until TX-5 builds `text.add` a commit adds
-// nothing and the status line says why. Presentation state only: focus.
+// Return and losing focus `.commit`, Escape `.cancel`, and a commit adds a text layer through `text.add`.
+// Keys the canvas gets while the box is open come as `.key` (#4798). Presentation state only: focus.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -16,8 +16,12 @@ enum TypeIntent {
     case commit
     /// Closes the box and drops its words.
     case cancel
+    /// A key the canvas got while the box is open (PhotoTextBoxKeys).
+    case key(PhotoTextBoxKey)
     /// Restyles the selected text layer: one text inspector gesture (PhotoTextInspector).
     case style(TextIntent)
+    /// Recolours the selected text layer, red, green, blue and alpha; picks under one `drag` are one step.
+    case color([UInt8], drag: String?)
 }
 
 extension PhotoWindow {
@@ -26,7 +30,9 @@ extension PhotoWindow {
         case .type(let words): model.typeText(words)
         case .commit: model.commitTextBox()
         case .cancel: model.cancelTextBox()
+        case .key(let key): model.pressTextKey(key)
         case .style(let intent): model.runText(intent)
+        case .color(let rgba, let drag): model.runTextColor(rgba, drag: drag)
         }
     }
 }

@@ -2,8 +2,8 @@
 // SuiteWindow: the title (the file's name, "Untitled" for an image with none,
 // else "Photo") with the save state as its subtitle, the toolbar's eight
 // commands (PhotoToolbarItem: Open, Save and Export beside the title; Undo,
-// Redo and the zoom commands trailing), the layer list in the sidebar
-// (PhotoLayerList), the canvas with its rulers in EditorDetail with the
+// Redo and the zoom commands trailing), the sidebar's Layers and AI tabs
+// (PhotoSidebarTabs), the canvas with its rulers in EditorDetail with the
 // floating tool palette over its leading edge while an image is open (each
 // tool a PhotoPaletteTool carrying the workspace's `toolHelp`) and the status
 // line under it (PhotoStatusLine, with the save status `photo.bar.saved`
@@ -18,12 +18,17 @@
 // layer in one Place step, centred; with none open it opens; another app's
 // file goes to that app; the mark at the bottom says which before the drop.
 // With the Pen, PhotoPenOverlay puts SuiteUI's PathEditOverlay over the canvas.
+// In debug builds its body runs report to SuiteUI's BodyTally, and `bodyRuns`
+// reads the running test's windows only, so a budget test that runs alongside
+// suites drawing their own Photo windows counts only its own. The inspector, layer list, status line and canvas overlay read
+// the window's PhotoSession facets themselves, so an option step that moves no
+// facet the window reads never re-runs this body.
 import PhotoModel
 import SuiteShell
 import SuiteUI
 import SwiftUI
 
-struct PhotoEditor: View {
+struct PhotoEditor: View, BodyCounted {
     let model: PhotoWorkspace
     var tiles: CanvasTiles?
     var renderMilliseconds: Double?
@@ -44,13 +49,12 @@ struct PhotoEditor: View {
     private static let trailingItems: [PhotoToolbarItem] = [.undo, .redo, .zoomOut, .fit, .zoomIn]
 
     #if DEBUG
-    /// How many times an editor's body ran; PhotoWindowStrokeTests counts a stroke's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         SuiteWindow(
             title: model.documentName ?? (model.canvas == nil ? "Photo" : "Untitled"),
@@ -60,7 +64,7 @@ struct PhotoEditor: View {
             actions: Self.trailingItems.map { action($0) },
             inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
         ) {
-            PhotoLayerList(model: model, perform: perform)
+            PhotoSidebarTabs(model: model, perform: perform)
         } content: {
             EditorDetail {
                 PhotoCanvas(
@@ -163,6 +167,9 @@ struct PhotoCanvas: View {
                             .frame(width: size.width * zoom, height: size.height * zoom, alignment: .topLeading)
                     }
                 }
+                // The viewport keeps Space for its pan before `onKey` or the box's field sees it, so the box's
+                // space is typed out here, outside it (#5951: SUMMER SALE came out SUMMERSALE).
+                .onKeyPress(.space) { key(" ") }
             } else {
                 EmptyStateView(
                     PhotoInspectorContent.noImageTitle, systemImage: PhotoInspectorContent.noImageSymbol,
@@ -172,8 +179,17 @@ struct PhotoCanvas: View {
         }
     }
 
+    /// Types `characters` into the open Type tool box; ignored when none is open or the box doesn't take them.
+    private func key(_ characters: String) -> KeyPress.Result {
+        guard let typed = model.textBox?.key(characters) else { return .ignored }
+        perform(.text(.key(typed)))
+        return .handled
+    }
+
     private func key(_ press: KeyPress) -> KeyPress.Result {
         guard press.modifiers.subtracting(.shift).isEmpty else { return .ignored }
+        // While a Type tool box is open its keys type into it, not pick tools (#4798).
+        if case .handled = key(press.characters) { return .handled }
         switch press.key {
         case .delete, .deleteForward:
             perform(press.modifiers.contains(.shift) ? .fillSelection : .deleteSelection)
@@ -183,7 +199,10 @@ struct PhotoCanvas: View {
             perform(.dismiss)
         default:
             // A disabled tool's key does nothing, as its palette button does.
-            guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp) else { return .ignored }
+            // Shift cycles the tools that share the letter (Shift-J: Spot Heal, Heal, Remove).
+            let current = press.modifiers.contains(.shift) ? model.tool : nil
+            guard let tool = PhotoTool.picked(byTyped: press.characters, help: model.toolHelp, cyclingFrom: current)
+            else { return .ignored }
             perform(.tool(tool))
         }
         return .handled
@@ -192,19 +211,28 @@ struct PhotoCanvas: View {
 
 /// The Pen over the canvas (#5072): SuiteUI's PathEditOverlay draws the draft and the path in edit and turns presses
 /// and keys into the kernel's PathIntents, sent as `.path` (PhotoWorkspace.runPath runs each as its catalog command).
-/// While Command is held it edits points (Direct Selection); whether it is held is the view's own state.
+/// While Command is held it edits points (Direct Selection); whether it is held is the view's own state. A press is
+/// held until release (#5145): a point drag moves the overlay's copy, and the window runs once, at mouse-up.
 struct PhotoPenOverlay: View {
     let model: PhotoWorkspace
     let zoom: Double
     var perform: PhotoPerform = { _ in }
     @State private var editsPoints = false
+    /// Edits points without Command held: the render budget test's way in, since a scripted event can't hold a key.
+    @Environment(\.photoPenEditsPoints) private var alwaysEditsPoints
 
     var body: some View {
         PathEditOverlay(draft: model.penDraft, path: model.pathInEdit, selection: model.anchorSelection,
-                        tool: editsPoints ? .directSelect : .pen, zoom: zoom) { perform(.path($0)) }
+                        tool: editsPoints || alwaysEditsPoints ? .directSelect : .pen, zoom: zoom) { perform(.path($0)) }
+            .holdsPressesUntilRelease()
             .onModifierKeysChanged(mask: .command) { _, keys in editsPoints = keys.contains(.command) }
             .accessibilityIdentifier("photo.canvas.pen")
     }
+}
+
+extension EnvironmentValues {
+    /// True: the Pen's overlay edits points as if Command were held (RenderBudgetPhotoPenAnchorTests).
+    @Entry var photoPenEditsPoints = false
 }
 
 extension PixelRect {

@@ -1,6 +1,7 @@
-// AllAppsCatalogTests.swift (adopt-command-catalog AC-z1): one walk over every app the CLI knows. `list-apps` and each
-// app's `list-commands` match their goldens in Golden/apps/, every catalog keeps the kernel's laws on a real job's
-// input, and every real job under Tests/RealJobs/<app>/ passes or is skipped for a reason that names its gap.
+// AllAppsCatalogTests.swift (adopt-command-catalog AC-z1): one walk over every app the CLI knows. `list-apps` (on
+// macOS its -macos golden, where Photo also opens the system's images) and each app's `list-commands` match their
+// goldens in Golden/apps/, every catalog keeps the kernel's laws on a real job's input, and every real job under
+// Tests/RealJobs/<app>/ passes or is skipped for a reason that names its gap.
 import AfterGlowCLICore
 import DesignModel
 import FlareModel
@@ -32,7 +33,13 @@ struct AllAppsCatalogTests {
 
     @Test func listAppsMatchesItsGolden() throws {
         let apps = try Self.printed(["list-apps"])
-        #expect(apps == (try Self.golden("list-apps")), "list-apps differs")
+        // macOS reads more images through the system (SystemImageDecoder), so Photo opens more there.
+        #if canImport(CoreImage)
+        let golden = "list-apps-macos"
+        #else
+        let golden = "list-apps"
+        #endif
+        #expect(apps == (try Self.golden(golden)), "\(golden) differs")
         guard case .object(let fields) = apps, case .array(let listed)? = fields["apps"] else { Issue.record("no apps"); return }
         let named = listed.compactMap { app -> String? in
             if case .object(let f) = app, case .string(let name)? = f["name"] { name } else { nil }
@@ -59,6 +66,25 @@ struct AllAppsCatalogTests {
             "easing.select-lane-keys: queryOrViewChangesNoBytes", "timeline.pick-keys: queryOrViewChangesNoBytes",
             "layer.select: queryOrViewChangesNoBytes",
             "timeline.scrub: queryOrViewChangesNoBytes", "viewer.drag-begin: queryOrViewChangesNoBytes"],
+        // #5841: a Flare command stays available on any file and refuses at run time in the engine's words.
+        "Flare's examples name scene-1, layer-1 and other ids ball.flare doesn't hold": [
+            "color-key.move: exampleRuns", "color-key.remove: exampleRuns", "guide.move: exampleRuns",
+            "guide.remove: exampleRuns", "instance.add: exampleRuns", "instance.remove: exampleRuns",
+            "instance.set-playback: exampleRuns", "instance.set-transform: exampleRuns",
+            "keyframe.remove: exampleRuns", "keyframe.set-easing: exampleRuns", "label.remove: exampleRuns",
+            "layer.add: exampleRuns", "layer.set-parent: exampleRuns", "machine.add-input: exampleRuns",
+            "machine.add-state: exampleRuns", "machine.add-transition: exampleRuns", "machine.remove: exampleRuns",
+            "machine.remove-input: exampleRuns", "machine.remove-state: exampleRuns",
+            "machine.remove-transition: exampleRuns", "machine.rename: exampleRuns",
+            "machine.set-initial: exampleRuns", "machine.update-input: exampleRuns",
+            "machine.update-state: exampleRuns", "machine.update-transition: exampleRuns", "mask.move: exampleRuns",
+            "mask.remove: exampleRuns", "scene.remove: exampleRuns", "scene.rename: exampleRuns",
+            "scene.reorder: exampleRuns", "scene.set-canvas: exampleRuns", "scene.timing: exampleRuns",
+            "swatch.remove: exampleRuns", "swatch.rename: exampleRuns", "swatch.set-color: exampleRuns",
+            "symbol.convert: exampleRuns", "symbol.remove: exampleRuns", "symbol.rename: exampleRuns",
+            "text.apply-style: exampleRuns", "text.clear-style: exampleRuns", "text.edit-string: exampleRuns",
+            "text.remove: exampleRuns", "text.set-font: exampleRuns", "text.set-on-path: exampleRuns",
+            "text.set-paragraph: exampleRuns", "text.set-string: exampleRuns"],
         "The kernel's place.image example is an SVG, which Photo doesn't place": ["place.image: exampleRuns"],
         "The kernel's shape.draw names its step for the kind drawn (\"Draw Star\")": ["shape.draw: stepNamedTitle"],
         "Halo's drag end with no drag is a no-op edit that stays enabled": [
@@ -71,6 +97,14 @@ struct AllAppsCatalogTests {
             "style.add: exampleRuns", "style.enable: exampleRuns", "style.fill-opacity: exampleRuns", "style.panel: exampleRuns",
             "style.paste: exampleRuns", "style.preset: exampleRuns", "style.read: exampleRuns", "style.remove: exampleRuns",
             "style.set: exampleRuns"],
+        "Photo's square.png is flat where the heal examples act, so they change no pixel and record no step": [
+            "retouch.spot-heal: stepNamedTitle", "retouch.spot-heal: editRecordsOneStep", "retouch.spot-heal: undoRestoresBytes",
+            "retouch.remove: stepNamedTitle", "retouch.remove: editRecordsOneStep", "retouch.remove: undoRestoresBytes"],
+        "The suite's Black & White example removes a B&W the file doesn't have": [
+            "adjust.black-and-white: stepNamedTitle", "adjust.black-and-white: editRecordsOneStep",
+            "adjust.black-and-white: undoRestoresBytes"],
+        "Photo's file.drop example places a file from disk, and the law has no host to hand over its bytes "
+            + "(PhotoDropCLITests runs it through the CLI)": ["file.drop: exampleRuns"],
     ]
 
     /// `D`'s law problems on the real job input `path`, as "<id>: <law>", less an example that can't run because its

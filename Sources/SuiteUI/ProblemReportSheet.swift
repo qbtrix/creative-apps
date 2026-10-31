@@ -1,5 +1,5 @@
 // ProblemReportSheet.swift (report-problem RP-3): Help > Report a Problem…'s sheet. A note field on top, the
-// report read-only below it in body-size code type, then Copy (which reads Copied for a moment), Save…, Email…
+// report read-only below it in body-size code type, then Copy (⌘C, which reads Copied for a moment), Save…, Email…
 // and Close. The sheet sends nothing itself: each action
 // hands the note plus the report (`ProblemReport.text(note:)`) to its host, and Save… and Email… stay disabled,
 // saying why, until the host passes them (RP-3e). The note lives in its own field view and a plain box the
@@ -9,10 +9,9 @@ import SuiteModel
 import SwiftUI
 
 /// The Report a Problem sheet over `report`.
-public struct ProblemReportSheet: View {
+public struct ProblemReportSheet: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     /// The controls, each with its `identifier(_:)`.
     nonisolated static let controls = ["note", "report", "copy", "save", "email", "close"]
@@ -38,7 +37,7 @@ public struct ProblemReportSheet: View {
 
     public var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
@@ -61,7 +60,7 @@ public struct ProblemReportSheet: View {
                 action("Save…", onSave, why: "Saving the report isn't in this build yet.", id: "save")
                 action("Email…", onEmail, why: "Emailing the report isn't in this build yet.", id: "email")
                 CopyButton { onCopy(report.text(note: draft.text)) }
-                    .buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
+                    .buttonStyle(.borderedProminent).keyboardShortcut("c")
                     .accessibilityIdentifier(Self.identifier("copy"))
             }
         }

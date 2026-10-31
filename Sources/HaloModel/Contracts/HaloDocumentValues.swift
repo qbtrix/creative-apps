@@ -5,6 +5,7 @@
 // stacks, on the kernel's History, in HaloHistory+Kernel.swift. Linux-safe.
 import CoreRaster
 import FlareCore
+import SuiteImaging
 import SuiteKernel
 import SuiteModel
 
@@ -33,15 +34,21 @@ public struct HaloDrawItem: Sendable, Hashable {
     /// PH-1: a solid's picture and its box and focus; nil draws `color`. HaloDrawRules fills them in PH-5.
     public var placedAsset: PlacedAsset?
     public var placedImage: PlacedImage?
+    /// AJ-12: the layer's filters and kinds, run on its pixels before the blend; hidden ones are skipped.
+    public var filters: [HaloLayerFilter]
+    /// HY-6: the layer's style with its keyable numbers sampled at the frame; nil draws none.
+    public var style: LayerStyle?
     public init(
         layerID: String, kind: HaloLayerKind, bounds: HaloLayerRect, matrix: HaloMatrix, opacity: Double,
         color: HaloLayerColor, blendMode: BlendMode, text: HaloTextContent? = nil, gradient: Fill? = nil,
-        shape: ShapeSpec? = nil, stroke: VectorStroke? = nil, placedAsset: PlacedAsset? = nil, placedImage: PlacedImage? = nil
+        shape: ShapeSpec? = nil, stroke: VectorStroke? = nil, placedAsset: PlacedAsset? = nil, placedImage: PlacedImage? = nil,
+        filters: [HaloLayerFilter] = [],
+        style: LayerStyle? = nil
     ) {
         self.layerID = layerID; self.kind = kind; self.bounds = bounds; self.matrix = matrix
         self.opacity = opacity; self.color = color; self.blendMode = blendMode; self.text = text
         self.gradient = gradient; self.shape = shape; self.stroke = stroke
-        self.placedAsset = placedAsset; self.placedImage = placedImage
+        self.placedAsset = placedAsset; self.placedImage = placedImage; self.filters = filters; self.style = style
     }
 }
 
@@ -127,17 +134,15 @@ public struct HaloRenderSettings: Sendable, Hashable {
 
     /// The Codec row's choices, in order.
     public static let codecs: [MovieCodec] = [.h264, .hevc, .prores4444]
-    /// Why ProRes 4444 can't be picked yet: Halo's own writer is H.264 only until HX-4.
-    public static let proResWaits = "ProRes 4444 isn't available yet."
-    /// Why HEVC can't be picked yet: Halo's own writer is H.264 only until HX-4.
-    public static let hevcWaits = "HEVC isn't available yet."
+    /// Why HEVC with alpha can't be picked: the Codec row doesn't offer it.
+    public static let hevcAlphaRefused = "HEVC with alpha isn't offered. Choose ProRes 4444 to keep transparency."
 
-    /// Why `codec` can't be picked yet, or nil.
+    /// Why `codec` can't be picked, or nil: every codec the row offers can
+    /// be, since the suite's media service writes them all (HX-4).
     public static func codecRefusal(_ codec: MovieCodec) -> String? {
         switch codec {
-        case .h264: nil
-        case .hevc, .hevcAlpha: hevcWaits
-        case .prores4444: proResWaits
+        case .h264, .hevc, .prores4444: nil
+        case .hevcAlpha: hevcAlphaRefused
         }
     }
 
@@ -213,13 +218,17 @@ public struct HaloRenderPlan: Sendable, Hashable {
     public var fileNames: [String]
     /// Whether each frame is flattened over opaque black before it is written: a movie without alpha (HX-3).
     public var opaque: Bool
+    /// What the suite's media service writes the movie as; nil for a PNG
+    /// sequence and for an H.264 movie at a fractional rate, which Halo's
+    /// own writer times exactly (HX-4).
+    public var movie: MovieSettings?
     public init(
         width: Int, height: Int, framesPerSecond: Int, frameRate: FrameRate? = nil, frames: [Int], fileNames: [String],
-        opaque: Bool = false
+        opaque: Bool = false, movie: MovieSettings? = nil
     ) {
         self.width = width; self.height = height; self.framesPerSecond = framesPerSecond
         self.frameRate = frameRate ?? FrameRate(whole: framesPerSecond)
-        self.frames = frames; self.fileNames = fileNames; self.opaque = opaque
+        self.frames = frames; self.fileNames = fileNames; self.opaque = opaque; self.movie = movie
     }
 }
 

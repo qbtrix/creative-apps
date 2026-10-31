@@ -4,14 +4,19 @@
 // wrote the workspace per pointer sample ran the window per sample. Instead the
 // press goes to the workspace (the selection shows at once) and the later
 // samples go here, to a copy of it (DesignLiveEdit) that only DesignCanvas
-// reads: `live.workspace ?? model`. Mouse-up (`land(into:)`) replays the last
-// sample into the workspace through its own methods, then `endDrag`, so the
-// window changes once and records one step; the window writes that workspace
-// and `clearAfterLanding()` drops the copy a turn later, so the canvas never
-// draws the old workspace in between. `preview` and `land` do the same for an
-// inspector scrub, a style row's, the Rotation bar's or a fill editor drag. DesignWindow owns one and hands it down as the
-// `designLiveDrag` environment value; without one (a view hosted alone) the
-// canvas draws the workspace. Presentation state only.
+// reads: `live.workspace ?? model`. The inspector reads `scrubbed`, the copy
+// only a scrub's values set (a style row's, the Rotation bar's or a fill editor
+// drag), so a canvas drag never reruns the Opacity, Corners, Stroke and Fill
+// rows per sample (each walks every layer for its lock help, 2,000 on `crowd`).
+// `begin` and `clear` write `scrubbed` only when it is set, so a canvas drag's
+// press and release don't wake those rows either. Mouse-up (`land(into:)`)
+// replays the last sample into the workspace through its own methods, then
+// `endDrag`, so the window changes once and records one step; the window
+// writes that workspace and `clearAfterLanding()` drops the copy a turn later,
+// so the canvas never draws the old workspace in between. `preview` and `land`
+// do the same for an inspector scrub. DesignWindow owns one and hands it down
+// as the `designLiveDrag` environment value; without one (a view hosted alone)
+// the canvas draws the workspace. Presentation state only.
 import DesignModel
 import Observation
 import SuiteKernel
@@ -24,6 +29,9 @@ import SwiftUI
 
     /// The copy the canvas draws while a drag or scrub lasts; nil with none live.
     var workspace: DesignWorkspace? { edit.workspace }
+    /// The copy the inspector shows: a scrub's alone. A canvas sample never sets it, so a drag doesn't run
+    /// and lay out the inspector per pointer sample (the rows show the workspace until mouse-up).
+    private(set) var scrubbed: DesignWorkspace?
     /// A drag or scrub is under way: the next sample or value goes to the copy, not a new `begin`.
     var isLive: Bool { workspace != nil && !isLanding }
 
@@ -31,6 +39,7 @@ import SwiftUI
     func begin(from model: DesignWorkspace) {
         isLanding = false
         edit.begin(from: model)
+        if scrubbed != nil { scrubbed = nil }
     }
 
     /// One pointer sample, run on the copy only.
@@ -39,13 +48,22 @@ import SwiftUI
     }
 
     /// One value of an inspector scrub, shown on the copy only.
-    func preview(_ change: DesignStyleChange) { edit.preview(change) }
+    func preview(_ change: DesignStyleChange) {
+        edit.preview(change)
+        scrubbed = edit.workspace
+    }
 
     /// One fill editor intent of a drag, run on the copy only.
-    func preview(_ intent: GradientIntent) { edit.preview(intent) }
+    func preview(_ intent: GradientIntent) {
+        edit.preview(intent)
+        scrubbed = edit.workspace
+    }
 
     /// One value of a transform scrub, shown on the copy only.
-    func preview(_ intent: TransformIntent) { edit.preview(intent) }
+    func preview(_ intent: TransformIntent) {
+        edit.preview(intent)
+        scrubbed = edit.workspace
+    }
 
     /// Replays the last sample or value into `model` as one step; a refused value's reason. The
     /// copy stays shown until `clear()` or `clearAfterLanding()`.
@@ -59,6 +77,8 @@ import SwiftUI
     func clear() {
         isLanding = false
         edit = DesignLiveEdit()
+        // Only a scrub set it, so a canvas drag's clear doesn't wake the rows that read it.
+        if scrubbed != nil { scrubbed = nil }
     }
 
     /// Stops showing the copy on the next main-actor turn, once the window has passed the canvas

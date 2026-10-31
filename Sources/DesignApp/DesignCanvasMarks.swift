@@ -4,7 +4,7 @@
 // stored (style-rows ST-5): corner radius, a stroke centered on the edge, and its
 // opacity times every enclosing layer's, so a frame fades its contents. The shape
 // and stroke geometry are small functions (artworkPath, artworkStroke) the tests
-// read; paintArtwork draws a list of them, for DesignArtwork and DesignPastEdge. DesignMarqueeMark
+// read; paintArtwork draws a list of them, for DesignArtwork and DesignPastEdge. SuiteUI's SelectBoxMark
 // is the rectangle a marquee drag covers, from the Model's `marquee`, drawn as a
 // shape in the overlay. Frame names (DesignFrameLabels) and the selection
 // (DesignSelectionMarks) have their own files. None takes clicks: the canvas
@@ -53,14 +53,16 @@ struct DesignPainted: Identifiable, Sendable {
 extension DesignPage {
     /// The nodes the canvas paints, back to front: depth first, skipping every hidden subtree.
     var painted: [DesignPainted] {
-        func walk(_ nodes: [DesignNode], backdrop: DesignColor?, opacity: Double) -> [DesignPainted] {
-            nodes.filter { !$0.isHidden }.flatMap { node in
+        var out: [DesignPainted] = []
+        func walk(_ nodes: [DesignNode], backdrop: DesignColor?, opacity: Double) {
+            for node in nodes where !node.isHidden {
                 let faded = opacity * drawnOpacity(node.opacity)
-                return [DesignPainted(node: node, backdrop: backdrop, opacity: faded)]
-                    + walk(node.children, backdrop: node.kind == .frame ? node.fill : backdrop, opacity: faded)
+                out.append(DesignPainted(node: node, backdrop: backdrop, opacity: faded))
+                walk(node.children, backdrop: node.kind == .frame ? node.fill : backdrop, opacity: faded)
             }
         }
-        return walk(nodes, backdrop: nil, opacity: 1)
+        walk(nodes, backdrop: nil, opacity: 1)
+        return out
     }
 }
 
@@ -75,7 +77,8 @@ func drawnOpacity(_ opacity: Double) -> Double {
 }
 
 /// The outline `node` fills at `scale` (view points), or nil for a kind with no shape of its own:
-/// rectangles, frames and instances as rounded rectangles at `drawnCornerRadius`, ellipses as
+/// rectangles, frames and instances as rounded rectangles at `drawnCornerRadius` (circular corners, as the kernel
+/// outline a dashed stroke traces and the SVG's `rx` draw them), ellipses as
 /// ellipses, a shape as its spec's path in its frame (its box when the spec draws none). All keep their curves.
 func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     let scale = usable(scale)
@@ -83,7 +86,7 @@ func artworkPath(for node: DesignNode, scale: Double) -> Path? {
     switch node.kind {
     case .frame, .rectangle, .instance, .shape:
         if node.kind == .shape, let path = node.path(in: node.frame) { return artworkPath(path, scale: scale) }
-        return RoundedRectangle(cornerRadius: node.drawnCornerRadius * scale).path(in: box)
+        return RoundedRectangle(cornerRadius: node.drawnCornerRadius * scale, style: .circular).path(in: box)
     case .ellipse:
         return Path(ellipseIn: box)
     case .text, .group:
@@ -190,6 +193,59 @@ struct DesignArtwork: View {
     }
 }
 
+/// The page's artwork on the canvas, compared by its inputs (`.equatable()`), so a step that leaves
+/// the page as it was (a marquee, a hover) repaints nothing. During a move drag (`lift`) it draws
+/// the page as it was at the press in three parts: the nodes under the moved run, the run, and
+/// the nodes over it. Each part is its own DesignArtwork with unchanged inputs, so a step only
+/// moves the run's view by the drag's offset and paints no node (render contract rule 3).
+struct DesignPageArtwork: View, Equatable {
+    let page: DesignPage
+    let zoom: Double
+    var editingTextID: String?
+    var lift: DesignMoveLift?
+
+    var body: some View {
+        if let lift {
+            let scale = usable(zoom)
+            ForEach([DesignLiftPart.Part.under, .run, .over], id: \.self) { part in
+                DesignLiftPart(page: lift.page, firstID: lift.firstID, lastID: lift.lastID, part: part, zoom: zoom,
+                               editingTextID: editingTextID)
+                .equatable()
+                .offset(x: part == .run ? lift.offset.x * scale : 0, y: part == .run ? lift.offset.y * scale : 0)
+            }
+        } else {
+            DesignArtwork(painted: page.painted, zoom: zoom, editingTextID: editingTextID)
+        }
+    }
+}
+
+/// One part of a lifted page (DesignPageArtwork): the painted nodes before, in, or after the moved run.
+struct DesignLiftPart: View, Equatable {
+    enum Part { case under, run, over }
+    let page: DesignPage
+    let firstID, lastID: String
+    let part: Part
+    let zoom: Double
+    var editingTextID: String?
+
+    var body: some View {
+        DesignArtwork(painted: Self.slice(page.painted, part, from: firstID, to: lastID),
+                      zoom: zoom, editingTextID: editingTextID)
+    }
+
+    /// `part` of `painted`, the run being `first` through `last`; the run's own ids missing, all of it under.
+    nonisolated static func slice(_ painted: [DesignPainted], _ part: Part, from first: String, to last: String) -> [DesignPainted] {
+        guard let i = painted.firstIndex(where: { $0.id == first }),
+              let j = painted[i...].firstIndex(where: { $0.id == last })
+        else { return part == .under ? painted : [] }
+        switch part {
+        case .under: return Array(painted[..<i])
+        case .run: return Array(painted[i...j])
+        case .over: return Array(painted[(j + 1)...])
+        }
+    }
+}
+
 /// Paints `painted` into `context` at `scale`, each node at its opacity times `fade`; the text
 /// node `editing` is left out. DesignArtwork and DesignPastEdge both draw through it. Main actor,
 /// as DesignTextArtwork is; both callers draw from a Canvas in their `body`.
@@ -224,23 +280,5 @@ func paintArtwork(
             faded.scaleBy(x: scale, y: scale)
             DesignTextArtwork.draw(node, in: faded)
         }
-    }
-}
-
-/// The marquee under way: `rect` (page points) at `zoom`, a 1 pt accent edge over a 10 % accent
-/// fill. A shape, not a Canvas, so a marquee dragged past the page's edge still shows.
-struct DesignMarqueeMark: View {
-    let rect: DesignRect
-    let zoom: Double
-
-    var body: some View {
-        let scale = usable(zoom)
-        let box = Path(rect.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale)))
-        ZStack(alignment: .topLeading) {
-            box.fill(SuiteColor.accent.opacity(0.1))
-            box.stroke(SuiteColor.accent, lineWidth: 1)
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 }

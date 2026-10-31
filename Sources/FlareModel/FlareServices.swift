@@ -28,7 +28,7 @@ public struct FlareServices: Sendable {
     }
 
     /// Every member a fake. `assistMode` comes from `-FlareAssistMode` (read by LM-0c4's fake).
-    public static func fake(assistMode: FakeAssistMode = .ok) -> FlareServices {
+    public static func fake(assistMode: FakeAssistMode = .ok, exportFrameDelay: Duration? = nil) -> FlareServices {
         FlareServices(
             scenes: FakeScenes(),
             stage: FakeStage(),
@@ -41,7 +41,7 @@ public struct FlareServices: Sendable {
             library: FakeLibrary(),
             machines: FakeMachines(),
             preview: FakePreview(),
-            export: FakeExport(),
+            export: exportFrameDelay.map { FakeExport(frameDelay: $0) } ?? FakeExport(),
             assist: NotBuilt(reason: "Not built yet (LM-0c4)."),
             isPreview: true)
     }

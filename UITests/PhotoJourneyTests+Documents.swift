@@ -9,7 +9,8 @@
 // layout) and opens each. Open Recent reads the focused window's list, so with
 // every window closed a reopen relaunches Photo with no file first (the list
 // is in the app's defaults). XCUITest reads no document-edited state, so
-// "edited" is `photo.bar.saved`'s label. Shots: `photo-documents-<step>`.
+// "edited" is `photo.bar.saved`'s label. PJ-DS (document-setup DS-8) makes a
+// 4 × 6 in image at 300 ppi from File > New's shared sheet. Shots: `photo-documents-<step>`.
 import CoreGraphics
 import ImageIO
 import XCTest
@@ -29,7 +30,8 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         chooseBlend("Multiply", photo)
         typeValue("50", into: "photo.layer.opacity", photo)
         expectRow("Layer 1", meta: "Multiply 50%", photo)
-        expectStatus("Edited", photo)
+        // The autosave, 5 s after the last edit, may already read "Edited, autosaved": still edited.
+        expectStatus("Edited", photo, prefix: true)
         let edited = steadyCanvas(photo)
         photo.shot("documents-1-edited")
 
@@ -128,8 +130,9 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
             ("NotZip.ora", Data("not a zip".utf8), "It isn't a Photo Document or an image Photo can open."),
             ("Newer.ora", edited(#""format":1,"#, #""format":2,"#), "It was saved by a newer version of Photo. Update Photo to open it."),
             ("Missing.ora", Self.storedZip(entries.filter { $0.name != "data/layer-2.png" }), "It is damaged and can't be read."),
-            ("Large.ora", edited(#""canvas":{"height":600,"width":800}"#, #""canvas":{"height":4000,"width":5000}"#),
-             "It is larger than Photo can open: up to 16 megapixels."),
+            // 48 MP, past PhotoWorkspace.maxOpenPixels (40 MP since #2969).
+            ("Large.ora", edited(#""canvas":{"height":600,"width":800}"#, #""canvas":{"height":6000,"width":8000}"#),
+             "It is larger than Photo can open: up to 40 megapixels."),
         ]
         for (index, item) in cases.enumerated() {
             let url = folder.appending(path: item.file)
@@ -152,7 +155,7 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let original = try Data(contentsOf: beach)
         var photo = launch(photoArguments(open: beach), window: "beach.png")
         paint(photo)
-        expectStatus("Edited", photo)
+        expectStatus("Edited", photo, prefix: true)
         photo.shot("documents-2-painted")
 
         // 2. Command-W asks; Cancel keeps the window, still Edited.
@@ -185,6 +188,34 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         XCTAssertFalse(items.first?.isEnabled ?? true, "Clear Menu is enabled with nothing to clear")
         photo.shot("documents-2-recent-cleared", screen: true)
         photo.press(.escape)
+    }
+
+    /// PJ-DS (document-setup DS-8): File > New opens the shared New sheet; 4 × 6 in at 300 ppi, Transparent,
+    /// Create makes a 1200 × 1800 image over the checkerboard.
+    @MainActor func testNewImageFromSheet() throws {
+        let photo = launch(photoArguments(), window: nil)
+        photo.press(character: "n", .command) // 1. File > New.
+        XCTAssert(photo.element("suite.newdoc").waitForExistence(timeout: 10), "File > New opened no New sheet (suite.newdoc)")
+        photo.shot("documents-ds-sheet")
+
+        photo.element("suite.newdoc.unit").click() // 2. Inches, 4 by 6 at 300.
+        photo.app.menuItems["in"].firstMatch.click()
+        for (id, value) in [("width", "4"), ("height", "6"), ("resolution", "300")] {
+            photo.element("suite.newdoc.\(id)").doubleClick()
+            photo.press(character: "a", .command)
+            photo.app.typeText(value)
+        }
+        XCTAssertEqual(photo.element("suite.newdoc.pixels").value as? String, "1200 × 1800 px")
+        photo.app.radioButtons["Transparent"].firstMatch.click() // 3. Transparent.
+        photo.shot("documents-ds-filled")
+
+        photo.element("suite.newdoc.create").click() // 4. Create.
+        XCTAssert(photo.element("suite.newdoc").waitForNonExistence(timeout: 10), "Create left the New sheet up")
+        let size = photo.app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '1200 × 1800 px'"))
+        XCTAssert(size.firstMatch.waitForExistence(timeout: 10), "the new image isn't 1200 × 1800 px")
+        let row = Self.rgba(steadyCanvas(photo)).enumerated().filter { $0.offset / 800 == 75 && $0.offset % 4 < 3 }
+        XCTAssertGreaterThan(Set(row.map(\.element)).count, 1, "the canvas is one flat color, not the checkerboard")
+        photo.shot("documents-ds-created")
     }
 
     // MARK: - Steps

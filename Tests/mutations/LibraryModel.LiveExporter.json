@@ -16,8 +16,8 @@
   {
     "label": "develop is skipped: render returns the decoded buffer",
     "file": "Sources/LibraryModel/Live/LiveExporter.swift",
-    "find": "            buffer = try develop.render(buffer, settings: photo.develop)\n",
-    "replace": "",
+    "find": "let buffer = try develop.render(preShrunk(b, photo: photo, longSide: longSide), settings: photo.develop)",
+    "replace": "let buffer = try preShrunk(b, photo: photo, longSide: longSide)",
     "tests": "LibraryExportPlanTests"
   },
   {
@@ -61,5 +61,54 @@
     "find": "digits = String(max(photos.count, 1)).count",
     "replace": "digits = 1",
     "tests": "LargeCatalogEquivalenceTests"
+  },
+  {
+    "label": "the source isn't shrunk: develop runs on all 24 MP of a 2,000 px export",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "guard full > longSide, longSide > 0 else { return b }",
+    "replace": "guard full < 0 else { return b }",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the shrink ignores the crop: it stops once the whole photo covers the plan, so the crop lands short (1022 x 682)",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "let cut = croppedSize(photo, at: size)",
+    "replace": "let cut = size",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the grow loop is gone: the shrink stops at the plan's scale and its crop lands short of the plan",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "!covers(planned, photo: photo, at: source.fitting(longSide: side)) { side += 1 }",
+    "replace": "!covers(planned, photo: photo, at: source.fitting(longSide: side)) { break }",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the cover check is off by one: a crop a pixel short of the plan counts as covering",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "return cut.width >= planned.width && cut.height >= planned.height",
+    "replace": "return cut.width >= planned.width - 1 && cut.height >= planned.height - 1",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the grow loop steps two pixels: the shrink overshoots the smallest size that covers",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "{ side += 1 }",
+    "replace": "{ side += 2 }",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the final resize is skipped: the export ships at the developed crop's size, not the plan's",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "return try buffer.resized(width: target.width, height: target.height, filter: .lanczos3)",
+    "replace": "return buffer",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "the final resize fits the developed shape to the long side instead of sizing to the plan",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "let target = croppedSize(photo).fitting(longSide: longSide)",
+    "replace": "let target = PixelSize(width: buffer.width, height: buffer.height).fitting(longSide: longSide)",
+    "tests": "LibraryExportPlanTests"
   }
 ]

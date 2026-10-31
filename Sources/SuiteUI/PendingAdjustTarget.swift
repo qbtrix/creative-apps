@@ -4,6 +4,7 @@
 // with `reason`, and a run throws NotBuilt; the look store is the app's own,
 // so Save Look… and Delete work on it.
 import SuiteImaging
+import SuiteKernel
 import SuiteModel
 
 public struct PendingAdjustTarget: AdjustTarget {
@@ -19,7 +20,7 @@ public struct PendingAdjustTarget: AdjustTarget {
     public var filterHelp: String? { reason }
     public var currentLook: LookPreset { LookPreset(id: "current", name: "Current") }
     public var kinds: [ImagingKind] { [] }
-    public mutating func setKinds(_ k: [ImagingKind], name: String) throws { throw AdjustCommands.notBuilt }
-    public mutating func applyFilter(_ f: ImagingFilter, name: String) throws { throw AdjustCommands.notBuilt }
-    public mutating func applyLook(_ l: LookPreset, name: String) throws { throw AdjustCommands.notBuilt }
+    public mutating func setKinds(_ k: [ImagingKind], name: String) throws { throw CatalogError.notBuilt(id: "adjust", feature: "adjust-everywhere AJ-8") }
+    public mutating func applyFilter(_ f: ImagingFilter, name: String) throws { throw CatalogError.notBuilt(id: "adjust", feature: "adjust-everywhere AJ-8") }
+    public mutating func applyLook(_ l: LookPreset, name: String) throws { throw CatalogError.notBuilt(id: "adjust", feature: "adjust-everywhere AJ-8") }
 }

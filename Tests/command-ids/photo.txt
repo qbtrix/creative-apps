@@ -1,10 +1,12 @@
 # Photo's command ids (adopt-command-catalog AC-p1). Never reuse one; mark a removed id "retired <id>".
 color.sample
+document.read
 edit.copy
 edit.cut
 edit.delete-selection
 edit.fill-selection
 edit.paste
+edit.paste-as-image
 edit.redo
 edit.select-all
 edit.undo
@@ -47,6 +49,7 @@ layer.select-below
 layer.send-backward
 layer.set-opacity
 layer.toggle-visibility
+paint.stroke
 place.focus
 place.image
 place.read
@@ -78,6 +81,7 @@ style.set
 text.add
 text.read
 text.set-alignment
+text.set-color
 text.set-font
 text.set-italic
 text.set-line-height
@@ -88,15 +92,20 @@ tool.brush
 tool.bucket
 tool.clone
 tool.crop
+tool.ellipse
 tool.eraser
 tool.eyedropper
 tool.gradient
 tool.heal
+tool.lasso
 tool.marquee
-tool.move
+retired tool.move
+tool.select
+tool.polygon
 tool.remove
 tool.spot-heal
 tool.text
+tool.wand
 transform.begin
 transform.cancel
 transform.commit
@@ -108,10 +117,14 @@ transform.scale
 transform.set
 view.actual-size
 view.fit
+view.snapshot
 view.zoom-in
 view.zoom-out
+history.begin
+history.end
 history.jump
 history.read
+history.undo-request
 tool.pen
 path.read
 path.draw
@@ -131,3 +144,18 @@ tone.read
 tone.set
 tone.reset
 tone.auto
+fill.bucket
+retouch.spot-heal
+retouch.heal
+retouch.remove
+adjust.black-and-white
+adjust.invert
+filter.gaussian-blur
+filter.motion-blur
+filter.sharpen
+filter.reduce-noise
+filter.add-noise
+look.list
+look.apply
+look.save
+look.delete

@@ -40,7 +40,7 @@ twelve Photo journeys green. The twelve, in `UITests/PhotoJourneyTests.swift`:
 | V4 | `testEveryMenuOpens` | File, Edit, Select, Image, Layer, View all open |
 | V5 | `testOpenImagePaintAndSave` | Open a PNG, paint with the brush, undo and redo, Save writes the file |
 | V6 | `testSaveAsAndActualSize` | Save As (Shift-Command-S) renames the window; Actual Size (Command-1) |
-| V7 | `testEveryToolEditsTheImage` | Clone (Option-click, drag), Heal, Eraser options, Marquee + Fill, Move, Crop + Apply, each a named undo step |
+| V7 | `testEveryToolEditsTheImage` | Clone (Option-click, drag), Heal, Eraser options, Marquee + Fill, Select (a move), Crop + Apply, each a named undo step |
 | V8 | `testStraighten` | Image > Straighten… by an angle with the grid and Crop to Fit |
 | V9 | `testTier1CropResize` | Crop tool, Image Size with kept proportions, Rotate |
 | V10 | `testTier1Layers` | New, delete, rename, hide, opacity, blend mode, Bring Forward / Send Backward, Select Layer Above / Below |
@@ -72,10 +72,11 @@ In plain words, v1 does:
   W3C modes), reorder by drag and by Command-] / Command-[, select by
   Option-Command-] / [. Several layers: Shift-click picks a range,
   Command-click adds or drops one, Select > All Layers (Option-Command-A)
-  picks every layer; hide, opacity, Move and Delete then act on every picked
+  picks every layer; hide, opacity, a Select move and Delete then act on every picked
   layer as one undo step, and Delete refuses to take every layer
   (`photo/multi-layer-select`).
-- **Tools on the rail:** Move V, Marquee M (rectangles only), Brush B, Eraser E
+- **Tools on the rail:** Select V (a drag pressed on a layer moves it, the old
+  Move tool folded in; a drag on empty canvas boxes layers; a click picks one), Marquee M (rectangles only), Brush B, Eraser E
   (each with its own size, hardness, opacity), Clone S, Heal J, Crop C, and
   Type T: a click opens a text box over the canvas, and the layer stays
   editable text after a save and reopen (`photo/text-layers`).
@@ -218,6 +219,7 @@ or writing any closed layered format.
 | Select | Rectangle, Ellipse and Lasso (freehand, closed on release); Shift adds, Option subtracts; Select > Invert; Feather; brush, eraser, clone, heal, Fill and Delete act inside it | Magic wand, quick selection, refine edge, saved selections |
 | Masks | Add Mask from Selection, Delete Mask, Apply Mask, disable a mask; paint on the mask with brush and eraser | Vector masks, mask density and feather sliders on the layer |
 | Transform | Edit > Free Transform (Command-T): scale with the 8 handles, rotate outside them, Shift keeps ratio, typed W%, H%, angle; Edit > Transform > Flip Horizontal and Flip Vertical (the selected layer); Image > Flip Canvas Horizontal and Vertical | Skew, distort, perspective, warp |
+| Tone | White Balance (Temperature, Tint), Tone (Brightness, Contrast, Highlights, Shadows, Whites, Blacks, Auto), Presence (Vibrance, Saturation) and Sharpen (Amount, Radius, Threshold) rows in the Adjust tab under Photo's own Exposure, on the image or on an adjustment layer; each drag is one named undo step, Auto is one "Auto Tone" step, the canvas follows on the GPU and export matches it; Sharpen is off on an adjustment layer and says why; the shared `tone.*` commands run them from the CLI and an agent too (`photo/tone-controls` on `suiteui/tone-controls`, beta) | Tone curves per channel, lens and noise correction |
 | History | The History tab: every named step, click to jump, later steps dimmed | Snapshots, history brush |
 | Paint | The brush cursor circle at the brush size; Eyedropper (I) picks a color from the image into the brush color, point or 3 × 3 or 5 × 5 average; the Gradient tool (G) drags a linear or radial gradient into the layer or the selection as one step, its stops set in Tool Options with the shared gradient editor (`photo/gradient-fill`, beta) | Paint bucket, brush presets and textures |
 | Export | PNG, JPEG, TIFF and HEIC; a size as a percent or a longest side; quality for JPEG and HEIC | Export several sizes at once, web presets, metadata editing |
@@ -269,7 +271,7 @@ name everything below, so no later feature edits `docs/c4/model.json`.
 | workspace | existing (v2 adds state in PV-0) | `PhotoWorkspace`: the open image, layers (top first) with kind and mask flags, pixels and masks as tiles, selection (rect plus optional coverage mask), tool and tool options, pending crop and aspect, transform draft, sample size, services, the saved marker | `PhotoWorkspace.swift`, `PhotoLayer.swift`, `PixelRect.swift`, `TiledPixels.swift`, `ToolOptions.swift`, `PhotoInspectorContent.swift`, `PhotoLayerMenu.swift` | calls contracts through `services`; records every edit in history |
 | history | existing (PV-0 adds step ids, the selection and mask-tiles steps, and masks in the stack) | Named undo and redo by tiles, layer lists or whole stacks; the history list and jump; each History tab row (PV-4) | `PhotoHistory.swift`, `PhotoHistoryRows.swift` (PV-4) | read by the History tab (PV-4) |
 | render | existing (PV-0 extracts the per-layer step) | Composite visible layers bottom-up, then the global adjustments; damaged tiles only for the live canvas; the curve's samples and histogram | `PhotoRender.swift`, `PhotoTileUpdate.swift`, `PhotoLayerComposite.swift` (new in PV-0: one layer's contribution, the hook PV-6 and PV-5 fill), `AdjustmentSettings.swift`, `GammaTrack.swift`, `HueSaturation.swift` | uses CoreRaster `composite`; calls `adjustmentLayers` and `masking` |
-| tools | existing (PV-0 routes drags) | Each tool's drag: brush, eraser, clone, heal, move; routes marquee, crop, eyedropper and transform drags to their components; weights paint by the selection's coverage | `PhotoStroke.swift`, `PhotoRetouch.swift`, `PhotoSelection.swift` | calls select-mask, crop, transform, eyedropper |
+| tools | existing (PV-0 routes drags) | Each tool's drag: brush, eraser, clone, heal, select (a press on a layer moves it); routes marquee, crop, eyedropper and transform drags to their components; weights paint by the selection's coverage | `PhotoStroke.swift`, `PhotoRetouch.swift`, `PhotoSelection.swift` | calls select-mask, crop, transform, eyedropper |
 | image-ops | existing | Open and export through `PhotoImageCodec`; Image Size, Rotate, Straighten | `PhotoImageFile.swift`, `PhotoImageOps.swift`, `PhotoStraighten.swift` | uses CoreRaster resample and rotate |
 | contracts | planned (PV-0) | One protocol per v2 use case and the values they share (section 5); `PhotoServices` with `.fake` and `.live` | `Contracts/`, `PhotoServices.swift` | implemented by fakes and live |
 | fakes | planned (PV-0) | Deterministic fakes and the fixture images for views, snapshots and `-PhotoFixture` journeys | `Fakes/`, `PhotoFixtures.swift` | implement contracts |
@@ -652,13 +654,14 @@ can point at them.
 | # | Test (file, feature) | Steps | Asserts | States |
 |---|---|---|---|---|
 | PJ-10 | `testHistoryTabJump` (`+History`, PV-4) | four edits; History tab; click step 2; New Layer | rows "Open", then each edit; rows after 2 dimmed; clicking 2 undoes two steps; a new edit removes the dimmed rows | empty: a new image lists only "New Image" |
-| PJ-11 | `testBrushCursorFollowsSize` (`+History`, PV-4) | Brush; hover the canvas; size 40, then 120; Move tool | `photo.canvas.brush-cursor` exists, its frame width is 40 × zoom, then 120 × zoom (±1 pt); gone with Move | none |
+| PJ-11 | `testBrushCursorFollowsSize` (`+History`, PV-4) | Brush; hover the canvas; size 40, then 120; Select tool | `photo.canvas.brush-cursor` exists, its frame width is 40 × zoom, then 120 × zoom (±1 pt); gone with Select | none |
 | PJ-12 | `testEllipseLassoAddSubtract` (`+Select`, PV-5) | Marquee shape Ellipse; drag; Shift-drag a rectangle; Option-drag a lasso; Select > Invert; Feather 10; brush | the marching-ants element exists after each; the info line reads the selection's bounds; brush paints only inside (a pixel outside unchanged); each change is one "Undo Select" step | empty: Invert with nothing selected selects all |
 | PJ-13 | `testLayerMaskFromSelection` (`+Mask`, PV-5) | ellipse select; Layer > Add Mask from Selection; paint black on the mask; Shift-click the badge; Layer > Apply Mask | `photo.layer.mask-badge` on the row; the pixels outside are hidden, not deleted (disable shows them); Apply makes them transparent; one step each | error: Add Mask on an adjustment layer with nothing selected reveals all |
 | PJ-14 | `testFreeTransformAndFlip` (`+Transform`, PV-7) | Command-T; drag the bottom-right handle out by half; drag outside a corner a quarter turn with Shift; Return; Edit > Transform > Flip Horizontal; Image > Flip Canvas Vertical | the transform box element; W% reads 150, angle 90; Return gives "Undo Free Transform"; Escape in a second round leaves the layer as it was; flips are exact (`testFlip…` model goldens) | loading: a transform over 12 MP shows "Transforming…" |
 | PJ-15 | `testExportAtSizeAsTIFFAndHEIC` (`+Export`, PV-8) | Export; TIFF; size 50%; Export; HEIC quality 70; longest side 400; Export | files exist with TIFF and HEIC headers; TIFF is 400 × 300; HEIC's longer side 400 | error: a longest side over 16384 disables Export with the reason; loading: "Exporting…" |
 | PJ-16 | `testEyedropperPicksColor` (`+Sample`, PV-9) | Eyedropper (I); click the sun; 5 × 5; click the sky; B | the brush color well's hex reads the sun's color, then the sky's mean; picking is not an undo step | empty: a click on a transparent pixel keeps the color and says "Nothing to sample here." |
 | PJ-PI1 | `PhotoPlaceJourneyTests.testPlaceLogo` (`+Place`, `photo/place-image`) | New Image 800 × 600; File > Place… `logo.png` (200 × 100); place `photo-4000x3000.jpg`; Undo; place `logo.svg` | a layer `logo` above Background, centred, at 100%; the photo layer at 800 × 600 and "Placed at 20%."; one Undo removes only the photo layer; the SVG adds nothing | error: "Photo places PNG or JPEG files."; empty: Place… disabled with "Open or make an image to place into." |
+| PJ-T1 | `PhotoToneJourneyTests.testWarmShadowsAndSharpen` (`+Tone`, `photo/tone-controls`) | Temperature −25; Undo; Shadows +40, Highlights −30, Auto; a Levels adjustment layer, Contrast +20; back on the image, Sharpen Amount 80; Export PNG | the canvas changes and one Undo gives it back; Auto is one "Auto Tone" step; the layer's Contrast changes the canvas; the PNG is written | disabled: Sharpen on an adjustment layer, with its help |
 | PJ-17 | `testLayoutAtWidths` (`+Layout`, PV-10) | relaunch at 880, 960 and 1024 pt (section 7.4) | the layout rules of section 7.4 at each width | none |
 
 ### 4.4 Fixtures
@@ -2164,7 +2167,7 @@ SuiteUI's #330) isn't built yet:
 | PB-6 | Lasso drag event (append a point) | ≤ 0.05 ms / ≤ 0.5 ms | ≤ 4 ms | QB-L1 | PV-5 |
 | PB-7 | Selection mouse-up: build the mask (ellipse, or a 1,000-point lasso) on 12 MP | ≤ 60 ms / report | – | QB-F2 (outline drawn before mouse-up) | PV-5 |
 | PB-8 | Crop drag and a typed crop field | ≤ 0.05 ms / ≤ 0.5 ms | ≤ 4 ms | QB-L1 | PV-3 |
-| PB-9 | Move tool drag | ≤ 0.1 ms / report | ≤ 8 ms | QB-L1 | existing (new row) |
+| PB-9 | Select drag on a layer (the Move it folds in) | ≤ 0.1 ms / report | ≤ 8 ms | QB-L1 | existing (new row) |
 | PB-10 | Free Transform handle drag (box only; pixels are transformed on Return) | ≤ 0.05 ms / ≤ 0.5 ms | ≤ 8 ms (preview: the layer's picture scaled and turned on the GPU, like Straighten's) | QB-L1, PJ-P1 | PV-7 |
 | PB-11 | Free Transform commit on a 12 MP layer, off the main actor | ≤ 1.5 s / report | "Transforming…" within 100 ms | QB-L9 | PV-7 |
 | PB-12 | Flip layer or canvas, 12 MP | ≤ 60 ms / report | – | – | PV-7 |

@@ -2,7 +2,7 @@
 // #37). The same target timestamps fired through HaloPlaybackDriver's link
 // and sent straight into HaloProject.tick(now:) land on the same frames; the
 // frames follow the targets, not wall time; and a paused model stops the
-// link, the way HaloTransport follows `playback.playing`. Every test runs on
+// link, the way HaloTransportAdapter follows `playback.playing`. Every test runs on
 // a HaloFakeLink fired by hand: none starts a real display link, which the
 // headless CI runner can't serve. macOS only.
 #if canImport(AppKit)

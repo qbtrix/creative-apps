@@ -21,7 +21,7 @@ import SwiftUI
 /// that hides every photo of the collection gets No Matching Photos with Clear
 /// Filter (`library.filter.empty.clear`). In loupe
 /// mode it shows the loupe's photo (LibraryLoupe) instead of the grid.
-struct LibraryBrowser: View {
+struct LibraryBrowser: View, BodyCounted {
     let model: LibraryCatalog
     /// The window's menu (LibraryMenu.disabled outside one), passed to the grid and the loupe.
     var menu = LibraryMenu()
@@ -43,14 +43,12 @@ struct LibraryBrowser: View {
     static let importFallbackHelp = "Import isn't connected yet."
 
     #if DEBUG
-    /// How many times the content's body ran; RenderBudgetLibraryFoldersTests checks a folder's
-    /// disclosure leaves it, and the grid under it, alone.
-    @MainActor static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(spacing: 0) {
             if case .running(let progress) = model.importState {

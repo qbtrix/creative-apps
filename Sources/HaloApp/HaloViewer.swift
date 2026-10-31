@@ -1,7 +1,8 @@
 // HaloViewer.swift: Halo's main content: HaloViewerCanvas with the Shape
-// button (HaloShapeTool, shape-tools HS-2) at its top trailing corner, the Model's
+// button (HaloShapeTool, shape-tools HS-2) at its top trailing corner and the
+// History panel (HaloHistoryOverlay) at its bottom trailing one, the Model's
 // `viewerNotice` captioned under it while layers can't be drawn, a status bar
-// with HaloTransport and the History button beside it, HaloTimelineView and a refusal's caption, or the empty
+// with HaloTransportAdapter and the History button beside it, HaloTimelineView and a refusal's caption, or the empty
 // state. The status bar's tooltips (HaloStatusText) say what the timecode's
 // four parts count and that the pills are zoom and pixel size. A narrow
 // column takes HaloStatusRow's shapes in turn: it drops the layer count,
@@ -59,6 +60,8 @@ struct HaloViewer: View {
                     .overlay(alignment: .topTrailing) {
                         HaloShapeTool(model: model, onIntent: onShapeIntent).padding(SuiteSpacing.s)
                     }
+                    // Over the viewer, never the status row or timeline (#5844).
+                    .overlay { HaloHistoryOverlay(model: model) }
                 // Under the artboard, not over it: the layout journey reads
                 // the artboard's frame from the viewer's pixels.
                 if let notice = model.viewerNotice {
@@ -76,11 +79,7 @@ struct HaloViewer: View {
                 // transport, History and three pills need about 456, so the
                 // zoom pill goes there (#4449).
                 ViewThatFits(in: .horizontal) {
-                    statusRow(comp, artboard: artboard, .wide)
-                    statusRow(comp, artboard: artboard, .noLayers)
-                    statusRow(comp, artboard: artboard, .leading)
-                    statusRow(comp, artboard: artboard, .leadingNoZoom)
-                    statusRow(comp, artboard: artboard, .bare)
+                    ForEach(HaloStatusRow.fallbacks, id: \.self) { statusRow(comp, artboard: artboard, $0) }
                 }
                 Divider()
                 HaloTimelineView(model: model, perform: perform)
@@ -120,7 +119,7 @@ struct HaloViewer: View {
             statusBar(comp, artboard: artboard, row)
         } else {
             HStack(spacing: 0) {
-                HaloTransport(model: model, perform: perform)
+                HaloTransportAdapter(model: model, perform: perform)
                 if row.history { HaloHistoryControl() }
                 statusBar(comp, artboard: artboard, row)
             }
@@ -152,7 +151,7 @@ struct HaloViewer: View {
             }
             if row.layers { Text(comp.layerSummary).help("Layers in this composition.") }
             if row.transportInBar {
-                HaloTransport(model: model, perform: perform)
+                HaloTransportAdapter(model: model, perform: perform)
                 if row.history { HaloHistoryControl() }
             }
         }

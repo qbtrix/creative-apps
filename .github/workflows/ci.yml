@@ -233,6 +233,7 @@ jobs:
           fi
           scripts/lottie-oracle/build
       - run: scripts/ci --build-only
+        timeout-minutes: 40  # under the job's 45: an overrun fails the step, so the gate goes red (a job timeout can read as cancelled)
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Pack the build
@@ -268,6 +269,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: sudo xcode-select -s /Applications/Xcode_26.6.app
       - run: scripts/bundle-apps
+        timeout-minutes: 25  # under the job's 30, as above
       - name: Upload app builds
         uses: actions/upload-artifact@v4
         with:
@@ -307,7 +309,7 @@ jobs:
     needs: mac-compile
     if: ${{ !inputs.build_only && !inputs.linux_only }}
     runs-on: macos-26
-    timeout-minutes: 60
+    timeout-minutes: 80
     permissions:
       contents: read
     strategy:
@@ -330,6 +332,7 @@ jobs:
           time zstd -dc "$RUNNER_TEMP/swift-build.tar.zst" | tar -xf -
           rm "$RUNNER_TEMP/swift-build.tar.zst"
       - name: scripts/ci --shard (memory sampled)
+        timeout-minutes: 75  # under the job's 80, as in the compile job
         if: ${{ !inputs.app }}
         run: |
           mem="$RUNNER_TEMP/crash-reports/memory.log"
@@ -358,10 +361,15 @@ jobs:
       # no test fails the step. The job summary lists what ran.
       - name: Scoped tests
         if: inputs.app
+        timeout-minutes: 75  # under the job's 80, as above
         run: |
           scope=$(scripts/test-scope app "$APP")
           model=$(sed -n 1p <<<"$scope") snap=$(sed -n 2p <<<"$scope")
           perf=$(scripts/test-scope perf)
+          # Quarantined swift tests ride the same --skip, as in scripts/ci; without this a scoped run or a
+          # lane gate ran them anyway (run 40991137652).
+          quarantined=$(scripts/quarantine skip)
+          [[ -z "$quarantined" ]] || { echo "skipping quarantined tests: $quarantined"; perf="$perf${perf:+|}$quarantined"; }
           {
             echo "## scoped: $APP"
             echo
@@ -371,6 +379,7 @@ jobs:
             if [[ -n "$snap" ]]; then echo "- Snapshot tests: \`swift test --filter '$snap' --no-parallel\`"; else echo "- Snapshot tests: none"; fi
             echo "- UI journeys: $JOURNEYS_NOTE"
             echo "- Perf and timing tests: skipped (Tests/perf-suites.txt; they run nightly on the captain's Mac)"
+            echo "- Quarantined tests: skipped (UITests/quarantine.json)"
             echo
             echo "Skipped: the Linux job (lints and every Model's tests), other apps' tests and journeys, and Promote and Dev red (a scoped run never moves main, and its journeys never lower the audit baseline)."
             echo
@@ -450,12 +459,18 @@ jobs:
   # (<apps>)" for a scoped or scoped gate run: MAC_JOB and MAC_GATE_RE in
   # scripts/fast-lane.sh): green once the compile job, every test job and the
   # bundles (when they run) passed. On ubuntu, after them, always (a red shard
-  # must make it red, not skipped). Its summary lists each macOS job's
-  # minutes. When red it deletes `app-builds`, so a red run ships no bundles.
+  # must make it red, not skipped), except when one of them was cancelled and
+  # none failed (the concurrency group, or no runner took it): then the gate
+  # is skipped, neither green nor red, so Promote and Dev red skip too and the
+  # run says nothing about dev. A job that hits its own timeout can be
+  # reported cancelled too, so each long step has a timeout under its job's,
+  # and an overrun fails.
+  # Its summary lists each macOS job's minutes. When red it deletes
+  # `app-builds`, so a red run ships no bundles.
   macos:
     name: ${{ inputs.app && format('macOS ({0})', inputs.app) || 'macOS' }}
     needs: [mac-compile, mac-test, mac-bundle]
-    if: ${{ always() && !inputs.build_only && !inputs.linux_only }}
+    if: ${{ always() && !inputs.build_only && !inputs.linux_only && (contains(needs.*.result, 'failure') || !contains(needs.*.result, 'cancelled')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -522,7 +537,8 @@ jobs:
 
   # Open, or update, the single "dev is red" issue when the Linux or macOS job
   # fails (journey reds go to Findings). main is the last green dev SHA, so main..SHA
-  # holds the culprit.
+  # holds the culprit. A run whose SHA main already contains (it finished after
+  # a newer green run promoted past it) is stale: it logs the skip and touches no issue.
   dev-red:
     name: Dev red
     needs: [linux, macos]
@@ -542,6 +558,10 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           git fetch origin main
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::notice::Skipped as stale: main ($(git rev-parse --short origin/main)) already contains $GITHUB_SHA, so a newer green run promoted past it. No dev-red issue opened or updated."
+            exit 0
+          fi
           range="main..$GITHUB_SHA"
           failed=$(jq -r '[to_entries[] | select(.value.result == "failure") | .key] | join(", ")' <<<"$NEEDS")
           # Lane and squash merges end their subject with (#N).

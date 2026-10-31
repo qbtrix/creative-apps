@@ -210,7 +210,7 @@ controls").
 | `SuiteSize.preset` | 24 | 28 | Preset buttons (2 pt hit inset each side) |
 | `SuiteSize.actionButton` | 32 | 32 | Full-width outlined action |
 | `SuiteSize.pill` | 20 | 24 | Status pills |
-| `SuiteSize.transportButton` | 32, play 36 | same | Transport capsule |
+| `SuiteSize.transportButton` | 32, play 36 | same | Large round transport buttons (the transport itself uses `pillHit`) |
 | `SuiteSize.swatch` | 24 × 16 | the row | Swatch inside a color row |
 | `SuiteSize.selectionHandle` | 8 | 12 | Stage selection handles |
 | `SuiteSize.anchor` | 6 | 12 | Pen and direct-select anchors and handle ends |
@@ -240,8 +240,19 @@ Nothing goes below 10 pt.
 
 **Motion.** Hover and state changes fade background, color and border over
 0.14 s, ease in and out (`SuiteMotion.state`). Under Reduce Motion they
-change at once. No other chrome animates; the artwork is the only thing that
-moves.
+change at once. The one other chrome motion is feedback: a refused rename's
+field shakes once, side to side, and stays still under Reduce Motion
+(`SuiteMotion.shakeOffset`, #3462). The other is an agent at work
+(SuiteUI `AgentWorking`, read from the document's history): while a request
+is open or a step just landed, an `accent` `statusDot` pulses at the AI
+segment's trailing edge, the live request's title in the AI tab shimmers
+(an `accentText` band, `SuiteMotion.shimmerSweep`) as its step count ticks
+and new steps ease in, and in Design the layers the newest step touched
+take a 2 pt `accent` outline. All of it holds 0.6 s past the last step or
+the request's end (`AgentWork.linger`), so fast steps never flicker, then
+fades over 0.5 s (`SuiteMotion.agentFade`). It is drawn by the render
+server: no app body or canvas render runs per frame. Otherwise the artwork
+is the only thing that moves.
 
 ### State colors
 
@@ -371,15 +382,17 @@ in `stateError` with a triangle.
 Toggle pills take the `stateSelected` tint with `accentText` when on;
 warning pills take the warning tint, color and triangle; error pills (a
 failed save or render) the `stateError` tint and color with an exclamation
-circle. Transport: a `row`
-capsule of round icon buttons (`textSecondary`, hover `rowHover`) and a
-larger round play button in `accentFill` with a white glyph. Timecode in
-`timecode`: the current value `textPrimary`, the total `textSecondary`.
+circle. Transport (one look in every app, Halo's): plain icon-only
+buttons, each at least a `pillHit` square, edge to edge, in `textSecondary`
+(`textTertiary` while disabled, `accent` for Loop while on), Play swapping
+to pause while playing, Loop a button-style toggle, in a status pill (or
+bare inside a bar that already gives the pill). Timecode in `pill` type:
+the current value `textPrimary`, the total `textSecondary`.
 
-**Tabs and the tool rail.** Segmented tabs (`SegmentedTabs`): a `row`
-capsule with 2 pt padding and `chip`-tall pills, labels `textSecondary`; the
-selected pill is the `stateSelected` tint with `textPrimary`. It stays a
-`Picker` underneath. Tool rail (`ToolbarGroup(style: .rail)`): idle symbols
+**Tabs and the tool rail.** Segmented tabs (`SegmentedTabs`): the stock
+macOS segmented control exactly as the HIG and AppKit's `NSSegmentedControl`
+draw it (captain, 10-27), with no custom capsule, tint or fill; it fills the
+panel's width. A tabbed pane is `NSTabView`. Tool rail (`ToolbarGroup(style: .rail)`): idle symbols
 in `textSecondary`, hover `rowHover`, selected on the `stateSelected` tint
 with the symbol in `accentText`.
 
@@ -422,7 +435,9 @@ no second row component.
   an adjustable value with units. Color is never alone. Differentiate
   Without Color adds the shape cues on the stage too.
 - **Reduce Motion:** state fades become instant, the recording dot stops,
-  the curve editor's preview dot stops.
+  the curve editor's preview dot stops, a refused rename's field doesn't shake,
+  the AI's working dot stays still, and a working request's title takes a
+  still `accentText` tint instead of the shimmer.
 - **Increase Contrast:** the Dark + IC and Light + IC columns above: the
   ladder steps double, `outline` goes to 30%, secondary text moves toward
   primary, and the state colors brighten (Dark) or deepen (Light).

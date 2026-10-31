@@ -13,12 +13,15 @@ lower its budget in the same PR. Never raise one. The target is where the row
 has to end up.
 
 - **Window bodies** come from a debug-only `bodyRuns` counter in the app's window
-  file. The count is deterministic, so `RenderBudget<App>Tests/bodies` runs in
-  the merge gate. Every suite that reads one of these process-global counters
-  nests in `BodyCountSuites`, which is `.serialized`, so two of them never run
-  at once and count each other's renders. A new counter-reading suite nests
-  there too, and its `perf-suites.txt` line reads
-  `AppSnapshotTests.BodyCountSuites/<Suite>`.
+  file, which reports through SuiteUI's `BodyTally`. The count is deterministic,
+  so `RenderBudget<App>Tests/bodies` runs in the merge gate. Every suite that
+  reads one nests in `BodyCountSuites`: its trait gives each test case its own
+  tally, every window the harness (`RenderBudgetWindow`) opens in that test
+  reports to it, and `bodyRuns` counts those windows only, so suites running
+  alongside never move it (factory lesson 345). `.serialized` still
+  keeps those suites' timings apart. A new counter-reading suite nests there
+  too (`scripts/check-body-counts` fails one that doesn't), and its
+  `perf-suites.txt` line reads `AppSnapshotTests.BodyCountSuites/<Suite>`.
 - **Step p95** is wall time, so `RenderBudget<App>Tests/timing` is listed in
   `Tests/perf-suites.txt`. It runs nightly on the captain's Mac (perf-nightly), one test at a
   time. The numbers below come from a debug build on an M2 Pro (max of
@@ -44,6 +47,9 @@ has to end up.
 | Flare | step the easing X1 scrub row 60 times | 60 / 60 / 60 | 11–13 ms p95 release, 12 ms debug / 20 / 8.3 ms | #1471 removed the per-step ticks; measured on the finisher's Mac (busy, not quiet), over the 8.3 ms target and under the 20 ms report bound |
 | Flare | draw an ellipse on the canvas, 120 samples (Rectangle is not connected yet, IN-1) | 1 / 3 / 3 (debug; 122 before #1792) | p95 2.3–2.5 ms release, 2.3–2.5 debug / 20 / 8.3 ms | #1792 runs the samples on the stage's FlareLiveDrag; the window runs once, at mouse-up |
 | Flare | drag a star with the Shape tool, 120 samples (`RenderBudgetFlareShapeTests/starDragInThreeBodies`; the draw waits on shape-tools FS-6) | not yet / 3 / 3 | not timed (packet: p95 ≤ 8 ms; its `timing` test is disabled until the supervisor lists it in Tests/perf-suites.txt) / 20 / 8 ms | first measured by the macOS run after shape-tools FS-4; the draft runs on the stage's FlareLiveDrag |
+| Photo | Free Transform rotate drag, 120 samples (`sample` for the counts, a 24 MP layer for the time), `RenderBudgetPhotoLiveTransformTests` | 1 / 1 / 1; CPU resamples 0 during the drag, 1 at the release, on the tile path and Metal | 2.1 release (24 MP, p50 1.2) / 4 / 4 ms | was 89 resamples and p95 187 ms debug: the drag moves the layer on SuiteUI's `CanvasLiveLayer`, and the Adjust panel and Transform rows sit out a held drag. The lift itself takes about 0.15 s at the press on 24 MP |
+| Photo | Select drag on a layer (the Move tool it folds in), 120 samples (`PixelMover` in `RenderBudgetPhotoLiveTransformTests`: every tool whose drag moves a layer's pixels, plus Free Transform's body drag) | 2 / 3 / 1; CPU resamples 0 during the drag and 0 at the release (the release lays offsets) | 1.6 debug (400 x 300), 6.5 debug on 24 MP (Free Transform's body drag: 5.9 in the same run) / 4 / 4 ms | was 53 bodies and p95 85 ms on 400 x 300, and the 24 MP drag ran past 3 minutes: the Move tool rewrote layer offsets on the window's workspace every sample and composited each one. Now a Move drag is Free Transform's body drag on an implied draft (`PhotoWorkspace.moveDraft`), lifted by the compositor, and the Move tool's lift pixels are made while the tool is up (`movePrepared`) |
+| Photo | Area and Crop tool drag, 120 samples (`OverlayDragger` in `RenderBudgetPhotoOverlayDragTests`, counts on 3 MP, the time on 24 MP in `RenderBudgetPhotoOverlayDragTimingTests`: every tool whose drag draws only a selection or a crop box: marquee, ellipse, lasso, polygon, wand, crop) | 1 / 2 / 1; 0 regions, layer composites or resamples with the pointer down | 3.4 to 7.6 debug (crop 17.6, its shade and aspect pill) / 4 / 4 ms | was 121 bodies (crop 81) and p95 34 to 66 ms debug: every sample wrote the window's workspace and re-ran the editor. Now the whole gesture, press included, runs on `LiveDragLine`'s copy (`PhotoWorkspace.dragShowsLineOnly`), which only `PhotoCanvasOverlay` reads (`shown`), and the release adopts it once. The 4 ms bound is the Move tool's, for perf-nightly's release build |
 | Photo | brush stroke, 120 samples (`large`), `PhotoWindowStrokeTests` | 0 / 1 / 1 | 7.1 / 11 / 8.3 ms | none in flight; the body bound is the stroke's existing one (`PhotoWindowStrokeTests`, measured 0) |
 | SuiteUI | stroke pad on the editor-kernel chrome panel, 120 samples, `RenderBudgetEditorKernelStrokeTests` | not yet / 1 / 0 | not yet / not gated / 8.3 ms | first measured by the macOS run after EK-31; the pad's samples stay in its own state, paced by `SuiteStrokePacer` |
 | SuiteUI gallery `editor-kernel` | drag Card 7 onto Header in the 200-row layer tree, 120 samples (`RenderBudgetEditorKernelTests`) | not yet / 3 / 1 | not timed | first measured by the macOS run after EK-6; the drop's log line and move should be the one body |
@@ -248,6 +254,15 @@ running; debug build, 1024 x 576 in 60 layers (the dev rows are from a
 | GPU, now | 9 (one per region, 9 cache hits) | 2 | none |
 | CPU, dev | 1556 | 0 | the queued render, 22 regions |
 | CPU, now | 96 (one per region, 96 hits) | 7 | none |
+| GPU, lift (#6024) | 357, all at the press: the picture under the lifted layer, 6 regions x 59 layers; a one-sample drag costs the same | 1 (the release) | none |
+| CPU, lift (#6024) | 1428, all at the press (24 regions); a one-sample drag costs the same | 1 (the release) | none |
+
+Since #6024 a Move drag is a compositor lift (docs/render-contract.md): the
+press renders the picture under the moved layer once, with one base per
+region (the kept base is not hit for that stack yet: a follow-up), the samples
+render nothing, and the release lands one picture. `photoMoveSettlesAfterTheDrag`
+gates that per-drag shape: a 30-sample drag costs no more than a one-sample
+drag on bases, regions, layers and pictures.
 
 What ran after the release was the Curves histogram recount (one row at a
 time through every layer, one core for seconds; a masked layer's tile is now
@@ -274,3 +289,35 @@ drain and the counters to hold still, then checks the gesture's work and that
 Those tests drop the window's autosave after the gesture: it still flattens
 the picture through the reference path 5 s after the last edit, which would
 read as a recount.
+
+## Photo: a Free Transform drag frame on a photo-sized layer
+
+Since #5285 the canvas draws the Free Transform draft live, and every render
+resampled the whole layer with CoreRaster's lanczos3 `transformed` on one
+thread (`transformPreview`). `PhotoAdjustSliderLatencyTests` (perf list) times
+the "transform turn drag" case: the 8K document's Fill layer (7680 x 4320,
+33 MP) turned 1 degree a step, each step a drag frame
+(`PhotoRenderer.update(live: true)`), from the edit to the picture holding it.
+Release, M2 Pro, machine load 80 to 100 (many agents building), p50 / p95 per
+step:
+
+| Step | GPU, resident | CPU |
+|---|---|---|
+| dev (#5285: whole-layer lanczos3 resample per frame; 6 steps) | 10782 / 12089 ms | 10533 / 11381 ms |
+| drag frame through CoreRender's affine composite per band (first cut) | 3932 / 5388 ms | 472 / 582 ms |
+| drag frame: 256 px chunks of the region resampled across the cores, one upload per region (this change, 60 steps) | 308 / 416 ms | 222 / 278 ms |
+
+The first cut's GPU row is CoreRaster's through-composite itself: it resamples
+the whole source once per output row, so a 7680 x 256 band paid 256 times its
+source. The chunked frame calls `transformed` once per 256 px chunk (the same
+sampling; transform-then-composite is what the through-composite is defined to
+equal) and composites the region as a tile, so the picture never leaves the
+GPU. The still frame after the drag (the window taking the live copy back)
+resamples once as before, and Return lays that same resample. The budget for
+the case sits a little above the measurement, 500 ms p95, so the suite is green
+today and fails on a regression; the target stays one frame. The rest of a step
+is the resample itself (CoreRaster's `transformed`, bilinear, 33 M output
+pixels a frame) plus the full-canvas redraw it forces (31 to 74 ms at 8K, the
+table above). The affine family is CPU-only in CoreRender
+(`RenderOp.notOnMetalYet`), so a Metal `.affine` kernel is where both rows go
+next.
