@@ -67,3 +67,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-10-26T14:57:13Z OC-z: PR #5802 opened (stacked on #5263), head 8bc91414, fast-lane + feature-done
 - 2026-10-31T12:46:32Z critic panel waits on #5913
 - 2026-10-31T13:09:25Z critic panel waits on #5913
+- 2026-10-31T13:30:47Z critic panel waits on #5913
