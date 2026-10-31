@@ -321,3 +321,4 @@ utc	stage	event	ref	note
 2026-10-31T00:20Z	3	check-in	quiet	full 41132544152 still waiting; blockers open
 2026-10-31T02:23Z	3	check-in	quiet	fulls 41132544152/41153597201 cancelled 0 Halo; 41154985284 waiting
 2026-10-31T04:25Z	3	check-in	quiet	full 41154985284 running; blockers open
+2026-10-31T06:28Z	3	check-in	quiet	full 41154985284 done, 0 Halo cases; blockers open
