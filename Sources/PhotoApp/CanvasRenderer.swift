@@ -33,7 +33,11 @@
 // tile set or composite cache the renderer drops (a switch, a closed window)
 // is released there at once, or, while a render still draws from it, as
 // that render ends (`retired`), so an idle renderer holds only its own.
+// Closing the window the tiles show in cancels the render in flight and drops what waits (`stop`): its tiles
+// stop at the next tile (PhotoRenderer's tile tasks check for cancellation) and nothing lands on the closed
+// view, so a closed 8K window takes no CPU from the next one. A later `show` draws again.
 // Presentation state only: it never changes the workspace.
+import AppKit
 import Combine
 import CoreGraphics
 import CoreRaster
@@ -103,6 +107,10 @@ final class CanvasRenderer {
     /// The next render redraws every tile: the route changed.
     @ObservationIgnored private var redrawAll = false
     @ObservationIgnored private var following: AnyCancellable?
+    /// The watch on window closes: the tiles' window closing stops the renders (`stop`).
+    @ObservationIgnored private var closing: AnyCancellable?
+    /// The render or lift in flight, cancelled by `stop`; nil when none runs.
+    @ObservationIgnored private var running: Task<Void, Never>?
 
     /// Layer tiles kept on the GPU route's backend between renders; a new set when the backend changes.
     @ObservationIgnored private var resident: ResidentTiles?
@@ -116,6 +124,20 @@ final class CanvasRenderer {
         #if DEBUG
         Self.all.add(self)
         #endif
+        closing = NotificationCenter.default.publisher(for: NSWindow.willCloseNotification).sink { [weak self] note in
+            MainActor.assumeIsolated {
+                guard let self, let window = self.tiles.attachedView?.window, note.object as? NSWindow === window else { return }
+                self.stop()
+            }
+        }
+    }
+
+    /// The window closed: drops what waits and cancels the render in flight, whose tiles stop at the next one
+    /// and whose picture never lands. `isRendering` stays until that render's `finished`, so a `show` meanwhile
+    /// waits for it instead of starting a second; a later `show` draws again.
+    func stop() {
+        (waiting, liftWaiting) = (nil, nil)
+        running?.cancel()
     }
 
     #if DEBUG
@@ -197,10 +219,14 @@ final class CanvasRenderer {
             target = resident.target
             if resident.isNew { since = nil }
         }
-        Task { [since, target, quietly] in
+        running = Task { [since, target, quietly] in
             do {
                 let update = try await PhotoRenderer.update(workspace, since: since, route: route, target: target, live: quietly)
-                tiles.apply(update, prepared: await Self.prepared(update))
+                try Task.checkCancellation()
+                let prepared = await Self.prepared(update)
+                // A render the close cancelled meanwhile never lands on the closed view.
+                try Task.checkCancellation()
+                tiles.apply(update, prepared: prepared)
                 if lift?.shown == true {
                     tiles.dropLift()
                     lift = nil
@@ -217,6 +243,7 @@ final class CanvasRenderer {
                 }
                 failure = nil
                 revision = update.revision
+            } catch is CancellationError {
             } catch {
                 failure = "The picture couldn't be drawn: \(error)"
             }
@@ -227,6 +254,7 @@ final class CanvasRenderer {
     /// A render is done: release what `use` dropped while it drew, then draw what waited.
     private func finished() {
         isRendering = false
+        running = nil
         #if DEBUG
         Self.inFlight -= 1
         #endif
@@ -279,7 +307,7 @@ final class CanvasRenderer {
         {
             target = resident.target
         }
-        Task { [target] in
+        running = Task { [target] in
             do {
                 // The pixels are the same for every drag of the draft: made once, here or when the draft showed.
                 let wanted = workspace.liftSprite
