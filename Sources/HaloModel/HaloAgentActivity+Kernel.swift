@@ -9,7 +9,7 @@
 // Halo's selection holds one: the first live id in the selected composition,
 // else in the first composition that holds one (switching to it).
 // `undoAgentRequest` runs `history.undo-request` and leaves a refusal in
-// `refusal`. Linux-safe.
+// `refusal`. `agentWork` feeds the tab's working marks. Linux-safe.
 import SuiteKernel
 
 extension HaloProject {
@@ -25,6 +25,9 @@ extension HaloProject {
             return after.filter { before[$0.id] != $0 }.map(\.id)
         })
     }
+
+    /// The open request and the newest agent step: what the AI tab's working marks read (SuiteUI AgentWorking).
+    public var agentWork: AgentWork { history.kernel.agentWork }
 
     /// Every layer's name by id, in every composition: the AI tab's layer rows.
     public var layerNamesByID: [String: String] {

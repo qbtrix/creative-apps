@@ -4,6 +4,7 @@
 // timed by CatalogHistory's `agentDates`). The tab only lists: a catalog has
 // no layers, so a request opens to its steps alone, and with no
 // `history.begin` in Library every request is loose steps, never a span.
+// `agentWork` feeds the tab's working marks.
 // Linux-safe.
 import SuiteKernel
 
@@ -15,4 +16,7 @@ extension LibraryCatalog {
 
     /// The agent's requests in this catalog, newest first.
     public var agentRequests: [AgentRequest] { AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates)) }
+
+    /// The open request and the newest agent step: what the AI tab's working marks read (SuiteUI AgentWorking).
+    public var agentWork: AgentWork { history.kernel.agentWork }
 }

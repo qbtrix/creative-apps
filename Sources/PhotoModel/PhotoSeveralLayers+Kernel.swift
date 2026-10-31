@@ -1,7 +1,7 @@
 // PhotoSeveralLayers+Kernel.swift: Hide and Show, Opacity, Delete and Move on
 // every picked layer (multi-layer-select). A row that is picked acts for the
 // whole selection, one undo step per gesture; an unpicked row acts alone, as
-// before. PM-5 fills Hide, Opacity and Delete; PM-6 Move, by the Move tool's drag
+// before. PM-5 fills Hide, Opacity and Delete; PM-6 Move, by a Select move's drag
 // and by `layer.move-by`. Linux-safe: no UI imports.
 
 extension PhotoWorkspace {

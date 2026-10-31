@@ -193,7 +193,7 @@ extension BodyCountSuites {
         {
             var model = PhotoWorkspace(services: PhotoRenderBudgetTests.services)
             try model.openStress(width: 1024, height: 576, layers: 60)
-            model.selectTool(.move)
+            model.selectTool(.select)
             let rendering = PhotoRendering(preference: FakeRenderingPreference(choice: choice))
             let opened = photoCounts()
             let w = RenderBudgetWindow(AnyView(PhotoWindow(model: model).environment(\.photoRendering, rendering)))
@@ -252,7 +252,8 @@ extension BodyCountSuites {
             let label = Self.label("move", choice)
             let (w, send, _, _) = try await Self.stressWindow(choice, label)
 
-            // A Move drag lifts the layer onto the compositor's live layer (PhotoTransformLift): the press renders
+            // A Select drag pressed on the picked top layer (Layer 59's paint, x < 256 at y 300; Move folded into
+            // Select) lifts the layer onto the compositor's live layer (PhotoTransformLift): the press renders
             // the picture under it once (one base per region, the layers below), each sample only places the lifted
             // pixels, and the release lands one picture where the layer was and is. So the drag's cost is per
             // drag, not per sample: a one-sample drag is the reference, measured after two steps that warm the
@@ -261,7 +262,7 @@ extension BodyCountSuites {
             var step: [String: Int] = [:]
             for n in 1...3 {
                 let before = Self.photoCounts()
-                try await w.ticks(1) { _ in send(.drag(CGPoint(x: 400, y: 300), CGPoint(x: 400 + Double(n) * 2, y: 300))) }
+                try await w.ticks(1) { _ in send(.drag(CGPoint(x: 128, y: 300), CGPoint(x: 128 + Double(n) * 2, y: 300))) }
                 send(.endDrag)
                 #expect(try await Self.rendered(w), Comment(rawValue: "\(label): step \(n)'s renders never drained"))
                 step = IdleWork.delta(Self.photoCounts(), since: before)
@@ -272,7 +273,7 @@ extension BodyCountSuites {
 
             let before = Self.photoCounts()
             try await w.ticks(30) { i in
-                send(.drag(CGPoint(x: 410, y: 300), CGPoint(x: 410 + Double(i) * 4, y: 300 + Double(i))))
+                send(.drag(CGPoint(x: 138, y: 300), CGPoint(x: 138 + Double(i) * 4, y: 300 + Double(i))))
             }
             send(.endDrag)
             let rendered = try await Self.rendered(w)
@@ -351,7 +352,7 @@ extension BodyCountSuites {
             }
             let above = 4
             model.selectLayer(model.layers[above].id)
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
             let canvas = try #require(model.canvas)
             let tiles = PhotoRenderer.tiles(of: canvas, in: .all)

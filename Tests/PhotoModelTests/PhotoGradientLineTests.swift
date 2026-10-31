@@ -46,12 +46,13 @@ struct PhotoGradientLineTests {
 
     @Test func otherToolsDrawNoLine() throws {
         var workspace = try whiteImage()
-        for tool in [PhotoTool.marquee, .crop, .brush, .move] {
+        for tool in [PhotoTool.marquee, .crop, .brush, .select] {
             workspace.selectTool(tool)
             workspace.drag(from: point(4, 5), to: point(4, 5))
             workspace.drag(from: point(4, 5), to: point(20, 30))
             #expect(workspace.gradientDrag == nil, "\(tool) drew a gradient line")
-            // The marquee's selection and the crop box are overlay marks too, so those drags share the line's copy.
+            // The marquee's selection and the crop box are overlay marks too, so those drags share the line's copy;
+            // Select pressed on the white layer moves it.
             #expect(workspace.dragShowsLineOnly == [.marquee, .crop].contains(tool), "\(tool)'s drag isn't line-only")
             workspace.endDrag()
         }

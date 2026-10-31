@@ -1,6 +1,6 @@
 // LibraryExportFidelityTests.swift: QB-V4 on an uncropped photo (packet
 // docs/blueprints/library/features/export.md, EX-4; slice EX-b). An exported
-// file looks like the loupe: (a) `LiveExporter.render` of a 4000 × 3000 file
+// file looks like the loupe: (a) `LiveExporter.render` of a 2000 × 1500 file
 // with exposure +0.5 at 1024 equals decode → lanczos3 to the smallest size
 // whose crop covers the plan → `LiveDevelop.render` → lanczos3 to the plan, by
 // hand, bit for bit (develop runs on the export's pixels, as the loupe's runs
@@ -20,6 +20,14 @@
 // (EX-14 names none). On the crop, developing at full size is not the
 // reference: its crop lands a fraction of a pixel off the loupe's (1.6/255
 // mean, #3453), the shrink-first order 0.38/255. macOS only.
+//
+// The uncropped fixture is 2000 × 1500, not the 4000 × 3000 the packet first
+// named: at 4000 the five tests ran five full-size lanczos3 passes in a debug
+// build (`PixelBuffer.convolved`, CoreRaster), 650 s one at a time, and in
+// CI's 3-core heavy pass they held every cooperative thread for so long that
+// the pass printed nothing for 600 s and the hang watchdog killed it (#6089).
+// Every check is a ratio or a pixel diff that doesn't depend on the source
+// size, as EX-14's 1440 × 1080 crop already showed.
 #if os(macOS)
 import CoreGraphics
 import CoreRaster
@@ -34,7 +42,7 @@ import UniformTypeIdentifiers
 @Suite struct LibraryExportFidelityTests {
     private let decoder = ImageIODecoder()
     private let develop = LiveDevelop()
-    /// The planned file: 4000 × 3000 at a long edge of 1024.
+    /// The planned file: 2000 × 1500 at a long edge of 1024.
     private let item = ExportPlan.Item(
         photoID: "IMG_0001", fileName: "IMG_0001.jpg", size: PixelSize(width: 1024, height: 768))
 
@@ -47,13 +55,13 @@ import UniformTypeIdentifiers
         return url
     }
 
-    /// `IMG_0001.jpg` in `root`: a `width` × `height` (4000 × 3000) sRGB JPEG at full quality whose
+    /// `IMG_0001.jpg` in `root`: a `width` × `height` (2000 × 1500) sRGB JPEG at full quality whose
     /// color runs across both axes, so resampling has detail to get wrong.
     /// Blue is a soft wave about 38 px long at 1024, photo-like rather than a
     /// hard checkerboard: a 160-level checker of 10 px squares at 1024 put
     /// (b) 4.2/255 apart on the two resamplers' edges (#3276) and (c) at
     /// 22 dB on JPEG's halved chroma (#3277), measuring the fixture, not QB-V4.
-    private func writePhoto(in root: URL, width: Int = 4000, height: Int = 3000,
+    private func writePhoto(in root: URL, width: Int = 2000, height: Int = 1500,
                             develop: DevelopSettings = DevelopSettings.neutral.setting(.exposure, to: 0.5)) throws -> PhotoItem {
         // The wave keeps its length at the output size, so a smaller file gets a shorter one.
         let (waveX, waveY) = (150.0 * Double(width) / 4000, 130.0 * Double(height) / 3000)

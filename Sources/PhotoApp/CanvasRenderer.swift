@@ -23,8 +23,8 @@
 // later one only places them (`moveLift`), and the next plain picture drops the lift as it lands. Wherever a
 // picture comes back as tiles (no presenter texture to write), a layer with nothing under it hides the picture
 // instead of drawing an empty one. The lifted
-// pixels are made once per Free Transform (when its draft first shows) and serve every drag of it; the Move
-// tool's next drag lifts the same way, so its pixels are made while the tool is up (`movePrepared`), one RGBA
+// pixels are made once per Free Transform (when its draft first shows) and serve every drag of it; a Select
+// move of the picks lifts the same way, so its pixels are made while the tool is up (`movePrepared`), one RGBA
 // copy of the layer held until the tool or layer changes. A lift that fails leaves its drag on the region path.
 // On the GPU route the renderer keeps the layer tiles resident on the backend
 // (ResidentSurfaces) and, while the view draws through its Metal presenter,
@@ -321,10 +321,10 @@ final class CanvasRenderer {
     }
 
     /// Makes the live layer's pixels for `shown`'s draft off the main thread when its Free Transform first
-    /// shows, or for the draft the Move tool's next drag begins, so the first drag only renders the picture
+    /// shows, or for the draft a Select move of the picks begins, so the first drag only renders the picture
     /// under them; drops them once neither is up.
-    /// ponytail: the Move tool holds one RGBA copy of its layer while it is up (96 MB at 24 MP); drop it on an
-    /// idle timer if memory matters.
+    /// ponytail: the Select tool holds one RGBA copy of its layer's painted pixels while it is up (96 MB for a
+    /// full 24 MP layer); drop it on an idle timer if memory matters.
     private func prepareSprite(for shown: PhotoWorkspace) {
         let workspace = shown.movePrepared ?? shown
         guard let wanted = workspace.liftSprite else {

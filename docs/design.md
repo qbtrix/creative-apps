@@ -242,8 +242,17 @@ Nothing goes below 10 pt.
 0.14 s, ease in and out (`SuiteMotion.state`). Under Reduce Motion they
 change at once. The one other chrome motion is feedback: a refused rename's
 field shakes once, side to side, and stays still under Reduce Motion
-(`SuiteMotion.shakeOffset`, #3462). Otherwise the artwork is the only thing
-that moves.
+(`SuiteMotion.shakeOffset`, #3462). The other is an agent at work
+(SuiteUI `AgentWorking`, read from the document's history): while a request
+is open or a step just landed, an `accent` `statusDot` pulses at the AI
+segment's trailing edge, the live request's title in the AI tab shimmers
+(an `accentText` band, `SuiteMotion.shimmerSweep`) as its step count ticks
+and new steps ease in, and in Design the layers the newest step touched
+take a 2 pt `accent` outline. All of it holds 0.6 s past the last step or
+the request's end (`AgentWork.linger`), so fast steps never flicker, then
+fades over 0.5 s (`SuiteMotion.agentFade`). It is drawn by the render
+server: no app body or canvas render runs per frame. Otherwise the artwork
+is the only thing that moves.
 
 ### State colors
 
@@ -426,7 +435,9 @@ no second row component.
   an adjustable value with units. Color is never alone. Differentiate
   Without Color adds the shape cues on the stage too.
 - **Reduce Motion:** state fades become instant, the recording dot stops,
-  the curve editor's preview dot stops, a refused rename's field doesn't shake.
+  the curve editor's preview dot stops, a refused rename's field doesn't shake,
+  the AI's working dot stays still, and a working request's title takes a
+  still `accentText` tint instead of the shimmer.
 - **Increase Contrast:** the Dark + IC and Light + IC columns above: the
   ladder steps double, `outline` goes to 30%, secondary text moves toward
   primary, and the state colors brighten (Dark) or deepen (Light).
