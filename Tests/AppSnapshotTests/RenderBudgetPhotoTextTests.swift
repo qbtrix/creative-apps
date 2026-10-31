@@ -1,9 +1,9 @@
 // RenderBudgetPhotoTextTests.swift (text-layers TX-4, #5951): what the Type tool and the Text section cost the
 // real Photo window, on the render budget harness (RenderBudgetHarness.swift), on an 8K image. Typing 20
 // letters into an open box re-runs only the box's overlay (the `textBox` facet), never PhotoEditor's body (a
-// debug-only counter); a 120-sample Size scrub on a text layer runs that body at most 3 times in all. Their 16 ms
-// p95s are disabled wall-clock tests until Tests/perf-suites.txt lists them. A box a canvas click opened takes
-// a space and Return adds it as a layer. `inspector` writes photo-text-inspector-light/dark.png: the Text
+// debug-only counter); a 120-sample Size scrub on a text layer runs that body at most 3 times in all. Their
+// 16 ms p95s live in RenderBudgetPhotoTests, which Tests/perf-suites.txt lists, so they gate nightly, not in
+// CI. A box a canvas click opened takes a space and Return adds it as a layer. `inspector` writes photo-text-inspector-light/dark.png: the Text
 // section for a "SALE" layer restyled to 120 pt, centered, on the window's live text (its Weight, Style and
 // Color rows).
 // Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
@@ -56,23 +56,9 @@ extension BodyCountSuites {
             expectBodies(step, atMost: 0, target: 0)
         }
 
-        /// The packet's keystroke budget on 8K, a wall-clock test: off until the supervisor lists it in
-        /// Tests/perf-suites.txt.
-        @Test(.disabled("wall-clock: waits for its Tests/perf-suites.txt line"), .timeLimit(.minutes(2)))
-        func typeOnEightKInSixteenMs() async throws {
-            let step = try await Self.typeTwentyOnEightK("photo type 20 chars on 8K, timed")
-            expectP95(step, atMost: 16, target: 8)
-        }
-
         /// A 120-sample Size scrub on a text layer of an 8K image: the window body runs at most 3 times.
         @Test(.timeLimit(.minutes(2))) func sizeScrub() async throws {
             expectBodies(try await Self.scrubSize("photo text Size scrub, 120 samples on 8K"), atMost: 3, target: 0)
-        }
-
-        /// The scrub's 16 ms p95, a wall-clock test: off until the supervisor lists it in Tests/perf-suites.txt.
-        @Test(.disabled("wall-clock: waits for its Tests/perf-suites.txt line"), .timeLimit(.minutes(2)))
-        func sizeScrubInSixteenMs() async throws {
-            expectP95(try await Self.scrubSize("photo text Size scrub, 120 samples on 8K, timed"), atMost: 16, target: 8)
         }
 
         /// Drags the Text section's Size 120 samples on a text layer of an 8K image; the window's measured step.
