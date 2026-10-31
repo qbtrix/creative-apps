@@ -349,8 +349,10 @@ final class LibraryDevelopJourneyTests: XCTestCase {
                              "the loupe photo's value \"\(value)\" has no checksum")
     }
 
-    /// What an element reads: its value where macOS puts a row's number, else its label.
+    /// What an element reads: a slider row's number (macOS gives a slider's value as an NSNumber), else its
+    /// string value, else its label.
     @MainActor private static func text(_ element: XCUIElement) -> String {
+        if let number = element.value as? NSNumber { return number.stringValue }
         let value = element.value as? String ?? ""
         return value.isEmpty ? element.label : value
     }
