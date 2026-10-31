@@ -2,8 +2,8 @@
 // paint section (packet docs/blueprints/suiteui/features/stroke-style.md). It never edits a document: each gesture
 // sample is one kernel `StrokeIntent` sent through `onIntent`, which the app runs as its stroke command. The rows are
 // the colour row (InspectorColorWellRow), Width (InspectorSliderRow, 0...1000 pt, "4 pt" or "0.5 pt"), Join and Cap
-// (ChoiceChips on the rows' edges, each option explained in the row's tooltip), Dash
-// (ChoiceChips of the presets, and for Custom a Dash and a Gap row), Trim Start and End (0...100 %) and Offset
+// (preset chips on the rows' edges, each group on one line, each option explained in the row's tooltip), Dash
+// (chips of the presets, and for Custom a Dash and a Gap row), Trim Start and End (0...100 %) and Offset
 // (−360...360 °), unless `showsTrim` is false, then Remove Stroke; with no stroke, Add Stroke alone. A scrub or a
 // run of colour picks shares one drag token until its end, so the host folds it into one undo step. A row that can't
 // act is disabled with its reason as its help: `help` for every row, "No stroke." without one, `styleHelp` for Join
@@ -81,13 +81,14 @@ public struct StrokeEditor: View {
             .suiteControl(id: StrokeEditorRow.color.identifier, enabled: reason == nil, reason: reason, identifies: false)
     }
 
-    /// A labelled chip group in Design's style: the label above, the chips under it, on the other rows' edges.
+    /// A labelled chip group in Design's style: the label above, the chips under it on one line, on the other rows' edges.
     private func chips(_ row: StrokeEditorRow, options: [InspectorOption<String>], selected: String?,
                        onSelect: @escaping @MainActor (String) -> Void) -> some View {
         let reason = rules.reason(row)
         return VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
             Text(StrokeEditorRules.label(row)).font(SuiteFont.inspectorLabel).foregroundStyle(SuiteColor.textSecondary)
-            ChoiceChips(options: options, selected: selected, onSelect: onSelect)
+            // One column per option, so Dash's four presets stay on one line instead of leaving Custom alone.
+            PresetGrid(options: options, selected: selected, columns: options.count, onSelect: onSelect)
                 .disabled(reason != nil)
                 .help(rules.chipsHelp(row))
                 .accessibilityElement(children: .contain)
