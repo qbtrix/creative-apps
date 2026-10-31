@@ -512,3 +512,4 @@ utc	stage	event	ref	note
 2026-10-31T16:14Z	check-in	#5353 open (clean), PX-9 waits. dev-red #6128 still open; #6131 lifted the Select budget quarantine at 16:08. New finding #6133 (Select redraw time, not export/text - skipped). 56 Photo findings open.
 2026-10-31T16:46Z	check-in	#5353 open (clean), PX-9 waits. dev-red #6128 still open (captain's Select). No merges, no new findings (56 Photo open).
 2026-10-31T17:18Z	check-in	#6128 closed 16:52Z (dev green, main moved); #5353 open clean a92b4651; no new photo findings (56 open); PX-9 waits on #5353
+2026-10-31T17:49Z	check-in	#5353 open clean a92b4651, PX-9 waits. No dev-red open, no merges, no new findings (56 Photo open).
