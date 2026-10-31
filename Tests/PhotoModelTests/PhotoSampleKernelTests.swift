@@ -112,7 +112,7 @@ import Testing
         let folder = PhotoJob.root.appendingPathComponent("sample-edge")
         let job = try JSONDecoder().decode(Job.self, from: Data(contentsOf: folder.appendingPathComponent("sample-edge.jobs.json")))
         let input = try Data(contentsOf: folder.appendingPathComponent("input/checker-red-blue.png"))
-        #expect(try CoreRasterImageCodec.readPNG(input).rgba8() == Self.checker, "the fixture is the checkerboard these tests read")
+        #expect(try PNG.read(input).rgba8() == Self.checker, "the fixture is the checkerboard these tests read")
         var doc = try PhotoHeadless.open(input, name: "checker-red-blue.png")
         #expect(job.steps.count == job.samples.count)
         for (step, want) in zip(job.steps, job.samples) {

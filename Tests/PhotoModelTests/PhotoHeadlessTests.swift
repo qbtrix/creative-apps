@@ -100,8 +100,8 @@ enum PhotoJob {
         return try script.expect.sorted { $0.key < $1.key }.flatMap { path, expectation -> [String] in
             guard let data = outputs[path], case .object(let kind) = expectation else { return ["\(path): not written"] }
             let pixels = try (kind["pixels"] ?? .null).decode(Pixels.self)
-            let want = try CoreRasterImageCodec.readPNG(Data(contentsOf: folder.appendingPathComponent(pixels.reference)))
-            let got = try CoreRasterImageCodec.readPNG(data)
+            let want = try PNG.read(Data(contentsOf: folder.appendingPathComponent(pixels.reference)))
+            let got = try PNG.read(data)
             guard got.width == want.width, got.height == want.height else {
                 return ["\(path): \(got.width)x\(got.height), not \(want.width)x\(want.height)"]
             }
