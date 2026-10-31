@@ -3,8 +3,11 @@
 // plays the seconds since the last one and puts the frame in DesignLiveDrag's `playingFrame`, which only the
 // canvas reads, so a tick runs the canvas and never the window, and never writes the workspace: no history,
 // autosave or saved-marker change. Pause lands the frame once as the workspace's playhead (shown state), so an
-// edit acts at the frame on screen; stop lands nil, the rest pose; play once ending lands its last frame. A
-// timeline scrub shows its frame the same way and lands it once the drag rests (`scrub`).
+// edit acts at the frame on screen; stop lands nil, the rest pose. Play once ending keeps its last frame shown
+// and lands it on the next main-actor turn (`land`), so the refresh that ends play runs the transport and never
+// the window: the window's one body for the landing (the whole editor, ~25 ms) comes after that frame is on
+// screen, when nothing moves. A timeline scrub shows its frame the same way and lands it once the drag rests
+// (`scrub`); until a pending frame lands, `isActive` makes the next intent land it first.
 // A reference type, so the window's body reads nothing that a tick changes. The link comes from the
 // `designRefreshLink` environment (the screen's display link, or one a test fires by hand), which
 // DesignWindow's RefreshLinkHandoff sets as `makeLink` once it appears: the window body never reads that
@@ -18,7 +21,7 @@ import SwiftUI
     private var transport = DesignTransport()
     private var ticker = PlaybackTicker()
     private var driver: SuitePlaybackDriver?
-    /// A scrub's frame until it lands as the playhead.
+    /// A scrub's frame, or play once's last, until it lands as the playhead.
     private var scrubbed: Int?
     private var settle: Task<Void, Never>?
     /// The window's `designRefreshLink`, set by DesignWindow's RefreshLinkHandoff once it appears.
@@ -43,7 +46,12 @@ import SwiftUI
                 let frame = self.transport.tick(by: seconds, time: time)
                 if live.playingFrame != frame { live.playingFrame = frame }
             }
-            if !self.transport.isPlaying { ended(self.halt(stopping: false, live: live)) }
+            if !self.transport.isPlaying, let last = self.transport.frame {
+                // Play once ended: the driver stops itself when this returns false.
+                self.driver = nil
+                live.isPlaying = false
+                self.land(last, live: live, after: 0, land: ended)
+            }
             return self.transport.isPlaying
         }, makeLink: makeLink)
         self.driver = driver
@@ -60,6 +68,7 @@ import SwiftUI
         let frame = stopping ? nil : scrubbed ?? transport.frame
         scrubbed = nil
         live.playingFrame = nil
+        live.landingFrame = nil
         live.isPlaying = false
         return frame
     }
@@ -73,11 +82,18 @@ import SwiftUI
             transport.pause()
             live.isPlaying = false
         }
+        self.land(frame, live: live, after: Self.settleSeconds, land: land)
+    }
+
+    /// Shows `frame` on the canvas and the timeline now and lands it through `land` after `seconds` of rest
+    /// (0: the next main-actor turn), unless a halt lands it first.
+    private func land(_ frame: Int, live: DesignLiveDrag, after seconds: Double, land: @escaping @MainActor (Int?) -> Void) {
         scrubbed = frame
         live.playingFrame = frame
+        live.landingFrame = frame
         settle?.cancel()
         settle = Task { @MainActor [weak self, weak live] in
-            try? await Task.sleep(for: .seconds(Self.settleSeconds))
+            if seconds > 0 { try? await Task.sleep(for: .seconds(seconds)) }
             guard !Task.isCancelled, let self, let live else { return }
             land(self.halt(stopping: false, live: live))
         }

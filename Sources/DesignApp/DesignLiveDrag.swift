@@ -13,7 +13,8 @@
 // inspector scrub, a style row's, the Rotation bar's or a fill editor drag. DesignWindow owns one and hands it down as the
 // `designLiveDrag` environment value; without one (a view hosted alone) the
 // canvas draws the workspace. `playingFrame` is the frame playback or a timeline scrub shows (DesignPlayer+Kernel.swift), read
-// by the canvas and the timeline slot alone, so a tick never runs the window. Presentation state only.
+// by the canvas alone; `landingFrame` is the one the timeline follows until it lands, so a tick never runs the
+// window or the lanes. Presentation state only.
 import DesignModel
 import Observation
 import SuiteKernel
@@ -26,6 +27,9 @@ import SwiftUI
 
     /// The frame playback or a timeline scrub shows; nil when neither is under way.
     var playingFrame: Int?
+    /// A frame shown ahead of its landing as the playhead: a scrub's, or play once's last frame. The timeline
+    /// follows it (DesignTimeline.swift); a play tick never sets it, so a tick rebuilds no lanes.
+    var landingFrame: Int?
     /// The player is running (the transport's Play reads Pause).
     var isPlaying = false
     /// Play wraps at the end instead of stopping (the transport's Loop).
