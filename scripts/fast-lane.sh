@@ -2109,7 +2109,8 @@ quarantine_sweep() {
   quarantine_add "$json"
 }
 
-# quarantine_expiry <quarantine json>: each lane entry's owner is read once:
+# quarantine_expiry <quarantine json>: each lane entry's owner is read once
+# (the REST API answers .state lowercase; it is upcased here to compare with OPEN):
 # closed, its entries go into one removal PR (returns 1 once that is open);
 # open and past the entry's `until`, it gets BLOCKER_LABEL and a comment, once.
 # The entry stays either way: an expired quarantine never comes back as a red.
@@ -2117,7 +2118,7 @@ quarantine_expiry() {
   local json="$1" owner until tests st labels closed="" new ids
   while IFS=$'\t' read -r owner until tests; do
     [[ -n "$owner" ]] || continue
-    st=$(gh api "repos/$REPO/issues/${owner#\#}" --jq '"\(.state)\t\([.labels[]?.name] | join(","))"' 2>/dev/null) || { log "auto-quarantine: could not read $owner; the next sweep looks again"; continue; }
+    st=$(gh api "repos/$REPO/issues/${owner#\#}" --jq '"\(.state | ascii_upcase)\t\([.labels[]?.name] | join(","))"' 2>/dev/null) || { log "auto-quarantine: could not read $owner; the next sweep looks again"; continue; }
     labels="${st#*$'\t'}"; st="${st%%$'\t'*}"
     if [[ "$st" != OPEN ]]; then closed+="${closed:+ }$owner"; continue; fi
     [[ "$until" < "$(quar_now)" ]] || continue
