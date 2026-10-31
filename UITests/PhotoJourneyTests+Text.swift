@@ -129,13 +129,15 @@ final class PhotoTextJourneyTests: XCTestCase {
         button.click()
     }
 
-    /// Types `value` into the scrub field identified by `id`: click it, clear it, type, Return.
+    /// Types `value` into the scrub field identified by `id`: click it, clear it, type, Return. The
+    /// field is the scrub's own editor (`suite.scrub.typing`), not the panel's first text field,
+    /// which is the colour row's hex field above Size.
     @MainActor private func typeValue(_ value: String, into id: String, _ photo: Journey) {
         let panel = photo.element("suite.inspector")
         let target = panel.descendants(matching: .any)[id].firstMatch
         XCTAssert(target.waitForExistence(timeout: 5), "no \(id) in the inspector")
         target.click()
-        let field = panel.textFields.firstMatch
+        let field = panel.textFields["suite.scrub.typing"]
         XCTAssert(field.waitForExistence(timeout: 5), "clicking \(id) opened no field")
         field.click()
         photo.app.typeKey(.rightArrow, modifierFlags: .command)
