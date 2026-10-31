@@ -67,7 +67,7 @@ typealias PhotoPerform = @MainActor (PhotoIntent) -> Void
 extension PhotoTool: PaletteTool {
     public var title: String {
         switch self {
-        case .move: "Move"
+        case .select: "Select"
         case .marquee: "Marquee"
         case .ellipse: "Ellipse"
         case .lasso: "Lasso"
@@ -90,7 +90,7 @@ extension PhotoTool: PaletteTool {
 
     public var systemImage: String {
         switch self {
-        case .move: "arrow.up.and.down.and.arrow.left.and.right"
+        case .select: "cursorarrow.click"
         case .marquee: "rectangle.dashed"
         case .ellipse: "circle.dashed"
         case .lasso: "lasso"
@@ -113,7 +113,7 @@ extension PhotoTool: PaletteTool {
 
     public var shortcut: Character? {
         switch self {
-        case .move: "v"
+        case .select: "v"
         case .marquee: "m"
         case .ellipse, .polygon: nil
         case .lasso: "l"
@@ -135,6 +135,6 @@ extension PhotoTool: PaletteTool {
 
     /// The pointer over the canvas while this tool is active.
     var pointer: PointerStyle {
-        self == .move ? .grabIdle : .rectSelection
+        self == .select ? .default : .rectSelection
     }
 }
