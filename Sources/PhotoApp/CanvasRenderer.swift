@@ -24,8 +24,9 @@
 // picture comes back as tiles (no presenter texture to write), a layer with nothing under it hides the picture
 // instead of drawing an empty one. The lifted
 // pixels are made once per Free Transform (when its draft first shows) and serve every drag of it; a Select
-// move of the picks lifts the same way, so its pixels are made while the tool is up (`movePrepared`), one RGBA
-// copy of the layer held until the tool or layer changes. A lift that fails leaves its drag on the region path.
+// move of the picks lifts the same way, so its pixels are made while the tool is up (`movePrepared`, whose
+// painted box the renderer keeps per layer pixels, not per show), one RGBA copy of the layer held until the tool
+// or layer changes. A lift that fails leaves its drag on the region path.
 // On the GPU route the renderer keeps the layer tiles resident on the backend
 // (ResidentSurfaces) and, while the view draws through its Metal presenter,
 // renders straight into the presenter's texture: no bytes come back, and an
@@ -79,6 +80,8 @@ final class CanvasRenderer {
     @ObservationIgnored private var sprite: Sprite?
     /// The sprite being made off the main thread for this draft, so a show doesn't start a second.
     @ObservationIgnored private var preparing: PhotoTransformLift.Sprite?
+    /// The picked layer's painted box a Select move lifts, read once per layer pixels (`movePrepared`).
+    @ObservationIgnored private var moveBox: PhotoWorkspace.PaintedBox?
 
     /// A live layer's pixels and what they were made from. The surface is only read once made.
     struct Sprite: @unchecked Sendable {
@@ -354,7 +357,7 @@ final class CanvasRenderer {
     /// ponytail: the Select tool holds one RGBA copy of its layer's painted pixels while it is up (96 MB for a
     /// full 24 MP layer); drop it on an idle timer if memory matters.
     private func prepareSprite(for shown: PhotoWorkspace) {
-        let workspace = shown.movePrepared ?? shown
+        let workspace = shown.movePrepared(reusing: &moveBox) ?? shown
         guard let wanted = workspace.liftSprite else {
             if workspace.transformDraft == nil { (sprite, preparing) = (nil, nil) }
             return
