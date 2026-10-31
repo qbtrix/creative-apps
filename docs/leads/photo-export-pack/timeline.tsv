@@ -520,3 +520,4 @@ utc	stage	event	ref	note
 2026-10-31T20:26Z	check-in	Quiet: dev-red #6134 still open (not ours), no merges, no new findings (56 Photo open). #5353 open clean a92b4651, PX-9 waits.
 2026-10-31T20:58Z	check-in	dev-red #6134 closed 20:53Z (dev green at 23e7ff60b, main moved). No merges, no new findings (56 Photo open). #5353 open clean a92b4651, PX-9 waits.
 2026-10-31T21:30Z	check-in	#6142 (captain: window close cancels canvas renders, fixes #6136) merged 21:15Z. No dev-red, no new findings (55 Photo open). #5353 open clean a92b4651, PX-9 waits.
+2026-10-31T22:01Z	check-in	#6143 (lane fix) merged; captain posted Quality-Proof #6125 on #5951. No dev-red, no new findings (55 Photo open). #5353 open clean a92b4651, PX-9 waits.
