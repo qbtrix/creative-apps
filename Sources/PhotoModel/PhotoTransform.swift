@@ -5,7 +5,7 @@
 // dragged from the press to the pointer (`services.transform.dragged`, the
 // kernel's HandleHit and BoxMath on the live services), so a body drag moves
 // the box, a side or corner scales it and the rotate zone turns it.
-// `endDrag` records the gesture as one "Transform" step. The Move tool's drag
+// `endDrag` records the gesture as one "Transform" step. A Select move's drag
 // comes here too, on the implied draft PhotoStroke.swift begins for it (the
 // press takes `.inside`); its frames damage only where the layer was and is,
 // and its release lays the offsets. Linux-safe.

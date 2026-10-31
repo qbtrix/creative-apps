@@ -31,7 +31,7 @@ import Testing
         if let log {
             let pointer = TimelineLanePointer<String>()
             pointer.configure(
-                track: Self.track, mapping: Self.mapping, playhead: 0, actions: log.actions,
+                track: Self.track, mapping: Self.mapping, context: TimelineLaneContext(playhead: 0, actions: log.actions),
                 extras: TimelineLanePointerExtras(focus: nil, pill: .constant(nil), mark: nil))
             view.pointer = pointer
         }

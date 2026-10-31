@@ -63,7 +63,7 @@ struct ToolOptionsSection: View {
             case .crop:
                 // CropOptions draws the crop's one instruction line itself.
                 CropOptions(model: model, perform: perform)
-            case .move:
+            case .select:
                 hint(model.moveHint)
                 // An adjustment layer can't move: its rows would only sit there disabled.
                 if model.canMoveSelection { TransformOptions(model: model, perform: perform) }
