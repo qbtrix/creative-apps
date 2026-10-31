@@ -108,3 +108,4 @@ ts	kind	note
 2026-10-27T12:24:31Z	3	heartbeat	lane	UP-flare #5089, UP-halo #5091, UP-z #5231 queued behind dev-red #5818
 2026-10-27T12:53:57Z	3	heartbeat	lane	UP-flare #5089, UP-halo #5091, UP-z #5231 queued behind dev-red #5818
 2026-10-27T13:24:02Z	3	heartbeat	lane	UP-flare #5089, UP-halo #5091, UP-z #5231 queued behind dev-red #5818
+2026-10-31T12:46:24Z	working	poll	#5089	UP-flare #5089 restacked on dev (7e1938fd); UP-z own patch ~250 lines, waits on stack
