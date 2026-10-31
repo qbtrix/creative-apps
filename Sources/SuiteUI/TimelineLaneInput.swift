@@ -14,7 +14,8 @@
 // draws each step on its layer and sends one onMoveKeyframes and onEndKeyDrag
 // on release; Escape drops it and sends nothing). A time pill
 // above the grabbed key shows its frame while it moves, and each step reports
-// a `step` mark in series `key-drag`. The press sits in TimelineLanePointer,
+// a `step` mark in series `key-drag`, each pointer sample a `key-drag` latency
+// sample (TimelineFadeMark, the strip's probe). The press sits in TimelineLanePointer,
 // SwiftUI doesn't watch; only the pill's frame is state, written per step.
 // A press within 6 pt of a clip's start or end tick, and not on a key, trims
 // that end (TL-15; TimelineTrimDrag): the edge follows the pointer, snapped to
@@ -249,6 +250,7 @@ struct TimelineLanePointerExtras {
         guard active, let lane else { return }
         if var trim, trim.move(dx: dx, id: lane.track.id, actions: live) { self.trim = trim; show(trim.frame) }
         else if var drag, drag.move(dx: dx, actions: live) { self.drag = drag; show(drag.frame) }
+        if drag != nil { extras?.mark?.report(TimelineFadeMark.keyDragSeries) }
         else if var slide, slide.move(dx: dx, id: lane.track.id, actions: live) { self.slide = slide; show(slide.frame) }
     }
 
@@ -314,7 +316,7 @@ struct TimelineLanePointerExtras {
             id: track.id, name: track.name, keys: keys, spans: spans, pickedFrames: picked, isSelected: track.isSelected)
         showLive?(TimelineLaneDrawing(shown, mapping: mapping))
         if extras?.pill.wrappedValue != frame { extras?.pill.wrappedValue = frame }
-        extras?.mark?.record(ProbeMark(name: "step", series: "key-drag", time: ProcessInfo.processInfo.systemUptime))
+        extras?.mark?.record(ProbeMark(name: "step", series: TimelineFadeMark.keyDragSeries, time: ProcessInfo.processInfo.systemUptime))
     }
 
     func reset() {
@@ -592,9 +594,23 @@ struct TimelineLaneHover: Equatable, Sendable {
     var key: Int?
 }
 
-/// Where hover fades report their marks; a probe host sets it.
+/// The strip's probe: where hover fades report their marks and key drags and scrubs their latency samples.
+/// `.suiteProbes()` sets it from the window's SuiteProbeRecorder; nil records nothing.
 struct TimelineFadeMark: Sendable {
+    static let keyDragSeries = "key-drag"
+    static let scrubSeries = "timeline-scrub"
     let record: @MainActor @Sendable (ProbeMark) -> Void
+    var sample: @MainActor @Sendable (ProbeSample) -> Void = { _ in }
+
+    /// A sample on `series` for the event now being handled, shown by the next main-actor turn (the host's
+    /// update has run by then), as ScrubField and CanvasViewport report theirs.
+    @MainActor func report(_ series: String) {
+        let eventTime = NSApplication.shared.currentEvent?.timestamp ?? ProcessInfo.processInfo.systemUptime
+        let sample = sample
+        Task { @MainActor in
+            sample(ProbeSample(series: series, eventTime: eventTime, shownAt: ProcessInfo.processInfo.systemUptime))
+        }
+    }
 }
 
 extension EnvironmentValues {
