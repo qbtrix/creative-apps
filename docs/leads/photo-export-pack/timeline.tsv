@@ -516,3 +516,4 @@ utc	stage	event	ref	note
 2026-10-31T18:21Z	check-in	dev-red #6134 opened 18:10Z (macos, range #6131 Select quarantine lift; triage says likely flaky); #6132 Select test fix merged 17:56Z; not ours. #5353 open clean a92b4651, PX-9 waits. 55 Photo findings open, none new.
 2026-10-31T18:53Z	check-in	dev-red #6134 open, lane flake re-run started 18:22Z (not ours). Finding #6136 (canvas renders survive window close) skipped: not export/text. #5353 open clean a92b4651, PX-9 waits. 56 Photo findings open.
 2026-10-31T19:24Z	check-in	dev-red #6134 real (rerun failed 19:18Z); lane auto-quarantined Select test (#6140 owner, PR #6141); not ours. #6135/#6137 merged. #5353 open clean a92b4651, PX-9 waits. 57 Photo findings open, none export/text.
+2026-10-31T19:55Z	check-in	dev-red #6134 still open; quarantine PR #6141 closed unmerged (not ours). No merges, no new findings (56 Photo open). #5353 open clean a92b4651, PX-9 waits.
