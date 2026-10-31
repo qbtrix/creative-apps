@@ -79,7 +79,16 @@ extension DesignWorkspace {
 
     /// `selectionBadge` with an open text edit's box fitted to `extent`, the draft's measured size.
     public func selectionBadge(draft extent: DesignTextExtent?) -> String? {
+        sizeBadge(draft: extent)?.text
+    }
+
+    /// `selectionBadge` and `selectionBadgeAnchor` from one walk of the page: the canvas asks per drag sample.
+    public func sizeBadge(draft extent: DesignTextExtent?) -> (text: String, anchor: DesignPoint)? {
         guard let bounds = liveSelectionBounds(extent) else { return nil }
+        return (badgeText(bounds), DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY))
+    }
+
+    private func badgeText(_ bounds: DesignRect) -> String {
         if case .move? = gesture?.route {
             return "X \(wholePoints(bounds.x)), Y \(wholePoints(bounds.y))"
         }
@@ -135,8 +144,7 @@ extension DesignWorkspace {
 
     /// `selectionBadgeAnchor` with an open text edit's box fitted to `extent`.
     public func selectionBadgeAnchor(draft extent: DesignTextExtent?) -> DesignPoint? {
-        guard let bounds = liveSelectionBounds(extent) else { return nil }
-        return DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)
+        sizeBadge(draft: extent)?.anchor
     }
 }
 
