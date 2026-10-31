@@ -25,7 +25,7 @@ struct TransformOverlay: View {
     /// The transform box's element; nil without a transform draft.
     var mark: PhotoCanvasMark? { Self.box(model).map { PhotoCanvasMark.transformBox(Self.rect($0.box)) } }
 
-    /// The draft's box as the kernel sees it; nil without a draft, or on the Move tool's implied one.
+    /// The draft's box as the kernel sees it; nil without a draft, or on a Select move's implied one.
     private nonisolated static func box(_ model: PhotoWorkspace) -> TransformBox? {
         model.showsTransformBox ? model.transformSelection : nil
     }

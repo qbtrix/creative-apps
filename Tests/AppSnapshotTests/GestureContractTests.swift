@@ -8,7 +8,8 @@
 //   selects       no pixel work past `pixelNoise` while the pointer is down
 //   every class   root bodies while the pointer is down within `bodyBound`, set at today's best path
 // A movesContent or selects row presses at the centre of an existing layer or object, read from the app's
-// model, and must change something at the release (the moved thing by the drag's delta, or the selection);
+// model, and must change something at the release (the moved thing by the drag's delta, or the selection). Select
+// (V, a selects tool in Photo and Design) moves the object it presses, so its row owes the move's delta;
 // one that changes nothing fails "drag hit nothing", which no exclusion covers. Pixel work is Photo's PhotoRenderCount (regions, layer composites, resamples); the other apps have no pixel
 // counter yet, so they owe the body bound only. Step p95 is printed per tool (GESTURE-CONTRACT lines), not gated:
 // a timing gate belongs in Tests/perf-suites.txt. A tool skips its contract only through `exclusions` (reason
@@ -93,7 +94,7 @@ extension BodyCountSuites {
             try await Self.run(.photo, tool.rawValue, tool.gesture, w, at: target, bodies: PhotoWindowStrokeTests.editorBodies,
                 pixels: pixels, effect: {
                 guard let after = edited.workspace else { return "no workspace after the release" }
-                if tool.gesture == .selects { return after == model ? "the selection didn't change" : nil }
+                if tool.gesture == .selects, tool != .select { return after == model ? "the selection didn't change" : nil }
                 let moved = after.layers.first { $0.id == layer.id }
                 let got = CGVector(dx: Double((moved?.offsetX ?? 0) - layer.offsetX), dy: Double((moved?.offsetY ?? 0) - layer.offsetY))
                 return Self.near(got, Self.delta(zoom), "layer \(layer.name) offset")
