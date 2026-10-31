@@ -211,3 +211,4 @@ utc	stage	event	ref	note
 2026-10-31T14:55:31Z	blocked	poll	#5262	question 6543538342 unanswered; #5262 needs-split
 2026-10-31T15:27:19Z	blocked	poll	#5262	question 6543538342 unanswered; #5262 needs-split
 2026-10-31T16:29:47Z	blocked	poll	#5262	AK-photo waits on SC-photo #5262 (needs-split); AK-z waits on SC-library replacement; question 6543538342 unanswered
+2026-10-31T17:31:18Z	blocked	poll	#5262	AK-photo waits on SC-photo #5262 (fast-lane, needs-split); AK-z waits on SC-library replacement; question 6543538342 unanswered
