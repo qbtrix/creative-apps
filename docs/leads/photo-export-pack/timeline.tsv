@@ -506,3 +506,4 @@ utc	stage	event	ref	note
 2026-10-31T13:02Z	check-in	#5353 open (clean), PX-9 waits. dev-red #6124 closed 12:30 as a flake (re-run passed; main moved to 9960b2f; lane filed #6127, gesture contract, not export/text - skipped). No merges, no new findings (54 Photo open).
 2026-10-31T13:33Z	check-in	#5353 open (clean), PX-9 waits. No merges, no new dev-red, no new findings (54 Photo open).
 2026-10-31T14:06Z	check-in	#5353 open (clean), PX-9 waits. New dev-red #6128 (macos: GestureContractTests/photo + RenderBudgetPhotoSelectTests; range #6018 #6090, likely the captain's Select tool #6018; lane flake re-run running) - not ours to fix. No merges, no new findings (54 Photo open).
+2026-10-31T14:38Z	check-in	#5353 open (clean), PX-9 waits. dev-red #6128 still open; flake re-run (attempt 2) still running. No merges, no new findings (54 Photo open).
