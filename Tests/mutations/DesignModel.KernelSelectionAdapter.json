@@ -9,15 +9,15 @@
   {
     "label": "refusalIsSuccess: a Shift-click the kernel refuses is adopted anyway and ends the run",
     "file": "Sources/DesignModel/DesignSelection.swift",
-    "find": "guard next.pick(id, .toggle, canAdd: canAddToSelection) else { return }",
-    "replace": "_ = next.pick(id, .toggle, canAdd: canAddToSelection)",
+    "find": "guard next != selection else { return }",
+    "replace": "// refused or not, the pick is adopted",
     "tests": "DesignKernelSelectionAdapterTests|DesignSelectionRunTests.swift"
   },
   {
     "label": "canAddIgnored: Shift-click adds a locked or hidden layer",
     "file": "Sources/DesignModel/DesignSelection.swift",
-    "find": "id, .toggle, canAdd: canAddToSelection)",
-    "replace": "id, .toggle, canAdd: { _ in true })",
+    "find": "hit: id, extending: true, canAdd: canAddToSelection)",
+    "replace": "hit: id, extending: true, canAdd: { _ in true })",
     "tests": "DesignKernelSelectionAdapterTests|DesignMultiSelectTests.swift"
   },
   {
@@ -51,8 +51,8 @@
   {
     "label": "marqueeExtends: a marquee keeps the selection it started from",
     "file": "Sources/DesignModel/DesignCanvasEditing.swift",
-    "find": "Marquee.union(selectedNodeIDs, found, extending: false)",
-    "replace": "Marquee.union(selectedNodeIDs, found, extending: true)",
+    "find": "SelectTool.box(selection, found: found, extending: false)",
+    "replace": "SelectTool.box(selection, found: found, extending: true)",
     "tests": "DesignKernelSelectionAdapterTests"
   }
 ]

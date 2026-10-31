@@ -58,7 +58,7 @@ import Testing
 
     @Test func strokePaintsOneBrushStrokeStepAndRestoresTheBrush() throws {
         var w = try Self.opened()
-        w.selectTool(.move)
+        w.selectTool(.select)
         let before = (w.tool, w.brushOptions), white = try w.composite().pixel(x: 40, y: 30)
         let done = try Self.run("paint.stroke", Self.stroke([(10, 30), (70, 30)]), on: &w)
         #expect(done.undoStep == "Brush Stroke" && w.history.kernel.steps == ["Brush Stroke"])

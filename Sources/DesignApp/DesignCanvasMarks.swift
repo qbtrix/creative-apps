@@ -4,7 +4,7 @@
 // stored (style-rows ST-5): corner radius, a stroke centered on the edge, and its
 // opacity times every enclosing layer's, so a frame fades its contents. The shape
 // and stroke geometry are small functions (artworkPath, artworkStroke) the tests
-// read; paintArtwork draws a list of them, for DesignArtwork and DesignPastEdge. DesignMarqueeMark
+// read; paintArtwork draws a list of them, for DesignArtwork and DesignPastEdge. SuiteUI's SelectBoxMark
 // is the rectangle a marquee drag covers, from the Model's `marquee`, drawn as a
 // shape in the overlay. Frame names (DesignFrameLabels) and the selection
 // (DesignSelectionMarks) have their own files. None takes clicks: the canvas
@@ -280,23 +280,5 @@ func paintArtwork(
             faded.scaleBy(x: scale, y: scale)
             DesignTextArtwork.draw(node, in: faded)
         }
-    }
-}
-
-/// The marquee under way: `rect` (page points) at `zoom`, a 1 pt accent edge over a 10 % accent
-/// fill. A shape, not a Canvas, so a marquee dragged past the page's edge still shows.
-struct DesignMarqueeMark: View {
-    let rect: DesignRect
-    let zoom: Double
-
-    var body: some View {
-        let scale = usable(zoom)
-        let box = Path(rect.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale)))
-        ZStack(alignment: .topLeading) {
-            box.fill(SuiteColor.accent.opacity(0.1))
-            box.stroke(SuiteColor.accent, lineWidth: 1)
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 }

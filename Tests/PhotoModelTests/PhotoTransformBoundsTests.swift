@@ -77,7 +77,7 @@ import Testing
 
     @Test func anOffsetLayerFramesItsPaintOnTheCanvas() throws {
         var workspace = try painted([square])
-        stroke(&workspace, .move, from: point(40, 40), to: point(47, 45))
+        stroke(&workspace, .select, from: point(110, 90), to: point(117, 95))
         let layer = try #require(workspace.selectedLayer)
         #expect((layer.offsetX, layer.offsetY) == (7, 5))
         try workspace.beginTransform()

@@ -6,7 +6,8 @@
 // layer-list or whole-stack edit is diffed by id against the layers now
 // (new ids were created, a differing value was changed). `setLayersHidden`
 // is the tab's eye, one "Hide Agent Layers"/"Show Agent Layers" step;
-// `selectLayers` picks exactly the live ones of the ids. Linux-safe.
+// `selectLayers` picks exactly the live ones of the ids. `agentWork` feeds the
+// tab's working marks. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -19,6 +20,9 @@ extension PhotoWorkspace {
     public var agentRequests: [AgentRequest] {
         AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step, _ in step.payload.layerIDs(now: layers) })
     }
+
+    /// The open request and the newest agent step: what the AI tab's working marks read (SuiteUI AgentWorking).
+    public var agentWork: AgentWork { history.kernel.agentWork }
 
     /// Hides or shows every live layer in `ids` as one step; nothing when none changes.
     public mutating func setLayersHidden(_ ids: [PhotoLayer.ID], hidden: Bool) {

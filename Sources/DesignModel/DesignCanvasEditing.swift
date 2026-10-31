@@ -9,7 +9,7 @@
 // document as it was at the start, so nothing drifts, and `endDrag` records the
 // one undo step. A click is a drag that never moves.
 //
-//   move    a press on a handle of the selected node resizes it (Shift keeps the
+//   move    Design's one pointer tool (V), its Select: a press on a handle of the selected node resizes it (Shift keeps the
 //           aspect, Option works from the center; a small node shows only its
 //           corners, outside it, and a press inside it moves it); otherwise it selects the node
 //           under the pointer (none deselects) and a drag moves it with its
@@ -75,7 +75,8 @@ struct DesignGesture: Sendable, Equatable {
         case move(String)
         /// Resize the node by the drag from the frame it had at the start.
         case resize(String, DesignHandle, DesignRect)
-        /// Select what `services.marquee` picks among the children of this frame (nil: the top level).
+        /// Select what `services.marquee` picks among the children of this frame (nil: the top level), through
+        /// SuiteKernel's shared `SelectTool.box`.
         case marquee(String?)
         /// Move these selected layers through `services.transforming`.
         case moveSeveral([String])
@@ -242,7 +243,7 @@ extension DesignWorkspace {
             let rect = DesignRect(x: box.minX, y: box.minY, width: box.maxX - box.minX, height: box.maxY - box.minY)
             marquee = rect
             let found = services.marquee.layers(touching: rect, in: parent, on: page)
-            selectedNodeIDs = Marquee.union(selectedNodeIDs, found, extending: false)
+            selectedNodeIDs = SelectTool.box(selection, found: found, extending: false).ordered
             expandAncestors(of: selectedNodeIDs, in: page.nodes)
         case .moveSeveral, .resizeSeveral, .optionCopy, .turn:
             applyStep(&current, delta: delta, modifiers: modifiers)

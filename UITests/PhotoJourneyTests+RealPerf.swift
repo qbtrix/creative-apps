@@ -56,7 +56,7 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
         }
 
         let viewport = photo.element("suite.viewport")
-        photo.element("suite.tools").buttons["Move"].click()
+        photo.element("suite.tools").buttons["Select"].click()
         photo.health("\(backend) move", pid: pid, series: "canvas-drag") {
             let span = viewport.frame.width * 0.4, scale = NSScreen.main?.backingScaleFactor ?? 1
             viewport.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click(
