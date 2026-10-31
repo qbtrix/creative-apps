@@ -190,3 +190,4 @@ Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (r
 - 2026-10-31T20:36:25Z AK-photo waits on #5262 (needs-split); AK-z waits on SC-library replacement; question 6543538342 unanswered
 - 2026-10-31T21:39:48Z AK-photo waits on shared-codecs SC-f (SC-15, PhotoWindow+File.swift), unmerged, no PR open; AK-z waits on the SC-library replacement for closed #5265
 - 2026-10-31T22:42:15Z AK-photo waits on shared-codecs SC-f (SC-15), unmerged, no PR open; AK-z waits on the SC-library replacement for closed #5265
+- 2026-10-31T23:44:28Z AK-photo waits on shared-codecs SC-f (SC-15), unmerged, no PR open; AK-z waits on the SC-library replacement for closed #5265
