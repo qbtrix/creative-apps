@@ -97,6 +97,8 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
     /// The loupe photo Show Original shows without its adjustments (CS-3); `showsOriginal` reads it.
     public internal(set) var originalPhotoID: String?
+    /// The photos whose develop settings the last undo or redo changed; the window redraws them.
+    public internal(set) var developChangedIDs: Set<String> = []
     /// The export sheet's run: the kernel's; `exportState` reads it (LibraryExportAdapter.swift).
     public internal(set) var exportRun = ExportRun<ExportOptions>.idle
     public internal(set) var exportSummary: ExportSummary?  // the finished run's summary
@@ -140,6 +142,7 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.loupeError == rhs.loupeError && lhs.loupeSteps == rhs.loupeSteps
             && lhs.loupeHistogramToken == rhs.loupeHistogramToken
             && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft && lhs.originalPhotoID == rhs.originalPhotoID
+            && lhs.developChangedIDs == rhs.developChangedIDs
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError
             && lhs.showsTestValues == rhs.showsTestValues

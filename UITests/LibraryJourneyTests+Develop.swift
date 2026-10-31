@@ -78,7 +78,7 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         for field in ["Black Point", "Midtones", "White Point", "Output Black", "Output White"] {
             XCTAssert(inspectorItem(field, library).exists, "no LEVELS row \(field)")
         }
-        original = try checksum(library)
+        original = try settledChecksum(library)
     }
 
     /// Step 2: dragging Exposure right is one step "Exposure" that re-renders and lifts the histogram.
@@ -111,19 +111,22 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         XCTAssert(wait(3) { Self.number(contrast) == 13 }, "Contrast reads \(Self.text(contrast)), not 13")
     }
 
-    /// Step 4: "Undo Contrast" undoes one key step.
+    /// Step 4: "Undo Contrast" undoes one key step and redraws the loupe.
     @MainActor private func undoContrast() throws {
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
+        let before = try settledChecksum(library)
         expectUndo("Undo Contrast", library)
         library.press(character: "z", .command)
         let contrast = row("Contrast", library)
         XCTAssert(wait(3) { Self.number(contrast) == 3 }, "after Undo Contrast reads \(Self.text(contrast)), not 3")
+        XCTAssert(wait(5) { (try? self.checksum(library)) != before && self.loupeQuality(library) == "full" },
+                  "Undo Contrast didn't redraw the loupe")
     }
 
     /// Step 5: Show Original draws step 1's picture without an undo step; again brings the edit back.
     @MainActor private func showOriginal(suffix: String) throws {
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
-        let developed = try checksum(library)
+        let developed = try settledChecksum(library)
         let button = library.element("library.develop.original")
         XCTAssert(button.waitForExistence(timeout: 3), "no Show Original (library.develop.original)")
         button.click()
@@ -288,6 +291,18 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         else { return nil }
         guard let develop = photo["develop"] as? [String: Any] else { return 0 }
         return (develop["exposure"] as? NSNumber)?.doubleValue
+    }
+
+    /// The checksum of the loupe's full render once it has held still for half a second.
+    @MainActor private func settledChecksum(_ library: Journey) throws -> String {
+        var last = "", since = Date()
+        let settled = wait(10) {
+            let now = loupeQuality(library) == "full" ? ((try? checksum(library)) ?? "") : ""
+            if now != last { (last, since) = (now, Date()) }
+            return !now.isEmpty && Date().timeIntervalSince(since) >= 0.5
+        }
+        XCTAssert(settled, "the loupe's full render never held still")
+        return try checksum(library)
     }
 
     /// Polls `condition` every tenth of a second for up to `seconds`.
