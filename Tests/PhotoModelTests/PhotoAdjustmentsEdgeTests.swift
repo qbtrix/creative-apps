@@ -193,7 +193,7 @@ private func checkInvariants(_ settings: AdjustmentSettings) {
         try workspace.newCanvas(width: 2, height: 2)
         workspace.adjust(.exposure(1.5))
         workspace.addLayer()
-        workspace.selectTool(.move)
+        workspace.selectTool(.select)
         #expect(workspace.adjustments.exposure == 1.5)
         #expect(throws: (any Error).self) { try workspace.newCanvas(width: 0, height: 0) }
         #expect(workspace.adjustments.exposure == 1.5)

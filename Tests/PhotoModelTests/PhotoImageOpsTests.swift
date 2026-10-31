@@ -46,7 +46,7 @@ import Testing
         stroke(&workspace, .marquee, from: point(0, 0), to: point(2, 2))
         workspace.fillSelection()
         workspace.deselect()
-        stroke(&workspace, .move, from: point(1, 1), to: point(4, 1))
+        stroke(&workspace, .select, from: point(1, 1), to: point(4, 1))
         workspace.rotateImage(.degrees180)
         // Painted at (3...4, 0...1) before the turn; (5...6, 8...9) after it.
         #expect(try canvasPixel(workspace, 5, 8) == RGBA(r: 0, g: 0, b: 0, a: 1))
