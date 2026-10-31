@@ -89,13 +89,13 @@ import Testing
         }
         _ = try DesignHeadless.catalog.run("edit.select", params: .object(["ids": .array([.string("node-2")])]), on: &doc)
         #expect(try doc.export("svg", options: .object(["scope": .string("selection")])).map(\.suggestedName) == ["A.svg"])
-        #expect(throws: CatalogError.failed(id: "export", message: "Design's SVG export takes one option, scope (selection, frame, page), not scale.")) {
+        #expect(throws: ExportOptionRefusal.invalid("Design's SVG export takes one option, scope (selection, frame, page), not scale.")) {
             try doc.export("svg", options: .object(["scale": .number(2)]))
         }
-        #expect(throws: CatalogError.failed(id: "export", message: "The scope is one of selection, frame, page.")) {
+        #expect(throws: ExportOptionRefusal.invalid("The scope is one of selection, frame, page.")) {
             try doc.export("svg", options: .object(["scope": .string("everything")]))
         }
-        #expect(throws: CatalogError.self) { try doc.export("svg", options: .string("page")) }
+        #expect(throws: ExportOptionRefusal.self) { try doc.export("svg", options: .string("page")) }
     }
 
     @Test(arguments: ["export-frames-svg", "align-and-save"])

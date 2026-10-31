@@ -5,7 +5,7 @@
 // a policy) Metadata rows, 8 pt apart, then the host's own options rows (the slot, #1989),
 // a progress bar while running, the finished or failed line after, and the
 // actions that state offers (ExportSheetAction); Export is disabled, its help
-// saying why, while the run is under way or the host's `blocked` reason holds. Every control's identifier
+// saying why, while the run is under way, the Size row is refused or the host's `blocked` reason holds. Every control's identifier
 // hangs off the host's prefix (ExportSheetIDs, "suite.export" by default) and
 // registers in `suite.controls`. When the progress row appears it marks
 // `progress-shown` on the prefix's series in the window's `suite.perf`
@@ -76,9 +76,16 @@ public struct ExportSheetRows: Hashable, Sendable {
         return shown + [line == nil ? .cancel : .dismiss, .start]
     }
 
-    /// Why Export can't run now, nil when it can: the run is under way or done, or the host's `blocked` reason
-    /// for the pick as it stands ("Select a layer first.").
-    public func startHelp(blocked: String?) -> String? { editable ? blocked : "The export is already under way or done." }
+    /// Why Export can't run now, nil when it can: the run is under way or done, the Size row's readout is a
+    /// refusal, or the host's `blocked` reason for the pick as it stands ("Select a layer first.").
+    public func startHelp(blocked: String?) -> String? {
+        guard editable else { return "The export is already under way or done." }
+        for case .pixels(let size, let w, let h) in rows {
+            let shown = Self.readout(size, source: (w, h))
+            if shown.refused { return shown.text }
+        }
+        return blocked
+    }
 
     /// Columns for the Format chips: up to four formats fill one row (no empty column, no orphan chip), more wrap by three.
     public static func formatColumns(_ count: Int) -> Int { count <= 4 ? max(count, 1) : 3 }

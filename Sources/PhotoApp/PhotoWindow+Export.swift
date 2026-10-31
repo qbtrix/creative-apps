@@ -10,9 +10,14 @@
 // workspace's run, its ids under `photo.export`: Format chips for the formats
 // the app writes today and Quality for JPEG, each pick the open run's choice
 // (`editExport`). Its Size row stays off until the app's write resizes (PX-4).
+// An export keeps the opened file's metadata (`carryingMetadata`, the
+// suite's live carrier): the sheet has no metadata row, so the suite's
+// default policy, `.all`, minus the orientation the decode already applied.
 import AppKit
 import PhotoModel
 import SuiteKernel
+import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -46,6 +51,19 @@ extension PhotoWindow {
         panel.nameFieldStringValue = name
         guard panel.runModal() == .OK, let url = panel.url else { return model.endExport(.failure(CancellationError())) }
         write(to: url, as: exportFormat, quality: exportQuality, saving: false)
+    }
+}
+
+extension PhotoWindow {
+    /// What an export drops of its source's metadata: nothing under `.all`, but the orientation, because the
+    /// decode turned the pixels upright already and the tag would turn them again.
+    nonisolated static let exportDropping = ExportRules.dropped(.all).properties.union(["Orientation", "{TIFF}.Orientation"])
+
+    /// `still` with the metadata of the file at `source` minus `exportDropping`; `still` as it is when there is
+    /// no source or it can't be read.
+    nonisolated static func carryingMetadata(_ still: Data, from source: URL?, carrier: any MetadataCarrying = StillMetadata()) -> Data {
+        guard let source, let original = try? Data(contentsOf: source), !original.isEmpty else { return still }
+        return (try? carrier.carrying(still, from: original, dropping: exportDropping)) ?? still
     }
 }
 

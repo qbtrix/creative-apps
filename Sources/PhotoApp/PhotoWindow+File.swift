@@ -331,7 +331,8 @@ extension PhotoWindow {
         if saving { files.working = .saving }
         Task {
             do {
-                let data = try await workspace.export(as: format, quality: quality, codec: ImageIOCodec())
+                var data = try await workspace.export(as: format, quality: quality, codec: ImageIOCodec())
+                if !saving { data = Self.carryingMetadata(data, from: opened) }
                 try data.write(to: url, options: .atomic)
                 if saving {
                     didSave(url, kind: .image(format), opened: opened)

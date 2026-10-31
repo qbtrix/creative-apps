@@ -3,7 +3,7 @@
 // go through the file codec (DesignFile), every command through Design's catalog (DesignCommandCatalog), and SVG
 // export writes the scope its options name (every visible top-level frame of every page by default, each page, or the
 // selection) through the export plan and its SVG (DesignExport+Kernel), names unique across the file; any other
-// option is refused in words. PNG waits on a Linux PNG writer (the App rasterizes it today). Linux-safe.
+// option, a size included, is refused in words as bad input (`ExportOptionRefusal`, the CLI's exit 65). PNG waits on a Linux PNG writer (the App rasterizes it today). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -87,14 +87,15 @@ public struct DesignHeadless: HeadlessDocument {
         let names = DesignExportScope.allCases.map(\.rawValue).joined(separator: ", ")
         guard case .object(let keys) = options else {
             if options == .null { return .frame }
-            throw CatalogError.failed(id: "export", message: "Design's export options are an object, such as {\"scope\": \"page\"}.")
+            throw ExportOptionRefusal.invalid("Design's export options are an object, such as {\"scope\": \"page\"}.")
         }
+        if keys["size"] != nil { throw ExportOptionRefusal.invalid("SVG writes each frame at its own size, so it takes no size. Leave size out.") }
         if let other = keys.keys.sorted().first(where: { $0 != "scope" }) {
-            throw CatalogError.failed(id: "export", message: "Design's SVG export takes one option, scope (\(names)), not \(other).")
+            throw ExportOptionRefusal.invalid("Design's SVG export takes one option, scope (\(names)), not \(other).")
         }
         guard let value = keys["scope"] else { return .frame }
         guard case .string(let name) = value, let scope = DesignExportScope(rawValue: name) else {
-            throw CatalogError.failed(id: "export", message: "The scope is one of \(names).")
+            throw ExportOptionRefusal.invalid("The scope is one of \(names).")
         }
         return scope
     }

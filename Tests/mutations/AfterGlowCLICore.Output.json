@@ -1,0 +1,16 @@
+[
+  {
+    "label": "exportRefusalFailed: a refused export option exits 70 \"failed\" again, not 65 \"data\" (#5834)",
+    "file": "Sources/AfterGlowCLICore/Output.swift",
+    "find": "case let error as ExportOptionRefusal:",
+    "replace": "case let error as ExportOptionRefusal where false:",
+    "tests": "CLIExportRefusalTests"
+  },
+  {
+    "label": "sheetHint: the CLI's shape refusal says the sheet's \"Unlock the ratio\" (#5834)",
+    "file": "Sources/AfterGlowCLICore/Output.swift",
+    "find": ".replacing(ExportRules.unlockHint, with: ExportRules.stretchHint)",
+    "replace": "",
+    "tests": "CLIExportRefusalTests"
+  }
+]

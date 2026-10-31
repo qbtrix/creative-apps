@@ -25,6 +25,9 @@ public struct PhotoHeadless: HeadlessDocument {
         ?? .empty(app: app)
     /// The codec every file goes through.
     public static let codec = CoreRasterImageCodec()
+    /// Exports write PNG at deflate level 1: core's level-6 search took 28 of 33 s of a scale-2 8064 x 6048 export
+    /// (creative-core #728). Still lossless; the file grows a little.
+    static let exportCodec = CoreRasterImageCodec(pngLevel: 1)
 
     /// The image the commands edit.
     public private(set) var workspace: PhotoWorkspace
@@ -83,7 +86,7 @@ public struct PhotoHeadless: HeadlessDocument {
 
     /// The flattened image as "png" or "jpeg" on the suite's export options (`SuiteExportOptions(json:)`: `size`,
     /// `quality`, ...; `format` names the file, whatever the options say), through the sheet's own
-    /// `exportPixels(_:)`. The older `{"longSide": n}` form still resizes a copy with `image.resize`.
+    /// `exportBuffer(_:)`, handed to the encoder as is. The older `{"longSide": n}` form still resizes a copy with `image.resize`.
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         guard let kind = ImageFormat(rawValue: format) else {
             throw CatalogError.unavailable(id: "export", why: "Photo exports png and jpeg.")
@@ -91,7 +94,7 @@ public struct PhotoHeadless: HeadlessDocument {
         guard case .object(let keys) = options, keys["longSide"] != nil else {
             var o = try SuiteExportOptions(json: options, defaults: workspace.exportOptionsDefault())
             o.format = format
-            let data = try Self.codec.encode(workspace.exportPixels(o), as: kind, quality: o.quality)
+            let data = try Self.exportCodec.encode(buffer: workspace.exportBuffer(o), as: kind, quality: o.quality)
             return [ExportedFile(suggestedName: workspace.fileName(for: kind), format: format, data: data)]
         }
         let o = try options.decode(ExportOptions.self)
@@ -102,7 +105,7 @@ public struct PhotoHeadless: HeadlessDocument {
                                            "height": .number(max((Double(canvas.height) * scale).rounded(), 1))])
             _ = try PhotoWorkspace.catalog.run("image.resize", params: size, on: &copy)
         }
-        let data = try Self.codec.encode(copy.exportPixels(as: kind), as: kind, quality: o.quality ?? 0.9)
+        let data = try Self.exportCodec.encode(copy.exportPixels(as: kind), as: kind, quality: o.quality ?? 0.9)
         return [ExportedFile(suggestedName: copy.fileName(for: kind), format: format, data: data)]
     }
 
