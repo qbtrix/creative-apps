@@ -23,6 +23,7 @@
 // (DesignControlID.canvas) without replacing CanvasViewport's identifier.
 // Content, not chrome: flat, no glass.
 import DesignModel
+import enum SuiteKernel.ZoomLevel
 import SuiteUI
 import SwiftUI
 
@@ -32,7 +33,7 @@ struct DesignCanvas: View {
     /// The rect Zoom to Selection asks the canvas to show (page points); stored until CanvasViewport takes it.
     var show: DesignRect?
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
-    var onZoom: @MainActor (Double) -> Void = { _ in }
+    var onZoomLevel: @MainActor (ZoomLevel) -> Void = { _ in }
     var perform: DesignPerform = { _ in }
     /// The window's live drag box; nil when the canvas is hosted alone.
     @Environment(\.designLiveDrag) private var live
@@ -56,7 +57,7 @@ struct DesignCanvas: View {
         let feedback = DesignCanvasFeedback(model: shown, zoom: zoom, perform: perform)
         return CanvasViewport(
             documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
-            pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
+            pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoomLevel: onZoomLevel,
             // The Eyedropper picks through DesignSampleLoupe's tap alone, so a click picks once, not twice.
             onDrag: model.tool == .eyedropper ? nil : { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
             onKey: model.editingTextID == nil ? { key($0) } : nil, onPointer: feedback.onPointer
