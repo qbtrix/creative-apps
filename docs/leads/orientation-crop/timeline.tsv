@@ -148,3 +148,4 @@ utc	stage	event	ref	note
 2026-10-26T02:28:27Z	-	wave	-	run act-1a175ee1051-o29l: #5266 dev merged, CI: PASS, Head 2432646a, fast-lane relabelled (15 files +280/-27); #5263 restacked on fabf6717, CI: PASS, Head 9b8cf01c; OC-z follows when both u slices land
 2026-10-26T14:40:29Z	all	resume	#3756	OC-library-u done run 40337540609; #5263 clean, waiting lane
 2026-10-26T14:57:13Z	build	pr-opened	#5802	OC-z PR opened, stacked on #5263, CI: PASS at 8bc91414
+2026-10-31T12:46:32Z	waiting	poll	#5913	critic panel waits on #5913
