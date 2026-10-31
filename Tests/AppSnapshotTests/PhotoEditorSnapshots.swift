@@ -102,7 +102,7 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         drag(&model, .marquee, (80, 140), (280, 340))
         model.fillSelection()
         model.deselect()
-        drag(&model, .move, (180, 240), (300, 240))
+        drag(&model, .select, (180, 240), (300, 240))
         try shoot("move", model)
     }
 

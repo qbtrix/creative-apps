@@ -94,7 +94,7 @@ extension DesignToolbarItem {
 extension DesignTool: PaletteTool {
     public var gesture: ToolGesture {
         switch self {
-        case .move: .movesContent
+        case .move: .selects
         case .frame, .rectangle, .ellipse, .shape, .text: .creates
         case .pen: .editsPoints
         case .eyedropper: .inspects

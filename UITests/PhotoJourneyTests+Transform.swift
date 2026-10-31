@@ -25,7 +25,7 @@ final class PhotoTransformJourneyTests: XCTestCase {
     @MainActor func testFreeTransformTurnFlip() throws {
         let photo = try openBeach()
 
-        // 1. A pasted layer selected, Move, Edit > Free Transform: the box, its knob and the rows.
+        // 1. A pasted layer selected, Select, Edit > Free Transform: the box, its knob and the rows.
         photo.element("suite.tools").buttons["Marquee"].click()
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.4, dy: 0.4), to: CGVector(dx: 0.6, dy: 0.55))
         photo.press(character: "c", .command)
@@ -34,7 +34,7 @@ final class PhotoTransformJourneyTests: XCTestCase {
         photo.press(character: "d", .command)
         let line = layerLine(photo)
         XCTAssertFalse(line.isEmpty, "the inspector header has no Pasted Layer line (W × H px at X, Y)")
-        photo.element("suite.tools").buttons["Move"].click()
+        photo.element("suite.tools").buttons["Select"].click()
         choose(["Edit", "Free Transform"], photo)
         let box = photo.element("photo.canvas.transform-box")
         XCTAssert(box.waitForExistence(timeout: 5), "Free Transform put no box on the canvas (photo.canvas.transform-box)")

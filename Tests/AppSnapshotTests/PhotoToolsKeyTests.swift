@@ -14,7 +14,7 @@ import Testing
 
     @Test func letterPicksTool() {
         let keys: [(String, PhotoTool)] = [
-            ("v", .move), ("m", .marquee), ("b", .brush), ("e", .eraser), ("s", .clone), ("j", .spotHeal),
+            ("v", .select), ("m", .marquee), ("b", .brush), ("e", .eraser), ("s", .clone), ("j", .spotHeal),
             ("c", .crop), ("i", .eyedropper), ("g", .bucket),
         ]
         for (typed, tool) in keys {
@@ -36,7 +36,7 @@ import Testing
     }
 
     @Test func shiftLetterCyclesTheGroup() {
-        let shiftJ: [(PhotoTool, PhotoTool)] = [(.move, .spotHeal), (.spotHeal, .heal), (.heal, .remove), (.remove, .spotHeal)]
+        let shiftJ: [(PhotoTool, PhotoTool)] = [(.select, .spotHeal), (.spotHeal, .heal), (.heal, .remove), (.remove, .spotHeal)]
         for (from, to) in shiftJ {
             #expect(PhotoTool.picked(byTyped: "J", help: open, cyclingFrom: from) == to)
         }
