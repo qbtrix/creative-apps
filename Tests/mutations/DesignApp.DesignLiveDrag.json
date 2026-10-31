@@ -1,0 +1,23 @@
+[
+  {
+    "label": "canvasSampleWakesRows: a canvas drag sample also sets the scrub-only copy, so the inspector style rows rerun per sample",
+    "file": "Sources/DesignApp/DesignLiveDrag.swift",
+    "find": "        edit.sample(from: start, to: end, modifiers: modifiers)\n",
+    "replace": "        edit.sample(from: start, to: end, modifiers: modifiers)\n        scrubbed = edit.workspace\n",
+    "tests": "RenderBudgetDesignTests/bodies"
+  },
+  {
+    "label": "opacityRowFollowsCanvas: the Opacity row reads the canvas drag's copy again",
+    "file": "Sources/DesignApp/DesignInspectorStyle.swift",
+    "find": "let opacity = (live?.scrubbed ?? model).sharedValue(\\.opacity)",
+    "replace": "let opacity = (live?.workspace ?? model).sharedValue(\\.opacity)",
+    "tests": "RenderBudgetDesignTests/bodies"
+  },
+  {
+    "label": "fillRowFollowsCanvas: the Fill section reads the canvas drag's copy again",
+    "file": "Sources/DesignApp/DesignInspectorFill.swift",
+    "find": "        let shown = live?.scrubbed ?? model\n",
+    "replace": "        let shown = live?.workspace ?? model\n",
+    "tests": "RenderBudgetDesignTests/bodies"
+  }
+]
