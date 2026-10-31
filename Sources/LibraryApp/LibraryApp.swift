@@ -41,6 +41,19 @@ import SwiftUI
     /// How to read the window's catalog, and land a live result in it (LibraryWindow keeps both current).
     static var read: (@MainActor () -> LibraryCatalog)?
     static var take: (@MainActor (LibraryHeadless) -> Void)?
+    /// The window whose catalog `read` and `take` reach; a closing window clears them only while it owns them (#6123).
+    private static var owner: UUID?
+
+    /// `window` now owns the channel.
+    static func claim(_ window: UUID, read: @escaping @MainActor () -> LibraryCatalog,
+                      take: @escaping @MainActor (LibraryHeadless) -> Void) {
+        (owner, self.read, self.take) = (window, read, take)
+    }
+    /// Clears the channel if `window` still owns it; a newer window's stays.
+    static func release(_ window: UUID) {
+        guard owner == window else { return }
+        (owner, read, take) = (nil, nil, nil)
+    }
 
     /// Live commands on the window's catalog; a client runs only on a grant it already holds.
     static let live = LiveCommandChannel(
