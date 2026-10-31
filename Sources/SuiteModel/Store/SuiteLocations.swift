@@ -1,7 +1,14 @@
 // SuiteLocations.swift: where the suite store lives (docs/blueprints/suite.md,
 // 2.6). `~/Library/Application Support/AfterGlow/` unless the launch
 // arguments name another folder with `-SuiteSupportDir <path>` (journeys and
-// tests). Pure string logic, Linux-safe, Sendable.
+// tests). Arguments that name a test bundle (`*.xctest`, how `swift test`
+// starts a test process) never get the real folder: they get one temporary
+// folder per process, so no test writes into a user's store (#5221). Linux-safe.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 
 /// Finds the suite store's support folder.
 public enum SuiteLocations {
@@ -17,9 +24,16 @@ public enum SuiteLocations {
                 return arguments[next]
             }
         }
+        if arguments.contains(where: { $0.hasSuffix(".xctest") || $0.contains(".xctest/") }) { return testProcessFolder }
         let base = home.hasSuffix("/") ? String(home.dropLast()) : home
         return base + "/Library/Application Support/AfterGlow"
     }
+
+    /// The support folder of a test process that names none: one per process, in the temporary directory.
+    public static let testProcessFolder: String = {
+        let tmp = FileManager.default.temporaryDirectory.path(percentEncoded: false)
+        return (tmp.hasSuffix("/") ? tmp : tmp + "/") + "AfterGlowTests-\(ProcessInfo.processInfo.processIdentifier)"
+    }()
 }
 
 /// One folder per app under the suite root, and where earlier builds kept an

@@ -4,11 +4,14 @@
 // support folder) before the defaults change, then TestDefaults registers a
 // fresh folder, and each store must write inside it. A store that fixed its
 // folder when it was built, or that ignores the registered default, fails here
-// whatever ran before it. The process's own folder is registered again after.
+// whatever ran before it. With no folder registered at all, the launcher's
+// store still falls to the test process's temporary folder, never the real
+// one (#5221). The process's own folder is registered again after.
 // macOS only.
 #if canImport(AppKit)
 import Foundation
 import PhotoModel
+import SuiteModel
 import Testing
 
 @testable import AfterGlowApp
@@ -16,7 +19,7 @@ import Testing
 @testable import PhotoModel
 
 @MainActor
-@Suite struct TestIsolationTests {
+@Suite(.serialized) struct TestIsolationTests {
     @Test func everyStoreWritesInTheRegisteredFolder() throws {
         let photo = try #require(PhotoServices.live.recovery as? LiveRecovery, "Photo's live recovery isn't LiveRecovery")
         let catalog = CatalogStore()
@@ -34,6 +37,17 @@ import Testing
             let path = folder.standardizedFileURL.path(percentEncoded: false)
             #expect(path.hasPrefix(root), "\(name) ignores the registered folder and writes to \(path)")
         }
+    }
+
+    /// With no folder registered (a windowless test that runs before any window), the process's
+    /// support folder is still not the user's real one (#5221).
+    @Test func noRegisteredFolderStillMissesTheRealOne() {
+        _ = TestDefaults.registered
+        UserDefaults.standard.register(defaults: ["SuiteSupportDir": ""])
+        defer { TestDefaults.register(in: TestDefaults.folder) }
+        let real = SuiteLocations.supportFolder(arguments: [], home: NSHomeDirectory())
+        #expect(!LauncherServices.support.hasPrefix(real), "the launcher's store is the real \(real)")
+        #expect(LauncherServices.support == SuiteLocations.testProcessFolder)
     }
 }
 #endif
