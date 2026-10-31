@@ -147,3 +147,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-31T14:55:27Z #5089 at 7e1938fd waits for the lane (blocked poll 2/3)
 - 2026-10-31T15:27:15Z rule 23 question posted (6545383424): #5089 waits on local-ci/prescreen
 - 2026-10-31T16:29:43Z UP-flare waits on local-ci/prescreen; question 6545383424 unanswered
+- 2026-10-31T17:31:13Z UP-flare waits on local-ci/prescreen; question 6545383424 unanswered; #5231 gained fast-lane, still needs-split
