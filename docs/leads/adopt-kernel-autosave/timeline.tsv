@@ -215,3 +215,4 @@ utc	stage	event	ref	note
 2026-10-31T18:32:42Z	blocked	poll	#5262	AK-photo waits on SC-photo #5262 (needs-split); AK-z waits on SC-library replacement; question 6543538342 unanswered
 2026-10-31T19:34:30Z	blocked	poll	#5262	AK-photo waits on SC-photo #5262 (needs-split); AK-z waits on SC-library replacement; question 6543538342 unanswered
 2026-10-31T20:36:25Z	blocked	poll	#5262	AK-photo waits on #5262 (needs-split); AK-z waits on SC-library replacement; question 6543538342 unanswered
+2026-10-31T21:39:48Z	blocked	poll	SC-f/SC-15	AK-photo waits on shared-codecs SC-f (SC-15, PhotoWindow+File.swift), unmerged, no PR open; AK-z waits on the SC-library replacement for closed #5265
