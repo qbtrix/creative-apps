@@ -239,6 +239,10 @@ private func withA() -> DesignWorkspace {
     both.toggleSelection("node-3")
     // A and B span 100...500 by 100...220.
     #expect(both.selectionBadgeAnchor == pt(300, 220))
+    // The canvas reads the text and the anchor together, from one walk.
+    #expect(both.sizeBadge(draft: nil)?.text == "400 × 120")
+    #expect(both.sizeBadge(draft: nil)?.anchor == pt(300, 220))
+    #expect(DesignFixtures.cards.sizeBadge(draft: nil) == nil)
 }
 
 @Test func theLiveCopysBadgeReadsTheDragWhileTheWorkspaceKeepsItsSize() {

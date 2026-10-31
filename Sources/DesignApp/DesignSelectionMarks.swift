@@ -28,10 +28,12 @@ struct DesignSelectionMarks: View {
         // A hidden node, or one inside a hidden frame, is not on the canvas, so it has no outline.
         if model.hasMultipleSelection {
             let ids = Set(model.selectedNodeIDs)
-            ForEach(painted.map(\.node).filter { ids.contains($0.id) }) { node in
+            // Painted skips hidden subtrees as selectionBounds does, so the hits' union is that box, without a second walk.
+            let hits = Array(painted.lazy.filter { ids.contains($0.node.id) }.map(\.node))
+            ForEach(hits) { node in
                 DesignSelectionBox(rect: node.frame, zoom: zoom, handles: false, degrees: node.rotation)
             }
-            if let bounds = model.selectionBounds {
+            if let bounds = DesignRect.union(hits.map(\.frame)) {
                 // A live marquee shows what it will select, not the box it will commit.
                 if model.marquee == nil {
                     DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.showsSelectionHandles, knob: true)
