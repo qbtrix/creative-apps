@@ -196,8 +196,9 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         XCTAssert(item.waitForExistence(timeout: 3), "the Exposure row's menu has no Reset Exposure")
         item.click()
         expectUndo("Undo Reset Exposure", library)
-        let toneReset = inspectorItem("Reset", library)
-        XCTAssert(toneReset.waitForExistence(timeout: 3), "TONE has no Reset")
+        let toneReset = library.element("suite.inspector.section.tone.reset")
+        XCTAssert(toneReset.waitForExistence(timeout: 3), "TONE has no Reset (suite.inspector.section.tone.reset)")
+        XCTAssertEqual(toneReset.label, "Reset Tone", "TONE's Reset label")
         toneReset.click()
         for slider in ["Exposure", "Contrast", "Highlights", "Shadows", "Whites", "Blacks"] {
             XCTAssertEqual(Self.number(row(slider, library)), 0, "TONE's Reset left \(slider) set")
