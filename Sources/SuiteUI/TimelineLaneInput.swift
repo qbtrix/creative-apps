@@ -32,15 +32,18 @@
 // and the change fades with SuiteMotion.state (at once under Reduce Motion),
 // reporting `fade-start` and `fade-end` marks (series `timeline-hover`) to
 // `timelineFadeMark`. The hover reaches only this lane, through the
-// environment, so no other lane redraws.
+// environment, so no other lane redraws. The playhead and the strip's
+// closures come through TimelineLaneContext, read when a press lands, so a
+// frame change re-runs no lane input (#5804); debug builds count this body
+// under TimelineLaneInputBodies.
 import AppKit
 import SwiftUI
 
 struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     let track: TimelineTrack<ID>
     let mapping: FrameMapping
-    let playhead: Int
-    let actions: TimelineLaneActions<ID>
+    /// The strip's playhead and closures, read when a press lands.
+    let context: TimelineLaneContext<ID>
     @State private var hover: TimelineLaneHover?
     /// The press in progress; not observed, so a pointer sample writes no state.
     @State private var pointer = TimelineLanePointer<ID>()
@@ -54,10 +57,16 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     @Environment(\.suiteReduceMotion) private var reduceMotion
     @Environment(\.timelineFadeMark) private var fadeMark
     @Environment(\.timelineFocusClaim) private var focusClaim
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
 
     func body(content: Content) -> some View {
+        #if DEBUG
+        bodyTally.ran(TimelineLaneInputBodies.self)
+        #endif
         pointer.configure(
-            track: track, mapping: mapping, playhead: playhead, actions: actions,
+            track: track, mapping: mapping, context: context,
             extras: TimelineLanePointerExtras(focus: focusClaim, pill: $pillFrame, mark: fadeMark))
         return content
             .environment(\.timelineLaneHover, hover)
@@ -66,7 +75,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
             .pointerStyle(overClipEnd ? .columnResize : nil)
             .onChange(of: rightPresses) {
                 let target: TimelineLanePress.Target = hover?.key.map { .key($0) } ?? .bed
-                TimelineLanePress.rightPress(target, on: track, actions: actions)
+                TimelineLanePress.rightPress(target, on: track, actions: context.actions)
             }
             .onAppear(perform: watchRightPresses)
             .onDisappear {
@@ -130,6 +139,9 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
     }
 }
 
+/// The key every TimelineLaneInput<ID> counts its body runs under in BodyTally.
+enum TimelineLaneInputBodies {}
+
 /// The key a press or the pointer at lane x `x` lands on, with no view.
 enum TimelineLaneHit {
     /// How near a clip's start or end tick a press must land to trim it.
@@ -164,6 +176,23 @@ enum TimelineLaneHit {
     static func key<ID>(atX x: CGFloat, on track: TimelineTrack<ID>, mapping: FrameMapping) -> Int? {
         let local = Double(x - timelineInset)
         return mapping.keyframe(nearX: local, in: track.keyframes, tolerance: Double(SuiteSize.timelineKeyframeHit / 2))
+    }
+}
+
+/// What a lane's press reads when it lands, not when the lane draws: the
+/// playhead and the strip's closures. The strip writes its one context on
+/// every body and nothing observes it, so a frame change re-runs no lane and
+/// no lane input (#5804), while a press still sees the frame on screen.
+@MainActor final class TimelineLaneContext<ID: Hashable & Sendable> {
+    var playhead: Int
+    var actions: TimelineLaneActions<ID>
+
+    init(
+        playhead: Int = 0,
+        actions: TimelineLaneActions<ID> = TimelineLaneActions(
+            onSelectKeyframe: { _, _ in }, onSelectTrack: { _ in }, onPickKeyframe: { _, _, _ in })
+    ) {
+        (self.playhead, self.actions) = (playhead, actions)
     }
 }
 
@@ -209,7 +238,7 @@ struct TimelineLanePointerExtras {
     /// AppKit's key code for Escape.
     nonisolated static var escapeKeyCode: UInt16 { 53 }
     var showLive: (@MainActor (TimelineLaneDrawing?) -> Void)?
-    private var lane: (track: TimelineTrack<ID>, mapping: FrameMapping, playhead: Int, actions: TimelineLaneActions<ID>)?
+    private var lane: (track: TimelineTrack<ID>, mapping: FrameMapping, context: TimelineLaneContext<ID>)?
     private var extras: TimelineLanePointerExtras?
     var active = false
     var target: TimelineLanePress.Target = .bed
@@ -221,12 +250,12 @@ struct TimelineLanePointerExtras {
     private var liveDelta = 0
     private var liveTrim: Int?
 
-    func configure(track: TimelineTrack<ID>, mapping: FrameMapping, playhead: Int, actions: TimelineLaneActions<ID>,
-                   extras: TimelineLanePointerExtras) { (lane, self.extras) = ((track, mapping, playhead, actions), extras) }
+    func configure(track: TimelineTrack<ID>, mapping: FrameMapping, context: TimelineLaneContext<ID>,
+                   extras: TimelineLanePointerExtras) { (lane, self.extras) = ((track, mapping, context), extras) }
 
     func route(_ point: CGPoint) -> TimelineLaneLayers.Press? {
         guard let lane else { return nil }
-        return TimelineLaneLayers.route(press: point, in: [lane.track], mapping: lane.mapping, playhead: lane.playhead)?.press
+        return TimelineLaneLayers.route(press: point, in: [lane.track], mapping: lane.mapping, playhead: lane.context.playhead)?.press
     }
 
     func down(at point: CGPoint, flags: NSEvent.ModifierFlags) {
@@ -237,10 +266,10 @@ struct TimelineLanePointerExtras {
         (active, modifiers, liveDelta, liveTrim) = (true, held, 0, nil)
         target = TimelineLanePress.target(atX: point.x, on: lane.track, mapping: lane.mapping)
         drag = TimelineLanePress.begin(
-            target, modifiers: held, on: lane.track, playhead: lane.playhead, mapping: lane.mapping, actions: lane.actions)
-        trim = TimelineLanePress.beginTrim(target, playhead: lane.playhead, mapping: lane.mapping)
+            target, modifiers: held, on: lane.track, playhead: lane.context.playhead, mapping: lane.mapping, actions: lane.context.actions)
+        trim = TimelineLanePress.beginTrim(target, playhead: lane.context.playhead, mapping: lane.mapping)
         if target == .bed, let span = TimelineLaneHit.clipBody(atX: point.x, on: lane.track, mapping: lane.mapping) {
-            slide = TimelineSlideDrag(span: span, playhead: lane.playhead, mapping: lane.mapping, snaps: held.contains(.shift))
+            slide = TimelineSlideDrag(span: span, playhead: lane.context.playhead, mapping: lane.mapping, snaps: held.contains(.shift))
         }
         if drag != nil || trim != nil || slide != nil { watchEscape() }
     }
@@ -261,7 +290,7 @@ struct TimelineLanePointerExtras {
             click = slide.release(atDX: dx, id: lane.track.id, actions: live)
             if !click { commit() }
         }
-        if click { TimelineLanePress.press(target, modifiers: modifiers, on: lane.track, actions: lane.actions) }
+        if click { TimelineLanePress.press(target, modifiers: modifiers, on: lane.track, actions: lane.context.actions) }
         reset()
     }
 
@@ -287,9 +316,9 @@ struct TimelineLanePointerExtras {
     /// The release: the whole move, or the trim's last frame, then its end, once.
     private func commit() {
         guard let lane else { return }
-        if let trim, let liveTrim { lane.actions.onTrim(lane.track.id, trim.end.edge, liveTrim); lane.actions.onEndTrim() }
-        else if drag != nil, liveDelta != 0 { lane.actions.onMoveKeyframes(liveDelta); lane.actions.onEndKeyDrag() }
-        else if slide != nil, liveDelta != 0 { lane.actions.onSlide(lane.track.id, liveDelta) }
+        if let trim, let liveTrim { lane.context.actions.onTrim(lane.track.id, trim.end.edge, liveTrim); lane.context.actions.onEndTrim() }
+        else if drag != nil, liveDelta != 0 { lane.context.actions.onMoveKeyframes(liveDelta); lane.context.actions.onEndKeyDrag() }
+        else if slide != nil, liveDelta != 0 { lane.context.actions.onSlide(lane.track.id, liveDelta) }
     }
 
     /// Draws the lane as the step leaves it, moves the pill and reports the step.
