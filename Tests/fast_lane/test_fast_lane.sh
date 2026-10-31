@@ -715,10 +715,10 @@ gh() {
       (cd "$sw/refs/$u" 2>/dev/null && find . -type f | sed 's:^\./::') | jq -R '{path: ., type: "blob"}' | jq -s '{truncated: false, tree: .}' ;;
     "api "*"/contents/"*) u="${!#}"; u="${u#*/contents/}"; cat "$sw/refs/${u##*\?ref=}/${u%%\?*}" ;;
     "api "*"/issues/"*"/comments "*) n="${2#*/issues/}"; cat "$sw/${n%%/*}.comments" 2>/dev/null || true ;;
-    "api repos/"*"/issues/"*)  # an issue's state ($sw/state.<n>, OPEN if absent) and labels ($sw/labels.<n>, none if absent, a failure if .fail)
+    "api repos/"*"/issues/"*)  # an issue's state ($sw/state.<n>, OPEN if absent; the REST API answers it lowercase, so the stub does too) and labels ($sw/labels.<n>, none if absent, a failure if .fail)
       n="${2##*/}"; echo "labels $n" >>"$sw/lookups"
       [[ ! -e "$sw/labels.$n.fail" ]] || return 1
-      jq -c --arg s "$(cat "$sw/state.$n" 2>/dev/null || echo OPEN)" '{state: $s, labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
+      jq -c --arg s "$(cat "$sw/state.$n" 2>/dev/null || echo OPEN)" '{state: ($s | ascii_downcase), labels: map({name: .})}' <<<"$(cat "$sw/labels.$n" 2>/dev/null || echo '[]')" | jq -r "${!#}" ;;
     "pr comment "*|"issue comment "*) echo "$a" >>"$sw/calls"; printf '%s\n' "${!#}" >>"$sw/$3.comments" ;;
     "pr merge "*) [[ ! -e "$sw/merge.fail.$3" ]] || return 1  # $sw/merge.fail.<n>: GitHub refuses the merge
       echo "$a" >>"$sw/calls"; touch "$sw/$3.merged"; printf '%s\n' "${!#}" >"$sw/$3.squash" ;;
@@ -2256,6 +2256,8 @@ expect "expiry: past its expiry with the issue open, the owner gets the blocker 
 echo '["p0", "blocker"]' >"$sw/labels.700"
 FAST_LANE_NOW=2026-10-27T10:00:01Z LANE_VERIFY_AFTER=1 lane_sweep
 expect "expiry: said once" "$(grep -c -- '--add-label blocker' "$sw/calls"),$(grep -c '^issue comment 700 ' "$sw/calls")" "1,1"
+expect "open owner (REST state \"open\"): the entry stays and no removal PR is opened" \
+  "$(quarantines),$(qjson | jq length),$(grep -c 'run PhotoModelTests.OpenTests/opens again' "$sw/calls")" "1,1,0"
 # Removal: once the owner closes, the lane's PR removes the entry; its Linux check runs the test again.
 rm -f "$sw/red.json"; echo CLOSED >"$sw/state.700"
 FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
