@@ -14,6 +14,7 @@
 #   scripts/test-scope timing              the tests that assert a wall-clock bound and aren't in the perf list
 #   scripts/test-scope ids TARGET FILE     each @Test in FILE as a perf-list id, Target.Suite/test (nested suites
 #                                          joined by /) or Target.freeTest; the fast lane's quarantine reads these
+#   scripts/test-scope slow XUNIT          fail on a shared-pass test that costs over SLOW_FAIL s alone
 #
 # app and changed print two lines (app with a comma list: the union, as the
 # lane's batch macOS gate asks for): the regex for the tests outside
@@ -101,6 +102,17 @@
 # when changed would say all or a test file fits no app (every snapshot
 # suite); empty when no test covers the paths.
 #
+# slow reads the swift-testing xUnit file of a --no-parallel run of the shared
+# pass (every test but the perf and heavy lists; CI's `Slow tests` job), where
+# each test's time is its own cost, not its place in the queue a parallel run
+# reports. It fails (::error::) on each test over SLOW_FAIL (10 s) that
+# Tests/slow-baseline.txt (SLOW_BASELINE) doesn't list: such a test belongs in
+# Tests/heavy-suites.txt, or its fixture should shrink (#5321: a few of them
+# starved the time-limited suites on CI's 3-4 thread runners). It notes
+# baseline lines now under SLOW_LIST (5 s) or gone, which can be dropped, and
+# prints every test over SLOW_LIST as the baseline lines it would take. A
+# parameterized test's cases add up to one id.
+#
 # Regexes match swift test's ids, Target.Suite/test() or Target.freeTest().
 # Never pass an empty one to --filter or --skip: it matches every test.
 # Tested by Tests/test_scope.
@@ -135,6 +147,8 @@ ALL = [("all", None)]
 FLAG = 3  # a perf test is flagged when it measured over FLAG times a bound it asserts
 PERF_LIST = os.environ.get("PERF_SUITES") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "perf-suites.txt")
 TIMING_BASELINE = os.environ.get("TIMING_BASELINE") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "timing-baseline.txt")
+SLOW_BASELINE = os.environ.get("SLOW_BASELINE") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "slow-baseline.txt")
+SLOW_FAIL, SLOW_LIST = 10, 5  # seconds alone: fail over SLOW_FAIL unless listed; list from SLOW_LIST (runner noise is ~2x)
 HEAVY_LIST = os.environ.get("HEAVY_SUITES") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Tests", "heavy-suites.txt")
 
 
@@ -481,6 +495,35 @@ def perf_report(log):
     print("\n".join(out))
 
 
+def slow_report(xunit):
+    """Exit 1 when a test outside the baseline cost over SLOW_FAIL s in a --no-parallel run's xUnit file."""
+    import xml.etree.ElementTree as ET
+    cost = {}
+    for case in ET.parse(xunit).iter("testcase"):
+        target, *suites = case.get("classname", "").split(".")
+        test = case.get("name", "").split("(", 1)[0]
+        tid = f"{target}.{'/'.join(suites + [test])}"
+        cost[tid] = cost.get(tid, 0.0) + float(case.get("time") or 0)
+    if not cost:
+        sys.exit(f"test-scope: {xunit} holds no test cases: the run died before it wrote any")
+    with open(SLOW_BASELINE) as f:
+        baseline = {l.split("#", 1)[0].strip() for l in f} - {""}
+    new = sorted((t for t, c in cost.items() if c > SLOW_FAIL and t not in baseline), key=lambda t: -cost[t])
+    for t in new:
+        target, rest = t.split(".", 1)
+        app = unit_scope(target, rest.split("/")[0])
+        line = f"{app if app in SCOPES else 'suite'} {t}"
+        print(f"::error title=Slow test::{t} took {cost[t]:.1f} s alone (over {SLOW_FAIL} s) in the shared parallel pass, "
+              f"where it starves the time-limited suites (#5321). Shrink its fixture, or add '{line}' to Tests/heavy-suites.txt")
+    for t in sorted(baseline):
+        if cost.get(t, 0) < SLOW_LIST:
+            print(f"note: Tests/slow-baseline.txt: {t} " + (f"now takes {cost[t]:.1f} s: drop its line" if t in cost else "did not run: drop its line if it is gone"))
+    print(f"Tests over {SLOW_LIST} s alone ({len(cost)} measured), as Tests/slow-baseline.txt lines:")
+    for t in sorted(t for t, c in cost.items() if c > SLOW_LIST):
+        print(f"{t}  # {cost[t]:.1f} s")
+    return 1 if new else 0
+
+
 def main(argv):
     cmd, args = (argv[0], argv[1:]) if argv else ("", [])
     if cmd == "app" and len(args) == 1:
@@ -500,6 +543,8 @@ def main(argv):
         print(shard(sys.stdin.read().splitlines(), *map(int, args[0].split("/"))))
     elif cmd == "perf-report" and len(args) == 1:
         perf_report(args[0])
+    elif cmd == "slow" and len(args) == 1:
+        sys.exit(slow_report(args[0]))
     elif cmd == "timing" and not args:
         for test, where, bound in unlisted_timing():
             print(f"{test}  ({where}: {bound})")
@@ -507,7 +552,7 @@ def main(argv):
         for suites, name, _, _ in swift_tests(args[1]):
             print("/".join([args[0] + "." + (suites[0] if suites else name)] + suites[1:] + ([name] if suites else [])))
     else:
-        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | shard K/N | perf-report LOG | timing | ids TARGET FILE")
+        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | shard K/N | perf-report LOG | timing | ids TARGET FILE | slow XUNIT")
 
 
 if __name__ == "__main__":
