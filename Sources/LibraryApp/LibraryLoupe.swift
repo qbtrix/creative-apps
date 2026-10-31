@@ -13,8 +13,8 @@
 // readout. Left and Right step through the sort; Escape, G or the glass
 // Grid button at the top leading corner (`library.loupe.grid`) go back to
 // the grid. The canvas pans on the other arrows, scroll and Space-drag, and
-// a click on it gives it the keys. Pinch and its zoom keys go through
-// `menu.view.zoomTo`, the measured fit through `menu.view.fitMeasured`
+// a click on it gives it the keys. Pinch and its zoom keys (the loupe's own
+// stops, `loupeZoomSteps`) go through `menu.view.zoomTo`, the measured fit through `menu.view.fitMeasured`
 // (the loupe area fills both). While a crop draft is open (crop CR-6) the
 // artboard is the straightened photo (`crop.canvas`) under the crop frame
 // overlay, a canvas drag moves the handle under its press (or the whole
@@ -50,6 +50,7 @@ struct LibraryLoupe: View {
             documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false, holdsRulerBand: false,
             onSize: { viewport = $0 }, onZoom: menu.view.zoomTo,
             // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
+            zoomSteps: LibraryCatalog.loupeZoomSteps,
             onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key
         ) {
             picture

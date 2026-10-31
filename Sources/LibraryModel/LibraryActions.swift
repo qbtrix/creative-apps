@@ -7,7 +7,10 @@
 // services refuse sets `cullError` as before and throws it too (on sample
 // data it ends with the import hint). Import Folder… (an open panel),
 // Show Catalog in Finder and the thumbnail hooks stay in the view: they
-// touch files or the window, not the catalog. Linux-safe.
+// touch files or the window, not the catalog. The loupe's zoom steps its own
+// stop table (`loupeZoomSteps`) on the suite's zoom model (SuiteKernel's
+// ZoomSteps and ZoomLevel, which `LoupeZoom` names). Linux-safe.
+import struct SuiteKernel.ZoomSteps
 
 /// One menu or key action on the catalog.
 public enum LibraryAction: Hashable, Sendable {
@@ -118,10 +121,49 @@ extension LibraryCatalog {
         if mode == .grid {
             return (step > 0 ? canShowLargerThumbnails : canShowSmallerThumbnails) ? nil : limit
         }
-        let scale = loupeZoom.scale(fit: fitScale)
-        let canStep = step > 0
-            ? LoupeZoom.steps.contains { $0 > scale * 1.0001 } : LoupeZoom.steps.contains { $0 < scale / 1.0001 }
-        return inLoupe && canStep ? nil : reason("loupe", limit)
+        return inLoupe && loupeStep(step, fitScale: fitScale) != nil ? nil : reason("loupe", limit)
+    }
+}
+
+extension LibraryCatalog {
+    /// The loupe's Zoom In and Zoom Out stops, 12.5% to 800%, on the suite's zoom model.
+    public static let loupeZoomSteps = ZoomSteps(stops: [0.125, 0.25, 0.5, 1, 2, 4, 8])
+
+    /// Sets the loupe's zoom; a scale of 1 is `.actual`, and a scale that
+    /// isn't a positive finite number changes nothing.
+    public mutating func zoomLoupe(_ zoom: LoupeZoom) {
+        if case .scale(let scale) = zoom {
+            guard LoupeZoom.isUsable(scale) else { return }
+            loupeZoom = LoupeZoom(scale: scale)
+        } else {
+            loupeZoom = zoom
+        }
+    }
+
+    /// The next step above (positive) or below the current scale; fit counts
+    /// as its scale. Moves `steps` steps, staying put past either end.
+    public mutating func stepZoom(by steps: Int, fitScale: Double) {
+        for _ in 0..<min(steps.magnitude, UInt(Self.loupeZoomSteps.stops.count)) {
+            guard let target = loupeStep(steps, fitScale: fitScale) else { return }
+            loupeZoom = LoupeZoom(scale: target)
+        }
+    }
+
+    /// The scale one step up (`step` positive) or down from the loupe's, or nil past that end.
+    private func loupeStep(_ step: Int, fitScale: Double) -> Double? {
+        let current = loupeZoom.scale(fit: fitScale), table = Self.loupeZoomSteps
+        let target = step > 0 ? table.zoomedIn(from: current) : table.zoomedOut(from: current)
+        return (step > 0 ? target > current : target < current) ? target : nil
+    }
+
+    /// "Larger Thumbnails" in the grid, "Zoom In" in the loupe.
+    public var zoomInTitle: String {
+        mode == .grid ? "Larger Thumbnails" : "Zoom In"
+    }
+
+    /// "Smaller Thumbnails" in the grid, "Zoom Out" in the loupe.
+    public var zoomOutTitle: String {
+        mode == .grid ? "Smaller Thumbnails" : "Zoom Out"
     }
 }
 
