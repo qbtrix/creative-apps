@@ -78,6 +78,13 @@ public final class OnboardingModel {
         isFinished = true
         Task { await finish() }
     }
+    /// Help > Welcome to AfterGlow: SwiftUI keeps a closed Window's state, so a tour that finished
+    /// starts over on page 1 with nothing held. A tour still open stays where it is.
+    public func reopen() {
+        guard isFinished else { return }
+        pageIndex = 0; isFinished = false
+        launching = nil; message = nil; failed = nil
+    }
     public func back() {
         guard sendingReason == nil else { return }
         pageIndex = max(pageIndex - 1, 0)

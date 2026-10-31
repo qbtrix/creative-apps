@@ -5,7 +5,8 @@
 // Continue's place as the default button. All of it sits on
 // OnboardingLayout's size and 24 pt margin. The scene presents itself at
 // launch when `launchBehavior` says so (OnboardingLaunch, decided once,
-// before the first frame) and Help > Welcome to AfterGlow reopens it.
+// before the first frame) and Help > Welcome to AfterGlow reopens it, on
+// page 1 again: the scene keeps its state, so `onAppear` calls `model.reopen()`.
 // Closing the window is Skip: `onDisappear` without a finish calls
 // `model.skip()`. `init(model:)` lets the snapshot and render budget suites
 // show a model they drove. The page id rides a ProbeElement's label, which
@@ -86,6 +87,7 @@ struct OnboardingWindow: View, BodyCounted {
         .padding(CGFloat(OnboardingLayout.margin))
         .frame(width: CGFloat(OnboardingLayout.width), height: CGFloat(OnboardingLayout.height))
         .suiteProbes()
+        .onAppear { model.reopen() }
         .task { await model.load() }
         .onChange(of: model.isFinished) { _, finished in
             if finished { dismissWindow(id: "onboarding") }

@@ -367,4 +367,25 @@ actor RacingPreferences: PreferencesStoring {
         await m.openSample(.design, now: now)
         #expect(m.message == nil && m.failed == nil && m.isFinished)
     }
+
+    /// Help > Welcome to AfterGlow on a window SwiftUI kept: the tour starts over on page 1, unheld,
+    /// and Skip closes it again (#5947: the reopened window read "start" and Escape left it open).
+    @Test func reopenAfterAFinishStartsOverOnTheFirstPage() async throws {
+        let (m, _) = await model()
+        m.continue(); m.continue()
+        await m.openSample(.flare, now: now)
+        #expect(m.isFinished && m.launching == .flare)
+        m.reopen()
+        #expect(m.pageIndex == 0 && m.page.id == "apps" && !m.isFinished)
+        #expect(m.launching == nil && m.sendingReason == nil && m.message == nil && m.failed == nil)
+        await m.skip()
+        #expect(m.isFinished)
+    }
+
+    @Test func reopenLeavesAnOpenTourWhereItIs() async {
+        let (m, _) = await model()
+        m.continue()
+        m.reopen()
+        #expect(m.pageIndex == 1 && !m.isFinished)
+    }
 }
