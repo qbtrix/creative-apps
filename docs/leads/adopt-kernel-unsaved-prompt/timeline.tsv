@@ -120,3 +120,4 @@ ts	kind	note
 2026-10-31T18:32:38Z	blocked	poll	#5089	UP-flare waits on local-ci/prescreen; question 6545383424 unanswered
 2026-10-31T19:34:26Z	blocked	poll	#5089	UP-flare waits on local-ci/prescreen; question 6545383424 unanswered
 2026-10-31T20:36:21Z	blocked	poll	#5089	UP-flare waits on local-ci/prescreen; question 6545383424 unanswered
+2026-10-31T21:39:52Z	blocked	poll	#5089	UP-flare #5089 open, waiting on local-ci/prescreen; UP-halo #5091 and UP-z #5231 stacked above it
