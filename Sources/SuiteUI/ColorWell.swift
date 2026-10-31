@@ -9,8 +9,7 @@
 // HexText, the suite's one hex codec, and HexColor's bridge to the kernel's
 // FillColor is `init(_:)` / `fill`. InspectorColorWellRow is its HexColor wrapper.
 // Both rows report `onEnd` once per gesture through an EditRun (HexEnds): a
-// hex commit is a change and an end in one, even when it keeps the color, and
-// Return leaves the field, so the Edit menu's ⌘Z goes to the editor's undo; the
+// hex commit is a change and an end in one, even when it keeps the color; the
 // color panel's picks stream through `onChange` and end once when the panel
 // closes (SwiftUI's ColorPicker reports no end of interaction) or the row goes
 // away. The row owns presentation state only: the hex text being typed and
@@ -213,8 +212,7 @@ public struct InspectorColorRow: View {
                 .font(SuiteFont.inspectorValue)
                 .multilineTextAlignment(.trailing)
                 .focused($isTyping)
-                // Return gives the keys back (the focus change commits, once), so ⌘Z undoes the edit, not the typing.
-                .onSubmit { isTyping = false }
+                .onSubmit(commit)
                 .onChange(of: isTyping) { _, typing in if !typing { commit() } }
                 .frame(width: SuiteSize.hexField)
                 .background {

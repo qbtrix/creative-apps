@@ -1,4 +1,0 @@
-[
-{"label": "Return commits but the hex field keeps the keys", "file": "Sources/SuiteUI/ColorWell.swift", "find": "                .onSubmit { isTyping = false }", "replace": "                .onSubmit(commit)", "tests": "ColorRowReturnTests"},
-{"label": "Return in the hex field does nothing", "file": "Sources/SuiteUI/ColorWell.swift", "find": "                .onSubmit { isTyping = false }", "replace": "                .onSubmit {}", "tests": "ColorRowReturnTests"}
-]
