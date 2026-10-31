@@ -31,7 +31,7 @@ final class AfterGlowOnboardingStartJourneys: XCTestCase {
         // 1. Continue, Photos, Continue: the start page.
         launcher.click("Continue", in: .window)
         XCTAssert(Tour.waitForPage(launcher, "focus"), "Continue led to \(Tour.page(launcher)), not focus")
-        launcher.click("Photos", in: .window)
+        Tour.chip(.photos, in: welcome).click()
         XCTAssert(Tour.waitFor { Tour.chip(.photos, in: welcome).isSelected }, "the Photos chip isn't selected")
         launcher.click("Continue", in: .window)
         XCTAssert(Tour.waitForPage(launcher, "start"), "Continue led to \(Tour.page(launcher)), not start")

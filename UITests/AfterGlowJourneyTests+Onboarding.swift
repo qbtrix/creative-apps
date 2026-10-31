@@ -78,7 +78,8 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
         launcher.shot("onboarding-focus")
 
         // 2. Photos, then Continue.
-        launcher.click("Photos", in: .window)
+        // By identifier: the chip reads "Photos: Library, Photo" since #3021.
+        Self.chip(.photos, in: welcome).click()
         XCTAssert(Self.waitFor { Self.chip(.photos, in: welcome).isSelected }, "the Photos chip isn't selected after a click")
         launcher.click("Continue", in: .window)
 
