@@ -5,7 +5,8 @@
 // transform (a press on a layer is a move that went nowhere), the box's whole gesture, its press too, on
 // LiveDragLine's copy, so with the pointer down the editor body runs 0 times and the canvas composites 0 regions
 // (PhotoRenderCount, debug only); the box shows on the overlay. The release picks: the click the background, the
-// box both layers. Nested in BodyCountSuites: it reads process-wide counters. macOS only.
+// box both layers. The counts start once the first picture has landed (`idle` must settle; it can take over a
+// minute on a loaded runner). Nested in BodyCountSuites: it reads process-wide counters. macOS only.
 #if canImport(AppKit)
 import AppKit
 import CoreRaster
@@ -25,7 +26,9 @@ extension BodyCountSuites {
             let (model, top, bottom) = try Self.document(.select)
             let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
             defer { w.close() }
+            let (opened, regions) = (ContinuousClock.now, Self.regions())
             let (edited, send) = try await Self.open(w)
+            print("RENDER-BUDGET photo select open, 24 MP: \(ContinuousClock.now - opened), \(Self.regions() - regions) regions")
 
             // A click on the background, where the top layer is clear.
             var down = try await Self.whileDown(w) {
@@ -79,7 +82,9 @@ extension BodyCountSuites {
         static func open<V: View>(_ w: RenderBudgetWindow<V>) async throws -> (PhotoWindowEditedView, PhotoPerform) {
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
             try await w.settle(untilStable: RenderBudgetPhotoTransformTests.bodies)
-            try await RenderBudgetPhotoLiveTransformTests.idle(w)
+            // The first 24 MP picture runs past a minute on a loaded runner; a press measured before it lands
+            // counts its last regions as the press's, so the counts start only from a settled canvas.
+            try #require(await RenderBudgetPhotoLiveTransformTests.idle(w, limit: .seconds(150)), "the first picture never landed")
             return (edited, try #require(edited.send))
         }
 
