@@ -514,3 +514,4 @@ utc	stage	event	ref	note
 2026-10-31T17:18Z	check-in	#6128 closed 16:52Z (dev green, main moved); #5353 open clean a92b4651; no new photo findings (56 open); PX-9 waits on #5353
 2026-10-31T17:49Z	check-in	#5353 open clean a92b4651, PX-9 waits. No dev-red open, no merges, no new findings (56 Photo open).
 2026-10-31T18:21Z	check-in	dev-red #6134 opened 18:10Z (macos, range #6131 Select quarantine lift; triage says likely flaky); #6132 Select test fix merged 17:56Z; not ours. #5353 open clean a92b4651, PX-9 waits. 55 Photo findings open, none new.
+2026-10-31T18:53Z	check-in	dev-red #6134 open, lane flake re-run started 18:22Z (not ours). Finding #6136 (canvas renders survive window close) skipped: not export/text. #5353 open clean a92b4651, PX-9 waits. 56 Photo findings open.
