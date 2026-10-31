@@ -457,3 +457,4 @@ Next: Lane: #5039 AK-6 in the lane; #5040 AK-9 stacked on it. AK-8 waits SC-f (r
 - 2026-10-31T11:09:25Z AK-photo blocked on SC-f #5262/#5265, both open
 - 2026-10-31T11:31:07Z AK-photo blocked on SC-f #5262/#5265, both open
 - 2026-10-31T11:54:04Z AK-photo blocked on SC-f #5262/#5265, both open
+- 2026-10-31T12:16:39Z AK-photo blocked on SC-photo #5262 (open); SC-library #5265 closed needs-split, no replacement yet, #3718 needs-human
