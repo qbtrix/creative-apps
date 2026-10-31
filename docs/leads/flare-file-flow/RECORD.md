@@ -820,3 +820,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 04:06Z check-in: #3482 quiet, no open Flare file-flow findings. Gaps #4764 and #1829 still open.
 
 - 04:38Z check-in: #3482 quiet, no open Flare file-flow findings. Gaps #4764 and #1829 still open.
+
+- 05:09Z check-in: #3482 quiet, no open Flare file-flow findings. #1829 got comment 23, the CI bot again reporting timeline key buttons 23/24 overlapping on flare-open-sample-button (run 41154985284). That is timeline-keys work, not file-flow, so no new gap. Gaps #4764 and #1829 still open.
