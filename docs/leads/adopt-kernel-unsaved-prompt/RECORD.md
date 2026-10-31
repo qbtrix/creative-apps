@@ -142,3 +142,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-10-31T12:46:24Z UP-flare #5089 restacked on dev (7e1938fd); UP-z own patch ~250 lines, waits on stack
 - 2026-10-31T13:09:17Z needs-rebase cleared on #5089; waits for its lane batch
 - 2026-10-31T13:30:39Z #5089 at 7e1938fd, label clear; waits for its lane batch
+- 2026-10-31T13:52:05Z #5089 at 7e1938fd waits for the lane (local-ci/prescreen)
