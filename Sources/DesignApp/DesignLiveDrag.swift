@@ -5,14 +5,18 @@
 // press goes to the workspace (the selection shows at once) and the later
 // samples go here, to a copy of it (DesignLiveEdit) that only DesignCanvas
 // reads: `live.workspace ?? model`. The inspector reads `scrubbed`, the copy
-// only a scrub's values set, so a canvas drag never lays it out per sample. Mouse-up (`land(into:)`) replays the last
-// sample into the workspace through its own methods, then `endDrag`, so the
-// window changes once and records one step; the window writes that workspace
-// and `clearAfterLanding()` drops the copy a turn later, so the canvas never
-// draws the old workspace in between. `preview` and `land` do the same for an
-// inspector scrub, a style row's, the Rotation bar's or a fill editor drag. DesignWindow owns one and hands it down as the
-// `designLiveDrag` environment value; without one (a view hosted alone) the
-// canvas draws the workspace. Presentation state only.
+// only a scrub's values set (a style row's, the Rotation bar's or a fill editor
+// drag), so a canvas drag never reruns the Opacity, Corners, Stroke and Fill
+// rows per sample (each walks every layer for its lock help, 2,000 on `crowd`).
+// `begin` and `clear` write `scrubbed` only when it is set, so a canvas drag's
+// press and release don't wake those rows either. Mouse-up (`land(into:)`)
+// replays the last sample into the workspace through its own methods, then
+// `endDrag`, so the window changes once and records one step; the window
+// writes that workspace and `clearAfterLanding()` drops the copy a turn later,
+// so the canvas never draws the old workspace in between. `preview` and `land`
+// do the same for an inspector scrub. DesignWindow owns one and hands it down
+// as the `designLiveDrag` environment value; without one (a view hosted alone)
+// the canvas draws the workspace. Presentation state only.
 import DesignModel
 import Observation
 import SuiteKernel
@@ -34,8 +38,8 @@ import SwiftUI
     /// Starts showing a copy of `model`, after the press went to it.
     func begin(from model: DesignWorkspace) {
         isLanding = false
-        scrubbed = nil
         edit.begin(from: model)
+        if scrubbed != nil { scrubbed = nil }
     }
 
     /// One pointer sample, run on the copy only.
@@ -72,8 +76,9 @@ import SwiftUI
     /// Stops showing the copy.
     func clear() {
         isLanding = false
-        scrubbed = nil
         edit = DesignLiveEdit()
+        // Only a scrub set it, so a canvas drag's clear doesn't wake the rows that read it.
+        if scrubbed != nil { scrubbed = nil }
     }
 
     /// Stops showing the copy on the next main-actor turn, once the window has passed the canvas
