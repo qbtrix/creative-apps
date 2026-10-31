@@ -83,7 +83,7 @@ public final class OnboardingModel {
     public func reopen() {
         guard isFinished else { return }
         pageIndex = 0; isFinished = false
-        launching = nil; message = nil; failed = nil
+        launching = nil; failed = nil; message = nil
     }
     public func back() {
         guard sendingReason == nil else { return }
