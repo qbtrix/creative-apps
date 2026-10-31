@@ -327,3 +327,4 @@ utc	stage	event	ref	note
 2026-10-31T12:35Z	3	check-in	quiet	full 41197183457 cancelled 0 Halo; 41201372484 waiting
 2026-10-31T14:38Z	3	check-in	quiet	full 41201372484 cancelled 0 Halo; 41207538797 waiting
 2026-10-31T16:40Z	3	check-in	quiet	full 41207538797 cancelled in wait; 41211873164 waiting
+2026-10-31T18:42Z	3	check-in	quiet	fulls 41211873164/41221791722 cancelled 0 Halo; 41228105560 waiting
