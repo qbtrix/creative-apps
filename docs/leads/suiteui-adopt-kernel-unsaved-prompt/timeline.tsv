@@ -461,3 +461,4 @@ ts	kind	note
 2026-10-31T11:09:22Z	waiting	poll	#5089	UP-flare #5089, UP-halo #5091, UP-z #5231 open, none needs-fix
 2026-10-31T11:31:04Z	waiting	poll	#5089	UP-flare #5089, UP-halo #5091, UP-z #5231 open, none needs-fix
 2026-10-31T11:54:01Z	waiting	poll	#5089	UP-flare #5089, UP-halo #5091, UP-z #5231 open, none needs-fix
+2026-10-31T12:16:35Z	waiting	poll	#5089	UP-flare #5089, UP-halo #5091 open; UP-z #5231 too big for fast lane (754 lines, 18 files), needs captain review
