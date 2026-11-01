@@ -271,10 +271,10 @@ public struct LayerTreeList: View {
     }
 
     /// How many rows an embedded list builds eagerly; past it, lazily.
-    static let embeddedEagerLimit = 300
+    nonisolated static let embeddedEagerLimit = 300
 
     /// Whether an embedded list of `rowCount` rows builds every row.
-    static func embeddedEager(rowCount: Int) -> Bool { rowCount <= embeddedEagerLimit }
+    nonisolated static func embeddedEager(rowCount: Int) -> Bool { rowCount <= embeddedEagerLimit }
 
     private var rowViews: some View {
         let joins = Self.selectionJoins(rows.map(\.id), selected: isSelected)
