@@ -100,6 +100,7 @@ import Testing
         }
         let saved = sessions.call(.save, .object(["doc": doc, "force": .bool(true)]), now: 0)
         #expect(saved.isError, "save wrote with no path: \(saved.text)")
+        #expect(saved.text.contains("no file yet"), "the import kept its path, so only the .json guard refused: \(saved.text)")
         #expect(io.files["/tmp/mcp/bounce.json"] == input, "a .flare was written over the JSON")
     }
 
