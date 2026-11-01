@@ -23,7 +23,8 @@
 // `halo.timeline.lane.<id>` and each key `halo.timeline.key.<id>.<frame>`.
 // A lane speaks its key count as its value, which XCUITest reads empty
 // (#262), so each row's `keysReadout` ("Ball: 3 keyframes") is also the label
-// of a hidden `halo.timeline.keys` element (HaloReadout.swift).
+// of a hidden `halo.timeline.keys` element (HaloReadout.swift), for the
+// first 100 rows only (HaloTimelineRow.readoutRows).
 // The strip sits in the column's safe area. HaloTimelineLayout fits its lanes
 // to the width the strip is laid out at, measured with onGeometryChange (the
 // GeometryReader's width only until then, and in snapshots), less the name
@@ -33,7 +34,9 @@
 // no scroller covers the ruler; the height is the lanes, at least the slot
 // minimum, at most 40% of the window's column, and past that the lanes
 // scroll vertically, by wheel and trackpad with no scroller (as Halo's
-// inspector), so the canvas keeps its room. Under `-SuitePerfProbe` a
+// inspector), so the canvas keeps its room. The strip builds only the rows
+// that scroll shows (`timelineRowsShown`, HaloTimelineLayout.rowsShown), so
+// huge's 2,000 rows stay out of the accessibility tree (#1262). Under `-SuitePerfProbe` a
 // ruler scrub records a `playhead-scrub` sample and each lane scroll offset a
 // `lanes-scroll` frame (HaloProbe).
 import HaloModel
@@ -52,6 +55,8 @@ struct HaloTimelineView: View {
     @State private var stripWidth: Double?
     /// The key drag under way: the dragStart its moves fold under.
     @State private var dragStart: Int?
+    /// The lane rows the scroll has in view (HaloTimelineLayout.rowsShown); nil until it reports.
+    @State private var rowsInView: Range<Int>?
     @Environment(\.suiteSnapshotRendering) private var snapshot
     @Environment(\.suiteProbeRecorder) private var recorder
 
@@ -82,6 +87,16 @@ struct HaloTimelineView: View {
                     .onScrollGeometryChange(for: Double.self) { Double($0.contentOffset.y) } action: { _, _ in
                         HaloProbe(recorder).drew(HaloProbe.lanesScroll)
                     }
+                    // Changes only when a row enters or leaves the view, so a scroll rebuilds rows, not every frame.
+                    .onScrollGeometryChange(for: Range<Int>.self) { geometry in
+                        layout.rowsShown(
+                            visibleY: Double(geometry.visibleRect.minY)...max(
+                                Double(geometry.visibleRect.minY), Double(geometry.visibleRect.maxY)),
+                            rows: rows.count)
+                    } action: { _, shown in
+                        rowsInView = shown
+                    }
+                    .environment(\.timelineRowsShown, rowsInView ?? layout.rowsShown(visibleY: nil, rows: rows.count))
             }
         }
         .focusable()
@@ -150,7 +165,7 @@ struct HaloTimelineView: View {
             }
             .frame(height: height)
             .background(alignment: .topLeading) {
-                ForEach(rows) { ProbeElement("halo.timeline.keys", label: $0.keysReadout, size: HaloReadout.size) }
+                ForEach(HaloTimelineRow.readoutRows(rows)) { ProbeElement("halo.timeline.keys", label: $0.keysReadout, size: HaloReadout.size) }
             }
             if rows.isEmpty {
                 Label("No layers yet. Add one from Layer > New.", systemImage: "square.stack.3d.up")

@@ -1,7 +1,8 @@
 // HaloViewerCanvas.swift: the artboard in Halo's viewer (#37). CanvasSurface
 // sized to the selected composition, with the Model's `viewerDrawList` drawn
 // over the artboard's fitted frame in one SwiftUI Canvas, bottom layer first
-// (the live drag's project while one lasts, HaloLiveEdit.swift),
+// (the live drag's project while one lasts, HaloLiveEdit.swift; a lifted
+// drag's three parts drawn once, the dragged one moved, HaloLiftedLayers),
 // in linear light as LiveFrameRendering composites (the Canvas's colorMode
 // and its drawing group both .linear): each item at its matrix times the fit
 // (a CanvasLayout of the composition filling that frame),
@@ -56,7 +57,8 @@ struct HaloViewerCanvas: View {
     }
 }
 
-/// The drawn layers over the artboard: the live drag's project while one
+/// The drawn layers over the artboard: a lifted drag's parts
+/// (HaloLiftedLayers), else the live drag's project while one
 /// lasts (HaloLiveEdit), else the playing frame, else the window's. Only this view reads the live
 /// project, so a drag sample re-runs it and nothing around it.
 struct HaloLiveLayers: View, BodyCounted {
@@ -72,8 +74,13 @@ struct HaloLiveLayers: View, BodyCounted {
         #if DEBUG
         let _ = bodyTally.ran(Self.self)
         #endif
-        let shown = live?.shown(model) ?? model
-        if let list = shown.viewerDrawList {
+        // A lifted drag reads only the lift here, so its samples re-run HaloLiftOffset alone.
+        if let live, let lift = live.lift {
+            HaloLiftedLayers(lift: lift, live: live)
+                .aspectRatio(artboard, contentMode: .fit)
+                .frame(maxWidth: artboard.width, maxHeight: artboard.height)
+                .padding(SuiteSize.canvasInset)
+        } else if case let shown = live?.shown(model) ?? model, let list = shown.viewerDrawList {
             HaloDrawnLayers(list: list, selectedLayerID: Self.outlinedLayer(shown))
                 .aspectRatio(artboard, contentMode: .fit)
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)
@@ -88,18 +95,83 @@ struct HaloLiveLayers: View, BodyCounted {
     }
 }
 
+/// A lifted viewer drag (HaloDrawLift): the layers under the dragged one,
+/// the dragged one and the layers over it, each drawn once; a sample only
+/// moves the middle part (HaloLiftOffset), a compositor transform, and draws
+/// no layer (render contract rule 3). One linear group over the three blends
+/// them as the single list would (#1161). No outline: the handles follow the
+/// drag (HaloViewerHandles).
+struct HaloLiftedLayers: View {
+    let lift: HaloDrawLift
+    let live: HaloLiveEdit
+
+    var body: some View {
+        ZStack {
+            HaloDrawnLayers(list: lift.below, selectedLayerID: nil).equatable()
+            HaloLiftOffset(live: live, width: lift.lifted.width) {
+                HaloDrawnLayers(list: lift.lifted, selectedLayerID: nil).equatable()
+            }
+            HaloDrawnLayers(list: lift.above, selectedLayerID: nil).equatable()
+        }
+        .drawingGroup(opaque: false, colorMode: .linear)  // render-contract: allow linear blend of the lift's parts (#1161) until the viewer is on the Metal canvas
+    }
+}
+
+/// `content` moved by the live drag's delta, scaled from composition pixels
+/// to the fitted artboard; the only view a lifted drag's sample re-runs.
+struct HaloLiftOffset<Content: View>: View, BodyCounted {
+    let live: HaloLiveEdit
+    let width: Int
+    @ViewBuilder let content: Content
+
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
+
+    var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(HaloLiftOffsetBodies.self)
+        #endif
+        let delta = live.project?.viewerDrag?.delta ?? HaloPoint(x: 0, y: 0)
+        let width = Double(max(width, 1))
+        content.visualEffect { content, proxy in
+            let scale = Double(proxy.size.width) / width
+            return content.offset(x: delta.x * scale, y: delta.y * scale)
+        }
+    }
+}
+
+/// HaloLiftOffset's body counter: one type for every content it wraps.
+enum HaloLiftOffsetBodies {}
+
+/// HaloDrawnLayers' Canvas draws, counted in DEBUG: a lifted drag's samples add none.
+enum HaloCanvasDraws {}
+
 /// One frame's draw list over the artboard's fitted frame, and the selected
 /// layer's outline. Composition pixels times `size / list size` is the fit.
-struct HaloDrawnLayers: View {
+/// Equatable, so an unchanged list isn't drawn again (HaloLiftedLayers).
+struct HaloDrawnLayers: View, Equatable {
     let list: HaloDrawList
     let selectedLayerID: String?
 
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
+
+    nonisolated static func == (a: Self, b: Self) -> Bool { a.list == b.list && a.selectedLayerID == b.selectedLayerID }
+
     var body: some View {
+        #if DEBUG
+        let tally = bodyTally
+        #endif
         let list = list
         // The Canvas's own working space must be linear: its default
         // (.nonLinear) mixes each item's opacity in sRGB inside the Canvas,
         // before the linear drawing group ever sees it (HF-1 keyed-6, #1161).
         Canvas(opaque: false, colorMode: .linear, rendersAsynchronously: false) { context, size in
+            #if DEBUG
+            MainActor.assumeIsolated { tally.ran(HaloCanvasDraws.self) }
+            #endif
             let fit = HaloCanvasFit.transform(HaloCanvasFit.layout(list: list, size: size))
             var ascents: [CGFloat: CGFloat] = [:]
             for item in list.items {

@@ -2,15 +2,22 @@
 // (#207, LK-11). A clear, hit-testable view laid out on the artboard's fitted
 // frame, the way HaloViewerCanvas lays out its layers, so the surround around
 // it takes no hits and its points map through the Model's `compositionPoint`
-// at the artboard's own size. A drag (minimum distance 0) sends
-// `beginViewerDrag` at its start, which hits and selects. Its moves go to the
+// at the artboard's own size. A drag (minimum distance 0) hits and selects
+// with `beginViewerDrag`. With a HaloLiveEdit the press writes nothing to the
+// window: the hit, the selection and the moves show only in the live copy,
+// and mouse-up sends the begin, the last move and the end together, since a
+// write to the window's project lays out the whole window (seconds on huge's
+// 2,000 layers) and swallowed the drag's samples. Its moves go to the
 // window's HaloLiveEdit as the window's project with that move applied
-// (`moveViewerDrag` on a copy, HaloLiveEdit.show), so only the drawn layers re-run per sample,
-// at most once per display refresh (HaloViewerPace, #4276; the latest move wins);
+// (`moveViewerDrag` on a copy, HaloLiveEdit.show), at most once per display
+// refresh (HaloViewerPace, #4276; the latest move wins). Its first move also
+// lifts the dragged layer (`viewerLift` into HaloLiveEdit.lift), so a sample
+// only moves the lifted layer and redraws none (render contract rule 3); a
+// layer that can't be lifted redraws the drawn layers per sample;
 // the release sends the last `moveViewerDrag` and `endViewerDrag`, and the
-// Model records one "Move". Hosted without a HaloLiveEdit, each move is sent
-// as it comes. A click focuses it, so Escape sends `cancelViewerDrag` and
-// drops the live preview. It is hidden from accessibility: the artboard
+// Model records one "Move". Hosted without a HaloLiveEdit, the begin goes at
+// the press and each move is sent as it comes. A click focuses it, so Escape
+// sends `cancelViewerDrag` and drops the live preview. It is hidden from accessibility: the artboard
 // element (`halo.viewer`) around it names it. It reads its model and never
 // assigns it. With the shape tool on (`haloShapeDrawing`, HS-3) a press
 // draws through it instead. Under `-SuitePerfProbe` each move records a
@@ -67,6 +74,7 @@ struct HaloViewerGestures: View {
                 start = nil
                 pace.cancel()
                 live?.project = nil
+                live?.lift = nil
                 perform(.cancelViewerDrag)
             }
             .accessibilityHidden(true)
@@ -80,7 +88,8 @@ struct HaloViewerGestures: View {
                     dragging = true
                     drawsShape = shapes?.isOn == true
                     start = point(value.startLocation)
-                    if let start, !drawsShape { perform(.beginViewerDrag(x: start.x, y: start.y)) }
+                    // With a live edit the press only previews; the window takes the begin at mouse-up.
+                    if let start, !drawsShape, live == nil { perform(.beginViewerDrag(x: start.x, y: start.y)) }
                 }
                 if drawsShape, let shapes {
                     guard let start, let now = point(value.location) else { return }
@@ -92,12 +101,17 @@ struct HaloViewerGestures: View {
                     perform(.moveViewerDrag(x: now.x, y: now.y))
                     return probe.sample(HaloProbe.viewerDrag)
                 }
+                if pace.isFresh {
+                    var begun = live.current() ?? model
+                    begun.beginViewerDrag(at: start)
+                    // A press over empty space starts no drag; there is nothing to preview.
+                    guard begun.viewerDrag != nil else { return self.start = nil }
+                    live.lift = Self.lift(begun, at: start)
+                }
                 let first = pace.isFresh
-                // A press over empty space started no drag; there is nothing to preview.
-                guard model.viewerDrag != nil || live.project == nil else { return }
                 pace.move(to: now, probe: probe) { point in
                     live.show { shown in
-                        // The window may not have drawn the begin yet; the copy takes it too.
+                        // The window takes the begin at mouse-up; the copy takes it now.
                         if shown.viewerDrag == nil { shown.beginViewerDrag(at: start) }
                         shown.moveViewerDrag(to: point)
                     }
@@ -109,11 +123,21 @@ struct HaloViewerGestures: View {
                     (dragging, drawsShape, start) = (false, false, nil)
                     return shapes?.release() ?? ()
                 }
+                if live != nil, let start { perform(.beginViewerDrag(x: start.x, y: start.y)) }
                 if let last = pace.end(probe: HaloProbe(recorder)) { perform(.moveViewerDrag(x: last.x, y: last.y)) }
                 perform(.endViewerDrag)
                 (dragging, start) = (false, nil)
                 live?.project = nil
+                live?.lift = nil
             }
+    }
+
+    /// The lift of a drag pressed at `start` on `project`; nil when the
+    /// press hits nothing or the layer can't be lifted.
+    nonisolated static func lift(_ project: HaloProject, at start: HaloPoint) -> HaloDrawLift? {
+        var begun = project
+        if begun.viewerDrag == nil { begun.beginViewerDrag(at: start) }
+        return begun.viewerLift
     }
 
     /// The modifiers held now: Shift squares a shape, Option grows it from the centre.

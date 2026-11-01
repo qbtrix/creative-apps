@@ -2,9 +2,15 @@
 // it. SuiteUI's lane speaks "3 keyframes" as its accessibility value, which
 // XCUITest reads empty (#262), so HaloTimelineView also publishes this text
 // as the label of a hidden `halo.timeline.keys` element per lane
-// (HaloReadout.swift), named by the layer so a journey finds its lane.
+// (HaloReadout.swift), named by the layer so a journey finds its lane. Only
+// the first 100 lanes get one: huge's 2,000 hidden readouts swelled the
+// accessibility tree past XCUITest's query timeout (#1262).
 
 extension HaloTimelineRow {
     /// "Ball: 3 keyframes": the layer's name and the keys its lane draws.
     public var keysReadout: String { "\(name): \(keyFrames.count) keyframes" }
+
+    /// The lanes that publish a readout: the first 100.
+    // ponytail: a fixed prefix; move the readout into the strip's rows if a journey reads lane 101+.
+    public static func readoutRows(_ rows: [HaloTimelineRow]) -> ArraySlice<HaloTimelineRow> { rows.prefix(100) }
 }
