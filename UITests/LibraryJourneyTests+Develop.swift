@@ -248,7 +248,16 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         cell("IMG_0001", library).doubleClick()
         developTab(library)
         XCTAssert(wait(5) { Self.number(self.row("Exposure", library)) == 1 }, "Exposure didn't survive the relaunch")
-        XCTAssert(wait(5) { (try? self.checksum(library)) == developed }, "the picture changed across the relaunch")
+        // The first render after a launch can land on the CPU route while the GPU's pipelines still compile,
+        // and the test checksum depends on the route (CPU pixels, or the base and its GPU program). Reopening
+        // draws again on the route that is ready, so the same picture reads the same once both share one.
+        var same = wait(5) { (try? self.checksum(library)) == developed }
+        for _ in 0..<3 where !same {
+            library.press(.escape)
+            cell("IMG_0001", library).doubleClick()
+            same = wait(5) { (try? self.checksum(library)) == developed }
+        }
+        XCTAssert(same, "the picture changed across the relaunch")
         library.press(.escape)
         let first = cell("IMG_0001", library)
         XCTAssert(wait(2) { Self.text(first).hasPrefix("ready") }, "IMG_0001's cell reads \(Self.text(first))")
