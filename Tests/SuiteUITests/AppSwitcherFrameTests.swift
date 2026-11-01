@@ -24,6 +24,8 @@ import Testing
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 600, height: 120), styleMask: [.titled], backing: .buffered,
             defer: false)
+        // ARC owns the window; released on close too, it is freed twice and the bundle crashes later.
+        window.isReleasedWhenClosed = false
         window.contentView = NSHostingView(
             rootView: AppSwitcher(items: items, current: "photo", spacing: spacing, onSelect: { _ in }))
         window.orderFrontRegardless()
