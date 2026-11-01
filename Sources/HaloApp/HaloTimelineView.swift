@@ -23,7 +23,8 @@
 // `halo.timeline.lane.<id>` and each key `halo.timeline.key.<id>.<frame>`.
 // A lane speaks its key count as its value, which XCUITest reads empty
 // (#262), so each row's `keysReadout` ("Ball: 3 keyframes") is also the label
-// of a hidden `halo.timeline.keys` element (HaloReadout.swift).
+// of a hidden `halo.timeline.keys` element (HaloReadout.swift), for the
+// first 100 rows only (HaloTimelineRow.readoutRows).
 // The strip sits in the column's safe area. HaloTimelineLayout fits its lanes
 // to the width the strip is laid out at, measured with onGeometryChange (the
 // GeometryReader's width only until then, and in snapshots), less the name
@@ -150,7 +151,7 @@ struct HaloTimelineView: View {
             }
             .frame(height: height)
             .background(alignment: .topLeading) {
-                ForEach(rows) { ProbeElement("halo.timeline.keys", label: $0.keysReadout, size: HaloReadout.size) }
+                ForEach(HaloTimelineRow.readoutRows(rows)) { ProbeElement("halo.timeline.keys", label: $0.keysReadout, size: HaloReadout.size) }
             }
             if rows.isEmpty {
                 Label("No layers yet. Add one from Layer > New.", systemImage: "square.stack.3d.up")

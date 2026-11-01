@@ -1,0 +1,4 @@
+[
+{"label":"every lane publishes a readout","file":"Sources/HaloModel/HaloTimelineReadout.swift","find":"-> ArraySlice<HaloTimelineRow> { rows.prefix(100) }","replace":"-> ArraySlice<HaloTimelineRow> { rows[...] }","tests":"HaloTimelineReadoutTests"},
+{"label":"the readouts skip the first lane","file":"Sources/HaloModel/HaloTimelineReadout.swift","find":"{ rows.prefix(100) }","replace":"{ rows.dropFirst().prefix(100) }","tests":"HaloTimelineReadoutTests"}
+]
