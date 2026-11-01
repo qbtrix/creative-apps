@@ -10,8 +10,9 @@
 # per code batch scoped to its apps, priority order, slots, the timer, a red
 # base set aside per job on Linux and judged by failing test on macOS, the culprit's stacked PRs named, and LANE_KILN=1's hold for a local Mac check's local-ci/macos), no batch forming on a red dev and a batch on a red base dropped once dev is green, and the red-dev
 # bisect, with its 2-of-3 vote mode for a timing budget test, and the
-# auto-revert of a red dev's culprit, own-proof landing on the pre-screen and a
-# stale proof's batch of one holding only its own PR
+# auto-revert of a red dev's culprit, own-proof landing on the pre-screen, a
+# stale proof's batch of one holding only its own PR, and the auto-quarantine,
+# whose removal PR lands only on a macOS pass of the test as well as Linux
 # (LANE_VERIFY_AFTER=1). No network,
 # needs bash, git and jq.
 #
@@ -2269,9 +2270,28 @@ expect "removal: a red check means the fix didn't hold: the owner is reopened an
 echo OPEN >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
 expect "removal: with the owner open again nothing is opened" "$(quarantines)" 2
 echo CLOSED >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
-verdict "$(head_of 602)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
-expect "removal: a green check lands it and CI on dev runs" \
-  "$(quarantines),$(merges),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "3,pr merge 600,pr merge 602,2"
+expect "removal: the PR body names the macOS gate that runs the test again" \
+  "$(jq -r .body "$sw/602.json" | grep -c "macOS gate (ci.yml mac_only) or local-ci/macos runs the test again")" 1
+# #6138: every quarantined test is macOS-only (AppKit snapshot suites, XCUITest bundles), so a green
+# Linux check proves nothing; a removal waits for one full macOS gate run on its head.
+verdict "$(head_of 602)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal (#6138): a green Linux check alone never lands it; one full macOS gate (mac_only, no app) starts on it, once" \
+  "$(merges),$(grep -c -- '-f mac_only=true --ref lane/quarantine$' "$sw/calls"),$(grep -c -- '-f mac_only=true -f app=' "$sw/calls"),$(grep -c '^pr comment 602 .*started a macOS gate' "$sw/calls")" "pr merge 600,1,0,1"
+gate "$(head_of 602)" success failure; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal (#6138): a red macOS gate means the fix didn't hold: the owner is reopened and told which check, the PR closed, nothing merged" \
+  "$(grep -c '^issue reopen 700 ' "$sw/calls"),$(grep -c '^issue comment 700 .*still fails without its quarantine entry (#602.s macOS gate: ' "$sw/calls"),$(grep -c '^pr close 602 ' "$sw/calls"),$(merges)" "2,1,1,pr merge 600"
+echo CLOSED >"$sw/state.700"; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+gate "$(head_of 603)" success in_progress; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal (#6138): a running macOS gate waits, nothing merged" "$(merges)" "pr merge 600"
+gate "$(head_of 603)" success success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal: green Linux and macOS gate land it, the merge comment names both checks, and CI on dev runs" \
+  "$(quarantines),$(merges),$(grep -c "^pr comment 603 .*its own Linux check, $LINUX_URL, and the macOS gate, $MAC_URL" "$sw/calls"),$(grep -c '^workflow run ci.yml -R qbtrix/creative-apps --ref dev$' "$sw/calls")" "4,pr merge 600,pr merge 603,1,2"
+# The local Mac gate's local-ci/macos pass counts as the macOS run too (mac_verdict). The stub's
+# merge leaves dev as it was, so the entry is still there and the next sweep opens #604 for it.
+FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+verdict "$(head_of 604)" success; lstatus "$(head_of 604)" success; FAST_LANE_NOW=$NOW LANE_VERIFY_AFTER=1 lane_sweep
+expect "removal (#6138): green Linux plus a local-ci/macos pass lands it, no GitHub macOS gate needed" \
+  "$(merges),$(grep -c -- '-f mac_only=true --ref lane/quarantine$' "$sw/calls"),$(grep -c '^pr comment 604 .*and the macOS gate, https://mac.local/ci/1' "$sw/calls")" "pr merge 600,pr merge 603,pr merge 604,1,1"
 # A Linux red whose bisect stopped short (no `Bisect:` verdict) has no certain culprit either.
 quardev macos "${TWO[@]}"
 printf '%s\n' "Bisect on dev stopped after 8 Linux runs: the Linux job is green at aaaaaaa and red at ${RED:0:7}; the culprit is one of the 2 commits between them. $BISECT_MARK ${RED:0:7} -->" >>"$sw/520.comments"
