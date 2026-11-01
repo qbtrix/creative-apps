@@ -4,8 +4,8 @@
 // Title.flare, Logo.flare, which live only in UITests/Fixtures/suite/), one test:
 // the file is there, opens with its app's headless open, has the content its
 // make script promises (counts from the app's summary) and re-saves without
-// error. Each stays disabled, naming the slice that makes its file, until that
-// slice lands. Tests/SuiteModelTests/SampleFilesTests.swift is the presence-only
+// error. Every row is on: each slice that made a file turned its row on.
+// Tests/SuiteModelTests/SampleFilesTests.swift is the presence-only
 // check; this suite is SampleOpenTests so the two never clash.
 import AfterGlowCLICore
 import Foundation
@@ -53,9 +53,10 @@ import Testing
 
     @Test func testCards() throws {
         let pages = Self.items(try Self.open("Cards.design", in: Self.samples, app: "design"), "pages")
-        // Three card pages, each holding its frame. No shape or title yet: headless Design can't add one (#4092).
+        // Three card pages, each holding its frame and the card's four shapes: card, badge, title and caption
+        // bars (bars, not text, until headless Design can add text, #4092).
         #expect(pages.count == 3)
-        #expect(pages.allSatisfy { Self.number($0, "layers") >= 1 })
+        #expect(pages.allSatisfy { Self.number($0, "layers") == 5 })
     }
 
     @Test func testLogoDesign() throws {
@@ -93,16 +94,17 @@ import Testing
         #expect(scenes.reduce(0) { $0 + Self.number($1, "layers") } >= 1)
     }
 
-    @Test(.disabled("SS-5: beach.ora waits on #4113 (Photo's .ora save is not byte-stable)")) func testBeach() throws {
+    @Test func testBeach() throws {
         let fields = try Self.open("beach.ora", in: Self.samples, app: "photo")
-        // The gradient photo, a second pixel layer and the Exposure adjustment.
+        // The gradient photo, the sun's pixel layer and the Exposure adjustment, at a real photo's size.
         #expect(Self.items(fields, "layers").count == 3)
-        #expect(Self.number(fields, "width") > 0 && Self.number(fields, "height") > 0)
+        #expect(Self.number(fields, "width") == 1600 && Self.number(fields, "height") == 1067)
     }
 
     @Test func testSunset() throws {
         let fields = try Self.open("Sunset.png", in: Self.samples, app: "photo")
-        #expect(Self.number(fields, "width") > 0 && Self.number(fields, "height") > 0)
+        // A real photo's size, not a thumbnail: Library shows it full window.
+        #expect(Self.number(fields, "width") == 1600 && Self.number(fields, "height") == 1067)
         // The tour's Library tile imports it into the person's catalog.
         var library = try LibraryHeadless.new(.object([:]))
         try library.importImage(try Self.bytes("Sunset.png", in: Self.samples), name: "Sunset.png")

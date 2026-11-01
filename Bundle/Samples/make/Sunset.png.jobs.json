@@ -1,11 +1,11 @@
 {
   "version": 1,
   "app": "photo",
-  "new": {"width": 128, "height": 96},
+  "new": {"width": 1600, "height": 1067},
   "inputs": ["seed.ora"],
   "steps": [
     {"id": "layer.rename", "params": {"name": "Sky"}},
-    {"id": "image.gradient", "params": {"type": "linear", "from": {"x": 0, "y": 0}, "to": {"x": 0, "y": 96}, "stops": [
+    {"id": "image.gradient", "params": {"type": "linear", "from": {"x": 0, "y": 0}, "to": {"x": 0, "y": 1067}, "stops": [
       {"offset": 0, "r": 0.24, "g": 0.18, "b": 0.45, "a": 1},
       {"offset": 0.45, "r": 0.93, "g": 0.45, "b": 0.36, "a": 1},
       {"offset": 0.62, "r": 0.99, "g": 0.75, "b": 0.42, "a": 1},
@@ -13,8 +13,8 @@
       {"offset": 1, "r": 0.1, "g": 0.16, "b": 0.3, "a": 1}]}},
     {"id": "layer.new", "params": {}},
     {"id": "layer.rename", "params": {"name": "Sun"}},
-    {"id": "select.rect", "params": {"minX": 46, "minY": 40, "maxX": 82, "maxY": 61}},
-    {"id": "image.gradient", "params": {"type": "radial", "from": {"x": 64, "y": 60}, "to": {"x": 82, "y": 60}, "stops": [
+    {"id": "select.rect", "params": {"minX": 575, "minY": 445, "maxX": 1025, "maxY": 678}},
+    {"id": "image.gradient", "params": {"type": "radial", "from": {"x": 800, "y": 667}, "to": {"x": 1025, "y": 667}, "stops": [
       {"offset": 0, "r": 1, "g": 0.92, "b": 0.6, "a": 1},
       {"offset": 0.75, "r": 1, "g": 0.7, "b": 0.35, "a": 1},
       {"offset": 1, "r": 1, "g": 0.7, "b": 0.35, "a": 0}]}},
@@ -22,5 +22,5 @@
   ],
   "output": {"format": "png"},
   "atomic": true,
-  "why": "A 128 x 96 sunset over the sea, flattened to a PNG: the image the tour's Library tile imports into the person's catalog."
+  "why": "A 1600 x 1067 sunset over the sea, flattened to a PNG: the image the tour's Library tile imports into the person's catalog."
 }
