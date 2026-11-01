@@ -95,4 +95,37 @@ struct PhotoSelectToolTests {
         #expect(w.layers.allSatisfy { $0.offsetX == 0 && $0.offsetY == 0 }, "a box moves nothing")
         #expect(w.history.kernel.steps == steps, "a box pick is not an undo step")
     }
+
+    #if DEBUG
+    /// The box a Select move lifts is read once per picked layer's pixels, not per canvas show (#6133): calls on
+    /// unchanged pixels reuse it, an offset-only move shifts it with no read, a fill reads it again and grows it,
+    /// and another tool drops it.
+    @Test func movePreparedReadsThePaintedBoxOncePerLayerPixels() throws {
+        var (w, _, _) = try Self.two()
+        let tally = PhotoRenderCount.Tally()
+        var known: PhotoWorkspace.PaintedBox?
+        func box() -> PixelRect? {
+            PhotoRenderCount.$tally.withValue(tally) { w.movePrepared(reusing: &known)?.transformDraft?.box }
+        }
+        func reads() -> Int { tally.snapshot["paintedBoxes"] ?? 0 }
+
+        let first = try #require(box())
+        for _ in 1...5 { #expect(box() == first) }
+        #expect(reads() == 1, "unchanged pixels read the box \(reads()) times")
+
+        w.moveSelectedLayers(dx: 7, dy: 4)
+        #expect(box() == first.offsetBy(7, 4))
+        #expect(reads() == 1, "an offset-only move read the box again")
+
+        w.selectAll()
+        w.fillSelection()
+        let grown = try #require(box())
+        #expect(reads() == 2, "a fill on the picked layer kept the old box")
+        #expect(grown != first.offsetBy(7, 4) && grown.union(first.offsetBy(7, 4)) == grown)
+
+        w.selectTool(.brush)
+        #expect(box() == nil)
+        #expect(known == nil, "another tool kept the layer's pixels")
+    }
+    #endif
 }
