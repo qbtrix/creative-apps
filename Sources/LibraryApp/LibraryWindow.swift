@@ -136,6 +136,10 @@ struct LibraryWindow: View, BodyCounted {
             importAreaLaunch()
             persistAreaLaunch()
             filtersAreaLaunch()
+            // After beginRestore, so a hand-off that launched the app imports after the launch read.
+            LibraryShell.receive = { model.importHandedOff($0) }
+            model.importHandedOff(LibraryShell.handedOff)
+            LibraryShell.handedOff = []
         }
         .onChange(of: model.saveRevision) { _, _ in
             persistAreaChanged()
@@ -157,6 +161,7 @@ struct LibraryWindow: View, BodyCounted {
         .onDisappear {
             LibraryShell.read = nil
             LibraryShell.take = nil
+            LibraryShell.receive = nil
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()
