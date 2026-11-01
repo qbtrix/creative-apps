@@ -952,3 +952,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 14:56Z check-in: #3482 quiet, no open Flare file-flow findings. Gaps #4764 and #1829 still open.
 
 - 15:28Z check-in: #3482 quiet, no open Flare file-flow findings. Gaps #4764 and #1829 still open.
+
+- 15:59Z check-in: #3482 quiet, no open Flare file-flow findings. #1829 got a CI bot note (journeys run 41307844351 could not read the FlareApp.app bundle identifier); that is app bundling, not file-flow, so no gap. Gaps #4764 and #1829 still open.

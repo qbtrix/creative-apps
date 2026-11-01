@@ -516,3 +516,4 @@ utc	stage	event	ref	note
 2026-11-01T14:24Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open
 2026-11-01T14:56Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open
 2026-11-01T15:28Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open
+2026-11-01T15:59Z	check	#3482 quiet; no open Flare file-flow findings; #1829 +1 CI bot note (FlareApp.app bundle id unreadable in journeys run 41307844351, infra, not file-flow); gaps #4764, #1829 open
