@@ -213,7 +213,9 @@ struct PhotoWindow: View {
         // Drag samples still waiting for the display frame land first, then a live stroke goes back.
         if case .drag = intent {} else {
             pacer.flush()
-            takeStroke(keepingTransform: Self.isTransformSample(intent) || Self.isToneSample(intent))
+            takeStroke(
+                keepingTransform: Self.isTransformSample(intent) || Self.isToneSample(intent)
+                    || Self.isAdjustSample(intent))
         }
         switch intent {
         case .newImage:
@@ -267,7 +269,8 @@ struct PhotoWindow: View {
         case .toolOption(let edit): model.setToolOption(edit)
         case .bucketOption(let edit): model.setBucketOption(edit)
         case .gradientOption(let intent): model.runGradientOption(intent)
-        case .adjust(let edit): model.adjust(edit)
+        case .adjust(let edit):
+            renderer.show(liveTransform.run(on: model, done: { takeStroke() }) { $0.adjust(edit) }, quietly: true)
         case .endAdjust: model.endAdjust()
         case .selectAll: model.selectAll()
         case .deselect: model.deselect()

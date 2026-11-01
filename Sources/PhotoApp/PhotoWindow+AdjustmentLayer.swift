@@ -3,7 +3,9 @@
 // on the window. Layer > New Adjustment Layer sends `add`; the inspector
 // sends `adjust` for each change to the selected adjustment layer and
 // `endAdjust` when its slider or curve gesture ends, so a gesture is one undo
-// step. PhotoAdjustmentLayerArea is the identity until the area needs it.
+// step. Each `adjust`, here and the whole image's in PhotoWindow.perform, runs on the window's live copy
+// (LiveTransformCopy+Kernel.swift), as a tone row's drag samples do, so a scrub never re-runs the editor; `endAdjust`, like any other intent, takes the copy back
+// first. PhotoAdjustmentLayerArea is the identity until the area needs it.
 import PhotoModel
 import SwiftUI
 
@@ -21,8 +23,18 @@ extension PhotoWindow {
     func performAdjustmentLayer(_ intent: AdjustmentLayerIntent) {
         switch intent {
         case .add(let kind): model.addAdjustmentLayer(kind)
-        case .adjust(let id, let edit): model.adjustLayer(id, edit)
+        case .adjust(let id, let edit):
+            renderer.show(liveTransform.run(on: model, done: { takeStroke() }) { $0.adjustLayer(id, edit) }, quietly: true)
         case .endAdjust: model.endAdjustLayer()
+        }
+    }
+
+    /// Whether `intent` is one inspector slider step, on the whole image or an adjustment layer, which runs
+    /// on the live copy.
+    nonisolated static func isAdjustSample(_ intent: PhotoIntent) -> Bool {
+        switch intent {
+        case .adjust, .adjustmentLayer(.adjust): true
+        default: false
         }
     }
 }
