@@ -66,7 +66,9 @@ public struct LiveOrdering: LayerOrdering {
 
     /// The name of the outermost locked layer at or around `id`; nil when nothing locks it.
     private func lockedName(_ id: String, in tree: LayerTree<DesignNodePayload>) -> String? {
-        ((tree.ancestors(of: id) ?? []) + [id]).lazy.compactMap { tree.node($0) }.first { $0.isLocked }?.name
+        // One search answers the usual case, nothing locked; naming the lock costs one per ancestor.
+        guard tree.isEffectivelyLocked(id) else { return nil }
+        return ((tree.ancestors(of: id) ?? []) + [id]).lazy.compactMap { tree.node($0) }.first { $0.isLocked }?.name
     }
 
     /// The Design refusal for the kernel's `error` on a move of the layer named `name`.
