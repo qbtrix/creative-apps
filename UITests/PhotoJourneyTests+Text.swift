@@ -4,12 +4,14 @@
 // picks the Type tool, a click in the sky opens the box (`photo.text.box`),
 // SUMMER SALE and Return add one text layer named after its words (the box's
 // Escape drops the words, so Return commits). The inspector's Text section
-// (`photo.text.*`) sets System UI Bold, size 120 and Center, one step each,
-// and Undo walks them back one at a time. Save as Photo Document writes
+// (`photo.text.*`) sets Helvetica Bold, size 120 and Center, one step each,
+// and Undo walks them back one at a time. The window draws through the
+// suite's live text, so the Family menu lists every font on the Mac, a list
+// longer than the screen: Helvetica is picked by typing its name into the
+// open menu when its item isn't on screen. A new layer is already System UI,
+// so picking that would make no step. Save as Photo Document writes
 // beach.ora; reopened from Open Recent the layer is still text, and a Type
-// tool click on it edits SALE into DEALS. Until shell-text's live slot
-// (ST-8) the window draws through PhotoServices' FakeText, whose system
-// family is System UI with a Bold face. Shots `text-editing`,
+// tool click on it edits SALE into DEALS. Shots `text-editing`,
 // `text-inspector`, `text-done` and `text-reopened`.
 import XCTest
 
@@ -36,9 +38,9 @@ final class PhotoTextJourneyTests: XCTestCase {
         XCTAssert(Self.waitUntil { self.steadyCanvas(photo) != photoOnly }, "the text layer drew nothing")
         photo.shot("text-done")
 
-        // 2. System UI Bold, 120, Center: one step each; Undo walks them back, Redo puts them again.
+        // 2. Helvetica Bold, 120, Center: one step each; Undo walks them back, Redo puts them again.
         XCTAssert(photo.element("photo.text.family").waitForExistence(timeout: 5), "no Text section (photo.text.family)")
-        chooseFamily("System UI", photo)
+        chooseFamily("Helvetica", photo)
         expect("Undo Font", photo, "the family made no Font step")
         chip("Bold", in: "photo.text.weight", photo)
         typeValue("120", into: "photo.text.size", photo)
@@ -105,16 +107,19 @@ final class PhotoTextJourneyTests: XCTestCase {
         photo.press(.return)
     }
 
-    /// Picks `family` from the Text section's Family menu (`photo.text.family`).
+    /// Picks `family` from the Text section's Family menu (`photo.text.family`): its item when it is on
+    /// screen, else the menu's type-select (its name typed into the open menu) and Return.
     @MainActor private func chooseFamily(_ family: String, _ photo: Journey) {
-        let types = [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) }
-        let picker = photo.element("suite.inspector").descendants(matching: .any).matching(NSPredicate(format:
-            "elementType IN %@ AND (identifier == 'photo.text.family' OR label == 'Family')", types)).firstMatch
+        let picker = photo.inspectorMenu("photo.text.family", label: "Family")
         XCTAssert(picker.waitForExistence(timeout: 5), "no Family menu (photo.text.family)")
         picker.click()
-        let item = photo.app.menus.firstMatch.descendants(matching: .menuItem).matching(NSPredicate(format: "title == %@", family)).firstMatch
-        XCTAssert(item.waitForExistence(timeout: 3), "the Family menu has no \(family)")
-        item.click()
+        let titles = photo.shownMenuTitles() ?? []
+        XCTAssert(titles.contains(family), "the Family menu has no \(family) (\(titles.count) items)")
+        if !photo.chooseShownMenuItem(family, timeout: 1) {
+            photo.app.typeText(family)
+            photo.press(.return)
+            XCTAssert(photo.menusClosed(), "typing \(family) and Return left the Family menu open")
+        }
     }
 
     /// Clicks the chip titled `title` in the group identified by `group`.
@@ -124,13 +129,15 @@ final class PhotoTextJourneyTests: XCTestCase {
         button.click()
     }
 
-    /// Types `value` into the scrub field identified by `id`: click it, clear it, type, Return.
+    /// Types `value` into the scrub field identified by `id`: click it, clear it, type, Return. The
+    /// field is the scrub's own editor (`suite.scrub.typing`), not the panel's first text field,
+    /// which is the colour row's hex field above Size.
     @MainActor private func typeValue(_ value: String, into id: String, _ photo: Journey) {
         let panel = photo.element("suite.inspector")
         let target = panel.descendants(matching: .any)[id].firstMatch
         XCTAssert(target.waitForExistence(timeout: 5), "no \(id) in the inspector")
         target.click()
-        let field = panel.textFields.firstMatch
+        let field = panel.textFields["suite.scrub.typing"]
         XCTAssert(field.waitForExistence(timeout: 5), "clicking \(id) opened no field")
         field.click()
         photo.app.typeKey(.rightArrow, modifierFlags: .command)

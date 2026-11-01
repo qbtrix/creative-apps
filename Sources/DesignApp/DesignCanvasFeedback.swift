@@ -57,10 +57,10 @@ struct DesignCanvasFeedback: View {
         }
         // An open text edit's box as its draft measures, so the badge grows with the typing (#3335).
         let draft = DesignTextOverlay.draftExtent(model)
-        if let badge = model.selectionBadge(draft: draft), let anchor = model.selectionBadgeAnchor(draft: draft) {
-            DesignSizeBadge(text: badge, anchor: anchor, zoom: zoom)
+        if let badge = model.sizeBadge(draft: draft) {
+            DesignSizeBadge(text: badge.text, anchor: badge.anchor, zoom: zoom)
             if let hint = model.textLegibilityHint(zoom: zoom) {
-                DesignSizeBadge(text: hint, anchor: anchor, zoom: zoom, hint: true)
+                DesignSizeBadge(text: hint, anchor: badge.anchor, zoom: zoom, hint: true)
             }
         }
         DesignGuideOverlay(guides: DesignGuidePin.guides ?? model.snapGuides, zoom: zoom)

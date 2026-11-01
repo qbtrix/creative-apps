@@ -88,9 +88,10 @@ struct DesignMenu {
         canDeletePage = model.canDeletePage
         canDeleteLayer = Self.deletesLayer(model)
         alignHelp = model.alignHelps
-        arrangeMenuHelp = model.arrangeMenuHelp
         alignMenuHelp = model.alignMenuHelp
         commandHelp = Self.helps(model)
+        // Each arrange help is a whole trial on the page's tree, so the submenu reuses the four above.
+        arrangeMenuHelp = DesignWorkspace.submenuHelp(DesignArrangeStep.allCases.map { commandHelp[.arrange($0)] })
         zoomToSelectionHelp = model.zoomToSelectionHelp
         noFileHelp = model.addPageHelp
         deletePageHelp = model.deletePageHelp
