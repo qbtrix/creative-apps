@@ -13,8 +13,8 @@
 // Both run live: Bounce.flare ships in the bundle and Flare and Design have
 // adopted the suite (Window > Switch To), so a missing sample, window or
 // Switch To fails the test (#5947). One skip is left: while Design refuses
-// the `.new` hand-off, Blank leaves the welcome open on Design's refusal and
-// OJ4 skips naming #5348, the fix; once it lands, OJ4 runs whole. A relaunch leaves out `-SuiteFixture`, which would
+// the `.new` hand-off, Design comes forward with no untitled window and OJ4
+// skips naming #5348, the fix; once it lands, OJ4 runs whole. A relaunch leaves out `-SuiteFixture`, which would
 // reseed `firstLaunch` and bring the welcome back. Ids are literals, as in
 // `AfterGlowOnboardingJourneys`, whose helpers this class reuses.
 import XCTest
@@ -86,18 +86,17 @@ final class AfterGlowOnboardingStartJourneys: XCTestCase {
         XCTAssert(blank.waitForExistence(timeout: 5), "Design's row has no Blank chip")
         XCTAssert(blank.isEnabled, "Design's Blank chip is disabled")
         blank.click()
-        let refusal = welcome.staticTexts["Design can't do that yet."]
-        if !welcome.waitForNonExistence(timeout: 10), refusal.exists {
-            throw XCTSkip("waits on #5348: Design refuses the welcome's .new hand-off")
-        }
-        XCTAssert(!welcome.exists, "Blank didn't close the welcome window")
+        XCTAssert(welcome.waitForNonExistence(timeout: 10), "Blank didn't close the welcome window")
         XCTAssert(XCUIApplication(bundleIdentifier: SuiteApp.design.bundleID).wait(for: .runningForeground, timeout: 30),
                   "Blank didn't bring Design forward")
         XCTAssertNotEqual(launcher.app.state, .notRunning, "AfterGlow quit when Design opened")
         let design = suite.attach(.design)
         XCTAssert(Self.hasSwitchTo(design), "Design's Window has no Switch To")
         let untitled = design.app.windows.matching(NSPredicate(format: "title BEGINSWITH 'Untitled'")).firstMatch
-        XCTAssert(untitled.waitForExistence(timeout: 10), "Design's window isn't an untitled design")
+        // Design refuses `.new` in its own process (DesignDocumentHost.paths(for:)), so no untitled window comes.
+        guard untitled.waitForExistence(timeout: 10) else {
+            throw XCTSkip("waits on #5348: Design refuses the welcome's .new hand-off, so no untitled design opens")
+        }
         design.shot("onboarding-new-design", element: untitled)
 
         // 3. Relaunch: no welcome.
