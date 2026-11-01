@@ -128,8 +128,8 @@
   {
     "label": "the badge hangs under the left edge, not the middle",
     "file": "Sources/DesignModel/DesignCanvasHints.swift",
-    "find": "return DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)",
-    "replace": "return DesignPoint(x: bounds.x, y: bounds.maxY)",
+    "find": "DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY))",
+    "replace": "DesignPoint(x: bounds.x, y: bounds.maxY))",
     "tests": "DesignCanvasHintsTests.swift"
   },
   {
