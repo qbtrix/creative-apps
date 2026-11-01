@@ -186,6 +186,23 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isFinished && m.message == nil)
     }
 
+    /// Home's RECENT lists the copy even when its app doesn't note its own opens yet (Design, #5947 OJ2).
+    @Test func openSampleNotesTheCopyInRecents() async throws {
+        let (m, s) = await model()
+        let sample = try #require(SampleCatalog.sample(for: .design))
+        await m.openSample(.design, now: now)
+        let items = try await s.recents.list().items
+        #expect(items.map(\.ref) == [SampleCatalog.ref(for: sample, path: "/D/Samples/Cards.design")])
+        #expect(items.first?.lastUsed == now)
+    }
+
+    @Test func openSampleThatIsRefusedNotesNothing() async throws {
+        let (m, s) = await model { $0.sending = FakeHandOffs(unavailable: "Design can't do that yet.") }
+        await m.openSample(.design, now: now)
+        #expect(try await s.recents.list().items.isEmpty)
+        #expect(!m.isFinished)
+    }
+
     @Test func openSampleNeverOverwritesAnEarlierCopy() async throws {
         let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") || $0 == "/D/Samples/Bounce.flare" })
         await m.openSample(.flare, now: now)
