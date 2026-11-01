@@ -90,7 +90,7 @@ extension PhotoTool: PaletteTool {
 
     public var systemImage: String {
         switch self {
-        case .select: "cursorarrow.click"
+        case .select: "cursorarrow"
         case .marquee: "rectangle.dashed"
         case .ellipse: "circle.dashed"
         case .lasso: "lasso"
@@ -101,7 +101,7 @@ extension PhotoTool: PaletteTool {
         case .clone: "square.on.square"
         case .spotHeal: "bandage.fill"
         case .heal: "bandage"
-        case .remove: "wand.and.stars"
+        case .remove: "eraser.line.dashed"
         case .crop: "crop"
         case .eyedropper: "eyedropper"
         case .bucket: "drop.fill"
