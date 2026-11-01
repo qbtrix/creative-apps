@@ -101,6 +101,8 @@ func heightIsCappedAndKeepsTheMinimum(rows: Int) {
     // Lanes start under the 24 pt ruler and are 32 pt tall: rows 100 to 119 show at y 3224...3864.
     #expect(layout.rowsShown(visibleY: 3224...3864, rows: 2000) == 92..<128)
     #expect(layout.rowsShown(visibleY: 0...344, rows: 2000) == 0..<18)
+    // y 3210 is row 99 once the ruler is off, row 100 if it were not.
+    #expect(layout.rowsShown(visibleY: 3210...3864, rows: 2000) == 91..<128)
     #expect(layout.rowsShown(visibleY: 63_864...64_024, rows: 2000) == 1987..<2000)
     #expect(layout.rowsShown(visibleY: 0...344, rows: 3) == 0..<3)
 }
