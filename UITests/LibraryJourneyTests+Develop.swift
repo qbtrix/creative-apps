@@ -239,7 +239,9 @@ final class LibraryDevelopJourneyTests: XCTestCase {
 
     /// Step 11 (F): a failed render says so under the histogram.
     @MainActor private func errorState() throws {
-        let library = Journey("Library", self, arguments: Self.fake + ["-LibraryFakeMode", "fail"])
+        // The bare -LibraryTestValues switch goes last, or it takes -LibraryFakeMode as its value (Journey.init).
+        let library = Journey(
+            "Library", self, arguments: ["-LibraryFixture", "shoot", "-LibraryFakeMode", "fail", "-LibraryTestValues"])
         sortByName(library)
         cell("IMG_0001", library).doubleClick()
         developTab(library)
