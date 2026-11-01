@@ -4,7 +4,8 @@
 // the unturned box would be. A red-to-blue gradient mirrored across paints blue at its left edge. The
 // selection box of the same turned node draws a handle at the turned top-left corner and none at the
 // unturned one, and its rotate knob turned with it. Two layers turned together from the knob above their box
-// (#4224), each outline turned about its own centre: design-transform-turned-several-{light,dark}.png. macOS only.
+// (#4224), each outline turned about its own centre: design-transform-turned-several-{light,dark}.png. The
+// marquee's hit outlines, drawn as one path, turn and scale the same way. macOS only.
 import AppKit
 import SuiteKernel
 import SwiftUI
@@ -81,6 +82,19 @@ import Testing
         }
         #expect(try accentPixels(near: corner.x, corner.y) > 0, "a handle at the turned top-left \(corner)")
         #expect(try accentPixels(near: 100, 100) == 0, "no handle at the unturned top-left")
+    }
+
+    @Test func severalOutlinesTurnAndScaleInOnePath() throws {
+        // The marquee's hit outlines share one path: a 200 × 100 box at (100, 100) turned 90° spans
+        // x 150 to 250 and y 50 to 250, doubled at 200%; the upright one beside it keeps its frame.
+        let upright = DesignNode(
+            id: "u", name: "U", kind: .rectangle, frame: DesignRect(x: 400, y: 100, width: 50, height: 50),
+            fill: DesignColor(255, 0, 0))
+        let bounds = DesignSelectionBox.outlines([turned(90)], zoom: 2).boundingRect
+        #expect(abs(bounds.minX - 300) < 0.01 && abs(bounds.minY - 100) < 0.01, "\(bounds)")
+        #expect(abs(bounds.width - 200) < 0.01 && abs(bounds.height - 400) < 0.01, "\(bounds)")
+        let both = DesignSelectionBox.outlines([turned(90), upright], zoom: 1).boundingRect
+        #expect(abs(both.maxX - 450) < 0.01 && abs(both.minY - 50) < 0.01, "\(both)")
     }
 
     @Test func theKnobTurnsWithTheNode() throws {
