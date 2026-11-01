@@ -2,8 +2,7 @@
 // packet, TL-7). The ideal height is the ruler plus every lane, plus the
 // toolbar row when it is on, so a host inside its own vertical ScrollView sees
 // today's layout; offered less, the ruler stays pinned at the top while the
-// lanes scroll under it, and only the rows in view (plus an overscan,
-// rowsShown) are built. The snapshot
+// lanes scroll under it, and only the rows in view are built. The snapshot
 // branch offers the lanes the strip's width, so a 20,000-frame snapshot draws
 // names and labels instead of a blank (#219). The lane stack's laziness is
 // read from the source, like TimelineStripSafeAreaTests. macOS only.
@@ -72,20 +71,6 @@ import Testing
         #expect(layout.lanesWidth(contentWidth: 40_000, offered: 600, snapshot: false) == 40_000 + SuiteSpacing.xl)
         #expect(layout.lanesWidth(contentWidth: 100, offered: 600, snapshot: true) == 600)
         #expect(layout.lanesWidth(contentWidth: 40_000, offered: -1, snapshot: true) == 0)
-    }
-
-    @Test func aScrolledStripBuildsOnlyTheRowsInViewPlusTheOverscan() {
-        let layout = TimelineStripLayout(trackCount: 2000, toolbar: false)
-        let lane = Double(SuiteSize.timelineLane)
-        #expect(layout.rowsShown(visibleY: (100 * lane)...(120 * lane)) == 92..<128)
-        #expect(layout.rowsShown(visibleY: 0...(10 * lane)) == 0..<18)
-        #expect(layout.rowsShown(visibleY: (1995 * lane)...(2010 * lane)) == 1987..<2000)
-    }
-
-    @Test func beforeTheFirstScrollReportTheFirstPageIsBuilt() {
-        #expect(TimelineStripLayout(trackCount: 2000, toolbar: false).rowsShown(visibleY: nil) == 0..<56)
-        #expect(TimelineStripLayout(trackCount: 3, toolbar: false).rowsShown(visibleY: nil) == 0..<3)
-        #expect(TimelineStripLayout(trackCount: 0, toolbar: false).rowsShown(visibleY: nil) == 0..<0)
     }
 
     @Test func theLaneAndNameStacksAreLazy() throws {

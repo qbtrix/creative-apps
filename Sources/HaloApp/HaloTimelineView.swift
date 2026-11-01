@@ -24,18 +24,16 @@
 // A lane speaks its key count as its value, which XCUITest reads empty
 // (#262), so each row's `keysReadout` ("Ball: 3 keyframes") is also the label
 // of a hidden `halo.timeline.keys` element (HaloReadout.swift).
-// Only the first 100 rows get one, so a 2,000-layer composition keeps them
-// out of the accessibility tree (#1262). The strip sits in the column's safe area. HaloTimelineLayout fits its lanes
+// The strip sits in the column's safe area. HaloTimelineLayout fits its lanes
 // to the width the strip is laid out at, measured with onGeometryChange (the
 // GeometryReader's width only until then, and in snapshots), less the name
 // column, the divider and the trailing room: a container width can count room
 // under the inspector, and lanes fitted to it lost their last frames (#1019).
 // So every frame and key shows, the strip never scrolls sideways and
 // no scroller covers the ruler; the height is the lanes, at least the slot
-// minimum, at most 40% of the window's column, and past that the strip's
-// own lanes scroll vertically, by wheel and trackpad with no scroller (as
-// Halo's inspector), so the canvas keeps its room and only the rows in view
-// are built. Under `-SuitePerfProbe` a
+// minimum, at most 40% of the window's column, and past that the lanes
+// scroll vertically, by wheel and trackpad with no scroller (as Halo's
+// inspector), so the canvas keeps its room. Under `-SuitePerfProbe` a
 // ruler scrub records a `playhead-scrub` sample and each lane scroll offset a
 // `lanes-scroll` frame (HaloProbe).
 import HaloModel
@@ -73,11 +71,16 @@ struct HaloTimelineView: View {
                 content(rows).frame(
                     height: CGFloat(max(layout.contentHeight(rows: rows.count), layout.minimumHeight)), alignment: .top)
             } else {
-                // The strip's own vertical scroll takes the lanes: wrapped in a second one it
-                // was offered every lane and built all 2,000 rows of huge (#1262).
-                content(rows)
+                ScrollView(.vertical) { content(rows) }
+                    // No scroller: with legacy scrollers on crowd's 300 lanes the vertical one's
+                    // page areas were unnamed buttons with no identifier to the app audit (#4264).
+                    .scrollIndicators(.never)
+                    .scrollBounceBehavior(.basedOnSize, axes: [.horizontal, .vertical])
                     .containerRelativeFrame(.vertical, alignment: .top) { length, _ in
                         CGFloat(layout.height(rows: rows.count, available: Double(length)))
+                    }
+                    .onScrollGeometryChange(for: Double.self) { Double($0.contentOffset.y) } action: { _, _ in
+                        HaloProbe(recorder).drew(HaloProbe.lanesScroll)
                     }
             }
         }
@@ -135,8 +138,7 @@ struct HaloTimelineView: View {
                     onSlide: { id, by in
                         if spanHelp == nil { slideLayer(.init(layer: id, by: by)) }
                     },
-                    onSelectAllKeys: { perform(.selectAllKeys) },
-                    onScrollLanes: { HaloProbe(recorder).drew(HaloProbe.lanesScroll) }) }
+                    onSelectAllKeys: { perform(.selectAllKeys) }) }
                     .accessibilityIdentifier("halo.timeline.track")
                     .environment(\.timelineIdentifierPrefix, "halo.timeline")
                     .contextMenu {
@@ -146,11 +148,9 @@ struct HaloTimelineView: View {
                     }
                     .onGeometryChange(for: Double.self) { Double($0.size.width) } action: { stripWidth = $0 }
             }
-            .frame(maxHeight: height)
+            .frame(height: height)
             .background(alignment: .topLeading) {
-                // ponytail: the first 100 rows only, so huge's 2,000 readouts stay out of the
-                // tree (#1262); move them into the strip's rows if a journey reads a row past 100.
-                ForEach(rows.prefix(100)) { ProbeElement("halo.timeline.keys", label: $0.keysReadout, size: HaloReadout.size) }
+                ForEach(rows) { ProbeElement("halo.timeline.keys", label: $0.keysReadout, size: HaloReadout.size) }
             }
             if rows.isEmpty {
                 Label("No layers yet. Add one from Layer > New.", systemImage: "square.stack.3d.up")
