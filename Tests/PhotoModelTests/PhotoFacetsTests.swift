@@ -2,7 +2,7 @@
 // stored field of the workspace is in exactly one facet's list, read off the
 // struct itself, so a new field fails here until it is placed; and an edit
 // moves only the facets that own what it changed (a brush-size step only
-// `toolOptions`, a layer pick only `document`), which is what lets a window
+// `toolOptions`, a layer pick only `document`, a typed key only `textBox`), which is what lets a window
 // re-run only the views that read them. Runs on Linux and macOS.
 import CoreRaster
 import PhotoModel
@@ -49,6 +49,18 @@ import Testing
         #expect(Self.changed(before, workspace.facets) == [.tool])
     }
 
+    /// A key typed into an open Type tool box moves only `textBox`, so the window body skips it (gap #6000).
+    @Test func aKeystrokeMovesOnlyTheTextBox() throws {
+        var workspace = try PhotoWorkspace.fixture(.layered)
+        workspace.selectTool(.text)
+        workspace.drag(from: Mask.Point(x: 4, y: 4), to: Mask.Point(x: 4, y: 4))
+        workspace.endDrag()
+        let before = workspace.facets
+        workspace.typeText("SALE")
+        #expect(Self.changed(before, workspace.facets) == [.textBox])
+        #expect(before.equal(to: workspace.facets, except: .textBox))
+    }
+
     @Test func eachFacetFollowsItsFields() throws {
         var workspace = try PhotoWorkspace.fixture(.layered)
         var before = workspace.facets
@@ -81,6 +93,7 @@ import Testing
         if a.status != b.status { out.insert(.status) }
         if a.canvas != b.canvas { out.insert(.canvas) }
         if a.file != b.file { out.insert(.file) }
+        if a.textBox != b.textBox { out.insert(.textBox) }
         return out
     }
 }
