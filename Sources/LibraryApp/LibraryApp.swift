@@ -49,6 +49,9 @@ import SwiftUI
     /// How to read the window's catalog, and land a live result in it (LibraryWindow keeps both current).
     static var read: (@MainActor () -> LibraryCatalog)?
     static var take: (@MainActor (LibraryHeadless) -> Void)?
+    /// The window that set `read`, `take` and `receive`; only it clears them, so a closing window's late
+    /// `onDisappear` never clears the next window's (#6123).
+    static var owner: UUID?
 
     /// Live commands on the window's catalog; a client runs only on a grant it already holds.
     static let live = LiveCommandChannel(
