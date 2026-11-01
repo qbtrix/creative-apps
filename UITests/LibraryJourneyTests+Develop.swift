@@ -191,6 +191,8 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     @MainActor private func reset() throws {
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         cell("IMG_0001", library).doubleClick()
+        // Step 8's Sync click scrolled the list down; a right click doesn't scroll back.
+        scrollDevelop(toShow: row("Exposure", library), library)
         row("Exposure", library).rightClick()
         let item = library.app.menuItems["Reset Exposure"]
         XCTAssert(item.waitForExistence(timeout: 3), "the Exposure row's menu has no Reset Exposure")
@@ -199,6 +201,7 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         let toneReset = library.element("suite.inspector.section.tone.reset")
         XCTAssert(toneReset.waitForExistence(timeout: 3), "TONE has no Reset (suite.inspector.section.tone.reset)")
         XCTAssertEqual(toneReset.label, "Reset Tone", "TONE's Reset label")
+        scrollDevelop(toShow: toneReset, library)
         toneReset.click()
         for slider in ["Exposure", "Contrast", "Highlights", "Shadows", "Whites", "Blacks"] {
             XCTAssertEqual(Self.number(row(slider, library)), 0, "TONE's Reset left \(slider) set")
@@ -325,6 +328,18 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     /// The Develop row of `slider` ("Exposure"): `library.develop.exposure`.
     @MainActor private func row(_ slider: String, _ library: Journey) -> XCUIElement {
         library.element("library.develop.\(slider.lowercased())")
+    }
+
+    /// Scrolls the Develop list until `element` lies whole inside it. XCUITest scrolls
+    /// to click a row, but it right-clicks a row hidden above the list at its frame,
+    /// which is the histogram's place (#3560).
+    @MainActor private func scrollDevelop(toShow element: XCUIElement, _ library: Journey) {
+        let list = library.element("suite.inspector").scrollViews.firstMatch
+        XCTAssert(element.waitForExistence(timeout: 5), "nothing to scroll to in the Develop list")
+        for _ in 0..<20 where !list.frame.contains(element.frame) {
+            list.scroll(byDeltaX: 0, deltaY: element.frame.minY < list.frame.minY ? 40 : -40)
+        }
+        XCTAssert(list.frame.contains(element.frame), "\(element.frame) didn't scroll into \(list.frame)")
     }
 
     /// The first element in the inspector whose label is `label`.
