@@ -4,7 +4,9 @@
 // track names (a fixed left column) and, to their right, a horizontal scroll
 // view of one lane per track (TimelineLaneRow: the lane and its input). Both
 // stacks are lazy, but the lanes' sits in a horizontal scroll view, so it
-// builds every row, not only those in view (#5804). Each stack sits behind one
+// builds every row (#5804). A host that scrolls the strip in its own vertical
+// scroll sets `timelineRowsShown`, and both stacks then build only those rows,
+// each at its own lane in a column as tall as every track (#1262). Each stack sits behind one
 // `.equatable()` (TimelineNameRows, TimelineLaneRows) over the tracks and the
 // mapping, and a row compares only its track and mapping; the playhead and the
 // closures a press needs sit in one unobserved TimelineLaneContext the body
@@ -73,6 +75,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     @Environment(\.suiteSnapshotRendering) private var snapshot
     /// The host's prefix for the name buttons' identifiers; nil puts none.
     @Environment(\.timelineIdentifierPrefix) private var idPrefix
+    @Environment(\.timelineRowsShown) private var rowsShown
     /// The stretch of the lanes the scroll view shows, in mapping x; nil until
     /// it first reports.
     @State private var visibleX: ClosedRange<Double>?
@@ -167,23 +170,26 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             // lanes offered the strip's width, clipped at its edge (#219).
             if snapshot {
                 HStack(alignment: .top, spacing: 0) {
-                    names
+                    names(rows: nil)
                     Divider()
                     GeometryReader { proxy in
                         lanes(width: layout.lanesWidth(
-                            contentWidth: mapping.contentWidth, offered: proxy.size.width, snapshot: true))
+                            contentWidth: mapping.contentWidth, offered: proxy.size.width, snapshot: true), rows: nil)
                     }
                     .clipped()
                 }
                 .frame(height: layout.lanesHeight, alignment: .top)
             } else {
                 // Offered less than the ideal height, the lanes scroll under the pinned ruler.
+                let shown = rowsShown.map { $0.clamped(to: tracks.indices) }
                 ScrollView(.vertical) {
                     HStack(alignment: .top, spacing: 0) {
-                        names
+                        names(rows: shown)
                         Divider()
                         ScrollView(.horizontal) {
-                            lanes(width: layout.lanesWidth(contentWidth: mapping.contentWidth, offered: 0, snapshot: false))
+                            lanes(
+                                width: layout.lanesWidth(contentWidth: mapping.contentWidth, offered: 0, snapshot: false),
+                                rows: shown)
                         }
                         .scrollIndicators(.never)
                         .onScrollGeometryChange(for: ClosedRange<Double>.self) { geometry in
@@ -328,13 +334,13 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             .padding(.leading, SuiteSize.timelineLabelColumn + TimelinePlayheadGrab.divider)
     }
 
-    private var names: some View {
-        TimelineNameRows(tracks: tracks, idPrefix: idPrefix, context: laneContext).equatable()
+    private func names(rows: Range<Int>?) -> some View {
+        TimelineNameRows(tracks: tracks, idPrefix: idPrefix, context: laneContext, rows: rows).equatable()
             .frame(width: SuiteSize.timelineLabelColumn)
     }
 
-    private func lanes(width: CGFloat) -> some View {
-        TimelineLaneRows(tracks: tracks, mapping: mapping, context: laneContext, width: width).equatable()
+    private func lanes(width: CGFloat, rows: Range<Int>?) -> some View {
+        TimelineLaneRows(tracks: tracks, mapping: mapping, context: laneContext, width: width, rows: rows).equatable()
             // Only the lanes' access modifiers read it, so a scroll re-runs those, never a lane's Canvas.
             .environment(\.timelineVisibleX, snapshot ? nil : visibleX)
             .simultaneousGesture(pinchGesture, isEnabled: !snapshot)
@@ -353,6 +359,8 @@ struct TimelineLaneRows<ID: Hashable & Sendable>: View, Equatable {
     let mapping: FrameMapping
     let context: TimelineLaneContext<ID>
     let width: CGFloat
+    /// The rows built; nil builds every one.
+    let rows: Range<Int>?
     #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
     #endif
@@ -362,15 +370,17 @@ struct TimelineLaneRows<ID: Hashable & Sendable>: View, Equatable {
         bodyTally.ran(TimelineLaneRowsBodies.self)
         #endif
         return LazyVStack(alignment: .leading, spacing: 0) {
-            ForEach(tracks) { track in
+            ForEach(tracks[rows ?? tracks.indices]) { track in
                 TimelineLaneRow(track: track, mapping: mapping, context: context).equatable()
             }
         }
+        .timelineRowWindow(rows, of: tracks.count)
         .frame(width: width, alignment: .leading)
     }
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.tracks == rhs.tracks && lhs.mapping == rhs.mapping && lhs.context === rhs.context && lhs.width == rhs.width
+            && lhs.rows == rhs.rows
     }
 }
 
@@ -384,10 +394,12 @@ struct TimelineNameRows<ID: Hashable & Sendable>: View, Equatable {
     let tracks: [TimelineTrack<ID>]
     let idPrefix: String?
     let context: TimelineLaneContext<ID>
+    /// The rows built; nil builds every one.
+    let rows: Range<Int>?
 
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 0) {
-            ForEach(tracks) { track in
+            ForEach(tracks[rows ?? tracks.indices]) { track in
                 let nameID = TimelineLaneSpeech.identifier(idPrefix, "name", track.id)
                 Button { context.actions.onSelectTrack(track.id) } label: {
                     Text(track.name)
@@ -403,10 +415,20 @@ struct TimelineNameRows<ID: Hashable & Sendable>: View, Equatable {
                 .accessibilityIdentifier(nameID ?? "", isEnabled: nameID != nil)
             }
         }
+        .timelineRowWindow(rows, of: tracks.count)
     }
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.tracks == rhs.tracks && lhs.idPrefix == rhs.idPrefix && lhs.context === rhs.context
+        lhs.tracks == rhs.tracks && lhs.idPrefix == rhs.idPrefix && lhs.context === rhs.context && lhs.rows == rhs.rows
+    }
+}
+
+extension View {
+    /// Places the built `rows` at their own lanes in a column as tall as
+    /// `count` lanes; nil (every row built) changes nothing.
+    func timelineRowWindow(_ rows: Range<Int>?, of count: Int) -> some View {
+        padding(.top, SuiteSize.timelineLane * CGFloat(rows?.lowerBound ?? 0))
+            .frame(height: rows.map { _ in SuiteSize.timelineLane * CGFloat(count) }, alignment: .top)
     }
 }
 
