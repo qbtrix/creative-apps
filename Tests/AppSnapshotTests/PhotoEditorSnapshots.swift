@@ -1,13 +1,14 @@
 // PhotoEditorSnapshots.swift: the Photo window (PhotoEditor) in each state
 // its core loop reaches: an opened photo, layers composited, a brush and an
-// eraser stroke, a marquee selection, a pending crop, a moved layer, exposure
-// +1, layers in the sidebar, the export sheet and a refusal in the status line
+// eraser stroke, a marquee selection, a pending crop, a moved layer, a Select
+// box mid-drag, exposure +1, layers in the sidebar, the export sheet and a refusal in the status line
 // (photo-status-message-dark.png only); the rail's tool help is checked here
 // too. Each other state writes
 // photo-<state>-light.png and photo-<state>-dark.png. The canvas picture is rendered the way the window renders
 // it (the workspace's tiles on their layers).
 import CoreRaster
 import PhotoModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -104,6 +105,20 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         model.deselect()
         drag(&model, .select, (180, 240), (300, 240))
         try shoot("move", model)
+    }
+
+    /// A Select drag from off the image (a press on the opaque photo would move it) across the sun, the pointer
+    /// still down: the canvas shows SuiteUI's box over the picture, and nothing has moved.
+    @Test func selectBoxDrag() throws {
+        var model = try opened()
+        model.selectTool(.select)
+        model.drag(from: Mask.Point(x: -40, y: -30), to: Mask.Point(x: -40, y: -30))
+        model.drag(from: Mask.Point(x: -40, y: -30), to: Mask.Point(x: 460, y: 300))
+        let box = try #require(model.selectBox, "the Select drag shows no box")
+        #expect(box == Rect(minX: -40, minY: -30, maxX: 460, maxY: 300))
+        let marks = PhotoCanvasOverlay(model: model, zoom: 1, hover: nil).marks.map(\.identifier)
+        #expect(marks.contains("photo.canvas.select-box"), "the overlay shows \(marks)")
+        try shoot("select-box", model)
     }
 
     @Test func exposurePlusOne() throws {
