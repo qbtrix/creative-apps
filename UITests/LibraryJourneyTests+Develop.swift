@@ -53,9 +53,16 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     // MARK: - Steps
 
     /// Step 1: by name, IMG_0001 in the loupe, the Develop tab: every row at 0, the curve, the levels.
-    @MainActor private func openDevelop(_ arguments: [String], suffix: String) throws {
+    @MainActor private func openDevelop(_ arguments: [String], suffix: String, imports: Int? = nil) throws {
         let library = Journey("Library", self, arguments: arguments)
         self.library = library
+        if let imports {
+            // The launch import fills the grid for seconds on a slow runner; a double-click on a cell
+            // that is still moving misses it. All Photos counts every file once the import is done.
+            let badge = library.element("suite.sidebar").descendants(matching: .any)
+                .matching(NSPredicate(format: "label == %@ OR value == %@", "\(imports)", "\(imports)")).firstMatch
+            XCTAssert(badge.waitForExistence(timeout: 60), "the import never reached \(imports) photos")
+        }
         sortByName(library)
         let first = cell("IMG_0001", library)
         XCTAssert(first.waitForExistence(timeout: 10), "no grid cell for IMG_0001")
@@ -263,10 +270,10 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
-        _ = try LibraryFiles.writeShoot(in: folder)
+        let shoot = try LibraryFiles.writeShoot(in: folder)
         let arguments = ["-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
                          "-LibraryImportOnLaunch", "-LibraryTestValues"]
-        try openDevelop(arguments, suffix: "-live")
+        try openDevelop(arguments, suffix: "-live", imports: shoot.count)
         try dragExposure(suffix: "-live")
         try stepContrast()
         try undoContrast()
