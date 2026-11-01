@@ -6,13 +6,15 @@
 // CPU, never from the undeveloped picture the GPU starts from, and taken apart
 // from the frame, which develops no pixel. Vibrance, Saturation and the kinds
 // stay on the GPU route: core's one-pass display program (`ToneProgram`, whose
-// `map` is the kernel in Swift) draws what the CPU renders.
+// `map` is the kernel in Swift) draws what the CPU renders. The per-operation
+// route check (`onGPU`) answers what `ImagingRoute.choose` answers.
 import Foundation
 import Synchronization
 import Testing
 import CoreColor
 import CoreRaster
 import CoreRender
+import SuiteImaging
 
 @testable import LibraryModel
 
@@ -110,6 +112,18 @@ import CoreRender
         #expect(counter.renders.withLock { $0 } == 0)
         _ = try await loupe.histogram(Self.shot, settings: Self.edit)
         #expect(counter.renders.withLock { $0 } == 1)
+    }
+
+    @Test func theRouteCheckAnswersWhatImagingRouteAnswers() {
+        let good = LiveDevelop.program(for: Self.edit.setting(.vibrance, to: 30))
+        let bad = good + [.matrix(rows: [1, 0, 0], lightness: 0)]
+        var known: [ToneProgram.Operation] = []
+        #expect(ImagingRoute.choose(preferGPU: true, program: bad) == .cpu)
+        #expect(!LiveLoupeImaging.onGPU(bad, known: &known))
+        #expect(LiveLoupeImaging.onGPU(good, known: &known) && known.count == good.count)
+        #expect(!LiveLoupeImaging.onGPU(bad, known: &known), "a known good prefix doesn't pass a bad operation")
+        let step = LiveDevelop.program(for: Self.edit.setting(.vibrance, to: 31))
+        #expect(LiveLoupeImaging.onGPU(step, known: &known) && known.count == good.count + 1, "a step adds only the moved operation")
     }
 }
 

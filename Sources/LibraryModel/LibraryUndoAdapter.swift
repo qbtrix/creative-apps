@@ -10,7 +10,8 @@
 // trashed: undo puts each file back and the photo at its index, redo trashes
 // the ones that came back again. Edits sharing an open coalesce key (one slider drag) stay
 // one step. The 100-step limit is the kernel's. Undo and redo never move the
-// loupe (#426). Every step is recorded through CatalogHistory.record, which
+// loupe (#426); each names the photos whose develop it changed
+// (`developChangedIDs`) for the window to redraw. Every step is recorded through CatalogHistory.record, which
 // stamps an agent step's time for the AI tab (LibraryAgentActivity.swift).
 // Linux-safe.
 
@@ -185,7 +186,10 @@ extension LibraryCatalog {
             }
             return swapped
         }
+        developChangedIDs = []
         guard moved, let applied else { return }
+        let back = Dictionary(applied.photos.map { ($0.id, $0.develop) }, uniquingKeysWith: { first, _ in first })
+        developChangedIDs = Set(current.lazy.filter { photo in back[photo.id].map { $0 != photo.develop } ?? false }.map(\.id))
         history.kernel = kernel
         history.open = false
         if let collections = applied[keyPath: side] { applyCollections(collections) }

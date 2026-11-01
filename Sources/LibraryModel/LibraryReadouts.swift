@@ -3,6 +3,7 @@
 // state alone, so the features that fill that state (thumbnails,
 // loupe-viewport, develop, persist) never edit this file. Journeys and Linux
 // tests read the same strings (blueprint 4.1). Linux-safe.
+import CoreRender
 
 /// What the content's notice slot shows; `source` says whose dismiss closes it.
 public struct LibraryNoticeContent: Hashable, Sendable {
@@ -66,7 +67,7 @@ extension LibraryCatalog {
     }
 
     /// The loupe photo's value: `unreadable`, `preview`, `full` or `loading`,
-    /// the render's W×H, its checksum under `showsTestValues`, the zoom, then
+    /// the render's W×H, its checksum under `showsTestValues` (with a GPU frame's steps), the zoom, then
     /// `cullSummary` ("full 2048×1365 3f9a… 100% 3 stars"). Nil outside the loupe.
     public var loupeValue: String? {
         guard mode == .loupe, let id = focusedItemID, let photo = items.first(where: { $0.id == id }) else {
@@ -78,13 +79,22 @@ extension LibraryCatalog {
         } else if let render = loupeRender {
             parts.append(render.quality.rawValue)
             parts.append(Self.sizeText(render.image.size))
-            if showsTestValues { parts.append(render.image.checksum) }
+            if showsTestValues { parts.append(Self.checksum(render.image.checksum, steps: loupeSteps)) }
         } else {
             parts.append("loading")
         }
         parts.append(Self.zoomText(loupeZoom))
         parts.append(photo.cullSummary)
         return parts.joined(separator: " ")
+    }
+
+    /// `base` alone on the CPU route and for an empty program (the base drawn as it is); otherwise the base
+    /// never changes, so FNV-1a goes on over the frame's program, the steps the view writes over it.
+    static func checksum(_ base: String, steps: [ToneProgram.Operation]?) -> String {
+        guard let steps, !steps.isEmpty, var hash = UInt64(base, radix: 16) else { return base }
+        for byte in String(describing: steps).utf8 { hash = (hash ^ UInt64(byte)) &* 0x0000_0100_0000_01b3 }
+        let hex = String(hash, radix: 16)
+        return String(repeating: "0", count: 16 - hex.count) + hex
     }
 
     /// The loupe's glass readout: name, place and cull summary, e.g.

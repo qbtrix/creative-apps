@@ -10,7 +10,8 @@
 // is drawn by the window's `\.libraryLoupeGPU` into a canvas host: the base
 // through the frame's develop steps, written on the GPU. Its help says
 // why the file can't be read or the render failed. The name, "12 of 60" position and cull summary sit in a glass
-// readout. Left and Right step through the sort; Escape, G or the glass
+// readout; a 1 pt probe (`library.loupe.value`) repeats the photo's value as
+// a label XCUITest can read. Left and Right step through the sort; Escape, G or the glass
 // Grid button at the top leading corner (`library.loupe.grid`) go back to
 // the grid. The canvas pans on the other arrows, scroll and Space-drag, and
 // a click on it gives it the keys. Pinch and its zoom keys go through
@@ -65,6 +66,8 @@ struct LibraryLoupe: View {
             }
             .padding(SuiteSpacing.l)
         }
+        // The photo's value again as a label, which XCUITest can read (#262): the develop journey's checksum.
+        .background { ProbeElement("library.loupe.value", label: model.loupeValue ?? "", size: CGSize(width: 1, height: 1)) }
         .overlay(alignment: .topLeading) {
             Button(action: onGrid) {
                 GlassPanel { Label("Grid", systemImage: "chevron.left") }

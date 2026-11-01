@@ -45,6 +45,8 @@ final class LibraryAreas {
 struct LibraryWindow: View, BodyCounted {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
+    /// This window's claim on LibraryShell's live channel.
+    @State private var shellID = UUID()
     /// The loupe's GPU route (suite-imaging IM-11); nil in a test window.
     @Environment(\.libraryLoupeGPU) var loupeGPU
 
@@ -150,13 +152,11 @@ struct LibraryWindow: View, BodyCounted {
         .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
         // The live command channel (editor-menus EM-7) reads this window's catalog and lands a result in it.
         .onAppear {
-            LibraryShell.read = { model }
-            LibraryShell.take = { model.takeLive($0) }
+            LibraryShell.claim(shellID, read: { model }, take: { model.takeLive($0) })
             loupeGPU?.onFailure = { loupeAreaRender(.full) }
         }
         .onDisappear {
-            LibraryShell.read = nil
-            LibraryShell.take = nil
+            LibraryShell.release(shellID)
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()

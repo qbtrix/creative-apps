@@ -1,6 +1,7 @@
 // LibraryDevelopLooks.swift (adjust-everywhere AJ-11): the Develop tab's
 // LOOKS grid (SuiteUI's LookGrid over the catalog as its AdjustTarget) and
-// BLACK & WHITE section (a checkbox and the six colour weights), plus the
+// BLACK & WHITE section (a checkbox, and the six colour weights while it is
+// on: off, they would only sit there dimmed), plus the
 // window's half that runs their commands. Each runs one catalog command
 // (`look.apply`, `look.save`, `look.delete`, `adjust.black-and-white`) on the
 // develop targets as one undo step; an apply or a B&W change then renders the
@@ -97,8 +98,10 @@ struct DevelopBlackAndWhiteSection: View {
             .disabled(!enabled)
             .help(enabled ? "" : help)
             .libraryControl(id: "library.develop.bw", enabled: enabled, help: help)
-            ForEach(Self.colors, id: \.0) { color in
-                weightRow(color.0, color.1, shown: stored ?? .neutral, on: enabled && stored != nil)
+            if let stored {
+                ForEach(Self.colors, id: \.0) { color in
+                    weightRow(color.0, color.1, shown: stored, on: enabled)
+                }
             }
         }
     }

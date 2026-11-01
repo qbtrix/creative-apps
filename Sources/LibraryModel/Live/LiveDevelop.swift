@@ -6,8 +6,15 @@
 // (DV-12), then levels, the curve and saturation, `ImagingProgram`'s, run on
 // CoreRender's CPU backend as Photo runs them, on one surface. A control at its neutral value runs no step, so neutral
 // settings return the input untouched.
-// The histogram is CoreRaster's, 256 bins over the sRGB values of the buffer
-// it is given (the rendered one). A slider in `waiting` throws
+// Every step works pixel by pixel, so the steps run on the buffer's 256 px
+// tiles across the cores (`LiveParallel`) and the tiles go back in place: the
+// same pixels as one pass over the whole buffer, a fraction of the time. A
+// buffer with fewer tiles than cores (the 512 px preview has four) runs in one
+// band of rows per core instead (each band pays the steps' setup again, so no
+// more), cut out whole rows at a time and copied back whole rows at a time
+// (a translucent row pixel by pixel, since core's row copy blends it).
+// The histogram is CoreRaster's counts, 256 bins over the sRGB values of the
+// buffer it is given (the rendered one), counted by `LiveHistogram`. A slider in `waiting` throws
 // `.renderFailed` with its reason; none waits today. After
 // the tone, a crop (crop CR-4) turns the buffer by its angle and cuts
 // `LiveCrop`'s frame for the buffer's own size out of the turned pixels.
@@ -75,8 +82,45 @@ public struct LiveDevelop: DevelopRendering {
         }
     }
 
-    /// `steps` on `b` through CoreRender's CPU backend, on one surface read once; none returns `b` untouched.
+    /// `steps` on `b`, tile by tile (or band by band) across the cores; none returns `b` untouched.
     static func run(_ steps: [ToneAdjustment], on b: PixelBuffer) throws -> PixelBuffer {
+        guard !steps.isEmpty else { return b }
+        let columns = b.tileColumns, cores = ProcessInfo.processInfo.activeProcessorCount
+        do {
+            if columns * b.tileRows < cores { return try banded(steps, on: b, bands: min(cores, b.height)) }
+            let tiles = try LiveParallel.run(columns * b.tileRows) { i in
+                try serial(steps, on: try b.tile(column: i % columns, row: i / columns))
+            }
+            var out = b
+            for (i, tile) in tiles.enumerated() { try out.replaceTile(column: i % columns, row: i / columns, with: tile) }
+            return out
+        } catch {
+            throw LibraryError.renderFailed("the renderer couldn't apply its develop settings")
+        }
+    }
+
+    /// `steps` on `b` in `bands` bands of rows across the cores, each copied out, developed and copied back.
+    /// The copy back is core's `composite`, which copies an opaque row whole; it blends a translucent one, so
+    /// each band's worker lists its translucent rows and those are stored again pixel by pixel.
+    static func banded(_ steps: [ToneAdjustment], on b: PixelBuffer, bands: Int) throws -> PixelBuffer {
+        let rows = (b.height + bands - 1) / max(bands, 1), width = b.width
+        let parts = try LiveParallel.run((b.height + rows - 1) / rows) { i in
+            let top = i * rows, height = min(rows, b.height - top)
+            let band = try serial(steps, on: try b.cropped(x: 0, y: top, width: width, height: height))
+            let translucent = try (0..<height).filter { y in try (0..<width).contains { try band.pixel(x: $0, y: y).a != 1 } }
+            return (band, translucent)
+        }
+        var out = b
+        for (i, (band, translucent)) in parts.enumerated() {
+            var exact = translucent
+            do { try out.composite(band, x: 0, y: i * rows, mode: .normal, opacity: 1) } catch { exact = Array(0..<band.height) }
+            for y in exact { for x in 0..<width { try out.setPixel(x: x, y: i * rows + y, band.pixel(x: x, y: y)) } }
+        }
+        return out
+    }
+
+    /// `steps` on `b` through CoreRender's CPU backend, on one surface read once; none returns `b` untouched.
+    static func serial(_ steps: [ToneAdjustment], on b: PixelBuffer) throws -> PixelBuffer {
         guard !steps.isEmpty else { return b }
         do {
             let cpu = CPUBackend()
@@ -94,8 +138,6 @@ public struct LiveDevelop: DevelopRendering {
     }
 
     public func histogram(of buffer: PixelBuffer) throws -> HistogramBins {
-        let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .sRGB)
-        return HistogramBins(red: h.red, green: h.green, blue: h.blue,
-                             shadowClipped: h.shadowClipped, highlightClipped: h.highlightClipped)
+        try LiveHistogram.histogram(of: buffer)
     }
 }

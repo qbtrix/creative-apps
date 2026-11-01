@@ -1,10 +1,10 @@
 [
   {
     "label": "the histogram counts linear values, not the sRGB values of the buffer it is given",
-    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .sRGB)",
-    "replace": "let h = try Histogram(of: buffer, bins: HistogramBins.binCount, encoding: .linear)",
-    "tests": "LibraryDevelopRenderTests"
+    "file": "Sources/LibraryModel/Live/LiveHistogram.swift",
+    "find": "Int(Float(TransferCurve.encode(Double(value))) * Float(bins))",
+    "replace": "Int(value * Float(bins))",
+    "tests": "LibraryDevelopTilesTests"
   },
   {
     "label": "the turn is skipped: a straightened crop cuts the upright pixels",
@@ -61,5 +61,19 @@
     "find": "return ImagingProgram.adjustments(adjust, tone: tone)",
     "replace": "return ImagingProgram.adjustments(adjust, tone: ToneRules.adjustments(s.tone.setting(.saturation, to: 0))) + (s.vibrance != 0 ? [.vibrance(Float(s.vibrance))] : [])",
     "tests": "LibraryDevelopColorTests"
+  },
+  {
+    "label": "a band's translucent rows keep core's blend: the band copy never stores them again",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "for y in exact { for x in 0..<width",
+    "replace": "for y in exact.prefix(0) { for x in 0..<width",
+    "tests": "LibraryDevelopTilesTests"
+  },
+  {
+    "label": "a translucent row is taken for opaque, so its blended copy stays",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "try band.pixel(x: $0, y: y).a != 1",
+    "replace": "try band.pixel(x: $0, y: y).a > 1",
+    "tests": "LibraryDevelopTilesTests"
   }
 ]

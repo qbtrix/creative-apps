@@ -51,6 +51,21 @@ enum LoupePicture: Sendable {
             return .failure(error as? LibraryError ?? .renderFailed(failure))
         }
     }
+
+    /// After a GPU frame, its histogram at `settings` on `queue` (latest wins), yielded under `request`'s
+    /// token; a CPU render carries its own. Every path that shows a frame calls this, or the histogram stays
+    /// on the last one's bins.
+    static func histogram(after result: Result<LoupePicture, LibraryError>, _ request: LoupeRequest,
+                          settings: DevelopSettings, service: any LoupeImaging, queue: RenderQueue,
+                          deliver: AsyncStream<LoupeHistogramResult>.Continuation) {
+        guard case .success(.frame) = result else { return }
+        Task.detached(priority: .utility) {
+            await queue.submit(token: request.token) {
+                guard let bins = try? await service.histogram(request.photo, settings: settings) else { return }
+                deliver.yield(LoupeHistogramResult(token: request.token, histogram: bins))
+            }
+        }
+    }
 }
 
 /// Observable for `fitScale` alone, so the zoom pill and the menu's zoom
@@ -146,13 +161,8 @@ extension LibraryWindow {
                     request, settings: request.settings, preferGPU: preferGPU, service: service,
                     failure: "the photo couldn't be drawn")
                 deliver.yield(LoupeRenderResult(token: request.token, result: result))
-                guard case .success(.frame) = result else { return }
-                Task.detached(priority: .utility) {
-                    await histograms.submit(token: request.token) {
-                        guard let bins = try? await service.histogram(request.photo, settings: request.settings) else { return }
-                        deliverHistogram.yield(LoupeHistogramResult(token: request.token, histogram: bins))
-                    }
-                }
+                LoupePicture.histogram(after: result, request, settings: request.settings, service: service,
+                                       queue: histograms, deliver: deliverHistogram)
             }
         }
     }

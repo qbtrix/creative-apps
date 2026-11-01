@@ -97,7 +97,8 @@ private let judgesRenders = true
 
     /// Quality gate #5953: a developed 6000x4000 photo (every control, Vibrance and Saturation included) exported
     /// at a 2,000 px long side shrinks before develop, so it costs about a 2,000 px render, not a 24 MP one.
-    /// Release on the shared Mac: median 1,064 ms, p95 1,209 ms; developing at full size took 6.3 s.
+    /// Release on the shared Mac: median 317 ms, p95 453 ms, with the shrink across the cores; developing at full
+    /// size took 2.1 s.
     @Test func realSizeExportAtTwoThousand() throws {
         let buffer = try developGradient(width: 6000, height: 4000)
         let settings = everyControlButColor().setting(.vibrance, to: 40).setting(.saturation, to: 20)
@@ -111,7 +112,7 @@ private let judgesRenders = true
         #expect(!judgesRenders || cost.p95 <= 1500, "export of 24 MP at 2,000 px took \(cost.p95) ms (p95), over 1,500 ms")
         guard judgesRenders else { return }
         // The bug was "develop at full size, then resize": the same photo developed at full size, timed under the
-        // same load, must cost well over twice the export (release on the shared Mac: 6.3 s against 1.1 s).
+        // same load, must cost well over twice the export (release on the shared Mac: 2.1 s against 0.3 s).
         let full = Budget.measure("develop full-size-24mp", runs: 1) {
             _ = try? LiveDevelop().render(buffer, settings: settings)
         }

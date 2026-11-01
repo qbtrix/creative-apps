@@ -92,6 +92,7 @@ Sources/LibraryModel/LibraryThumbnails.swift
 Sources/LibraryModel/Live/LiveCrop.swift
 Sources/LibraryModel/Live/LiveDevelop.swift
 Sources/LibraryModel/Live/LiveExporter.swift
+Sources/LibraryModel/Live/LiveHistogram.swift
 Sources/LibraryModel/Live/LiveThumbnails.swift
 Sources/LibraryModel/LoupeZoom.swift
 Sources/PhotoApp/CropOptions.swift

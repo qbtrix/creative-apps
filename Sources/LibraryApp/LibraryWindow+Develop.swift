@@ -115,7 +115,7 @@ extension LibraryWindow {
         let settings = original ? DevelopSettings.neutral.setting(crop: request.settings.crop) : request.settings
         let service = model.services.loupe
         let deliver = state.deliver
-        let queue = state.queue
+        let queue = state.queue, histograms = state.histograms, deliverHistogram = state.deliverHistogram
         let preferGPU = loupeGPU?.prefersGPU ?? false
         Task.detached(priority: .userInitiated) {
             await queue.submit(token: request.token) {
@@ -123,6 +123,8 @@ extension LibraryWindow {
                     request, settings: settings, preferGPU: preferGPU, service: service,
                     failure: "the develop edit couldn't be drawn")
                 deliver.yield(LoupeRenderResult(token: request.token, result: result))
+                LoupePicture.histogram(after: result, request, settings: settings, service: service,
+                                       queue: histograms, deliver: deliverHistogram)
             }
         }
     }

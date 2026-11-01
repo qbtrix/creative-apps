@@ -100,7 +100,7 @@
   {
     "label": "the final resize is skipped: the export ships at the developed crop's size, not the plan's",
     "file": "Sources/LibraryModel/Live/LiveExporter.swift",
-    "find": "return try buffer.resized(width: target.width, height: target.height, filter: .lanczos3)",
+    "find": "return try LiveResize.resized(buffer, width: target.width, height: target.height)",
     "replace": "return buffer",
     "tests": "LibraryExportPlanTests"
   },

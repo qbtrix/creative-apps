@@ -6,7 +6,8 @@
 // plan (`preShrunk`: develop runs on the export's pixels, not the camera's, as
 // the loupe's does on its decode), develop through `DevelopRendering` (tone,
 // then crop), lanczos3 to exactly the plan's size when the crop left more, sRGB
-// bytes. Decode errors pass through.
+// bytes. Both lanczos3 resizes run across the cores (`LiveResize`, the same
+// pixels as core's `resized`). Decode errors pass through.
 // Each item carries the properties the options' metadata policy drops, for
 // the writer (export-pack, LX-3).
 #if canImport(FoundationEssentials)
@@ -76,7 +77,7 @@ public struct LiveExporter: PhotoExporting {
         let buffer = try develop.render(preShrunk(b, photo: photo, longSide: longSide), settings: photo.develop)
         let target = croppedSize(photo).fitting(longSide: longSide)
         guard target.width != buffer.width || target.height != buffer.height else { return buffer }
-        return try buffer.resized(width: target.width, height: target.height, filter: .lanczos3)
+        return try LiveResize.resized(buffer, width: target.width, height: target.height)
     }
 
     /// `b`, the photo's full-size pixels, shrunk so its crop is about the planned long side; untouched at full
@@ -91,7 +92,7 @@ public struct LiveExporter: PhotoExporting {
         while side < source.longSide, !covers(planned, photo: photo, at: source.fitting(longSide: side)) { side += 1 }
         let size = source.fitting(longSide: side)
         guard size.width < b.width || size.height < b.height else { return b }
-        return try b.resized(width: size.width, height: size.height, filter: .lanczos3)
+        return try LiveResize.resized(b, width: size.width, height: size.height)
     }
 
     /// Whether `photo` drawn at `size` (its pixels before orientation) crops to at least `planned` both ways.

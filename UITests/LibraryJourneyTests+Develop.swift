@@ -4,7 +4,7 @@
 // fixture's fakes (F); the live pass (L) runs steps 1 to 10 on the 24 JPEGs
 // `LibraryFiles.writeShoot` writes, imported on launch, its shots ending
 // `-live`. Every launch passes `-LibraryTestValues`, so the loupe photo's
-// value (`library.loupe.photo`, "full 2048×1365 3f9a… 100% No stars") carries
+// value (repeated as the label of `library.loupe.value`, "full 2048×1365 3f9a… 100% No stars") carries
 // the render's checksum, 16 hex digits. Rows are `library.develop.<slider>`
 // (`library.develop.exposure`), the histogram readout
 // `library.develop.histogram` with "mean 0.…" in its value.
@@ -53,14 +53,26 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     // MARK: - Steps
 
     /// Step 1: by name, IMG_0001 in the loupe, the Develop tab: every row at 0, the curve, the levels.
-    @MainActor private func openDevelop(_ arguments: [String], suffix: String) throws {
+    @MainActor private func openDevelop(_ arguments: [String], suffix: String, imports: Int? = nil) throws {
         let library = Journey("Library", self, arguments: arguments)
         self.library = library
+        if let imports {
+            // The launch import fills the grid for seconds on a slow runner; a double-click on a cell
+            // that is still moving misses it. All Photos counts every file once the import is done.
+            let badge = library.element("suite.sidebar").descendants(matching: .any)
+                .matching(NSPredicate(format: "label == %@ OR value == %@", "\(imports)", "\(imports)")).firstMatch
+            XCTAssert(badge.waitForExistence(timeout: 60), "the import never reached \(imports) photos")
+        }
         sortByName(library)
         let first = cell("IMG_0001", library)
         XCTAssert(first.waitForExistence(timeout: 10), "no grid cell for IMG_0001")
         first.doubleClick()
-        XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "double-click didn't open the loupe")
+        let loupe = library.element("library.loupe")
+        // A loaded runner sometimes drops a synthesized double-click while the grid settles after the
+        // sort (journeys run 41279040508: three suites missed the loupe this way); a second one, as a
+        // person would, opens it.
+        if !loupe.waitForExistence(timeout: 5), first.exists { first.doubleClick() }
+        XCTAssert(loupe.waitForExistence(timeout: 10), "double-click didn't open the loupe")
         developTab(library)
         let histogram = library.element("library.develop.histogram")
         XCTAssert(histogram.waitForExistence(timeout: 5), "no histogram (library.develop.histogram)")
@@ -78,7 +90,7 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         for field in ["Black Point", "Midtones", "White Point", "Output Black", "Output White"] {
             XCTAssert(inspectorItem(field, library).exists, "no LEVELS row \(field)")
         }
-        original = try checksum(library)
+        original = try settledChecksum(library)
     }
 
     /// Step 2: dragging Exposure right is one step "Exposure" that re-renders and lifts the histogram.
@@ -111,19 +123,22 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         XCTAssert(wait(3) { Self.number(contrast) == 13 }, "Contrast reads \(Self.text(contrast)), not 13")
     }
 
-    /// Step 4: "Undo Contrast" undoes one key step.
+    /// Step 4: "Undo Contrast" undoes one key step and redraws the loupe.
     @MainActor private func undoContrast() throws {
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
+        let before = try settledChecksum(library)
         expectUndo("Undo Contrast", library)
         library.press(character: "z", .command)
         let contrast = row("Contrast", library)
         XCTAssert(wait(3) { Self.number(contrast) == 3 }, "after Undo Contrast reads \(Self.text(contrast)), not 3")
+        XCTAssert(wait(5) { (try? self.checksum(library)) != before && self.loupeQuality(library) == "full" },
+                  "Undo Contrast didn't redraw the loupe")
     }
 
     /// Step 5: Show Original draws step 1's picture without an undo step; again brings the edit back.
     @MainActor private func showOriginal(suffix: String) throws {
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
-        let developed = try checksum(library)
+        let developed = try settledChecksum(library)
         let button = library.element("library.develop.original")
         XCTAssert(button.waitForExistence(timeout: 3), "no Show Original (library.develop.original)")
         button.click()
@@ -138,13 +153,19 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     @MainActor private func editCurveAndLevels(suffix: String) throws {
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         let before = try checksum(library)
-        let middle = library.element("library.develop.curve").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        // Step 5's Show Original click scrolls the list down; a drag doesn't scroll, so on a short screen
+        // the curve's middle would sit under the Info/Develop switch.
+        let curve = library.element("library.develop.curve")
+        scrollDevelop(toShow: curve, library)
+        let middle = curve.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         middle.press(forDuration: 0.1, thenDragTo: middle.withOffset(CGVector(dx: 0, dy: -40)))
         XCTAssert(wait(5) { (try? self.checksum(library)) != before }, "the curve didn't re-render the loupe")
         library.shot("develop-curve\(suffix)")
         expectUndo("Undo Curve", library)
         // The Midtones handle (LevelsHandles) dragged left brightens: one "Levels" step.
-        let midtones = inspectorItem("Midtones", library).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let handle = inspectorItem("Midtones", library)
+        scrollDevelop(toShow: handle, library)
+        let midtones = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         midtones.press(forDuration: 0.1, thenDragTo: midtones.withOffset(CGVector(dx: -20, dy: 0)))
         expectUndo("Undo Levels", library)
     }
@@ -188,13 +209,17 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     @MainActor private func reset() throws {
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         cell("IMG_0001", library).doubleClick()
+        // Step 8's Sync click scrolled the list down; a right click doesn't scroll back.
+        scrollDevelop(toShow: row("Exposure", library), library)
         row("Exposure", library).rightClick()
         let item = library.app.menuItems["Reset Exposure"]
         XCTAssert(item.waitForExistence(timeout: 3), "the Exposure row's menu has no Reset Exposure")
         item.click()
         expectUndo("Undo Reset Exposure", library)
-        let toneReset = inspectorItem("Reset", library)
-        XCTAssert(toneReset.waitForExistence(timeout: 3), "TONE has no Reset")
+        let toneReset = library.element("suite.inspector.section.tone.reset")
+        XCTAssert(toneReset.waitForExistence(timeout: 3), "TONE has no Reset (suite.inspector.section.tone.reset)")
+        XCTAssertEqual(toneReset.label, "Reset Tone", "TONE's Reset label")
+        scrollDevelop(toShow: toneReset, library)
         toneReset.click()
         for slider in ["Exposure", "Contrast", "Highlights", "Shadows", "Whites", "Blacks"] {
             XCTAssertEqual(Self.number(row(slider, library)), 0, "TONE's Reset left \(slider) set")
@@ -223,16 +248,30 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         cell("IMG_0001", library).doubleClick()
         developTab(library)
         XCTAssert(wait(5) { Self.number(self.row("Exposure", library)) == 1 }, "Exposure didn't survive the relaunch")
-        XCTAssert(wait(5) { (try? self.checksum(library)) == developed }, "the picture changed across the relaunch")
-        library.press(.escape)
+        // The first render after a launch can land on the CPU route while the GPU's pipelines still compile,
+        // and the test checksum depends on the route (CPU pixels, or the base and its GPU program). Reopening
+        // draws again on the route that is ready, so the same picture reads the same once both share one.
+        var same = wait(5) { (try? self.checksum(library)) == developed }
+        for _ in 0..<3 where !same {
+            backToGrid(library)
+            let again = cell("IMG_0001", library)
+            XCTAssert(again.waitForExistence(timeout: 5), "the grid has no IMG_0001 after the loupe")
+            again.doubleClick()
+            same = wait(5) { (try? self.checksum(library)) == developed }
+        }
+        XCTAssert(same, "the picture changed across the relaunch")
+        backToGrid(library)
         let first = cell("IMG_0001", library)
+        XCTAssert(first.waitForExistence(timeout: 5), "the grid has no IMG_0001 after the loupe")
         XCTAssert(wait(2) { Self.text(first).hasPrefix("ready") }, "IMG_0001's cell reads \(Self.text(first))")
         library.app.terminate()
     }
 
     /// Step 11 (F): a failed render says so under the histogram.
     @MainActor private func errorState() throws {
-        let library = Journey("Library", self, arguments: Self.fake + ["-LibraryFakeMode", "fail"])
+        // The bare -LibraryTestValues switch goes last, or it takes -LibraryFakeMode as its value (Journey.init).
+        let library = Journey(
+            "Library", self, arguments: ["-LibraryFixture", "shoot", "-LibraryFakeMode", "fail", "-LibraryTestValues"])
         sortByName(library)
         cell("IMG_0001", library).doubleClick()
         developTab(library)
@@ -248,10 +287,10 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
-        _ = try LibraryFiles.writeShoot(in: folder)
+        let shoot = try LibraryFiles.writeShoot(in: folder)
         let arguments = ["-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path,
                          "-LibraryImportOnLaunch", "-LibraryTestValues"]
-        try openDevelop(arguments, suffix: "-live")
+        try openDevelop(arguments, suffix: "-live", imports: shoot.count)
         try dragExposure(suffix: "-live")
         try stepContrast()
         try undoContrast()
@@ -273,9 +312,9 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         tab.click()
     }
 
-    /// The loupe render's quality, the first word of the loupe photo's value ("full", "preview").
+    /// The loupe render's quality, the first word of the loupe value probe's label ("full", "preview").
     @MainActor private func loupeQuality(_ library: Journey) -> String {
-        ((library.element("library.loupe.photo").value as? String) ?? "").split(separator: " ").first.map(String.init) ?? ""
+        library.element("library.loupe.value").label.split(separator: " ").first.map(String.init) ?? ""
     }
 
     /// The Exposure `catalog.json` in `catalog` holds for the photo named `name`; 0 when its develop is
@@ -288,6 +327,18 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         else { return nil }
         guard let develop = photo["develop"] as? [String: Any] else { return 0 }
         return (develop["exposure"] as? NSNumber)?.doubleValue
+    }
+
+    /// The checksum of the loupe's full render once it has held still for half a second.
+    @MainActor private func settledChecksum(_ library: Journey) throws -> String {
+        var last = "", since = Date()
+        let settled = wait(10) {
+            let now = loupeQuality(library) == "full" ? ((try? checksum(library)) ?? "") : ""
+            if now != last { (last, since) = (now, Date()) }
+            return !now.isEmpty && Date().timeIntervalSince(since) >= 0.5
+        }
+        XCTAssert(settled, "the loupe's full render never held still")
+        return try checksum(library)
     }
 
     /// Polls `condition` every tenth of a second for up to `seconds`.
@@ -306,9 +357,29 @@ final class LibraryDevelopJourneyTests: XCTestCase {
             format: "identifier BEGINSWITH %@ AND identifier CONTAINS %@", "library.grid.cell.", name)).firstMatch
     }
 
+    /// Leaves the loupe by its Grid button. Escape goes only to a focused loupe, and the
+    /// Develop tab's click has just taken the focus.
+    @MainActor private func backToGrid(_ library: Journey) {
+        let grid = library.element("library.loupe.grid")
+        XCTAssert(grid.waitForExistence(timeout: 3), "the loupe has no Grid button (library.loupe.grid)")
+        grid.click()
+    }
+
     /// The Develop row of `slider` ("Exposure"): `library.develop.exposure`.
     @MainActor private func row(_ slider: String, _ library: Journey) -> XCUIElement {
         library.element("library.develop.\(slider.lowercased())")
+    }
+
+    /// Scrolls the Develop list until `element` lies whole inside it. XCUITest scrolls
+    /// to click a row, but it right-clicks or drags a control hidden outside the list
+    /// at its frame, which is another control's place (#3560).
+    @MainActor private func scrollDevelop(toShow element: XCUIElement, _ library: Journey) {
+        let list = library.element("suite.inspector").scrollViews.firstMatch
+        XCTAssert(element.waitForExistence(timeout: 5), "nothing to scroll to in the Develop list")
+        for _ in 0..<20 where !list.frame.contains(element.frame) {
+            list.scroll(byDeltaX: 0, deltaY: element.frame.minY < list.frame.minY ? 40 : -40)
+        }
+        XCTAssert(list.frame.contains(element.frame), "\(element.frame) didn't scroll into \(list.frame)")
     }
 
     /// The first element in the inspector whose label is `label`.
@@ -341,16 +412,18 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         library.press(.escape)
     }
 
-    /// The loupe render's checksum: the 16 hex digits in the loupe photo's value.
+    /// The loupe render's checksum: the 16 hex digits in the loupe value probe's label.
     @MainActor private func checksum(_ library: Journey) throws -> String {
-        let value = (library.element("library.loupe.photo").value as? String) ?? ""
+        let value = library.element("library.loupe.value").label
         let words = value.split(separator: " ").map(String.init)
         return try XCTUnwrap(words.first { $0.count == 16 && $0.allSatisfy(\.isHexDigit) },
                              "the loupe photo's value \"\(value)\" has no checksum")
     }
 
-    /// What an element reads: its value where macOS puts a row's number, else its label.
+    /// What an element reads: a slider row's number (macOS gives a slider's value as an NSNumber), else its
+    /// string value, else its label.
     @MainActor private static func text(_ element: XCUIElement) -> String {
+        if let number = element.value as? NSNumber { return number.stringValue }
         let value = element.value as? String ?? ""
         return value.isEmpty ? element.label : value
     }
