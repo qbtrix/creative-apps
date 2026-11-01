@@ -1,7 +1,8 @@
 // HaloKernelFollowTests.swift: AL-h2, Halo's own parent-chain walk gone.
 // `HaloKeyRules.follows` and the parent choices are the kernel's follow
 // link, and a damaged file's cycle check (a layer that is its own parent,
-// or whose parent follows it) still refuses the file. Linux and macOS.
+// or whose parent follows it) still refuses the file. The choices on a
+// 2,000-layer chain are one parent-map walk (#1283). Linux and macOS.
 @testable import HaloModel
 import SuiteKernel
 import Testing
@@ -52,6 +53,22 @@ private func damagedReason(_ change: (inout HaloComposition) -> Void) throws -> 
         #expect(HaloKeyRules.parentCandidates(for: layer.id, in: c) == expected)
     }
     #expect(HaloKeyRules.parentCandidates(for: c.layers[3].id, in: c) == [c.layers[2].id])
+}
+
+/// huge's 2,000 layers in one parent chain: the Parent picker's choices walk
+/// one parent map, not a kernel tree search per step per layer, which took
+/// most of a real viewer drag's main thread (#1283). The time limit is the
+/// check: the old walk ran far past it.
+@Test(.timeLimit(.minutes(1))) func parentChoicesOnAHugeChainAreOneWalk() throws {
+    var c = HaloFixtures.huge(1)
+    #expect(c.layers.count >= 2_000)
+    for i in c.layers.indices.dropLast() { c.layers[i].parentID = c.layers[i + 1].id }
+    let ids = c.layers.map(\.id)
+    let root = try #require(ids.last)
+    let leaf = try #require(ids.first)
+    #expect(HaloKeyRules.parentCandidates(for: root, in: c).isEmpty)
+    #expect(HaloKeyRules.parentCandidates(for: leaf, in: c) == Array(ids.dropFirst()))
+    #expect(HaloKeyRules.parentCandidates(for: ids[1_000], in: c) == Array(ids[1_001...]))
 }
 
 @Test func aLayerThatIsItsOwnParentIsDamaged() throws {

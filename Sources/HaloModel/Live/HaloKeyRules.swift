@@ -7,7 +7,7 @@
 // (AE-h1); opacity's home and the stopwatch's last-frame rule stay here.
 // A layer's place through its parents and the parent picker run on the
 // kernel's follow link (`LayerTree.worldPlacement`, `follows`, `setFollow`;
-// AL-h1).
+// AL-h1); the picker's choices walk the same links in one parent map (#1283).
 // Internal; Linux-safe.
 import FlareCore
 import SuiteKernel
@@ -192,8 +192,20 @@ enum HaloKeyRules {
         body(&c.layers[i])
     }
 
-    /// Every other layer except those that already follow `id`, in timeline order.
+    /// Every other layer except those that already follow `id`, in timeline
+    /// order: `follows` over one parent map, so 2,000 layers walk their chains
+    /// once instead of building and searching the kernel tree per step (#1283).
     static func parentCandidates(for id: String, in c: HaloComposition) -> [String] {
-        c.layers.map(\.id).filter { $0 != id && !follows($0, id, in: c) }
+        let parent = Dictionary(c.layers.map { ($0.id, $0.parentID) }, uniquingKeysWith: { first, _ in first })
+        func followsID(_ start: String) -> Bool {
+            var seen: Set<String> = [start]
+            var next = parent[start] ?? nil
+            while let current = next, seen.insert(current).inserted {
+                if current == id { return true }
+                next = parent[current] ?? nil
+            }
+            return false
+        }
+        return c.layers.map(\.id).filter { $0 != id && !followsID($0) }
     }
 }
