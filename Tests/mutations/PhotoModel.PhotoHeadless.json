@@ -40,5 +40,12 @@
     "find": "for path in [\"mergedimage.png\", \"Thumbnails/thumbnail.png\"] { package.files[path].map(files.keep) }",
     "replace": "for path in [\"Thumbnails/thumbnail.png\"] { package.files[path].map(files.keep) }",
     "tests": "PhotoReusingCodecTests"
+  },
+  {
+    "label": "metadataSkipped: a JPEG export from a JPEG carries none of its metadata again (#5834)",
+    "file": "Sources/PhotoModel/PhotoHeadless.swift",
+    "find": "if kind == .jpeg, let source {",
+    "replace": "if kind == .jpeg, let source, false {",
+    "tests": "PhotoHeadlessMetadataTests"
   }
 ]
