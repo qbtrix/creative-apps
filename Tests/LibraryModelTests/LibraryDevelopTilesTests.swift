@@ -3,7 +3,7 @@
 // (`LiveDevelop.run`) and the banded one for small buffers (`banded`) equal
 // one pass over the whole buffer (`serial`) with
 // every control and Invert on, partial edge tiles and translucent pixels
-// included; `LiveHistogram` equals CoreRaster's sRGB histogram on renders,
+// included (a band's opaque and translucent rows copy back by two routes); `LiveHistogram` equals CoreRaster's sRGB histogram on renders,
 // on seeded noise with transparent, translucent and out-of-range pixels, and
 // bin for bin on every float of each table run that straddles two bins.
 // The export's parallel shrink (`LiveResize`) equals CoreRaster's `resized`.
@@ -44,8 +44,11 @@ private func noise(width: Int, height: Int, seed: UInt64) throws -> PixelBuffer 
 
     @Test func theTiledDevelopIsOnePassOverTheWholeBuffer() throws {
         let steps = LiveDevelop.steps(for: everything) + AdjustKinds.adjustments(everything.kinds)
+        // Opaque rows and translucent ones in one buffer: the band copy takes both routes.
+        var striped = try developGradient(width: 130, height: 90)
+        for y in stride(from: 0, to: 90, by: 7) { try striped.setPixel(x: y, y: y, RGBA(r: 0.2, g: 0.1, b: 0.3, a: 0.4)) }
         for buffer in [try developGradient(width: 600, height: 400), try noise(width: 300, height: 520, seed: 7),
-                       try developGradient(width: 40, height: 30)] {
+                       try developGradient(width: 40, height: 30), striped] {
             let tiled = try LiveDevelop.run(steps, on: buffer)
             #expect(tiled == (try LiveDevelop.serial(steps, on: buffer)), "\(buffer.width)x\(buffer.height)")
             #expect(tiled != buffer)

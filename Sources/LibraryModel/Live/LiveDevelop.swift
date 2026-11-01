@@ -11,7 +11,8 @@
 // same pixels as one pass over the whole buffer, a fraction of the time. A
 // buffer with fewer tiles than cores (the 512 px preview has four) runs in one
 // band of rows per core instead (each band pays the steps' setup again, so no
-// more), cut out whole rows at a time and copied back pixel by pixel.
+// more), cut out whole rows at a time and copied back whole rows at a time
+// (a translucent row pixel by pixel, since core's row copy blends it).
 // The histogram is CoreRaster's counts, 256 bins over the sRGB values of the
 // buffer it is given (the rendered one), counted by `LiveHistogram`. A slider in `waiting` throws
 // `.renderFailed` with its reason; none waits today. After
@@ -99,15 +100,21 @@ public struct LiveDevelop: DevelopRendering {
     }
 
     /// `steps` on `b` in `bands` bands of rows across the cores, each copied out, developed and copied back.
+    /// The copy back is core's `composite`, which copies an opaque row whole; it blends a translucent one, so
+    /// each band's worker lists its translucent rows and those are stored again pixel by pixel.
     static func banded(_ steps: [ToneAdjustment], on b: PixelBuffer, bands: Int) throws -> PixelBuffer {
         let rows = (b.height + bands - 1) / max(bands, 1), width = b.width
         let parts = try LiveParallel.run((b.height + rows - 1) / rows) { i in
             let top = i * rows, height = min(rows, b.height - top)
-            return try serial(steps, on: try b.cropped(x: 0, y: top, width: width, height: height))
+            let band = try serial(steps, on: try b.cropped(x: 0, y: top, width: width, height: height))
+            let translucent = try (0..<height).filter { y in try (0..<width).contains { try band.pixel(x: $0, y: y).a != 1 } }
+            return (band, translucent)
         }
         var out = b
-        for (i, band) in parts.enumerated() {
-            for y in 0..<band.height { for x in 0..<width { try out.setPixel(x: x, y: i * rows + y, band.pixel(x: x, y: y)) } }
+        for (i, (band, translucent)) in parts.enumerated() {
+            var exact = translucent
+            do { try out.composite(band, x: 0, y: i * rows, mode: .normal, opacity: 1) } catch { exact = Array(0..<band.height) }
+            for y in exact { for x in 0..<width { try out.setPixel(x: x, y: i * rows + y, band.pixel(x: x, y: y)) } }
         }
         return out
     }
