@@ -3,8 +3,9 @@
 // the loupe at Exposure +1, rendered through the live path: LiveLoupeImaging
 // over LiveDevelop (CoreRaster) decodes the fake decoder's gradient, develops it and
 // takes its histogram. The loupe shows that picture and the Develop tab beside
-// it reads Exposure +1.00 EV and the rendered histogram's mean; on the live
-// develop service Vibrance and Saturation show disabled with their reason.
+// it reads Exposure +1.00 EV and the rendered histogram's mean.
+// `library-develop-color` is the same photo at Vibrance +60 and Saturation
+// -100 (DV-12): the loupe turns grey and both rows read live, no reason.
 // macOS only.
 import AppKit
 import SuiteUI
@@ -56,14 +57,28 @@ import Testing
         let neutralMean = mean(catalog)
         catalog.setDevelop(.exposure, to: 1, coalesceKey: nil)
         #expect(catalog.developValue(.exposure) == .value(1))
-        #expect(catalog.sliderHelp(.vibrance) == LiveDevelop.waiting[.vibrance])
         let developed = try await render(&catalog)
         #expect(developed.image.size == neutral.image.size)
         #expect(developed.image.checksum != neutral.image.checksum, "Exposure +1 didn't change the live render")
         #expect(catalog.loupeRender == developed)
         #expect(mean(catalog) > neutralMean, "the histogram's mean didn't rise: \(catalog.histogramValue)")
         #expect(catalog.developError == nil)
-        try draw(catalog)
+        try draw(catalog, "library-develop-render")
+    }
+
+    /// DV-12: Vibrance and Saturation reach the loupe's picture, and their rows are live.
+    @Test func colorRender() async throws {
+        var catalog = try shootOnFirst()
+        let neutral = try await render(&catalog)
+        catalog.setDevelop(.vibrance, to: 60, coalesceKey: nil)
+        catalog.setDevelop(.saturation, to: -100, coalesceKey: nil)
+        #expect(catalog.developValue(.vibrance) == .value(60))
+        #expect(catalog.developValue(.saturation) == .value(-100))
+        #expect(catalog.sliderHelp(.vibrance) == nil && catalog.sliderHelp(.saturation) == nil)
+        let developed = try await render(&catalog)
+        #expect(developed.image.checksum != neutral.image.checksum, "Vibrance and Saturation didn't change the render")
+        #expect(catalog.developError == nil)
+        try draw(catalog, "library-develop-color")
     }
 
     /// A window's menu whose develop edits can run (each does nothing here), so the rows show enabled.
@@ -79,7 +94,7 @@ import Testing
     }
 
     /// The loupe on the left, the Develop tab on the panel at the inspector's ideal width on the right.
-    private func draw(_ catalog: LibraryCatalog) throws {
+    private func draw(_ catalog: LibraryCatalog, _ name: String) throws {
         let menu = menu()
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
@@ -92,7 +107,7 @@ import Testing
                         .background(SuiteColor.panel)
                 }
                 .frame(width: 1440, height: 900),
-                name: "library-develop-render-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+                name: "\(name)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }
 }

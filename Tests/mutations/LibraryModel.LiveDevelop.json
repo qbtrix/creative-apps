@@ -61,5 +61,12 @@
     "find": "return ImagingProgram.adjustments(adjust, tone: tone)",
     "replace": "return ImagingProgram.adjustments(adjust, tone: ToneRules.adjustments(s.tone.setting(.saturation, to: 0))) + (s.vibrance != 0 ? [.vibrance(Float(s.vibrance))] : [])",
     "tests": "LibraryDevelopColorTests"
+  },
+  {
+    "label": "Vibrance and Saturation swapped: the Vibrance slider runs core's hue/saturation step",
+    "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
+    "find": "tone.append(.vibrance(Float(s.vibrance)))",
+    "replace": "tone.append(.hueSaturation(hue: 0, saturation: Float(s.vibrance), lightness: 0))",
+    "tests": "LibraryDevelopColorTests"
   }
 ]
