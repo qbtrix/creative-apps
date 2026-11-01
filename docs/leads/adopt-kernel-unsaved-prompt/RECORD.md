@@ -166,3 +166,4 @@ One PR per slice: each app slice's PR holds its test-first task and its adoption
 - 2026-11-01T10:02:14Z UP-flare #5089 open, waiting on local-ci/prescreen; UP-halo #5091 and UP-z #5231 stacked above it
 - 2026-11-01T11:04:22Z UP-flare #5089 open, waiting on local-ci/prescreen; UP-halo #5091 and UP-z #5231 stacked above it
 - 2026-11-01T12:06:32Z UP-flare #5089 open, waiting on local-ci/prescreen; UP-halo #5091 and UP-z #5231 stacked above it
+- 2026-11-01T13:10:11Z UP-flare #5089 open, waiting on local-ci/prescreen; UP-halo #5091 and UP-z #5231 stacked above it
