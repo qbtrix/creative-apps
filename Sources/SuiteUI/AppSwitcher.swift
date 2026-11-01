@@ -3,7 +3,8 @@
 // SuiteWindow's toolbar (Home, Flare, Design, Photo, Library, Halo), no labels
 // and no bar behind it (docs/blueprints/suiteui.md section 6).
 // The current app's item sits in a capsule of SuiteUI glass (`suiteGlass`, the
-// row's one glass shape) with its icon in textPrimary; the others are
+// row's one glass shape, drawn behind the row so no item's frame grows past
+// its slot) with its icon in textPrimary; the others are
 // textSecondary. Item centers sit `spacing` apart, one of `spacingSteps`
 // (80, 64, 48, 40: from `switcherSpacing` down by SuiteSpacing.l to
 // `switcherSpacingMinimum`), or the last step, `compactSpacing` (toolButton,
@@ -28,7 +29,7 @@
 // the environment's `suiteSwitcher`, or `placeholder(processName:)` until the
 // switching feature wires it, with every item disabled and the current one
 // picked from the running executable's name. Tested in AppSwitcherTests and
-// SuiteAppSwitcherSnapshots.
+// SuiteAppSwitcherSnapshots, AppSwitcherFrameTests.
 import SuiteModel
 import SwiftUI
 
@@ -241,14 +242,6 @@ public struct AppSwitcher: View {
                         .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
-                .background {
-                    if isCurrent {
-                        Color.clear
-                            .frame(
-                                width: Self.capsuleWidth(spacing: spacing), height: Self.capsuleHeight(spacing: spacing))
-                            .suiteGlass(in: Capsule())
-                    }
-                }
                 .disabled(item.isDisabled(current: current))
                 // After .disabled, so the tooltip still shows on a disabled item.
                 .help(item.help)
@@ -260,6 +253,18 @@ public struct AppSwitcher: View {
                         reason: item.isDisabled(current: current) ? item.unavailableHelp : nil
                     ).selecting(isCurrent),
                     identifies: true)
+            }
+        }
+        // The capsule is the row's background, centered on the current slot: as a button's background it is
+        // wider than the slot and widened that button's frame over its neighbours (#6011).
+        .background(alignment: .leading) {
+            if let index = items.firstIndex(where: { $0.id == current }) {
+                let width = Self.capsuleWidth(spacing: spacing)
+                Color.clear
+                    .frame(width: width, height: Self.capsuleHeight(spacing: spacing))
+                    .suiteGlass(in: Capsule())
+                    .offset(x: CGFloat(index) * spacing + (spacing - width) / 2)
+                    .accessibilityHidden(true)
             }
         }
         .accessibilityElement(children: .contain)
