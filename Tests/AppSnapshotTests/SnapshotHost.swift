@@ -5,7 +5,10 @@
 // appearance decides how dynamic colors resolve, and draws it at backing
 // scale 2, so a 100 × 50 pt view is a 200 × 100 px image and a 1 pt hairline is 2 device pixels (QB-V3). The
 // bitmap is tagged sRGB, so a token's hex comes back as written. Glass draws
-// as SuiteUI's flat stand-in (`suiteSnapshotRendering`). Its images feed
+// as SuiteUI's flat stand-in (`suiteSnapshotRendering`). The window is not
+// key unless `key` is set: a key host draws a front window's look (the
+// default button in the accent), for a window people only ever see in
+// front, like the welcome window. Its images feed
 // GoldenImage (SH-9) through `assertGolden(_:size:name:area:appearance:)`.
 // macOS only.
 import AppKit
@@ -61,6 +64,8 @@ private final class ScaledSnapshotWindow: NSWindow {
 struct SnapshotHost {
     nonisolated static let scale: CGFloat = 2
     let appearance: SnapshotAppearance
+    /// Draw as the key window (SnapshotHostTests.keyHostDrawsTheDefaultButtonInTheAccent).
+    var key = false
 
     /// `view` at `size` points over the window background, as a 2× bitmap; nil
     /// when the size is empty or AppKit has no such appearance. AppKit gives
@@ -82,7 +87,9 @@ struct SnapshotHost {
             .frame(width: size.width, height: size.height)
             .background(SuiteColor.windowBackground)
             .environment(\.suiteSnapshotRendering, true)
-            .environment(\._colorSchemeContrast, appearance.contrast))
+            .environment(\._colorSchemeContrast, appearance.contrast)
+            // An offscreen window is never key, so SwiftUI is told how active to draw.
+            .environment(\.appearsActive, key))
         // No colorScheme override: SwiftUI derives the scheme from the
         // effective NSAppearance, and forcing it made SwiftUI resolve NSColor
         // tokens against a plain aqua/darkAqua appearance, dropping the
@@ -116,13 +123,13 @@ struct SnapshotHost {
     }
 }
 
-/// Renders `view` at `size` points through SnapshotHost and checks it as
+/// Renders `view` at `size` points through SnapshotHost (as the key window when `key`) and checks it as
 /// `Golden/<area>/<name>-<appearance>.png` (light, dark, light-ic, dark-ic).
 @MainActor
 func assertGolden(_ view: some View, size: CGSize, name: String, area: String, appearance: SnapshotAppearance,
-                  tolerance: GoldenTolerance = .standard, filePath: String = #filePath,
+                  key: Bool = false, tolerance: GoldenTolerance = .standard, filePath: String = #filePath,
                   sourceLocation: SourceLocation = #_sourceLocation) {
-    guard let image = SnapshotHost(appearance: appearance).image(view, size: size) else {
+    guard let image = SnapshotHost(appearance: appearance, key: key).image(view, size: size) else {
         Issue.record("could not render \(area)/\(name)-\(appearance.rawValue)", sourceLocation: sourceLocation)
         return
     }

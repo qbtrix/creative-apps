@@ -78,7 +78,8 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
         launcher.shot("onboarding-focus")
 
         // 2. Photos, then Continue.
-        launcher.click("Photos", in: .window)
+        // By identifier: the chip reads "Photos: Library, Photo" since #3021.
+        Self.chip(.photos, in: welcome).click()
         XCTAssert(Self.waitFor { Self.chip(.photos, in: welcome).isSelected }, "the Photos chip isn't selected after a click")
         launcher.click("Continue", in: .window)
 
@@ -186,7 +187,8 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
                       "RECENT reads \(AfterGlowJourneyTests.cardNames(launcher)), without \(file)")
         }
         launcher.shot("onboarding-samples-home")
-        if !missing.isEmpty { throw XCTSkip("waits on #4113: \(missing.joined(separator: ", ")) isn't in Bundle/Samples") }
+        // Every sample ships (beach.ora since #5947), so a missing one is a failure, not a skip.
+        XCTAssert(missing.isEmpty, "\(missing.joined(separator: ", ")) isn't in the bundle's Samples")
     }
 
     // MARK: - Helpers

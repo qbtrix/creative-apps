@@ -1,8 +1,7 @@
 // SampleFilesTests.swift: every file SampleCatalog.samples names is shipped
 // in Bundle/Samples/, non-empty, with an extension its SuiteTypeRegistry type
 // lists (onboarding packet OB-11). A row whose fixture export issue is still
-// open is disabled naming that issue; when the export lands and is copied in,
-// its row is turned on. Files are read by path from #filePath.
+// open would be disabled naming that issue; every row is on now. Files are read by path from #filePath.
 import Foundation
 import Testing
 import SuiteModel
@@ -34,7 +33,7 @@ import SuiteModel
 
     @Test func bounceFlare() throws { try Self.check("Bounce.flare") }
     @Test func cardsDesign() throws { try Self.check("Cards.design") }
-    @Test(.disabled("waits on #4113: Photo's .ora save is not byte-stable")) func beachOra() throws { try Self.check("beach.ora") }
+    @Test func beachOra() throws { try Self.check("beach.ora") }
     @Test func sunsetPng() throws { try Self.check("Sunset.png") }
     @Test func introHalo() throws { try Self.check("Intro.halo") }
 }
