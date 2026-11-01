@@ -17,6 +17,8 @@ import Testing
         #expect(DesignTool.eyedropper.title == "Eyedropper")
         #expect(DesignTool.eyedropper.shortcut == "i")
         #expect(DesignTool.eyedropper.unavailableHelp == nil, "DY-5: a click picks")
+        // #6012: V is Select in every app; Design's pointer tool reads as Photo's does.
+        #expect(DesignTool.move.title == "Select" && DesignTool.move.shortcut == "v")
         var model = DesignWorkspace()
         model.useServices(.fake)
         let opened = model.openFixture("cards")
