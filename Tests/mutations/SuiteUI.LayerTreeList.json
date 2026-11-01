@@ -1,4 +1,6 @@
 [
 {"label":"Shift and Command swapped","file":"Sources/SuiteUI/LayerTreeList.swift","find":"shift ? .extend : command ? .toggle : .replace","replace":"shift ? .toggle : command ? .extend : .replace","tests":"LayerTreeListTests/pickModes"},
-{"label":"isSelected reads only the primary id","file":"Sources/SuiteUI/LayerTreeList.swift","find":"selection == id || selected.contains(id)","replace":"selection == id","tests":"LayerTreeListTests/severalSelected"}
+{"label":"isSelected reads only the primary id","file":"Sources/SuiteUI/LayerTreeList.swift","find":"selection == id || selected.contains(id)","replace":"selection == id","tests":"LayerTreeListTests/severalSelected"},
+{"label":"embedded list always eager","file":"Sources/SuiteUI/LayerTreeList.swift","find":"rowCount <= embeddedEagerLimit","replace":"rowCount >= 0","tests":"LayerTreeListTests/embeddedListGoesLazyOnlyWhenLong"},
+{"label":"embedded limit off by one","file":"Sources/SuiteUI/LayerTreeList.swift","find":"rowCount <= embeddedEagerLimit","replace":"rowCount < embeddedEagerLimit","tests":"LayerTreeListTests/embeddedListGoesLazyOnlyWhenLong"}
 ]

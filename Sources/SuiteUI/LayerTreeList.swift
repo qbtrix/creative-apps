@@ -9,7 +9,7 @@
 // so it is tested without a window. The list mutates nothing: every gesture
 // goes out through one `onAction` closure. Rows are keyed by the
 // layer's id, lazy in the list's own scroll view and eager when `embedded` in a
-// host's, and `.equatable()` on their plain values (swiftui-rules 2, 5).
+// host's (lazy there too past `embeddedEagerLimit` rows, #1283), and `.equatable()` on their plain values (swiftui-rules 2, 5).
 // The only view state is the drop target lit while a drag hovers it and the
 // row under the pointer (fill plus outline), each written on enter and exit,
 // never per sample. A flat list (`nests: false`) drops the disclosure column.
@@ -255,15 +255,26 @@ public struct LayerTreeList: View {
     }
 
     @ViewBuilder private var list: some View {
-        if options.embedded {
+        if options.embedded && Self.embeddedEager(rowCount: rows.count) {
             // Eager: in a host's scroll view a lazy stack never builds the rows
             // below its fold, so they had no accessibility node to press.
             VStack(alignment: .leading, spacing: 0) { rowViews }
+                .padding(.vertical, SuiteSpacing.xs)
+        } else if options.embedded {
+            // Past the limit every eager row joined the accessibility tree and a
+            // UI query on huge timed out (#1283); lazy in the host's scroll view.
+            LazyVStack(alignment: .leading, spacing: 0) { rowViews }
                 .padding(.vertical, SuiteSpacing.xs)
         } else {
             scrolling
         }
     }
+
+    /// How many rows an embedded list builds eagerly; past it, lazily.
+    static let embeddedEagerLimit = 300
+
+    /// Whether an embedded list of `rowCount` rows builds every row.
+    static func embeddedEager(rowCount: Int) -> Bool { rowCount <= embeddedEagerLimit }
 
     private var rowViews: some View {
         let joins = Self.selectionJoins(rows.map(\.id), selected: isSelected)
