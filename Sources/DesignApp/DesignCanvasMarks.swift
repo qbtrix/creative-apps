@@ -197,7 +197,9 @@ struct DesignArtwork: View {
 /// the page as it was (a marquee, a hover) repaints nothing. During a move drag (`lift`) it draws
 /// the page as it was at the press in three parts: the nodes under the moved run, the run, and
 /// the nodes over it. Each part is its own DesignArtwork with unchanged inputs, so a step only
-/// moves the run's view by the drag's offset and paints no node (render contract rule 3).
+/// moves the run's view by the drag's offset and paints no node (render contract rule 3). The
+/// parts are overlaid in a ZStack, each the artboard's size; left bare, the ForEach would be laid
+/// out as a vertical stack, a third of the page each.
 struct DesignPageArtwork: View, Equatable {
     let page: DesignPage
     let zoom: Double
@@ -207,11 +209,13 @@ struct DesignPageArtwork: View, Equatable {
     var body: some View {
         if let lift {
             let scale = usable(zoom)
-            ForEach([DesignLiftPart.Part.under, .run, .over], id: \.self) { part in
-                DesignLiftPart(page: lift.page, firstID: lift.firstID, lastID: lift.lastID, part: part, zoom: zoom,
-                               editingTextID: editingTextID)
-                .equatable()
-                .offset(x: part == .run ? lift.offset.x * scale : 0, y: part == .run ? lift.offset.y * scale : 0)
+            ZStack(alignment: .topLeading) {
+                ForEach([DesignLiftPart.Part.under, .run, .over], id: \.self) { part in
+                    DesignLiftPart(page: lift.page, firstID: lift.firstID, lastID: lift.lastID, part: part, zoom: zoom,
+                                   editingTextID: editingTextID)
+                    .equatable()
+                    .offset(x: part == .run ? lift.offset.x * scale : 0, y: part == .run ? lift.offset.y * scale : 0)
+                }
             }
         } else {
             DesignArtwork(painted: page.painted, zoom: zoom, editingTextID: editingTextID)
