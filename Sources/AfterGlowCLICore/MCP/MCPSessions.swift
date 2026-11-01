@@ -151,6 +151,7 @@ public struct MCPSessions: Sendable {
         let files: [ExportedFile]
         do { files = try open.session.export(format, options: args["options"] ?? .object([:])) }
         catch { throw Refused("could not export as \(format): \(error)") }
+        if files.count == 1, let why = CLI.misnamed(out, format: format) { throw Refused(why) }
         guard files.count != 1 else { return try written(files.map { ($0.data, out) }, out, force: Self.force(args)) }
         var targets: [(Data, String)] = []
         for file in files { targets.append((file.data, try place(out + "/" + file.suggestedName))) }
