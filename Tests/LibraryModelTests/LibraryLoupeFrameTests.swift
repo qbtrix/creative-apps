@@ -41,6 +41,24 @@ import Testing
         #expect(catalog.loupeShownToken == request.token)
     }
 
+    /// Journeys read the loupe's checksum to see a develop step land; on the GPU route the base never changes,
+    /// so the checksum has to follow the frame's program too, and stay put for the same program.
+    @Test func checksumFollowsTheFramesSteps() throws {
+        var catalog = Self.loupe()
+        catalog.showsTestValues = true
+        func checksum(_ program: [ToneProgram.Operation]) throws -> String? {
+            let request = try #require(Self.request(&catalog))
+            catalog.showLoupeFrame(try LoupeGPUFrame(base: #require(Self.pixels(9)), program: program), token: request.token)
+            return catalog.loupeValue?.split(separator: " ").map(String.init).first { $0.count == 16 }
+        }
+        let plain = try checksum([])
+        let stepped = try checksum(Self.steps)
+        #expect(plain != nil)
+        #expect(stepped != plain)
+        #expect(try checksum([.adjustment(.exposure(stops: 0.6)), .adjustment(.contrast(20))]) != stepped)
+        #expect(try checksum(Self.steps) == stepped)
+    }
+
     @Test func staleFrameNeverLands() throws {
         var catalog = Self.loupe()
         let old = try #require(Self.request(&catalog))

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "the loupe's test checksum ignores a GPU frame's steps",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "parts.append(Self.checksum(render.image.checksum, steps: loupeSteps))",
+    "replace": "parts.append(Self.checksum(render.image.checksum, steps: nil))",
+    "tests": "LibraryLoupeFrameTests"
+  },
+  {
+    "label": "the steps' bytes never reach the hash",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "for byte in String(describing: steps).utf8 {",
+    "replace": "for byte in String(describing: steps).utf8.prefix(0) {",
+    "tests": "LibraryLoupeFrameTests"
+  }
+]
