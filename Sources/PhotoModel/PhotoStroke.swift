@@ -246,7 +246,8 @@ extension PhotoWorkspace {
         }
         var current = PhotoStroke(tool: .select, start: start, layerID: nil, layersBefore: layers, movesLayer: true)
         (current.extending, current.picksBefore) = (extending, before)
-        if let draft = moveDraft() {
+        var box: PaintedBox?
+        if let draft = moveDraft(&box) {
             (current.transformFrom, current.transformHandle) = (draft, .inside)
             transformDraft = draft
         }
@@ -360,27 +361,33 @@ extension PhotoWorkspace {
     /// shows (a stroke on a 24 MP layer lifts the stroke, not 96 MB), when the
     /// compositor can lift it (`liftKey`). Nil for several picked layers, a
     /// text or clear layer, or a layer the lift can't draw (one under a
-    /// visible layer, masked, styled, blended): those move by offsets.
-    /// ponytail: `movePrepared` reads this on every canvas show; clear tiles
-    /// that share no buffer are each read in full (`paintedBounds`), cache the
-    /// box per layer revision if that shows up.
-    private func moveDraft() -> TransformDraft? {
+    /// visible layer, masked, styled, blended): those move by offsets. The box
+    /// comes from `known` while its layer and pixels match, else is read into
+    /// it (`paintedBounds(of:in:reusing:)`); the offset and the lift check run
+    /// every call.
+    private func moveDraft(_ known: inout PaintedBox?) -> TransformDraft? {
         let targets = movableSelectedLayers
-        guard targets.count == 1, let at = targets.first, let tiles = pixels[layers[at].id],
-            let painted = try? tiles.paintedBounds()
-        else { return nil }
+        guard targets.count == 1, let at = targets.first else { return nil }
+        let id = layers[at].id
+        guard let painted = paintedBounds(of: id, in: nil, reusing: &known) else { return nil }
         let box = painted.offsetBy(layers[at].offsetX, layers[at].offsetY)
         var probe = self
-        probe.transformDraft = TransformDraft(layerID: layers[at].id, box: box)
+        probe.transformDraft = TransformDraft(layerID: id, box: box)
         return probe.liftKey == nil ? nil : probe.transformDraft
     }
 
     /// Self with the draft a Select move of the picks begins (`moveDraft`), so
     /// the canvas makes the lift's pixels before the press, as it does once a
     /// Free Transform draft shows; nil when the tool isn't Select, a draft is
-    /// already up, or the next drag wouldn't lift.
-    public var movePrepared: PhotoWorkspace? {
-        guard tool == .select, transformDraft == nil, let draft = moveDraft() else { return nil }
+    /// already up, or the next drag wouldn't lift. `known` is the box kept
+    /// across calls; it is dropped when the tool isn't Select, so no other
+    /// tool's writes copy the tiles it holds.
+    public func movePrepared(reusing known: inout PaintedBox?) -> PhotoWorkspace? {
+        guard tool == .select else {
+            known = nil
+            return nil
+        }
+        guard transformDraft == nil, let draft = moveDraft(&known) else { return nil }
         var ahead = self
         ahead.transformDraft = draft
         return ahead

@@ -5,7 +5,9 @@
 // transform (a press on a layer is a move that went nowhere), the box's whole gesture, its press too, on
 // LiveDragLine's copy, so with the pointer down the editor body runs 0 times and the canvas composites 0 regions
 // (PhotoRenderCount, debug only); the box shows on the overlay. The release picks: the click the background, the
-// box both layers. The counts start once the first picture has landed (`idle` must settle). The window draws on
+// box both layers. The counts start once the first picture has landed (`idle` must settle). Redraws with Select
+// picked that leave the picked layer's pixels alone read its painted box (the move's lift, the Transform rows) 0
+// times (#6133). The window draws on
 // the app's default route, Metal with resident tiles (`photoRendering`, as the live transform tests set it): hosted
 // without one the canvas draws 24 MP on the CPU, about 35 s on a debug build and past 150 s on a loaded runner.
 // Nested in BodyCountSuites: it reads process-wide counters. macOS only.
@@ -64,6 +66,43 @@ extension BodyCountSuites {
             #if DEBUG
             #expect(down.bodies == 0, "the box drag ran the editor body \(down.bodies) times over \(Self.samples) samples")
             #expect(down.regions == 0, "the box drag composited \(down.regions) regions")
+            #endif
+        }
+
+        static let redraws = 30
+
+        /// A canvas redraw with Select picked reads the picked layer's painted box (the move's lift and the
+        /// Transform rows, #6133) only when that layer's pixels change, not on every show: 30 redraws (the
+        /// background's visibility toggled, the picked top layer untouched) read it 0 times. Each redraw's main-thread step is printed for
+        /// Select and Marquee, not judged (a wall-clock bound belongs on the perf list).
+        @Test(.timeLimit(.minutes(3))) func selectRedrawsReadThePickedLayersBoxOnlyWhenItsPixelsChange() async throws {
+            let (model, _, bottom) = try Self.document(.select)
+            let w = RenderBudgetWindow(AnyView(PhotoWindow(model: model).allowsWindowActivationEvents()
+                .environment(\.photoRendering, RenderBudgetPhotoLiveTransformTests.rendering(.gpu))))
+            defer { w.close() }
+            let (_, send) = try await Self.open(w)
+
+            let boxes = Self.paintedBoxes()
+            let select = try await w.measure("photo select redraws, 24 MP", bodies: RenderBudgetPhotoTransformTests.bodies) {
+                try await w.ticks(Self.redraws) { _ in send(.toggleVisibility(bottom)) }
+            }
+            let read = Self.paintedBoxes() - boxes
+            send(.tool(.marquee))
+            try await w.settle()
+            let marquee = try await w.measure("photo marquee redraws, 24 MP", bodies: RenderBudgetPhotoTransformTests.bodies) {
+                try await w.ticks(Self.redraws) { _ in send(.toggleVisibility(bottom)) }
+            }
+            print("RENDER-BUDGET photo select redraw p95 \(select.p95) ms (marquee \(marquee.p95) ms), \(read) box reads over \(Self.redraws) redraws")
+            #if DEBUG
+            #expect(read <= 1, "Select read the picked layer's painted box \(read) times over \(Self.redraws) redraws that left its pixels alone")
+            #endif
+        }
+
+        static func paintedBoxes() -> Int {
+            #if DEBUG
+            return PhotoRenderCount.paintedBoxes.withLock { $0 }
+            #else
+            return 0
             #endif
         }
 
