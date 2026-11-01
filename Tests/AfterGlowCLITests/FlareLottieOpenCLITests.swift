@@ -3,7 +3,7 @@
 // on it writes a .flare and leaves the JSON's bytes as they were, a save of the native format to anything but a .flare
 // (`--in-place`, `--out <name>.json` with or without `--force`, `new`, an MCP save) refuses rather than write a .flare
 // into a .json, a script's Lottie output is named .json (the extension Flare opens, not
-// the format id) and opens again, and a file that isn't Lottie is refused. The bounce fixture is FlareModelTests'
+// the format id) and opens again, an export to a .lottie (dotLottie's zip), by the CLI or MCP, is refused, and a file that isn't Lottie is refused. The bounce fixture is FlareModelTests'
 // hand-written one. In process, on a FakeIO; runs on Linux and macOS.
 import AfterGlowCLICore
 import FlareModel
@@ -100,7 +100,34 @@ import Testing
         }
         let saved = sessions.call(.save, .object(["doc": doc, "force": .bool(true)]), now: 0)
         #expect(saved.isError, "save wrote with no path: \(saved.text)")
+        #expect(saved.text.contains("no file yet"), "the import kept its path, so only the .json guard refused: \(saved.text)")
         #expect(io.files["/tmp/mcp/bounce.json"] == input, "a .flare was written over the JSON")
+    }
+
+    @Test func anExportToADotLottieIsRefusedAndAJSONOneOpensAgain() throws {
+        let io = FakeIO(files: ["bounce.json": try Self.bounce()])
+        let refused = CLI.run(["flare", "export", "bounce.json", "--format", "lottie", "--out", "e.lottie", "--force"], io: io)
+        #expect(refused == CLI.Exit.usage, "--out e.lottie exited \(refused)")
+        #expect(io.files["e.lottie"] == nil, "a Lottie JSON was written under dotLottie's zip extension")
+        #expect(io.stderr.joined().contains("e.json"), "the refusal doesn't name the .json to use: \(io.stderr)")
+        let code = CLI.run(["flare", "export", "bounce.json", "--format", "lottie", "--out", "e.json"], io: io)
+        #expect(code == 0, "export exited \(code): \(io.stderr)")
+        #expect(CLI.run(["flare", "open", "e.json"], io: io) == 0, "the export doesn't open: \(io.stderr)")
+    }
+
+    @Test func anMCPExportToADotLottieIsRefused() throws {
+        let io = FakeIO(files: ["/tmp/mcp/bounce.json": try Self.bounce()])
+        var sessions = MCPSessions(MCPOptions(apps: Apps.all, roots: ["/tmp/mcp"]), io: io)
+        let opened = sessions.call(.open(app: "flare"), .object(["path": .string("/tmp/mcp/bounce.json")]), now: 0)
+        guard case .object(let fields) = opened.structured, let doc = fields["doc"] else {
+            Issue.record("open failed: \(opened.text)")
+            return
+        }
+        let args = { (path: String) -> JSONValue in .object(["doc": doc, "format": .string("lottie"), "path": .string(path)]) }
+        let refused = sessions.call(.export, args("/tmp/mcp/e.lottie"), now: 0)
+        #expect(refused.isError && io.files["/tmp/mcp/e.lottie"] == nil, "export wrote a .lottie: \(refused.text)")
+        let made = sessions.call(.export, args("/tmp/mcp/e.json"), now: 0)
+        #expect(!made.isError && io.files["/tmp/mcp/e.json"] != nil, "a .json export refused: \(made.text)")
     }
 
     @Test func aScriptsLottieOutputIsNamedJSONAndOpensAgain() throws {

@@ -26,5 +26,19 @@
     "find": "tool: .init(tool: tool, cropAspect: cropAspect)",
     "replace": "tool: .init(tool: .move, cropAspect: cropAspect)",
     "tests": "PhotoFacetsTests"
+  },
+  {
+    "label": "textBoxNotCarried: the textBox facet is always empty, so a typed key moves no facet and the box never shows its words",
+    "file": "Sources/PhotoModel/PhotoFacets.swift",
+    "find": "            textBox: textBox)\n",
+    "replace": "            textBox: nil)\n",
+    "tests": "PhotoFacetsTests"
+  },
+  {
+    "label": "textBoxInCanvas: the canvas facet compares the open box too, so a typed key moves the canvas and the window body re-runs",
+    "file": "Sources/PhotoModel/PhotoFacets.swift",
+    "find": "        case .canvas: canvas == other.canvas\n",
+    "replace": "        case .canvas: canvas == other.canvas && textBox == other.textBox\n",
+    "tests": "PhotoFacetsTests"
   }
 ]
