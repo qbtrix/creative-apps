@@ -32,9 +32,7 @@ struct DesignSelectionMarks: View {
             let hits = Array(painted.lazy.filter { ids.contains($0.node.id) }.map(\.node))
             // Every hit's outline in one stroked path, not a view each: a marquee that grows by a
             // hundred layers changes one shape instead of inserting a hundred views (render contract rule 3).
-            DesignSelectionBox.outlines(hits, zoom: zoom).stroke(SuiteColor.accent, lineWidth: 1)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
+            DesignSelectionBox.outlines(hits, zoom: zoom)
             if let bounds = DesignRect.union(hits.map(\.frame)) {
                 // A live marquee shows what it will select, not the box it will commit.
                 if model.marquee == nil {
@@ -105,8 +103,15 @@ struct DesignSelectionBox: View {
         TransformBox(box: Rect(minX: rect.x, minY: rect.y, maxX: rect.maxX, maxY: rect.maxY), degrees: degrees)
     }
 
-    /// Each node's outline as the box draws it alone, scaled by `zoom` and turned with the node, in one path.
-    static func outlines(_ nodes: [DesignNode], zoom: Double) -> Path {
+    /// Each node's accent outline as the box draws it alone, all stroked as one shape.
+    static func outlines(_ nodes: [DesignNode], zoom: Double) -> some View {
+        outlinePath(nodes, zoom: zoom).stroke(SuiteColor.accent, lineWidth: 1)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+
+    /// Each node's outline, scaled by `zoom` and turned with the node, in one path.
+    static func outlinePath(_ nodes: [DesignNode], zoom: Double) -> Path {
         let scale = usable(zoom)
         return Path { path in
             for node in nodes {

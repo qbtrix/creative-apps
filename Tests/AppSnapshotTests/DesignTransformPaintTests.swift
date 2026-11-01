@@ -90,10 +90,10 @@ import Testing
         let upright = DesignNode(
             id: "u", name: "U", kind: .rectangle, frame: DesignRect(x: 400, y: 100, width: 50, height: 50),
             fill: DesignColor(255, 0, 0))
-        let bounds = DesignSelectionBox.outlines([turned(90)], zoom: 2).boundingRect
+        let bounds = DesignSelectionBox.outlinePath([turned(90)], zoom: 2).boundingRect
         #expect(abs(bounds.minX - 300) < 0.01 && abs(bounds.minY - 100) < 0.01, "\(bounds)")
         #expect(abs(bounds.width - 200) < 0.01 && abs(bounds.height - 400) < 0.01, "\(bounds)")
-        let both = DesignSelectionBox.outlines([turned(90), upright], zoom: 1).boundingRect
+        let both = DesignSelectionBox.outlinePath([turned(90), upright], zoom: 1).boundingRect
         #expect(abs(both.maxX - 450) < 0.01 && abs(both.minY - 50) < 0.01, "\(both)")
     }
 
