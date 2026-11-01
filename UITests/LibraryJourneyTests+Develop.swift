@@ -253,13 +253,16 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         // draws again on the route that is ready, so the same picture reads the same once both share one.
         var same = wait(5) { (try? self.checksum(library)) == developed }
         for _ in 0..<3 where !same {
-            library.press(.escape)
-            cell("IMG_0001", library).doubleClick()
+            backToGrid(library)
+            let again = cell("IMG_0001", library)
+            XCTAssert(again.waitForExistence(timeout: 5), "the grid has no IMG_0001 after the loupe")
+            again.doubleClick()
             same = wait(5) { (try? self.checksum(library)) == developed }
         }
         XCTAssert(same, "the picture changed across the relaunch")
-        library.press(.escape)
+        backToGrid(library)
         let first = cell("IMG_0001", library)
+        XCTAssert(first.waitForExistence(timeout: 5), "the grid has no IMG_0001 after the loupe")
         XCTAssert(wait(2) { Self.text(first).hasPrefix("ready") }, "IMG_0001's cell reads \(Self.text(first))")
         library.app.terminate()
     }
@@ -352,6 +355,14 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     @MainActor private func cell(_ name: String, _ library: Journey) -> XCUIElement {
         library.app.descendants(matching: .any).matching(NSPredicate(
             format: "identifier BEGINSWITH %@ AND identifier CONTAINS %@", "library.grid.cell.", name)).firstMatch
+    }
+
+    /// Leaves the loupe by its Grid button. Escape goes only to a focused loupe, and the
+    /// Develop tab's click has just taken the focus.
+    @MainActor private func backToGrid(_ library: Journey) {
+        let grid = library.element("library.loupe.grid")
+        XCTAssert(grid.waitForExistence(timeout: 3), "the loupe has no Grid button (library.loupe.grid)")
+        grid.click()
     }
 
     /// The Develop row of `slider` ("Exposure"): `library.develop.exposure`.
