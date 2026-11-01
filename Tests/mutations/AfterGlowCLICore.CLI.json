@@ -1,0 +1,4 @@
+[
+  {"label": "CLI export skips the dotLottie check", "file": "Sources/AfterGlowCLICore/CLI.swift", "find": "if files.count == 1, let why = misnamed(out, format: format) { throw Refusal.usage(why) }", "replace": "", "tests": "FlareLottieOpenCLITests"},
+  {"label": "misnamed never names .lottie", "file": "Sources/AfterGlowCLICore/CLI.swift", "find": "target.lowercased().hasSuffix(\".lottie\")", "replace": "target.lowercased().hasSuffix(\".dotlottie\")", "tests": "FlareLottieOpenCLITests"}
+]
