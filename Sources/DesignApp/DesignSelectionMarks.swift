@@ -7,7 +7,7 @@
 // with the box's handles, but no knob, while the Model's `showsSelectionHandles` holds; a lock or
 // hidden layer in the selection leaves none. While a marquee is live only each hit
 // layer's outline draws: no box, no handles until the drag ends. Dashes are the live marquee's alone
-// (DesignMarqueeMark), so a committed selection never reads as one in progress.
+// (SuiteUI's SelectBoxMark), so a committed selection never reads as one in progress.
 // A turned layer's outline and handles turn with it. The text node being edited shows its editor's box instead. The box carries the
 // one accessibility element, `design.canvas.selection` ("Selection"): a clear
 // rectangle at the box's frame, an image, never a control. Takes no clicks; the

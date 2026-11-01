@@ -58,7 +58,7 @@ private final class TonedSink: @unchecked Sendable {
         var workspace = try Self.document()
         workspace.adjust(.hue(-30))
         workspace.selectLayer(try #require(workspace.layers.first?.id))
-        workspace.selectTool(.move)
+        workspace.selectTool(.select)
         try workspace.beginTransform()
         let canvas = try #require(workspace.canvas)
         let (route, _, gpu) = Self.route()

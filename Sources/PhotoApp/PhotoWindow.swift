@@ -243,11 +243,15 @@ struct PhotoWindow: View {
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
             pacer.add(move) { moves in
                 if samplePress(moves) { return }
+                // A drag the live transform holds (Free Transform's, a Select move) keeps going there: a later
+                // sample's `from` is the last sample, not the press, so only the first routes by the press.
+                if liveTransform.held { return runLiveDrag(moves) }
                 // A drag that only moves an overlay mark (a Gradient line, an area tool's selection, a crop
-                // box) runs on LiveDragLine's copy, and the overlay alone redraws.
+                // box, Select's box) runs on LiveDragLine's copy, and the overlay alone redraws.
                 if dragLine.drags(moves, on: model, zoom: zoom) { return }
-                // Free Transform's canvas drags and the Move tool's run on the live transform, as the handles' do.
-                if model.dragRunsLive { return runLiveDrag(moves) }
+                // Free Transform's canvas drags and a Select press on a layer run on the live transform, as the
+                // handles' do.
+                if let press = moves.first, model.dragRunsLive(pressAt: press.from) { return runLiveDrag(moves) }
                 guard let painted = liveStroke.drags(moves, on: model, zoom: zoom) else {
                     model.drags(moves, zoom: zoom)
                     return renderer.show(model)
