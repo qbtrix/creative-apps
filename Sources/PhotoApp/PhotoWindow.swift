@@ -213,7 +213,9 @@ struct PhotoWindow: View {
         // Drag samples still waiting for the display frame land first, then a live stroke goes back.
         if case .drag = intent {} else {
             pacer.flush()
-            takeStroke(keepingTransform: Self.isTransformSample(intent) || Self.isToneSample(intent))
+            takeStroke(
+                keepingTransform: Self.isTransformSample(intent) || Self.isToneSample(intent)
+                    || Self.isAdjustmentLayerSample(intent))
         }
         switch intent {
         case .newImage:
