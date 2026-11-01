@@ -67,7 +67,12 @@ final class LibraryDevelopJourneyTests: XCTestCase {
         let first = cell("IMG_0001", library)
         XCTAssert(first.waitForExistence(timeout: 10), "no grid cell for IMG_0001")
         first.doubleClick()
-        XCTAssert(library.element("library.loupe").waitForExistence(timeout: 10), "double-click didn't open the loupe")
+        let loupe = library.element("library.loupe")
+        // A loaded runner sometimes drops a synthesized double-click while the grid settles after the
+        // sort (journeys run 41279040508: three suites missed the loupe this way); a second one, as a
+        // person would, opens it.
+        if !loupe.waitForExistence(timeout: 5), first.exists { first.doubleClick() }
+        XCTAssert(loupe.waitForExistence(timeout: 10), "double-click didn't open the loupe")
         developTab(library)
         let histogram = library.element("library.develop.histogram")
         XCTAssert(histogram.waitForExistence(timeout: 5), "no histogram (library.develop.histogram)")
