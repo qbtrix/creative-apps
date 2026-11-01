@@ -5,8 +5,12 @@
 // transform (a press on a layer is a move that went nowhere), the box's whole gesture, its press too, on
 // LiveDragLine's copy, so with the pointer down the editor body runs 0 times and the canvas composites 0 regions
 // (PhotoRenderCount, debug only); the box shows on the overlay. The release picks: the click the background, the
-// box both layers. The counts start once the first picture has landed (`idle` must settle; it can take over a
-// minute on a loaded runner). Nested in BodyCountSuites: it reads process-wide counters. macOS only.
+// box both layers. The counts start once the first picture has landed (`idle` must settle). Redraws with Select
+// picked that leave the picked layer's pixels alone read its painted box (the move's lift, the Transform rows) 0
+// times (#6133). The window draws on
+// the app's default route, Metal with resident tiles (`photoRendering`, as the live transform tests set it): hosted
+// without one the canvas draws 24 MP on the CPU, about 35 s on a debug build and past 150 s on a loaded runner.
+// Nested in BodyCountSuites: it reads process-wide counters. macOS only.
 #if canImport(AppKit)
 import AppKit
 import CoreRaster
@@ -24,7 +28,8 @@ extension BodyCountSuites {
 
         @Test(.timeLimit(.minutes(3))) func selectClickAndBoxRunNoBodyAndNoPixelWorkWhileDown() async throws {
             let (model, top, bottom) = try Self.document(.select)
-            let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
+            let w = RenderBudgetWindow(AnyView(PhotoWindow(model: model).allowsWindowActivationEvents()
+                .environment(\.photoRendering, RenderBudgetPhotoLiveTransformTests.rendering(.gpu))))
             defer { w.close() }
             let (opened, regions) = (ContinuousClock.now, Self.regions())
             let (edited, send) = try await Self.open(w)
@@ -64,6 +69,43 @@ extension BodyCountSuites {
             #endif
         }
 
+        static let redraws = 30
+
+        /// A canvas redraw with Select picked reads the picked layer's painted box (the move's lift and the
+        /// Transform rows, #6133) only when that layer's pixels change, not on every show: 30 redraws (the
+        /// background's visibility toggled, the picked top layer untouched) read it 0 times. Each redraw's main-thread step is printed for
+        /// Select and Marquee, not judged (a wall-clock bound belongs on the perf list).
+        @Test(.timeLimit(.minutes(3))) func selectRedrawsReadThePickedLayersBoxOnlyWhenItsPixelsChange() async throws {
+            let (model, _, bottom) = try Self.document(.select)
+            let w = RenderBudgetWindow(AnyView(PhotoWindow(model: model).allowsWindowActivationEvents()
+                .environment(\.photoRendering, RenderBudgetPhotoLiveTransformTests.rendering(.gpu))))
+            defer { w.close() }
+            let (_, send) = try await Self.open(w)
+
+            let boxes = Self.paintedBoxes()
+            let select = try await w.measure("photo select redraws, 24 MP", bodies: RenderBudgetPhotoTransformTests.bodies) {
+                try await w.ticks(Self.redraws) { _ in send(.toggleVisibility(bottom)) }
+            }
+            let read = Self.paintedBoxes() - boxes
+            send(.tool(.marquee))
+            try await w.settle()
+            let marquee = try await w.measure("photo marquee redraws, 24 MP", bodies: RenderBudgetPhotoTransformTests.bodies) {
+                try await w.ticks(Self.redraws) { _ in send(.toggleVisibility(bottom)) }
+            }
+            print("RENDER-BUDGET photo select redraw p95 \(select.p95) ms (marquee \(marquee.p95) ms), \(read) box reads over \(Self.redraws) redraws")
+            #if DEBUG
+            #expect(read <= 1, "Select read the picked layer's painted box \(read) times over \(Self.redraws) redraws that left its pixels alone")
+            #endif
+        }
+
+        static func paintedBoxes() -> Int {
+            #if DEBUG
+            return PhotoRenderCount.paintedBoxes.withLock { $0 }
+            #else
+            return 0
+            #endif
+        }
+
         /// The 24 MP image with `tool` picked and the clear top layer selected: a background, and a top layer
         /// painted only near (50, 50).
         static func document(_ tool: PhotoTool) throws -> (PhotoWorkspace, top: String, bottom: String) {
@@ -82,8 +124,8 @@ extension BodyCountSuites {
         static func open<V: View>(_ w: RenderBudgetWindow<V>) async throws -> (PhotoWindowEditedView, PhotoPerform) {
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
             try await w.settle(untilStable: RenderBudgetPhotoTransformTests.bodies)
-            // The first 24 MP picture runs past a minute on a loaded runner; a press measured before it lands
-            // counts its last regions as the press's, so the counts start only from a settled canvas.
+            // A press measured before the first picture lands counts its last regions as the press's, so the
+            // counts start only from a settled canvas.
             try #require(await RenderBudgetPhotoLiveTransformTests.idle(w, limit: .seconds(150)), "the first picture never landed")
             return (edited, try #require(edited.send))
         }
