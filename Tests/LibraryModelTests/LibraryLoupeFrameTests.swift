@@ -53,7 +53,9 @@ import Testing
         }
         let plain = try checksum([])
         let stepped = try checksum(Self.steps)
-        #expect(plain != nil)
+        // An empty program draws the base itself, so it reads the base's checksum, as the CPU route shows it:
+        // the live journey's Show Original lands on the GPU route after a CPU-route first render.
+        #expect(plain == (try #require(Self.pixels(9))).checksum)
         #expect(stepped != plain)
         #expect(try checksum([.adjustment(.exposure(stops: 0.6)), .adjustment(.contrast(20))]) != stepped)
         #expect(try checksum(Self.steps) == stepped)

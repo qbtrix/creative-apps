@@ -12,5 +12,12 @@
     "find": "for byte in String(describing: steps).utf8 {",
     "replace": "for byte in String(describing: steps).utf8.prefix(0) {",
     "tests": "LibraryLoupeFrameTests"
+  },
+  {
+    "label": "an empty program hashes over the base, so Show Original never matches the CPU route's picture",
+    "file": "Sources/LibraryModel/LibraryReadouts.swift",
+    "find": "guard let steps, !steps.isEmpty, var hash",
+    "replace": "guard let steps, var hash",
+    "tests": "LibraryLoupeFrameTests"
   }
 ]

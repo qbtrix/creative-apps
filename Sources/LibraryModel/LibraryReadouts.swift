@@ -88,10 +88,10 @@ extension LibraryCatalog {
         return parts.joined(separator: " ")
     }
 
-    /// `base` alone on the CPU route; on the GPU route the base never changes, so FNV-1a goes on over the
-    /// frame's program, the steps the view writes over it.
+    /// `base` alone on the CPU route and for an empty program (the base drawn as it is); otherwise the base
+    /// never changes, so FNV-1a goes on over the frame's program, the steps the view writes over it.
     static func checksum(_ base: String, steps: [ToneProgram.Operation]?) -> String {
-        guard let steps, var hash = UInt64(base, radix: 16) else { return base }
+        guard let steps, !steps.isEmpty, var hash = UInt64(base, radix: 16) else { return base }
         for byte in String(describing: steps).utf8 { hash = (hash ^ UInt64(byte)) &* 0x0000_0100_0000_01b3 }
         let hex = String(hash, radix: 16)
         return String(repeating: "0", count: 16 - hex.count) + hex
