@@ -141,13 +141,19 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     @MainActor private func editCurveAndLevels(suffix: String) throws {
         let library = try XCTUnwrap(self.library, "step 1 opened no window")
         let before = try checksum(library)
-        let middle = library.element("library.develop.curve").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        // Step 5's Show Original click scrolls the list down; a drag doesn't scroll, so on a short screen
+        // the curve's middle would sit under the Info/Develop switch.
+        let curve = library.element("library.develop.curve")
+        scrollDevelop(toShow: curve, library)
+        let middle = curve.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         middle.press(forDuration: 0.1, thenDragTo: middle.withOffset(CGVector(dx: 0, dy: -40)))
         XCTAssert(wait(5) { (try? self.checksum(library)) != before }, "the curve didn't re-render the loupe")
         library.shot("develop-curve\(suffix)")
         expectUndo("Undo Curve", library)
         // The Midtones handle (LevelsHandles) dragged left brightens: one "Levels" step.
-        let midtones = inspectorItem("Midtones", library).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let handle = inspectorItem("Midtones", library)
+        scrollDevelop(toShow: handle, library)
+        let midtones = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         midtones.press(forDuration: 0.1, thenDragTo: midtones.withOffset(CGVector(dx: -20, dy: 0)))
         expectUndo("Undo Levels", library)
     }
@@ -333,8 +339,8 @@ final class LibraryDevelopJourneyTests: XCTestCase {
     }
 
     /// Scrolls the Develop list until `element` lies whole inside it. XCUITest scrolls
-    /// to click a row, but it right-clicks a row hidden above the list at its frame,
-    /// which is the histogram's place (#3560).
+    /// to click a row, but it right-clicks or drags a control hidden outside the list
+    /// at its frame, which is another control's place (#3560).
     @MainActor private func scrollDevelop(toShow element: XCUIElement, _ library: Journey) {
         let list = library.element("suite.inspector").scrollViews.firstMatch
         XCTAssert(element.waitForExistence(timeout: 5), "nothing to scroll to in the Develop list")
