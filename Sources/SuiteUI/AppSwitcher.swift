@@ -3,7 +3,8 @@
 // SuiteWindow's toolbar (Home, Flare, Design, Photo, Library, Halo), no labels
 // and no bar behind it (docs/blueprints/suiteui.md section 6).
 // The current app's item sits in a capsule of SuiteUI glass (`suiteGlass`, the
-// row's one glass shape) with its icon in textPrimary; the others are
+// row's one glass shape, drawn behind the row so each item's frame stays one
+// step wide) with its icon in textPrimary; the others are
 // textSecondary. Item centers sit `spacing` apart, one of `spacingSteps`
 // (80, 64, 48, 40: from `switcherSpacing` down by SuiteSpacing.l to
 // `switcherSpacingMinimum`), or the last step, `compactSpacing` (toolButton,
@@ -241,14 +242,6 @@ public struct AppSwitcher: View {
                         .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
-                .background {
-                    if isCurrent {
-                        Color.clear
-                            .frame(
-                                width: Self.capsuleWidth(spacing: spacing), height: Self.capsuleHeight(spacing: spacing))
-                            .suiteGlass(in: Capsule())
-                    }
-                }
                 .disabled(item.isDisabled(current: current))
                 // After .disabled, so the tooltip still shows on a disabled item.
                 .help(item.help)
@@ -260,6 +253,18 @@ public struct AppSwitcher: View {
                         reason: item.isDisabled(current: current) ? item.unavailableHelp : nil
                     ).selecting(isCurrent),
                     identifies: true)
+            }
+        }
+        // The capsule sits behind the row, not inside the current button: it is
+        // wider than the step, and inside the button it widened that button's
+        // frame over both neighbours (the app audit's overlap check).
+        .background(alignment: .leading) {
+            if let index = items.firstIndex(where: { $0.id == current }) {
+                let width = Self.capsuleWidth(spacing: spacing)
+                Color.clear
+                    .frame(width: width, height: Self.capsuleHeight(spacing: spacing))
+                    .suiteGlass(in: Capsule())
+                    .offset(x: CGFloat(index) * spacing + (spacing - width) / 2)
             }
         }
         .accessibilityElement(children: .contain)
