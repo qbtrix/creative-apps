@@ -17,9 +17,7 @@
 // folder, never the user's. In Tests/perf-suites.txt, so the merge gate skips
 // it. PhotoFlipCanvasBudgetTests (OC-14, in BodyCountSuites): Flip Canvas on an
 // 8K two-layer window takes at most 2 window bodies. Its window draws on the
-// app's default route, Metal with resident tiles (`photoRendering`): on the CPU
-// its 8K renders outlive the window by over 30 s and starve the next hosted
-// window's first picture (PhotoWindowStrokeTests). macOS only.
+// app's default route, Metal with resident tiles (`photoRendering`). macOS only.
 import CoreRaster
 import CoreRender
 import CoreRenderMetal
