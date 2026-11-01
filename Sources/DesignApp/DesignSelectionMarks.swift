@@ -99,19 +99,19 @@ struct DesignSelectionBox: View {
         .accessibilityHidden(true)
     }
 
-    static func turn(_ rect: DesignRect, degrees: Double) -> TransformBox {
+    nonisolated static func turn(_ rect: DesignRect, degrees: Double) -> TransformBox {
         TransformBox(box: Rect(minX: rect.x, minY: rect.y, maxX: rect.maxX, maxY: rect.maxY), degrees: degrees)
     }
 
     /// Each node's accent outline as the box draws it alone, all stroked as one shape.
-    static func outlines(_ nodes: [DesignNode], zoom: Double) -> some View {
+    @MainActor static func outlines(_ nodes: [DesignNode], zoom: Double) -> some View {
         outlinePath(nodes, zoom: zoom).stroke(SuiteColor.accent, lineWidth: 1)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
     }
 
     /// Each node's outline, scaled by `zoom` and turned with the node, in one path.
-    static func outlinePath(_ nodes: [DesignNode], zoom: Double) -> Path {
+    nonisolated static func outlinePath(_ nodes: [DesignNode], zoom: Double) -> Path {
         let scale = usable(zoom)
         return Path { path in
             for node in nodes {
