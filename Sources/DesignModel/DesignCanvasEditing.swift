@@ -101,6 +101,8 @@ struct DesignGesture: Sendable, Equatable {
     var before: DesignSnapshot
     /// Whether the node under a Move press was already selected before it.
     var wasSelected: Bool
+    /// The layer a press on one of several selected hit: a release without a move picks it alone.
+    var pressed: String?
     /// Whether any call left the start.
     var moved = false
     /// The undo history at the start; a service step puts it back before it applies.
@@ -452,7 +454,10 @@ extension DesignWorkspace {
         case .marquee(let frame):
             // A click without moving: the frame's background selects it; outside, nothing.
             if !done.moved, let frame { selectItem(frame) }
-        case .moveSeveral, .resizeSeveral, .optionCopy, .turn:
+        case .moveSeveral:
+            // A click on one of several selected picks it alone; a drag moved them all.
+            if !done.moved, let id = done.pressed { selectItem(id) }
+        case .resizeSeveral, .optionCopy, .turn:
             break
         case .draw(let kind):
             record("Add \(kind.defaultName)", before: done.before)
@@ -478,6 +483,7 @@ extension DesignWorkspace {
         let (shift, option) = (modifiers.contains(.shift), modifiers.contains(.option))
         var route = DesignGesture.Route.none
         var wasSelected = false
+        var pressed: String?
         let ids = selectedNodeIDs
         switch tool {
         case .move:
@@ -498,6 +504,7 @@ extension DesignWorkspace {
                 route = .optionCopy(ids, mint())
             } else if let id = hit, ids.contains(id), ids.count > 1 {
                 route = .moveSeveral(ids)
+                pressed = id
             } else if let id = hit, !ids.contains(id), selectedPage?.nodes.node(id)?.kind == .frame {
                 route = .marquee(id)
             } else if let id = hit {
@@ -519,7 +526,8 @@ extension DesignWorkspace {
         case .pen:
             break
         }
-        var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)
+        var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected,
+                                    pressed: pressed, history: history)
         buildSnap(&gesture)
         return gesture
     }
