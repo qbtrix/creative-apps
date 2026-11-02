@@ -597,3 +597,4 @@ utc	stage	event	ref	note
 2026-11-02T14:58Z	check-in	dev green, no new dev-red; captain merged #6215 (photo autosave); #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-02T16:26Z	check-in	dev green, no new dev-red; captain merged #6214 (suiteui/library mac finish); #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-02T17:06Z	check-in	dev green, no new dev-red; captain merged #6217 (suiteui grid click count); #5353 open clean a92b4651; no new findings; 52 photo findings
+2026-11-02T17:57Z	check-in	new dev-red #6220 (macos, real on rerun, range #6212 #6214 #6215 #6217, all captain's; not ours); #5353 open clean a92b4651; no new findings; 52 photo findings
