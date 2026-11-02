@@ -113,7 +113,9 @@ private func clearThroughFileFlow<T: FileFlowTarget>(_ target: inout T) throws {
     @Test func aMissingDroppedSVGSaysSo() throws {
         var workspace = opened()
         let before = workspace.document
-        try workspace.perform([.place(path: "/nowhere/logo.svg")])
+        #expect(throws: CatalogError.failed(id: "file.drop", message: "Can't read logo.svg.")) {
+            try workspace.perform([.place(path: "/nowhere/logo.svg")])
+        }
         #expect(workspace.document == before)
         #expect(workspace.placeStatus == "Can't read logo.svg.")
     }
