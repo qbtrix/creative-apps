@@ -10,7 +10,10 @@
 // (as "<title>.flare"), else the file the document was opened from or last
 // saved to, else where the save panel says; Save As always asks. A write that
 // fails says why in `saveError`. The panels, the alerts and the dirty dot are
-// FlareFilePanels' (FlareFilePanels.swift). Close asks to save a dirty document.
+// FlareFilePanels' (FlareFilePanels.swift). Open, Open Recent, Open Sample and
+// New go through the unsaved guard first (`replacing`, FlareWindow.swift), and
+// Close sends the key window performClose, so SuiteUI's guard asks over a
+// dirty animation.
 // Open Sample opens the named fixture document (FlareFixtures, as `-FlareSample`
 // does) through `finishOpen`, clean and with no undo history; Keyed Ball is
 // FlareWindow's menu door. Each open and save is noted in the suite's recents
@@ -32,16 +35,16 @@ extension FlareWindow {
     /// Acts on a file intent.
     func performFile(_ intent: FlareIntent.File) {
         switch intent {
-        case .new: presented = .new
-        case .open: if let url = FlareFileDialogs.chooseFile() { open(url) }
-        case .openRecent(let path): open(URL(fileURLWithPath: path))
+        case .new: replacing { presented = .new }
+        case .open: replacing { if let url = FlareFileDialogs.chooseFile() { open(url) } }
+        case .openRecent(let path): replacing { open(URL(fileURLWithPath: path)) }
         case .clearRecent:
             try? model.clearRecent()
             drainFileRequests()
         case .save: Task { await save(asking: false) }
         case .saveAs: Task { await save(asking: true) }
-        case .close: Task { await close() }
-        case .openSample(let name): openSample(name)
+        case .close: NSApp.keyWindow?.performClose(nil)
+        case .openSample(let name): replacing { openSample(name) }
         case .create:
             guard let spec = NewDocumentSpec(intent) else { return }
             model.newDocument(spec)
@@ -186,18 +189,5 @@ extension FlareWindow {
             URL(fileURLWithPath: path).lastPathComponent == name
         else { return nil }
         return URL(fileURLWithPath: path)
-    }
-
-    /// Closes the window, first asking to save a dirty document.
-    func close() async {
-        let window = NSApp.keyWindow
-        if model.document != nil, model.isDirty {
-            switch await FlareFileDialogs.askToSave(model.title, in: window) {
-            case .cancel: return
-            case .save: guard await save(asking: false) else { return }
-            case .discard: break
-            }
-        }
-        window?.close()
     }
 }
