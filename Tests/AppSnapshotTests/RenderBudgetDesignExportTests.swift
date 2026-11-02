@@ -4,9 +4,9 @@
 // `sheet`: on `cards` with Desktop selected and the fakes, it opens File >
 // Export… (through DesignWindow's DEBUG `openExport` hook: the hosted window has
 // no menu bar), picks a format, a scale and a scope chip 3 times each, then
-// presses Cancel (`design.export.cancel`). The sheet's run is the export area's
-// own state, so the window body runs only for the request: at most 2 bodies over
-// the whole walk. `liveRun` (DE-10): on the live services, Desktop, A and B
+// presses Cancel (`design.export.cancel`). The request (DesignExportRequest) and
+// the sheet's run are the export area's own state, so the window body never runs
+// over the whole walk. `liveRun` (DE-10): on the live services, Desktop, A and B
 // selected, Scope Selection at PNG 1x into a temp folder (DesignExportArea's
 // DEBUG `testFolder`, standing in for the folder panel), Export writes three
 // files: at most 4 DesignEditor bodies (one per progress step plus the finish;
@@ -64,8 +64,9 @@ extension BodyCountSuites {
             }
             #expect(missing.isEmpty, "nothing to press for \(missing): \(walk)")
             #expect(w.window.attachedSheet == nil, "Cancel left the sheet open")
-            // The request is one window body; the sheet's edits are the area's own. Target: 1.
-            expectBodies(walk, atMost: 2, target: 1)
+            // The request and the sheet's edits are the area's own: the window never runs (its
+            // body re-run cost the open ~40 ms on the 2,000-layer page).
+            expectBodies(walk, atMost: 0, target: 0)
         }
 
         @Test(.timeLimit(.minutes(2)))
