@@ -101,7 +101,7 @@ final class DesignSnapJourneyTests: XCTestCase {
             }
             design.shot("snap-draw")
             clickUndo(design)
-            tool(design, "Move").click()
+            tool(design, "Select").click()
         }
 
         // 7. Off: View > Snap to Layers; step 2's drag lands short of 200 with no guides.

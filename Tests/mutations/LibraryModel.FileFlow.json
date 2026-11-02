@@ -12,5 +12,26 @@
     "find": "[\"jpg\", \"jpeg\", \"png\", \"heic\", \"heif\"]",
     "replace": "[\"jpg\", \"jpeg\", \"png\"]",
     "tests": "LibraryFileFlowTests.swift"
+  },
+  {
+    "label": "the host accepts an open hand-off but delivers nothing (#5947: Open sample lands in an empty catalog)",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "if !paths.isEmpty { await deliver(paths) }",
+    "replace": "_ = paths",
+    "tests": "LibraryDocumentHostTests"
+  },
+  {
+    "label": "a hand-off during the launch read imports at once, under the photos the restore brings",
+    "file": "Sources/LibraryModel/LibraryFileFlow+Kernel.swift",
+    "find": "guard catalogState != .loading, !handedOff.isEmpty else { return }",
+    "replace": "guard !handedOff.isEmpty else { return }",
+    "tests": "LibraryDocumentHostTests"
+  },
+  {
+    "label": "the restore never imports the waiting hand-off",
+    "file": "Sources/LibraryModel/LibraryPersistence.swift",
+    "find": "        saveError = nil\n        importHandedOff([])",
+    "replace": "        saveError = nil",
+    "tests": "LibraryDocumentHostTests"
   }
 ]
