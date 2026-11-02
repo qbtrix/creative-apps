@@ -1,0 +1,30 @@
+[
+  {
+    "label": "an inverted mask keeps the inside instead of the outside",
+    "file": "Sources/FlareModel/Live/FlareRaster.swift",
+    "find": "let inside = clip.inverted ? 1 - c[i] : c[i]",
+    "replace": "let inside = c[i]",
+    "tests": "FlareRasterTests"
+  },
+  {
+    "label": "a luma matte reads the source's alpha",
+    "file": "Sources/FlareModel/Live/FlareRaster.swift",
+    "find": "case .luma, .lumaInverted: 0.2126 * p[i * 4] + 0.7152 * p[i * 4 + 1] + 0.0722 * p[i * 4 + 2]",
+    "replace": "case .luma, .lumaInverted: p[i * 4 + 3]",
+    "tests": "FlareRasterTests"
+  },
+  {
+    "label": "a hidden matte source is looked up among the visible items",
+    "file": "Sources/FlareModel/Live/FlareRaster.swift",
+    "find": "let pool = link.inMatteItems ? list.matteItems : list.items",
+    "replace": "let pool = list.items",
+    "tests": "FlareRasterTests"
+  },
+  {
+    "label": "an item's masks are ignored",
+    "file": "Sources/FlareModel/Live/FlareRaster.swift",
+    "find": "                gate = mask\n",
+    "replace": "",
+    "tests": "FlareRasterTests"
+  }
+]

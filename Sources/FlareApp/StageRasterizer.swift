@@ -5,7 +5,8 @@
 // paint order exactly as FlareStage draws it on screen: `StagePath.cgPath` with the item's matrix, the fill (solid or
 // gradient, clipped to the path) and the stroke (its trimmed, dashed `strokePath`) at `width × stretch` with its cap
 // and join, both at the item's opacity. ImageIO encodes the CGImage as PNG; `frame` paints the same way into a
-// straight-alpha MediaFrame of an exact size for MP4 and GIF (export-pack FV-7). A zero or non-finite size, a context CoreGraphics won't make and a
+// straight-alpha MediaFrame of an exact size for MP4 and GIF (export-pack FV-7). A list with masks or mattes,
+// which this CoreGraphics path doesn't clip, draws through FlareRaster instead, the same pixels the CLI writes. A zero or non-finite size, a context CoreGraphics won't make and a
 // PNG it won't finalize each throw a RasterizerError; nothing here force-unwraps or crashes.
 import CoreGraphics
 import FlareCore
@@ -31,6 +32,9 @@ struct StageRasterizer: FrameRasterizing {
 
     func png(_ list: StageDrawList, scale: Double, transparent: Bool) throws -> Data {
         let (width, height) = try Self.pixelSize(width: list.width, height: list.height, scale: scale)
+        if Self.isGated(list) {
+            return try Self.encodePNG(Self.image(try FlareRaster.render(list, width: width, height: height, transparent: transparent)))
+        }
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
               let context = CGContext(
                   data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: space,
@@ -47,6 +51,7 @@ struct StageRasterizer: FrameRasterizing {
         guard width >= 1, height >= 1, width <= Self.maxSide, height <= Self.maxSide,
               list.width.isFinite, list.height.isFinite, list.width > 0, list.height > 0
         else { throw RasterizerError.invalidSize }
+        if Self.isGated(list) { return try FlareRaster.render(list, width: width, height: height, transparent: transparent) }
         guard let space = CGColorSpace(name: CGColorSpace.sRGB) else { throw RasterizerError.contextUnavailable }
         // Both sides are at most `maxSide`, so the byte count (1 GiB at most) can't overflow.
         var rgba = [UInt8](repeating: 0, count: width * height * 4)
@@ -159,6 +164,23 @@ struct StageRasterizer: FrameRasterizing {
         let colors = stops.map { StagePath.cgColor($0.color) } as CFArray
         let locations = stops.map { CGFloat($0.offset) }
         return CGGradient(colorsSpace: space, colors: colors, locations: locations)
+    }
+
+    /// Whether an item carries a mask or a matte, which only FlareRaster draws.
+    static func isGated(_ list: StageDrawList) -> Bool {
+        list.items.contains { !$0.isText && (!$0.clips.isEmpty || $0.matte != nil) }
+    }
+
+    /// A straight-alpha sRGB CGImage over `frame`'s bytes.
+    private static func image(_ frame: MediaFrame) throws -> CGImage {
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let provider = CGDataProvider(data: Data(frame.rgba) as CFData),
+              let image = CGImage(
+                  width: frame.width, height: frame.height, bitsPerComponent: 8, bitsPerPixel: 32,
+                  bytesPerRow: frame.width * 4, space: space, bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+                  provider: provider, decode: nil, shouldInterpolate: false, intent: .defaultIntent)
+        else { throw RasterizerError.contextUnavailable }
+        return image
     }
 
     /// `image` as PNG bytes through ImageIO.

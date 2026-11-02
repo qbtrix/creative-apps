@@ -26,6 +26,10 @@ public struct StageItem: Equatable, Sendable {
     public var transform: Matrix
     public var opacity: Double          // 0...1, already multiplied down the instance chain
     public var isText: Bool
+    /// Its layer's and host layers' masks, in scene space (FlareCore's `RenderItem.clips`); the PNG frames draw them.
+    public var clips: [ClipMask] = []
+    /// Its track matte, naming source items in `items` or `StageDrawList.matteItems`.
+    public var matte: MatteLink?
     public init(address: StageAddress, path: FlarePath, fill: Fill?, stroke: Stroke?,
                 transform: Matrix, opacity: Double, isText: Bool = false, strokePath: FlarePath? = nil) {
         self.address = address; self.path = path; self.fill = fill; self.stroke = stroke
@@ -38,6 +42,7 @@ public struct StageDrawList: Equatable, Sendable {
     public var background: FlareColor
     public var items: [StageItem]       // paint order, bottom first
     public var hiddenTextCount: Int     // drives the "Text not shown (n)" pill
+    public var matteItems: [StageItem] = [] // hidden matte sources: drawn only as mattes
     public init(width: Double, height: Double, background: FlareColor,
                 items: [StageItem], hiddenTextCount: Int = 0) {
         self.width = width; self.height = height; self.background = background
