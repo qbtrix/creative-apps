@@ -107,7 +107,7 @@ struct PhotoTextInspector: View {
     }
 
     /// One chip per weight the family has, named.
-    static func weights(_ faces: [(weight: Int, italic: Bool)]) -> [InspectorOption<Int>] {
+    nonisolated static func weights(_ faces: [(weight: Int, italic: Bool)]) -> [InspectorOption<Int>] {
         Set(faces.map { $0.weight }).sorted().map {
             InspectorOption(id: $0, title: Self.weightNames[$0] ?? "\($0)", identifier: "photo.text.weight.\($0)")
         }
