@@ -40,10 +40,14 @@ extension DesignWorkspace {
     }
 
     /// The box around every selected layer the canvas shows (none hidden, itself or by a group), or nil.
-    /// One walk of the page that skips hidden subtrees, however many layers are selected: the canvas
-    /// reads it several times per drag sample.
-    public var selectionBounds: DesignRect? {
-        guard let page = selectedPage, !selectedNodeIDs.isEmpty else { return nil }
+    public var selectionBounds: DesignRect? { selectionBounds(on: selectedPage) }
+    /// The same box as the canvas shows it at the playhead (`shownPage`): what a move snaps.
+    var shownSelectionBounds: DesignRect? { selectionBounds(on: shownPage) }
+
+    /// The box around the selected layers' frames on `page`, less the hidden ones: one walk of the page that
+    /// skips hidden subtrees, however many layers are selected (the canvas reads it several times per drag sample).
+    func selectionBounds(on page: DesignPage?) -> DesignRect? {
+        guard let page, !selectedNodeIDs.isEmpty else { return nil }
         let wanted = Set(selectedNodeIDs)
         var frames: [DesignRect] = []
         func walk(_ nodes: [DesignNode]) {

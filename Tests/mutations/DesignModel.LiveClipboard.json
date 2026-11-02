@@ -40,5 +40,12 @@
     "find": "payload.version == 1, !payload.nodes.isEmpty",
     "replace": "payload.version == 1",
     "tests": "DesignPasteboardTests"
+  },
+  {
+    "label": "track offset: a paste onto its original keeps the original's keys",
+    "file": "Sources/DesignModel/Live/LiveClipboard.swift",
+    "find": "copies[index].translate(by: DesignPoint(x: 10, y: 10), carryingKeys: true)",
+    "replace": "copies[index].translate(by: DesignPoint(x: 10, y: 10))",
+    "tests": "DesignTrackOffsetTests"
   }
 ]
