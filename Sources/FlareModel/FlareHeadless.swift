@@ -1,7 +1,8 @@
 // FlareHeadless.swift (adopt-command-catalog AC-f3): Flare's document with no window, for the afterglow CLI, MCP and
 // the real jobs. It opens and saves Flare's own file (.flare) through FlareFormat, opens a Lottie .json untitled, makes a one-scene document from file.new's params, runs
 // `FlareWorkspace.catalog` lifted onto itself, and exports a scene as SVG frames or Lottie through FlareCore's
-// exporters, on a copy without text as the window's export does. PNG frames need a rasterizer only macOS has, so
+// exporters, on a copy without text as the window's export does; options failing `exportSchema` are malformed
+// params, as for every other app. PNG frames need a rasterizer only macOS has, so
 // they are refused here. Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -68,6 +69,10 @@ public struct FlareHeadless: HeadlessDocument {
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         if format == "png" { throw CatalogError.unavailable(id: "export", why: Self.pngHelp) }
         guard Self.exportFormats.contains(format) else { throw CatalogError.unavailable(id: "export", why: "Flare exports svg and lottie.") }
+        if options != .null {
+            let issues = Self.exportSchema.validate(options)
+            guard issues.isEmpty else { throw CatalogError.malformedParams(id: "export", issues) }
+        }
         let o = options == .null ? ExportOptions() : try options.decode(ExportOptions.self)
         guard let document = workspace.document else { throw CatalogError.failed(id: "export", message: "No animation is open.") }
         let clean = ExportScan.withoutText(document), id = o.scene ?? workspace.selectedSceneID
@@ -116,4 +121,10 @@ public struct FlareHeadless: HeadlessDocument {
     }
 
     struct ExportOptions: Decodable { var scene: String?; var frames: [Int]? }
+    /// `{"scene", "frames"}`, both optional; any other key or a wrong type fails it, so the CLI exits 65 with the
+    /// issues (docs/cli.md) and writes nothing.
+    static let exportSchema = ParamSchema.object([
+        "scene": .optional(.string("The scene id; the selected scene when absent.")),
+        "frames": .optional(.array(of: .integer(minimum: 0))),
+    ], required: [])
 }

@@ -80,6 +80,22 @@ import Testing
         #expect(FlareHeadless.openExtensions == ["flare", "json"] && FlareHeadless.exportFormats == ["svg", "lottie"])
     }
 
+    /// docs/cli.md: export options failing the schema are 65 with every issue, and nothing is written.
+    @Test(arguments: [
+        (JSONValue.object(["quality": .number(10)]), "/quality", "unexpected key"),
+        (.object(["quality": .string("x")]), "/quality", "unexpected key"),
+        (.object(["bogus": .number(1)]), "/bogus", "unexpected key"),
+        (.object(["scene": .number(1)]), "/scene", "expected string"),
+        (.object(["frames": .array([.number(-1)])]), "/frames/0", "expected at least 0"),
+        (.array([]), "", "expected object"),
+    ])
+    func exportOptionsFailingTheSchemaAreMalformed(options: JSONValue, path: String, message: String) throws {
+        let doc = try Self.keyed()
+        #expect(throws: CatalogError.malformedParams(id: "export", [SchemaIssue(path: path, message: message)])) {
+            try doc.export("svg", options: options)
+        }
+    }
+
     @Test(arguments: ["export-svg-frames", "gradient-edit", "key-and-save"])
     func realJobPasses(job: String) throws {
         #expect(try FlareJob.check(job) == [], "\(job)")

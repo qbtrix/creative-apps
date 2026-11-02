@@ -26,5 +26,19 @@
     "find": "guard (0..<scene.durationFrames).contains(frame)",
     "replace": "guard (0..<scene.durationFrames - 1).contains(frame)",
     "tests": "FlareHeadlessTests"
+  },
+  {
+    "label": "exportOptionsFailingTheSchemaAreMalformed: the schema check skipped",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "guard issues.isEmpty else { throw CatalogError.malformedParams(id: \"export\", issues) }",
+    "replace": "_ = issues",
+    "tests": "FlareHeadlessTests"
+  },
+  {
+    "label": "exportOptionsFailingTheSchemaAreMalformed: frames take any whole number",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "\"frames\": .optional(.array(of: .integer(minimum: 0))),",
+    "replace": "\"frames\": .optional(.array(of: .integer())),",
+    "tests": "FlareHeadlessTests"
   }
 ]
