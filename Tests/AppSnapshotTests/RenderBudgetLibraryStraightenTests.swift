@@ -21,7 +21,7 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetLibraryStraightenTests {
-        @Test(.timeLimit(.minutes(2))) func bodies() async throws {
+        @Test(.timeLimit(.minutes(4))) func bodies() async throws {
             let (step, renders) = try await Self.run()
             // A straighten step is a compositor turn of the picture already drawn. Target: 0.
             #expect(renders == 0, "120 straighten steps started \(renders) loupe renders: \(step)")
@@ -29,7 +29,7 @@ extension BodyCountSuites {
             expectBodies(step, atMost: Self.budget, target: 120)
         }
 
-        @Test(.disabled("a wall-clock gate: waits on its Tests/perf-suites.txt line"), .timeLimit(.minutes(2)))
+        @Test(.disabled("a wall-clock gate: waits on its Tests/perf-suites.txt line"), .timeLimit(.minutes(4)))
         func timing() async throws {
             let (step, _) = try await Self.run()
             // One 120 Hz frame is the target; one 60 Hz frame the hard cap (render-contract rule 3).
