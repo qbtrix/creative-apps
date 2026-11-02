@@ -7,7 +7,7 @@
 // floating tool palette over its leading edge while an image is open (each
 // tool a PhotoPaletteTool carrying the workspace's `toolHelp`) and the status
 // line under it (PhotoStatusLine, with the save status `photo.bar.saved`
-// beside it), and PhotoPanel in the inspector. Values in, intents out: it
+// beside it), all in PhotoEditorDetail, and PhotoPanel in the inspector. Values in, intents out: it
 // reads the workspace and sends every action to `perform`, so the same view
 // draws the live window and the snapshots. A control that can't act now is
 // disabled with a tooltip saying why, and a disabled tool's shortcut key does
@@ -66,30 +66,10 @@ struct PhotoEditor: View, BodyCounted {
         ) {
             PhotoSidebarTabs(model: model, perform: perform)
         } content: {
-            EditorDetail {
-                PhotoCanvas(
-                    model: model, tiles: tiles, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
-                    straighten: straighten)
-                    .scrollIndicators(.never)
-            } palette: {
-                if model.canvas != nil {
-                    ToolbarGroup(
-                        tools: PhotoPaletteTool.palette(model), selected: PhotoPaletteTool(model.tool, in: model)
-                    ) { perform(.tool($0.tool)) }
-                }
-            } status: {
-                HStack(spacing: 0) {
-                    if let saveStatus {
-                        EditorSaveStatus(
-                            saveStatus.editorState, title: saveStatus.title,
-                            help: saveStatus.help(fileName: model.documentName), identifier: "photo.bar.saved")
-                    }
-                    PhotoStatusLine(
-                        model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds,
-                        renderBackend: renderBackend)
-                }
-                .background(SuiteColor.panel)
-            }
+            PhotoEditorDetail(
+                model: model, tiles: tiles, renderMilliseconds: renderMilliseconds, renderBackend: renderBackend,
+                note: note, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
+                straighten: straighten, saveStatus: saveStatus)
         } inspector: {
             PhotoPanel(model: model, perform: perform)
         }
@@ -113,6 +93,50 @@ struct PhotoEditor: View, BodyCounted {
             item.title(in: model), systemImage: item.systemImage, unavailableHelp: item.unavailableHelp(in: model),
             identifier: item.identifier
         ) { perform(intent) }
+    }
+}
+
+/// The window's middle column: the canvas with its rulers in EditorDetail, the tool palette over its leading edge
+/// while an image is open, and the status line with the save status. Its own view so a golden draws it without the
+/// split view, which renders blank offscreen (PhotoFileFlowSnapshots).
+struct PhotoEditorDetail: View {
+    let model: PhotoWorkspace
+    var tiles: CanvasTiles?
+    var renderMilliseconds: Double?
+    var renderBackend: String?
+    var note: String?
+    var zoom = 1.0
+    var onViewport: @MainActor (CGSize) -> Void = { _ in }
+    var onZoom: @MainActor (Double) -> Void = { _ in }
+    var perform: PhotoPerform = { _ in }
+    var straighten: StraightenDraft?
+    var saveStatus: PhotoSaveStatus?
+
+    var body: some View {
+        EditorDetail {
+            PhotoCanvas(
+                model: model, tiles: tiles, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,
+                straighten: straighten)
+                .scrollIndicators(.never)
+        } palette: {
+            if model.canvas != nil {
+                ToolbarGroup(
+                    tools: PhotoPaletteTool.palette(model), selected: PhotoPaletteTool(model.tool, in: model)
+                ) { perform(.tool($0.tool)) }
+            }
+        } status: {
+            HStack(spacing: 0) {
+                if let saveStatus {
+                    EditorSaveStatus(
+                        saveStatus.editorState, title: saveStatus.title,
+                        help: saveStatus.help(fileName: model.documentName), identifier: "photo.bar.saved")
+                }
+                PhotoStatusLine(
+                    model: model, zoom: zoom, note: note, renderMilliseconds: renderMilliseconds,
+                    renderBackend: renderBackend)
+            }
+            .background(SuiteColor.panel)
+        }
     }
 }
 

@@ -13,6 +13,11 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+#if canImport(Glibc)
+import Glibc  // cos, sin
+#elseif canImport(Musl)
+import Musl
+#endif
 import CoreRaster
 import Dispatch
 import Synchronization

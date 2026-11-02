@@ -4,7 +4,8 @@
 // layer's box sits on the canvas where its paint does, an opaque layer keeps its whole bounds, and a
 // clear layer (or a selection over clear pixels) refuses with "Nothing to transform.". Commit and the
 // live preview place the moved square on its new box, and the layer keeps its extent (grown when the
-// box leaves it) so later strokes still land. Runs on Linux and macOS.
+// box leaves it) so later strokes still land. With a selection only the selected pixels move; the paint
+// outside it stays (#5813). A flip mirrors the painted box in place, not the whole layer (#5814). Runs on Linux and macOS.
 import CoreRaster
 import SuiteKernel
 import Testing
@@ -117,6 +118,39 @@ import Testing
         try workspace.beginTransform()
         #expect(workspace.transformDraft?.box == PixelRect(x: 110, y: 85, width: 210, height: 135),
                 "paint outside the old box lands on the layer")
+    }
+
+    @Test func aSelectionMovesOnlyItsPixels() throws {
+        var workspace = try painted([square, crossing])
+        let red = try workspace.composite().pixel(x: 250, y: 210)
+        workspace.setSelection(PixelRect(x: 90, y: 70, width: 80, height: 70))
+        try workspace.beginTransform()
+        #expect(workspace.transformDraft?.box == square)
+        try workspace.setTransform(TransformBox(box: Rect(minX: 110, minY: 85, maxX: 170, maxY: 135)), name: "Move", drag: nil)
+        let preview = try workspace.transformPreview.composite()
+        try workspace.commitTransform()
+        let picture = try workspace.composite()
+        #expect(picture == preview, "Return lays exactly the last preview")
+        #expect(try picture.pixel(x: 250, y: 210) == red, "paint outside the selection stays")
+        #expect(try picture.pixel(x: 112, y: 87) == red, "the selected square moved")
+        #expect(try picture.pixel(x: 102, y: 82) == picture.pixel(x: 5, y: 5), "white where the square was")
+    }
+
+    @Test func aFlipMirrorsThePaintedBoxInPlace() throws {
+        var workspace = try painted([square])
+        workspace.setToolOption(.color(red: 30, green: 40, blue: 200))
+        workspace.setSelection(PixelRect(x: 100, y: 80, width: 10, height: 50))
+        workspace.fillSelection()
+        workspace.deselect()
+        let before = try workspace.composite()
+        let (red, blue, white) = try (before.pixel(x: 130, y: 100), before.pixel(x: 105, y: 100), before.pixel(x: 5, y: 5))
+        let shown = try #require(workspace.transformSelection)
+        try workspace.setTransform(TransformRules.flipped(shown, .horizontal), name: "Flip Horizontal", drag: nil)
+        let picture = try workspace.composite()
+        #expect(try picture.pixel(x: 155, y: 100) == blue, "the blue edge mirrored to the square's right side")
+        #expect(try picture.pixel(x: 105, y: 100) == red, "the square's left side is red now")
+        #expect(try picture.pixel(x: 250, y: 100) == white, "the square stays put, not mirrored across the canvas")
+        #expect(workspace.transformSelection == shown, "the box the inspector shows stays")
     }
 
     @Test func aMoveOffTheLayerGrowsIt() throws {
