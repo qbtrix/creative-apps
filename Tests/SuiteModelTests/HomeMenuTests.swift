@@ -49,14 +49,15 @@ import Testing
         #expect(menu().clearMenu == HomeMenu.Item("Clear Menu", reason: HomeMenu.noRecents))
     }
 
-    /// #6203: with the window open, no item on either page waits on a feature ("isn't available yet").
+    /// #6203: with the window open, no item on either page waits on a feature ("isn't available yet"),
+    /// except Open…, which waits on file routing (#1763, openWaitsForRouting).
     @Test func noItemWaitsOnAFeature() throws {
         let recents = try crowd()
         let id = try #require(recents.items.first?.ref.fileID)
         for page in [HomePage.home, .assets] {
             for (selection, step) in [(nil, 1), (id, 0), (id, 3)] {
                 let m = menu(recents, selection: selection, step: step, page: page)
-                let all = m.new.map(\.item) + [m.open, m.clearMenu, m.undo, m.larger, m.smaller]
+                let all = m.new.map(\.item) + [m.clearMenu, m.undo, m.larger, m.smaller]
                     + [m.delete].compactMap { $0 } + m.recents.map(\.item)
                 for item in all { #expect(item.reason?.hasSuffix("isn't available yet.") != true, "\(item.title)") }
             }
