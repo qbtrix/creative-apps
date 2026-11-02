@@ -566,3 +566,4 @@ utc	stage	event	ref	note
 2026-11-02T20:34Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open
 2026-11-02T21:07Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open
 2026-11-02T21:38Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open
+2026-11-02T22:10Z	check	#3482 quiet; no open Flare file-flow findings; gaps #4764, #1829 open (#1829 new CI note: timeline key overlap, not file-flow)
