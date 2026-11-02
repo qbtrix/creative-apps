@@ -16,5 +16,6 @@
   {"label": "the summary names every file", "file": "Sources/DesignModel/DesignExportSheet+Kernel.swift", "find": "if let only = names.first, names.count == 1", "replace": "if let only = names.first", "tests": "DesignExportSheetTests"},
   {"label": "no files reads as a count", "file": "Sources/DesignModel/DesignExportSheet+Kernel.swift", "find": "names.isEmpty ? \"Exported nothing.\" : ", "replace": "", "tests": "DesignExportSheetTests"},
   {"label": "a finished run shows the raw names", "file": "Sources/DesignModel/DesignExportSheet+Kernel.swift", "find": "guard case .finished(let options, let files) = self else { return self }", "replace": "return self; guard case .finished(let options, let files) = self else { return self }", "tests": "DesignExportSheetTests"},
-  {"label": "a refused plan reads as no files", "file": "Sources/DesignModel/DesignExportSheet+Kernel.swift", "find": "return .failure(DesignExportFailure(error.help))", "replace": "return .success([])", "tests": "DesignExportSheetTests"}
+  {"label": "a refused plan reads as no files", "file": "Sources/DesignModel/DesignExportSheet+Kernel.swift", "find": "return .failure(DesignExportFailure(error.help))", "replace": "return .success([])", "tests": "DesignExportSheetTests"},
+  {"label": "stillShowsFrame: a still document's export sheet shows the Frame field", "file": "Sources/DesignModel/DesignExportSheet+Kernel.swift", "find": "public var exportShowsFrame: Bool { !isStill }", "replace": "public var exportShowsFrame: Bool { true }", "tests": "DesignExportFrameTests"}
 ]

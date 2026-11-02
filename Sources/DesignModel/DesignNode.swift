@@ -276,6 +276,12 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         get { extras.value.shape }
         set { extras.value.shape = newValue }
     }
+    /// Keyed properties (DesignNodeTime.swift); nil for a still node, and a time with no keys is stored as nil, so a
+    /// still node saves with no `time` key. Boxed with the extras, so `init(id:copying:)` copies it.
+    public var time: DesignNodeTime? {
+        get { extras.value.time }
+        set { extras.value.time = newValue?.isEmpty == true ? nil : newValue }
+    }
     /// The stroke, gradient, shape spec and picture, on the heap so a node stays small on a thread's stack (DesignNodeExtras).
     private var extras = DesignNodeExtrasBox()
 
@@ -332,6 +338,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
         flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
         if let shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape) { self.shape = shape }
+        if let time = try container.decodeIfPresent(DesignNodeTime.self, forKey: .time) { self.time = time }
     }
 
     /// The stroke as saved now (the kernel's), else as a file written before stroke-style saved it: a colour in
@@ -347,7 +354,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     /// The file's keys, one per stored field.
     enum CodingKeys: String, CodingKey {
         case id, name, kind, frame, children, isHidden, isLocked, fill, text, cornerRadius, opacity, stroke, textStyle
-        case gradient, placedAsset, placedFocus, rotation, flipX, flipY, shape
+        case gradient, placedAsset, placedFocus, rotation, flipX, flipY, shape, time
     }
 
     /// Encodes a node as before transforms, adding the turn, each mirror, a shape's spec, a picture and a moved
@@ -374,13 +381,32 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         if flipX { try container.encode(flipX, forKey: .flipX) }
         if flipY { try container.encode(flipY, forKey: .flipY) }
         try container.encodeIfPresent(shape, forKey: .shape)
+        try container.encodeIfPresent(time, forKey: .time)
     }
 
-    /// Shifts this node and everything under it by `delta`.
-    mutating func translate(by delta: DesignPoint) {
+    /// Shifts this node and everything under it by `delta`. Only frames move unless `carryingKeys`: then each keyed
+    /// node's x and y keys move too, so its animation shows at the same offset at every frame (duplicate, paste and
+    /// rest-pose moves). The sampled tree and scratch copies move frames only.
+    mutating func translate(by delta: DesignPoint, carryingKeys: Bool = false) {
         frame.x += delta.x
         frame.y += delta.y
-        for index in children.indices { children[index].translate(by: delta) }
+        if carryingKeys, let time { self.time = time.translated(by: delta) }
+        for index in children.indices { children[index].translate(by: delta, carryingKeys: carryingKeys) }
+    }
+}
+
+extension DesignNodeTime {
+    /// These keys moved by `delta`: every x key by its x, every y key by its y; opacity keys are unchanged.
+    public func translated(by delta: DesignPoint) -> DesignNodeTime {
+        var time = self
+        for (property, by) in [(DesignKeyProperty.x, delta.x), (.y, delta.y)] where by != 0 {
+            time.tracks[property] = time.tracks[property]?.map { key in
+                var key = key
+                key.value += by
+                return key
+            }
+        }
+        return time
     }
 }
 

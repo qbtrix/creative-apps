@@ -1,0 +1,30 @@
+[
+  {
+    "label": "aStillDocumentShowsTheSlot: the slide-in rule ignores keys",
+    "file": "Sources/DesignModel/DesignTimelineTracks.swift",
+    "find": "public var showsTimeline: Bool { !isStill }",
+    "replace": "public var showsTimeline: Bool { true }",
+    "tests": "DesignTimelineTracksTests"
+  },
+  {
+    "label": "aKeyedChildHasNoTrack: only the top layers become rows",
+    "file": "Sources/DesignModel/DesignTimelineTracks.swift",
+    "find": "                visit(node.children)\n",
+    "replace": "",
+    "tests": "DesignTimelineTracksTests"
+  },
+  {
+    "label": "oneTrackDropped: opacity keys never reach the row",
+    "file": "Sources/DesignModel/DesignTimelineTracks.swift",
+    "find": "for property in DesignKeyProperty.allCases {",
+    "replace": "for property in DesignKeyProperty.allCases.dropLast() {",
+    "tests": "DesignTimelineTracksTests"
+  },
+  {
+    "label": "easingIgnored: an eased key draws linear",
+    "file": "Sources/DesignModel/DesignTimelineTracks.swift",
+    "find": "        case .cubicBezier: .eased",
+    "replace": "        case .cubicBezier: .linear",
+    "tests": "DesignTimelineTracksTests"
+  }
+]

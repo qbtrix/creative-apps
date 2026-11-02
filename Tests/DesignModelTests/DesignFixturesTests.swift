@@ -2,7 +2,9 @@
 // blueprint's Fixtures table (docs/blueprints/design.md section 4) layer for
 // layer: name, kind, frame, parent, back-to-front order, Locked locked and
 // Hidden hidden; `crowd` holds exactly 2,000 layers with unique ids; and every
-// fixture saves to the same bytes after a reopen (QD-V1). Runs on Linux and macOS.
+// fixture saves to the same bytes after a reopen (QD-V1). The node-costing variants
+// (`animated(_:kinds:)`) hold the kind they name, every leaf keyed, and save stably too.
+// Runs on Linux and macOS.
 import DesignModel
 import Testing
 
@@ -118,6 +120,39 @@ private let cardsTable: [Layer] = [
             try reopened.open(saved)
             #expect(reopened.pages == fixture.pages, "\(name)")
             #expect(try reopened.fileData() == saved, "\(name)")
+        }
+    }
+
+    /// OD-17: each costing variant holds the nodes it names, every leaf keyed, ids unique, and saves stably.
+    @Test func animatedKindsHoldTheirNodes() throws {
+        func leaves(_ fixture: DesignWorkspace) throws -> [DesignNode] {
+            let frame = try #require(fixture.pages.first?.nodes.first)
+            #expect(frame.kind == .frame && frame.time != nil)
+            return frame.children
+        }
+        let texts = try leaves(DesignFixtures.animated(500, kinds: .texts))
+        #expect(texts.count == 500 && texts.allSatisfy { $0.kind == .text && !$0.text.isEmpty })
+        let gradients = try leaves(DesignFixtures.animated(500, kinds: .gradients))
+        #expect(gradients.count == 500 && gradients.allSatisfy { $0.kind == .rectangle && $0.gradient != nil })
+        let strokes = try leaves(DesignFixtures.animated(500, kinds: .strokes))
+        #expect(strokes.count == 500 && strokes.allSatisfy { $0.kind == .rectangle && $0.stroke != nil })
+        #expect(strokes.filter { $0.stroke?.dash.isEmpty == false }.count == 250, "half dashed, half solid")
+        let ui = try leaves(DesignFixtures.animated(200, kinds: .realUI))
+        #expect(ui.count == 196, "one gradient header and 39 cards of 5")
+        #expect(ui.filter { $0.gradient != nil }.count == 1)
+        #expect(ui.filter { $0.kind == .text }.count == 117)
+        #expect(ui.filter { $0.stroke?.dash.isEmpty == true }.count == 39)
+        #expect(ui.filter { $0.stroke?.dash.isEmpty == false }.count == 39)
+        #expect(try leaves(DesignFixtures.animated(500, kinds: .rectangles)) == leaves(DesignFixtures.animated(500)))
+        for kinds in DesignFixtures.AnimatedKinds.allCases {
+            let fixture = DesignFixtures.animated(kinds == .realUI ? 200 : 500, kinds: kinds)
+            #expect(try leaves(fixture).allSatisfy { $0.time?.tracks.count == 3 }, "\(kinds)")
+            let ids = allIDs(fixture)
+            #expect(Set(ids).count == ids.count, "\(kinds)")
+            let saved = try fixture.fileData()
+            var reopened = DesignWorkspace()
+            try reopened.open(saved)
+            #expect(try reopened.fileData() == saved, "\(kinds)")
         }
     }
 }

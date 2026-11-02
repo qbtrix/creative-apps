@@ -61,7 +61,7 @@ public struct LiveClipboard: LayerClipboard {
             siblings.contains { $0.name == copy.name && $0.frame == copy.frame }
         }
         if landsOnOne {
-            for index in copies.indices { copies[index].translate(by: DesignPoint(x: 10, y: 10)) }
+            for index in copies.indices { copies[index].translate(by: DesignPoint(x: 10, y: 10), carryingKeys: true) }
         }
         let pasted = copies
         let nodes = fakeSiblings(target, page.nodes) { $0 += pasted }

@@ -36,7 +36,7 @@ public struct LiveDuplicating: LayerDuplicating {
         for id in ids {
             guard let original = byID[id], copies[id] == nil else { continue }
             var copy = copySubtree(original, mint: &mint)
-            copy.translate(by: offset)
+            copy.translate(by: offset, carryingKeys: true)
             copy.isLocked = false
             copies[id] = copy
             selection.append(copy.id)
