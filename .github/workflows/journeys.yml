@@ -31,9 +31,12 @@
 # (REPORT_ONLY_RE in scripts/fast-lane.sh).
 #
 # Concurrency, two levels:
-#  - the run, keyed by branch and scope (journeys-<branch>-<app|full>), with
-#    cancel-in-progress: a newer run of the same kind cancels the older one,
-#    waiting or already on macOS (the newer head is what matters);
+#  - the run, keyed by branch and scope (journeys-<branch>-<app|full>). A
+#    full run has cancel-in-progress: a newer full run cancels the older one,
+#    waiting or already on macOS (it can't finish in 110 min anyway). A
+#    scoped run (15-80 min) on macOS is never cancelled: the newer one waits
+#    `pending` on the group, and one still in `Journeys wait` cancels itself
+#    for it (scripts/journeys-wait), so the newer head still wins the queue;
 #  - the macOS job, one group for every branch and scope (journeys-macos), so
 #    at most one journeys job holds a macOS runner. GitHub keeps one pending
 #    job per group and cancels the older pending one; the FIFO wait above
@@ -74,7 +77,7 @@ env:
 
 concurrency:
   group: journeys-${{ github.ref_name }}-${{ inputs.app || 'full' }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !inputs.app }}
 
 jobs:
   # Holds on ubuntu until the macOS job may take a runner (header). Its name

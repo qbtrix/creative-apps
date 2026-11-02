@@ -7,7 +7,8 @@
 // failed (scene-1.svg already in Exports). Each test checks the Model state it
 // shows first. Under the format and size rows each shows Flare's options rows
 // (FlareExportOptionRows): the Frame or From, To and Step rows, the 1x and 2x
-// chips, Transparent background, the three warnings, and while editing the
+// chips, Transparent background, the scan's warnings (SVG writes text and plays
+// symbols, so only the machine's; PNG adds the text's), and while editing the
 // file count or, at To 90, the problem line "Frames 0–90 aren't all in the
 // scene."; finished reads "Exported 7 files.". flare-export-*.png. macOS only.
 import FlareModel
@@ -55,7 +56,7 @@ import Testing
         #expect(model.exportingOptions?.format == .svgFrame)
         #expect(model.exportProblem == nil && model.exportFileCount == 1)
         let options = try #require(model.exportingOptions)
-        #expect(model.exportWarnings(options).count == 3)
+        #expect(model.exportWarnings(options) == ["Interactions aren't exported (1 machine)."])
         try shoot(model, "flare-export-svg-light", scheme: .light)
         try shoot(model, "flare-export-svg-dark")
     }

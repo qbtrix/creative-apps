@@ -458,11 +458,12 @@ Crew PRs merge into `dev` at once; `main` moves only when full CI passes on
   run <id>: journeys <app|full> at <sha>` and checks out the commit that CI
   run tested. Its concurrency group is
   `journeys-<branch>-<app|full>`, so a journeys job waiting for a macOS
-  runner never holds `ci-dev`. A running journeys run is never cancelled;
-  only the newest pending run of each scope waits. Its `Journeys wait` job
+  runner never holds `ci-dev`. A scoped journeys run on macOS is never
+  cancelled; only the newest pending run of its scope waits. A newer full run
+  cancels the older one, even on macOS. Its `Journeys wait` job
   (scripts/journeys-wait) holds the run on ubuntu until no CI run is queued
-  for a macOS runner and fewer than two older journeys runs are alive, so
-  journeys hold at most two macOS runners and the lane's gate goes first; a
+  for a macOS runner and no older journeys run is alive, so journeys hold at
+  most one macOS runner and the lane's gate goes first; a
   run a newer one of its scope supersedes cancels itself. On a branch, or to ask for one by hand: `gh workflow
   run journeys.yml --ref <branch> [-f app=<app>]` (findings and the audit
   baseline move only on `dev`).

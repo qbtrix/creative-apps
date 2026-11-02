@@ -69,16 +69,18 @@ import Testing
         #expect(calls.withLock { $0 } == 0)
     }
 
-    @Test func textNeverReachesTheExporters() async throws {
+    @Test func svgWritesTextAndTheOtherFormatsNameItsDrop() async throws {
         let showcase = try #require(FlareFixtures.named("showcase"))
-        #expect(showcase.scenes[0].layers.contains { !$0.texts.isEmpty })
+        let title = try #require(showcase.scenes[0].layers.flatMap(\.texts).first?.string)
         for format in ExportFormat.allCases where !format.writesVideo {
             let o = options(format, 0...4, step: 2)
             let result = try await export(live, showcase, o)
             #expect(!result.files.isEmpty, "\(format)")
-            #expect(result.warnings.contains("Text isn't exported yet (1 layer)."), "\(format)")
+            #expect(result.warnings.contains("Text isn't exported yet (1 layer).") == (format != .svgFrame), "\(format)")
             #expect(result.warnings == ExportScan.warnings(showcase, options: o), "\(format)")
         }
+        let svg = try await export(live, showcase, options(.svgFrame, 0...0))
+        #expect(String(decoding: svg.files[0].data, as: UTF8.self).contains(title))
     }
 
     @Test func svgTransparentDropsTheBackground() async throws {
