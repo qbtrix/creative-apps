@@ -49,7 +49,7 @@ extension DesignWorkspace {
     /// frame), then the page. Skips hidden layers, the moving layers and everything inside them;
     /// locked layers count. Empty with no page open.
     public func snapCandidates(moving: [String], drawingInto parent: String?) -> [DesignSnapCandidate] {
-        guard let page = selectedPage else { return [] }
+        guard let page = shownPage else { return [] }
         let bounds = Rect(minX: 0, minY: 0, maxX: page.frameWidth, maxY: page.frameHeight)
         return Snapping.candidates(in: page.nodes.layerTree, moving: moving, drawingInto: parent, page: bounds) {
             $0.payload.node.frame.snapRect

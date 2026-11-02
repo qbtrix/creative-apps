@@ -9,8 +9,8 @@
   {
     "label": "opacityRowFollowsCanvas: the Opacity row reads the canvas drag's copy again",
     "file": "Sources/DesignApp/DesignInspectorStyle.swift",
-    "find": "let opacity = (live?.scrubbed ?? model).sharedValue(\\.opacity)",
-    "replace": "let opacity = (live?.workspace ?? model).sharedValue(\\.opacity)",
+    "find": "        let shown = live?.scrubbed ?? model\n        let opacity = shown.sharedValue { shown.shown($0).opacity }\n",
+    "replace": "        let shown = live?.workspace ?? model\n        let opacity = shown.sharedValue { shown.shown($0).opacity }\n",
     "tests": "RenderBudgetDesignTests/bodies"
   },
   {

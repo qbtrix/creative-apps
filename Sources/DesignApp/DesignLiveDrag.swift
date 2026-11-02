@@ -16,7 +16,10 @@
 // so the canvas never draws the old workspace in between. `preview` and `land`
 // do the same for an inspector scrub. DesignWindow owns one and hands it down
 // as the `designLiveDrag` environment value; without one (a view hosted alone)
-// the canvas draws the workspace. Presentation state only.
+// the canvas draws the workspace. `playingFrame` is the frame playback or a
+// timeline scrub shows (DesignPlayer+Kernel.swift), read by the canvas alone;
+// `landingFrame` is the one the timeline follows until it lands, so a tick
+// never runs the window or the lanes. Presentation state only.
 import DesignModel
 import Observation
 import SuiteKernel
@@ -26,6 +29,16 @@ import SwiftUI
     private var edit = DesignLiveEdit()
     /// Set from `clearAfterLanding()` until its clear runs: the copy still shows, but nothing is live.
     @ObservationIgnored private var isLanding = false
+
+    /// The frame playback or a timeline scrub shows; nil when neither is under way.
+    var playingFrame: Int?
+    /// A frame shown ahead of its landing as the playhead: a scrub's, or play once's last frame. The timeline
+    /// follows it (DesignTimeline.swift); a play tick never sets it, so a tick rebuilds no lanes.
+    var landingFrame: Int?
+    /// The player is running (the transport's Play reads Pause).
+    var isPlaying = false
+    /// Play wraps at the end instead of stopping (the transport's Loop).
+    var playLoops = false
 
     /// The copy the canvas draws while a drag or scrub lasts; nil with none live.
     var workspace: DesignWorkspace? { edit.workspace }

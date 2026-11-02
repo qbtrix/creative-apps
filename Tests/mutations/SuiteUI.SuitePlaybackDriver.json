@@ -1,0 +1,6 @@
+[
+{"label":"stop leaves the link: a stopped driver keeps a display link refreshing","file":"Sources/SuiteUI/SuitePlaybackDriver.swift","find":"        link?.invalidate()\n        link = nil\n        recent.removeAll()\n","replace":"        link = nil\n        recent.removeAll()\n","tests":"SuitePlaybackDriverTests"},
+{"label":"start while running opens a second link","file":"Sources/SuiteUI/SuitePlaybackDriver.swift","find":"        guard link == nil else { return }\n","replace":"","tests":"SuitePlaybackDriverTests"},
+{"label":"a tick that says playback stopped keeps the link","file":"Sources/SuiteUI/SuitePlaybackDriver.swift","find":"        if !onTick(target) { stop() }\n","replace":"        _ = onTick(target)\n","tests":"SuitePlaybackDriverTests"},
+{"label":"the measure window keeps a target a whole second old","file":"Sources/SuiteUI/SuitePlaybackDriver.swift","find":"        return Double(recent.count(where: { $0 > last - 1 + Self.slack }))\n","replace":"        return Double(recent.count(where: { $0 >= last - 1 - Self.slack }))\n","tests":"SuitePlaybackDriverTests"}
+]
