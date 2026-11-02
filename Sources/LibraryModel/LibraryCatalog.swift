@@ -107,6 +107,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var showsTestValues = false  // -LibraryTestValues
     public internal(set) var cullError: String?  // a refused cull change
     public internal(set) var fileRequests: [LibraryFileRequest] = []  // file-flow work for the window
+    var handedOff: [String] = []  // hand-off photos waiting for the launch read (importHandedOff)
     /// The filter bar's rules outside a smart collection (LibraryFilter.swift).
     public internal(set) var filter = LibraryFilter.all
     /// The collections you made and the smart ones, in sidebar order.

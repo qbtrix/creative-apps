@@ -43,9 +43,9 @@ final class DesignFeedbackJourneyTests: XCTestCase {
         let hover = design.element("design.canvas.hover")
         let badge = design.element("design.canvas.badge")
 
-        // 1. Hover outline: Move in the tool box, then the pointer over A.
-        XCTAssert(tools["Move"].waitForExistence(timeout: 5), "no Move in the tool box (suite.tools)")
-        tools["Move"].click()
+        // 1. Hover outline: Select in the tool box, then the pointer over A.
+        XCTAssert(tools["Select"].waitForExistence(timeout: 5), "no Select in the tool box (suite.tools)")
+        tools["Select"].click()
         let aCenter = Self.frac(150, 140), aCorner = Self.frac(200, 180)
         canvas.coordinate(withNormalizedOffset: aCenter).hover()
         XCTAssert(hover.waitForExistence(timeout: 5), "hovering A shows no hover mark (design.canvas.hover)")

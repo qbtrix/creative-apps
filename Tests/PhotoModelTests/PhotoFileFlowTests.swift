@@ -54,8 +54,55 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
     @Test func photoNamesItselfAndPlacesImages() {
         let workspace = PhotoWorkspace(services: .fake)
         #expect(workspace.appID == "photo")
-        #expect(workspace.placesExtensions == ["png", "jpg", "jpeg", "heic", "tiff", "psd"])
+        #expect(workspace.placesExtensions.isSubset(of: CoreRasterImageCodec().readExtensions))
+        #expect(workspace.placesExtensions.isSuperset(of: ["png", "jpg", "jpeg"]))
         #expect(!workspace.hasDocument)
+    }
+
+    @Test func everyTypePhotoPlacesIsPlacedByTheDropRule() throws {
+        var workspace = try openedImage()
+        workspace.readImages(with: AllReadingCodec())
+        let actions = DropPlan.plan(workspace.placesExtensions.sorted().map { "/in/f.\($0)" }, into: "photo", hasDocument: true,
+                                    places: workspace.placesExtensions, readers: { workspace.readers(ofExtension: $0) })
+        for action in actions { if case .place = action {} else { Issue.record("advertised but not placed: \(action)") } }
+    }
+
+    @Test func aDropOnlyTakesWhatTheCodecReads() {
+        var workspace = PhotoWorkspace(services: .fake)
+        workspace.readImages(with: RawCodec())
+        #expect(workspace.placesExtensions == ["png", "jpg", "jpeg"], "a drop took a type the codec can't read")
+    }
+
+    @Test func aPhotoLargerThanTheCanvasIsFittedAndCentred() throws {
+        let big = try redPNG("Big.png", in: tempFolder(), width: 40, height: 20)
+        var workspace = try openedImage()
+        try workspace.perform([.place(path: big)])
+        let layer = try #require(workspace.selectedLayer)
+        #expect(layer.name == "Big")
+        #expect(workspace.pixels[layer.id]?.width == 4 && workspace.pixels[layer.id]?.height == 2, "placed at \(String(describing: workspace.pixels[layer.id]?.width)), not fitted to 4 x 3")
+        #expect(layer.offsetX == 0 && layer.offsetY == 0, "not centred: \(layer.offsetX), \(layer.offsetY)")
+        #expect(workspace.statusMessage == "Placed at 10%.")
+        workspace.undo()
+        #expect(workspace.layers.count == 1)
+    }
+
+    @Test func aSmallPhotoIsNeverUpscaled() throws {
+        let small = try redPNG("Small.png", in: tempFolder(), width: 2, height: 2)
+        var workspace = try openedImage()
+        try workspace.perform([.place(path: small)])
+        #expect(workspace.selectedLayerID.flatMap { workspace.pixels[$0]?.width } == 2)
+        #expect(workspace.statusMessage != "Placed at 100%.")
+    }
+
+    @Test func aHandedOverDropReadsOnlyItsBytes() throws {
+        let folder = try tempFolder()
+        let onDisk = try redPNG("Disk.png", in: folder)
+        let bytes = try Data(contentsOf: URL(fileURLWithPath: try redPNG("Given.png", in: folder)))
+        var workspace = try openedImage()
+        workspace.receiveDropped(["/elsewhere/Given.png": bytes])
+        try workspace.perform([.place(path: "/elsewhere/Given.png")])
+        #expect(workspace.selectedLayer?.name == "Given")
+        #expect(throws: CatalogError.self, "a handed-over drop read the disk") { try workspace.perform([.place(path: onDisk)]) }
     }
 
     @Test func aPNGOnAnOpenImagePlacesOneLayerInOneStep() throws {
@@ -185,7 +232,7 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
         #expect(items.allSatisfy { $0.ref.app == .photo && $0.ref.type == .png })
     }
 
-    /// RJ-P42 on Linux: the CLI keeps file commands window-only, so the walk runs the job's steps here.
+    /// RJ-P42 on Linux: the job's steps on a headless workspace, each drop's bytes handed over first.
     @Test func dropLayerRealJobPasses() throws {
         let folder = PhotoJob.root.appendingPathComponent("drop-layer")
         let script = try JSONDecoder().decode(DropJob.self, from: Data(contentsOf: folder.appendingPathComponent("drop-layer.jobs.json")))
@@ -194,8 +241,11 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
         for step in script.steps {
             var params = step.params
             if case .object(var fields) = params, case .array(let paths)? = fields["paths"] {
-                fields["paths"] = .array(paths.map { if case .string(let p) = $0 { .string(folder.appendingPathComponent(p).path) } else { $0 } })
+                let full = paths.compactMap { if case .string(let p) = $0 { folder.appendingPathComponent(p).path } else { nil } }
+                fields["paths"] = .array(full.map(JSONValue.string))
                 params = .object(fields)
+                // A headless workspace places only what its host handed over, as the CLI's DropFiles does.
+                workspace.receiveDropped(try Dictionary(uniqueKeysWithValues: full.map { ($0, try Data(contentsOf: URL(fileURLWithPath: $0))) }))
             }
             _ = try PhotoWorkspace.catalog.run(step.id, params: params, on: &workspace)
             counts.append(workspace.layers.count)
@@ -213,3 +263,12 @@ private func redPNG(_ name: String, in folder: URL, width: Int = 2, height: Int 
 
 /// The parts of drop-layer.jobs.json the walk runs.
 private struct DropJob: Decodable { var steps: [CommandEnvelope] }
+
+/// A codec that claims every image extension, so the drop rule decides what Photo can place.
+private struct AllReadingCodec: PhotoImageCodec {
+    var readExtensions: Set<String> { ["png", "jpg", "jpeg", "heic", "heif", "tif", "tiff", "psd"] }
+    func decode(_ data: Data, longestSide: Int?) throws -> DecodedImage { try CoreRasterImageCodec().decode(data, longestSide: longestSide) }
+    func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data {
+        try CoreRasterImageCodec().encode(image, as: format, quality: quality)
+    }
+}

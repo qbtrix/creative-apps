@@ -47,7 +47,7 @@ import Testing
         #expect(PhotoHeadless.catalog.ids == PhotoWorkspace.catalog.ids)
         let doc = try PhotoHeadless.new(.object(["width": .number(4), "height": .number(4)]))
         for spec in PhotoWorkspace.commands {
-            let expected = spec.kind == .file ? .unavailable(PhotoHeadless.fileCommandHelp) : spec.availability(doc.workspace)
+            let expected = spec.kind == .file && spec.id != "file.drop" ? .unavailable(PhotoHeadless.fileCommandHelp) : spec.availability(doc.workspace)
             #expect(PhotoHeadless.catalog.availability(spec.id, on: doc) == expected, "\(spec.id)")
         }
     }

@@ -2,7 +2,7 @@
 // step: its name ("Add Rectangle") and the snapshot of the document just before
 // it. Undo swaps the current snapshot for the step's and keeps the current one
 // for Redo, and the reverse. A snapshot holds the pages, both selections, the
-// id counters and the held-id index (DesignHeldIDs). A restore sets each
+// id counters, the held-id index (DesignHeldIDs) and the document's rate and length. A restore sets each
 // counter to the larger of the current and the snapshot's, so an undone add
 // never gives its id away again (a redo of New File therefore doesn't restart
 // the ids). The restored selection's enclosing
@@ -25,7 +25,8 @@
 // kernel DocumentSession on those step ids (DesignSession+Kernel.swift), and ends
 // the edit run; a New File swap marks its own step, as an untouched new file is
 // clean. isDirty, the save state's word and the close prompt read it
-// (DocumentSession.stateText, UnsavedPrompt), shared with the other apps.
+// (DocumentSession.stateText, UnsavedPrompt), shared with the other apps. An
+// agent step's record time is kept by its id for the AI tab (AgentStepDates).
 // undoTarget routes Edit > Undo to a focused text field's own undo.
 // ponytail: one whole-document snapshot per step (copy-on-write, so edits share
 // the nodes they didn't touch); switch to per-node diffs if files get large.
@@ -47,6 +48,8 @@ struct DesignSnapshot: Sendable, Equatable {
     var nodeCount: Int
     /// Every page and node id in `pages` (DesignHeldIDs).
     var heldIDs: Set<String>
+    /// The document's rate and length, so undoing New File brings back the file's.
+    var time = DesignDocumentTime()
 }
 
 struct DesignHistory: Sendable, Equatable {
@@ -66,6 +69,8 @@ struct DesignHistory: Sendable, Equatable {
     var undo: [History<Revert>.Step] { kernel.undoSteps }
     /// The steps Redo reapplies, the next one last.
     var redo: [History<Revert>.Step] { kernel.redoSteps }
+    /// When each agent step was recorded (the AI tab's time, DesignAgentActivity+Kernel.swift).
+    var agentDates = AgentStepDates()
 }
 
 /// Where Edit > Undo and Redo go.
@@ -123,7 +128,7 @@ extension DesignWorkspace {
     var snapshot: DesignSnapshot {
         DesignSnapshot(
             pages: pages, selectedPageID: selectedPageID, selectedNodeIDs: selectedNodeIDs,
-            expandedNodeIDs: expandedNodeIDs, pageCount: pageCount, nodeCount: nodeCount, heldIDs: held.ids)
+            expandedNodeIDs: expandedNodeIDs, pageCount: pageCount, nodeCount: nodeCount, heldIDs: held.ids, time: time)
     }
 
     /// Records the edit just made as one step named `name`, undone by putting back `before`. Does
@@ -140,6 +145,7 @@ extension DesignWorkspace {
         history.kernel.record(
             name, DesignHistory.Revert(snapshot: before, swapsDocument: swapsDocument, documentURL: documentURL),
             key: coalescing)
+        history.agentDates.stamp(history.kernel, limit: DesignHistory.limit)
         if swapsDocument { history.kernel.markSaved() }
     }
 
@@ -169,17 +175,17 @@ extension DesignWorkspace {
     private mutating func restore(_ step: DesignHistory.Revert) {
         let snapshot = step.snapshot
         if step.swapsDocument { documentURL = step.documentURL }
-        pages = snapshot.pages
+        (pages, time) = (snapshot.pages, snapshot.time)
         held.replace(with: snapshot.heldIDs)
         (selectedPageID, selectedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs)
         (pageCount, nodeCount) = (Swift.max(pageCount, snapshot.pageCount), Swift.max(nodeCount, snapshot.nodeCount))
-        if let page = selectedPage { for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) } }
+        if let page = selectedPage { expandAncestors(of: selectedNodeIDs, in: page.nodes) }
     }
 
     /// A gesture or discarded text edit: the document goes back to `snapshot` exactly, counters
     /// and expansion included, because nothing it made was ever recorded.
     mutating func rewind(to snapshot: DesignSnapshot) {
-        pages = snapshot.pages
+        (pages, time) = (snapshot.pages, snapshot.time)
         held.replace(with: snapshot.heldIDs)
         (selectedPageID, selectedNodeIDs, expandedNodeIDs) = (snapshot.selectedPageID, snapshot.selectedNodeIDs, snapshot.expandedNodeIDs)
         (pageCount, nodeCount) = (snapshot.pageCount, snapshot.nodeCount)

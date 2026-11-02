@@ -1,5 +1,5 @@
 // FlareTimeline.swift: the timeline under the stage (draw-key-save DK-10).
-// The transport (FlareTransport, DK-11) and the readouts (`timecode` and
+// The transport (FlareTransportAdapter, DK-11) and the readouts (`timecode` and
 // `frameReadout`) sit on one row above a TimelineStrip with one lane per row
 // of `timelineRows`: its name and its key frames as diamonds, the playhead on
 // `currentFrame`; FlareTimelineEdit draws it and edits keys and labels (IT-7), and
@@ -36,7 +36,7 @@ struct FlareTimeline: View {
             // No Spacer: its two gaps made the row 14 pt wider than the narrowest column (#2259). The readouts
             // take the room left and sit at its trailing edge, `s` from the transport at the least.
             HStack(spacing: SuiteSpacing.s) {
-                FlareTransport(model: model, perform: perform)
+                FlareTransportAdapter(model: model, perform: perform)
                 HStack(spacing: SuiteSpacing.s) {
                     readout(
                         model.timecodeParts, label: model.timecode, help: model.timecodeHelp,

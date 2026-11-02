@@ -8,9 +8,11 @@
 //
 // A view says which facets it shows with `workspace(reading:)`, which reads
 // those boxes (so its body depends on them) and hands back the workspace now.
-// The window's body reads every facet but `toolOptions`; the inspector
-// (PhotoPanel) and the canvas overlay read `toolOptions` themselves, so a
-// brush-size step re-runs them and not the window, its editor or its canvas.
+// The window's body reads every facet but `toolOptions` and `textBox`; the
+// inspector (PhotoPanel) and the canvas overlay read `toolOptions` themselves,
+// so a brush-size step re-runs them and not the window, its editor or its
+// canvas, and the Type tool's box overlay reads `textBox`, so a typed key
+// re-runs only the box.
 // Invariant: anything a view shows comes from a facet that it, or a view
 // that re-creates it, reads.
 import Observation
@@ -27,6 +29,7 @@ import SuiteUI
     let status: Facet<PhotoFacets.Status>
     let canvas: Facet<PhotoFacets.Canvas>
     let file: Facet<PhotoFacets.File>
+    let textBox: Facet<PhotoTextBox?>
 
     init(_ workspace: PhotoWorkspace) {
         stored = workspace
@@ -39,6 +42,7 @@ import SuiteUI
         status = Facet(facets.status)
         canvas = Facet(facets.canvas)
         file = Facet(facets.file)
+        textBox = Facet(facets.textBox)
     }
 
     /// The workspace now. Reading it tracks nothing; a write re-derives the facets once the access ends,
@@ -67,6 +71,7 @@ import SuiteUI
             case .status: _ = status.value
             case .canvas: _ = canvas.value
             case .file: _ = file.value
+            case .textBox: _ = textBox.value
             }
         }
         return stored
@@ -83,5 +88,6 @@ import SuiteUI
         status.set(facets.status)
         canvas.set(facets.canvas)
         file.set(facets.file)
+        textBox.set(facets.textBox)
     }
 }

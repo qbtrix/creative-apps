@@ -62,7 +62,10 @@ import Testing
             #expect(text.contains("SuiteHelpCatalog.notesAnswer(BetaNotes.current)"))
             #expect(!text.contains("\"title\": .string("), "the notes are mapped by hand")
         }
-        #expect(try source(Self.help).contains("value.decode(ProblemReport.self)"), "the presenter parses the report field by field")
+        // The sheet takes the report itself: decoded from its JSON answer it loses the names that redact the note.
+        let help = try source(Self.help)
+        #expect(help.contains("report = ShellHelpProvider().problemReport(app: app.rawValue)"), "the sheet's report isn't the provider's")
+        #expect(!help.contains("decode(ProblemReport.self)"), "the sheet decodes its report from JSON and drops the note's redaction")
     }
 
     /// The report body is prose and crash JSON, so it reads in body-size code type, not the caption-size
@@ -87,7 +90,8 @@ import Testing
         let provider = try source("Sources/SuiteShell/ShellHelpProvider.swift")
         #expect(provider.contains("crashes: CrashFolderReader.read("), "the report has no crashes")
         #expect(!provider.contains("crashes: [],"))
-        let reader = try source("Sources/SuiteShell/CrashFolderReader.swift")
+        // One reader in SuiteModel, which the CLI's HelpReports reads too.
+        let reader = try source("Sources/SuiteModel/Help/CrashFolderReader.swift")
         #expect(reader.contains("CrashFolder.path(arguments: arguments, home: home)"))
         #expect(reader.contains("CrashFolder.toRead(entries, now: now)"), "the reader opens every file in the folder")
         #expect(!reader.contains("URLSession") && !reader.contains("NSWorkspace"), "the reader reaches the network")

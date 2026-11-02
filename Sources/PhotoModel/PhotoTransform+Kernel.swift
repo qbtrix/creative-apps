@@ -5,6 +5,8 @@
 // bounds of the selected pixel layer's painted pixels (alpha above 0), cut to
 // the selection when one is set; a clear layer refuses "Nothing to transform.".
 // Availability reads only `transformArea` (layer and selection, no pixel scan).
+// The painted box is read once per layer pixels by a caller that keeps a
+// `PaintedBox` (the Transform rows, the canvas's Select move), not per redraw.
 // A scale, turn or move edits the draft as one step whose undo puts the
 // previous draft back (a drag's steps fold under its token). The canvas shows
 // the draft live: a still frame draws `transformPreview`, the workspace with
@@ -25,13 +27,20 @@ extension PhotoWorkspace: TransformTarget {
     /// layer's painted bounds (in the selection when one is set); nil with no
     /// pixel layer or nothing painted there.
     public var transformSelection: TransformBox? {
+        var none: PaintedBox?
+        return transformSelection(reusing: &none)
+    }
+
+    /// `transformSelection` with the painted box kept in `known` across calls,
+    /// for a caller that reads it on every change (the Transform rows).
+    public func transformSelection(reusing known: inout PaintedBox?) -> TransformBox? {
         if let draft = transformDraft {
             let b = draft.box, t = draft.transform
             let (x, y) = (Double(b.x) + t.dx, Double(b.y) + t.dy)
             let box = Rect(minX: x, minY: y, maxX: x + Double(b.width) * t.scaleX, maxY: y + Double(b.height) * t.scaleY)
             return TransformBox(box: box, degrees: t.degrees)
         }
-        guard let rect = transformBounds else { return nil }
+        guard let rect = transformBounds(reusing: &known) else { return nil }
         return TransformBox(box: Rect(minX: Double(rect.x), minY: Double(rect.y),
                                       maxX: Double(rect.x + rect.width), maxY: Double(rect.y + rect.height)))
     }
@@ -93,10 +102,42 @@ extension PhotoWorkspace: TransformTarget {
     /// layer's pixels with alpha above 0 inside `transformArea`, on the canvas;
     /// nil without a pixel layer or when nothing is painted there.
     var transformBounds: PixelRect? {
-        guard let layer = selectedLayer, let area = transformArea, let tiles = pixels[layer.id],
-            let painted = try? tiles.paintedBounds(in: area.offsetBy(-layer.offsetX, -layer.offsetY))
+        var none: PaintedBox?
+        return transformBounds(reusing: &none)
+    }
+
+    /// `transformBounds` with the painted box kept in `known` across calls.
+    func transformBounds(reusing known: inout PaintedBox?) -> PixelRect? {
+        guard let layer = selectedLayer, let area = transformArea,
+            let painted = paintedBounds(of: layer.id, in: area.offsetBy(-layer.offsetX, -layer.offsetY), reusing: &known)
         else { return nil }
         return painted.offsetBy(layer.offsetX, layer.offsetY)
+    }
+
+    /// A layer's painted bounds and the pixels and window they were read from.
+    /// A caller that reads the box on every change (the canvas's Select move,
+    /// the Transform rows) keeps one, so the box is read once per layer pixels,
+    /// not per show: the pixels compare by storage first, so an unchanged
+    /// layer costs one compare. Holding one holds the layer's tiles, so a
+    /// caller drops it once its tool is put down.
+    public struct PaintedBox: Sendable {
+        let layerID: PhotoLayer.ID
+        let source: TiledPixels
+        let window: PixelRect?
+        let painted: PixelRect?
+    }
+
+    /// `id`'s painted bounds inside `window` (layer pixels; nil reads the whole
+    /// layer), from `known` when it was read from the same layer, pixels and
+    /// window, else read (`TiledPixels.paintedBounds`) into it; nil when that
+    /// part is clear.
+    func paintedBounds(of id: PhotoLayer.ID, in window: PixelRect?, reusing known: inout PaintedBox?) -> PixelRect? {
+        guard let tiles = pixels[id] else { return nil }
+        if known?.layerID != id || known?.window != window || known?.source != tiles {
+            PhotoRenderCount.paintedBox()
+            known = PaintedBox(layerID: id, source: tiles, window: window, painted: try? tiles.paintedBounds(in: window))
+        }
+        return known?.painted
     }
 
     /// Where Free Transform looks for pixels: the selected pixel layer's

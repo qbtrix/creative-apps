@@ -33,5 +33,26 @@
     "find": "let target = parentID ?? payload.parentID.flatMap { page.nodes.node($0) == nil ? nil : $0 }",
     "replace": "let target = parentID",
     "tests": "DesignArrangeFakesTests"
+  },
+  {
+    "label": "the fake codec drops a set rate and length on save (theFixtureFakesKeepTheTime)",
+    "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+    "find": "if document.time == DesignDocumentTime() { return try JSONEncoder().encode(document.pages) }",
+    "replace": "if true { return try JSONEncoder().encode(document.pages) }",
+    "tests": "DesignFileTimeTests"
+  },
+  {
+    "label": "the fake codec opens a timed file at the default time (theFixtureFakesKeepTheTime)",
+    "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+    "find": "return DesignDocument(pages: pages, time: timed?.time ?? DesignDocumentTime())",
+    "replace": "return DesignDocument(pages: pages)",
+    "tests": "DesignFileTimeTests"
+  },
+  {
+    "label": "the fake codec wraps a still file's pages (theFixtureFakesKeepTheTime)",
+    "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+    "find": "if document.time == DesignDocumentTime() {",
+    "replace": "if document.time != DesignDocumentTime() {",
+    "tests": "DesignFileTimeTests"
   }
 ]

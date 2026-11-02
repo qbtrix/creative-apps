@@ -27,7 +27,10 @@ import SuiteKernel
 
 /// The tools on Photo's floating tool palette.
 public enum PhotoTool: String, CaseIterable, Sendable {
-    case move, marquee, ellipse, lasso, polygon, wand, brush, eraser, clone
+    /// Select (V, #6012), Move folded in: a click picks the layer under it and moves nothing, a drag pressed on a
+    /// layer moves it (and the other picks with it), and a drag on empty canvas boxes layers.
+    case select
+    case marquee, ellipse, lasso, polygon, wand, brush, eraser, clone
     /// Spot Heal (fill-heal): a click heals a spot from its surroundings. Before
     /// Heal, so J picks it first.
     case spotHeal = "spot-heal"
@@ -80,7 +83,7 @@ public struct PhotoWorkspace: Sendable {
     public internal(set) var pixels: [PhotoLayer.ID: TiledPixels] = [:]
     /// The picked layers, primary last, on the kernel's Selection (PhotoLayerSelection+Kernel.swift).
     var layerSelection = Selection<PhotoLayer.ID>()
-    /// The layer the inspector, the brush and the Move tool act on: the
+    /// The layer the inspector, the brush and a Select move act on: the
     /// selection's primary. Setting it makes that layer the whole selection;
     /// nil clears it.
     public internal(set) var selectedLayerID: PhotoLayer.ID? {
@@ -89,7 +92,7 @@ public struct PhotoWorkspace: Sendable {
             if let newValue { layerSelection.replace([newValue]) } else { layerSelection.clear() }
         }
     }
-    public private(set) var tool: PhotoTool = .move
+    public private(set) var tool: PhotoTool = .select
     /// The brush's options; its color is also the marquee's Fill color.
     public private(set) var brushOptions = ToolOptions()
     /// The eraser's own size, hardness and opacity; it has no color.

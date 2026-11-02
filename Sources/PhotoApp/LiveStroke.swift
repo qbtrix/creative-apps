@@ -12,7 +12,7 @@
 // and at once when a sample set a status message, so a refusal shows at the
 // press. The area and Crop tools' drags draw only an overlay mark, so they run
 // on LiveDragLine's copy (PhotoWorkspace.dragShowsLineOnly); Free Transform's and
-// the Move tool's run on LiveTransformCopy (PhotoWorkspace.dragRunsLive). A press that
+// a Select move runs on LiveTransformCopy (PhotoWorkspace.dragRunsLive(pressAt:)). A press that
 // picks a colour (the Eyedropper, or the Brush with Option held at the press:
 // PhotoWorkspace.pressPicksColor) picks once, at its first sample, and its
 // other samples do nothing (`press`) until the window takes the copy back.

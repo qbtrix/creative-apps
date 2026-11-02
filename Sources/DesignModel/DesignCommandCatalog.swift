@@ -9,7 +9,8 @@
 // ShapeTarget (shape-tools DS-6); select.pick, select.enter-group and select.exit-group are GroupPick's on its
 // GroupPickTarget (area-selection AR-14); the nine stroke.* are StrokeCommands on its StrokeTarget (stroke-style DK-6);
 // edit.copy-as and edit.paste-as-image are CopyAsCommands on DesignPasteboardAdapter's CopyAsTarget (clipboard-interop CB-6);
-// the five place.* are PlaceCommands on its PlacedImageTarget (placed-images PD-5).
+// the five place.* are PlaceCommands on its PlacedImageTarget (placed-images PD-5); the keyframe.* and time.* ids are
+// DesignKeyCommands' (one-document OD-8).
 // Ids are `<menu>.<action>` in lowercase; Tests/command-ids/design.txt keeps them. Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -33,13 +34,13 @@ extension DesignWorkspace {
     /// color.pick's params: the page point and where the colour goes ("fill" or "stroke").
     struct PickParams: Codable, Sendable { var x, y: Double; var to: String }
 
-    /// Every Design action as a command spec, in menu order, the History panel's two after the tools, then the View menu's.
+    /// Every Design action as a command spec, in menu order, the History panel's two after the tools, the key commands, then the View menu's.
     public static let commands: [CommandSpec<DesignWorkspace>] =
         fileSpecs + editSpecs + CopyAsCommands.specs(DesignWorkspace.self) + objectSpecs + GradientCommands.specs(DesignWorkspace.self) + SampleCommands.specs(DesignWorkspace.self)
             + [pick] + groupSpecs + TransformCommands.specs(DesignWorkspace.self) + pageSpecs + toolSpecs + ShapeCommands.specs(DesignWorkspace.self)
             + StrokeCommands.specs(DesignWorkspace.self)
             + PlaceCommands.specs(DesignWorkspace.self)
-            + HistoryCommands.specs(DesignWorkspace.self) + viewSpecs
+            + HistoryCommands.specs(DesignWorkspace.self) + keySpecs + viewSpecs
 
     /// The specs as a catalog whose history is the workspace's own.
     public static let catalog: CommandCatalog<DesignWorkspace> =
@@ -79,8 +80,8 @@ extension DesignWorkspace {
         export,
     ]
 
-    /// file.export's params: the sheet's format, whole scale and scope; its result, the files the run would write.
-    struct ExportParams: Codable, Sendable { var format: String; var scale: Int; var scope: String }
+    /// file.export's params: the sheet's format, whole scale, scope and optional frame; its result, the files the run would write.
+    struct ExportParams: Codable, Sendable { var format: String; var scale: Int; var scope: String; var frame: Int? }
     struct ExportedFiles: Encodable, Sendable { var files: [ExportedName] }
     struct ExportedName: Encodable, Sendable { var name: String; var width: Int; var height: Int }
 
@@ -93,7 +94,8 @@ extension DesignWorkspace {
         kind: .file, params: ExportParams.self,
         schema: .object(["format": .string("The file type.", oneOf: DesignExportFormat.allCases.map(\.rawValue)),
                          "scale": .integer("PNG and JPEG's whole scale; vectors take 1.", minimum: 1, maximum: 3),
-                         "scope": .string("What it writes.", oneOf: DesignExportScope.allCases.map(\.rawValue))],
+                         "scope": .string("What it writes.", oneOf: DesignExportScope.allCases.map(\.rawValue)),
+                         "frame": .integer("The frame an animated file is written at; left out, the rest pose.", minimum: 0)],
                         required: ["format", "scale", "scope"]),
         result: .object(["files": .array(of: .object(["name": .string("The file's name."), "width": .integer("Pixels wide."),
                                                       "height": .integer("Pixels high.")], required: ["name", "width", "height"]))],
@@ -102,7 +104,9 @@ extension DesignWorkspace {
     ) { w, p in
         guard let format = DesignExportFormat(rawValue: p.format), let scope = DesignExportScope(rawValue: p.scope)
         else { throw DesignRefusal.unchanged }
-        let plan = try w.exportPlan(DesignExportOptions(format: format, scale: p.scale, scope: scope), existing: [])
+        var options = DesignExportOptions(format: format, scale: p.scale, scope: scope)
+        options.frame = p.frame
+        let plan = try w.exportPlan(options, existing: [])
         return ExportedFiles(files: plan.map { ExportedName(name: $0.fileName, width: $0.pixelWidth, height: $0.pixelHeight) })
     }
 
@@ -145,8 +149,7 @@ extension DesignWorkspace {
                schema: .object(["ids": .array(of: .string("A layer's id."), minItems: 1)], required: ["ids"]),
                example: .object(["ids": .array([.string("node-1")])]), availability: { reason($0.addPageHelp) }
         ) { w, p in
-            for (index, id) in p.ids.enumerated() { if index == 0 { w.selectItem(id) } else { w.toggleSelection(id) } }
-            guard w.selectedNodeIDs == p.ids else { throw DesignRefusal.unknownID(p.ids.joined(separator: ", ")) }
+            try w.select(p.ids)
             return JSONValue.object([:])
         },
         plain("edit.select-all", "Select All", "Selects every visible, unlocked layer at the selection's level.", .view,

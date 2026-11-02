@@ -3,10 +3,11 @@
 // shows play, Loop unselected), and playing with Loop on (Play shows pause and
 // reads selected, Loop selected). The transport owns no driver, so the frame
 // stays 30. Writes
-// flare-transport-paused.png and flare-transport-playing.png. The flat row
-// (#1858) shows Play on accentFill and the whole Loop toggle; two checks pin
-// the controls' kinds and that the row asks for room for every control, and
-// that the whole readout row fits the narrowest content column (#2101).
+// flare-transport-paused.png and flare-transport-playing.png. It is the
+// shared TransportCapsule in its pill; two checks pin the controls' order,
+// unique ids and reasons, and that the row asks for a pillHit square per
+// control, and one that the whole readout row fits the narrowest content
+// column (#2101).
 // The status pills (inspector-timeline IT-9) in the stage's status bar, from
 // `statusPills(measuredFPS:)` on `bounce` playing: at a measured 60 the
 // actual-fps pill reads 24 fps plain, at 18 it reads 18 fps in the warning
@@ -16,11 +17,11 @@
 // macOS only.
 import AppKit
 import FlareModel
-import SuiteUI
 import SwiftUI
 import Testing
 
 @testable import FlareApp
+@testable import SuiteUI
 
 @MainActor
 @Suite struct FlareTransportSnapshots {
@@ -45,28 +46,32 @@ import Testing
         try snapshot(transport(model), name: "flare-transport-playing", scheme: .light)
     }
 
-    /// #1858: Play is the one prominent control, Loop a toggle, the rest plain steps, with unique ids.
-    @Test func playIsTheProminentControl() {
+    /// The shared transport's six controls in order, each its intent's id (the steps suffixed), live mid-timeline.
+    @Test func controlsAreTheIntentsInOrder() {
         var model = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "bounce"]))
         model.setCurrentFrame(30)
-        let items = FlareTransport.items(for: model)
-        #expect(items.map(\.kind) == [.step, .step, .play, .step, .step, .loop])
-        #expect(Set(items.map(\.id)).count == items.count)
+        let items = FlareTransportAdapter(model: model, perform: { _ in }).capsule.items
+        #expect(items.map(\.button) == TransportButton.allCases)
+        #expect(items.map(\.id) == ["flare.timeline.goToStart", "flare.timeline.step.back", "flare.timeline.togglePlay",
+                                    "flare.timeline.step.forward", "flare.timeline.goToEnd", "flare.timeline.setLoops"])
         #expect(items.allSatisfy { $0.help == nil })
+        model.setCurrentFrame(0)
+        model.setLoops(false)
+        let first = FlareTransportAdapter(model: model, perform: { _ in }).capsule.items
+        #expect(first.map(\.help) == ["Already at the first frame.", "Already at the first frame.", nil, nil, nil, nil])
     }
 
-    /// #1858: laid out unconstrained, the flat row holds five transportButton squares and the larger
-    /// playButton whole (nothing clipped by a capsule), and is at least playButton tall.
+    /// Laid out unconstrained, the row holds six pillHit squares, at least pillHit tall.
     @Test func rowHoldsEveryControlWhole() {
         var model = FlareWorkspace(launch: FlareLaunch(arguments: ["-FlareFixture", "bounce"]))
         model.setCurrentFrame(30)
         model.setLoops(true)
         model.play()
-        let row = FlareTransport(model: model, perform: { _ in })
+        let row = FlareTransportAdapter(model: model, perform: { _ in })
         let taken = NSHostingController(rootView: row).sizeThatFits(in: CGSize(width: 2000, height: 2000))
-        let least = 5 * SuiteSize.transportButton + SuiteSize.playButton
+        let least = 6 * SuiteSize.pillHit
         #expect(taken.width >= least - 0.5, "the transport is \(taken.width) pt wide, under \(least)")
-        #expect(taken.height >= SuiteSize.playButton - 0.5, "the transport is \(taken.height) pt tall")
+        #expect(taken.height >= SuiteSize.pillHit - 0.5, "the transport is \(taken.height) pt tall")
     }
 
     /// #2101: the transport and both readouts, playing with Loop on at the last frame, fit inside
@@ -123,7 +128,7 @@ import Testing
     }
 
     private func transport(_ model: FlareWorkspace) -> some View {
-        FlareTransport(model: model, perform: { _ in })
+        FlareTransportAdapter(model: model, perform: { _ in })
             .padding(SuiteSpacing.m)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

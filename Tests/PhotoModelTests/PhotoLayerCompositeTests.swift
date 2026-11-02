@@ -41,7 +41,7 @@ import Testing
         let blue = try #require(workspace.selectedLayerID)
         workspace.setBlendMode(blue, .screen)
         workspace.setOpacity(blue, percent: 50)
-        stroke(&workspace, .move, from: point(300, 300), to: point(237, 271))
+        stroke(&workspace, .select, from: point(300, 300), to: point(237, 271))
         return workspace
     }
 
@@ -75,7 +75,7 @@ import Testing
         #expect(probe(frame, 600, 500) == [215, 150, 126, 255])
         // A partial redraw after the stack changed still matches a full one.
         var moved = workspace
-        stroke(&moved, .move, from: point(200, 200), to: point(203, 198))
+        stroke(&moved, .select, from: point(200, 200), to: point(203, 198))
         let redrawn = try await PhotoRenderer.render(moved, after: frame)
         let full = try await PhotoRenderer.render(moved)
         #expect(redrawn.rgba8 == full.rgba8)

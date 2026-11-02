@@ -13,7 +13,7 @@
 // the run is the area's state, the canvas never redraws). The
 // sheet is its own window attached to the hosted one, so its controls are found
 // from `attachedSheet`'s accessibility tree. The proofs on the live services:
-// a read-only folder fails on Desktop.png with the system's reason, the JPEG
+// a read-only folder fails on Desktop.png with the system's reason and closes on Done, the JPEG
 // chip writes a 2x JPEG on white, a refused plan (Selection, nothing selected)
 // leaves Export off and starts nothing, and a finished run's options reach the
 // Model's export defaults. Nested in BodyCountSuites, as every
@@ -170,7 +170,11 @@ extension BodyCountSuites {
             #expect(Self.texts(in: sheet).contains { $0.contains("Desktop.png couldn't be written. You don’t have permission") },
                     "the line lacks the system's reason: \(Self.texts(in: sheet))")
             #expect(((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? ["?"]).isEmpty)
-            _ = Self.press("design.export.dismiss", in: sheet)
+            // J18 closes the failed sheet: the line shows, so the close button is Done, not Cancel.
+            #expect(Self.node("design.export.cancel", in: sheet) == nil, "the failed sheet still offers Cancel")
+            #expect(Self.press("design.export.dismiss", in: sheet), "the failed sheet has no Done")
+            for _ in 0..<100 where w.window.attachedSheet != nil { try await Task.sleep(for: .milliseconds(20)) }
+            #expect(w.window.attachedSheet == nil, "Done left the failed sheet open")
         }
 
         /// The JPEG chip writes a JPEG: Desktop at 2x decodes at 2880 × 2048 on its frame's fill, not black.

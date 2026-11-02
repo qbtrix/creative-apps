@@ -26,5 +26,12 @@
     "find": "let alone = target == nil && workspace.liftsAlone",
     "replace": "let alone = !route.isGPU && workspace.liftsAlone",
     "tests": "BodyCountSuites/RenderBudgetPhotoRapidRotateTests"
+  },
+  {
+    "label": "closeKeepsRendering: a closed window's render runs on, its tiles taking the CPU from the next window",
+    "file": "Sources/PhotoApp/CanvasRenderer.swift",
+    "find": "        running?.cancel()\n",
+    "replace": "",
+    "tests": "PhotoWindowCloseTests"
   }
 ]

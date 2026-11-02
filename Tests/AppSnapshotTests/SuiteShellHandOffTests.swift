@@ -2,6 +2,7 @@
 // A hand-off file a delegate receives reaches the host and is settled with the
 // state the host ends in; an expired one never reaches the host; a document
 // URL becomes an open hand-off to the host, and a file no suite type claims is dropped.
+// The scene's setup reaches the delegate whether the scene or the delegate comes first.
 import Foundation
 import SuiteModel
 import SuiteShell
@@ -50,6 +51,24 @@ import Testing
         let accepted = await host.accepted
         #expect(accepted.map(\.verb) == [.open])
         #expect(accepted.first?.documents.map(\.displayName) == ["Logo.design"])
+    }
+
+    /// SwiftUI builds the scene (`.suiteApp`) before it creates the delegate; the setup waits for it (#5947).
+    /// No await between setting and reading the registry, so no other test's delegate runs in between.
+    @Test func aSceneSetupMadeBeforeTheDelegateReachesItOnceCreated() {
+        let host = FakeDocumentHost(app: .flare, verbs: [.open])
+        SuiteAppRegistry.configure = { $0.app = .flare; $0.host = host }
+        defer { SuiteAppRegistry.configure = nil }
+        let delegate = SuiteAppDelegate()
+        #expect(delegate.app == .flare)
+        #expect(delegate.host != nil)
+    }
+
+    @Test func aSceneSetupMadeAfterTheDelegateReachesItAtOnce() {
+        let delegate = SuiteAppDelegate()
+        SuiteAppRegistry.configure = { $0.app = .flare }
+        defer { SuiteAppRegistry.configure = nil }
+        #expect(delegate.app == .flare)
     }
 
     @Test func aFileNoSuiteTypeClaimsIsDropped() async {

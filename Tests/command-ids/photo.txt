@@ -99,7 +99,8 @@ tool.gradient
 tool.heal
 tool.lasso
 tool.marquee
-tool.move
+retired tool.move
+tool.select
 tool.polygon
 tool.remove
 tool.spot-heal

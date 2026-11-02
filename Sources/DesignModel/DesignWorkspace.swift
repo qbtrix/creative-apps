@@ -10,6 +10,8 @@
 // - `held` holds exactly the page and node ids on the pages; every change that
 //   adds or removes an id updates it, so minting never walks the tree (#433).
 // - Every node frame is absolute page points, children included (DesignNode).
+// - `playhead` is shown state: reads of the screen go through `shownPage`; an edit of a keyed property at the
+//   playhead writes a key there, every other edit writes the rest pose (Live/LiveKeying.swift).
 // - Every document edit records exactly one named undo step (DesignHistory). A
 //   refused call (it throws, names an unknown id, hits a locked node, or changes
 //   nothing) records nothing and leaves the workspace as it was.
@@ -87,6 +89,9 @@ public enum DesignTool: String, CaseIterable, Sendable {
 public struct DesignWorkspace: Sendable, Equatable {
     /// Pages of the open file; empty when no file is open.
     public internal(set) var pages: [DesignPage] = []
+    /// The document's frame rate and length (DesignNodeTime.swift): the default for a new or still file, the file's when
+    /// opened (DesignFile.swift). Saved only at file version 2 (LiveFiling).
+    public internal(set) var time = DesignDocumentTime()
     public internal(set) var selectedPageID: String?
     /// The selected layers on the selected page: SuiteKernel's ordered selection (DesignSelection).
     var selection = Selection<String>()
@@ -151,10 +156,23 @@ public struct DesignWorkspace: Sendable, Equatable {
 
     public var selectedNode: DesignNode? { selectedNodeID.flatMap { selectedPage?.nodes.node($0) } }
 
+    /// The frame the canvas shows, or nil for the rest pose. Shown state, like the zoom: outside the document,
+    /// its history and its save, so moving it is never an edit.
+    public internal(set) var playhead: Int?
+
+    /// The selected page as the canvas shows it: sampled at the playhead when one is set (DesignNodeTime.swift),
+    /// else the page itself. Every read of what is on screen (paint, hit-test, handles, snapping, the marquee,
+    /// Zoom to Selection) goes through it; edits still write the rest pose.
+    public var shownPage: DesignPage? {
+        guard let playhead else { return selectedPage }
+        return selectedPage?.sampled(at: Double(playhead))
+    }
+
     /// The selected page's tree as rows under the current expanded set, as the Layers panel shows it.
     public var layerRows: [DesignRow] { selectedPage?.visibleRows(expanded: expandedNodeIDs) ?? [] }
 
-    /// Opens a new file with one desktop-sized page holding a "Desktop" frame the size of the page.
+    /// Opens a new file with one desktop-sized page holding a "Desktop" frame the size of the page, at the default
+    /// rate and length with no playhead.
     /// Over an open file it is the undo step "New File", so Undo brings the old file back, location
     /// included. The new file has no location until it is saved.
     public mutating func newFile() {
@@ -166,16 +184,18 @@ public struct DesignWorkspace: Sendable, Equatable {
         held.replace(with: [])
         let page = nextPage()
         (pages, selectedPageID, selectedNodeID, expandedNodeIDs) = ([page], page.id, nil, [])
+        (time, playhead) = (DesignDocumentTime(), nil)
         if wasOpen { record("New File", before: before, swapsDocument: true) }
         documentURL = nil
     }
 
     /// Replaces the document with `pages` (the file codec opens a file through this): selects the
-    /// first page, clears the history, any drag or inline edit and the expanded rows, and starts
+    /// first page, clears the history, the playhead, any drag or inline edit and the expanded rows, and starts
     /// the id counters past the highest "page-N" and "node-N" in the file. Ids at or past the cap
     /// don't move the counters, but minting skips them, so a new id never repeats one (#296).
     mutating func load(_ pages: [DesignPage]) {
         self.pages = pages
+        (time, playhead) = (DesignDocumentTime(), nil)
         held.scan(pages)
         (selectedPageID, selectedNodeID, expandedNodeIDs) = (pages.first?.id, nil, [])
         (history, gesture, placedText) = (DesignHistory(), nil, nil)
@@ -268,6 +288,11 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// Expands every node that encloses `id` in `nodes`, so `id`'s own Layers row shows.
     mutating func expandAncestors(of id: String, in nodes: [DesignNode]) {
         expandedNodeIDs.formUnion(nodes.ancestors(of: id) ?? [])
+    }
+
+    /// Expands every node that encloses any of `ids` in `nodes`, walking the tree once.
+    mutating func expandAncestors(of ids: some Sequence<String>, in nodes: [DesignNode]) {
+        expandedNodeIDs.formUnion(nodes.ancestors(ofAny: Set(ids)))
     }
 
     /// Whether `id`'s Layers row shows its children.
@@ -364,13 +389,14 @@ public struct DesignWorkspace: Sendable, Equatable {
     /// value and width and height stay at least 1. Changing x or y moves the node's subtree with
     /// it; changing the size leaves its children. A run of changes to one node is one step.
     public mutating func setNodeFrame(_ id: String, x: Double, y: Double, width: Double, height: Double) throws(DesignTreeError) {
-        guard let old = findNode(id)?.frame else { throw .unknownID(id) }
+        guard let rest = findNode(id)?.frame else { throw .unknownID(id) }
+        let old = shownPage?.nodes.node(id)?.frame ?? rest  // X and Y are what the canvas shows
         let new = DesignRect(
             x: x.isFinite ? x : old.x, y: y.isFinite ? y : old.y,
             width: width.isFinite ? Swift.max(width, 1) : old.width, height: height.isFinite ? Swift.max(height, 1) : old.height)
-        try editNode(id, named: "Change Frame", coalescing: "frame-\(id)") { node in
-            node.translate(by: DesignPoint(x: new.x - old.x, y: new.y - old.y))
-            node.frame = new
+        try editNode(id, named: "Change Frame", coalescing: "frame-\(id)") { [playhead] node in
+            node = node.moved(by: DesignPoint(x: new.x - old.x, y: new.y - old.y), at: playhead)
+            (node.frame.width, node.frame.height) = (new.width, new.height)
         }
     }
 

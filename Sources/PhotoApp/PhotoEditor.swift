@@ -136,6 +136,8 @@ struct PhotoCanvas: View {
     @Environment(\.photoRendering) private var rendering
     /// The window's live drag line (LiveDragLine.swift); only the overlay reads its line.
     @Environment(\.photoDragLine) private var dragLine
+    /// The window's state, read at a key press: the box's words move without re-running this body.
+    @Environment(PhotoSession.self) private var session: PhotoSession?
 
     var body: some View {
         Group {
@@ -181,7 +183,7 @@ struct PhotoCanvas: View {
 
     /// Types `characters` into the open Type tool box; ignored when none is open or the box doesn't take them.
     private func key(_ characters: String) -> KeyPress.Result {
-        guard let typed = model.textBox?.key(characters) else { return .ignored }
+        guard let typed = (session?.workspace ?? model).textBox?.key(characters) else { return .ignored }
         perform(.text(.key(typed)))
         return .handled
     }

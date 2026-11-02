@@ -13,9 +13,10 @@
 // history's edits through its step names, index and ids, `services` through
 // `isPreviewData`. The geometry hooks are tests' counters and never show.
 //
-// `toolOptions` is the one facet a window body doesn't read: a brush-size
-// step re-runs only the views that show options (the inspector, the canvas
-// overlay's brush cursor). The doc's single `tool` facet is split in two for
+// `toolOptions` and `textBox` are the facets a window body doesn't read: a
+// brush-size step re-runs only the views that show options (the inspector,
+// the canvas overlay's brush cursor), and a key typed into the Type tool's
+// box only the box's overlay, not the 8K editor's layout (gap #6000). The doc's single `tool` facet is split in two for
 // that, since the window must still follow which tool is picked (its palette,
 // pointer and menus). Linux-safe.
 import CoreRaster
@@ -24,7 +25,7 @@ import SuiteKernel
 
 /// A facet of a Photo window's state.
 public enum PhotoFacet: String, CaseIterable, Sendable {
-    case document, tool, toolOptions, adjust, history, status, canvas, file
+    case document, tool, toolOptions, adjust, history, status, canvas, file, textBox
 }
 
 /// Every facet of a workspace, derived by `PhotoWorkspace.facets`.
@@ -89,7 +90,6 @@ public struct PhotoFacets: Equatable, Sendable {
         let stroke: PhotoStroke?
         public let transformDraft: TransformDraft?
         let liveDraft: Bool
-        public let textBox: PhotoTextBox?
         let pathState: PhotoPathState
     }
 
@@ -112,6 +112,8 @@ public struct PhotoFacets: Equatable, Sendable {
     public let status: Status
     public let canvas: Canvas
     public let file: File
+    /// The open Type tool box and its words: only the box's overlay shows them.
+    public let textBox: PhotoTextBox?
 }
 
 extension PhotoFacets {
@@ -130,6 +132,7 @@ extension PhotoFacets {
         case .status: status == other.status
         case .canvas: canvas == other.canvas
         case .file: file == other.file
+        case .textBox: textBox == other.textBox
         }
     }
 }
@@ -145,10 +148,11 @@ extension PhotoWorkspace {
         .status: ["statusMessage", "progress"],
         .canvas: [
             "revision", "contentRevision", "damageLog", "pixels", "masks", "selection", "selectionMask", "maskOutline",
-            "area", "areaCorners", "pendingCrop", "cloneSource", "stroke", "transformDraft", "liveDraft", "textBox",
-            "pathState", "geometryChangeCount", "lastGeometryChange",
+            "area", "areaCorners", "pendingCrop", "cloneSource", "stroke", "transformDraft", "liveDraft", "pathState",
+            "geometryChangeCount", "lastGeometryChange",
         ],
         .file: ["services", "fileKind", "fileFlow", "exportOptions", "exportRun"],
+        .textBox: ["textBox"],
     ]
 
     /// The workspace as its facets.
@@ -169,10 +173,11 @@ extension PhotoWorkspace {
             canvas: .init(
                 revision: revision, contentRevision: contentRevision, selection: selection, selectionMask: selectionMask,
                 area: area, areaCorners: areaCorners, pendingCrop: pendingCrop, cloneSource: cloneSource, stroke: stroke,
-                transformDraft: transformDraft, liveDraft: liveDraft, textBox: textBox, pathState: pathState),
+                transformDraft: transformDraft, liveDraft: liveDraft, pathState: pathState),
             file: .init(
                 isPreviewData: isPreviewData, fileKind: fileKind, recents: fileFlow.recents,
                 documentPath: fileFlow.documentPath, requests: fileFlow.requests, exportOptions: exportOptions,
-                exportRun: exportRun))
+                exportRun: exportRun),
+            textBox: textBox)
     }
 }

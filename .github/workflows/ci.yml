@@ -366,6 +366,10 @@ jobs:
           scope=$(scripts/test-scope app "$APP")
           model=$(sed -n 1p <<<"$scope") snap=$(sed -n 2p <<<"$scope")
           perf=$(scripts/test-scope perf)
+          # Quarantined swift tests ride the same --skip, as in scripts/ci; without this a scoped run or a
+          # lane gate ran them anyway (run 40991137652).
+          quarantined=$(scripts/quarantine skip)
+          [[ -z "$quarantined" ]] || { echo "skipping quarantined tests: $quarantined"; perf="$perf${perf:+|}$quarantined"; }
           {
             echo "## scoped: $APP"
             echo
@@ -375,6 +379,7 @@ jobs:
             if [[ -n "$snap" ]]; then echo "- Snapshot tests: \`swift test --filter '$snap' --no-parallel\`"; else echo "- Snapshot tests: none"; fi
             echo "- UI journeys: $JOURNEYS_NOTE"
             echo "- Perf and timing tests: skipped (Tests/perf-suites.txt; they run nightly on the captain's Mac)"
+            echo "- Quarantined tests: skipped (UITests/quarantine.json)"
             echo
             echo "Skipped: the Linux job (lints and every Model's tests), other apps' tests and journeys, and Promote and Dev red (a scoped run never moves main, and its journeys never lower the audit baseline)."
             echo

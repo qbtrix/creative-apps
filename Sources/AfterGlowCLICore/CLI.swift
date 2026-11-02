@@ -72,7 +72,10 @@ public enum CLI {
         case .new(let app, let out, let options, let force):
             try refuseForeign(out, as: app, inPlace: false)
             try refuseExisting([out], force: force, io: io)
-            let session = try app.session(new: options)
+            let session: HeadlessSession
+            do { session = try app.session(new: options) } catch let error as CatalogError { throw error } catch {
+                throw Refusal.data("--json can't start a new \(app.name) document: \(words(error))")
+            }
             try write(try session.save(), to: out, replace: force, io: io)
             return ["output": .string(out)]
         case .command(let app, let step, let input, let output, let force):
@@ -81,7 +84,9 @@ public enum CLI {
             try refuseForeign(target, as: app, inPlace: output == nil)
             if output != nil { try refuseExisting([target], force: force, io: io) }
             if let why = session.availability(step.id).why { throw CatalogError.unavailable(id: step.id, why: why) }
-            let outcome = try session.run(step)
+            let dropped = try DropFiles.attach([step], dir: "", io: io)
+            session.receiveDropped(dropped.files)
+            let outcome = try session.run(dropped.steps.first ?? step)
             try write(try session.save(), to: target, replace: force || output == nil, io: io)
             return ["command": .string(step.id), "output": .string(target), "result": outcome.result,
                     "undoStep": outcome.undoStep.map(JSONValue.string) ?? .null]
@@ -89,6 +94,7 @@ public enum CLI {
             let files = try open(file, as: app, io: io).export(format, options: options)
             guard !files.isEmpty else { throw Refusal(code: Exit.failed, kind: "failed", message: "\(file) exported no files as \(format)") }
             let targets = files.count == 1 ? [out] : files.map { out + "/" + $0.suggestedName }
+            if files.count == 1, let why = misnamed(out, format: format) { throw Refusal.usage(why) }
             try refuseExisting(targets, force: force, io: io)
             for (exported, target) in zip(files, targets) { try write(exported.data, to: target, replace: force, io: io) }
             return ["outputs": .array(targets.map(JSONValue.string))]
@@ -101,7 +107,18 @@ public enum CLI {
         let data: Data
         do { data = try io.read(file) } catch let error as CLIIOError { throw error } catch { throw Refusal.io("could not read \(file): \(error)") }
         do { return try app.session(open: data, name: file) } catch let error as CatalogError { throw error } catch {
-            throw Refusal.data("\(file) is not a \(app.name) document: \(error)")
+            throw Refusal.data("\(file) is not a \(app.name) document: \(words(error))")
+        }
+    }
+
+    /// An error in plain words: a decoding error names the field and what was wrong with it, never Swift's dump
+    /// or an NSCocoaErrorDomain code.
+    static func words(_ error: any Error) -> String {
+        switch error as? DecodingError {
+        case .keyNotFound(let key, _)?: return "it has no \"\(key.stringValue)\""
+        case .dataCorrupted(let context)? where context.codingPath.isEmpty: return "it isn't JSON"
+        case .some: return Script.reason(error)
+        case nil: return String(describing: error)
         }
     }
 
@@ -111,6 +128,13 @@ public enum CLI {
         guard !app.savesNatively(to: target), let native = app.openExtensions.first else { return }
         throw Refusal.usage(inPlace ? "--in-place would write a .\(native) over \(target); pass --out <file>.\(native)"
             : "--out \(target) would get a .\(native) document; name it <file>.\(native), or use export for another format")
+    }
+
+    /// Why a one-file `format` export can't go to `target`, or nil: a Lottie export is JSON, and .lottie is
+    /// dotLottie's zip, which no app (Flare included) opens as JSON.
+    static func misnamed(_ target: String, format: String) -> String? {
+        guard format == "lottie", target.lowercased().hasSuffix(".lottie") else { return nil }
+        return "\(target) would hold Lottie JSON, but .lottie is the dotLottie zip; name it \(target.dropLast(7)).json"
     }
 
     /// Refuses (73) when any of `paths` exists and `force` is false.

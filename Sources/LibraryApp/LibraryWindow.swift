@@ -1,5 +1,6 @@
 // LibraryWindow.swift: the Library window. It is SuiteWindow with the
-// collections in the sidebar, LibraryBrowser as content (with LibraryStatusBar
+// sidebar's Library and AI tabs (SuiteUI AgentSidebarTabs: the collections
+// list, and the agent's requests, list only), LibraryBrowser as content (with LibraryStatusBar
 // under it in the loupe and on preview data), LibraryInspector in the inspector, and
 // LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
@@ -44,6 +45,7 @@ final class LibraryAreas {
 struct LibraryWindow: View, BodyCounted {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
+    @State private var shellOwner = UUID()
     /// The loupe's GPU route (suite-imaging IM-11); nil in a test window.
     @Environment(\.libraryLoupeGPU) var loupeGPU
 
@@ -73,11 +75,6 @@ struct LibraryWindow: View, BodyCounted {
         let filters = filtersMenu
         SuiteWindow(
             title: "Library",
-            sections: sidebarSections(filters),
-            selection: model.sidebarSelection,
-            // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
-            onSelect: { model.selectSidebarRow($0) },
-            onRename: filters.renameCollection,
             contextActions: { id in
                 guard LibraryFolders.isRowID(id) else { return [] }
                 return LibraryFoldersSection.actions(
@@ -85,6 +82,19 @@ struct LibraryWindow: View, BodyCounted {
                     toggleSubfolders: { model.toggleFolderSubfolders(row: id) })
             }
         ) {
+            AgentSidebarTabs("Library", id: LibraryCatalog.sidebarTabsID, work: { model.agentWork }) {
+                SuiteSidebarList(
+                    sections: sidebarSections(filters),
+                    selection: model.sidebarSelection,
+                    // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
+                    onSelect: { model.selectSidebarRow($0) },
+                    onRename: filters.renameCollection)
+            } ai: {
+                // List only: a catalog has no layer to show, hide or select, and no span to undo.
+                AgentActivityList(requests: model.agentRequests, layerNames: [:], hidden: [], showsEye: false,
+                                  undoHelp: LibraryCatalog.agentUndoHelp, work: model.agentWork) { _ in }
+            }
+        } content: {
             VStack(spacing: 0) {
                 LibraryFilterBar(
                     filter: model.activeFilter, value: model.filterValue, caption: model.filterCaption, menu: filters)
@@ -127,6 +137,10 @@ struct LibraryWindow: View, BodyCounted {
             importAreaLaunch()
             persistAreaLaunch()
             filtersAreaLaunch()
+            // After beginRestore, so a hand-off that launched the app imports after the launch read.
+            LibraryShell.receive = { model.importHandedOff($0) }
+            model.importHandedOff(LibraryShell.handedOff)
+            LibraryShell.handedOff = []
         }
         .onChange(of: model.saveRevision) { _, _ in
             persistAreaChanged()
@@ -141,13 +155,17 @@ struct LibraryWindow: View, BodyCounted {
         .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
         // The live command channel (editor-menus EM-7) reads this window's catalog and lands a result in it.
         .onAppear {
+            LibraryShell.owner = shellOwner
             LibraryShell.read = { model }
             LibraryShell.take = { model.takeLive($0) }
             loupeGPU?.onFailure = { loupeAreaRender(.full) }
         }
         .onDisappear {
+            guard LibraryShell.owner == shellOwner else { return }
+            LibraryShell.owner = nil
             LibraryShell.read = nil
             LibraryShell.take = nil
+            LibraryShell.receive = nil
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()

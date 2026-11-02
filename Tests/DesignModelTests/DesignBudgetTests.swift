@@ -2,7 +2,7 @@
 // (docs/blueprints/design.md section 7.1; packet
 // docs/blueprints/design/features/design-seams.md, D0-4b), on `crowd` (2,000
 // layers on one page). Each row times 200 runs through DesignBudget and fails
-// when the p95 is over the Linux debug gate (10 × the device target):
+// when the median or the p95 is over the Linux debug gate (10 × the device target):
 // QD-S8, one hit test per pointer move, ≤ 0.5 ms / ≤ 5 ms; QD-S9, one document
 // edit (`apply` plus one history record), ≤ 1 ms / ≤ 10 ms; QD-S11, encode and
 // decode the crowd file, ≤ 50 ms / ≤ 500 ms. Each also checks the timed body did
@@ -43,6 +43,7 @@ import Testing
         }
         #expect(move == 200 && hits == 200, "the timed moves hit \(hits) of \(move) as expected")
         #expect(report.median <= gate, "QD-S8 hit test on crowd: \(report), median over the gate \(gate)")
+        #expect(report.p95 <= gate, "QD-S8 hit test on crowd: \(report), p95 over the gate \(gate)")
     }
 
     @Test func applyStep() throws {
@@ -69,6 +70,7 @@ import Testing
         #expect(workspace.history.undo.last?.name == "Move")
         #expect(workspace.selectedPage?.nodes == edits[1].nodes)
         #expect(report.median <= gate, "QD-S9 apply step on crowd: \(report), median over the gate \(gate)")
+        #expect(report.p95 <= gate, "QD-S9 apply step on crowd: \(report), p95 over the gate \(gate)")
     }
 
     @Test func fileRoundTrip() throws {
@@ -87,5 +89,6 @@ import Testing
         #expect(reopened.pages == crowd.pages, "the round trip changed the document")
         #expect(try reopened.fileData() == expected, "the round trip changed the file bytes")
         #expect(report.median <= gate, "QD-S11 file round trip on crowd: \(report), median over the gate \(gate)")
+        #expect(report.p95 <= gate, "QD-S11 file round trip on crowd: \(report), p95 over the gate \(gate)")
     }
 }

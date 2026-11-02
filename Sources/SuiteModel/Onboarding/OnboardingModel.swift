@@ -78,6 +78,13 @@ public final class OnboardingModel {
         isFinished = true
         Task { await finish() }
     }
+    /// Help > Welcome to AfterGlow: SwiftUI keeps a closed Window's state, so a tour that finished
+    /// starts over on page 1 with nothing held. A tour still open stays where it is.
+    public func reopen() {
+        guard isFinished else { return }
+        pageIndex = 0; isFinished = false
+        launching = nil; failed = nil; message = nil
+    }
     public func back() {
         guard sendingReason == nil else { return }
         pageIndex = max(pageIndex - 1, 0)
@@ -112,7 +119,7 @@ public final class OnboardingModel {
     }
 
     /// Open sample: copies the bundle's sample into Documents/Samples (never over an earlier copy),
-    /// sends the `.open` hand-off for that copy, then finishes. A sample that can't open sends nothing.
+    /// sends the `.open` hand-off for that copy, notes it in the recents, then finishes. A sample that can't open sends nothing.
     public func openSample(_ app: SuiteApp, now: Date) async {
         let starter = starters.first { $0.tile.app == app }
         guard let sample = starter?.sample else { refuse(Self.sampleMissing(app), for: app); return }
@@ -122,9 +129,11 @@ public final class OnboardingModel {
             refuse(.ioFailed("Documents/Samples has no free name for \(sample.fileName)."), for: app); return
         }
         do throws(SuiteError) { try copy(source, destination) } catch { refuse(error, for: app); return }
-        let handOff = HandOff(id: makeID(), from: .launcher, to: app, verb: .open,
-                              documents: [SampleCatalog.ref(for: sample, path: destination)], createdAt: now)
+        let ref = SampleCatalog.ref(for: sample, path: destination)
+        let handOff = HandOff(id: makeID(), from: .launcher, to: app, verb: .open, documents: [ref], createdAt: now)
         guard await send(handOff) else { return }
+        // The welcome made this copy, so it notes it: Home's RECENT lists it whether or not the app notes its opens.
+        try? await services.recents.note(ref, event: .opened, at: now, thumbnail: nil)
         await finish()
     }
 

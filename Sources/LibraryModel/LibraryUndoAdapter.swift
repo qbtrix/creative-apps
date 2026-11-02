@@ -10,7 +10,9 @@
 // trashed: undo puts each file back and the photo at its index, redo trashes
 // the ones that came back again. Edits sharing an open coalesce key (one slider drag) stay
 // one step. The 100-step limit is the kernel's. Undo and redo never move the
-// loupe (#426). Linux-safe.
+// loupe (#426). Every step is recorded through CatalogHistory.record, which
+// stamps an agent step's time for the AI tab (LibraryAgentActivity.swift).
+// Linux-safe.
 
 import SuiteKernel
 
@@ -61,8 +63,12 @@ extension History<CatalogChange>.Step {
 public struct CatalogHistory: Hashable, Sendable {
     public typealias Step = History<CatalogChange>.Step
 
+    /// How many steps the history keeps.
+    static let limit = 100
     /// The kernel's history; each payload is the photos (and collections) to put back.
-    public internal(set) var kernel = History<CatalogChange>(limit: 100)
+    public internal(set) var kernel = History<CatalogChange>(limit: CatalogHistory.limit)
+    /// When each agent step was recorded (the AI tab's time; the kernel keeps no date).
+    var agentDates = AgentStepDates()
     /// True while the top step can still take a coalesced edit.
     public internal(set) var open = false
 
@@ -76,6 +82,13 @@ public struct CatalogHistory: Hashable, Sendable {
     public var top: Step? { kernel.undoSteps.last }
     /// The step Redo would reapply; nil when there is nothing to redo.
     public var redoTop: Step? { kernel.redoSteps.last }
+
+    /// Records the step `name` that `change` undoes, stamping its time when an agent made it.
+    /// Every catalog step goes through here.
+    mutating func record(_ name: String, _ change: CatalogChange, key: String? = nil) {
+        kernel.record(name, change, key: key)
+        agentDates.stamp(kernel, limit: Self.limit)
+    }
 }
 
 extension LibraryCatalog {
@@ -99,7 +112,7 @@ extension LibraryCatalog {
         let after = indices.map { items[$0] }
         guard before != after else { return }
         saveRevision += 1
-        history.kernel.record(name, CatalogChange(photos: before), key: coalesceKey)
+        history.record(name, CatalogChange(photos: before), key: coalesceKey)
         history.open = true
         refreshAfterHistoryChange(replacing: before, with: after)
     }
@@ -111,7 +124,7 @@ extension LibraryCatalog {
         var edited = userCollections
         edit(&edited)
         guard edited != userCollections else { return }
-        history.kernel.record(name, CatalogChange(
+        history.record(name, CatalogChange(
             photos: [], collectionsBefore: userCollections, collectionsAfter: edited, selectedBefore: selectedCollectionID))
         history.open = false
         applyCollections(edited)

@@ -210,7 +210,7 @@ controls").
 | `SuiteSize.preset` | 24 | 28 | Preset buttons (2 pt hit inset each side) |
 | `SuiteSize.actionButton` | 32 | 32 | Full-width outlined action |
 | `SuiteSize.pill` | 20 | 24 | Status pills |
-| `SuiteSize.transportButton` | 32, play 36 | same | Transport capsule |
+| `SuiteSize.transportButton` | 32, play 36 | same | Large round transport buttons (the transport itself uses `pillHit`) |
 | `SuiteSize.swatch` | 24 × 16 | the row | Swatch inside a color row |
 | `SuiteSize.selectionHandle` | 8 | 12 | Stage selection handles |
 | `SuiteSize.anchor` | 6 | 12 | Pen and direct-select anchors and handle ends |
@@ -242,8 +242,17 @@ Nothing goes below 10 pt.
 0.14 s, ease in and out (`SuiteMotion.state`). Under Reduce Motion they
 change at once. The one other chrome motion is feedback: a refused rename's
 field shakes once, side to side, and stays still under Reduce Motion
-(`SuiteMotion.shakeOffset`, #3462). Otherwise the artwork is the only thing
-that moves.
+(`SuiteMotion.shakeOffset`, #3462). The other is an agent at work
+(SuiteUI `AgentWorking`, read from the document's history): while a request
+is open or a step just landed, an `accent` `statusDot` pulses at the AI
+segment's trailing edge, the live request's title in the AI tab shimmers
+(an `accentText` band, `SuiteMotion.shimmerSweep`) as its step count ticks
+and new steps ease in, and in Design the layers the newest step touched
+take a 2 pt `accent` outline. All of it holds 0.6 s past the last step or
+the request's end (`AgentWork.linger`), so fast steps never flicker, then
+fades over 0.5 s (`SuiteMotion.agentFade`). It is drawn by the render
+server: no app body or canvas render runs per frame. Otherwise the artwork
+is the only thing that moves.
 
 ### State colors
 
@@ -373,10 +382,12 @@ in `stateError` with a triangle.
 Toggle pills take the `stateSelected` tint with `accentText` when on;
 warning pills take the warning tint, color and triangle; error pills (a
 failed save or render) the `stateError` tint and color with an exclamation
-circle. Transport: a `row`
-capsule of round icon buttons (`textSecondary`, hover `rowHover`) and a
-larger round play button in `accentFill` with a white glyph. Timecode in
-`timecode`: the current value `textPrimary`, the total `textSecondary`.
+circle. Transport (one look in every app, Halo's): plain icon-only
+buttons, each at least a `pillHit` square, edge to edge, in `textSecondary`
+(`textTertiary` while disabled, `accent` for Loop while on), Play swapping
+to pause while playing, Loop a button-style toggle, in a status pill (or
+bare inside a bar that already gives the pill). Timecode in `pill` type:
+the current value `textPrimary`, the total `textSecondary`.
 
 **Tabs and the tool rail.** Segmented tabs (`SegmentedTabs`): the stock
 macOS segmented control exactly as the HIG and AppKit's `NSSegmentedControl`
@@ -424,7 +435,9 @@ no second row component.
   an adjustable value with units. Color is never alone. Differentiate
   Without Color adds the shape cues on the stage too.
 - **Reduce Motion:** state fades become instant, the recording dot stops,
-  the curve editor's preview dot stops, a refused rename's field doesn't shake.
+  the curve editor's preview dot stops, a refused rename's field doesn't shake,
+  the AI's working dot stays still, and a working request's title takes a
+  still `accentText` tint instead of the shimmer.
 - **Increase Contrast:** the Dark + IC and Light + IC columns above: the
   ladder steps double, `outline` goes to 30%, secondary text moves toward
   primary, and the state colors brighten (Dark) or deepen (Light).
@@ -545,7 +558,8 @@ SwiftUI in SuiteUI. Photo and Design use it.
 | Canvas | `CanvasViewport`, `SelectionOutline`, `CropShade` | Rulers in document pixels along the top and left, a checkerboard behind the image, centered while it fits, scrolling with a 32 pt margin once it doesn't. Drags arrive in document pixels. With the canvas focused, a drag that starts with Space held pans it (grab pointer) instead of reaching the tool, and an arrow key the app doesn't use pans a tenth of the view (Shift: a whole view), never past the scrollable area. The image is clipped to the artboard; selection marks and handles in the overlay are not, so they show past its edge. |
 | Right panel | `SegmentedTabs`, then `InspectorSection`s | 280 pt, the tabs (Adjust, Layers) on top. A section's Reset icon shows only while the section differs from its defaults. A color is `InspectorColorRow`: the swatch plus its hex code, opening the system color panel. |
 | Status line | `ViewerStatusBar` | Status pills: zoom, document size, and the trailing slot for the render time. |
-| Timeline (optional) | `EditorShell(timeline:)`, `TimelineStrip`, `TransportCapsule` | A resizable, collapsible bottom slot. |
+| Timeline (optional) | `EditorDetail(timeline:)`, `TimelineStrip`, `TransportCapsule` | A collapsible bottom slot between the canvas and the status line; the canvas fits in what is left. Design's (`DesignTimeline`) slides in from the bottom on the document's first key (no slide under Reduce Motion), one lane per keyed layer, at most five lanes tall before they scroll; a still document shows none. The transport and a Hide/Show button sit on its header row, and collapsed stays collapsed (per window). A ruler drag shows its frame on the canvas at once and lands it as the playhead once the drag rests. |
+| Key button | `KeyframeButton` | Beside Design's X, Y and Opacity rows for one selected layer. The stopwatch animates the row from the playhead to the last frame (the first key slides the timeline in) or leaves one held key; the diamond sets or removes the key at the playhead. Animate > Set Key and Remove Key (⌥⌘K, ⌥⇧⌘K) key every row at once; Play/Pause (⌥⌘P) and Stop (⌥⌘.) say "Set a key first." on a still document. |
 
 - **Dark in both appearances, on purpose.** The shell sets the dark scheme on
   its window, like the Studio editor, so the image is the brightest thing on
@@ -684,6 +698,8 @@ the feature that builds each one.
   Undo, Redo, Copy, Paste, Select All, Find, Settings, Close, Quit). Add custom
   shortcuts only for the most frequent app commands.
 - Export lives at File > Export, opening a sheet on the document window.
+  In Design, a document with keys adds a Frame field to the sheet: the files
+  show that moment. A still document never shows it.
 
 ## Color, type, spacing
 

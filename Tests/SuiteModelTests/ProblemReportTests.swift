@@ -96,4 +96,28 @@ import Testing
         let data = try JSONEncoder().encode(report)
         #expect(try JSONDecoder().decode(ProblemReport.self, from: data) == report)
     }
+
+    /// The packet keeps `.ips` (and `.crash`) files: an older plain-text `.crash` names its process on a
+    /// `Process:` line and is redacted like the rest.
+    @Test func readsCrashFilesToo() {
+        let text = """
+        Process:               Photo [4242]
+        Path:                  /Users/tester/Applications/AfterGlow.app/Contents/MacOS/Photo
+        Exception Type:        EXC_BAD_ACCESS (SIGSEGV)
+        """
+        let crash = CrashFile(name: "Photo_2026-10-21-101010_testers-mac.crash", modified: Self.now - 3600, text: text)
+        let other = CrashFile(name: "Safari_2026-10-21-101010_testers-mac.crash", modified: Self.now - 60,
+                              text: "Process:               Safari [1]")
+        let crashes = Self.report([crash, other]).crashes
+        #expect(crashes.count == 1 && crashes.first?.contains("EXC_BAD_ACCESS") == true, "the Photo .crash isn't read")
+        #expect(!crashes.contains { $0.lowercased().contains("tester") || $0.contains("/Users/") })
+    }
+
+    /// A report that knows no version or build (a CLI run outside AfterGlow.app) leaves them out, never "Photo  ()".
+    @Test func anUnknownVersionIsLeftOut() {
+        let report = ProblemReport(app: "Photo", version: "", build: "", macOS: "26.1", model: "", crashes: [])
+        let text = report.text(note: "")
+        #expect(text.hasPrefix("Photo\nmacOS 26.1\n\nNo crash"), "\(text)")
+        #expect(!text.contains("()") && !text.contains("Mac \n"))
+    }
 }

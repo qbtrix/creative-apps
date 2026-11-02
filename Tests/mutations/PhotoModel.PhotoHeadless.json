@@ -33,5 +33,12 @@
     "find": "public static func open(_ data: Data, name: String, services: PhotoServices) throws -> PhotoHeadless {\n        var workspace = PhotoWorkspace(services: services)",
     "replace": "public static func open(_ data: Data, name: String, services: PhotoServices) throws -> PhotoHeadless {\n        var workspace = PhotoWorkspace(services: .live); _ = services",
     "tests": "PhotoHeadlessTextTests"
+  },
+  {
+    "label": "mergedNotKept: an opened .ora's merged PNG isn't kept, so an edit re-encodes the unchanged composite",
+    "file": "Sources/PhotoModel/PhotoHeadless.swift",
+    "find": "for path in [\"mergedimage.png\", \"Thumbnails/thumbnail.png\"] { package.files[path].map(files.keep) }",
+    "replace": "for path in [\"Thumbnails/thumbnail.png\"] { package.files[path].map(files.keep) }",
+    "tests": "PhotoReusingCodecTests"
   }
 ]

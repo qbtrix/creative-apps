@@ -99,7 +99,7 @@ struct FlareCommandCatalogTests {
         #expect(CommandIDLedger.check(FlareWorkspace.catalog.ids, ledger: text) == [])
         #expect(Set(FlareWorkspace.catalog.ids).isSubset(of: text.split(separator: "\n").map(String.init)), "every id is listed")
     }
-    /// FlareTransport.help as the app has it today.
+    /// FlareTransportAdapter.help as the app has it today.
     static func transportHelp(_ intent: FlareIntent.Timeline, _ ws: FlareWorkspace) -> String? {
         guard ws.canPlay else { return "Open an animation to play it." }
         let atStart = ws.currentFrame <= 0, atEnd = ws.currentFrame >= ws.timelineFrames - 1

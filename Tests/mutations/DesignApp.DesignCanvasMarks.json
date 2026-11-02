@@ -1,0 +1,23 @@
+[
+  {
+    "label": "liftPartsStacked: the lift's three parts are laid out one above the other again, a third of the page each",
+    "file": "Sources/DesignApp/DesignCanvasMarks.swift",
+    "find": "            ZStack(alignment: .topLeading) {\n                ForEach([DesignLiftPart.Part.under, .run, .over]",
+    "replace": "            VStack(spacing: 0) {\n                ForEach([DesignLiftPart.Part.under, .run, .over]",
+    "tests": "DesignMoveLiftPaintTests"
+  },
+  {
+    "label": "runNotOffset: the run's view stays where it was pressed, so the drag shows no move",
+    "file": "Sources/DesignApp/DesignCanvasMarks.swift",
+    "find": ".offset(x: part == .run ? lift.offset.x * scale : 0, y: part == .run ? lift.offset.y * scale : 0)",
+    "replace": ".offset(x: 0, y: 0)",
+    "tests": "DesignMoveLiftPaintTests"
+  },
+  {
+    "label": "runSliceDropsLast: the run's slice leaves out its last node, so a one-layer move paints nothing",
+    "file": "Sources/DesignApp/DesignCanvasMarks.swift",
+    "find": "case .run: return Array(painted[i...j])",
+    "replace": "case .run: return Array(painted[i..<j])",
+    "tests": "DesignMoveLiftPaintTests"
+  }
+]

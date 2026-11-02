@@ -55,7 +55,7 @@ private let events = 60
 
     @Test func moveDrag() throws {
         var workspace = try PhotoWorkspace.fixture(.large)
-        workspace.selectTool(.move)
+        workspace.selectTool(.select)
         let costs = timedMoves(&workspace, from: point(2000, 1500), step: 3)
         workspace.endDrag()
         #expect(workspace.selectedLayer?.offsetX == 3 * events)

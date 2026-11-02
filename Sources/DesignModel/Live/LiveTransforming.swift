@@ -12,6 +12,7 @@
 //   moves. The help is that refusal's help, nil exactly when the writes can run.
 // - A selected layer inside another selected layer moves only with that one, so
 //   nothing is ever moved twice.
+// - At a playhead, Move and Nudge key a keyed axis there (LiveKeying.swift); Resize edits the rest pose.
 // - Move, Resize and Nudge coalesce on `runKey(base, ids)`; Delete is one step.
 //   A write that changes nothing throws `.unchanged`.
 // - A box of no width or height never divides: that axis maps onto the new box.
@@ -34,10 +35,14 @@ public struct LiveTransforming: SelectionTransforming {
     }
 
     public func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try move(ids, by: delta, on: page, at: nil)
+    }
+
+    public func move(_ ids: [String], by delta: DesignPoint, on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
         let roots = try targets(ids, on: page)
         var nodes = page.nodes
         if delta.isFinite {
-            for root in roots { _ = nodes.update(root.id) { $0.translate(by: delta) } }
+            for root in roots { _ = nodes.update(root.id) { $0 = $0.moved(by: delta, at: playhead) } }
         }
         guard nodes != page.nodes else { throw .unchanged }
         return DesignEdit(name: "Move", nodes: nodes, selection: ids, coalescingKey: DesignEdit.runKey("move", ids))
@@ -55,6 +60,11 @@ public struct LiveTransforming: SelectionTransforming {
     }
 
     public func nudge(_ ids: [String], _ direction: DesignDirection, large: Bool, on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try nudge(ids, direction, large: large, on: page, at: nil)
+    }
+
+    public func nudge(_ ids: [String], _ direction: DesignDirection, large: Bool, on page: DesignPage,
+                      at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
         let step = large ? 10.0 : 1.0
         let delta = switch direction {
         case .up: DesignPoint(x: 0, y: -step)
@@ -62,7 +72,7 @@ public struct LiveTransforming: SelectionTransforming {
         case .left: DesignPoint(x: -step, y: 0)
         case .right: DesignPoint(x: step, y: 0)
         }
-        var edit = try move(ids, by: delta, on: page)
+        var edit = try move(ids, by: delta, on: page, at: playhead)
         (edit.name, edit.coalescingKey) = ("Nudge", DesignEdit.runKey("nudge", ids))
         return edit
     }

@@ -1,4 +1,4 @@
-// DesignNodeExtras.swift: a node's rarely set payloads (stroke, gradient, shape spec, picture and its focus), kept on
+// DesignNodeExtras.swift: a node's rarely set payloads (stroke, gradient, shape spec, picture and its focus, keys), kept on
 // the heap behind one copy-on-write box so DesignNode stays small inline. The kernel projection (`layerNode`) recurses once per tree
 // level and holds several node copies per frame, so every inline byte costs stack at every level; a 416-byte node
 // overflowed a 512 KB test thread at 61 levels (DesignNodeStackTests pins the size). Every node without extras
@@ -13,6 +13,8 @@ struct DesignNodeExtras: Hashable, Sendable {
     var shape: ShapeSpec?
     var placedAsset: PlacedAsset?
     var placedFocus = DesignNode.centreFocus
+    /// Keyed properties; nil for a still node.
+    var time: DesignNodeTime?
 }
 
 /// `DesignNodeExtras` on the heap: reads share it, a write to a shared box copies it first.

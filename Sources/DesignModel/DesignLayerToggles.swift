@@ -82,8 +82,7 @@ extension DesignPage {
     /// Whether node `id` or any node enclosing it on this page is hidden; false for an id not on
     /// it. The one hidden-in-tree rule: the Layers rows, the selection and export all read it.
     public func isHiddenInTree(_ id: String) -> Bool {
-        guard let path = nodes.ancestors(of: id) else { return false }
-        return (path + [id]).contains { nodes.node($0)?.isHidden == true }
+        nodes.onPath(to: id) { $0.isHidden } == true
     }
 }
 

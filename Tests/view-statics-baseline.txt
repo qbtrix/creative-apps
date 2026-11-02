@@ -24,8 +24,6 @@ Sources/FlareApp/FlareStage.swift::FlareStage.statusPills
 Sources/FlareApp/FlareStage.swift::FlareStageArt.paint
 Sources/FlareApp/FlareStageOverlay.swift::FlareStageOverlay.rect
 Sources/FlareApp/FlareTimeline.swift::FlareTimeline.laneWidth
-Sources/FlareApp/FlareTransport.swift::FlareTransport.help
-Sources/FlareApp/FlareTransport.swift::FlareTransport.items
 Sources/FlareApp/FlareWindow+Edit.swift::FlareWindow.editHelp
 Sources/FlareApp/FlareWindow+Inspector.swift::FlareWindow.inspectorHelp
 Sources/FlareApp/FlareWindow+Timeline.swift::FlareWindow.timelineHelp

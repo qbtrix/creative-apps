@@ -2,7 +2,7 @@
 // sidebar's AI tab: 0 window bodies, 0 canvas shows"): the real Photo window
 // on the `large` fixture, hosted on the render budget harness through
 // RenderBudgetPhotoFacetsTests' host. Picking the sidebar's AI segment (as its click does)
-// switches PhotoSidebarTabs' own state, so PhotoEditor's body runs 0 times
+// switches AgentSidebarTabs' own state, so PhotoEditor's body runs 0 times
 // and the canvas view's `show` is called 0 times; the tab shows its empty
 // state. Opening a request row is the AI list's own state too; it is covered
 // here once History records agent steps (#6028). Debug builds only. macOS only.

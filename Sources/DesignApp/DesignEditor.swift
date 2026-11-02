@@ -3,9 +3,10 @@
 // none, else "Design"), the toolbar's nine commands (DesignToolbarItem: New,
 // Open and Save beside the title; Undo, Redo, History and the zoom commands
 // trailing, History toggling the window's panel, DesignHistoryArea),
-// the pages and layer tree in the sidebar (DesignLayersPanel), the canvas in
+// the sidebar's Layers and AI tabs (DesignSidebarTabs), the canvas in
 // EditorDetail with the floating tool palette over its leading edge while a
-// file is open and the status line under it (zoom, "Page 1440 × 1024 pt", the last
+// file is open, the timeline slot (DesignTimeline) sliding in under it once the
+// document has keys, and the status line under that (zoom, "Page 1440 × 1024 pt", the last
 // message, "2 Layers" with a selection, the save state's slot
 // (DesignSaveStatus), the active tool), and Properties (DesignInspector) in the
 // inspector. Values in, intents out: it reads the workspace and sends every
@@ -35,6 +36,7 @@ struct DesignEditor: View, BodyCounted {
     var perform: DesignPerform = { _ in }
     /// The window's History panel, which the History button toggles.
     @Environment(\.designHistory) private var history
+    @Environment(\.suiteReduceMotion) private var reduceMotion
 
     /// The commands beside the title, then the trailing ones, in toolbar order.
     private static let documentItems: [DesignToolbarItem] = [.newFile, .open, .save]
@@ -56,13 +58,17 @@ struct DesignEditor: View, BodyCounted {
             actions: Self.trailingItems.map { action($0) },
             inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
         ) {
-            DesignLayersPanel(model: model, perform: perform)
+            DesignSidebarTabs(model: model, perform: perform)
         } content: {
             EditorDetail {
                 DesignCanvas(model: model, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform)
             } palette: {
                 if model.isOpen {
                     ToolbarGroup(palette, axis: .vertical, style: .floating)
+                }
+            } timeline: {
+                if model.showsTimeline {
+                    DesignTimeline(model: model, perform: perform).transition(.move(edge: .bottom))
                 }
             } status: {
                 ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.statusSizeText) {
@@ -83,6 +89,7 @@ struct DesignEditor: View, BodyCounted {
                         .suiteControl(id: DesignControlID.statusTool, enabled: true, reason: nil)
                 }
             }
+            .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: model.showsTimeline)
         } inspector: {
             if model.isOpen {
                 DesignInspector(model: model, perform: perform)
