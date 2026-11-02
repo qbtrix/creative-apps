@@ -65,7 +65,7 @@ struct LibraryWindow: View, BodyCounted {
     nonisolated static let dropTarget = "Library"
 
     #if DEBUG
-    @Environment(\.bodyTally) private var bodyTally
+    @Environment(\.bodyTally) var bodyTally
     #endif
 
     var body: some View {
