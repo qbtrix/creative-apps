@@ -3,7 +3,8 @@
 // Model's `RecoveryStoring` (one `<window>.ora` per window); this holds only
 // the timing and the off-main calls. When `model.autosaveDue` says so, `tick`
 // builds `recoveryEntry` and writes it in one detached task, once per edit
-// (the main actor only copies the workspace value); a write that fails waits
+// (the main actor only copies the workspace value), re-encoding only the
+// layers changed since its last write (`PhotoPNGMemo`); a write that fails waits
 // for the next edit, so an unchanged document is never encoded twice. A write
 // that lands after a save or a discard is removed again. `launch` reads
 // `leftBehind()` off the main actor (a damaged file is already dropped) and
@@ -27,6 +28,8 @@ final class PhotoAutosave {
     @ObservationIgnored private var writtenEdit: Double?
     /// Counts saves and discards, so a write that lands after one is removed again.
     @ObservationIgnored private var resets = 0
+    /// The PNG each layer got at the last write, so the next encodes only the layers that changed (#5312).
+    @ObservationIgnored private let pngs = PhotoPNGMemo()
 
     init(window: String, delay: Double, store: any RecoveryStoring) {
         self.window = window
@@ -116,9 +119,9 @@ final class PhotoAutosave {
     /// Builds `model`'s entry and writes it in one detached task, off the main
     /// actor; whether it landed. A clean image has no entry and writes nothing.
     private func write(_ model: PhotoWorkspace, now: Double, codec: any PhotoImageCodec) async -> Bool {
-        let (store, window) = (store, window)
+        let (store, window, pngs) = (store, window, pngs)
         let task = Task.detached(priority: .utility) { () throws -> Bool in
-            guard let entry = try model.recoveryEntry(now: now, codec: codec) else { return false }
+            guard let entry = try model.recoveryEntry(now: now, codec: codec, reusing: pngs) else { return false }
             try store.write(entry, window: window)
             return true
         }
