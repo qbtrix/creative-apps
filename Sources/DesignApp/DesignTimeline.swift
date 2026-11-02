@@ -24,8 +24,9 @@ struct DesignTimeline: View {
                 DesignTransportAdapter(model: model, perform: perform)
                 Spacer()
                 let title = collapsed ? "Show Timeline" : "Hide Timeline"
-                Button(title, systemImage: collapsed ? "chevron.up" : "chevron.down") { collapsed.toggle() }
-                    .labelStyle(.iconOnly).buttonStyle(.borderless).help(title)
+                MenuCommand(DesignMenuState.spec("view.timeline"), on: DesignMenuState(hasWindow: true), title: title,
+                            systemImage: collapsed ? "chevron.up" : "chevron.down") { collapsed.toggle() }
+                    .labelStyle(.iconOnly).buttonStyle(.borderless)
                     .accessibilityIdentifier("design.timeline.collapse")
             }
             .padding(.horizontal, SuiteSpacing.s)

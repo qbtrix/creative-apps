@@ -41,11 +41,16 @@ public struct DesignMenuState: Sendable {
     })
 
     /// Items that drive the window rather than the file, so the catalog has no command for them and the item's own
-    /// perform does the work: View > Show History shows the window's History panel, which needs a window.
+    /// perform does the work: View > Show History shows the window's History panel, and the timeline's collapse button
+    /// shows or hides its lanes; both need a window.
     static let windowSpecs: [String: CommandSpec<DesignMenuState>] = [
         "view.history": .typed("view.history", title: "Show History", summary: "Shows or hides this window's steps.", kind: .view,
                                params: JSONValue.self, example: .object([:]),
                                availability: { $0.hasWindow ? .available : .unavailable("Open a Design window to see its history.") }
+        ) { _, _ in JSONValue.object([:]) },
+        "view.timeline": .typed("view.timeline", title: "Hide Timeline", summary: "Shows or hides this window's timeline.", kind: .view,
+                                params: JSONValue.self, example: .object([:]),
+                                availability: { $0.hasWindow ? .available : .unavailable("Open a Design window to see its timeline.") }
         ) { _, _ in JSONValue.object([:]) },
         "animate.play-pause": playback("animate.play-pause", "Play/Pause", "Plays or pauses this window's document from the playhead."),
         "animate.stop": playback("animate.stop", "Stop", "Stops playback and shows the document's rest pose."),
