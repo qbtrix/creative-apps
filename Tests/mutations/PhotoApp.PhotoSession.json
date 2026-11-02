@@ -12,5 +12,12 @@
     "find": "            defer { refresh() }\n",
     "replace": "",
     "tests": "RenderBudgetPhotoFacetsTests"
+  },
+  {
+    "label": "draftNeverPublished: the session never stores the textBox facet, so the box's field never shows a typed key",
+    "file": "Sources/PhotoApp/PhotoSession.swift",
+    "find": "        textBox.set(facets.textBox)\n",
+    "replace": "",
+    "tests": "RenderBudgetPhotoTextTests"
   }
 ]

@@ -3,7 +3,7 @@
 // outline and, unless a lock stops it, its resize handles where DesignRect.handles
 // puts them (a small selection shows only its corners, outside the box) and the rotate knob on its
 // stem above the top, SuiteUI's `SelectionHandles` marks (transform DT-u). Several
-// layers: the same accent outline on each and a solid accent box around them all,
+// layers: the same accent outline on each, all in one stroked path, and a solid accent box around them all,
 // with the box's handles, but no knob, while the Model's `showsSelectionHandles` holds; a lock or
 // hidden layer in the selection leaves none. While a marquee is live only each hit
 // layer's outline draws: no box, no handles until the drag ends. Dashes are the live marquee's alone
@@ -28,10 +28,12 @@ struct DesignSelectionMarks: View {
         // A hidden node, or one inside a hidden frame, is not on the canvas, so it has no outline.
         if model.hasMultipleSelection {
             let ids = Set(model.selectedNodeIDs)
-            ForEach(painted.map(\.node).filter { ids.contains($0.id) }) { node in
-                DesignSelectionBox(rect: node.frame, zoom: zoom, handles: false, degrees: node.rotation)
-            }
-            if let bounds = model.selectionBounds {
+            // Painted skips hidden subtrees as selectionBounds does, so the hits' union is that box, without a second walk.
+            let hits = Array(painted.lazy.filter { ids.contains($0.node.id) }.map(\.node))
+            // Every hit's outline in one stroked path, not a view each: a marquee that grows by a
+            // hundred layers changes one shape instead of inserting a hundred views (render contract rule 3).
+            DesignSelectionBox.outlines(hits, zoom: zoom)
+            if let bounds = DesignRect.union(hits.map(\.frame)) {
                 // A live marquee shows what it will select, not the box it will commit.
                 if model.marquee == nil {
                     DesignSelectionBox(rect: bounds, zoom: zoom, handles: model.showsSelectionHandles, knob: true)
@@ -79,7 +81,7 @@ struct DesignSelectionBox: View {
                 path.addRect(CGRect(x: at.x * scale - side / 2, y: at.y * scale - side / 2, width: side, height: side))
             }
         }
-        let turn = TransformBox(box: Rect(minX: rect.x, minY: rect.y, maxX: rect.maxX, maxY: rect.maxY), degrees: degrees)
+        let turn = Self.turn(rect, degrees: degrees)
         ZStack(alignment: .topLeading) {
             Path(box).stroke(SuiteColor.accent, lineWidth: lineWidth)
             squares.fill(SuiteColor.overlayPaper)
@@ -95,5 +97,27 @@ struct DesignSelectionBox: View {
         .transformEffect(artworkPlacement(turn, scale: scale))
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+
+    nonisolated static func turn(_ rect: DesignRect, degrees: Double) -> TransformBox {
+        TransformBox(box: Rect(minX: rect.x, minY: rect.y, maxX: rect.maxX, maxY: rect.maxY), degrees: degrees)
+    }
+
+    /// Each node's accent outline as the box draws it alone, all stroked as one shape.
+    @MainActor static func outlines(_ nodes: [DesignNode], zoom: Double) -> some View {
+        outlinePath(nodes, zoom: zoom).stroke(SuiteColor.accent, lineWidth: 1)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+
+    /// Each node's outline, scaled by `zoom` and turned with the node, in one path.
+    nonisolated static func outlinePath(_ nodes: [DesignNode], zoom: Double) -> Path {
+        let scale = usable(zoom)
+        return Path { path in
+            for node in nodes {
+                let box = node.frame.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale))
+                path.addRect(box, transform: artworkPlacement(turn(node.frame, degrees: node.rotation), scale: scale))
+            }
+        }
     }
 }

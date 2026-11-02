@@ -72,7 +72,7 @@ extension DesignWorkspace {
     }
 
     /// A submenu's reason: its first item's when every item is off; nil when any item can run (or it has none).
-    static func submenuHelp(_ helps: [String?]) -> String? {
+    public static func submenuHelp(_ helps: [String?]) -> String? {
         helps.contains { $0 == nil } ? nil : helps.lazy.compactMap { $0 }.first
     }
 

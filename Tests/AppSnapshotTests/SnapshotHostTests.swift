@@ -37,6 +37,22 @@ import Testing
         #expect(SnapshotHost(appearance: .light).render(Color.clear, size: .zero) == nil)
     }
 
+    /// A key host draws a prominent default button in the accent, as a front window shows it; a plain
+    /// host draws it grey, as an inactive window does (#5947: the welcome golden's Continue read grey).
+    @Test func keyHostDrawsTheDefaultButtonInTheAccent() throws {
+        let button = Button("Continue") {}.buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
+        func saturated(_ key: Bool) throws -> Int {
+            let image = try #require(SnapshotHost(appearance: .light, key: key).image(button, size: CGSize(width: 120, height: 40)))
+            // Pixels whose channels spread more than 60 apart: colour, not grey.
+            return (0..<image.width * image.height).filter { i in
+                let rgb = Self.pixel(image, i % image.width, i / image.width).prefix(3)
+                return Int(rgb.max() ?? 0) - Int(rgb.min() ?? 0) > 60
+            }.count
+        }
+        #expect(try saturated(true) > 1000)
+        #expect(try saturated(false) < 100)
+    }
+
     /// QB-S25: a 1 pt hairline at x = 10 pt covers exactly pixels 20 and 21, at full color.
     @Test func hairline() throws {
         let view = HStack(spacing: 0) {

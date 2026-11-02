@@ -94,6 +94,7 @@ public enum CLI {
             let files = try open(file, as: app, io: io).export(format, options: options)
             guard !files.isEmpty else { throw Refusal(code: Exit.failed, kind: "failed", message: "\(file) exported no files as \(format)") }
             let targets = files.count == 1 ? [out] : files.map { out + "/" + $0.suggestedName }
+            if files.count == 1, let why = misnamed(out, format: format) { throw Refusal.usage(why) }
             try refuseExisting(targets, force: force, io: io)
             for (exported, target) in zip(files, targets) { try write(exported.data, to: target, replace: force, io: io) }
             return ["outputs": .array(targets.map(JSONValue.string))]
@@ -127,6 +128,13 @@ public enum CLI {
         guard !app.savesNatively(to: target), let native = app.openExtensions.first else { return }
         throw Refusal.usage(inPlace ? "--in-place would write a .\(native) over \(target); pass --out <file>.\(native)"
             : "--out \(target) would get a .\(native) document; name it <file>.\(native), or use export for another format")
+    }
+
+    /// Why a one-file `format` export can't go to `target`, or nil: a Lottie export is JSON, and .lottie is
+    /// dotLottie's zip, which no app (Flare included) opens as JSON.
+    static func misnamed(_ target: String, format: String) -> String? {
+        guard format == "lottie", target.lowercased().hasSuffix(".lottie") else { return nil }
+        return "\(target) would hold Lottie JSON, but .lottie is the dotLottie zip; name it \(target.dropLast(7)).json"
     }
 
     /// Refuses (73) when any of `paths` exists and `force` is false.

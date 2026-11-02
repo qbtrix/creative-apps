@@ -49,6 +49,12 @@ import Testing
         #expect(PhotoTool.picked(byTyped: "J", help: noHeal, cyclingFrom: .spotHeal) == .remove)
     }
 
+    /// V is Select in every app (#6012), so Photo's Select wears the arrow Flare's Select, Design's V tool and
+    /// Halo's move tool wear, not a look that reads as its own tool.
+    @Test func selectWearsTheSuitesSelectArrow() {
+        #expect(PhotoTool.select.systemImage == "cursorarrow")
+    }
+
     @Test func disabledToolIsNotPicked() {
         let noImage: (PhotoTool) -> String? = { $0 == .brush ? "Open an image to paint on it." : nil }
         #expect(PhotoTool.picked(byTyped: "b", help: noImage) == nil)
