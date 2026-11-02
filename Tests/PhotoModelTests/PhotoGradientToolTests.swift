@@ -192,7 +192,7 @@ import Testing
         let report = PhotoHeadless.catalog.runBatch(script.steps, on: &doc, atomic: script.atomic)
         #expect(report.stoppedAt == nil, "\(report.steps.compactMap(\.error))")
         let data = try #require(try doc.export(script.output.format, options: script.output.options).first?.data)
-        return try CoreRasterImageCodec.readPNG(data)
+        return try PNG.read(data)
     }
 
     @Test func skyGradientJobPasses() throws {

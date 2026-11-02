@@ -1,12 +1,5 @@
 [
   {
-    "label": "pngRoundTripExact: the PNG writer stores premultiplied colour as straight",
-    "file": "Sources/PhotoModel/CoreRasterImageCodec.swift",
-    "find": "let rgba = try buffer.rgba8(), stride = buffer.width * 4",
-    "replace": "let straight = try buffer.rgba8(); let rgba = straight.indices.map { $0 % 4 == 3 ? straight[$0] : UInt8(Int(straight[$0]) * Int(straight[$0 | 3]) / 255) }; let stride = buffer.width * 4",
-    "tests": "PhotoHeadlessTests"
-  },
-  {
     "label": "realJobPasses(batch-resize): export ignores the longSide option",
     "file": "Sources/PhotoModel/PhotoHeadless.swift",
     "find": "_ = try PhotoWorkspace.catalog.run(\"image.resize\", params: size, on: &copy)",

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "formatSniff: a JPEG is routed to the PNG reader",
+    "file": "Sources/PhotoModel/CoreRasterImageCodec.swift",
+    "find": "guard data.starts(with: signature) else {",
+    "replace": "guard data.count >= 0 else {",
+    "tests": "PhotoCodecRouteTests"
+  },
+  {
+    "label": "errorsSurface: a core error is swallowed into an empty buffer",
+    "file": "Sources/PhotoModel/CoreRasterImageCodec.swift",
+    "find": "return try PNG.read(data)",
+    "replace": "return try (try? PNG.read(data)) ?? PixelBuffer(width: 1, height: 1)",
+    "tests": "PhotoCodecRouteTests"
+  }
+]

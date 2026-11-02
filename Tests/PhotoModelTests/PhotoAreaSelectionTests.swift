@@ -111,7 +111,7 @@ import Testing
         let report = PhotoHeadless.catalog.runBatch(script.steps, on: &doc, atomic: script.atomic)
         #expect(report.stoppedAt == nil, "\(report.steps.compactMap(\.error))")
         let data = try #require(try doc.export(script.output.format, options: script.output.options).first?.data)
-        let (before, after) = try (CoreRasterImageCodec.readPNG(input).rgba8(), CoreRasterImageCodec.readPNG(data).rgba8())
+        let (before, after) = try (CoreRasterImageCodec.read(input).rgba8(), CoreRasterImageCodec.read(data).rgba8())
         func red(_ bytes: [UInt8], _ x: Int, _ y: Int) -> Int { bytes.indices.contains((y * 96 + x) * 4) ? Int(bytes[(y * 96 + x) * 4]) : -1 }
         #expect(red(after, 48, 40) == red(before, 48, 40)) // the face centre
         #expect([red(after, 2, 2), red(after, 93, 93)] == [0, 0] as [Int]) // the surround
