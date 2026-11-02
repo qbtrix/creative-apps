@@ -8,8 +8,10 @@
 // each holding its blueprint 6.2 items disabled with their reason until that
 // feature wires them, and SuiteHelpCommands' Help menu, whose Welcome to
 // AfterGlow opens the onboarding window. LauncherDelegate (LauncherRouter.swift) is the app
-// delegate. The beta shows no placeholder item (no-placeholders NP-2), so the
-// assets and updater stubs are out of the home scene until they act.
+// delegate. View > Show Sidebar and Show Inspector are the system's
+// SidebarCommands and InspectorCommands over SuiteWindow's split view. The
+// beta shows no placeholder item (no-placeholders NP-2), so the assets and
+// updater stubs are out of the home scene until they act.
 import SuiteModel
 import SuiteShell
 import SuiteUI
@@ -28,6 +30,8 @@ struct AfterGlowApp: App {
             .commands {
                 SuiteCommands(app: .launcher)
                 LauncherCommandsHome()
+                SidebarCommands()
+                InspectorCommands()
             }
         Settings { SettingsView() }
             .commands { LauncherCommandsSettings() }

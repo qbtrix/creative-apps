@@ -1,6 +1,7 @@
 // PlaceholderMenuTests.swift (no-placeholders NP-1): no dead menu items. Scans every `Sources/*App/` file as
-// text for a menu `Button(` (in a `Commands` type, `CommandMenu`, `CommandGroup` or `.commands { }`) whose
-// action is empty, whose modifiers hold a constant `.disabled(true)`, or whose reason is `notConnected(`. A live
+// text for a menu `Button(` or SuiteUI `MenuCommand(` (in a `Commands` type, `CommandMenu`, `CommandGroup` or
+// `.commands { }`) whose action is empty, which is constantly off (`.disabled(true)`, `isEnabled: false`), or
+// whose reason is `notConnected(`. A reason a Model sets is its Model test's to refuse (HomeMenuTests). A live
 // reason (`.disabled(!model.canCut)`) passes, and so does a `Commands` type no line of its app builds (the
 // launcher's updater and assets stubs, out of the beta). Each hit must be in Tests/placeholder-menu-baseline.txt
 // as `<file>: <trimmed line>` (`#` lines are comments), and a listed line naming no hit fails: the baseline only
@@ -20,6 +21,9 @@ enum PlaceholderMenuScan {
     enum Kind: String, Hashable, Sendable, CaseIterable {
         case emptyAction = "an empty action", constantDisabled = "a constant .disabled(true)", notConnected = "a notConnected( reason"
     }
+
+    /// The calls that make a menu item: SwiftUI's `Button(` and SuiteUI's `MenuCommand(` (#6203).
+    static let itemCalls = ["Button(", "MenuCommand("]
 
     /// The tokens after which the next `{` opens a menu body.
     static let menuStarts = [": Commands", "CommandMenu(", "CommandGroup(", ".commands {"]
@@ -76,8 +80,9 @@ enum PlaceholderMenuScan {
             } else if menuStarts.contains(where: { matches(chars, at: index, $0) }) {
                 pending = true
                 if char == ":" { owner = typeName(chars, before: index) }
-            } else if braces.last?.menu == true, matches(chars, at: index, "Button("), startsWord(chars, at: index) {
-                let kinds = classify(chars, from: index + 7)
+            } else if braces.last?.menu == true, let call = itemCalls.first(where: { matches(chars, at: index, $0) }),
+                      startsWord(chars, at: index) {
+                let kinds = classify(chars, from: index + call.count)
                 if !kinds.isEmpty, row < lines.count {
                     found.append(PlaceholderSite(file: file, line: row + 1, text: lines[row].trimmingCharacters(in: .whitespaces),
                                                  kinds: kinds, owner: braces.last?.owner))
@@ -97,11 +102,12 @@ enum PlaceholderMenuScan {
         if end < chars.count, chars[end] == "{", let body = matchingClose(chars, from: end + 1) {
             (emptyTrailing, end) = (chars[(end + 1)..<body].allSatisfy(\.isWhitespace), body + 1)
         }
-        let emptyArgument = arguments.filter { !$0.isWhitespace }.contains("action:{}")
+        let compact = arguments.filter { !$0.isWhitespace }
+        let emptyArgument = compact.contains("action:{}") || compact.contains("perform:{}")
         let modifiers = modifierChain(chars, from: end)
         var kinds: Set<Kind> = []
         if emptyTrailing || emptyArgument { kinds.insert(.emptyAction) }
-        if modifiers.contains(".disabled(true)") { kinds.insert(.constantDisabled) }
+        if modifiers.contains(".disabled(true)") || compact.contains("isEnabled:false") { kinds.insert(.constantDisabled) }
         if (arguments + modifiers).contains("notConnected(") { kinds.insert(.notConnected) }
         return kinds
     }
@@ -130,7 +136,7 @@ enum PlaceholderMenuScan {
         return !(token.last?.isLetter ?? false) || after >= chars.count || !(chars[after].isLetter || chars[after].isNumber)
     }
 
-    /// `Button(`, not `KeyframeButton(`.
+    /// `Button(`, not `KeyframeButton(`; `MenuCommand(`, not `FlareMenuCommand(`.
     static func startsWord(_ chars: [Character], at index: Int) -> Bool {
         index == 0 || !(chars[index - 1].isLetter || chars[index - 1].isNumber || chars[index - 1] == "_")
     }
@@ -214,14 +220,17 @@ enum PlaceholderMenuScan {
             #"Menus.swift.txt:9: Button("Empty") {}"#, #"Menus.swift.txt:10: Button("Disabled") { model?.run() }"#,
             #"Menus.swift.txt:12: Button("Not Connected") { model?.run() }.help(SuiteIdentity.notConnected("fixture"))"#,
             #"Menus.swift.txt:19: Button("Empty Argument", action: {})"#,
+            #"Menus.swift.txt:21: MenuCommand(item: menu.clear) {}"#,
+            #"Menus.swift.txt:22: MenuCommand("Off", help: "Later.", isEnabled: false) { model?.run() }"#,
         ])
-        #expect(sites.map(\.kinds) == [[.emptyAction], [.constantDisabled], [.notConnected], [.emptyAction]])
+        #expect(sites.map(\.kinds) == [[.emptyAction], [.constantDisabled], [.notConnected], [.emptyAction],
+                                       [.emptyAction], [.constantDisabled]])
     }
 
     /// An empty action fails against an empty baseline, naming its file, line and kind.
     @Test func emptyActionFails() throws {
         let problems = PlaceholderMenuScan.problems(try Self.fixtureSites(), baseline: "", baselineName: "b.txt")
-        #expect(problems.count == 4)
+        #expect(problems.count == 6)
         #expect(problems.first?.hasPrefix(#"Menus.swift.txt:9: Button("Empty") {}: a placeholder menu item (an empty action)"#) == true)
         #expect(PlaceholderMenuScan.sites(in: "CommandMenu(\"A\") {\n  Button(\"B\") {\n  }\n}", file: "a").count == 1)
     }
@@ -240,7 +249,7 @@ enum PlaceholderMenuScan {
         let sites = try Self.fixtureSites()
         let first = sites.prefix(1).map { PlaceholderMenuScan.key(file: $0.file, text: $0.text) }.joined()
         let problems = PlaceholderMenuScan.problems(sites, baseline: "# comment\n" + first + "\n", baselineName: "b.txt")
-        #expect(problems.count == 3 && !problems.contains { $0.hasPrefix("Menus.swift.txt:9:") }, "\(problems)")
+        #expect(problems.count == 5 && !problems.contains { $0.hasPrefix("Menus.swift.txt:9:") }, "\(problems)")
     }
 
     /// A baseline line that names no hit fails, so the baseline only shrinks.
