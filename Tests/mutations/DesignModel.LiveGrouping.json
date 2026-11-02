@@ -23,8 +23,8 @@
   {
     "label": "a cross-parent group is made",
     "file": "Sources/DesignModel/Live/LiveGrouping.swift",
-    "find": "_ = try fakeSharedParent(present, page)",
-    "replace": "",
+    "find": "let parent = try fakeSharedParent(present, page)",
+    "replace": "let parent = fakeFind(present, page).first.flatMap { _ in String?.none }",
     "tests": "DesignGroupTests"
   },
   {
@@ -32,6 +32,20 @@
     "file": "Sources/DesignModel/Live/LiveGrouping.swift",
     "find": "name: \"Group \\(freeGroupNumber(page.nodes))\"",
     "replace": "name: \"Group 1\"",
+    "tests": "DesignGroupTests"
+  },
+  {
+    "label": "the group puts its members in the wrong order",
+    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
+    "find": "made.children = kids.filter { picked.contains($0.id) }",
+    "replace": "made.children = kids.filter { picked.contains($0.id) }.reversed()",
+    "tests": "DesignGroupTests"
+  },
+  {
+    "label": "the group lands at the back, not the topmost member's place",
+    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
+    "find": "kids.insert(made, at: at)",
+    "replace": "kids.insert(made, at: 0)",
     "tests": "DesignGroupTests"
   }
 ]
