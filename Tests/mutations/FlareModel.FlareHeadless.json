@@ -40,5 +40,12 @@
     "find": "guard let scene = document.scenes.first(where: { $0.id == id }) else {",
     "replace": "guard let scene = ExportScan.withoutText(document).scenes.first(where: { $0.id == id }) else {",
     "tests": "FlareHeadlessTests"
+  },
+  {
+    "label": "file.drop stays window-only, so the CLI can't place a dropped SVG",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "windowOnly = spec.kind == .file && id != \"file.drop\"",
+    "replace": "windowOnly = spec.kind == .file",
+    "tests": "FlareDropCLITests"
   }
 ]

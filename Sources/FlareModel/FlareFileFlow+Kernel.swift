@@ -29,6 +29,8 @@ public struct FlareFileFlowState: Sendable {
     public internal(set) var recents: [RecentFileEntry] = []
     /// The window's requests (oldest first), and who reads each type.
     var requests: [FlareFileRequest] = [], registry = SuiteTypeRegistry.standard
+    /// The dropped files' bytes by path, once a host without a disk hands them over (`receiveDropped`).
+    var dropped: [String: Data]?
     public init() {}
 }
 
@@ -104,7 +106,7 @@ extension FlareWorkspace: FileFlowTarget {
     }
 
     /// Opens and hand-offs become requests for the window, the SVGs are placed (`place(paths:)`), and a refusal
-    /// changes nothing (the drop's result says why).
+    /// changes nothing (the drop's result says why). A place that can't run throws its status line's words.
     public mutating func perform(_ actions: [DropAction]) throws {
         var places: [String] = []
         for action in actions {
@@ -115,21 +117,30 @@ extension FlareWorkspace: FileFlowTarget {
             case .refuse: continue
             }
         }
-        if !places.isEmpty { place(paths: places) }
+        if !places.isEmpty, !place(paths: places) {
+            throw CatalogError.failed(id: "file.drop", message: placeStatus ?? "The drop placed nothing.")
+        }
     }
 
     /// Places the files at `paths` as File > Place… does; one that can't be read stops the place and says so.
-    public mutating func place(paths: [String]) {
+    /// After `receiveDropped` the bytes come from what the host handed over, never the disk. False on a refusal.
+    @discardableResult public mutating func place(paths: [String]) -> Bool {
         var files: [(name: String, data: Data)] = []
         for path in paths {
             let name = path.split(separator: "/").last.map(String.init) ?? path
-            guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else {
+            let data = fileFlow.dropped.map { $0[path] } ?? (try? Data(contentsOf: URL(fileURLWithPath: path)))
+            guard let data else {
                 placeStatus = "Can't read \(name)."
-                return
+                return false
             }
             files.append((name, data))
         }
-        place(files)
+        return place(files)
+    }
+
+    /// Hands the next drops their files' bytes by path; from then on a drop never reads the disk.
+    public mutating func receiveDropped(_ files: [String: Data]) {
+        fileFlow.dropped = (fileFlow.dropped ?? [:]).merging(files) { $1 }
     }
 
     /// A drop's actions split: the files to place, and the rest, in order.

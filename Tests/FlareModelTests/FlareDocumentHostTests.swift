@@ -1,9 +1,9 @@
 // FlareDocumentHostTests.swift: finding #4636. Flare's suite document host:
 // a dropped or reopened .flare (an `.open` hand-off) asks the app to open
 // each animation in a window, an open with nothing in it is refused, `.new`
-// is accepted and opens nothing, a placed SVG hand-off points at the window and File > Place…,
-// yet, and every other verb is refused; a refusal delivers nothing. Runs on
-// Linux and macOS.
+// is accepted and opens nothing, a placed SVG hand-off points at the window
+// and File > Place…, and every other verb is refused; a refusal delivers
+// nothing. Runs on Linux and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else

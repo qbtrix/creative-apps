@@ -25,18 +25,19 @@ extension FlareWorkspace {
     }
 
     /// Runs `place.image` on each file, centred in the scene. The status line then reads the place's report, or
-    /// the first refusal, and the files after a refusal aren't placed.
-    public mutating func place(_ files: [(name: String, data: Data)]) {
+    /// the first refusal, and the files after a refusal aren't placed. False when one was refused.
+    @discardableResult public mutating func place(_ files: [(name: String, data: Data)]) -> Bool {
         for file in files {
             let command = PlaceIntent.place(name: file.name, data: file.data, at: nil).command
             do throws(CatalogError) {
                 _ = try Self.catalog.run(command.id, params: command.params, on: &self)
             } catch {
                 placeStatus = Self.placeRefusal(error)
-                return
+                return false
             }
             placeStatus = placeReport ?? "Placed \(file.name)."
         }
+        return true
     }
 
     /// A refusal in the status line's words: the reason alone, not the command's id.
