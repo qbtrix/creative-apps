@@ -579,3 +579,4 @@ utc	stage	event	ref	note
 2026-11-02T03:51Z	check-in	dev-red #6186 opened 03:32Z (LiveStandInTests baseline, from #6178, not ours); captain fixed it in #6187; #5353 open clean a92b4651; #5951 open, no text finding; 52 photo findings, none export/text
 2026-11-02T04:23Z	check-in	dev-red #6186 still open (fix #6187 merged, waiting on next full run; not ours); #5353 open clean a92b4651; #5951 open, no text finding; 52 photo findings, none export/text
 2026-11-02T04:56Z	check-in	dev-red #6186 still open: bisect named #6178, lane opened revert #6189 (fix #6187 already merged; not ours); #5353 open clean a92b4651; #5951 open, no text finding; 52 photo findings, none export/text
+2026-11-02T05:27Z	check-in	quiet; dev-red #6186 still open (not ours, fix #6187 merged, revert #6189 open); #5353 open clean a92b4651; #5951 open, no text finding; 52 photo findings, none export/text
