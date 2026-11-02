@@ -2,8 +2,10 @@
 // stubs, LF-3 bodies). The catalog is a `SuiteDocumentHost` (hand-offs from
 // other apps) and a `FileFlowTarget` (Open In and drops). Library is one
 // catalog, always open, so it has no recent files of its own. It accepts
-// open and place hand-offs; a drop imports the photos it places as one
-// "Import" step and selects them, and hands other apps' documents to them
+// open and place hand-offs: `LibraryDocumentHost` hands their photo paths to
+// the window, which imports them like a drop (after the launch read, when
+// one arrives while the catalog is loading). A drop imports the photos it
+// places as one "Import" step and selects them, and hands other apps' documents to them
 // as `LibraryFileRequest`s the window runs. Open In hands the loupe's photo
 // to another app that reads it. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -48,6 +50,15 @@ extension LibraryCatalog {
         select(Set(fresh.map(\.id)))
     }
 
+    /// Imports the photos an open or place hand-off brought, like a drop; while
+    /// the launch read runs they wait, and `restore` / `failRestore` import them.
+    public mutating func importHandedOff(_ paths: [String]) {
+        handedOff += paths
+        guard catalogState != .loading, !handedOff.isEmpty else { return }
+        defer { handedOff = [] }
+        importDropped(handedOff)
+    }
+
     /// What the file-flow commands left for the window, oldest first; empties the list.
     public mutating func takeFileRequests() -> [LibraryFileRequest] {
         defer { fileRequests = [] }
@@ -65,6 +76,27 @@ extension LibraryCatalog: SuiteDocumentHost {
 
     public func accept(_ handOff: HandOff) async throws(SuiteError) -> HandOffState {
         if let refusal = await refusal(for: handOff) { throw refusal }
+        return .accepted
+    }
+}
+
+/// The hand-off host `.suiteEditor(.library, host:)` gets: an open or place
+/// hand-off's photo paths go to `deliver` (the window's `importHandedOff`).
+public struct LibraryDocumentHost: SuiteDocumentHost {
+    private let deliver: @Sendable ([String]) async -> Void
+
+    public init(deliver: @escaping @Sendable ([String]) async -> Void) {
+        self.deliver = deliver
+    }
+
+    public func refusal(for handOff: HandOff) async -> SuiteError? {
+        [.open, .place].contains(handOff.verb) ? nil : LibraryCatalog.handOffRefusal
+    }
+
+    public func accept(_ handOff: HandOff) async throws(SuiteError) -> HandOffState {
+        if let refusal = await refusal(for: handOff) { throw refusal }
+        let paths = handOff.documents.map(\.path)
+        if !paths.isEmpty { await deliver(paths) }
         return .accepted
     }
 }

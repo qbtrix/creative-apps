@@ -45,6 +45,7 @@ final class LibraryAreas {
 struct LibraryWindow: View, BodyCounted {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
+    @State private var shellOwner = UUID()
     /// The loupe's GPU route (suite-imaging IM-11); nil in a test window.
     @Environment(\.libraryLoupeGPU) var loupeGPU
 
@@ -136,6 +137,10 @@ struct LibraryWindow: View, BodyCounted {
             importAreaLaunch()
             persistAreaLaunch()
             filtersAreaLaunch()
+            // After beginRestore, so a hand-off that launched the app imports after the launch read.
+            LibraryShell.receive = { model.importHandedOff($0) }
+            model.importHandedOff(LibraryShell.handedOff)
+            LibraryShell.handedOff = []
         }
         .onChange(of: model.saveRevision) { _, _ in
             persistAreaChanged()
@@ -150,13 +155,17 @@ struct LibraryWindow: View, BodyCounted {
         .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
         // The live command channel (editor-menus EM-7) reads this window's catalog and lands a result in it.
         .onAppear {
+            LibraryShell.owner = shellOwner
             LibraryShell.read = { model }
             LibraryShell.take = { model.takeLive($0) }
             loupeGPU?.onFailure = { loupeAreaRender(.full) }
         }
         .onDisappear {
+            guard LibraryShell.owner == shellOwner else { return }
+            LibraryShell.owner = nil
             LibraryShell.read = nil
             LibraryShell.take = nil
+            LibraryShell.receive = nil
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()
