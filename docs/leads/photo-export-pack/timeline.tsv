@@ -593,3 +593,4 @@ utc	stage	event	ref	note
 2026-11-02T11:29Z	check-in	dev-red #6208 open; captain merged #6211 (library Glibc fix for the linux red); macos run at b854fe2 flaky GestureContractTests photo, lane rerunning; not ours; #5353 open clean a92b4651; no new findings; 53 photo findings
 2026-11-02T12:01Z	check-in	quiet; dev-red #6208 still open (not ours); #5353 open clean a92b4651; no merges, no new findings; 53 photo findings
 2026-11-02T12:37Z	check-in	dev-red #6208 open; macos GestureContractTests photo red again at 1a3075e, lane rerunning (not ours); captain merged #6093 (photo file-flow goldens), #6181 library, #6103 design; #5353 open clean a92b4651; no new findings; 53 photo findings
+2026-11-02T13:40Z	check-in	dev green b854fe2, #6208 closed (flake); #5353 open clean; 53 findings, none new
