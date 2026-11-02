@@ -90,13 +90,13 @@ public struct SuiteExportOptions: Hashable, Codable, Sendable {
     }
 
     /// The one params schema: every key optional, each missing one from `defaults`; an unknown key throws.
-    /// `.null` is `defaults`; a schema issue throws with its JSON pointer ("/colour: unexpected key").
+    /// `.null` is `defaults`. Options failing the schema throw `CatalogError.malformedParams` on `export` with
+    /// every issue, so the CLI exits 65 and lists them (docs/cli.md).
     public init(json: JSONValue, defaults: SuiteExportOptions) throws {
         self = defaults
         if case .null = json { return }
-        if let issue = Self.schema.validate(json).first {
-            throw ExportOptionRefusal.invalid("\(issue.path.isEmpty ? "options" : issue.path): \(issue.message)")
-        }
+        let issues = Self.schema.validate(json)
+        guard issues.isEmpty else { throw CatalogError.malformedParams(id: "export", issues) }
         guard case .object(let o) = json else { return }
         if case .string(let f)? = o["format"] { format = f }
         if case .object(let s)? = o["size"] { size = try Self.size(s) }
@@ -121,7 +121,8 @@ public struct SuiteExportOptions: Hashable, Codable, Sendable {
             }
         default: break
         }
-        throw ExportOptionRefusal.invalid("/size: give one of scale, pixels or longEdge; stretch goes with pixels.")
+        throw CatalogError.malformedParams(id: "export", [SchemaIssue(path: "/size",
+            message: "give one of scale, pixels or longEdge; stretch goes with pixels")])
     }
 
     /// `{"format", "size": {"scale" | "pixels": [w, h] | "longEdge", "stretch"}, "quality", "metadata", "alpha", "fps", "loop"}`.
