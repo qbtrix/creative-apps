@@ -151,8 +151,12 @@ public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
                     .onAppear { setVisible(item.id, true) }
                     .onDisappear { setVisible(item.id, false) }
                     .contentShape(.rect)
-                    .onTapGesture { click(item.id, kind: Self.clickKind()) }
-                    .simultaneousGesture(TapGesture(count: 2).onEnded { onOpen(item.id) })
+                    // The event's click count, not a `TapGesture(count: 2)`: that one times the two taps by
+                    // when it handles them, so a first click whose selection rerun outlasts the double-click
+                    // interval (a loaded machine) turned a double-click into two single clicks (#6216).
+                    .onTapGesture {
+                        if Self.clickCount() >= 2 { onOpen(item.id) } else { click(item.id, kind: Self.clickKind()) }
+                    }
                     .accessibilityAction { click(item.id, kind: .plain) }
                     .accessibilityAction(named: "Open") { onOpen(item.id) }
             }
@@ -187,6 +191,14 @@ public struct ThumbnailGrid<ID: Hashable & Sendable>: View {
     private var currentAnchor: ID? {
         if let anchor, selection.contains(anchor) { return anchor }
         return order.first(where: selection.contains)
+    }
+
+    /// The click count the window server stamped on the click being handled (`NSApp.currentEvent`, as
+    /// DesignIntent reads a double-click); 1 when it is no click (an accessibility action).
+    // view-static: main-actor
+    private static func clickCount() -> Int {
+        guard let event = NSApp.currentEvent, event.type == .leftMouseUp || event.type == .leftMouseDown else { return 1 }
+        return event.clickCount
     }
 
     private static func clickKind() -> ClickKind {
