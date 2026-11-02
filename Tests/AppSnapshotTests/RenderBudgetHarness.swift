@@ -34,8 +34,9 @@
 // could never focus a panel in another hosting view, such as an inspector's).
 // Nor can it run a system
 // drag: a real session waits for a window-server mouse-up forever (#2971), so
-// once a harness window opens, DragSessions hands every `.draggable` drag an
-// idle session that never starts. macOS only.
+// once a harness or snapshot window opens, DragSessions hands every
+// `.draggable` drag an idle session and makes the drag manager's wait return
+// at once. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -455,15 +456,18 @@ final class CountingHostingView<Content: View>: NSHostingView<Content> {
     }
 }
 
-/// The harness never starts a system drag. A drag over a `.draggable` view makes SwiftUI call
-/// `NSView.beginDraggingSession`, whose real session starts on the next run-loop turn and then blocks the main
-/// thread until a mouse-up comes from the window server, which a test process never gets: it froze the next test
-/// that turned the run loop, past every time limit (#2971). And ending one with a posted mouse-up left the test
-/// process's main run loop to return, so it exited 0 mid-run. So, once the first harness window opens, the method
-/// is swapped for one that counts the call in `begun` and hands back an idle session that never starts. A step's
-/// cost is measured up to the drag's start; whether a drop lands is a journey's to prove.
+/// The harness never runs a system drag. A drag over a `.draggable` view makes SwiftUI begin an AppKit drag
+/// session, which starts on the next run-loop turn and then blocks the main thread in NSCoreDragManager's
+/// `_dragUntilMouseUp:…` until a mouse-up comes from the window server, which a test process
+/// never gets: it froze the next test that turned the run loop, past every time limit (#2971). Ending one with a
+/// posted mouse-up left the test process's main run loop to return, so it exited 0 mid-run. So `faked` swaps two
+/// methods. `NSView.beginDraggingSession` counts the call in `begun` and hands back an idle session that never
+/// starts. And since macOS 27's SwiftUI begins `.draggable` sessions by a path that skips that swap, the frame
+/// every real session blocks in returns at once, counted in `held`. A step's cost is measured up to the drag's
+/// start; whether a drop lands is a journey's to prove. Every harness and snapshot window installs it.
 @MainActor enum DragSessions {
     static var begun = 0
+    static var held = 0
     static let faked: Void = {
         let begin = #selector(NSView.beginDraggingSession(with:event:source:))
         let fake = #selector(NSView.harnessBeginDraggingSession(with:event:source:))
@@ -474,7 +478,32 @@ final class CountingHostingView<Content: View>: NSHostingView<Content> {
             return
         }
         method_exchangeImplementations(original, replacement)
+        // A private AppKit frame, named differently on macOS 26 and 27, so finding neither fails here by name
+        // rather than hanging a later test.
+        let waits = ["_dragUntilMouseUp:initialEvent:async:", "_dragUntilMouseUp:location:modifiers:"]
+        let manager: AnyClass? = NSClassFromString("NSCoreDragManager")
+        let blocking = waits.compactMap { name in manager.flatMap { class_getInstanceMethod($0, NSSelectorFromString(name)) } }
+        guard !blocking.isEmpty else {
+            Issue.record("NSCoreDragManager has none of \(waits) to stop")
+            return
+        }
+        // Takes only self: the other arguments sit unread in their registers. Returns 0 for any integer or
+        // object result.
+        let skip: @convention(block) (AnyObject) -> Int = { _ in
+            MainActor.assumeIsolated { DragSessions.held += 1 }
+            return 0
+        }
+        for method in blocking { method_setImplementation(method, imp_implementationWithBlock(skip)) }
     }()
+
+    /// Begins a real session through AppKit's own method (swapped to `harnessBeginDraggingSession`), as a path
+    /// that skips the swap would.
+    static func beginRealSession(
+        on view: NSView, items: [NSDraggingItem], event: NSEvent, source: any NSDraggingSource
+    ) -> NSDraggingSession {
+        _ = faked
+        return view.harnessBeginDraggingSession(with: items, event: event, source: source)
+    }
 }
 
 extension NSView {
