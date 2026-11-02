@@ -55,6 +55,15 @@ import Testing
     #else
     static let scale = 1
     #endif
+
+    /// The export rows' gate in ms: both run at full size, so a release build gets the packet's release row.
+    static func exportBudget(debug: Double, release: Double) -> Double {
+        #if DEBUG
+        debug
+        #else
+        release
+        #endif
+    }
 }
 
 /// MJ-LG's Model budgets, which LG-3 and LG-4 (LG-model) meet. They time wall
@@ -95,21 +104,26 @@ struct LargeCatalogModelBudgetTests {
         #expect(cost.median <= 10.0 / Double(Base.scale), "shift-range took \(cost.median) ms (median)")
     }
 
-    /// Debug budget, at full size: the plan for 1,000 of the fixture's photos.
+    /// QB-LIB-7 model half (docs/blueprints/library/features/export.md, Budgets), at full size: the plan for
+    /// 1,000 of the fixture's photos under `{date}-{seq}` at 2048 with sidecars, against a folder that already
+    /// holds some of its names.
     @Test func exportPlanWithinBudget() throws {
         let catalog = try Base.catalog(10_000, "plan")
         let photos = Array(catalog.items.prefix(1_000))
         let exporter = LiveExporter(decoder: FakeDecoder(photos: []), develop: FakeDevelop())
-        let options = ExportOptions(folder: "/out", naming: ExportNaming(template: "{date}-{seq}"))
+        let options = ExportOptions(longEdge: 2048, folder: "/out", naming: ExportNaming(template: "{date}-{seq}"),
+                                    sidecar: true)
+        let existing = Set(exporter.plan(Array(photos.prefix(50)), options: options, existingNames: []).items.map(\.fileName))
         var plan = ExportPlan(items: [], options: options)
         let cost = Budget.measure("large export-plan-1000", runs: 5) {
-            plan = exporter.plan(photos, options: options, existingNames: [])
+            plan = exporter.plan(photos, options: options, existingNames: existing)
         }
         #expect(Set(plan.items.map(\.fileName)).count == 1_000)
-        #expect(cost.median <= 50, "the plan took \(cost.median) ms (median), over 50 ms")
+        #expect(plan.items.allSatisfy { max($0.size.width, $0.size.height) <= 2048 })
+        #expect(cost.median <= Base.exportBudget(debug: 50, release: 5), "the plan took \(cost.median) ms (median)")
     }
 
-    /// Debug budget, at full size: opening the sheet on 10,000 selected photos.
+    /// QB-L9 model half, at full size: opening the sheet on 10,000 selected photos.
     @Test func beginExportWithinBudget() throws {
         var catalog = try Base.catalog(10_000, "begin")
         catalog.select(Set(catalog.order))
@@ -118,7 +132,7 @@ struct LargeCatalogModelBudgetTests {
             _ = catalog.beginExport(folder: "/out")
         }
         #expect(catalog.exportRun == .editing(ExportOptions(folder: "/out")))
-        #expect(cost.median <= 10, "beginExport took \(cost.median) ms (median), over 10 ms")
+        #expect(cost.median <= Base.exportBudget(debug: 10, release: 1), "beginExport took \(cost.median) ms (median)")
     }
 }
 
