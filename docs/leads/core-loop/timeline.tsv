@@ -351,3 +351,4 @@ utc	stage	event	ref	note
 2026-11-02T12:54Z	3	check-in	quiet	fulls 41425757279, 41434558978 cancelled, 0 cases; no halo run
 2026-11-02T15:18Z	3	check-in	quiet	fulls 41442576302, 41451609811 cancelled, 0 Halo cases; no halo run
 2026-11-02T17:37Z	3	check-in	pending	full 41462417779 journeys running; full 41492580011 pending; no halo run
+2026-11-02T19:40Z	3	check-in	quiet	fulls 41462417779, 41492580011 cancelled, 0 Halo cases; no halo run
