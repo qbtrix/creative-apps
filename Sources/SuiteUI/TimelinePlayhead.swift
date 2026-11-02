@@ -9,7 +9,8 @@
 // redraws for it either. The pill and a 16 pt band down the line grab it
 // (TimelinePlayheadGrab); a drag scrubs through TimelineScrubSender, which
 // the ruler's drag uses too and which calls onScrub only when the frame
-// changes (#1297). With a work area, the lanes before its first tick and
+// changes (#1297); each frame it sends reports a `timeline-scrub` latency
+// sample to the strip's probe, as the ruler's do. With a work area, the lanes before its first tick and
 // after its last are dimmed to 60 % here (laneBed at 40 % over them,
 // TimelinePlayheadGrab.dims), so no lane redraws when it moves. Equatable
 // without its closure, so the strip skips it unless the playhead, the
@@ -32,6 +33,7 @@ struct TimelinePlayhead: View, BodyCounted {
     var rate: FrameRate? = nil
     let onScrub: @MainActor (Int) -> Void
     @State private var sender = TimelineScrubSender()
+    @Environment(\.timelineFadeMark) private var probe
 
     #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
@@ -61,7 +63,7 @@ struct TimelinePlayhead: View, BodyCounted {
             .contentShape(TimelinePlayheadGrab.shape(lineX: lineX, pill: pill, height: proxy.size.height))
             .gesture(DragGesture(minimumDistance: 0).onChanged { drag in
                 let frame = mapping.frame(atX: Double(drag.location.x + scroll.x - timelineInset))
-                sender.send(frame, from: playhead, to: onScrub)
+                if sender.send(frame, from: playhead, to: onScrub) { probe?.report(TimelineFadeMark.scrubSeries) }
             }.onEnded { _ in sender.end() })
         }
     }
@@ -200,12 +202,13 @@ enum TimelinePlayheadGrab {
 @MainActor final class TimelineScrubSender {
     private(set) var lastSent: Int?
 
-    /// Sends `frame` unless it is the last frame sent, or `playhead` before any.
-    func send(_ frame: Int, from playhead: Int, to onScrub: @MainActor (Int) -> Void) {
+    /// Sends `frame` unless it is the last frame sent, or `playhead` before any; true when it sent.
+    @discardableResult func send(_ frame: Int, from playhead: Int, to onScrub: @MainActor (Int) -> Void) -> Bool {
         let last = lastSent ?? playhead
-        guard frame != last else { return }
+        guard frame != last else { return false }
         lastSent = frame
         onScrub(frame)
+        return true
     }
 
     /// The drag ended; the next one starts from the playhead.

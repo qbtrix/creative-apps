@@ -16,9 +16,10 @@
 // lists a whole entry, so the toggle-style controls (InspectorAction,
 // SegmentedTabs, KeyframeButton) report `selected` (ControlStateTests).
 // The publishing call also sets
-// `gridProbe`, `scrubProbe`, `chipProbe` and `curveProbe`, so grids, layer
-// lists, scrub fields, chips and curve editors record their frames, samples
-// and marks into the window's `suite.perf` (SP1, SP4, SP6, SP7, SJ20), and
+// `gridProbe`, `scrubProbe`, `chipProbe`, `curveProbe` and `timelineFadeMark`,
+// so grids, layer lists, scrub fields, chips, curve editors and the timeline
+// record their frames, samples and marks into the window's `suite.perf` (SP1,
+// SP3, SP4, SP6, SP7, SP8, SJ20), and
 // `suiteProbeRecorder`, the window's SuiteProbeRecorder itself, so an app
 // view records its own samples, drawn frames and marks into that one probe
 // (#3401); outside a publishing call it is nil. Only the hidden element
@@ -187,6 +188,7 @@ private struct SuiteProbesModifier: ViewModifier {
                 .environment(\.scrubProbe, recorder.scrubProbe)
                 .environment(\.chipProbe, recorder.chipProbe)
                 .environment(\.curveProbe, recorder.curveProbe)
+                .environment(\.timelineFadeMark, recorder.timelineProbe)
                 .environment(\.suiteProbeRecorder, recorder)
                 .background(alignment: .topLeading) {
                     SuitePerfHost(recorder: recorder)
@@ -210,6 +212,7 @@ private struct SuiteProbesModifier: ViewModifier {
     private(set) var scrubProbe = ScrubProbe { _ in }
     private(set) var chipProbe = ChipProbe(record: { _ in }, sample: { _ in })
     private(set) var curveProbe = CurveProbe(record: { _ in }, mark: { _ in })
+    private(set) var timelineProbe = TimelineFadeMark(record: { _ in })
 
     init() {
         gridProbe = GridProbe { [weak self] series, time in self?.probe.drew(series, at: time) }
@@ -220,6 +223,9 @@ private struct SuiteProbesModifier: ViewModifier {
         curveProbe = CurveProbe(
             record: { [weak self] sample in self?.probe.record(sample) },
             mark: { [weak self] mark in self?.mark(mark) })
+        timelineProbe = TimelineFadeMark(
+            record: { [weak self] mark in self?.mark(mark) },
+            sample: { [weak self] sample in self?.probe.record(sample) })
     }
 
     /// An input sample: the event's timestamp and the target timestamp of the refresh that showed it.
