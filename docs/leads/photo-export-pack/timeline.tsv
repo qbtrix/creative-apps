@@ -604,3 +604,4 @@ utc	stage	event	ref	note
 2026-11-02T20:11Z	check-in	quiet: dev-red #6220 still open (not ours); no merges; #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-02T20:44Z	check-in	dev-red #6220 still open (not ours); captain merged #6219 (library crop) and #6221 (suiteui/flare/library export); #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-02T21:16Z	check-in	quiet: dev-red #6220 still open (not ours); no merges; #5353 open clean a92b4651; no new findings; 52 photo findings
+2026-11-02T21:47Z	check-in	dev-red #6220 still open (not ours); captain posted #6227 on #6206 and filed gap #6229 (transform rotation scrub, not export/text, skipped); #5353 open clean a92b4651; no new findings; 52 photo findings
