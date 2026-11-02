@@ -10,7 +10,9 @@
 // file joins them. Every page root carries `suite.gallery.<page>`; an unknown
 // name shows an EmptyStateView naming it. The index page lists every page and
 // opens one through `openGalleryPage`; every other page has a back button to
-// the index. The gallery root applies `.suiteProbes()`. A page adds nothing
+// the index: the gallery's own row above the page, or, for a page in
+// `ownsBackButton` (the `shell` page, whose sidebar runs the window's full
+// height), the page's own `suite.gallery.back` in its toolbar. The gallery root applies `.suiteProbes()`. A page adds nothing
 // to the window's minimum height, so the gallery fits `-SuiteWindowSize`.
 import SwiftUI
 
@@ -76,7 +78,11 @@ public struct SuiteGallery: View {
         GalleryCrop.pages,
         GalleryExportPack.pages,
         GalleryBrushKeys.pages,
+        GalleryShell.pages,
     ]
+
+    /// Whether `page` draws its own `suite.gallery.back`, so the gallery adds no back row above it.
+    nonisolated static func ownsBackButton(_ page: String) -> Bool { page == GalleryShell.name }
 
     /// All pages by name; `SuiteGalleryTests` checks no two areas declare one name.
     @MainActor static let pages: GalleryPages = areas.reduce(into: [:]) { all, area in
@@ -115,7 +121,7 @@ public struct SuiteGallery: View {
         // from the inset, its `.suiteControl` never reached the window's
         // `suite.controls` while the index rows in the page did (SJ0).
         VStack(alignment: .leading, spacing: 0) {
-            if name != GalleryIndex.name {
+            if name != GalleryIndex.name, !Self.ownsBackButton(name) {
                 Button {
                     opened = GalleryIndex.name
                 } label: {
