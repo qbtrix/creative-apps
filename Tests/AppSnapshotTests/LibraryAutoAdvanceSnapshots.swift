@@ -75,8 +75,9 @@ import Testing
         let notice = try #require(catalog.notice)
         #expect(notice.source == .cull && notice.isError)
         #expect(notice.action == .importFolder)
-        let row = LibraryNoticeRow(notice: notice, onClose: {})
-        #expect(row.onClose != nil)
+        let close = LibraryBrowser(model: catalog, menu: Self.cullMenu).noticeClose(notice)
+        #expect(close?.isEnabled == true && close?.identifier == "library.notice.close")
+        #expect(LibraryBrowser(model: catalog).noticeClose(notice) == nil, "no close until the cull area passes one")
         var dismissed = catalog
         dismissed.dismissCullError()
         #expect(dismissed.notice == nil)

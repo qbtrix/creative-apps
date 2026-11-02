@@ -12,7 +12,8 @@
 // sets in the environment. `onVisibleChange` reports the cells on
 // screen so the app can load only those thumbnails. Images aspect-fit inside
 // the cell; a reject is dimmed with a badge and an unreadable file shows a
-// warning mark. Columns hold at least `cellSize.width` plus padding, and the
+// warning mark, and a cell still waiting for its image pulses its placeholder
+// symbol (none under `suiteReduceMotion`). Columns hold at least `cellSize.width` plus padding, and the
 // cells stretch to fill the row with their images a fixed 8 pt
 // (`SuiteSpacing.s`) apart, keeping `cellSize`'s aspect; adjacent selection
 // fills touch; `showsCaptions: false` drops the file name under each
@@ -57,6 +58,8 @@ public struct ThumbnailItem<ID: Hashable>: Identifiable {
     public let help: String?
     /// The file can't be read: a warning triangle over the placeholder fill.
     public let isUnreadable: Bool
+    /// No image yet and nothing wrong with the file: the placeholder's `photo` symbol pulses, except under reduce motion.
+    public var isLoading: Bool { image == nil && !isUnreadable }
 
     public init(
         id: ID, image: Image? = nil, caption: String, badges: ThumbnailBadges = ThumbnailBadges(),
@@ -259,6 +262,7 @@ private struct ThumbnailCell<ID: Hashable>: View {
     let isSelected: Bool
     var isActive = false
     @State private var hovering = false
+    @Environment(\.suiteReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: SuiteSpacing.xs) {
@@ -338,6 +342,7 @@ private struct ThumbnailCell<ID: Hashable>: View {
                 Image(systemName: "photo")
                     .font(SuiteFont.title)
                     .foregroundStyle(SuiteColor.secondaryText)
+                    .symbolEffect(.pulse, isActive: item.isLoading && !reduceMotion)
                     .accessibilityHidden(true)
             }
         }
