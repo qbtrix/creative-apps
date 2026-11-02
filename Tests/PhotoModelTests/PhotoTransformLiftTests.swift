@@ -2,7 +2,7 @@
 // The draft's layer lifts only when a plain over draws it as the canvas does: here the Logo under a visible
 // translucent Wash doesn't lift, and does once the Wash is hidden, unless its blend mode isn't normal or the
 // image's adjustments change it. A lift's pixels are the layer's in the box (premultiplied sRGB), its base is the
-// workspace without the layer or the draft, and its placement puts each lifted pixel where the draft's matrix
+// workspace without the layer (a selection's keeps the layer outside the box) or the draft, and its placement puts each lifted pixel where the draft's matrix
 // (the one commit resamples through) puts that layer pixel. Runs on Linux and macOS.
 import CoreRaster
 import Foundation
@@ -84,5 +84,20 @@ import Testing
         let m = try workspace.services.transform.matrix(try #require(workspace.transformDraft), origin: (120, 80))
         // Lifted pixel (0, 0) is layer pixel (10, 10).
         #expect(abs(place.tx - (m.a * 10 + m.c * 10 + m.tx)) < 1e-9 && abs(place.ty - (m.b * 10 + m.d * 10 + m.ty)) < 1e-9)
+    }
+
+    /// The picture under a selection's lift keeps the layer's pixels outside the box, as Return does (#5813).
+    @Test func theBaseUnderASelectionsLiftKeepsTheRestOfTheLayer() throws {
+        var workspace = try PhotoLiveTransformTests.transforming()
+        workspace.cancelTransform()
+        for layer in workspace.layers where layer.name != "Logo" && layer.isVisible { workspace.toggleVisibility(layer.id) }
+        workspace.selection = PixelRect(x: 130, y: 90, width: 20, height: 10)
+        try workspace.beginTransform()
+        try workspace.setTransform(TransformBox(box: Rect(minX: 130, minY: 140, maxX: 150, maxY: 150)), name: "Move", drag: "m")
+        #expect(!workspace.liftsAlone, "the rest of the Logo is under the lift")
+        let base = try #require(workspace.liftedBase).composite()
+        let clear = try base.pixel(x: 5, y: 5)
+        #expect(try base.pixel(x: 125, y: 85) != clear, "the Logo outside the selection stays under the lift")
+        #expect(try base.pixel(x: 135, y: 95) == clear, "the lifted part is not under itself")
     }
 }
