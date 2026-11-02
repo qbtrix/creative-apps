@@ -80,9 +80,10 @@ extension FlareWorkspace: PlacedImageTarget {
         }
         let fit = Self.fitMatrix(width: imported.scene.width, height: imported.scene.height, into: image.box)
         var taken = takenLayerNames
+        // The search resumes past the last id it took, so a 2,000-path SVG names its layers in one pass.
+        var n = 1
         let placed = imported.scene.layers.map { svgLayer -> Layer in
             var layer = Self.fitted(svgLayer, by: fit)
-            var n = 1
             while taken.contains("layer-\(n)") { n += 1 }
             layer.id = "layer-\(n)"
             taken.insert(layer.id)

@@ -41,11 +41,13 @@ struct FlareTimelineEdit: View {
 
     private func strip(_ rows: [TimelineRow], lastFrame: Int, frameWidth: CGFloat) -> some View {
         let picked = Dictionary(grouping: model.selectedKeys.filter { $0.property == nil }, by: \.layerID)
+        // Read once: the getter walks every timeline row, so one read per row was O(n²) on a 2,000-layer place.
+        let selected = model.selectedTimelineRowID
         let tracks = rows.map { row in
             TimelineTrack(
                 id: row.layerID, name: row.name, keys: row.keyFrames.map { TimelineKey(frame: $0, shape: .linear) },
                 pickedFrames: Set((picked[row.layerID] ?? []).map(\.frame)),
-                isSelected: row.layerID == model.selectedTimelineRowID)
+                isSelected: row.layerID == selected)
         }
         return TimelineStrip(
             tracks: tracks, duration: lastFrame, frameWidth: frameWidth, playhead: model.currentFrame,
