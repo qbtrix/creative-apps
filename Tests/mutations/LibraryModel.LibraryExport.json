@@ -16,8 +16,8 @@
   {
     "label": "beginExport is allowed while running",
     "file": "Sources/LibraryModel/LibraryExport.swift",
-    "find": "if case .running = exportState { return \"An export is already running.\" }",
-    "replace": "_ = exportState",
+    "find": "if case .running = exportRun { return \"An export is already running.\" }",
+    "replace": "_ = exportRun",
     "tests": "LibraryExportFlowTests"
   },
   {
@@ -44,7 +44,7 @@
   {
     "label": "cancelExport is true when not running",
     "file": "Sources/LibraryModel/LibraryExport.swift",
-    "find": "if case .running = exportState { return true }\n        return false",
+    "find": "if case .running = exportRun { return true }\n        return false",
     "replace": "return true",
     "tests": "LibraryExportBatchTests"
   }

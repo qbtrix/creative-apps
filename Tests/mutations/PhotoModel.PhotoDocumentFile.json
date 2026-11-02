@@ -1,3 +1,5 @@
 [
-  {"label": "flatSaveDropsPaths: Save writes a flat file and loses the paths without asking", "file": "Sources/PhotoModel/PhotoDocumentFile.swift", "find": " || !paths.isEmpty\n", "replace": "\n", "tests": "PhotoPathsTests"}
+  {"label": "flatSaveDropsPaths: Save writes a flat file and loses the paths without asking", "file": "Sources/PhotoModel/PhotoDocumentFile.swift", "find": " || !paths.isEmpty\n", "replace": "\n", "tests": "PhotoPathsTests"},
+  {"label": "snapshotKeyDropsTheLayer: every layer's image shares one key, so an autosave re-encodes the layers it kept (#5312)", "file": "Sources/PhotoModel/PhotoDocumentFile.swift", "find": "(id, try image(\"\\(kind)/\\(id)\", tiles))", "replace": "(id, try image(kind, tiles))", "tests": "PhotoPNGMemoTests"},
+  {"label": "snapshotSkipsTheMaker: the layers' images bypass the caller, so an autosave re-encodes every layer (#5312)", "file": "Sources/PhotoModel/PhotoDocumentFile.swift", "find": "pixels: try images(pixels, \"pixels\")", "replace": "pixels: try pixels.mapValues(Self.decoded)", "tests": "PhotoPNGMemoTests"}
 ]

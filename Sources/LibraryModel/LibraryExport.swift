@@ -2,7 +2,7 @@
 // help, the sheet's options, preview, plan, progress, summary, cancel, retry of
 // the failed photos) and the runner that renders and writes a plan in order,
 // keeping each file's failure and stopping on Cancel. Exporting is never an undo step. Each move is
-// one call on the kernel's `exportRun` (LibraryExportAdapter.swift); `exportState` reads it.
+// one call on the kernel's `exportRun` (LibraryExportAdapter.swift).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -30,7 +30,7 @@ extension LibraryCatalog {
 
     /// Why Export… can't act; nil when it can.
     public var exportHelp: String? {
-        if case .running = exportState { return "An export is already running." }
+        if case .running = exportRun { return "An export is already running." }
         if !hasExportTarget { return "Select a photo to export it." }
         return services.unavailable["exporter"]
     }
@@ -54,7 +54,7 @@ extension LibraryCatalog {
     /// exporter's unavailable reason; otherwise nil unless editing.
     public var exportPreview: String? {
         if let reason = services.unavailable["exporter"] { return reason }
-        guard case .editing(let options) = exportState else { return nil }
+        guard case .editing(let options) = exportRun else { return nil }
         if let help = options.naming.help { return help }
         guard let first = exportTargets.first,
               let item = services.exporter.plan([first], options: options, existingNames: []).items.first
@@ -66,7 +66,7 @@ extension LibraryCatalog {
     /// The plan for `exportTargets` under the editing options, `.running(0, n)`;
     /// nil unless editing with a usable template and something to export.
     public mutating func exportPlan(existingNames: Set<String>) -> ExportPlan? {
-        guard case .editing(let options) = exportState, options.naming.help == nil else { return nil }
+        guard case .editing(let options) = exportRun, options.naming.help == nil else { return nil }
         let targets = exportTargets
         guard !targets.isEmpty else { return nil }
         let plan = services.exporter.plan(targets, options: options, existingNames: existingNames)
@@ -89,14 +89,14 @@ extension LibraryCatalog {
     /// True while running; the area then cancels its task, and the runner's
     /// summary (`cancelled`) ends the run through `finishExport`.
     public mutating func cancelExport() -> Bool {
-        if case .running = exportState { return true }
+        if case .running = exportRun { return true }
         return false
     }
 
     /// From `.finished` with failures: the plan of only `failedIDs` under
     /// `options`, in that order, `.running(0, n)`; nil otherwise.
     public mutating func retryExport(options: ExportOptions, existingNames: Set<String>) -> ExportPlan? {
-        guard case .finished(let summary) = exportState, !summary.failedIDs.isEmpty else { return nil }
+        guard let summary = exportFinished, !summary.failedIDs.isEmpty else { return nil }
         let byID = Dictionary(items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         let failed = summary.failedIDs.compactMap { byID[$0] }
         let plan = services.exporter.plan(failed, options: options, existingNames: existingNames)

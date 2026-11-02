@@ -19,8 +19,9 @@
 // compositor moves the box's pixels over the rest (`boxCut`). Any other drag's
 // frames (`transformPreview(live:)`) draw the rest, then the box's pixels
 // through the draft's matrix region by region (PhotoRenderRoute.swift,
-// bilinear); the exact frame follows at the release. A flip mirrors the layer's
-// pixels in place at once, never a draft. Canvas Size is PhotoImageOps'.
+// bilinear); the exact frame follows at the release. A flip mirrors the box's
+// pixels in place at once (`boxChanged` again), never a draft, so a small square
+// on a canvas-sized layer stays where it is. Canvas Size is PhotoImageOps'.
 // Linux-safe.
 import CoreRaster
 import SuiteKernel
@@ -87,13 +88,17 @@ extension PhotoWorkspace: TransformTarget {
         touch(.all)
     }
 
-    /// Mirrors the selected layer's pixels across their own centre lines, the
-    /// layer staying where it is: one step named `name`.
+    /// Mirrors the pixels in the box the inspector shows (`transformBounds`) across the box's centre lines,
+    /// the rest of the layer staying where it is (`boxChanged`): one step named `name`.
     private mutating func flipLayer(x: Bool, y: Bool, name: String) throws {
-        guard let id = selectedLayerID, let at = index(of: id), let tiles = pixels[id] else { return }
-        var content = PlacedPixels(pixels: tiles, x: layers[at].offsetX, y: layers[at].offsetY)
-        if x { content = try services.transform.flipped(content, .horizontal) }
-        if y { content = try services.transform.flipped(content, .vertical) }
+        guard let id = selectedLayerID, let at = index(of: id), let box = transformBounds,
+            let content = try boxChanged(at, in: box, { part in
+                var content = part
+                if x { content = try services.transform.flipped(content, .horizontal) }
+                if y { content = try services.transform.flipped(content, .vertical) }
+                return content
+            })
+        else { return }
         record(.stack(stackState), named: name)
         pixels[id] = content.pixels
         layers[at].offsetX = content.x

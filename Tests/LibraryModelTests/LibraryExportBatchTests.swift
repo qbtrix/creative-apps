@@ -126,7 +126,7 @@ private struct CancelInRenderExporter: PhotoExporting {
         #expect(retry.items.map(\.photoID) == [id("IMG_0002"), id("IMG_0004")])
         #expect(retry.items.map(\.fileName) == ["IMG_0002 2.jpg", "IMG_0004.jpg"])
         #expect(retry.options == options)
-        #expect(catalog.exportState == .running(done: 0, total: 2))
+        #expect(catalog.exportRun == .running(options, done: 0, total: 2))
     }
 
     @Test func retryRefusesWithoutFailures() {
@@ -134,12 +134,12 @@ private struct CancelInRenderExporter: PhotoExporting {
         let options = ExportOptions(folder: "/out")
         #expect(catalog.retryExport(options: options, existingNames: []) == nil)
         catalog.finishExport(ExportSummary(total: 2, written: ["IMG_0001.jpg", "IMG_0002.jpg"]))
-        #expect(catalog.exportState == .idle)
+        #expect(catalog.exportRun == .idle)
         #expect(catalog.beginExport(folder: "/out") == true)
         _ = catalog.exportPlan(existingNames: [])
         catalog.finishExport(ExportSummary(total: 2, written: ["IMG_0001.jpg", "IMG_0002.jpg"]))
         #expect(catalog.retryExport(options: options, existingNames: []) == nil)
-        #expect(catalog.exportState == .finished(ExportSummary(total: 2, written: ["IMG_0001.jpg", "IMG_0002.jpg"])))
+        #expect(catalog.exportFinished == (ExportSummary(total: 2, written: ["IMG_0001.jpg", "IMG_0002.jpg"])))
     }
 
     @Test func cancelExportIsTrueOnlyWhileRunning() {

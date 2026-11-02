@@ -48,7 +48,7 @@ private final class ProgressLog: @unchecked Sendable {
         var catalog = shoot(selecting: [])
         #expect(catalog.exportHelp == "Select a photo to export it.")
         #expect(catalog.beginExport(folder: "/out") == false)
-        #expect(catalog.exportState == .idle)
+        #expect(catalog.exportRun == .idle)
     }
 
     @Test func runningRefusesASecondExportAndClose() {
@@ -57,29 +57,29 @@ private final class ProgressLog: @unchecked Sendable {
         #expect(catalog.beginExport(folder: "/out") == true)
         let history = catalog.history
         #expect(catalog.exportPlan(existingNames: [])?.items.count == 1)
-        #expect(catalog.exportState == .running(done: 0, total: 1))
+        #expect(catalog.exportRun == .running(ExportOptions(folder: "/out"), done: 0, total: 1))
         #expect(catalog.exportHelp == "An export is already running.")
         #expect(catalog.beginExport(folder: "/other") == false)
         catalog.setExportOptions(ExportOptions(longEdge: 512, folder: "/out"))
-        #expect(catalog.exportState == .running(done: 0, total: 1))
+        #expect(catalog.exportRun == .running(ExportOptions(folder: "/out"), done: 0, total: 1))
         catalog.closeExport()
-        #expect(catalog.exportState == .running(done: 0, total: 1))
+        #expect(catalog.exportRun == .running(ExportOptions(folder: "/out"), done: 0, total: 1))
         catalog.showExportProgress(done: 1, total: 1)
-        #expect(catalog.exportState == .running(done: 1, total: 1))
+        #expect(catalog.exportRun == .running(ExportOptions(folder: "/out"), done: 1, total: 1))
         catalog.finishExport(ExportSummary(total: 1, written: ["IMG_0001.jpg"]))
         #expect(catalog.history == history)
         catalog.closeExport()
-        #expect(catalog.exportState == .idle)
+        #expect(catalog.exportRun == .idle)
     }
 
     @Test func optionsChangeOnlyWhileEditing() {
         var catalog = shoot(selecting: ["IMG_0001"])
         catalog.setExportOptions(ExportOptions(longEdge: 512, folder: "/out"))
-        #expect(catalog.exportState == .idle)
+        #expect(catalog.exportRun == .idle)
         #expect(catalog.beginExport(folder: "/out") == true)
-        #expect(catalog.exportState == .editing(ExportOptions(folder: "/out")))
+        #expect(catalog.exportRun == .editing(ExportOptions(folder: "/out")))
         catalog.setExportOptions(ExportOptions(longEdge: 512, folder: "/out"))
-        #expect(catalog.exportState == .editing(ExportOptions(longEdge: 512, folder: "/out")))
+        #expect(catalog.exportRun == .editing(ExportOptions(longEdge: 512, folder: "/out")))
     }
 
     @Test func previewReadsNameAndSize() {
@@ -123,12 +123,12 @@ private final class ProgressLog: @unchecked Sendable {
                                                  writeSidecar: { _, _, _ in }, progress: { log.add($0) })
             #expect(log.all == [1, 2])
             for done in log.all { catalog.showExportProgress(done: done, total: plan.items.count) }
-            #expect(catalog.exportState == .running(done: 2, total: 2))
+            #expect(catalog.exportRun == .running(ExportOptions(longEdge: 1024, quality: 80, folder: "/out"), done: 2, total: 2))
             catalog.finishExport(summary)
             #expect(summary.message == "Exported 2 photos.")
-            #expect(catalog.exportState == .finished(summary))
+            #expect(catalog.exportFinished == summary)
             catalog.closeExport()
-            #expect(catalog.exportState == .idle)
+            #expect(catalog.exportRun == .idle)
         }
     }
 }

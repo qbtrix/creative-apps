@@ -199,24 +199,21 @@ extension LibraryCatalog {
 
     /// Why the sheet's options can't change: only while editing them.
     var exportEditingHelp: String? {
-        switch exportState {
+        switch exportRun {
         case .editing: nil
         case .running: "The export is running."
-        case .idle, .finished: "Choose File > Export… to open the export sheet."
+        case .idle, .finished, .failed: "Choose File > Export… to open the export sheet."
         }
     }
 
     /// Why Close (Cancel or Done) can't act: the sheet is closed, or the export runs.
     var exportCloseHelp: String? {
-        switch exportState {
+        switch exportRun {
         case .idle: "The export sheet isn't open."
         case .running: "The export is still running."
-        case .editing, .finished: nil
+        case .editing, .finished, .failed: nil
         }
     }
-
-    /// The finished run's summary, nil before one ends.
-    var exportFinished: ExportSummary? { if case .finished(let summary) = exportState { summary } else { nil } }
 
     /// A spec that can run while `help` is nil, `run` refusing with that reason otherwise.
     static func sheet<P: Codable & Sendable>(
@@ -273,7 +270,7 @@ extension LibraryCatalog {
             return try JSONValue(encoding: ExportPreset(name: p.name, options: options))
         },
         sheet("export.cancel", "Cancel Export", "Stops the running export after the photo it is writing.", .view, NoParams.self,
-              help: { c in c.exportState.isRunning ? nil : "No export is running." }) { c, _ in
+              help: { c in c.exportRun.isRunning ? nil : "No export is running." }) { c, _ in
             _ = c.cancelExport()
             return .object([:])
         },
@@ -352,10 +349,6 @@ extension LibraryNoticeContent.Action {
         case .importFolder: "file.import-folder"
         }
     }
-}
-
-extension ExportState {
-    var isRunning: Bool { if case .running = self { true } else { false } }
 }
 
 extension LibraryCatalog {
