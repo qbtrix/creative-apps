@@ -81,7 +81,7 @@ struct LibraryCatalogDoc: HeadlessDocument {
         case "file.export": .some(c.exportHelp)
         case "export.set-folder", "export.apply-preset", "export.save-preset": .some(c.exportEditingHelp)  // CS-5
         case "export.close": .some(c.exportCloseHelp)
-        case "export.cancel": .some(c.exportState.isRunning ? nil : "No export is running.")
+        case "export.cancel": .some(c.exportRun.isRunning ? nil : "No export is running.")
         case "export.retry": .some(c.exportFinished?.failedIDs.isEmpty == false ? nil : "No photos failed to export.")
         case "export.show-in-finder": .some(c.exportFinished == nil ? "Nothing has been exported yet." : nil)
         case "file.show-catalog": .some(c.catalogState == .damaged ? nil : "The catalog file isn't damaged.")

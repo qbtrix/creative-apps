@@ -1,0 +1,4 @@
+[
+{"label": "reuseIgnoresTheTiles: a kept PNG is reused after its layer changed, so the autosave writes stale pixels (#5312)", "file": "Sources/PhotoModel/PhotoPNGMemo.swift", "find": "$0.tiles == tiles ? $0.png : nil", "replace": "$0.png", "tests": "PhotoPNGMemoTests"},
+{"label": "nothingKept: a write keeps no PNGs, so the next one encodes every layer again (#5312)", "file": "Sources/PhotoModel/PhotoPNGMemo.swift", "find": "kept.withLock { $0 = write.used }", "replace": "_ = write.used", "tests": "PhotoPNGMemoTests"}
+]

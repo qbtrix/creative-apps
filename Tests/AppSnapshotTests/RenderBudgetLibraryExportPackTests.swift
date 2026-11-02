@@ -39,7 +39,7 @@ extension BodyCountSuites {
             LibraryShell.take?(LibraryHeadless(catalog: catalog))
             let sheet = try #require(await RenderBudgetLibraryBackupTests.sheet(of: w.window), "no export sheet opened")
             try await w.settle(untilStable: bodies, turns: 8)
-            let metadata = { LibraryShell.read.flatMap { LibraryExportSheet.options($0().exportState)?.metadata } }
+            let metadata = { LibraryShell.read.flatMap { $0().exportRun.editingOptions?.metadata } }
             #expect(metadata() == .noLocation, "the sheet didn't open on All but location")
             var pressed = false
             let pick = try await w.measure("library export metadata pick, None", bodies: bodies) {

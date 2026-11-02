@@ -42,10 +42,24 @@
     "tests": "LibraryKernelExportAdapterTests"
   },
   {
-    "label": "readoutDropsSummary: the readout shows only the kernel's written names, so the failures and Try Again's ids are lost",
+    "label": "readoutDropsSummary: exportFinished shows only the kernel's written names, so the failures and Try Again's ids are lost",
     "file": "Sources/LibraryModel/LibraryExportAdapter.swift",
-    "find": "self = .finished(summary ?? ExportSummary(total: files.count, written: files))",
-    "replace": "self = .finished(ExportSummary(total: files.count, written: files))",
+    "find": "return exportSummary ?? ExportSummary(total: files.count, written: files)",
+    "replace": "return ExportSummary(total: files.count, written: files)",
     "tests": "LibraryExportBatchTests"
+  },
+  {
+    "label": "failedReadsAsFinished: a failed kernel run reads as a finished one with no files, so the sheet shows it as done",
+    "file": "Sources/LibraryModel/LibraryExportAdapter.swift",
+    "find": "        guard case .finished(_, let files) = exportRun else { return nil }\n",
+    "replace": "        guard case .finished(_, let files) = exportRun else { return exportError.map { _ in ExportSummary(total: 0, written: []) } }\n",
+    "tests": "LibraryKernelExportAdapterTests"
+  },
+  {
+    "label": "dropsError: a failed run's message is lost, so the sheet has no error to show",
+    "file": "Sources/LibraryModel/LibraryExportAdapter.swift",
+    "find": "        if case .failed(_, let message) = exportRun { return message }\n",
+    "replace": "        if case .failed = exportRun { return nil }\n",
+    "tests": "LibraryKernelExportAdapterTests"
   }
 ]
