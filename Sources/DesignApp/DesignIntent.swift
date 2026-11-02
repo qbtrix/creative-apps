@@ -103,7 +103,7 @@ extension DesignTool: PaletteTool {
 
     public var title: String {
         switch self {
-        case .move: "Move"
+        case .move: "Select"
         case .frame: "Frame"
         case .rectangle: "Rectangle"
         case .ellipse: "Ellipse"
