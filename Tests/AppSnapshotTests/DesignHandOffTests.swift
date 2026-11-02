@@ -1,8 +1,9 @@
 // DesignHandOffTests.swift (#5200): a .design file handed to Design the way the
 // launcher's Open In and the home's Recent hand it (an .aghandoff file the
 // suite delegate receives), and the way Finder opens it (the file's own URL),
-// reaches Design's host as DesignShell wires it and loads the file's pages. Each
-// test has its own open queue, so a window another test mounted never takes the file.
+// reaches Design's host as DesignShell wires it and loads the file's pages; a
+// `.new` hand-off (the welcome's Blank, #3333) asks a window for a new file.
+// Each test has its own open queue, so a window another test mounted never takes the file.
 import DesignModel
 import Foundation
 import SuiteModel
@@ -38,8 +39,9 @@ import Testing
 
     /// The file a window takes from the open queue, opened as DesignWindow opens it.
     private func openedByAWindow() throws -> DesignWorkspace {
-        let taken = queue.windowAppeared(requestWindow: {})
-        let url = try #require(taken)
+        guard case .file(let url) = queue.windowAppeared(requestWindow: {}) else {
+            throw DesignHandOffMissing()
+        }
         var workspace = DesignWorkspace()
         try workspace.open(Data(contentsOf: url), at: url)
         return workspace
@@ -62,6 +64,21 @@ import Testing
         #expect(opened.documentURL == file)
     }
 
+    /// #3333: the welcome's Blank sends `.new` to Design; it's accepted and a window takes a new file.
+    @Test func aNewFromTheWelcomeAsksForANewFile() async throws {
+        let store = FileStore(folder: folder.path)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let preset = NewDocumentPreset(id: "design.blank", app: .design, title: "Blank", detail: "One page")
+        let handOff = SuiteCreating().handOff(for: preset, id: HandOff.newID(), at: Date())
+        try store.writeData("handoffs/\(handOff.id).aghandoff", try HandOffCodec.encode(handOff))
+
+        await delegate(store: store).handle(URL(fileURLWithPath: store.folder + "/handoffs/\(handOff.id).aghandoff"))
+
+        let settled = try #require(try store.readData("handoffs/\(handOff.id).aghandoff"))
+        #expect(try HandOffCodec.decode(settled).state == .accepted)
+        #expect(queue.windowAppeared(requestWindow: {}) == .newDocument)
+    }
+
     @Test func aFinderOpenLoadsTheFile() async throws {
         let file = try designFile()
 
@@ -71,3 +88,5 @@ import Testing
         #expect(opened.pages.map(\.name) == ["Handed Page"])
     }
 }
+
+private struct DesignHandOffMissing: Error {}
