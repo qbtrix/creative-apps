@@ -97,7 +97,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
     /// The loupe photo Show Original shows without its adjustments (CS-3); `showsOriginal` reads it.
     public internal(set) var originalPhotoID: String?
-    /// The export sheet's run: the kernel's; `exportState` reads it (LibraryExportAdapter.swift).
+    /// The export sheet's run: the kernel's; `exportFinished` and `exportError` read it (LibraryExportAdapter.swift).
     public internal(set) var exportRun = ExportRun<ExportOptions>.idle
     public internal(set) var exportSummary: ExportSummary?  // the finished run's summary
     public internal(set) var catalogState = CatalogFileState.ready
@@ -135,7 +135,7 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.failuresShownFor == rhs.failuresShownFor
             && lhs.thumbnailCache == rhs.thumbnailCache && lhs.autoAdvance == rhs.autoAdvance
             && lhs.cullError == rhs.cullError && lhs.exportRun == rhs.exportRun
-            && lhs.exportState == rhs.exportState && lhs.fileRequests == rhs.fileRequests
+            && lhs.exportFinished == rhs.exportFinished && lhs.fileRequests == rhs.fileRequests
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
             && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
             && lhs.loupeError == rhs.loupeError && lhs.loupeSteps == rhs.loupeSteps

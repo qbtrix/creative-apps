@@ -137,6 +137,18 @@ struct CLIArgsTests {
         #expect(Self.afterglow(["photo", "list-commands"]).code != 64)
     }
 
+    /// #5948: export options failing the schema are 65 with the schema `issues`, not a bare 70.
+    @Test
+    func exportOptionsFailingTheSchemaAre65WithIssues() {
+        let run = Self.afterglow(["fake", "export", "a.fake", "--format", "jpeg", "--out", "a.jpg", "--json", #"{"quality":10}"#])
+        Self.expectFailure(run, 65, "data", naming: "/quality")
+        guard case .object(let error)? = run.reply?["error"], case .array(let issues)? = error["issues"] else {
+            Issue.record("no issues in \(run.io.stdout)"); return
+        }
+        #expect(issues == [.object(["path": .string("/quality"), "message": .string("expected at most 1")])])
+        #expect(run.io.files["a.jpg"] == nil)
+    }
+
     @Test
     func unavailableIs69() {
         let run = Self.afterglow(["fake", "rect.move", "--in", "a.fake", "--out", "b.fake", "--json", Self.move])

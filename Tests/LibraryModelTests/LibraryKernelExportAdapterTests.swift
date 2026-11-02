@@ -3,8 +3,8 @@
 // Each move is one kernel call: open is `begin`, the plan is `start`, progress
 // is `progressed`, the summary is `end`, close is `dismiss`. The kernel's
 // `finished` holds the written names; the full `ExportSummary` rides beside it,
-// and `exportState` is the sheet's readout of both. A move the kernel refuses
-// changes nothing. Plan: Tests/mutations/LibraryModel.KernelExportAdapter.json.
+// and `exportFinished` reads both. A failed run is never finished: it reads as
+// its error. A move the kernel refuses changes nothing. Plan: Tests/mutations/LibraryModel.KernelExportAdapter.json.
 // Runs on Linux and macOS.
 @testable import LibraryModel
 import SuiteKernel
@@ -37,7 +37,7 @@ import Testing
             reason: "full")], failedIDs: [Self.id("IMG_0002")])
         catalog.finishExport(summary)
         #expect(catalog.exportRun == .finished(options, ["IMG_0001.jpg"]))
-        #expect(catalog.exportState == .finished(summary))
+        #expect(catalog.exportFinished == summary && catalog.exportError == nil)
         catalog.closeExport()
         #expect(catalog.exportRun == .idle)
     }
@@ -67,22 +67,24 @@ import Testing
     }
 
     @Test func theReadoutFollowsTheKernel() {
+        var catalog = LibraryCatalog()
         let options = ExportOptions(folder: "/out")
-        #expect(ExportState(.idle, summary: nil) == .idle)
-        #expect(ExportState(.editing(options), summary: nil) == .editing(options))
-        #expect(ExportState(.running(options, done: 1, total: 3), summary: nil) == .running(done: 1, total: 3))
-        #expect(ExportState(.finished(options, ["a.jpg"]), summary: nil)
-            == .finished(ExportSummary(total: 1, written: ["a.jpg"])))
-        #expect(ExportState(.failed(options, "The disk is full."), summary: nil)
-            == .finished(ExportSummary(total: 0, written: [], failures: [FileFailure(path: "/out",
-                reason: "The disk is full.")])))
+        for run: ExportRun<ExportOptions> in [.idle, .editing(options), .running(options, done: 1, total: 3)] {
+            catalog.exportRun = run
+            #expect(catalog.exportFinished == nil && catalog.exportError == nil)
+        }
+        catalog.exportRun = .finished(options, ["a.jpg"])
+        #expect(catalog.exportFinished == ExportSummary(total: 1, written: ["a.jpg"]) && catalog.exportError == nil)
     }
 
-    @Test func aWrittenStateLandsOnTheKernel() {
-        var catalog = LibraryCatalog()
-        catalog.exportState = .running(done: 0, total: 1)
-        #expect(catalog.exportRun == .running(ExportOptions(folder: ""), done: 0, total: 1))
-        #expect(catalog.exportState == .running(done: 0, total: 1))
-        #expect(catalog != LibraryCatalog())
+    /// #5948: a failed kernel run is not a finished export with no files; it reads as its error.
+    @Test func aFailedRunReadsAsItsErrorNotAsFinished() {
+        var catalog = Self.shoot(selecting: ["IMG_0001"])
+        catalog.exportRun = .failed(ExportOptions(folder: "/out"), "The disk is full.")
+        #expect(catalog.exportFinished == nil)
+        #expect(catalog.exportError == "The disk is full.")
+        #expect(catalog.exportCloseHelp == nil && catalog.exportEditingHelp != nil)
+        catalog.closeExport()
+        #expect(catalog.exportRun == .idle && catalog.exportError == nil)
     }
 }

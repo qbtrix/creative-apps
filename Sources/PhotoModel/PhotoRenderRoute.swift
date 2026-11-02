@@ -253,7 +253,8 @@ extension PhotoWorkspace {
     /// through the matrix, widened by bilinear's reach) with CoreRaster's `transformed`; the chunks make one
     /// region-sized buffer that composites as a tile would, so the picture stays on the route's backend and a
     /// band uploads once. A matrix with no inverse, or one that maps the region out of range, draws the layer
-    /// as it is.
+    /// as it is. A box on part of the layer (a selection) draws the rest of the layer as it is first, then only
+    /// the box's pixels through the matrix (`boxCut`), as Return lays them.
     func compositeDraft(_ draft: TransformDraft, _ tiled: TiledPixels, of layer: PhotoLayer, onto picture: inout RenderSurface,
                         at rect: PixelRect, on dispatcher: RenderDispatcher) throws {
         let m = try services.transform.matrix(draft, origin: (layer.offsetX, layer.offsetY))
@@ -275,7 +276,9 @@ extension PhotoWorkspace {
                 PixelRect(x: rect.x + x, y: rect.y + y, width: min(size, rect.width - x), height: min(size, rect.height - y))
             }
         }
-        let whole = PixelRect(x: 0, y: 0, width: tiled.width, height: tiled.height)
+        let cut = try boxCut(of: layer, in: draft.box)
+        if let cut { try composite(cut.rest, of: layer, onto: &picture, at: rect, on: dispatcher) }
+        let whole = cut?.part ?? PixelRect(x: 0, y: 0, width: tiled.width, height: tiled.height)
         let drawn: [PixelBuffer?] = try PhotoLayerComposite.inParallel(chunks.count) { i in
             let chunk = chunks[i]
             let corners = mapped(back, chunk)

@@ -53,11 +53,15 @@ private final class MainProbeCodec: PhotoImageCodec {
     }
 }
 
-/// A store whose every write fails (a full disk, a folder it can't write).
-private struct FailingStore: RecoveryStoring {
+/// A store whose every write fails (a full disk, a folder it can't write); counts the tries.
+private final class FailingStore: RecoveryStoring {
     struct Refused: Error {}
+    let writes = Mutex(0)
     var unavailableHelp: String? { nil }
-    func write(_ entry: RecoveryEntry, window: String) throws { throw Refused() }
+    func write(_ entry: RecoveryEntry, window: String) throws {
+        writes.withLock { $0 += 1 }
+        throw Refused()
+    }
     func leftBehind() throws -> [RecoveryEntry] { [] }
     func discard(window: String) throws {}
     func discardAll() throws {}
@@ -149,7 +153,8 @@ private func block(on semaphore: DispatchSemaphore) {
     /// The next edit tries again.
     @Test func aFailedWriteWaitsForTheNextEdit() async throws {
         let model = try edited()
-        let autosave = makeAutosave(FailingStore())
+        let store = FailingStore()
+        let autosave = makeAutosave(store)
         let codec = CountingCodec()
         autosave.noteEdit(at: 0)
         await autosave.tick(model: model, now: 5, codec: codec)
@@ -160,7 +165,8 @@ private func block(on semaphore: DispatchSemaphore) {
         #expect(!autosave.autosaved)
         autosave.noteEdit(at: 30)
         await autosave.tick(model: model, now: 35, codec: codec)
-        #expect(codec.encodes.withLock { $0 } == 2 * once, "the next edit didn't try again")
+        // The layers are unchanged, so the retry reuses their PNGs (#5312): count the write, not the encodes.
+        #expect(store.writes.withLock { $0 } == 2, "the next edit didn't try again")
     }
 
     /// The 8K budget fixture's window autosaves while the zoom budget runs; that must land in a temp

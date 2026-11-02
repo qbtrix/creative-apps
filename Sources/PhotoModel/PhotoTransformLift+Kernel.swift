@@ -6,7 +6,8 @@
 // canvas would (`liftKey`): a visible, unmasked, unstyled pixel layer at normal blend and opacity in 0...1, with
 // no visible layer above it and the image's adjustments at identity, and a box no wider or taller than 16384
 // px (the GPU's texture limit). Anything else draws through the matrix region by region
-// (`transformPreview(live:)`). The lift shows pixels outside the box gone, as commit does. The pixels are the
+// (`transformPreview(live:)`). The picture under the lift keeps the layer's pixels outside the box (`boxCut`),
+// as commit does. The pixels are the
 // same for every drag of one draft (`liftSprite`), so the canvas makes them once per Free Transform; each drag
 // renders only the picture under them (`liftedBase`). Linux-safe.
 import CoreRaster
@@ -74,19 +75,27 @@ extension PhotoWorkspace {
         return PhotoTransformLift.Sprite(key: key, opacity: layers[at].opacity, source: tiles)
     }
 
-    /// The workspace without the draft's layer, no draft: the picture under the lift; nil when nothing lifts.
+    /// The workspace without the draft's box, no draft: the picture under the lift (the layer's pixels outside the
+    /// box stay); nil when nothing lifts.
     public var liftedBase: PhotoWorkspace? {
         guard let (at, _) = liftPart else { return nil }
         var base = self
         base.transformDraft = nil
         base.liveDraft = false
         base.layers[at].isVisible = false
+        if let draft = transformDraft, let (_, rest) = try? boxCut(of: layers[at], in: draft.box) {
+            base.pixels[layers[at].id] = rest
+            base.layers[at].isVisible = true
+        }
         return base
     }
 
-    /// Whether the lifted layer is all the canvas shows: no other visible layer, so the picture under it is empty.
+    /// Whether the lifted layer is all the canvas shows: no other visible layer and the whole layer lifts, so the
+    /// picture under it is empty.
     public var liftsAlone: Bool {
-        guard let (at, _) = liftPart else { return false }
+        guard let (at, part) = liftPart, let tiles = pixels[layers[at].id],
+            part == PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)
+        else { return false }
         return layers.indices.allSatisfy { $0 == at || !layers[$0].isVisible }
     }
 

@@ -48,18 +48,20 @@ extension PhotoWorkspace {
 
     /// What an autosave at `now` writes: the document package of the open
     /// image with its name, through `archive`. Nil when the image is clean or
-    /// none is open.
+    /// none is open. With `memo` (the window's), a layer or mask unchanged
+    /// since the memo's last write keeps the PNG it made then (#5312).
     public func recoveryEntry(
-        now: Double, archive: any DocumentArchiving, codec: any PhotoImageCodec
+        now: Double, archive: any DocumentArchiving, codec: any PhotoImageCodec, reusing memo: PhotoPNGMemo? = nil
     ) throws -> RecoveryEntry? {
         guard isDirty else { return nil }
-        return RecoveryEntry(
-            documentName: documentName, savedAt: now, package: try documentPackage(archive: archive, codec: codec))
+        let package = try memo.map { try $0.package(of: self, archive: archive, codec: codec) }
+            ?? documentPackage(archive: archive, codec: codec)
+        return RecoveryEntry(documentName: documentName, savedAt: now, package: package)
     }
 
     /// What an autosave at `now` writes, through `services.archive`.
-    public func recoveryEntry(now: Double, codec: any PhotoImageCodec) throws -> RecoveryEntry? {
-        try recoveryEntry(now: now, archive: services.archive, codec: codec)
+    public func recoveryEntry(now: Double, codec: any PhotoImageCodec, reusing memo: PhotoPNGMemo? = nil) throws -> RecoveryEntry? {
+        try recoveryEntry(now: now, archive: services.archive, codec: codec, reusing: memo)
     }
 
     /// Opens the autosaved document in `entry` through `services.archive`.
