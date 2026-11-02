@@ -2,7 +2,9 @@
 // commands. The workspace is a `TextStyleTarget` (the selected text layer's style), and `text.add` and
 // `text.set-words` join the kernel's seven `TextCommands.specs` in Photo's catalog. Every edit lays the words
 // out with `TextStyleRules.layout` (advances from `services.text`), draws them through its `GlyphRasterizing`
-// into the layer's tiles at the box's origin, and is one undo step of the whole stack. Linux-safe.
+// into the layer's tiles at the box's origin, and is one undo step of the whole stack. A text layer is named
+// after its words' first line, and an edit renames it while the name still follows the old words (a name the
+// user gave it stays). Linux-safe.
 import CoreRaster
 import SuiteKernel
 import SuiteModel
@@ -54,8 +56,7 @@ extension PhotoWorkspace: TextStyleTarget {
         let drawn = try rasterized(text)
         record(.stack(stackState), named: "Add Text")
         let above = selectedLayerID.flatMap(index(of:)) ?? 0
-        let name = String(p.words.prefix { !$0.isNewline }.prefix(40))
-        let id = insertLayer(named: name.isEmpty ? "Text" : name, pixels: drawn.pixels, kind: .text(text), at: above)
+        let id = insertLayer(named: Self.textLayerName(p.words), pixels: drawn.pixels, kind: .text(text), at: above)
         if let at = index(of: id) { (layers[at].offsetX, layers[at].offsetY) = (drawn.x, drawn.y) }
         selectedLayerID = id
         touch(.all)
@@ -67,8 +68,16 @@ extension PhotoWorkspace: TextStyleTarget {
             throw CatalogError.unavailable(id: "text.set-words", why: "Select a text layer first.")
         }
         guard !words.isEmpty else { throw CatalogError.failed(id: "text.set-words", message: "Type some words first.") }
+        let follows = selectedLayer?.name == Self.textLayerName(text.words)
         text.words = words
         try redraw(id, as: text, named: "Edit Text", coalescing: nil)
+        if follows, let at = index(of: id) { layers[at].name = Self.textLayerName(words) }
+    }
+
+    /// A text layer's name from its words: the first line, at most 40 characters; "Text" when that is empty.
+    static func textLayerName(_ words: String) -> String {
+        let name = String(words.prefix { !$0.isNewline }.prefix(40))
+        return name.isEmpty ? "Text" : name
     }
 
     /// Layer `id` becomes `text`, drawn afresh; nothing changes when drawing throws.

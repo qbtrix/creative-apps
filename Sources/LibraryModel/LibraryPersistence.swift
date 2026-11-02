@@ -30,6 +30,7 @@ extension LibraryCatalog {
         catalogState = .ready
         savedRevision = saveRevision
         saveError = nil
+        importHandedOff([])
     }
 
     /// `.damagedCatalog` -> `.damaged` (the persist area set the file aside
@@ -40,6 +41,7 @@ extension LibraryCatalog {
         } else {
             catalogState = .damaged
         }
+        importHandedOff([])
     }
 
     /// What to write: nil when the session reads clean (every change is saved)

@@ -5,7 +5,8 @@
 // lanes scroll under it, and only the rows in view are built. The snapshot
 // branch offers the lanes the strip's width, so a 20,000-frame snapshot draws
 // names and labels instead of a blank (#219). The lane stack's laziness is
-// read from the source, like TimelineStripSafeAreaTests. macOS only.
+// read from the source, like TimelineStripSafeAreaTests. The lane rows
+// compare their rows shown, so a scroll is never an equal value (#6116). macOS only.
 import Foundation
 @testable import SuiteUI
 import Testing
@@ -71,6 +72,31 @@ import Testing
         #expect(layout.lanesWidth(contentWidth: 40_000, offered: 600, snapshot: false) == 40_000 + SuiteSpacing.xl)
         #expect(layout.lanesWidth(contentWidth: 100, offered: 600, snapshot: true) == 600)
         #expect(layout.lanesWidth(contentWidth: 40_000, offered: -1, snapshot: true) == 0)
+    }
+
+    /// The lanes sit in a sideways scroll laid out at every lane's height, so their lazy stack built every row;
+    /// the strip slices them to the rows the vertical scroll shows, half a row of margin each side, and the
+    /// range is not clamped (the strip clamps to tracks that may have grown since the report).
+    @Test func lanesShownAreTheRowsInViewWithHalfARowOfMargin() {
+        let lane = Double(SuiteSize.timelineLane)
+        #expect(TimelineStripLayout.lanesShown(visibleY: 0...lane * 5) == 0..<6)
+        #expect(TimelineStripLayout.lanesShown(visibleY: lane * 2...lane * 7) == 1..<8)
+        // Jitter of a fraction of a point around a row boundary leaves the range alone.
+        #expect(TimelineStripLayout.lanesShown(visibleY: 0.3...lane * 5 + 0.3) == 0..<6)
+        #expect(TimelineStripLayout.lanesShown(visibleY: -0.13...lane * 5 - 0.13) == 0..<6)
+        #expect(TimelineStripLayout.lanesShown(visibleY: lane * 200...lane * 205) == 199..<206)
+    }
+
+    /// `shown` is part of TimelineLaneRows' `==`: a scroll that compared equal would let `.equatable()` skip the
+    /// body, and every row below the first screen would stay blank (#6116).
+    @MainActor @Test func aScrollIsNeverAnEqualLaneRowsValue() {
+        let tracks = (0..<300).map { TimelineTrack(id: $0, name: "Lane \($0)", keys: []) }
+        let mapping = FrameMapping(duration: 100, frameWidth: 4), context = TimelineLaneContext<Int>()
+        func rows(_ shown: Range<Int>) -> TimelineLaneRows<Int> {
+            TimelineLaneRows(tracks: tracks, shown: shown, mapping: mapping, context: context, width: 400)
+        }
+        #expect(rows(0..<6) == rows(0..<6))
+        #expect(rows(0..<6) != rows(100..<106), "a scroll compares equal, so the lower rows stay blank")
     }
 
     @Test func theLaneAndNameStacksAreLazy() throws {
