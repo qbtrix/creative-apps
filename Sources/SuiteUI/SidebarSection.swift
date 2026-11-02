@@ -15,6 +15,8 @@
 // app's set and a click calls onExpand; without onExpand the group keeps its
 // own state (LL-9). A parent row keeps its toggles as their own elements.
 // Selection stays one SidebarItem.ID across every section. A header's
+// add button is its own accessibility element, `suite.sidebar.add.<section id>`,
+// even inside a List's section header (#4831). A header's
 // title is SuiteColor.textSecondary: the sidebar style's own header gray is
 // about 2.2:1 on the sidebar, under the 4.5:1 the app audit asks for.
 import SwiftUI
@@ -53,8 +55,11 @@ struct SidebarSectionHeader: View {
                 .buttonStyle(.plain)
                 .help(add.title)
                 .accessibilityLabel(add.title)
+                .accessibilityIdentifier("suite.sidebar.add.\(section.id)")
             }
         }
+        // Inside a List's section header the add button was no element of its own (#4831).
+        .accessibilityElement(children: .contain)
     }
 }
 
