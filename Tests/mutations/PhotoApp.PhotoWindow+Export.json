@@ -1,0 +1,16 @@
+[
+  {
+    "label": "orientationKept: an export carries the source's orientation onto pixels the decode already turned",
+    "file": "Sources/PhotoApp/PhotoWindow+Export.swift",
+    "find": ".union([\"Orientation\", \"{TIFF}.Orientation\"])",
+    "replace": ".union([])",
+    "tests": "PhotoExportMetadataTests"
+  },
+  {
+    "label": "metadataDropped: an export drops every tag of its source",
+    "file": "Sources/PhotoApp/PhotoWindow+Export.swift",
+    "find": "return (try? carrier.carrying(still, from: original, dropping: exportDropping)) ?? still",
+    "replace": "return still",
+    "tests": "PhotoExportMetadataTests"
+  }
+]

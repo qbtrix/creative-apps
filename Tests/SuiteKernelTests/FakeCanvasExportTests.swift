@@ -1,6 +1,6 @@
 // FakeCanvasExportTests.swift (export-pack XP-9): the fake app exports PNG and JPEG at a size read by
 // `SuiteExportOptions(json:)`. Its JPEG at pixels(1080, 1350) decodes 1080 × 1350, a shape the artwork doesn't keep
-// is refused through ExportRules, the json export old jobs write is byte-identical, and RJ-X42's job runs on Linux.
+// is refused through ExportRules as an ExportOptionRefusal (bad input, not a failed command), the json export old jobs write is byte-identical, and RJ-X42's job runs on Linux.
 import Foundation
 import Testing
 import SuiteKernel
@@ -52,12 +52,13 @@ import SuiteKernel
 
     @Test func refusesBadShape() throws {
         let doc = try Self.artwork()
-        let refused = #expect(throws: CatalogError.self) { try Self.export(doc, "jpeg", #"{"size":{"pixels":[1080,1351]}}"#) }
-        #expect(refused.map { String(describing: $0).contains("1080 × 1351 doesn't keep the artwork's 4:5 shape. Unlock the ratio to stretch.") } == true)
+        #expect(throws: ExportOptionRefusal.invalid("1080 × 1351 doesn't keep the artwork's 4:5 shape. Unlock the ratio to stretch.")) {
+            try Self.export(doc, "jpeg", #"{"size":{"pixels":[1080,1351]}}"#)
+        }
         let stretched = try #require(Self.jpegSize(try Self.export(doc, "jpeg", #"{"size":{"pixels":[1080,1351],"stretch":true}}"#).data))
         #expect(stretched.width == 1080 && stretched.height == 1351)
-        #expect(throws: CatalogError.self) { try Self.export(FakeCanvasDocument(), "png", "{}") }
-        #expect(throws: CatalogError.self) { try Self.export(doc, "jpeg", #"{"colour":1}"#) }
+        #expect(throws: ExportOptionRefusal.self) { try Self.export(FakeCanvasDocument(), "png", "{}") }
+        #expect(throws: ExportOptionRefusal.invalid(#"There's no export option "colour"."#)) { try Self.export(doc, "jpeg", #"{"colour":1}"#) }
         #expect(throws: CatalogError.self) { try Self.export(doc, "gif", "{}") }
     }
 

@@ -1,7 +1,7 @@
 // Output.swift (afterglow-cli CL-4): one JSON object per run, keys sorted,
 // `{"ok":true,...}` or `{"ok":false,"error":{kind,message,issues?}}`, plus one
 // stderr line on failure. `Refusal` maps each error to its sysexits code:
-// usage 64, data 65, unavailable/notBuilt 69, failed 70, exists 73, io 74.
+// usage 64, data 65 (a refused export option among them), unavailable/notBuilt 69, failed 70, exists 73, io 74.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -31,6 +31,8 @@ extension Refusal {
         switch error {
         case let refusal as Refusal: self = refusal
         case let error as CatalogError: self.init(catalog: error)
+        case let error as ExportOptionRefusal:
+            self = .data(String(describing: error).replacing(ExportRules.unlockHint, with: ExportRules.stretchHint))
         case CLIIOError.missing(let path): self = .io("there is no file at \(path)")
         case CLIIOError.exists(let path):
             self.init(code: CLI.Exit.cannotCreate, kind: "exists", message: "\(path) already exists; pass --force to replace it")

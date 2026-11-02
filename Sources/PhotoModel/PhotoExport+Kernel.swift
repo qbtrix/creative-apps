@@ -24,6 +24,13 @@ extension PhotoWorkspace {
     /// `ExportOptionRefusal` for options the kernel refuses (a format Photo
     /// lacks, Pixels at another shape unless stretched) and with no image open.
     public func exportPixels(_ o: SuiteExportOptions) throws -> DecodedImage {
+        let image = try exportBuffer(o)
+        return DecodedImage(rgba8: try image.rgba8(), width: image.width, height: image.height)
+    }
+
+    /// `exportPixels(_:)` before its 8-bit step: the premultiplied linear buffer core's encoders take, so an
+    /// export can hand it to `CoreRasterImageCodec.encode(buffer:as:quality:)` without a second conversion.
+    public func exportBuffer(_ o: SuiteExportOptions) throws -> PixelBuffer {
         guard let whole = canvas?.rect else { throw RasterError.invalid("no image is open") }
         let scope = pendingCrop.flatMap { whole.intersection($0) } ?? whole
         if let why = ExportRules.refusal(o, source: (scope.width, scope.height), formats: Self.exportFormats) {
@@ -31,7 +38,7 @@ extension PhotoWorkspace {
         }
         var image = try sized(rendered(scope), o)
         if Self.exportFormats.first(where: { $0.id == o.format })?.keepsAlpha == false { image = try image.onWhite() }
-        return DecodedImage(rgba8: try image.rgba8(), width: image.width, height: image.height)
+        return image
     }
 
     /// `buffer` resampled to the size `o` asks for, with Lanczos; itself when that is its size already.

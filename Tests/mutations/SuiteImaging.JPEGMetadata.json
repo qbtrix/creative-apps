@@ -1,0 +1,23 @@
+[
+  {
+    "label": "gpsLeft: a dropped GPS dictionary is left in the copied Exif",
+    "file": "Sources/SuiteImaging/JPEGMetadata.swift",
+    "find": "case (\"{GPS}\", _): remove(0x8825, from: ifd0)",
+    "replace": "case (\"{GPS}\", _): continue",
+    "tests": "PhotoHeadlessMetadataTests"
+  },
+  {
+    "label": "removeKeepsBytes: a removed entry's out-of-line value is not zeroed, so a dropped serial stays readable",
+    "file": "Sources/SuiteImaging/JPEGMetadata.swift",
+    "find": "        zero(outside(at))\n        b.replaceSubrange",
+    "replace": "        b.replaceSubrange",
+    "tests": "PhotoHeadlessMetadataTests"
+  },
+  {
+    "label": "orientationKept: the source's orientation is carried onto pixels the decode already turned upright",
+    "file": "Sources/SuiteImaging/JPEGMetadata.swift",
+    "find": "{ put16(e.at + 8, 1) }",
+    "replace": "{ _ = e }",
+    "tests": "PhotoHeadlessMetadataTests"
+  }
+]

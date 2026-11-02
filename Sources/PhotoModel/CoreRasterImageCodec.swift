@@ -16,7 +16,9 @@ import SuiteModel
 
 /// PNG and JPEG through CoreRaster; HEIC, TIFF and PSD through the system on macOS.
 public struct CoreRasterImageCodec: PhotoImageCodec {
-    public init() {}
+    /// Core's deflate level for PNG writes. Saves keep 6, so a saved file stays byte for byte; exports pass 1.
+    public let pngLevel: Int
+    public init(pngLevel: Int = 6) { self.pngLevel = pngLevel }
 
     /// The files CoreRaster reads itself.
     static let rasterExtensions = SuiteImageFormat.png.extensions
@@ -40,11 +42,15 @@ public struct CoreRasterImageCodec: PhotoImageCodec {
     }
 
     public func encode(_ image: DecodedImage, as format: ImageFormat, quality: Double) throws -> Data {
-        let buffer = try PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height)
+        try encode(buffer: PixelBuffer(rgba8: image.rgba8, width: image.width, height: image.height), as: format, quality: quality)
+    }
+
+    /// `buffer` as `format`, straight to core's encoder: no 8-bit round trip on the way in.
+    public func encode(buffer: PixelBuffer, as format: ImageFormat, quality: Double) throws -> Data {
         switch format {
         case .jpeg: return try JPEG.write(buffer, quality: Int((min(max(quality, 0), 1) * 100).rounded()))
         case .png:
-            do { return try PNG.write(buffer) } catch CodecError.unsupported { return try Self.writePNG(buffer) }
+            do { return try PNG.write(buffer, level: pngLevel) } catch CodecError.unsupported { return try Self.writePNG(buffer) }
         }
     }
 

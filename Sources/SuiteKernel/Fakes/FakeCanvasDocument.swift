@@ -196,17 +196,15 @@ public struct FakeCanvasDocument: HeadlessDocument {
     }
     public static func new(_ options: JSONValue) throws -> FakeCanvasDocument { FakeCanvasDocument() }
     /// `json` is `save()`, options unread, as before sizes; `png` and `jpeg` are a flat grey frame at the size
-    /// `options` asks for (`SuiteExportOptions(json:)`), its pixels from ExportRules, which refuses a bad option.
+    /// `options` asks for (`SuiteExportOptions(json:)`), its pixels from ExportRules, which refuses a bad option
+    /// (`ExportOptionRefusal`, bad input to the CLI).
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         if format == "json" { return [ExportedFile(suggestedName: "canvas.json", format: "json", data: try save())] }
         guard let writer = FakeRaster.writers.first(where: { $0.format == format }), let spec = ExportFormats.spec(format) else {
             throw CatalogError.failed(id: "export", message: "The fake exports \(Self.exportFormats.joined(separator: ", ")), not \(format).")
         }
-        let source = exportSource, pixels: (width: Int, height: Int)
-        do {
-            let asked = try SuiteExportOptions(json: options, defaults: SuiteExportOptions(format: format))
-            pixels = try ExportRules.pixels(of: source, asked.size, evenSize: spec.needsEvenSize)
-        } catch { throw CatalogError.failed(id: "export", message: String(describing: error)) }
+        let asked = try SuiteExportOptions(json: options, defaults: SuiteExportOptions(format: format))
+        let pixels = try ExportRules.pixels(of: exportSource, asked.size, evenSize: spec.needsEvenSize)
         return [ExportedFile(suggestedName: "canvas.\(spec.fileExtension)", format: format, data: writer.encode(pixels))]
     }
     /// The artwork at 1x: the rects' frames together, whole pixels rounded up; 0 × 0 with no rects.

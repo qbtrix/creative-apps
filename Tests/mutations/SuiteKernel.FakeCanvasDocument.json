@@ -156,15 +156,15 @@
   {
     "label": "optionsIgnored: the fake writes its 1x size whatever the options ask (.exportsAtSize)",
     "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
-    "find": "pixels = try ExportRules.pixels(of: source, asked.size, evenSize: spec.needsEvenSize)",
-    "replace": "pixels = try ExportRules.pixels(of: source, .scale(1), evenSize: spec.needsEvenSize)",
+    "find": "let pixels = try ExportRules.pixels(of: exportSource, asked.size, evenSize: spec.needsEvenSize)",
+    "replace": "let pixels = try ExportRules.pixels(of: exportSource, .scale(1), evenSize: spec.needsEvenSize)",
     "tests": "FakeCanvasExportTests"
   },
   {
     "label": "refusalSwallowed: a refused size writes the 1x file instead of saying why (.refusesBadShape)",
     "file": "Sources/SuiteKernel/Fakes/FakeCanvasDocument.swift",
-    "find": "} catch { throw CatalogError.failed(id: \"export\", message: String(describing: error)) }",
-    "replace": "} catch { pixels = source }",
+    "find": "let pixels = try ExportRules.pixels(of: exportSource, asked.size, evenSize: spec.needsEvenSize)",
+    "replace": "let pixels = (try? ExportRules.pixels(of: exportSource, asked.size, evenSize: spec.needsEvenSize)) ?? exportSource",
     "tests": "FakeCanvasExportTests"
   }
 ]

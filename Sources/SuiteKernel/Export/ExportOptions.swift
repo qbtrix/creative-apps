@@ -90,13 +90,11 @@ public struct SuiteExportOptions: Hashable, Codable, Sendable {
     }
 
     /// The one params schema: every key optional, each missing one from `defaults`; an unknown key throws.
-    /// `.null` is `defaults`; a schema issue throws with its JSON pointer ("/colour: unexpected key").
+    /// `.null` is `defaults`; a schema issue throws in words, never its JSON pointer (`plain(_:)`).
     public init(json: JSONValue, defaults: SuiteExportOptions) throws {
         self = defaults
         if case .null = json { return }
-        if let issue = Self.schema.validate(json).first {
-            throw ExportOptionRefusal.invalid("\(issue.path.isEmpty ? "options" : issue.path): \(issue.message)")
-        }
+        if let issue = Self.schema.validate(json).first { throw ExportOptionRefusal.invalid(Self.plain(issue)) }
         guard case .object(let o) = json else { return }
         if case .string(let f)? = o["format"] { format = f }
         if case .object(let s)? = o["size"] { size = try Self.size(s) }
@@ -105,6 +103,19 @@ public struct SuiteExportOptions: Hashable, Codable, Sendable {
         if case .bool(let a)? = o["alpha"] { alpha = a }
         if case .number(let r)? = o["fps"] { fps = Int(exactly: r) }
         if case .bool(let l)? = o["loop"] { loop = l }
+    }
+
+    /// A schema issue as a sentence: "Each side in pixels has to be at least 1.", "There's no export option
+    /// "colour".", "The quality has to be at most 1."
+    static func plain(_ issue: SchemaIssue) -> String {
+        let keys = issue.path.split(separator: "/").filter { Int($0) == nil }.map(String.init)
+        if issue.message == "unexpected key" { return "There's no export option \"\(keys.joined(separator: "."))\"." }
+        if keys == ["size", "pixels"], issue.message.hasSuffix("items") { return "Pixels takes two numbers, the width and the height." }
+        let name = keys == ["size", "pixels"] ? "Each side in pixels" : keys.isEmpty ? "The options" : "The \(keys.joined(separator: " "))"
+        let types = ["integer": "a whole number", "number": "a number", "string": "text", "boolean": "true or false",
+                     "object": "an object", "array": "a list"]
+        let wanted = issue.message.hasPrefix("expected ") ? String(issue.message.dropFirst("expected ".count)) : issue.message
+        return "\(name) has to be \(types[wanted] ?? wanted)."
     }
 
     /// The size object's one mode: `{"scale": s}`, `{"pixels": [w, h], "stretch": b}` or `{"longEdge": n}`.
@@ -143,6 +154,9 @@ public struct SuiteExportOptions: Hashable, Codable, Sendable {
 
 /// The rules every export follows.
 public enum ExportRules {
+    /// How the sheet's shape refusal ends; the CLI and MCP, which have no ratio lock, say `stretchHint` instead.
+    public static let unlockHint = "Unlock the ratio to stretch.", stretchHint = #"Pass "stretch": true with pixels to stretch."#
+
     /// The longest side any export writes, in pixels.
     public static let maxSide = 16_384
 
@@ -164,7 +178,7 @@ public enum ExportRules {
             guard pw >= 1, ph >= 1 else { throw refuse("A size needs at least 1 px on each side.") }
             guard pw <= maxSide, ph <= maxSide else { throw pastLimit(pw, ph) }
             if !stretch, !keepsShape(pw, ph, sw, sh) {
-                throw refuse("\(pw) × \(ph) doesn't keep the artwork's \(ratio(source)) shape. Unlock the ratio to stretch.")
+                throw refuse("\(pw) × \(ph) doesn't keep the artwork's \(ratio(source)) shape. \(unlockHint)")
             }
             (w, h) = (pw, ph)
         }

@@ -1,7 +1,8 @@
 // PhotoHeadless.swift (adopt-command-catalog AC-p2): Photo's document with no window, for the afterglow CLI, MCP and
 // the real jobs. It opens Photo's own file (OpenRaster .ora) and every image `CoreRasterImageCodec` reads (PNG and
 // JPEG; HEIC, TIFF and PSD on macOS), saves .ora, exports the flattened image as PNG or JPEG on the suite's export
-// options (export-pack PX-3), and runs `PhotoWorkspace.catalog` lifted onto itself. The window's file commands are
+// options (export-pack PX-3; a JPEG export from a JPEG keeps its Exif by the `metadata` policy, through
+// SuiteImaging's `JPEGMetadata`), and runs `PhotoWorkspace.catalog` lifted onto itself. The window's file commands are
 // unavailable except `file.drop`, which places only the files its host handed over (`receiveDropped`), never
 // reading the disk. Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
@@ -9,6 +10,7 @@ import FoundationEssentials
 #else
 import Foundation
 #endif
+import SuiteImaging
 import SuiteKernel
 
 /// Photo's headless document: one `PhotoWorkspace` on the live services, or on the caller's (`open(_:name:services:)`,
@@ -25,11 +27,16 @@ public struct PhotoHeadless: HeadlessDocument {
         ?? .empty(app: app)
     /// The codec every file goes through.
     public static let codec = CoreRasterImageCodec()
+    /// Exports write PNG at deflate level 1: core's level-6 search took 28 of 33 s of a scale-2 8064 x 6048 export
+    /// (creative-core #728). Still lossless; the file grows a little.
+    static let exportCodec = CoreRasterImageCodec(pngLevel: 1)
 
     /// The image the commands edit.
     public private(set) var workspace: PhotoWorkspace
     /// The codec its file was read with, which hands back the read PNGs of images an edit left alone.
     var files = PhotoReusingCodec(PhotoHeadless.codec)
+    /// The opened JPEG's bytes, whose metadata a JPEG export carries; nil for anything else.
+    var source: Data?
 
     /// A headless document holding `workspace`.
     public init(workspace: PhotoWorkspace) {
@@ -58,6 +65,7 @@ public struct PhotoHeadless: HeadlessDocument {
         }
         var document = PhotoHeadless(workspace: workspace)
         document.files = files
+        if ["jpg", "jpeg"].contains(name.split(separator: ".").last.map({ $0.lowercased() }) ?? "") { document.source = data }
         return document
     }
 
@@ -83,7 +91,7 @@ public struct PhotoHeadless: HeadlessDocument {
 
     /// The flattened image as "png" or "jpeg" on the suite's export options (`SuiteExportOptions(json:)`: `size`,
     /// `quality`, ...; `format` names the file, whatever the options say), through the sheet's own
-    /// `exportPixels(_:)`. The older `{"longSide": n}` form still resizes a copy with `image.resize`.
+    /// `exportBuffer(_:)`, handed to the encoder as is. The older `{"longSide": n}` form still resizes a copy with `image.resize`.
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         guard let kind = ImageFormat(rawValue: format) else {
             throw CatalogError.unavailable(id: "export", why: "Photo exports png and jpeg.")
@@ -91,7 +99,12 @@ public struct PhotoHeadless: HeadlessDocument {
         guard case .object(let keys) = options, keys["longSide"] != nil else {
             var o = try SuiteExportOptions(json: options, defaults: workspace.exportOptionsDefault())
             o.format = format
-            let data = try Self.codec.encode(workspace.exportPixels(o), as: kind, quality: o.quality)
+            var data = try Self.exportCodec.encode(buffer: workspace.exportBuffer(o), as: kind, quality: o.quality)
+            if kind == .jpeg, let source {
+                // The decode already turned the pixels upright, so the orientation goes too.
+                let dropping = ExportRules.dropped(o.metadata).properties.union(["Orientation"])
+                data = (try? JPEGMetadata().carrying(data, from: source, dropping: dropping)) ?? data
+            }
             return [ExportedFile(suggestedName: workspace.fileName(for: kind), format: format, data: data)]
         }
         let o = try options.decode(ExportOptions.self)
@@ -102,7 +115,7 @@ public struct PhotoHeadless: HeadlessDocument {
                                            "height": .number(max((Double(canvas.height) * scale).rounded(), 1))])
             _ = try PhotoWorkspace.catalog.run("image.resize", params: size, on: &copy)
         }
-        let data = try Self.codec.encode(copy.exportPixels(as: kind), as: kind, quality: o.quality ?? 0.9)
+        let data = try Self.exportCodec.encode(copy.exportPixels(as: kind), as: kind, quality: o.quality ?? 0.9)
         return [ExportedFile(suggestedName: copy.fileName(for: kind), format: format, data: data)]
     }
 
