@@ -18,7 +18,7 @@ import Testing
         #expect(options.metadata == .noLocation)
         for scheme in [ColorScheme.light, .dark] {
             let sheet = LibraryExportSheet(
-                state: .editing(options), count: 3, preview: "IMG_0001.jpg · 2048 × 1365", writable: [.jpeg],
+                run: .editing(options), summary: nil, count: 3, preview: "IMG_0001.jpg · 2048 × 1365", writable: [.jpeg],
                 exportHelp: nil, presets: [], progressDelay: .zero)
             try snapshot(sheet, name: "library-export-metadata-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
