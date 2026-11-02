@@ -212,16 +212,20 @@ public struct InspectorStepperRow: View {
 }
 
 /// One choice in an InspectorPickerRow or a PresetGrid. `identifier` is the
-/// accessibility identifier a PresetGrid gives this option's button (#1148).
+/// accessibility identifier a PresetGrid gives this option's button (#1148);
+/// `unavailableHelp`, when set, disables that button and is its tooltip (no
+/// dead controls: the choice shows, off, with why).
 public struct InspectorOption<ID: Hashable & Sendable>: Identifiable, Hashable, Sendable {
     public let id: ID
     public let title: String
     public let identifier: String?
+    public let unavailableHelp: String?
 
-    public init(id: ID, title: String, identifier: String? = nil) {
+    public init(id: ID, title: String, identifier: String? = nil, unavailableHelp: String? = nil) {
         self.id = id
         self.title = title
         self.identifier = identifier
+        self.unavailableHelp = unavailableHelp
     }
 }
 

@@ -56,9 +56,10 @@ struct LibraryExportSheet: View {
             InspectorOption(id: edge, title: edge == 0 ? "Original Size" : String(edge),
                             identifier: "library.export.size." + (edge == 0 ? "original" : String(edge)))
         }
-        let formats: [InspectorOption<ExportFormat>] = ExportFormat.allCases.filter { $0.help(writable: writable) == nil }
-            .map { InspectorOption(id: $0, title: $0.rawValue, identifier: "library.export.format.\($0.rawValue)") }
-        let formatHelp = ExportFormat.allCases.compactMap { $0.help(writable: writable) }.joined(separator: " ")
+        let formats: [InspectorOption<ExportFormat>] = ExportFormat.allCases.map {
+            InspectorOption(id: $0, title: $0.rawValue, identifier: "library.export.format.\($0.rawValue)",
+                            unavailableHelp: $0.help(writable: writable))
+        }
         let blocked: String? = fieldsHelp(options) ?? exportHelp
         Form {
             LabeledContent("Size") {
@@ -85,7 +86,6 @@ struct LibraryExportSheet: View {
                 ChoiceChips(options: formats, selected: options.format) { (format: ExportFormat) -> Void in
                     change { $0.format = format }
                 }
-                .help(formatHelp)
             }
             LabeledContent("Metadata") {
                 ChoiceChips(options: Self.metadataOptions, selected: Self.pick(options).metadata) {
