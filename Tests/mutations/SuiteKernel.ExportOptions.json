@@ -47,5 +47,19 @@
     "find": "if o.alpha, !spec.keepsAlpha {",
     "replace": "if o.alpha, false {",
     "tests": "ExportOptionsTests"
+  },
+  {
+    "label": "pathLeaks: a schema issue throws its JSON pointer again, not a sentence (#5834)",
+    "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "find": "if let issue = Self.schema.validate(json).first { throw ExportOptionRefusal.invalid(Self.plain(issue)) }",
+    "replace": "if let issue = Self.schema.validate(json).first { throw ExportOptionRefusal.invalid(\"\\(issue.path): \\(issue.message)\") }",
+    "tests": "CLIExportRefusalTests"
+  },
+  {
+    "label": "rawWanted: the plain sentence keeps the schema's \"expected ...\" wording (#5834)",
+    "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "find": "return \"\\(name) has to be \\(types[wanted] ?? wanted).\"",
+    "replace": "return \"\\(name): \\(issue.message).\"",
+    "tests": "CLIExportRefusalTests"
   }
 ]
