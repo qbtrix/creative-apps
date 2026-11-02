@@ -608,3 +608,4 @@ utc	stage	event	ref	note
 2026-11-02T22:18Z	check-in	quiet: dev-red #6220 still open (not ours); no merges; #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-02T22:49Z	check-in	quiet: dev-red #6220 still open (not ours); merged #6225 (suite, captain); #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-02T23:20Z	check-in	quiet: dev-red #6220 still open (not ours); no merges; #5353 open clean a92b4651; no new findings; 52 photo findings
+2026-11-02T23:53Z	check-in	quiet: dev-red #6220 still open (not ours); merged #6227 (photo transform), #6230 (suiteui), both captain's; #5353 open clean a92b4651; no new findings; 52 photo findings
