@@ -91,7 +91,7 @@ struct FlareWindow: View, BodyCounted {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
                 help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey,
-                onFit: { fitted = $0 }, onDismissNote: { model.dismissImportNote() })
+                onFit: { fitted = $0 }, onZoom: { zoom = $0 }, onDismissNote: { model.dismissImportNote() })
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
@@ -172,6 +172,8 @@ struct FlareCanvas: View {
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
     var onFit: @MainActor (Double) -> Void = { _ in }
+    /// A zoom the stage asks for (pinch, its zoom keys): nil to fit, else the scale.
+    var onZoom: @MainActor (Double?) -> Void = { _ in }
     /// The import note's Dismiss (FlareImportNoteAdapter.swift): the window's `model.dismissImportNote()`.
     var onDismissNote: @MainActor () -> Void = {}
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
@@ -184,7 +186,7 @@ struct FlareCanvas: View {
                 FlareImportNoteAdapter(rows: model.importNoteRows, onDismiss: onDismissNote)
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit)
+                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit, onZoom: onZoom)
                 FlareTimeline(model: model, perform: perform)
             }
             .overlay { FlareRecording(model: model) }
