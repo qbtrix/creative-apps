@@ -13,9 +13,9 @@
 // 3. Option-click E1: A gains a stroke, one "Stroke" step. Choosing Stroke in the inspector turns a plain click
 //    onto the stroke (#3993) and the 5 × 5 chip reads the square the loupe shows (#3991): a click on Desktop's
 //    white is a second "Stroke" step, and Undo takes back only that one, leaving the Option-click's.
-// 4. Click the palette's Move (`design.tool.move`): it is selected, the status line reads Move, A still selected
+// 4. Click the palette's Select (`design.tool.move`): it is selected, the status line reads Select, A still selected
 //    ("1 Layer").
-// 5. Keyboard parity: press I, the Eyedropper is selected; press V, Move is back.
+// 5. Keyboard parity: press I, the Eyedropper is selected; press V, Select is back.
 // The Fill/Stroke picker is a system segmented Picker, so a segment's state is read as selected or as its
 // value (1 for the picked one), the accessibility value a radio button carries.
 // Shots: design-eyedropper-active, -fill, -stroke, -stroke-target, -move.
@@ -31,7 +31,7 @@ final class DesignEyedropperJourneyTests: XCTestCase {
     /// Page points inside Title, A, E1 and Desktop's empty white.
     static let title = (150.0, 56.0), middleA = (150.0, 140.0), middleE1 = (950.0, 450.0), white = (620.0, 320.0)
 
-    /// J-DY: the Eyedropper picks Title's black onto A's fill, E1 and Desktop onto its stroke, then Move and I/V.
+    /// J-DY: the Eyedropper picks Title's black onto A's fill, E1 and Desktop onto its stroke, then Select and I/V.
     @MainActor func testPickFillFromShape() throws {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
@@ -80,17 +80,17 @@ final class DesignEyedropperJourneyTests: XCTestCase {
         XCTAssert(Self.waitForLabel(redo, "Redo Stroke"), "Undo didn't take back the white stroke (Redo reads \(redo.label))")
         XCTAssert(Self.waitForLabel(undo, "Undo Stroke"), "one Undo took the Option-click's stroke too (Undo reads \(undo.label))")
 
-        // 4. The palette's Move: picked, named in the status line, A still selected.
-        tool(design, "Move").click()
-        expectTool(design, "Move", after: "the palette's Move")
+        // 4. The palette's Select: picked, named in the status line, A still selected.
+        tool(design, "Select").click()
+        expectTool(design, "Select", after: "the palette's Select")
         expectCount(design, "1 Layer", after: "leaving the Eyedropper")
         design.shot("eyedropper-move")
 
-        // 5. Keyboard parity: I picks the Eyedropper, V brings Move back.
+        // 5. Keyboard parity: I picks the Eyedropper, V brings Select back.
         design.press(character: "i")
         expectTool(design, "Eyedropper", after: "pressing I")
         design.press(character: "v")
-        expectTool(design, "Move", after: "pressing V")
+        expectTool(design, "Select", after: "pressing V")
     }
 
     // MARK: - Steps
