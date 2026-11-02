@@ -103,13 +103,24 @@ extension PhotoWorkspace {
     /// whole-image adjustments and the selected layer. Throws
     /// `RasterError.invalid` with no image open.
     public func snapshot() throws -> PhotoDocumentSnapshot {
+        try snapshot { _, tiles in try Self.decoded(tiles) }
+    }
+
+    /// `snapshot()` with each layer's and mask's image made by `image` from its tiles and a key naming it
+    /// ("pixels/<id>" or "mask/<id>"), so a caller can reuse what it made of the same tiles before.
+    func snapshot(_ image: (_ key: String, _ tiles: TiledPixels) throws -> DecodedImage) throws -> PhotoDocumentSnapshot {
         guard let canvas else { throw RasterError.invalid("no image is open") }
-        func image(_ tiles: TiledPixels) throws -> DecodedImage {
-            DecodedImage(rgba8: try tiles.rgba8(), width: tiles.width, height: tiles.height)
+        func images(_ all: [PhotoLayer.ID: TiledPixels], _ kind: String) throws -> [PhotoLayer.ID: DecodedImage] {
+            try Dictionary(uniqueKeysWithValues: all.map { id, tiles in (id, try image("\(kind)/\(id)", tiles)) })
         }
         return PhotoDocumentSnapshot(
-            canvas: canvas, layers: layers, pixels: try pixels.mapValues(image), masks: try masks.mapValues(image),
+            canvas: canvas, layers: layers, pixels: try images(pixels, "pixels"), masks: try images(masks, "mask"),
             adjustments: adjustments, selectedLayerID: selectedLayerID, paths: paths)
+    }
+
+    /// `tiles` as 8-bit straight-alpha sRGB.
+    static func decoded(_ tiles: TiledPixels) throws -> DecodedImage {
+        DecodedImage(rgba8: try tiles.rgba8(), width: tiles.width, height: tiles.height)
     }
 
     /// The open image's document package, encoded through `archive`.
