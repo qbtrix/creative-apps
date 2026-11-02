@@ -54,6 +54,19 @@ private func normalized(_ node: DesignNode, back offset: DesignPoint = pt(0, 0))
 private func bytes(_ json: String) -> Data { Data(json.utf8) }
 
 @Suite struct DesignPasteboardTests {
+    /// J8 (#6198): `cards`' group Pair copied and pasted comes back with its own E1 and E2 under fresh ids, frontmost
+    /// in Desktop, so its row sits above Hidden's and opening it moves every row under it down by two.
+    @Test func aCopiedGroupPastesWithItsChildren() throws {
+        var workspace = DesignFixtures.cards
+        workspace.selectItem("node-6")
+        try workspace.paste(workspace.copySelection())
+        let copy = try pasted(workspace)
+        #expect(copy.name == "Pair" && copy.kind == .group && copy.children.map(\.name) == ["E1", "E2"])
+        let ids = allIDs(top(workspace))
+        #expect(Set(ids).count == ids.count && ids.count == 13)
+        #expect(top(workspace).first?.children.frontToBack.prefix(2).map(\.name) == ["Pair", "Hidden"])
+    }
+
     @Test func copyThenPasteGivesNewIDsAndTheSameLayers() throws {
         var workspace = try cardsFile()
         workspace.selectItem(ID.card)
