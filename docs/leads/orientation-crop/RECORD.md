@@ -117,3 +117,4 @@ Next: lane on #5246 #5244 #5263 #5266; OC-z (OC-15, OC-16) folds into whichever 
 - 2026-11-02T11:57:42Z closed; critic review of photo-crop-portrait.png waits on finding #5913
 - 2026-11-02T13:22:28Z closed; critic review of photo-crop-portrait.png waits on finding #5913
 - 2026-11-02T15:29:43Z closed; critic review of photo-crop-portrait.png waits on finding #5913
+- 2026-11-02T17:11:55Z closed; critic review of photo-crop-portrait.png waits on finding #5913
