@@ -15,7 +15,8 @@ extension Scene {
     @MainActor
     public func suiteApp(_ app: SuiteApp, host: any SuiteDocumentHost, live: LiveCommandChannel? = nil) -> some Scene {
         try? live?.start()
-        if let delegate = SuiteAppRegistry.delegate {
+        // The delegate may not exist yet: the registry runs this once it does.
+        SuiteAppRegistry.configure = { delegate in
             let support = SuiteLocations.processSupportFolder
             delegate.app = app
             delegate.host = host

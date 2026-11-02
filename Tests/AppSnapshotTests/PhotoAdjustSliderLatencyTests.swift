@@ -73,7 +73,7 @@ import Testing
         // The Move tool on the top layer (one brush stroke), 3 px a step.
         Case(name: "move layer", setUp: { workspace in
             workspace.selectLayer(try #require(workspace.layers.first?.id))
-            workspace.selectTool(.move)
+            workspace.selectTool(.select)
             return nil
         }, step: { workspace, _, i in
             workspace.drag(from: Mask.Point(x: 2000, y: 2000), to: Mask.Point(x: 2000 + Double(i * 3), y: 2000 + Double(i)))
@@ -82,7 +82,7 @@ import Testing
         Case(name: "move under levels layer", setUp: { workspace in
             _ = try layer(.levels, in: &workspace)
             workspace.selectLayer(workspace.layers[1].id)
-            workspace.selectTool(.move)
+            workspace.selectTool(.select)
             return nil
         }, step: { workspace, _, i in
             workspace.drag(from: Mask.Point(x: 2000, y: 2000), to: Mask.Point(x: 2000 + Double(i * 3), y: 2000 + Double(i)))
@@ -90,7 +90,7 @@ import Testing
         // Free Transform on the Fill layer (the whole 8K canvas): a rotate drag's frames, 1 degree a step, 60 steps.
         Case(name: "transform turn drag", setUp: { workspace in
             workspace.selectLayer(workspace.layers[1].id)
-            workspace.selectTool(.move)
+            workspace.selectTool(.select)
             try workspace.beginTransform()
             return nil
         }, step: { workspace, _, _ in

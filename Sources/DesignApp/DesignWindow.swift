@@ -67,6 +67,8 @@ struct DesignWindow: View, BodyCounted {
     @State private var model = DesignWorkspace()
     /// The drag or scrub shown on a copy until it ends; the canvas reads it from the environment.
     @State private var live = DesignLiveDrag()
+    /// Playback on the suite's display link; a tick changes nothing this body reads (DesignPlayer+Kernel.swift).
+    @State private var player = DesignPlayer()
     /// A test's starting workspace: the window opens it as it is and skips the launch steps.
     private let seeded: Bool
     @State private var zoom = 1.0
@@ -104,6 +106,9 @@ struct DesignWindow: View, BodyCounted {
     /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
     // view-static: main-actor
     static var openExport: (@MainActor () -> Void)?
+    /// The last started window's intents; RenderBudgetDesignAnimateTests plays through it.
+    // view-static: main-actor
+    static var lastPerform: DesignPerform?
     /// Reads the last started window's workspace and adopts one as a live command's result would
     /// (`.adoptLive`); RenderBudgetDesignAgentWorkingTests drives agent steps through it (the off-screen
     /// window never becomes active, so it never joins DesignShell.front).
@@ -142,15 +147,23 @@ struct DesignWindow: View, BodyCounted {
         } message: { shown in
             Text(shown.message)
         }
-        .task { start() }
+        .task {
+            #if DEBUG
+            Self.lastPerform = perform
+            #endif
+            start()
+        }
         // The key window is the one live commands act on (EM-4).
         .suiteLiveWindow(DesignShell.front, read: { DesignHeadless(model) }, write: { perform(.adoptLive($0.workspace)) })
-        // A file handed to Design (Finder, the home's Recent, Open In) opens here while the window is empty (#5200).
-        .suiteOpenQueue(DesignShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
+        // A file handed to Design (Finder, the home's Recent, Open In) or a new file (New Design,
+        // the welcome's Blank) lands here while the window is empty (#5200, #3333).
+        .suiteOpenQueue(DesignShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) },
+                        newDocument: { perform(.newFile) })
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
         .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }, remember: { perform(.rememberExport($0)) }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
+        .modifier(RefreshLinkHandoff(player: player))
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
         // SuiteWindow's inner one then adds nothing, so the menus' and alert's hosts share one inventory.
         .suiteProbes()
@@ -160,6 +173,11 @@ struct DesignWindow: View, BodyCounted {
         #if DEBUG
         defer { Self.lastWorkspace = model }
         #endif
+        // Anything but a transport intent pauses playback first, so it acts at the frame on screen.
+        switch intent {
+        case .play, .pause, .stop, .playPause, .scrub, .loop: break
+        default: if player.isActive { model.setPlayhead(player.halt(stopping: false, live: live)) }
+        }
         // An open text edit ends, fitted to its text, before anything else acts (canvas-basics CB-6).
         switch intent {
         case .textDraft, .cancelText, .rememberExport: break
@@ -215,6 +233,23 @@ struct DesignWindow: View, BodyCounted {
         case .commitText: break  // committed above
         case .cancelText: model.cancelTextEdit()
         case .zoomIn: userZoom(ZoomMath.zoomedIn(from: zoom))
+        case .playPause: perform(player.isPlaying ? .pause : .play)
+        case .play:
+            guard !model.isStill, !player.isPlaying else { break }
+            if player.isActive { model.setPlayhead(player.halt(stopping: false, live: live)) }
+            player.play(model, live: live) { model.setPlayhead($0) }
+        case .pause: if player.isPlaying { model.setPlayhead(player.halt(stopping: false, live: live)) }
+        case .stop: model.setPlayhead(player.halt(stopping: true, live: live))
+        case .scrub(let frame): player.scrub(to: frame, live: live) { model.setPlayhead($0) }
+        case .loop(let on): live.playLoops = on
+        case .keys(let commands):
+            var refusal: String?
+            for command in commands {
+                do { _ = try DesignWorkspace.catalog.run(command.id, params: command.params, on: &model) } catch {
+                    refusal = refusal ?? error.description
+                }
+            }
+            if let refusal { note = refusal }
         case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
         case .fit:
             fitting = true
@@ -492,5 +527,17 @@ struct DesignWindow: View, BodyCounted {
 
     private static func reason(_ error: Error) -> String {
         (error as? DesignFileError)?.reason ?? error.localizedDescription
+    }
+}
+
+/// Hands the window's `designRefreshLink` to `player` once it appears. Only this modifier's body reads the
+/// closure, so an environment change (a sheet opening) re-runs it, not DesignWindow's body
+/// (RenderBudgetDesignExportTests' sheet budget).
+private struct RefreshLinkHandoff: ViewModifier {
+    let player: DesignPlayer
+    @Environment(\.designRefreshLink) private var makeLink
+
+    func body(content: Content) -> some View {
+        content.onAppear { player.makeLink = makeLink }
     }
 }

@@ -24,10 +24,11 @@ import Testing
 /// The Photo tools whose canvas drag draws only an overlay mark until the release: every PhotoTool but the
 /// pixel movers, the painters, and the tools that pick, type or draw paths.
 enum OverlayDragger {
-    /// Move moves a layer's pixels (PixelMover); brush, eraser, clone, heal, spot heal, remove, bucket and
-    /// gradient lay new pixels; eyedropper picks a colour, text types and pen draws paths.
+    /// Select pressed on this one opaque layer moves its pixels (PixelMover; its box from empty canvas is
+    /// RenderBudgetPhotoSelectTests'); brush, eraser, clone, heal, spot heal, remove, bucket and gradient lay new
+    /// pixels; eyedropper picks a colour, text types and pen draws paths.
     static let excluded: Set<PhotoTool> = [
-        .move, .brush, .eraser, .clone, .heal, .spotHeal, .remove, .bucket, .gradient, .eyedropper, .text, .pen,
+        .select, .brush, .eraser, .clone, .heal, .spotHeal, .remove, .bucket, .gradient, .eyedropper, .text, .pen,
     ]
 
     static var allCases: [PhotoTool] { PhotoTool.allCases.filter { !excluded.contains($0) } }

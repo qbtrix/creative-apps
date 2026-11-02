@@ -45,6 +45,13 @@ enum DesignIntent {
     case editText(String)
     case textDraft(String), commitText, cancelText
     case zoomIn, zoomOut, fit
+    /// Playback on the one clock (DesignPlayer+Kernel.swift): shown state, never an edit.
+    case play, pause, stop, playPause
+    /// The timeline's ruler, steps and ends: show `frame` now, land it as the playhead once the scrub rests.
+    case scrub(Int)
+    case loop(Bool)
+    /// A key button or an Animate menu item: these keyframe.set and keyframe.remove commands, run in order.
+    case keys([(id: String, params: JSONValue)])
     /// A selection command (DesignCommand): duplicate, group, ungroup, delete, nudge, align,
     /// distribute or arrange; a refusal's help goes to the status line.
     case command(DesignCommand)
@@ -94,7 +101,7 @@ extension DesignToolbarItem {
 extension DesignTool: PaletteTool {
     public var gesture: ToolGesture {
         switch self {
-        case .move: .movesContent
+        case .move: .selects
         case .frame, .rectangle, .ellipse, .shape, .text: .creates
         case .pen: .editsPoints
         case .eyedropper: .inspects
@@ -103,7 +110,7 @@ extension DesignTool: PaletteTool {
 
     public var title: String {
         switch self {
-        case .move: "Move"
+        case .move: "Select"
         case .frame: "Frame"
         case .rectangle: "Rectangle"
         case .ellipse: "Ellipse"

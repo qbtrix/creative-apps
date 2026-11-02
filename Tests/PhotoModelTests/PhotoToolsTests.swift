@@ -31,8 +31,8 @@ private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoW
         a.selection != b.selection || a.selectionMask != b.selectionMask || a.areaDraft != b.areaDraft
     case .crop:
         a.pendingCrop != b.pendingCrop
-    case .move:
-        a.layers.map { [$0.offsetX, $0.offsetY] } != b.layers.map { [$0.offsetX, $0.offsetY] }
+    case .select:
+        a.selectedLayerIDs != b.selectedLayerIDs || a.layers.map { [$0.offsetX, $0.offsetY] } != b.layers.map { [$0.offsetX, $0.offsetY] }
     case .eyedropper:
         a.brushOptions != b.brushOptions
     case .text:
@@ -46,6 +46,8 @@ private func shows(_ tool: PhotoTool, changeFrom a: PhotoWorkspace, to b: PhotoW
 /// press at `source` and lifts the pointer, so the next drag stamps.
 private func ready(_ workspace: inout PhotoWorkspace, _ tool: PhotoTool, source: Mask.Point) {
     workspace.selectTool(tool)
+    // Select shows its pick by moving the selection off a new clear layer onto the painted one under the drag.
+    if tool == .select { workspace.addLayer() }
     guard tool == .clone || tool == .heal else { return }
     workspace.drag(from: source, to: source, modifiers: [.option])
     workspace.endDrag()
@@ -132,12 +134,12 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     #expect(options.settings == ToolOptions().settings && options.red == 0)
 }
 
-/// The Move tool's transform rows show only while a picked layer can move:
+/// The Select tool's transform rows show only while a picked layer can move:
 /// on an adjustment layer they would sit disabled under the refusal, their
 /// labels too faint to read (#2593). A picked image layer beside it still moves.
 @Test func moveOptionsShowOnlyForAMovableSelection() throws {
     var workspace = try PhotoWorkspace.fixture(.layered)
-    workspace.selectTool(.move)
+    workspace.selectTool(.select)
     let background = try #require(workspace.layers.first { $0.name == "Background" })
     let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
     workspace.selectLayer(background.id)
@@ -147,25 +149,30 @@ func photoToolActsOrHasHelpOnLiveServices(_ tool: PhotoTool) throws {
     #expect(workspace.moveHint == "Select an image layer in the sidebar to move it.")
     workspace.pickLayer(background.id, .toggle)
     #expect(workspace.canMoveSelection)
-    #expect(workspace.moveHint == "Drag over the image to move the selected layer.")
+    #expect(workspace.moveHint == PhotoWorkspace.selectHint)
 }
 
-/// Move refuses an adjustment layer, which has no origin on the canvas, and
-/// says why in the status and in its hint (#1630); an image layer moves.
+/// A move refuses an adjustment layer, which has no origin on the canvas, and
+/// says why in the status and in its hint (#1630); an image layer moves. A
+/// Select drag on the canvas lands on an image layer's pixels, so it picks and
+/// moves that layer and the adjustment layer stays put.
 @Test func moveRefusesAnAdjustmentLayerAndSaysWhy() throws {
     var workspace = try PhotoWorkspace.fixture(.layered)
-    workspace.selectTool(.move)
+    workspace.selectTool(.select)
     let background = try #require(workspace.layers.first { $0.name == "Background" })
     workspace.selectLayer(background.id)
-    #expect(workspace.moveHint == "Drag over the image to move the selected layer.")
+    #expect(workspace.moveHint == PhotoWorkspace.selectHint)
     let curves = try #require(workspace.layers.first { $0.name == "Curves 1" })
     workspace.selectLayer(curves.id)
     #expect(workspace.moveHint == "Select an image layer in the sidebar to move it.")
     let steps = workspace.historySteps.count
+    workspace.moveSelectedLayers(dx: 50, dy: 50)
+    #expect(workspace.historySteps.count == steps)
+    #expect(workspace.statusMessage == "Select an image layer in the sidebar to move it.")
     stroke(&workspace, from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 150, y: 150))
     let after = try #require(workspace.layers.first { $0.id == curves.id })
     #expect(after.offsetX == curves.offsetX)
     #expect(after.offsetY == curves.offsetY)
-    #expect(workspace.historySteps.count == steps)
-    #expect(workspace.statusMessage == "Select an image layer in the sidebar to move it.")
+    #expect(!workspace.selectedLayerIDs.contains(curves.id), "the press picked the image layer under it")
+    #expect(workspace.historySteps.count == steps + 1)
 }

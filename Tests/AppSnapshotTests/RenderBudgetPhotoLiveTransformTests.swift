@@ -13,7 +13,7 @@
 // layout and display it forces, has a p95 of at most 4 ms on a release build with testing and DEBUG on
 // (Tests/render-budgets.md). `PixelMover` runs both measurements over every drag that moves a layer's
 // existing pixels (each PhotoTool but the paint, area, crop, pick, type and path tools, plus Free Transform's
-// body drag), so a Move-tool drag meets the same budget and a new pixel-moving tool fails until it uses the
+// body drag), so a Select drag pressed on a layer (the Move it folds in) meets the same budget and a new pixel-moving tool fails until it uses the
 // lift. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -131,7 +131,7 @@ extension BodyCountSuites {
         static func draft() throws -> RenderBudgetPhotoTransformTests.Draft {
             var model = PhotoWorkspace()
             try model.newImage(DocumentSetup(width: 400, height: 300))
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
             return RenderBudgetPhotoTransformTests.Draft(model: model, before: try #require(model.transformSelection))
         }
@@ -165,14 +165,27 @@ extension BodyCountSuites {
         /// Every resample of Free Transform's layer in the process so far (debug only).
         static func resamples() -> Int { PhotoRenderCount.resamples.withLock { $0 } }
 
-        /// Waits up to 60 s for the window's canvas renders and its live-layer pixels to finish.
-        static func idle<V: View>(_ w: RenderBudgetWindow<V>) async throws {
+        /// Waits up to `limit` of wall clock for the window's canvas renders and its live-layer pixels to finish;
+        /// past that it prints what is still busy and goes on, so a slow runner shows the cause, not a time limit.
+        /// False when it gave up: a test that counts work from here on `#require`s true.
+        @discardableResult
+        static func idle<V: View>(_ w: RenderBudgetWindow<V>, limit: Duration = .seconds(60)) async throws -> Bool {
             // This window's renderer only: windows of suites running alongside keep the process-wide count busy.
             let renderer = canvas(in: w.host).flatMap(CanvasRenderer.rendering(into:))
-            for _ in 0..<3000 where renderer?.isSettled == false || (renderer == nil && CanvasRenderer.inFlight != 0) {
+            let deadline = ContinuousClock.now + limit
+            var settled = true
+            while renderer?.isSettled == false || (renderer == nil && CanvasRenderer.inFlight != 0) {
+                guard ContinuousClock.now < deadline else {
+                    let busy = renderer == nil ? "\(CanvasRenderer.inFlight) renders in the process"
+                        : renderer?.isIdle == false ? "a canvas render" : "the live layer's pixels (a lift sprite)"
+                    print("RENDER-BUDGET idle: still busy after \(limit): \(busy)")
+                    settled = false
+                    break
+                }
                 try await Task.sleep(for: .milliseconds(20))
             }
             try await w.settle(100)
+            return settled
         }
 
         struct NoRenderer: Error {}
@@ -184,7 +197,7 @@ extension BodyCountSuites {
         @Test(.timeLimit(.minutes(3))) func rotateDragStepIsUnder4MillisecondsOn24Megapixels() async throws {
             var model = PhotoWorkspace()
             try model.newImage(DocumentSetup(width: 6000, height: 4000))
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
             let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
             defer { w.close() }
@@ -260,7 +273,7 @@ enum PixelMover: CustomStringConvertible, Sendable {
         switch self {
         case .tool(let tool): model.selectTool(tool)
         case .freeTransform:
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
         }
         return model

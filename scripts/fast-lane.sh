@@ -29,7 +29,8 @@
 #   at most one revert per sweep, never two for one PR, never of a revert.
 # - One quarantine call per red sha (QUAR_MARK), at most QUAR_MAX tests, none
 #   on a QUAR_NEVER_RE path; the lane's own PR on QUAR_BRANCH that changes
-#   exactly QUAR_FILE is the one protected-path change it lands (quarantine_land).
+#   exactly QUAR_FILE is the one protected-path change it lands (quarantine_land);
+#   a removal lands only once a macOS run of the test passes too.
 # - Merge drivers and helper scripts come from this checkout (main), never
 #   from a PR.
 # Rules for agents: CLAUDE.md, "Fast lane". How the gate, batches, bisects
@@ -237,7 +238,7 @@ FINDING_LABEL="finding"
 # Auto-quarantine (quarantine_sweep, LANE_VERIFY_AFTER=1): a real red the lane has no revert for.
 QUAR_FILE="UITests/quarantine.json"  # PROTECTED; the lane's own PR is the one exception (quarantine_land)
 QUAR_BRANCH="lane/quarantine"        # the lane's one quarantine PR at a time (adds or removes entries)
-QUAR_LABEL="lane-quarantine"         # on it (never fast-lane: quarantine_land lands it on its Linux check)
+QUAR_LABEL="lane-quarantine"         # on it (never fast-lane: quarantine_land lands it on its Linux check, a removal also on a macOS run)
 QUAR_MARK="<!-- lane-quarantine"     # one quarantine call per red sha on the dev-red issue: "<!-- lane-quarantine <red7> -->"
 QUAR_LINE="Lane-Quarantine:"         # the PR body's kind line: "Lane-Quarantine: add" or "Lane-Quarantine: remove #<owner> ..."
 QUAR_MAX=5                           # more failing tests than this is a broad break: today's red handling stands
@@ -2109,7 +2110,8 @@ quarantine_sweep() {
   quarantine_add "$json"
 }
 
-# quarantine_expiry <quarantine json>: each lane entry's owner is read once:
+# quarantine_expiry <quarantine json>: each lane entry's owner is read once
+# (the REST API answers .state lowercase; it is upcased here to compare with OPEN):
 # closed, its entries go into one removal PR (returns 1 once that is open);
 # open and past the entry's `until`, it gets BLOCKER_LABEL and a comment, once.
 # The entry stays either way: an expired quarantine never comes back as a red.
@@ -2117,7 +2119,7 @@ quarantine_expiry() {
   local json="$1" owner until tests st labels closed="" new ids
   while IFS=$'\t' read -r owner until tests; do
     [[ -n "$owner" ]] || continue
-    st=$(gh api "repos/$REPO/issues/${owner#\#}" --jq '"\(.state)\t\([.labels[]?.name] | join(","))"' 2>/dev/null) || { log "auto-quarantine: could not read $owner; the next sweep looks again"; continue; }
+    st=$(gh api "repos/$REPO/issues/${owner#\#}" --jq '"\(.state | ascii_upcase)\t\([.labels[]?.name] | join(","))"' 2>/dev/null) || { log "auto-quarantine: could not read $owner; the next sweep looks again"; continue; }
     labels="${st#*$'\t'}"; st="${st%%$'\t'*}"
     if [[ "$st" != OPEN ]]; then closed+="${closed:+ }$owner"; continue; fi
     [[ "$until" < "$(quar_now)" ]] || continue
@@ -2133,7 +2135,7 @@ quarantine_expiry() {
   new=$(jq --arg o " $closed " 'map(.owner as $w | select(((.lane | type) == "object" and ($o | contains(" " + $w + " "))) | not))' <<<"$json")
   log "auto-quarantine: $closed closed; removing $ids from the quarantine"
   quarantine_pr remove "$new" "test(quarantine): run $ids again" "$QUAR_LINE remove $closed
-Removes the fast lane's quarantine entries of $ids: their owner issue ($closed) closed, so the fix should be on $BASE_BRANCH. This PR's own Linux check runs the test again; red, the lane reopens the owner and closes this PR." >/dev/null || return 0
+Removes the fast lane's quarantine entries of $ids: their owner issue ($closed) closed, so the fix should be on $BASE_BRANCH. Every quarantined test is macOS-only, so the Linux check alone proves nothing: a macOS gate (ci.yml mac_only) or local-ci/macos runs the test again, and this PR lands only once that and its Linux check pass. Red on either, the lane reopens the owner and closes this PR." >/dev/null || return 0
   return 1
 }
 
@@ -2174,7 +2176,7 @@ quarantine_add() {
   for e in "${ids[@]}"; do
     id="${e%%|*}"; path="${e#*|}"
     app=$(build_apps <(printf '%s\n' "$path")); [[ "$app" =~ ^[a-z]+$ && "$app" != all ]] || app=suite
-    issue=$(quarantine_issue "$id" "$app" "The fast lane quarantined \`$id\` ($path): $BASE_BRANCH is red on ${BASE_RED_JOBS#*: } at $red7 (dev-red #$BASE_RED, run ${BASE_RED_RUN:-not named}) and the lane found no culprit to revert. PRs in the culprit range main..$red7: ${list:-none found}; their leads own the fix. The test is skipped on $BASE_BRANCH until $until; past that this issue is a \`$BLOCKER_LABEL\`, and the test stays skipped until the fix lands and this issue closes, when the lane removes the entry (its PR's Linux check runs the test again). \`scripts/quarantine release\` fails while the entry is in.") || continue
+    issue=$(quarantine_issue "$id" "$app" "The fast lane quarantined \`$id\` ($path): $BASE_BRANCH is red on ${BASE_RED_JOBS#*: } at $red7 (dev-red #$BASE_RED, run ${BASE_RED_RUN:-not named}) and the lane found no culprit to revert. PRs in the culprit range main..$red7: ${list:-none found}; their leads own the fix. The test is skipped on $BASE_BRANCH until $until; past that this issue is a \`$BLOCKER_LABEL\`, and the test stays skipped until the fix lands and this issue closes, when the lane removes the entry (its PR lands only after a macOS run of the test passes). \`scripts/quarantine release\` fails while the entry is in.") || continue
     entry=$(jq -nc --arg t "$id" --arg o "#$issue" --arg r "Quarantined by the fast lane: fails on $BASE_BRANCH at $red7 (dev-red #$BASE_RED) with no culprit to revert; #$issue owns the fix" \
       --arg x "${until:0:10}" --arg red "#$BASE_RED" --arg range "main..$red7" --arg u "$until" \
       '{test: $t, owner: $o, reason: $r, expires: $x, lane: {red: $red, range: $range, until: $u}}')
@@ -2235,20 +2237,32 @@ quarantine_note() {
 }
 
 # quarantine_land <n>|<head>|<branch>|<add|remove>|<owners>: the lane's open
-# quarantine PR lands on its own Linux check, once no batch holds the lane.
+# quarantine PR lands on its own Linux check, once no batch holds the lane. A
+# removal also needs a macOS pass (mac_verdict: the macOS gate job or
+# LOCAL_MAC_CONTEXT), since every quarantined test is macOS-only and Linux never
+# runs it (#6138); none yet, one full mac_only run is dispatched, its comment the record.
 # THE protected-path exception, and all of it: the PR is the lane's bot's on
 # QUAR_BRANCH with QUAR_LABEL (quarantine_sweep's filter) AND changes exactly
-# QUAR_FILE; anything else is never landed. A red check on a removal means the
+# QUAR_FILE; anything else is never landed. A red check (either) on a removal means the
 # fix didn't hold: the owners are reopened and the PR closed (the entries
 # stay); on an add a human looks. A merge dev moved under is rebuilt.
 quarantine_land() {
-  local m head br kind owners files v o
+  local m head br kind owners files v o mv="" what="Linux check" url BATCH_APPS=all  # all: a full macOS gate, snapshot suites no app claims included
   IFS='|' read -r m head br kind owners <<<"$1"
   files=$(gh api "repos/$REPO/pulls/$m/files" --paginate --jq '.[].filename' 2>/dev/null) || { log "auto-quarantine: could not read #$m's files; the next sweep looks again"; return 0; }
   if [[ "$files" != "$QUAR_FILE" ]]; then
     comment_once "$m" "Fast lane: this $QUAR_LABEL PR changes more than $QUAR_FILE ($(paste -sd, - <<<"$files" | sed 's/,/, /g')), so the lane will not land it; a human looks."; return 0
   fi
   v=$(check_verdict "$head")
+  if [[ "$kind" == remove ]]; then
+    mv=$(mac_verdict "$head")
+    if [[ "$mv" == red* ]]; then v="$mv"; what="macOS gate"
+    elif [[ "$mv" == none && "$v" != red* ]] && ! has_comment "$m" "started a macOS gate on head $head"; then
+      dispatch_mac "$br" "quar-mac-$head"
+      comment_once "$m" "Fast lane: started a macOS gate on head $head (ci.yml mac_only, every test); this removal lands once it and the Linux check pass."
+    fi
+  fi
+  url="${v#*|}"; url="${url%%|*}"
   case "$v" in
     none)
       if has_comment "$m" "started a Linux check on head $head"; then log "auto-quarantine: #$m: its Linux check on $head started; waiting"; return 0; fi
@@ -2259,16 +2273,17 @@ quarantine_land() {
       if [[ "$kind" == remove ]]; then
         for o in $owners; do
           write gh issue reopen "${o#\#}" -R "$REPO" >/dev/null || log "could not reopen $o"
-          write gh issue comment "${o#\#}" -R "$REPO" --body "Reopened: the test still fails without its quarantine entry (#$m's Linux check: ${v#red|}), so the fix didn't hold. The entry stays until this closes again." || log "could not comment on $o"
+          write gh issue comment "${o#\#}" -R "$REPO" --body "Reopened: the test still fails without its quarantine entry (#$m's $what: $url), so the fix didn't hold. The entry stays until this closes again." || log "could not comment on $o"
         done
-        write gh pr close "$m" -R "$REPO" --comment "Fast lane: the Linux check is red (${v#red|}), so the test still fails; its owner is reopened and the entry stays." >/dev/null || log "could not close #$m"
+        write gh pr close "$m" -R "$REPO" --comment "Fast lane: the $what is red ($url), so the test still fails; its owner is reopened and the entry stays." >/dev/null || log "could not close #$m"
       else
         comment_once "$m" "Fast lane: the Linux check on this quarantine change is red (${v#red|}), so a human looks."
       fi ;;
     green*)
+      if [[ "$kind" == remove && "$mv" != green* ]]; then log "auto-quarantine: #$m: Linux is green; its macOS gate is ${mv:-none}"; return 0; fi
       if (( HOLD )); then log "auto-quarantine: #$m waits for the batch in flight"; return 0; fi
       if ! scratch "$BASE_BRANCH" "$br"; then log "auto-quarantine: could not fetch $br; the next sweep looks again"; return 0; fi
-      land "$m" "$head" "its own Linux check, ${v#green|}" && return 0
+      land "$m" "$head" "its own Linux check, $url${mv:+, and the macOS gate, ${mv#green|}}" && return 0
       [[ "$(gh pr view "$m" -R "$REPO" --json mergeable 2>/dev/null | jq -r '.mergeable // ""')" == CONFLICTING ]] || return 0
       rebuild_lane_pr "$m" "$head" "$br" "quarantine change" "it conflicts with $BASE_BRANCH" ;;
   esac

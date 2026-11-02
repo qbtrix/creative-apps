@@ -30,7 +30,7 @@ import Testing
         let blue = TiledPixels(try PixelBuffer(width: 300, height: 200, fill: RGBA(r: 0, g: 0, b: 0.3, a: 0.3)))
         _ = workspace.insertLayer(named: "Wash", pixels: blue, kind: .pixels, at: 0)
         workspace.selectLayer(logo)
-        workspace.selectTool(.move)
+        workspace.selectTool(.select)
         try workspace.beginTransform()
         return workspace
     }

@@ -16,8 +16,10 @@
 // a click on it gives it the keys. Pinch and its zoom keys go through
 // `menu.view.zoomTo`, the measured fit through `menu.view.fitMeasured`
 // (the loupe area fills both). While a crop draft is open (crop CR-6) the
-// artboard is the straightened photo (`crop.canvas`) under the crop frame
-// overlay, a canvas drag moves the handle under its press (or the whole
+// artboard is the straightened photo (`crop.canvas`): the unturned render
+// turned by the draft's angle with `.rotationEffect` (a compositor transform,
+// so a straighten step never waits for a render), under the crop frame
+// overlay; a canvas drag moves the handle under its press (or the whole
 // frame), Escape cancels and the arrows nudge the frame 1 px (Shift 10);
 // otherwise the artboard is the photo at its stored crop (`crop.artboard`).
 // The crop controls come from the window through `\.libraryCrop`. The photo
@@ -52,7 +54,16 @@ struct LibraryLoupe: View {
             // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
             onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key
         ) {
-            picture
+            if let draft = crop.draft, let canvas = crop.canvas, let photo = model.loupePhotoSize {
+                // The unturned picture turned by the draft's angle on the GPU, centred
+                // on the straightened canvas: a straighten step renders nothing.
+                picture
+                    .frame(width: Double(photo.width) * zoom, height: Double(photo.height) * zoom)
+                    .rotationEffect(.degrees(draft.angle))
+                    .frame(width: Double(canvas.width) * zoom, height: Double(canvas.height) * zoom)
+            } else {
+                picture
+            }
         } overlay: {
             if crop.draft != nil { LibraryCropOverlay(crop: crop, zoom: zoom) }
         }

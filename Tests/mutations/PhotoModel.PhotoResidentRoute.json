@@ -1,5 +1,6 @@
 [
 {"label": "a backend without every blend family keeps resident tiles", "file": "Sources/PhotoModel/PhotoRenderRoute.swift", "find": "Self.residentFamilies.isSubset(of: preferred.supports)", "replace": "true", "tests": "PhotoResidentRouteTests"},
 {"label": "an adjustment layer takes the resident path", "file": "Sources/PhotoModel/PhotoRenderRoute.swift", "find": "if case .adjustment = layer.kind { return false }", "replace": "if case .adjustment = layer.kind { return true }", "tests": "PhotoResidentRouteTests"},
-{"label": "the update writes nothing to the target", "file": "Sources/PhotoModel/PhotoTileUpdate.swift", "find": "        try target.write(picture, area)", "replace": "        _ = target", "tests": "PhotoResidentRouteTests"}
+{"label": "the update writes nothing to the target", "file": "Sources/PhotoModel/PhotoTileUpdate.swift", "find": "        try target.write(picture, area)", "replace": "        _ = target", "tests": "PhotoResidentRouteTests"},
+{"label": "a cancelled CPU update renders every tile anyway", "file": "Sources/PhotoModel/PhotoTileUpdate.swift", "find": "                    // A cancelled update (its window closed) renders no more tiles.\n                    try Task.checkCancellation()\n", "replace": "", "tests": "PhotoWindowCloseTests"}
 ]

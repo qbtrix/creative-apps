@@ -101,7 +101,7 @@ import Testing
         let opened = try await PhotoRenderer.update(workspace, since: nil, route: route)
         #expect(route.composites.made == regions, "the open's render keeps every region whole")
 
-        workspace.selectTool(.move)
+        workspace.selectTool(.select)
         workspace.drag(from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 110, y: 104))
         let first = try await PhotoRenderer.update(workspace, since: opened.revision, route: route)
         #expect(route.composites.made == regions * 2, "the first step makes the base under the moved layer once per region")

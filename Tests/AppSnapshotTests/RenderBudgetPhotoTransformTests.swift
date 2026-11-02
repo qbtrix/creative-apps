@@ -118,7 +118,7 @@ extension BodyCountSuites {
         /// The large fixture with the Move tool and Free Transform begun on Noise.
         static func draft() throws -> Draft {
             var model = try PhotoWorkspace.fixture(.large)
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
             let before = try #require(model.transformSelection)
             return Draft(model: model, before: before)

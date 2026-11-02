@@ -339,7 +339,7 @@ final class PhotoJourneyTests: XCTestCase {
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.55, dy: 0.15), to: CGVector(dx: 0.85, dy: 0.45), step: "selected")
         photo.click("Fill", in: .window, step: "filled")
 
-        tools["Move"].click()
+        tools["Select"].click()
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.5, dy: 0.5), to: CGVector(dx: 0.6, dy: 0.55), step: "moved")
 
         tools["Crop"].click()

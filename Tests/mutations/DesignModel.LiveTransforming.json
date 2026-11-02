@@ -61,5 +61,19 @@
     "find": "let maxY = frames.map(\\.maxY).max()",
     "replace": "let maxY = frames.map(\\.maxY).min()",
     "tests": "DesignSeveralTransformTests"
+  },
+  {
+    "label": "autokey: move edits the rest pose at a playhead",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "$0 = $0.moved(by: delta, at: playhead) }",
+    "replace": "$0 = $0.moved(by: delta, at: nil) }",
+    "tests": "DesignAutoKeyTests"
+  },
+  {
+    "label": "autokey: nudge drops the playhead",
+    "file": "Sources/DesignModel/Live/LiveTransforming.swift",
+    "find": "var edit = try move(ids, by: delta, on: page, at: playhead)",
+    "replace": "var edit = try move(ids, by: delta, on: page, at: nil)",
+    "tests": "DesignAutoKeyTests"
   }
 ]

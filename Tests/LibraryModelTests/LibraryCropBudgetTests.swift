@@ -4,10 +4,13 @@
 // `IMG_0001` (6000 × 4000) at 1:1: one `dragCrop` within 2 ms debug (0.2 ms
 // release) and one `setCropAngle` within 2 ms (0.2 ms release), neither
 // recording a step. The 2048 px render at 1:1 and 5° through `LiveDevelop`
-// is report-only in debug (decision D8) and within 120 ms in release. Each
-// prints a `LIBRARY-BUDGET crop …` line. Runs on Linux and macOS.
+// is report-only in debug (decision D8) and within 120 ms in release; the
+// audit's real-size turn (2400 × 2000 at 10° of 6000 × 4000) is within
+// 375 ms, release only. Each prints a `LIBRARY-BUDGET crop …` line.
+// Runs on Linux and macOS.
 @testable import LibraryModel
 import CoreRaster
+import SuiteKernel
 import Testing
 
 #if DEBUG
@@ -70,5 +73,30 @@ struct LibraryCropBudgetTests {
         let out = try live.render(buffer, settings: settings)
         #expect(abs(out.width - out.height) <= 1 && out.width < 1365)
         #expect(!judgesRenders || cost.median <= 120)
+    }
+
+    /// #5954 at real size: a 2400 × 2000 frame at 10° out of a 6000 × 4000
+    /// photo (the audit's 7.95 s export). The crop's share of the render, held
+    /// to the 2048 px row's 120 ms per 1.5 MP of frame: 375 ms for its 4.8 MP.
+    /// Release only: a debug pixel loop is no measure (D8).
+    @Test(.enabled(if: judgesRenders)) func realSizeTurnedCropWithinBudget() throws {
+        let buffer = try developGradient(width: 6000, height: 4000)
+        let settings = DevelopSettings.neutral.setting(crop: try cropLiveFrame600x400At10())
+        let live = LiveDevelop()
+        let cost = Budget.measure("crop render-6000-2400x2000-10", runs: 5) {
+            _ = try? live.render(buffer, settings: settings)
+        }
+        let out = try live.render(buffer, settings: settings)
+        #expect(abs(out.width - 2400) <= 1 && abs(out.height - 2000) <= 1)
+        #expect(cost.median <= 375)
+    }
+
+    /// The audit's frame: 2400 × 2000 at (600, 400) of the 10° straightened 6000 × 4000.
+    private func cropLiveFrame600x400At10() throws -> CropSettings {
+        var catalog = cropLiveLoupe()
+        let frame = JSONValue.object(["x": .number(600), "y": .number(400), "w": .number(2400), "h": .number(2000),
+                                      "angle": .number(10)])
+        _ = try LibraryCatalog.catalog.run("crop.set-frame", params: frame, on: &catalog)
+        return try #require(catalog.loupeItem?.develop.crop)
     }
 }

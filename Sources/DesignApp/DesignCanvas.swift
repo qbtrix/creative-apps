@@ -8,7 +8,7 @@
 // (not clipped to the page) is, bottom to top: the layers past the page's edge,
 // dimmed (DesignPastEdge), the frame names (DesignFrameLabels), the glow on what the newest agent step
 // touched (DesignAgentGlow), the selection's marks (DesignSelectionMarks), the marquee
-// under way (DesignMarqueeMark), DesignTextOverlay, the inline text editor, and
+// under way (SuiteUI's SelectBoxMark), DesignTextOverlay, the inline text editor, and
 // DesignCanvasFeedback's marks. `show` is the rect View > Zoom to Selection asks
 // for, kept until CanvasViewport can scroll to a rect. Keys reach the
 // canvas while it has focus. During an inline text edit the canvas passes no key
@@ -19,6 +19,8 @@
 // selection's marks, the marquee and the feedback are drawn from the window's
 // DesignLiveDrag copy (`live.workspace ?? model`), so a sample redraws the
 // canvas without running the window (D0-8a); keys and text editing read `model`.
+// While playing, that copy shows at the live drag box's `playingFrame`, so paint,
+// marks and hit-tests sample one tree. Space plays or pauses a document with keys.
 // The canvas lists itself in `suite.controls` as `design.canvas.page`
 // (DesignControlID.canvas) without replacing CanvasViewport's identifier.
 // Content, not chrome: flat, no glass.
@@ -38,8 +40,8 @@ struct DesignCanvas: View {
     @Environment(\.designLiveDrag) private var live
 
     var body: some View {
-        let shown = live?.workspace ?? model
-        if let page = shown.selectedPage {
+        let shown = Self.shown(live?.workspace ?? model, at: live?.playingFrame)
+        if let page = shown.shownPage {
             canvas(page, shown: shown)
         } else {
             EmptyStateView(
@@ -48,6 +50,14 @@ struct DesignCanvas: View {
                 action: ToolbarAction("New File", systemImage: "plus") { perform(.newFile) })
             .accessibilityIdentifier("design.new-file")
         }
+    }
+
+    /// `workspace` at the frame playback shows; itself when nothing plays.
+    nonisolated private static func shown(_ workspace: DesignWorkspace, at frame: Int?) -> DesignWorkspace {
+        guard let frame else { return workspace }
+        var copy = workspace
+        copy.setPlayhead(frame)
+        return copy
     }
 
     /// `page` of `shown`, the live copy while a drag or scrub lasts and `model` otherwise.
@@ -71,7 +81,7 @@ struct DesignCanvas: View {
             }
             .equatable()
             DesignSelectionMarks(model: shown, painted: painted, zoom: zoom)
-            if let marquee = shown.marquee { DesignMarqueeMark(rect: marquee, zoom: zoom) }
+            if let marquee = shown.marquee { SelectBoxMark(rect: marquee.cgRect, zoom: zoom) }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
             feedback
         }
@@ -85,6 +95,7 @@ struct DesignCanvas: View {
     private func key(_ press: KeyPress) -> KeyPress.Result {
         let modifiers = DesignKeyModifiers(press.modifiers)
         guard modifiers.reachesCanvas else { return .ignored }
+        if press.key == .space, modifiers.isEmpty, !model.isStill { perform(.playPause); return .handled }
         if let key = DesignCanvasKey(press.key) {
             switch model.canvasKeyAction(key, modifiers: modifiers) {
             case .nudge(let direction, let shift)?: perform(.nudge(direction, shift: shift))

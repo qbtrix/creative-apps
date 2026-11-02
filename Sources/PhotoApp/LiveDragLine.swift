@@ -6,10 +6,10 @@
 // LiveCopy of the workspace that only PhotoCanvasOverlay reads: the Gradient
 // line as `line`, Remove's outline as `path` (fill-heal FH-4), and the whole
 // copy as `shown`, which the overlay draws instead of the workspace for the
-// area tools' selection in progress and the Crop tool's box (#6020). A
-// Gradient or Remove press goes to the workspace first (it holds the drag,
-// and the panels see it at once); an area or Crop gesture runs here from its
-// press. The window takes the copy back once (`take()`), before the release
+// area tools' selection in progress, the Crop tool's box (#6020) and
+// Select's box (#6012). A Gradient or Remove press goes to the workspace
+// first (it holds the drag, and the panels see it at once); an area, Crop or
+// Select-box gesture runs here from its press. The window takes the copy back once (`take()`), before the release
 // or any other intent, so the release lands from the last sample. PhotoWindow
 // owns one and hands it down as the `photoDragLine` environment value;
 // without one (a view hosted alone) the overlay draws the workspace's marks.
@@ -30,9 +30,11 @@ import SwiftUI
     private(set) var shown: PhotoWorkspace?
 
     /// `moves` run on the copy, made from `model` at the first, when `model`
-    /// holds a line-only drag; false when it doesn't, for the window to apply them.
+    /// holds a line-only drag pressed where the first move starts, or the copy
+    /// is live already (a later sample's `from` is the last sample, not the
+    /// press); false otherwise, for the window to apply them.
     func drags(_ moves: [PhotoStrokeMove], on model: PhotoWorkspace, zoom: Double) -> Bool {
-        guard model.dragShowsLineOnly else { return false }
+        guard let press = moves.first, copy.shown != nil || model.dragShowsLineOnly(pressAt: press.from) else { return false }
         var live = copy.take() ?? model
         live.drags(moves, zoom: zoom)
         copy.begin(live)

@@ -7,7 +7,7 @@
 // edge, so its handles show past it), a rectangle and an ellipse, moves and
 // resizes the ellipse, Shift-clicks the rectangle (2 Layers, with the disabled
 // Distribute rows' reason shown as a caption, #2438), checks the palette and the status line's tool are back
-// on Move after each draw and after the text placement (#278), so the move and
+// on Select after each draw and after the text placement (#278), so the move and
 // the press on the committed text select and move rather than draw again; checks the sidebar still marks the current page while the
 // ellipse is selected, finds Add Page and Delete Page (`design.page.add`,
 // `design.page.delete`) by the pages with Delete Page disabled on the one
@@ -154,7 +154,7 @@ final class DesignJourneyTests: XCTestCase {
         XCTAssert(design.app.buttons["Undo Add Ellipse"].waitForExistence(timeout: 5), "drawing an ellipse made no undo step")
         expectMove(design, after: "drawing an ellipse")
 
-        // No click on Move: the draw left it picked, so this press grabs the ellipse's middle
+        // No click on Select: the draw left it picked, so this press grabs the ellipse's middle
         // and drags it down instead of drawing a second ellipse: it now spans (0.55, 0.475)-(0.75, 0.725).
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.65, dy: 0.325), to: CGVector(dx: 0.65, dy: 0.6), step: "moved")
         XCTAssert(design.app.buttons["Undo Move"].waitForExistence(timeout: 5), "the press after a draw didn't move the ellipse")
@@ -251,20 +251,20 @@ final class DesignJourneyTests: XCTestCase {
         reopened.shot("reopened")
     }
 
-    /// The palette shows Move as the picked tool and the status line names Move, checked for
+    /// The palette shows Select as the picked tool and the status line names Select, checked for
     /// up to three seconds after `action`.
     @MainActor private func expectMove(_ design: Journey, after action: String) {
-        let move = design.element("suite.tools").buttons["Move"]
+        let move = design.element("suite.tools").buttons["Select"]
         let status = design.element("design.status.tool")
         XCTAssert(status.waitForExistence(timeout: 5), "no tool in the status line (design.status.tool)")
         var picked = false
         for _ in 0..<10 {
-            picked = move.isSelected && ((status.value as? String) == "Move" || status.label == "Move")
+            picked = move.isSelected && ((status.value as? String) == "Select" || status.label == "Select")
             if picked { break }
             Thread.sleep(forTimeInterval: 0.3)
         }
-        XCTAssert(move.isSelected, "the palette doesn't show Move picked after \(action)")
-        XCTAssert(picked, "the status line shows \(status.label) \(String(describing: status.value)), not Move, after \(action)")
+        XCTAssert(move.isSelected, "the palette doesn't show Select picked after \(action)")
+        XCTAssert(picked, "the status line shows \(status.label) \(String(describing: status.value)), not Select, after \(action)")
     }
 
     /// The items of `menu` whose title starts with "Delete".

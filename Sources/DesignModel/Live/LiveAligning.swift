@@ -15,6 +15,7 @@
 //   already at its edge reports `alreadyHelp`, as today.
 // - Targets come from the bounds and each layer's own size, so a repeat
 //   changes nothing.
+// At a playhead Align lines up the frames the canvas shows and keys a keyed axis there (LiveKeying.swift).
 // Linux-safe.
 
 public struct LiveAligning: LayerAligning {
@@ -25,18 +26,25 @@ public struct LiveAligning: LayerAligning {
     }
 
     public func align(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        let selected = try layers(ids, on: page)
+        try align(edge, ids, on: page, at: nil)
+    }
+
+    public func align(_ edge: DesignAlignEdge, _ ids: [String], on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
+        let shown = page.shown(at: playhead)
+        let selected = try layers(ids, on: shown)
         let movable = selected.filter { !isLocked($0.id, on: page) }
         if movable.isEmpty, let locked = selected.first { throw .locked(locked.name) }
-        let box = selected.count == 1 ? selected.first.flatMap { page.alignBounds($0.id) } : DesignRect.union(selected.map(\.frame))
+        let box = selected.count == 1 ? selected.first.flatMap { shown.alignBounds($0.id) } : DesignRect.union(selected.map(\.frame))
         guard let box else { throw .nothingSelected }
-        var nodes = page.nodes
+        var (nodes, landed) = (page.nodes, shown.nodes)
         // Outer layers first, so a selected layer inside another lands on its own target.
         for node in movable.sorted(by: { depth($0.id, on: page) < depth($1.id, on: page) }) {
-            _ = nodes.update(node.id) { node in
-                let target = edge.origin(of: node.frame, in: box)
-                if target.isFinite { node.translate(by: DesignPoint(x: target.x - node.frame.x, y: target.y - node.frame.y)) }
-            }
+            guard let frame = landed.node(node.id)?.frame else { continue }
+            let target = edge.origin(of: frame, in: box)
+            guard target.isFinite else { continue }
+            let delta = DesignPoint(x: target.x - frame.x, y: target.y - frame.y)
+            _ = landed.update(node.id) { $0.translate(by: delta) }
+            _ = nodes.update(node.id) { $0 = $0.moved(by: delta, at: playhead) }
         }
         guard nodes != page.nodes else { throw .unchanged }
         return DesignEdit(name: edge.title, nodes: nodes, selection: ids)

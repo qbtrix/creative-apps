@@ -8,7 +8,9 @@
 // and no large layer is drawn on the CPU (CALayer `display`, swizzled for the
 // process); after it, the window's workspace holds the stroke as one "Undo
 // Paint" step. Layout passes and step times are reported, not judged here;
-// RenderBudgetPhotoTests' timing test judges them.
+// RenderBudgetPhotoTests' timing test judges them. The window stays on the
+// CPU route (no `photoRendering`): on Metal the tile layers get no contents, so
+// the tile reads above would see nothing.
 // PHOTO_WINDOW_STROKE_SECONDS=20 first strokes for that long, for `sample`.
 // The suite nests in BodyCountSuites: it reads a debug body counter.
 import AppKit
@@ -22,7 +24,7 @@ import Testing
 
 extension BodyCountSuites {
     @MainActor @Suite struct PhotoWindowStrokeTests {
-        @Test(.timeLimit(.minutes(2))) func aBrushStrokeRedrawsOnlyTheCanvas() async throws {
+        @Test(.timeLimit(.minutes(3))) func aBrushStrokeRedrawsOnlyTheCanvas() async throws {
             let stroke = try await Self.stroke()
             let report = stroke.report
             #expect(stroke.inked > 0, "the canvas showed nothing while drawing: \(report)")
@@ -53,9 +55,10 @@ extension BodyCountSuites {
             let w = RenderBudgetWindow(PhotoWindow(model: open))
             defer { w.close() }
 
-            // The first picture: every tile layer has its image (seconds in debug).
+            // The first picture: every tile layer has its image (about 10 s in debug). Renders an earlier
+            // suite's window left in flight share the CPU with it, so a loaded runner gets up to 90 s.
             let canvas = try #require(await w.first(CanvasHostView.self))
-            for _ in 0..<600 where tileImages(canvas).isEmpty { try await Task.sleep(for: .milliseconds(50)) }
+            for _ in 0..<1800 where tileImages(canvas).isEmpty { try await Task.sleep(for: .milliseconds(50)) }
             let shown = tileImages(canvas)
             try #require(!shown.isEmpty, "the canvas never showed its first picture")
             try await w.settle()

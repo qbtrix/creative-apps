@@ -1,5 +1,5 @@
 // Playback/PlaybackTicker.swift: the suite's one display-link ticker (#5077). A display link (SuiteUI's
-// PlaybackDriver) hands each refresh's target timestamp, the time that frame reaches the screen, never wall time;
+// SuitePlaybackDriver) hands each refresh's target timestamp, the time that frame reaches the screen, never wall time;
 // the ticker turns consecutive targets into the elapsed seconds between them. Invariants: the first tick after a
 // reset only sets the baseline, so a pause never counts as play time; a target that is not finite or not later than
 // the previous one is ignored and the baseline stays put. Linux-safe.
@@ -11,7 +11,7 @@ public struct PlaybackTicker: Sendable, Equatable {
 
     public init() {}
 
-    /// Forgets the baseline: the next tick starts timing afresh. The driver calls this on start and stop.
+    /// Forgets the baseline: the next tick starts timing afresh. An app starts a fresh ticker, or calls this, on each play.
     public mutating func reset() {
         lastTarget = nil
     }

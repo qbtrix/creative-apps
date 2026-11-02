@@ -1,8 +1,9 @@
 // EditorDetail.swift: the detail column of a canvas editor inside a
 // SuiteWindow (docs/design.md, Editor shell). From the top: the canvas (a
 // CanvasViewport, rulers included) filling the column, with the floating tool
-// palette (a `.floating` ToolbarGroup) over its leading edge, then a hairline
-// and the status line (a ViewerStatusBar). The palette sits `ruler + l` from
+// palette (a `.floating` ToolbarGroup) over its leading edge, then the
+// optional timeline slot (a host's TimelineStrip, empty by default, so the canvas
+// fits in what is left once), then a hairline and the status line (a ViewerStatusBar). The palette sits `ruler + l` from
 // the leading edge and is centred in the area inside the rulers, so it never
 // covers a ruler. Content, not chrome: flat on the canvas surround, no glass;
 // the palette brings its one capsule. The canvas region carries the
@@ -18,19 +19,21 @@
 import enum SuiteKernel.ZoomLevel
 import SwiftUI
 
-public struct EditorDetail<Canvas: View, Palette: View, Status: View>: View {
+public struct EditorDetail<Canvas: View, Palette: View, Timeline: View, Status: View>: View {
     private let canvas: Canvas
     private let palette: Palette
+    private let timeline: Timeline
     private let status: Status
     /// The palette's measured height, from which its tool count follows.
     @State private var paletteHeight: CGFloat = 0
 
     public init(
         @ViewBuilder canvas: () -> Canvas, @ViewBuilder palette: () -> Palette,
-        @ViewBuilder status: () -> Status
+        @ViewBuilder timeline: () -> Timeline, @ViewBuilder status: () -> Status
     ) {
         self.canvas = canvas()
         self.palette = palette()
+        self.timeline = timeline()
         self.status = status()
     }
 
@@ -52,12 +55,23 @@ public struct EditorDetail<Canvas: View, Palette: View, Status: View>: View {
                 }
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("suite.viewport")
+            timeline
             Divider()
             status
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("suite.status")
         }
         .background(SuiteColor.canvasSurround)
+    }
+}
+
+extension EditorDetail where Timeline == EmptyView {
+    /// An editor with no timeline slot.
+    public init(
+        @ViewBuilder canvas: () -> Canvas, @ViewBuilder palette: () -> Palette,
+        @ViewBuilder status: () -> Status
+    ) {
+        self.init(canvas: canvas, palette: palette, timeline: { EmptyView() }, status: status)
     }
 }
 

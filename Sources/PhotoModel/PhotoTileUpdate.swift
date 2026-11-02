@@ -19,7 +19,9 @@
 // backend runs one over a surface, a region takes the live route
 // (PhotoLiveTone.swift): adjustments and adjustment layers as GPU passes over
 // a cached composite, so a slider step composites nothing and reads nothing
-// back. Linux-safe.
+// back. Each tile (CPU) or band (GPU) task checks for cancellation before it
+// renders, so a cancelled update stops after the tiles already running.
+// Linux-safe.
 import CoreRaster
 import CoreRender
 
@@ -111,6 +113,8 @@ extension PhotoRenderer {
         let done = try await withThrowingTaskGroup(of: (PixelRect, [UInt8], String).self) { group in
             for rect in rects {
                 group.addTask {
+                    // A cancelled update (its window closed) renders no more tiles.
+                    try Task.checkCancellation()
                     var (bytes, backend) = try workspace.displayed(rect, on: route.dispatcher(), cache: route.composites)
                     premultiply(&bytes)
                     return (rect, bytes, backend)
@@ -137,6 +141,7 @@ extension PhotoRenderer {
         let done = try await withThrowingTaskGroup(of: ([(PixelRect, [UInt8])], String).self) { group in
             for band in bands {
                 group.addTask {
+                    try Task.checkCancellation()
                     guard let target else { return try regionTiles(workspace, band, route: route) }
                     return try targetRegion(workspace, band, route: route, target: target, live: live)
                 }

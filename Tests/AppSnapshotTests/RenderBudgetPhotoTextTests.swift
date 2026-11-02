@@ -1,11 +1,11 @@
 // RenderBudgetPhotoTextTests.swift (text-layers TX-4, #5951): what the Type tool and the Text section cost the
 // real Photo window, on the render budget harness (RenderBudgetHarness.swift), on an 8K image. Typing 20
-// letters into an open box runs PhotoEditor's body (a debug-only counter) at most 3 times a keystroke; its 16 ms
-// p95 is a disabled wall-clock test until Tests/perf-suites.txt lists it, and misses today (gap #6000). A
-// 120-sample Size scrub on a text layer runs the body at most 3 times in all; a box a canvas click opened
-// takes a space and Return adds it as a layer. `inspector` writes photo-text-inspector-light/dark.png: the
-// Text section for a "SALE" layer restyled to 120 pt, centered, on the window's live text (its Weight, Style
-// and Color rows).
+// letters into an open box re-runs only the box's overlay (the `textBox` facet), never PhotoEditor's body (a
+// debug-only counter); a 120-sample Size scrub on a text layer runs that body at most 3 times in all. Their
+// 16 ms p95s live in RenderBudgetPhotoTests, which Tests/perf-suites.txt lists, so they gate nightly, not in
+// CI. A box a canvas click opened takes a space and Return adds it as a layer. `inspector` writes photo-text-inspector-light/dark.png: the Text
+// section for a "SALE" layer restyled to 120 pt, centered, on the window's live text (its Weight, Style and
+// Color rows).
 // Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -49,25 +49,20 @@ extension BodyCountSuites {
             return step
         }
 
+        /// The packet allows 3 bodies a key; a key re-runs only the box's overlay, so the editor runs none. When it
+        /// ran once a key, each key laid the whole 8K editor out again, about 54 ms in debug (gap #6000).
         @Test(.timeLimit(.minutes(2))) func typeTwentyCharsInThreeBodiesEach() async throws {
             let step = try await Self.typeTwentyOnEightK("photo type 20 chars on 8K")
-            // Budget 3 bodies a keystroke; target 1, the draft's own redraw.
-            expectBodies(step, atMost: 60, target: 20)
-        }
-
-        /// The packet's keystroke budget on 8K, a wall-clock test: off until the supervisor lists it in
-        /// Tests/perf-suites.txt. Each key lays the whole editor out again, about 54 ms in debug (gap #6000).
-        @Test(.disabled("wall-clock: waits for its Tests/perf-suites.txt line; over budget, gap #6000"),
-              .timeLimit(.minutes(2)))
-        func typeOnEightKInSixteenMs() async throws {
-            let step = try await Self.typeTwentyOnEightK("photo type 20 chars on 8K, timed")
-            withKnownIssue("a keystroke lays the whole editor out again on 8K (gap #6000)", isIntermittent: true) {
-                expectP95(step, atMost: 16, target: 8)
-            }
+            expectBodies(step, atMost: 0, target: 0)
         }
 
         /// A 120-sample Size scrub on a text layer of an 8K image: the window body runs at most 3 times.
         @Test(.timeLimit(.minutes(2))) func sizeScrub() async throws {
+            expectBodies(try await Self.scrubSize("photo text Size scrub, 120 samples on 8K"), atMost: 3, target: 0)
+        }
+
+        /// Drags the Text section's Size 120 samples on a text layer of an 8K image; the window's measured step.
+        static func scrubSize(_ name: String) async throws -> RenderStep {
             var open = try Self.eightK()
             open.selectTool(.text)
             let at = Mask.Point(x: 400, y: 400)
@@ -85,11 +80,11 @@ extension BodyCountSuites {
             // A control below the window's edge would take the drag nowhere and pass on zero cost.
             #expect(w.host.bounds.insetBy(dx: 0, dy: box.height / 2).contains(start), "Size at \(box) is off the window")
             let before = w.value("photo.text.size")
-            let step = try await w.measure("photo text Size scrub, 120 samples on 8K", bodies: bodies) {
+            let step = try await w.measure(name, bodies: bodies) {
                 try await w.drag(from: start) { CGPoint(x: start.x + Double($0) / 2, y: start.y) }
             }
             #expect(w.value("photo.text.size") != before, "the scrub didn't move Size")
-            expectBodies(step, atMost: 3, target: 0)
+            return step
         }
 
         /// PJ-TX (#5951): a Type tool click on the canvas, as the journey makes, then "A B" and Return: the space
