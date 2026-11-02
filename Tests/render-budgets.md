@@ -40,6 +40,15 @@ has to end up.
 | Halo | drag Floor in the viewer, 120 samples | 2 / 3 / 3 | 2.9 / 4 / 8.3 ms | none: at the `haloViewerTakesActivationClicks` bound (3); could tighten to 2 |
 | Design | drag a shape on `crowd`, 120 samples | 3 / 3 / 3 | 4.1 / 6 / 8.3 ms | none in flight; at design-window DW-b's bound |
 | Design | marquee select on `crowd`, 120 samples | 3 / 3 / 3 | 2.7 / 4 / 8.3 ms | none in flight; at DW-b's bound |
+| Design | play `animated(500)` and `animated(50)` once, 5 s of 120 Hz refreshes on a hand-fired link (`RenderBudgetDesignAnimateTests.playback`) | 0 / 0 / 0 | 1.9 / QB-L4: at most 2 refreshes over 16.7 ms, and refresh 1 and the last refresh each under 16.7 ms / 8.3 ms | HITCH, release, `--no-parallel`, load 20-36, 3 runs: `animated(500)` p50 1.35, p95 1.9, refresh 1 6.6-15.6 ms, last refresh 5.7-6.1 ms, 0 over 16.7 ms; `animated(50)` p50 0.9, p95 1.35, refresh 1 9.8-10.2, last 4.7-6.1 ms, 0 over 16.7 ms. Before: refresh 1 23.6 ms and the last refresh 120 ms on 500 (34 ms on 50), the two late frames QB-L4 allowed. Refresh 1 is the first play in the process (the Pause glyph and the sampled canvas path instantiate once); later plays cost 5-7 ms |
+| Design | first key slides the timeline in, `cards` plus one key (`RenderBudgetDesignTimelineTests.slideIn`) | window 2, strip 3 / same / 1 | not timed | at the measured bound; OD-15's row (4) asks for one window body |
+| Design | scrub the timeline ruler 30 steps (`RenderBudgetDesignTimelineTests.slideIn`) | window 0 / 0 / 0 | not timed | none: frames show through `playingFrame` and land once as the playhead, no undo step, no unsaved change |
+| Design | play `animated(500)` with the timeline slot showing (`RenderBudgetDesignAnimateTests.playback`) | 0 / 0 / 0 | 1.9 / QB-L4: at most 2 refreshes over 16.7 ms / 8.3 ms | the slot is what made play start and end hitch (HITCH): one window body cost 114 ms on 500 rows, 90 ms of it TimelineStrip building every lane (the lanes' lazy stack sits in a sideways scroll laid out at every lane's height, so it was never lazy) and the lanes also re-ran on play start and end because they read `isPlaying`. Now the strip builds only the rows in view (`lanesShown`), the lanes never read `isPlaying` (their playhead follows the playing frame through a leaf, DesignTimelineStrip, so a tick runs that leaf and the strip's playhead layer, never `timelineRows`), and play once lands its frame a turn after the refresh that ends it. A window body on 500 rows is ~27 ms, the same as on 50; the slot adds ~5 ms of it. With the live playhead (release, `--no-parallel`, load 14-32, 4 runs): `animated(500)` p50 2.2, p95 2.8-3.3, refresh 1 8.0-17.2 ms (one run over 16.7), last refresh 2.8-3.0 ms; the parked playhead in the same runs read p50 1.4, p95 1.9-2.1, refresh 1 11.7-12.9 ms |
+| Design | press the X row's key diamond on `animated(1)` at frame 60 (`RenderBudgetDesignKeyTests.press`) | window 1, editor 1 / same / 1 | not timed | none: one key edit is one window and one editor body, and the key holds the value shown there, so the canvas paints the same frames and opacities |
+| Design | drag a keyed rectangle at frame 60 on `animated(500)`, 120 samples (`RenderBudgetDesignHeroTests.dragKeyed`) | window 2 / 3 / 3 | 36.0 / 6 / 8.3 ms | over on time, which isn't gated here (timing gates live in the perf list). Measured `--no-parallel` at load 35-65: 122 steps, p50 26.3, p95 36.0 ms. The drag writes the x key at 60. OD-16 reruns it on a quiet machine |
+| Design | scrub the timeline ruler 120 steps on `animated(500)` (`RenderBudgetDesignHeroTests.scrubRuler`) | window 0 / 0 / 0 | 62.6 / 8.3 / 8.3 ms | window at budget; time far over and not gated here. Measured `--no-parallel` at load 35-65: p50 51.1, p95 62.6, max 116 ms, all 120 steps over 8.3. Playback ticks the same canvas at p50 3.7 ms, so the per-step cost is more likely the timeline slot following the scrub (500 lanes rebuilt) than load. OD-16 measures it quiet and takes a sample before calling it |
+| Design | first key slide-in, the one-document packet's row (4) | see the slide-in row above | not timed | over the packet's one window body: measured 2, and the budget stays at the measured 2 |
+| Design | inspector toggle-key, the packet's row (5) | see the key press row above | not timed | at the packet's bound: one window and one editor body |
 | Library | scroll the grid, 120 steps of 12 pt (`samples`) | 0 / 0 / 0 | 6.6 / 10 / 8.3 ms | none in flight |
 | Library | step the Develop tab's Midtones handle 120 times at 120 Hz (`samples`, first photo in the loupe; `RenderBudgetLibraryLevelsTests`) | 120 / 120 / 0 | 24.7 ms p95, printed, not judged | each step reruns the window body once; a Levels edit should only touch the inspector and the loupe. The histogram is counted once per loupe render off the main thread (`LibraryHistogramBudgetTests`) |
 | Library | select, 10 clicks on grid cells | 10 / 10 / 10 | 80 / 120 / 33 ms | none in flight |
@@ -63,6 +72,30 @@ has to end up.
 Bodies for Flare's scrub row and Library's selection count one per edit: each
 step changes the model once. Their target is that count, not 3. Halo's
 playback bound comes from #1296: at least `fps / 2` and at most `fps + 6`.
+
+## Design raster cost per node kind (recorded, not gated)
+
+`RenderBudgetDesignRasterTests.nodeCost` (OD-17) samples each keyed fixture at 31 frames
+(0 to 120, every 4th) and rasters it at 2x through `DesignArtwork`, the canvas painter, off the
+window, after one untimed warm-up. Per node is the raster time over the node count, frame
+included. A kind's compositor trigger is the node count at which its sampled raster passes 8.3 ms
+at p95, taken as floor(8.3 ms / per-node p95). That extrapolates linearly and keeps the fixed render
+overhead inside the per-node figure, so it errs low. Below the trigger, the SwiftUI painter stays.
+Release build (`swift test -c release -Xswiftc -enable-testing -Xswiftc -DDEBUG`), M2 Pro, one run
+on 2026-10-30, with the 1-minute load printed by the test itself:
+
+| Kind (`DesignFixtures.animated(_:kinds:)`) | Nodes | Raster p50 / p95 | Per node p50 / p95 | Compositor trigger | Load (1 min) |
+|---|---|---|---|---|---|
+| rectangles (control, `animated(500)`) | 501 | 0.53 / 0.77 ms | 1.07 / 1.54 us | 5,399 nodes | 40, under load |
+| texts, "Label" in 48 x 20 | 501 | 11.65 / 17.92 ms | 23.25 / 35.76 us | 232 nodes | 40, under load |
+| gradients, linear blue to white | 501 | 0.68 / 0.98 ms | 1.35 / 1.97 us | 4,223 nodes | 40, under load |
+| strokes, 1 pt, solid and dashed (4, 2) by turns | 501 | 1.83 / 2.85 ms | 3.65 / 5.68 us | 1,460 nodes | 40, under load |
+| realUI: gradient header, 39 cards (stroked card, title, body, dashed chip, label) | 197 | 4.59 / 10.73 ms | 23.32 / 54.49 us | 152 nodes | 40, under load |
+
+The rectangle control matches the spike's 1.0 us, so the load did not skew this run much. Text
+is the cost that matters: about 23 us per node, roughly 20x a rectangle. A UI page that is
+mostly text reaches the 8.3 ms frame at about 150-230 nodes. Gradients cost about the same as
+solid fills. Strokes cost about 3.5x a fill and stay far from the trigger.
 
 ## Photo at 8K, CPU against GPU (recorded, no budget yet)
 

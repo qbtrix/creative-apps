@@ -104,12 +104,14 @@ struct TimelinePlayhead: View, BodyCounted {
         }
     }
 
-    /// The rows a lanes' visible y range shows; every row before it reports.
+    /// The rows a lanes' visible y range shows, inside `count` (a range reported before the tracks shrank, or
+    /// one taller than them, stops at the last row); every row before it reports.
     static func rows(showing visibleY: ClosedRange<Double>?, count: Int) -> Range<Int> {
-        guard let visibleY else { return 0..<max(count, 0) }
+        let count = max(count, 0)
+        guard let visibleY else { return 0..<count }
         let lane = Double(SuiteSize.timelineLane)
-        let first = max(Int((visibleY.lowerBound / lane).rounded(.down)), 0)
-        let end = max(Int((visibleY.upperBound / lane).rounded(.up)), first)
+        let first = min(max(Int((visibleY.lowerBound / lane).rounded(.down)), 0), count)
+        let end = min(max(Int((visibleY.upperBound / lane).rounded(.up)), first), count)
         return first..<end
     }
 }

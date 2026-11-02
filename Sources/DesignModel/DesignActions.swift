@@ -83,17 +83,19 @@ extension DesignWorkspace {
         guard editingTextID == nil, gesture == nil else { throw .unchanged }
         if ids.count == 1, command.hasOneLayerMethod { return try runOneLayer(command) }
         var mint = mint()
-        let edit: DesignEdit
+        var edit: DesignEdit
         switch command {
         case .duplicate: edit = try services.duplicating.duplicate(ids, offset: DesignPoint(x: 10, y: 10), on: page, mint: &mint)
         case .group: edit = try services.grouping.group(ids, on: page, mint: &mint)
         case .ungroup: edit = try services.grouping.ungroup(ids, on: page)
         case .delete: edit = try services.transforming.delete(ids, on: page)
-        case .nudge(let direction, let large): edit = try services.transforming.nudge(ids, direction, large: large, on: page)
-        case .align(let edge): edit = try services.aligning.align(edge, ids, on: page)
+        case .nudge(let direction, let large): edit = try services.transforming.nudge(ids, direction, large: large, on: page, at: playhead)
+        case .align(let edge): edit = try services.aligning.align(edge, ids, on: page, at: playhead)
         case .distribute(let axis): edit = try services.aligning.distribute(axis, ids, on: page)
         case .arrange(let step): edit = try services.ordering.arrange(step, ids, on: page)
         }
+        // A new group is still, so only Ungroup changes a layer's containers' offset (Live/LiveKeying.swift).
+        if case .ungroup = command { edit.nodes = edit.nodes.rebased(from: page.nodes, at: playhead) }
         apply(edit, mint: mint)
         // The new group's own Layers row opens too, so its members stay in view (D0-3a, #2471).
         if case .group = command { expandedNodeIDs.formUnion(edit.selection) }
@@ -110,7 +112,7 @@ extension DesignWorkspace {
 
     /// What View > Zoom to Selection shows; nil with nothing selected (the command is then off).
     public var zoomToSelectionRect: DesignRect? {
-        guard let page = selectedPage, !selectedNodeIDs.isEmpty else { return nil }
+        guard let page = shownPage, !selectedNodeIDs.isEmpty else { return nil }
         return services.framing.rectToShow(selectedNodeIDs, on: page)
     }
 

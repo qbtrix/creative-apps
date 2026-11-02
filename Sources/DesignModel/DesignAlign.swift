@@ -99,7 +99,7 @@ extension DesignWorkspace {
 
     /// Why `edge` can't align the selected layer now, or nil when it can.
     public func alignHelp(_ edge: DesignAlignEdge) -> String? {
-        guard let node = selectedNode else { return "Select a layer to align it." }
+        guard let node = shownSelectedNode else { return "Select a layer to align it." }
         if let multipleSelectionHelp { return multipleSelectionHelp }
         if editingTextID != nil { return "Finish editing the text first." }
         if let lockHelp = lockHelp(node.id) { return lockHelp }
@@ -116,14 +116,19 @@ extension DesignWorkspace {
     /// Moves the selected layer so `edge` lines up with its align bounds: one undo step named
     /// after the command. Does nothing when `alignHelp(edge)` gives a reason.
     public mutating func alignLayer(_ edge: DesignAlignEdge) {
-        guard alignHelp(edge) == nil, let node = selectedNode, let target = alignOrigin(edge, of: node) else { return }
+        guard alignHelp(edge) == nil, let node = shownSelectedNode, let target = alignOrigin(edge, of: node) else { return }
         let delta = DesignPoint(x: target.x - node.frame.x, y: target.y - node.frame.y)
         // alignHelp nil means the id is known and unlocked, so editNode can't refuse it.
-        try? editNode(node.id, named: edge.title) { $0.translate(by: delta) }
+        try? editNode(node.id, named: edge.title) { [playhead] in $0 = $0.moved(by: delta, at: playhead) }
+    }
+
+    /// The selected layer as the canvas shows it at the playhead.
+    private var shownSelectedNode: DesignNode? {
+        selectedNodeID.flatMap { shownPage?.nodes.node($0) } ?? selectedNode
     }
 
     private func alignOrigin(_ edge: DesignAlignEdge, of node: DesignNode) -> DesignPoint? {
-        page(holding: node.id)?.alignOrigin(edge, of: node)
+        (shownPage?.nodes.node(node.id) != nil ? shownPage : page(holding: node.id))?.alignOrigin(edge, of: node)
     }
 
     private func page(holding id: String) -> DesignPage? {
