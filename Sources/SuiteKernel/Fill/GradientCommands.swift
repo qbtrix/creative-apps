@@ -1,7 +1,8 @@
 // GradientCommands.swift (gradient-fill GF-1 specs, GF-6 bodies): the eight fill commands every app registers with
 // one line, `+ GradientCommands.specs(<X>Workspace.self)`, and the editor's gestures as those commands. Each edit reads
 // the target's `fillSelection`, applies one `GradientRules` rule in its box and calls `setFill` exactly once with its
-// title, passing a drag token through so the target's `History` folds a drag into one undo step.
+// title, passing a drag token through so the target's `History` folds a drag into one undo step. `fill.type` also
+// saves the fill's `FillMemory`, so a switch back gives the angle, centre and radius it left.
 
 /// One gesture of the gradient editor; the app runs its `command` through its catalog.
 public enum GradientIntent: Hashable, Sendable {
@@ -41,6 +42,8 @@ public enum GradientCommands {
     /// Why the stop commands can't run on a solid fill, the 64-stop cap, and why the angle needs a linear fill.
     static let solidHelp = "Switch the fill to a gradient first.", fullHelp = "A gradient holds at most 64 stops."
     static let angleHelp = "Angle is for a linear gradient."
+    /// Why the stop, colour and angle commands wait on a layer with no fill.
+    public static let noneHelp = "Choose a fill type first."
 
     static let type = ParamSchema.string("The fill type.", oneOf: FillType.allCases.map(\.rawValue))
     static let unit = ParamSchema.number("0 to 1.", minimum: 0, maximum: 1)
@@ -57,10 +60,15 @@ public enum GradientCommands {
                    kind: .query, params: Empty.self, schema: .none,
                    result: .object(["type": type, "stops": .array(of: stop), "angle": angle], required: ["type", "stops", "angle"]),
                    example: .object([:]), availability: { ready($0) }) { target, _ in try read(target) },
-            .typed("fill.type", title: "Fill Type", summary: "Makes the selection's fill solid, linear or radial.", kind: .edit,
+            .typed("fill.type", title: "Fill Type", summary: "Makes the selection's fill solid, linear or radial, or none where a layer can go without one.", kind: .edit,
                    params: TypeParams.self, schema: .object(["type": type], required: ["type"]),
-                   example: .object(["type": .string("linear")]), availability: { ready($0) }) { target, p in
-                try edit(&target, "Fill Type") { GradientRules.converted($0, to: p.type, in: $1) }
+                   example: .object(["type": .string("linear")]), availability: { ready($0) }) { target, p throws -> JSONValue in
+                guard p.type != .none else { try target.clearFill(name: "Fill Type"); return JSONValue.object([:]) }
+                guard let selection = target.fillSelection else { throw CatalogError.failed(id: "fill.type", message: "Select something with a fill first.") }
+                let memory = GradientRules.remembering(selection.fill, in: selection.memory)
+                let fill = GradientRules.converted(selection.fill, to: p.type, in: selection.box, memory: memory)
+                try target.setFill(fill, memory: memory, in: selection.box, name: "Fill Type", drag: nil)
+                return JSONValue.object([:])
             },
             .typed("fill.gradient", title: "Set Gradient", summary: "Sets the selection's gradient: its type, 2 to 64 stops and a linear fill's angle.",
                    kind: .edit, params: GradientParams.self,
@@ -90,7 +98,7 @@ public enum GradientCommands {
                    kind: .edit, params: ColorParams.self,
                    schema: .object(rgba.merging(["index": index, "drag": drag]) { old, _ in old }, required: ["index", "r", "g", "b", "a", "drag"]),
                    example: .object(["index": .number(0), "r": .number(1), "g": .number(0), "b": .number(0), "a": .number(1)]),
-                   availability: { ready($0) }) { target, p in
+                   availability: { painted($0) }) { target, p in
                 try edit(&target, "Gradient Stop Color", drag: p.drag, stop: p.index) { fill, _ in
                     GradientRules.recoloring(fill, index: p.index, to: FillColor(r: p.r, g: p.g, b: p.b, a: p.a))
                 }
@@ -109,17 +117,22 @@ public enum GradientCommands {
         if let why = target.fillHelp { return .unavailable(why) }
         return target.fillSelection == nil ? .unavailable("Select something with a fill first.") : .available
     }
-    /// `ready`, and a gradient: not full when `adding`, more than two stops when `removing`.
+    /// `ready`, and a layer with a fill (`noneHelp` without one).
+    static func painted<T: GradientFillTarget>(_ target: T) -> Availability {
+        guard ready(target) == .available else { return ready(target) }
+        return target.fillSelection?.isEmpty == true ? .unavailable(noneHelp) : .available
+    }
+    /// `painted`, and a gradient: not full when `adding`, more than two stops when `removing`.
     static func stops<T: GradientFillTarget>(_ target: T, adding: Bool = false, removing: Bool = false) -> Availability {
-        guard ready(target) == .available, let fill = target.fillSelection?.fill else { return ready(target) }
+        guard painted(target) == .available, let fill = target.fillSelection?.fill else { return painted(target) }
         if GradientRules.type(of: fill) == .solid { return .unavailable(solidHelp) }
         if adding, fill.stops.count >= GradientRules.maxStops { return .unavailable(fullHelp) }
         if removing, fill.stops.count <= 2 { return .unavailable(GradientRules.stopHelp) }
         return .available
     }
-    /// `ready`, and a linear fill.
+    /// `painted`, and a linear fill.
     static func linear<T: GradientFillTarget>(_ target: T) -> Availability {
-        guard ready(target) == .available, let fill = target.fillSelection?.fill else { return ready(target) }
+        guard painted(target) == .available, let fill = target.fillSelection?.fill else { return painted(target) }
         return GradientRules.type(of: fill) == .linear ? .available : .unavailable(angleHelp)
     }
     /// The selection's fill after `change` (given the fill and its box), set back once as the step `title`, under `drag`
@@ -148,9 +161,12 @@ public enum GradientCommands {
         let line = GradientRules.rotated(.linear(stops: stops, start: Point(x: 0, y: 0), end: Point(x: 0, y: 0)), to: p.angle ?? 0, in: box)
         return p.type == .radial ? GradientRules.converted(line, to: .radial, in: box) : line
     }
-    /// `fill.read`'s result: the type, each stop's offset and colour, and a linear fill's angle (null otherwise).
+    /// `fill.read`'s result: the type, each stop's offset and colour, and a linear fill's angle (null otherwise); a
+    /// layer with no fill reads type "none" with no stops.
     static func read<T: GradientFillTarget>(_ target: T) throws -> JSONValue {
-        guard let fill = target.fillSelection?.fill else { throw CatalogError.failed(id: "fill.read", message: "Select something with a fill first.") }
+        guard let selection = target.fillSelection else { throw CatalogError.failed(id: "fill.read", message: "Select something with a fill first.") }
+        if selection.isEmpty { return .object(["type": .string(FillType.none.rawValue), "stops": .array([]), "angle": .null]) }
+        let fill = selection.fill
         let stops = (GradientRules.type(of: fill) == .solid ? [GradientStop(offset: 0, color: GradientRules.color(of: fill, at: 0))] : fill.stops)
             .map { JSONValue.object(["offset": .number($0.offset), "r": .number($0.color.r), "g": .number($0.color.g),
                                      "b": .number($0.color.b), "a": .number($0.color.a)]) }

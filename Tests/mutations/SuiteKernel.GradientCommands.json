@@ -33,5 +33,33 @@
     "find": "to: p.angle ?? 0, in: box)",
     "replace": "to: 0, in: box)",
     "tests": "GradientCommandsTests"
+  },
+  {
+    "label": "stopsAndAngleWaitForAPaint: a layer with no fill not checked, so its stops edit a hidden fill",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "return target.fillSelection?.isEmpty == true ? .unavailable(noneHelp) : .available",
+    "replace": "return .available",
+    "tests": "FillNoneTests"
+  },
+  {
+    "label": "noneClearsAndATypeBringsTheFillBack: none converted like a paint, so the layer keeps its fill",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "guard p.type != .none else { try target.clearFill(name: \"Fill Type\"); return JSONValue.object([:]) }",
+    "replace": "",
+    "tests": "FillNoneTests"
+  },
+  {
+    "label": "noneClearsAndATypeBringsTheFillBack: fill.read reports the kept paint for an empty layer",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "if selection.isEmpty { return .object([\"type\": .string(FillType.none.rawValue), \"stops\": .array([]), \"angle\": .null]) }",
+    "replace": "",
+    "tests": "FillNoneTests"
+  },
+  {
+    "label": "typeSwitchesSaveTheMemoryAsOneStepEach: fill.type drops the memory, so linear comes back at 0°",
+    "file": "Sources/SuiteKernel/Fill/GradientCommands.swift",
+    "find": "try target.setFill(fill, memory: memory, in: selection.box, name: \"Fill Type\", drag: nil)",
+    "replace": "try target.setFill(fill, in: selection.box, name: \"Fill Type\", drag: nil)",
+    "tests": "FillMemoryTests"
   }
 ]
