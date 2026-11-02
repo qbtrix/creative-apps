@@ -9,9 +9,9 @@
 // the draft has turned or moved. Nested in BodyCountSuites: it reads process-wide
 // counters. `RenderBudgetPhotoLiveTransformTimingTests` (a perf suite, Tests/perf-suites.txt, nested in
 // BodyCountSuites too so no other window's renders count) times the same
-// drag on a 24 MP layer (6000 x 4000, one opaque layer): each sample's main-thread step, the event and the
-// layout and display it forces, has a p95 of at most 4 ms on a release build with testing and DEBUG on
-// (Tests/render-budgets.md). `PixelMover` runs both measurements over every drag that moves a layer's
+// drag, the handles' corner drag and the inspector's Rotation scrub on a 24 MP layer (6000 x 4000, one opaque
+// layer): each sample's main-thread step, the event and the layout and display it forces, has a p95 of at most
+// 4 ms (the scrub 8 ms, one frame) on a release build with testing and DEBUG on (Tests/render-budgets.md). `PixelMover` runs both measurements over every drag that moves a layer's
 // existing pixels (each PhotoTool but the paint, area, crop, pick, type and path tools, plus Free Transform's
 // body drag), so a Select drag pressed on a layer (the Move it folds in) meets the same budget and a new pixel-moving tool fails until it uses the
 // lift. macOS only.
@@ -195,11 +195,7 @@ extension BodyCountSuites {
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetPhotoLiveTransformTimingTests {
         @Test(.timeLimit(.minutes(3))) func rotateDragStepIsUnder4MillisecondsOn24Megapixels() async throws {
-            var model = PhotoWorkspace()
-            try model.newImage(DocumentSetup(width: 6000, height: 4000))
-            model.selectTool(.select)
-            try model.beginTransform()
-            let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
+            let w = RenderBudgetWindow(PhotoWindow(model: try Self.draft24MP()).allowsWindowActivationEvents())
             defer { w.close() }
             _ = try await RenderBudgetPhotoTransformTests.settle(w)
             try await RenderBudgetPhotoLiveTransformTests.idle(w)
@@ -212,6 +208,47 @@ extension BodyCountSuites {
             expectP95(step, atMost: 4, target: 4)
             // The renderer outlives its window: the release's exact picture finishes before the next suite counts.
             try await RenderBudgetPhotoLiveTransformTests.idle(w)
+        }
+
+        /// The handles' corner drag (a scale) on 24 MP: it lifts like the rotate drag, so the same step bound.
+        @Test(.timeLimit(.minutes(3))) func cornerDragStepIsUnder4MillisecondsOn24Megapixels() async throws {
+            let w = RenderBudgetWindow(PhotoWindow(model: try Self.draft24MP()).allowsWindowActivationEvents())
+            defer { w.close() }
+            _ = try await RenderBudgetPhotoTransformTests.settle(w)
+            try await RenderBudgetPhotoLiveTransformTests.idle(w)
+            let corner = try #require(await w.element("suite.handles.bottomRight"), "no bottom-right handle on the draft")
+            let step = try await w.measure("photo transform corner drag, 24 MP", bodies: { nil }) {
+                // Window points have y up: in from the bottom-right corner is left and up.
+                try await w.drag(from: CGPoint(x: corner.midX, y: corner.midY), by: CGVector(dx: -120, dy: 80))
+            }
+            #expect(step.steps >= 120, "\(step)")
+            expectP95(step, atMost: 4, target: 4)
+            try await RenderBudgetPhotoLiveTransformTests.idle(w)
+        }
+
+        /// The inspector's Rotation row stepped 120 times at 120 Hz on 24 MP: each step within a frame.
+        @Test(.timeLimit(.minutes(3))) func rotationScrubStepIsUnder8MillisecondsOn24Megapixels() async throws {
+            let w = RenderBudgetWindow(PhotoWindow(model: try Self.draft24MP()).allowsWindowActivationEvents())
+            defer { w.close() }
+            _ = try await RenderBudgetPhotoTransformTests.settle(w)
+            try await RenderBudgetPhotoLiveTransformTests.idle(w)
+            var found = false
+            let step = try await w.measure("photo transform rotation scrub, 24 MP", bodies: { nil }) {
+                found = try await w.adjust("suite.transform.rotation", steps: 120)
+            }
+            #expect(found, "the Rotation row isn't adjustable")
+            #expect(step.steps >= 120, "\(step)")
+            expectP95(step, atMost: 8, target: 8)
+            try await RenderBudgetPhotoLiveTransformTests.idle(w)
+        }
+
+        /// A 6000 x 4000 white image (24 MP, one opaque layer) with the Move tool and Free Transform begun.
+        static func draft24MP() throws -> PhotoWorkspace {
+            var model = PhotoWorkspace()
+            try model.newImage(DocumentSetup(width: 6000, height: 4000))
+            model.selectTool(.select)
+            try model.beginTransform()
+            return model
         }
 
         /// Every pixel mover's straight drag on 24 MP: the same step bound as the rotate drag.

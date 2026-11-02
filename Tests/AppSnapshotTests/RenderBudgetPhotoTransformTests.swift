@@ -15,9 +15,9 @@
 // (`setTransform`, PT-5). A scrub's steps run on the window's live copy, which
 // it takes back only once they go quiet (LiveTransformCopy+Kernel.swift), so
 // each test reads the workspace after waiting, up to 2 s, for that edit to land
-// (`landed`). The step p95 (budget 16 ms) is printed, never asserted, until the
-// supervisor lists these in Tests/perf-suites.txt. Nested in BodyCountSuites,
-// as every suite that reads a body counter is. macOS only.
+// (`landed`). The step times are gated on 24 MP in the perf suite
+// RenderBudgetPhotoLiveTransformTimingTests (Tests/perf-suites.txt), not here.
+// Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import PhotoModel
@@ -43,7 +43,6 @@ extension BodyCountSuites {
                 // Window points have y up: out from the bottom-right corner is right and down.
                 try await w.drag(from: start, by: CGVector(dx: 120, dy: -80), samples: Self.samples)
             }
-            print("RENDER-BUDGET photo transform corner drag p95 \(String(format: "%.2f", step.p95)) ms (budget 16, print-only)")
             #expect(step.steps >= Self.samples, "\(step)")
             let after = try #require(await Self.landed(edited) {
                 ($0.transformSelection?.box).map { $0 != draft.before.box } ?? true
@@ -94,7 +93,6 @@ extension BodyCountSuites {
             let step = try await w.measure("photo transform rotation scrub, 120 steps", bodies: Self.bodies) {
                 found = try await w.adjust("suite.transform.rotation", steps: Self.samples)
             }
-            print("RENDER-BUDGET photo transform rotation scrub p95 \(String(format: "%.2f", step.p95)) ms (budget 16, print-only)")
             #expect(found, "the Rotation row isn't adjustable")
             #expect(step.steps >= Self.samples, "\(step)")
             let after = try #require(await Self.landed(edited) {
