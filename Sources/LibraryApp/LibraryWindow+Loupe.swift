@@ -111,6 +111,7 @@ extension LibraryWindow {
 
     #if DEBUG
     /// Loupe renders started, for the render budget tests (a straighten step starts none).
+    // view-static: main-actor
     static var loupeRenders = 0
     #endif
 
