@@ -3,7 +3,8 @@
 // the filter bar call on the focused window: every filter, collection and
 // smart-collection action, each built as `enabled(help == nil)` from the
 // catalog's help, so it lights up when a slice sets its `unavailable` to nil
-// with no app edit. `LibraryFilterBar` draws the bar: Picked, Unflagged and
+// with no app edit. `LibraryFilterBar` draws the bar, all at the compact control
+// size so its type and heights match: Picked, Unflagged and
 // Rejected chips, the rating and label menus, Hide Rejected, the summary
 // and Clear; a control that can't act is disabled with its reason as help,
 // and each is listed in `library.controls`. When one row doesn't fit the
@@ -210,6 +211,8 @@ struct LibraryFilterBar: View {
                 }
             }
         }
+        // Compact, so the menus, checkbox and Clear match the chips' type and height.
+        .controlSize(SuiteSize.compactControl)
         .padding(.horizontal, SuiteSpacing.m)
         .padding(.vertical, SuiteSpacing.xs)
         .accessibilityElement(children: .contain)
