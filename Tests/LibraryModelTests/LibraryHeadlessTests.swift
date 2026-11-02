@@ -85,6 +85,47 @@ import Testing
         #expect(!LibraryHeadless.openWords(CancellationError(), name: "a.library").contains("("))
     }
 
+    /// Quality gate #6205: a headless PNG carries an sRGB chunk right after IHDR (sips read its profile as nil), and
+    /// core's reader still reads it back.
+    @Test func exportedPNGIsTaggedSRGB() throws {
+        var doc = try LibraryHeadless.open(Self.input("import-rate-export"), name: "shoot.library")
+        _ = try LibraryHeadless.catalog.run("edit.select", params: .object(["ids": .array([.string("meadow")])]), on: &doc)
+        _ = try LibraryHeadless.catalog.run("metadata.pick", params: .object([:]), on: &doc)
+        let png = try #require(doc.export("png", options: .object(["longSide": .number(300)])).first).data
+        #expect([UInt8](png[33..<46]) == [0, 0, 0, 1, 0x73, 0x52, 0x47, 0x42, 0, 0xAE, 0xCE, 0x1C, 0xE9])
+        #expect(LibraryHeadless.pngSize(png) == PixelSize(width: 300, height: 300))
+        #expect(try PNG.read(png).width == 300)
+    }
+
+    /// Quality gate #6205: a `.library` holds JPEGs too ("images/IMG_0001.jpg isn't a PNG." before), upright by
+    /// their EXIF orientation, and exports them as PNGs.
+    @Test func jpegImagesOpenUprightAndExport() throws {
+        let jpeg = try JPEG.write(PixelBuffer(width: 300, height: 200, fill: RGBA(r: 0.2, g: 0.4, b: 0.6, a: 1)))
+        var turned = [UInt8](jpeg)
+        turned.insert(contentsOf: Self.exifOrientation(6), at: 2)  // EXIF 6: turn a quarter clockwise
+        var doc = try LibraryHeadless.new(.object([:]))
+        try doc.importImage(jpeg, name: "IMG_0001.jpg")
+        try doc.importImage(Data(turned), name: "IMG_0002.jpg")
+        #expect(doc.library.items.map(\.pixelSize) == [PixelSize(width: 300, height: 200), PixelSize(width: 200, height: 300)])
+        let reopened = try LibraryHeadless.open(doc.save(), name: "x.library")
+        #expect(reopened.library.items.map(\.id) == ["IMG_0001", "IMG_0002"])
+        _ = try LibraryHeadless.catalog.run("edit.select-all", params: .object([:]), on: &doc)
+        _ = try LibraryHeadless.catalog.run("metadata.pick", params: .object([:]), on: &doc)
+        let files = try doc.export("png", options: .object([:]))
+        #expect(files.map(\.suggestedName) == ["IMG_0001.png", "IMG_0002.png"])
+        #expect(files.map { LibraryHeadless.pngSize($0.data) } == [PixelSize(width: 300, height: 200), PixelSize(width: 200, height: 300)])
+        #expect(throws: CatalogError.failed(id: "import", message: "images/notes.txt isn't a PNG or JPEG image.")) {
+            try doc.importImage(Data("hello".utf8), name: "notes.txt")
+        }
+    }
+
+    /// A JPEG APP1 segment holding only an EXIF orientation tag (big-endian TIFF, one IFD entry).
+    static func exifOrientation(_ value: UInt8) -> [UInt8] {
+        let tiff: [UInt8] = [0x4D, 0x4D, 0, 0x2A, 0, 0, 0, 8, 0, 1, 0x01, 0x12, 0, 3, 0, 0, 0, 1, 0, value, 0, 0, 0, 0, 0, 0]
+        let body = Array("Exif".utf8) + [0, 0] + tiff
+        return [0xFF, 0xE1, 0, UInt8(body.count + 2)] + body
+    }
+
     @Test func newAndSummary() throws {
         let doc = try LibraryHeadless.new(.object([:]))
         #expect(doc.library.items.isEmpty && doc.images.isEmpty)
