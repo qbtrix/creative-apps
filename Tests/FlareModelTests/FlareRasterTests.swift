@@ -61,15 +61,16 @@ private func pixel(_ frame: MediaFrame, _ x: Int, _ y: Int) -> [UInt8] {
 }
 
 @Test func aSymbolInstanceAnimatesAcrossPNGFrames() throws {
-    // The same mid frame with the instance playing and held on its first frame: only the symbol differs.
+    // Frame 12, the wave at its widest, with the instance playing and held on its first frame: only the symbol differs.
     var held = FlareFixtures.character
     held.scenes[0].layers[2].instances[0].loop = .singleFrame
     let scene = try #require(held.scenes.first)
     let frames = try [FlareFixtures.character, held].map {
-        try FlareRaster.render(LiveStage().drawList($0, sceneID: scene.id, frame: scene.durationFrames / 2, editing: nil),
+        try FlareRaster.render(LiveStage().drawList($0, sceneID: scene.id, frame: 12, editing: nil),
                                width: 275, height: 200, transparent: false).rgba
     }
-    #expect(frames[0] != frames[1])
+    let moved = frames[0] != frames[1]
+    #expect(moved, "the symbol drew its first frame")
 }
 
 @Test func aSizeOutsideTheLimitsThrows() throws {
