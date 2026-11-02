@@ -16,7 +16,7 @@
   {
     "label": "an SVG export ignores transparentBackground",
     "file": "Sources/FlareModel/Live/LiveExportAdapter.swift",
-    "find": "            if options.transparentBackground { scene.background.a = 0 }\n",
+    "find": "            if options.transparentBackground { whole.background.a = 0 }\n",
     "replace": "",
     "tests": "LiveExportTests"
   },

@@ -3,9 +3,9 @@
 // `-FlareSample showcase` (550 × 400, 24 fps, 48 frames, scene `scene-1`)
 // with `-FlareExportTo` on this test's own temp folder, so Export writes with
 // no panel. The toolbar's Export… opens SuiteUI's export sheet under Flare's
-// flare.export.* ids with the scan's three warnings; Export writes scene-1.svg
+// flare.export.* ids with the scan's two SVG warnings; Export writes scene-1.svg
 // (an `<svg>` root 550 by 400) and offers Reveal in Finder; File > Export…
-// and the Lottie chip add the background warning and write scene-1.json
+// and the Lottie chip add the text and background warnings and write scene-1.json
 // (`fr` 24, `w` 550, `h` 400, `op` 48); the PNG sequence with To 12 and Step 2
 // reads "7 files" and writes frame_0000.png … frame_0012.png, each 550 wide
 // in its IHDR (StageRasterizer's pixels, not the fakes' 1 × 1). One shot per
@@ -58,7 +58,7 @@ final class FlareExportJourneys: XCTestCase {
         let lottie = flare.element("flare.export.format.lottie")
         XCTAssert(lottie.waitForExistence(timeout: 5), "the sheet has no Lottie chip (flare.export.format.lottie)")
         lottie.click()
-        for warning in Self.warnings + ["Background color isn't part of Lottie."] { expectLine(warning, flare) }
+        for warning in Self.warnings + [Self.text, "Background color isn't part of Lottie."] { expectLine(warning, flare) }
         flare.shot("export-3-lottie")
 
         // 4. Export: scene-1.json with fr 24, w 550, h 400, op 48.
@@ -108,11 +108,12 @@ final class FlareExportJourneys: XCTestCase {
         close(flare)
     }
 
-    /// The scan's warnings on showcase in every format.
+    /// The scan's warnings on showcase as an SVG frame, which writes its text.
     private static let warnings = [
-        "Text isn't exported yet (1 layer).", "Symbol animation exports as its first frame (1 instance).",
-        "Interactions aren't exported (1 machine).",
+        "Symbol animation exports as its first frame (1 instance).", "Interactions aren't exported (1 machine).",
     ]
+    /// Lottie can't hold text, so its sheet names the Title layer too.
+    private static let text = "Text isn't exported yet (1 layer)."
 
     // MARK: - Helpers
 

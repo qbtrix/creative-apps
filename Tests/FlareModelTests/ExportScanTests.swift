@@ -32,21 +32,23 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     var w = FlareWorkspace(services: .fake()); w.load(document); return w
 }
 
-@Test func aTextLayerIsNamedAndCountedInEveryFormat() {
+@Test func aTextLayerIsNamedAndCountedWhereTheFormatDropsIt() {
     var document = FlareFixtures.bounce
     let title = TextShape(string: "Hi", fontFamily: "System", fontSize: 24, position: Point(x: 10, y: 10))
     document.scenes[0].layers.append(Layer(id: "title", name: "Title", texts: [title]))
-    #expect(ExportScan.warnings(document, options: options(.svgFrame)) == [text])
+    #expect(ExportScan.warnings(document, options: options(.svgFrame)).isEmpty)
     #expect(ExportScan.warnings(document, options: options(.pngSequence)) == [text])
+    #expect(ExportScan.warnings(document, options: options(.lottie, transparent: true)) == [text])
     document.scenes[0].layers[0].texts = [title, title]
-    #expect(ExportScan.warnings(document, options: options(.svgFrame)) == ["Text isn't exported yet (2 layers)."])
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Text isn't exported yet (2 layers)."])
+    #expect(ExportScan.textLayers(in: document, sceneID: "scene-1") == 2)
 }
 
 @Test func anAnimatedSymbolInstanceIsNamedButAStillOneIsNot() {
-    #expect(ExportScan.warnings(FlareFixtures.character, options: options(.svgFrame)) == [symbol])
+    #expect(ExportScan.warnings(FlareFixtures.character, options: options(.lottie, transparent: true)) == [symbol])
     var held = FlareFixtures.character
     held.scenes[0].layers[2].instances[0].loop = .singleFrame
-    #expect(ExportScan.warnings(held, options: options(.svgFrame)).isEmpty)
+    #expect(ExportScan.warnings(held, options: options(.lottie, transparent: true)).isEmpty)
 }
 
 @Test func aMachineIsNamed() {
@@ -66,7 +68,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     try FlareFormat.validate(showcase)
     #expect(showcase.scenes[0].layers.map(\.name) == ["Background", "Shadow", "Ball", "Spinner", "Title"])
     #expect(showcase.symbols.map(\.name) == ["Spin"] && showcase.stateMachines.count == 1)
-    #expect(ExportScan.warnings(showcase, options: options(.svgFrame)) == [text, symbol, machine])
+    #expect(ExportScan.warnings(showcase, options: options(.svgFrame)) == [machine])
     #expect(ExportScan.warnings(showcase, options: options(.lottie)) == [text, symbol, machine, background])
 }
 
@@ -126,7 +128,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     let o = try #require(w.exportingOptions)
     #expect(o == options(.svgFrame, 0...47))
     let result = try await run(document, o)
-    #expect(result.warnings == [text, symbol, machine])
+    #expect(result.warnings == [machine])
     w.endExport(.success(result.files.map(\.name)))
     #expect(w.exportState == .finished(o, ["scene-1.svg"]))
     w.dismissExport()
@@ -178,13 +180,13 @@ private func workspace(_ document: Document) -> FlareWorkspace {
 }
 
 /// The PNG frames draw the stage's picture, which has no masks or mattes yet; SVG and Lottie write them.
-@Test func aMaskOrMatteIsNamedForPNGOnly() {
+@Test func aMaskOrMatteNeedsNoWarningSincePNGDrawsThem() {
     var document = FlareFixtures.bounce
     let square = [Point(x: 0, y: 0), Point(x: 10, y: 0), Point(x: 10, y: 10)]
     document.scenes[0].layers[0].masks = [LayerMask(path: FlarePath(polyline: square, closed: true))]
-    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Masks and mattes aren't drawn in PNG yet (1 layer)."])
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)).isEmpty)
     #expect(ExportScan.warnings(document, options: options(.svgFrame)).isEmpty)
     #expect(ExportScan.warnings(document, options: options(.lottie, transparent: true)).isEmpty)
     document.scenes[0].layers.append(Layer(id: "m", name: "M", matte: TrackMatte(sourceLayerID: document.scenes[0].layers[0].id)))
-    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Masks and mattes aren't drawn in PNG yet (2 layers)."])
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)).isEmpty)
 }
