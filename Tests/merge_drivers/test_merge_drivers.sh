@@ -9,7 +9,10 @@
 # back to git's line merge; a rebase uses the driver too; with the attribute
 # but no driver installed git merges by lines, so the attribute is inert for
 # anyone who never ran the installer; the installer sets rebase.updateRefs and
-# defines every driver .gitattributes names. Hermetic: HOME and git config
+# defines every driver .gitattributes names; two branches that each add a
+# different command line to a CLI golden (Tests/AfterGlowCLITests/Golden/apps,
+# one command per line) merge with no conflict, with and without the driver.
+# Hermetic: HOME and git config
 # point into the temp dir. No network; needs bash, git, jq.
 #
 # Run: bash Tests/merge_drivers/test_merge_drivers.sh   (exit 0 = all pass)
@@ -102,5 +105,24 @@ for drv in $(grep -oE 'merge=[A-Za-z0-9_-]+' "$root/.gitattributes" | cut -d= -f
 done
 [[ "$(git -C "$d" config --get merge.json.driver)" == "'$(cd "$root/scripts" && pwd)/merge-json"* ]] && ok "driver path is absolute" || bad "driver path: $(git -C "$d" config --get merge.json.driver)"
 bash "$root/scripts/install-merge-drivers" "$d" >/dev/null && [[ "$(git -C "$d" config --get-all merge.json.driver | wc -l | tr -d ' ')" == 1 ]] && ok "installer is idempotent" || bad "installer not idempotent"
+
+# 12. a CLI golden is one command per line, so two PRs adding different commands merge
+golden="$root/Tests/AfterGlowCLITests/Golden/apps/photo.list-commands.json"
+n=$(wc -l <"$golden" | tr -d ' ')
+cmd() { printf '{"id":"%s","kind":"edit","summary":"S.","title":"T","undoable":true},' "$1"; }
+for mode in --no-install ""; do
+  d="$tmp/golden${mode:+-plain}"; repo "$d" $mode
+  cp "$golden" "$d/g.json"; git -C "$d" add -A; git -C "$d" commit -qm base
+  git -C "$d" switch -qc theirs; sed -i.bak "10a\\
+$(cmd zz.theirs)
+" "$d/g.json"; rm "$d/g.json.bak"; git -C "$d" commit -qam theirs
+  git -C "$d" switch -qc ours main; sed -i.bak "60a\\
+$(cmd zz.ours)
+" "$d/g.json"; rm "$d/g.json.bak"; git -C "$d" commit -qam ours
+  label="golden: two added commands merge${mode:+ (no driver)}"
+  if [[ "$(merge "$d")" == 0 && -z "$(unmerged "$d")" && "$(wc -l <"$d/g.json" | tr -d ' ')" == $((n + 2)) ]] \
+    && jq -e '[.commands[].id] | index("zz.ours") and index("zz.theirs")' "$d/g.json" >/dev/null; then ok "$label"
+  else bad "$label: $(git -C "$d" diff --name-only --diff-filter=U) $(head -c 300 "$d/g.json")"; fi
+done
 
 (( fail == 0 )) && echo "merge drivers: PASS" || { echo "merge drivers: FAIL"; exit 1; }
