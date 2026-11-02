@@ -2,13 +2,14 @@
 // ruler (TimelineRuler) is pinned along the top, outside both scroll views and
 // shifted by the sideways scroll; under it a vertical scroll view holds the
 // track names (a fixed left column) and, to their right, a horizontal scroll
-// view of one lane per track (TimelineLaneRow: the lane and its input). Both
-// stacks are lazy, but the lanes' sits in a horizontal scroll view, which
-// builds every row, so the strip builds only the lanes in the vertical scroll's
-// view plus a few (TimelineStripLayout.lanesBuilt, #6183). Each stack sits behind one
-// `.equatable()` (TimelineNameRows, TimelineLaneRows) over the tracks and the
-// mapping, and a row compares only its track and mapping; the playhead and the
-// closures a press needs sit in one unobserved TimelineLaneContext the body
+// view of one lane per track (TimelineLaneRow: the lane and its input). The
+// names stack is lazy; the lanes stack, laid out at every lane's height inside
+// the sideways scroll, builds only the rows the vertical scroll shows
+// (`lanesShown`), with clear space for the rest, so a long track list costs the
+// rows in view. Each stack sits behind one `.equatable()` (TimelineNameRows,
+// TimelineLaneRows) over the tracks and the mapping (and, for the lanes, the
+// rows shown), and a row compares only its track and mapping; the playhead and
+// the closures a press needs sit in one unobserved TimelineLaneContext the body
 // rewrites. So a frame change runs the playhead layer and never re-evaluates a
 // ForEach or a lane, even when layout runs ahead of SwiftUI's flush under load
 // (#5804). The strip's ideal height is the
@@ -79,6 +80,10 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     @State private var visibleX: ClosedRange<Double>?
     /// The lanes' visible y range; nil until the vertical scroll view first reports.
     @State private var visibleY: ClosedRange<Double>?
+    /// The lane rows that range shows with half a row of margin (TimelineStripLayout.lanesShown), set only when it
+    /// changes: the visible rect jitters by fractions of a point while the strip animates in, and a body that read
+    /// `visibleY` ran once per jitter.
+    @State private var visibleRows: Range<Int>?
     /// The zoom over the host's frameWidth; 1 is fit.
     @State private var zoom: Double = 1
     /// A pinch under way: the zoom it began at and the view x it anchors.
@@ -172,8 +177,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                     Divider()
                     GeometryReader { proxy in
                         lanes(width: layout.lanesWidth(
-                            contentWidth: mapping.contentWidth, offered: proxy.size.width, snapshot: true),
-                              rows: 0..<tracks.count)
+                            contentWidth: mapping.contentWidth, offered: proxy.size.width, snapshot: true))
                     }
                     .clipped()
                 }
@@ -185,8 +189,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                         names
                         Divider()
                         ScrollView(.horizontal) {
-                            lanes(width: layout.lanesWidth(contentWidth: mapping.contentWidth, offered: 0, snapshot: false),
-                                  rows: layout.lanesBuilt(visibleY: visibleY))
+                            lanes(width: layout.lanesWidth(contentWidth: mapping.contentWidth, offered: 0, snapshot: false))
                         }
                         .scrollIndicators(.never)
                         .onScrollGeometryChange(for: ClosedRange<Double>.self) { geometry in
@@ -214,6 +217,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                     return Double(rect.minY)...max(Double(rect.minY), Double(rect.maxY))
                 } action: { _, visible in
                     visibleY = visible
+                    let rows = TimelineStripLayout.lanesShown(visibleY: visible)
+                    if rows != visibleRows { visibleRows = rows }
                 }
             }
         }
@@ -336,17 +341,27 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             .frame(width: SuiteSize.timelineLabelColumn)
     }
 
-    private func lanes(width: CGFloat, rows: Range<Int>) -> some View {
-        TimelineLaneRows(tracks: tracks, mapping: mapping, context: laneContext, width: width, rows: rows).equatable()
+    /// The lanes the stack builds: the rows the vertical scroll shows (`visibleRows`), or every row before it
+    /// reports and in a snapshot. The lanes' horizontal scroll view is laid out at every lane's height, so inside
+    /// it the lazy stack alone built every lane (500 tracks cost a host ~90 ms a body); the names column, a direct
+    /// child of the vertical scroll, is lazy on its own.
+    private var lanesShown: Range<Int> {
+        let all = 0..<tracks.count
+        guard !snapshot, let visibleRows else { return all }
+        return visibleRows.clamped(to: all)
+    }
+
+    private func lanes(width: CGFloat) -> some View {
+        TimelineLaneRows(tracks: tracks, shown: lanesShown, mapping: mapping, context: laneContext, width: width)
+            .equatable()
             // Only the lanes' access modifiers read it, so a scroll re-runs those, never a lane's Canvas.
             .environment(\.timelineVisibleX, snapshot ? nil : visibleX)
             .simultaneousGesture(pinchGesture, isEnabled: !snapshot)
     }
 }
 
-/// The lane rows `rows` builds (TimelineStripLayout.lanesBuilt), each at its
-/// track's height, behind one `.equatable()`: Equatable over the tracks, the
-/// mapping, the width and the rows, so a frame change never re-evaluates the
+/// The lane rows, one per shown track, behind one `.equatable()`: Equatable over
+/// the tracks, the rows shown, the mapping and the width, so a frame change never re-evaluates the
 /// ForEach. A re-evaluated ForEach is not free even when every row compares
 /// equal: when the hosting view lays out before SwiftUI's own flush (a frame
 /// tick right before AppKit's layout, which a loaded Mac makes common), the
@@ -354,11 +369,11 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
 /// skips the row's `==` and runs every lane and lane input (#5804).
 struct TimelineLaneRows<ID: Hashable & Sendable>: View, Equatable {
     let tracks: [TimelineTrack<ID>]
+    /// The rows built (TimelineStrip.lanesShown); clear space stands in for the rest.
+    let shown: Range<Int>
     let mapping: FrameMapping
     let context: TimelineLaneContext<ID>
     let width: CGFloat
-    /// The rows built; the rest are empty room at their lanes' height (#6183).
-    let rows: Range<Int>
     #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
     #endif
@@ -367,19 +382,25 @@ struct TimelineLaneRows<ID: Hashable & Sendable>: View, Equatable {
         #if DEBUG
         bodyTally.ran(TimelineLaneRowsBodies.self)
         #endif
-        let built = rows.clamped(to: tracks.indices)
         return LazyVStack(alignment: .leading, spacing: 0) {
-            ForEach(tracks[built]) { track in
+            // Clear space for the rows scrolled above and below, so the content keeps every lane's height. Only
+            // when there are such rows: a zero-height row in the lazy stack made the vertical scroll's visible rect
+            // jitter by fractions of a point while the strip slid in, and each report ran this body again.
+            if shown.lowerBound > 0 { Color.clear.frame(height: SuiteSize.timelineLane * CGFloat(shown.lowerBound)) }
+            ForEach(tracks[shown]) { track in
                 TimelineLaneRow(track: track, mapping: mapping, context: context).equatable()
             }
+            if shown.upperBound < tracks.count {
+                Color.clear.frame(height: SuiteSize.timelineLane * CGFloat(tracks.count - shown.upperBound))
+            }
         }
-        .padding(.top, SuiteSize.timelineLane * CGFloat(built.lowerBound))
-        .frame(width: width, height: SuiteSize.timelineLane * CGFloat(tracks.count), alignment: .topLeading)
+        .frame(width: width, alignment: .leading)
     }
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.tracks == rhs.tracks && lhs.mapping == rhs.mapping && lhs.context === rhs.context && lhs.width == rhs.width
-            && lhs.rows == rhs.rows
+        // `shown` must compare: without it a scroll skips the body and every row past the first screen stays blank.
+        lhs.tracks == rhs.tracks && lhs.shown == rhs.shown && lhs.mapping == rhs.mapping && lhs.context === rhs.context
+            && lhs.width == rhs.width
     }
 }
 
@@ -516,19 +537,14 @@ struct TimelineStripLayout: Equatable, Sendable {
         return first..<max(first, end)
     }
 
-    /// Lanes built past each edge of the view, so a scroll shows built rows before the next report.
-    static let overscan = 4
-    /// Lanes built before the vertical scroll view first reports what it shows.
-    static let firstLanes = 16
-
-    /// The lane rows the strip builds (#6183): those in the lanes' visible y, `overscan` more either side;
-    /// before the first report (nil), the first `firstLanes`. A scroll past the end keeps the last rows.
-    func lanesBuilt(visibleY: ClosedRange<Double>?) -> Range<Int> {
-        guard let visibleY else { return 0..<min(trackCount, Self.firstLanes) }
-        let shown = TimelinePlayhead.rows(showing: visibleY, count: trackCount)
-        let end = min(shown.upperBound + Self.overscan, trackCount)
-        let first = max(min(shown.lowerBound, end - 1) - Self.overscan, 0)
-        return first..<max(first, end)
+    /// The lane rows a lanes' visible y range shows, with half a row of margin each side so a viewport edge that
+    /// sits on a row boundary doesn't flip the range as the rect jitters; not clamped to a count (the strip clamps
+    /// to its tracks, which can grow after the range was reported).
+    static func lanesShown(visibleY: ClosedRange<Double>) -> Range<Int> {
+        let lane = Double(SuiteSize.timelineLane)
+        let first = max(Int((visibleY.lowerBound / lane - 0.5).rounded(.down)), 0)
+        let end = max(Int((visibleY.upperBound / lane + 0.5).rounded(.up)), first)
+        return first..<end
     }
 
     /// The lanes' width: every frame plus trailing room, or in a snapshot the

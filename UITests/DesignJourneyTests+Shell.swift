@@ -59,7 +59,7 @@ final class DesignShellJourneyTests: XCTestCase {
         XCTAssert(texts.contains { Self.isZoom($0) }, "the status line shows no zoom (its texts: \(texts.filter { !$0.isEmpty }))")
         let size = status.staticTexts.matching(NSPredicate(format: "label CONTAINS ' × ' OR value CONTAINS ' × '")).firstMatch
         XCTAssert(size.exists, "the status line shows no page size")
-        XCTAssertEqual(text(design.element("design.status.tool")), "Move", "the status line's tool")
+        XCTAssertEqual(text(design.element("design.status.tool")), "Select", "the status line's tool")
 
         // DS-J3: a selected rectangle on the page's left edge, at Fit Page.
         drawOnEdge(design, shot: "shell-handles")
@@ -101,7 +101,7 @@ final class DesignShellJourneyTests: XCTestCase {
         let tools = design.element("suite.tools").buttons
         XCTAssert(tools.firstMatch.waitForExistence(timeout: 5), "no floating palette (suite.tools)")
         let titles = (0..<tools.count).map { tools.element(boundBy: $0).label }
-        XCTAssertEqual(titles, ["Move", "Frame", "Rectangle", "Ellipse", "Shape", "Text", "Pen", "Eyedropper"], "the palette's tools")
+        XCTAssertEqual(titles, ["Select", "Frame", "Rectangle", "Ellipse", "Shape", "Text", "Pen", "Eyedropper"], "the palette's tools")
         let palette = design.element("suite.tools").frame, viewport = design.element("suite.viewport").frame
         XCTAssertLessThan(palette.minX - viewport.minX, viewport.width / 4, "the palette isn't at the canvas's leading edge")
         design.shot(shot)

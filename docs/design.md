@@ -558,7 +558,8 @@ SwiftUI in SuiteUI. Photo and Design use it.
 | Canvas | `CanvasViewport`, `SelectionOutline`, `CropShade` | Rulers in document pixels along the top and left, a checkerboard behind the image, centered while it fits, scrolling with a 32 pt margin once it doesn't. Drags arrive in document pixels. With the canvas focused, a drag that starts with Space held pans it (grab pointer) instead of reaching the tool, and an arrow key the app doesn't use pans a tenth of the view (Shift: a whole view), never past the scrollable area. The image is clipped to the artboard; selection marks and handles in the overlay are not, so they show past its edge. |
 | Right panel | `SegmentedTabs`, then `InspectorSection`s | 280 pt, the tabs (Adjust, Layers) on top. A section's Reset icon shows only while the section differs from its defaults. A color is `InspectorColorRow`: the swatch plus its hex code, opening the system color panel. |
 | Status line | `ViewerStatusBar` | Status pills: zoom, document size, and the trailing slot for the render time. |
-| Timeline (optional) | `EditorShell(timeline:)`, `TimelineStrip`, `TransportCapsule` | A resizable, collapsible bottom slot. |
+| Timeline (optional) | `EditorDetail(timeline:)`, `TimelineStrip`, `TransportCapsule` | A collapsible bottom slot between the canvas and the status line; the canvas fits in what is left. Design's (`DesignTimeline`) slides in from the bottom on the document's first key (no slide under Reduce Motion), one lane per keyed layer, at most five lanes tall before they scroll; a still document shows none. The transport and a Hide/Show button sit on its header row, and collapsed stays collapsed (per window). A ruler drag shows its frame on the canvas at once and lands it as the playhead once the drag rests. |
+| Key button | `KeyframeButton` | Beside Design's X, Y and Opacity rows for one selected layer. The stopwatch animates the row from the playhead to the last frame (the first key slides the timeline in) or leaves one held key; the diamond sets or removes the key at the playhead. Animate > Set Key and Remove Key (⌥⌘K, ⌥⇧⌘K) key every row at once; Play/Pause (⌥⌘P) and Stop (⌥⌘.) say "Set a key first." on a still document. |
 
 - **Dark in both appearances, on purpose.** The shell sets the dark scheme on
   its window, like the Studio editor, so the image is the brightest thing on
@@ -697,6 +698,8 @@ the feature that builds each one.
   Undo, Redo, Copy, Paste, Select All, Find, Settings, Close, Quit). Add custom
   shortcuts only for the most frequent app commands.
 - Export lives at File > Export, opening a sheet on the document window.
+  In Design, a document with keys adds a Frame field to the sheet: the files
+  show that moment. A still document never shows it.
 
 ## Color, type, spacing
 

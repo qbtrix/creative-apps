@@ -105,9 +105,9 @@ private func sample() throws -> DesignWorkspace {
 @Test func aNewerVersionReportsItsVersion() throws {
     var workspace = openDesign()
     let before = workspace
-    // A version 2 file whose pages have a shape this version doesn't know.
-    #expect(throws: DesignFileError.unsupportedVersion(2)) {
-        try workspace.open(bytes("{\"version\":2,\"pages\":{\"future\":true}}"))
+    // A version 3 file whose pages have a shape this version doesn't know.
+    #expect(throws: DesignFileError.unsupportedVersion(3)) {
+        try workspace.open(bytes("{\"version\":3,\"pages\":{\"future\":true}}"))
     }
     #expect(throws: DesignFileError.unsupportedVersion(0)) { try workspace.open(bytes("{\"version\":0,\"pages\":[]}")) }
     #expect(workspace == before)
