@@ -64,6 +64,25 @@ import Testing
         #expect(layout.rowsBuilt(offered: 10, scrollY: 0).isEmpty, "the toolbar and ruler take all 10 pt")
     }
 
+    /// #6183: the lanes sit in a horizontal ScrollView, so their LazyVStack builds every row; the strip builds
+    /// only the rows in the vertical scroll's view, plus a few either side, instead.
+    @Test func onlyTheLanesInViewAreBuilt() {
+        let layout = TimelineStripLayout(trackCount: 50, toolbar: false)
+        // 8 lanes in view (256 pt), scrolled 640 pt down: lanes 20 to 27, with the overscan either side.
+        let rows = layout.lanesBuilt(visibleY: 640...896)
+        #expect(rows == (20 - TimelineStripLayout.overscan)..<(28 + TimelineStripLayout.overscan))
+        #expect(layout.lanesBuilt(visibleY: 0...256) == 0..<(8 + TimelineStripLayout.overscan))
+        #expect(layout.lanesBuilt(visibleY: 1_500...1_756).upperBound == 50)
+        #expect(layout.lanesBuilt(visibleY: 99_000...99_256).isEmpty == false, "past the end keeps the last rows")
+    }
+
+    @Test func beforeTheFirstScrollReportTheFirstLanesAreBuilt() {
+        #expect(TimelineStripLayout(trackCount: 50, toolbar: false).lanesBuilt(visibleY: nil)
+            == 0..<TimelineStripLayout.firstLanes)
+        #expect(TimelineStripLayout(trackCount: 3, toolbar: false).lanesBuilt(visibleY: nil) == 0..<3)
+        #expect(TimelineStripLayout(trackCount: 0, toolbar: false).lanesBuilt(visibleY: 0...300).isEmpty)
+    }
+
     @Test func theSnapshotBranchOffersTheLanesTheStripsWidth() {
         let layout = TimelineStripLayout(trackCount: 3, toolbar: false)
         // #219: a 20,000-frame timeline at 2 pt per frame is 40,000 pt of lanes.
