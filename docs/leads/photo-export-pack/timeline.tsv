@@ -586,3 +586,4 @@ utc	stage	event	ref	note
 2026-11-02T07:38Z	check-in	quiet; dev-red #6186 still open (macos real, not ours); #5353 open clean a92b4651; no merges, no new findings; 52 photo findings
 2026-11-02T08:18Z	check-in	dev-red #6186 open; newer run at 69538d3 fails only RenderBudgetDesignAnimate (Photo gesture test now passes), lane rerunning; not ours; #5353 open clean a92b4651; no merges, no new findings; 52 photo findings
 2026-11-02T08:50Z	check-in	captain merged #6188 (text inspector chip ids, Quality-Proof on #5951), #6196 (Design playback timing to nightly), #6195; dev-red #6186 still open (rerun at 69538d3 real; #6196 should clear it); #5353 open clean a92b4651; no new findings; 52 photo findings
+2026-11-02T09:22Z	check-in	quiet; dev-red #6186 still open (not ours); #5353 open clean a92b4651; no merges, no new findings; 52 photo findings
