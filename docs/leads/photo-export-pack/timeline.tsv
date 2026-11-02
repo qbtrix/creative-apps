@@ -589,3 +589,4 @@ utc	stage	event	ref	note
 2026-11-02T09:22Z	check-in	quiet; dev-red #6186 still open (not ours); #5353 open clean a92b4651; no merges, no new findings; 52 photo findings
 2026-11-02T09:54Z	check-in	#5951 reaudit fail at d05d3c44 (box 4: 8K typing/Size scrub real-time sample missing); captain adding the drive in #6197, no finding filed, not ours; dev-red #6186 still open; #5353 open clean a92b4651; no merges; 52 photo findings
 2026-11-02T10:25Z	check-in	dev green at f10dccf2, #6186 closed 10:04Z, main promoted; #5348 #6025 merged; new #6206 quality gate transform (Photo, needs-mac-finish) not export/text, skipped; #5353 open clean a92b4651; 53 photo findings
+2026-11-02T10:58Z	check-in	new dev-red #6208 (linux, rerun real; triage blames library #6025, not ours); captain merged #6207 (photo Free Transform); #5353 open clean a92b4651; no new findings; 53 photo findings
