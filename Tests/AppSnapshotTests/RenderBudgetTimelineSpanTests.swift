@@ -107,7 +107,7 @@ extension BodyCountSuites {
         let view = TimelineLanesView(frame: NSRect(x: 0, y: 0, width: 1_800, height: SuiteSize.timelineLane))
         let pointer = TimelineLanePointer<String>()
         pointer.configure(
-            track: Self.track, mapping: Self.mapping, playhead: 0, actions: log.actions,
+            track: Self.track, mapping: Self.mapping, context: TimelineLaneContext(playhead: 0, actions: log.actions),
             extras: TimelineLanePointerExtras(focus: nil, pill: .constant(nil), mark: nil))
         view.pointer = pointer
         view.update([TimelineLaneDrawing(Self.track, mapping: Self.mapping)])

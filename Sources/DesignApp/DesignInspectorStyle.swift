@@ -75,7 +75,7 @@ struct DesignFrameScrub: View {
     }
 }
 
-/// The Layer section's Opacity bar, in percent: "Mixed" when the selected layers differ.
+/// The Layer section's Opacity bar, in percent ("Mixed" when the selected layers differ), with one layer's key button.
 struct DesignOpacityRow: View, BodyCounted {
     let model: DesignWorkspace
     let perform: DesignPerform
@@ -89,25 +89,35 @@ struct DesignOpacityRow: View, BodyCounted {
         let _ = bodyTally.ran(Self.self)
         #endif
         let send = DesignStyleSend(model: model, live: live, perform: perform)
-        let opacity = (live?.scrubbed ?? model).sharedValue(\.opacity)
+        let shown = live?.scrubbed ?? model
+        let opacity = shown.sharedValue { shown.shown($0).opacity }
         let help = model.styleHelp(.opacity)
-        InspectorSliderRow(
-            "Opacity", value: (opacity ?? 1) * 100, in: 0...100, step: 1, unit: "%", decimals: 0, mixed: opacity == nil,
-            onChange: { send.preview(.opacity($0 / 100)) }, onEnd: send.end
-        )
-        .disabled(help != nil)
-        .help(help ?? "")
-        .suiteControl(id: DesignControlID.inspectorOpacity, enabled: help == nil, reason: help)
+        HStack(spacing: SuiteSpacing.xs) {
+            InspectorSliderRow(
+                "Opacity", value: (opacity ?? 1) * 100, in: 0...100, step: 1, unit: "%", decimals: 0, mixed: opacity == nil,
+                onChange: { send.preview(.opacity($0 / 100)) }, onEnd: send.end
+            )
+            .disabled(help != nil)
+            .help(help ?? "")
+            .suiteControl(id: DesignControlID.inspectorOpacity, enabled: help == nil, reason: help)
+            if !model.hasMultipleSelection { DesignKeyControl(model: model, property: .opacity, help: help, perform: perform) }
+        }
     }
 }
 
 /// The Corners section over the selection: the Radius bar, off with its reason on a kind with no corners.
-struct DesignCornersSection: View {
+struct DesignCornersSection: View, BodyCounted {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
 
     var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
         let send = DesignStyleSend(model: model, live: live, perform: perform)
         let shown = live?.scrubbed ?? model
         let radiusHelp = model.styleHelp(.cornerRadius)
@@ -126,10 +136,13 @@ struct DesignCornersSection: View {
 }
 
 /// The Stroke section over the selection, after Fill: paint reads fill, then stroke (#3871).
-struct DesignInspectorStyle: View {
+struct DesignInspectorStyle: View, BodyCounted {
     let model: DesignWorkspace
     let perform: DesignPerform
     @Environment(\.designLiveDrag) private var live
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
     /// A stroke scrub's run is open: its samples preview until it lands.
     @State private var strokeRun = false
     /// A mouse button is down in the stroke editor, so a resting scrub is still one gesture.
@@ -139,6 +152,9 @@ struct DesignInspectorStyle: View {
     private static let settleDelay = Duration.milliseconds(400)
 
     var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
         InspectorSection("Stroke") {
             strokeRows(live?.scrubbed ?? model, send: DesignStyleSend(model: model, live: live, perform: perform))
         }

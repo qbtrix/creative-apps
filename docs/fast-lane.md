@@ -388,13 +388,20 @@ token), the head branch is QUAR_BRANCH, the PR carries QUAR_LABEL
 (quarantine_sweep's filter), and `gh api pulls/<n>/files` lists exactly
 UITests/quarantine.json. A PR that changes anything else gets one comment and
 is never landed, whatever its labels. Like a revert, it lands on its own
-Linux-only check (dispatched once, its comment the record), with no prescreen,
-batch or macOS run, while the dev-red issue holds batches; a merge GitHub
+Linux check (dispatched once, its comment the record), with no prescreen or
+batch, while the dev-red issue holds batches; a merge GitHub
 refuses as conflicting is cherry-picked onto today's BASE_BRANCH
 (rebuild_lane_pr) and checked again. The landing dispatches CI on BASE_BRANCH
-(UITests/ is a UI_RE path). A red check on a removal means the fix didn't
-hold: the owners are reopened with a comment, the PR is closed and the
-entries stay; a red check on an add waits for a human.
+(UITests/ is a UI_RE path). A removal also waits for a macOS pass of the
+test (#6138): every quarantined test is macOS-only (AppKit snapshot suites,
+XCUITest bundles), so the Linux check never runs it. mac_verdict reads the
+`macOS` gate job and the `local-ci/macos` status, as a batch's gate does;
+with neither, the lane dispatches one full `mac_only` run (no `app`, so a
+snapshot suite no app claims still runs), once per head with its comment the
+record, and the merge comment names both checks. A red check on a removal,
+Linux or macOS, means the fix didn't hold: the owners are reopened with a
+comment naming the check, the PR is closed and the entries stay; a red check
+on an add waits for a human.
 
 `scripts/quarantine release` is the release gate: it fails while any lane
 entry is in the file, naming each test, owner and `until`. There is no

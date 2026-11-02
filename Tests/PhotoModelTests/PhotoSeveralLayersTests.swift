@@ -17,6 +17,18 @@ private func onePlusThree() throws -> (PhotoWorkspace, one: PhotoLayer.ID, two: 
     return (workspace, one, two, three)
 }
 
+/// `onePlusThree` with a dot painted on Layer 1 at (2, 2), so a Select press there lands on a picked layer and
+/// moves the picks.
+private func onePlusThreeDotted() throws -> (PhotoWorkspace, one: PhotoLayer.ID, two: PhotoLayer.ID, three: PhotoLayer.ID) {
+    var (workspace, one, two, three) = try onePlusThree()
+    workspace.selectedLayerID = one
+    workspace.selectTool(.brush)
+    workspace.drag(from: point(2, 2), to: point(2, 2))
+    workspace.endDrag()
+    workspace.layerSelection.replace([one, three])
+    return (workspace, one, two, three)
+}
+
 private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLayer? {
     workspace.layers.first { $0.id == id }
 }
@@ -115,8 +127,8 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
     }
 
     @Test func moveMovesEvery() throws {
-        var (workspace, one, two, three) = try onePlusThree()
-        stroke(&workspace, .move, from: point(2, 2), to: point(5, 3))
+        var (workspace, one, two, three) = try onePlusThreeDotted()
+        stroke(&workspace, .select, from: point(2, 2), to: point(5, 3))
         #expect(layer(workspace, one)?.offsetX == 3 && layer(workspace, one)?.offsetY == 1)
         #expect(layer(workspace, three)?.offsetX == 3 && layer(workspace, three)?.offsetY == 1)
         #expect(layer(workspace, two)?.offsetX == 0)
@@ -129,9 +141,9 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
     }
 
     @Test func moveOneStep() throws {
-        var (workspace, one, _, three) = try onePlusThree()
+        var (workspace, one, _, three) = try onePlusThreeDotted()
         let (before, undoName) = (workspace.layers, workspace.undoActionName)
-        workspace.selectTool(.move)
+        workspace.selectTool(.select)
         for x in [2.0, 3, 4, 6] { workspace.drag(from: point(2, 2), to: point(x, 2)) }
         workspace.endDrag()
         #expect(layer(workspace, one)?.offsetX == 4 && layer(workspace, three)?.offsetX == 4)
@@ -142,9 +154,9 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
     }
 
     @Test func oneLayerMovesAsBefore() throws {
-        var (workspace, one, _, three) = try onePlusThree()
+        var (workspace, one, _, three) = try onePlusThreeDotted()
         workspace.selectedLayerID = one
-        stroke(&workspace, .move, from: point(2, 2), to: point(4, 2))
+        stroke(&workspace, .select, from: point(2, 2), to: point(4, 2))
         #expect(layer(workspace, one)?.offsetX == 2 && layer(workspace, three)?.offsetX == 0)
         #expect(workspace.undoActionName == "Undo Move Layer")
     }
@@ -179,7 +191,7 @@ private func layer(_ workspace: PhotoWorkspace, _ id: PhotoLayer.ID) -> PhotoLay
         for _ in 0..<99 { workspace.addLayer() }
         workspace.selectAllLayers()
         let clock = ContinuousClock(), started = clock.now
-        stroke(&workspace, .move, from: point(0, 0), to: point(5, 5))
+        stroke(&workspace, .select, from: point(0, 0), to: point(5, 5))
         #expect(clock.now - started <= .milliseconds(8))
         #expect(workspace.layers.allSatisfy { $0.offsetX == 5 })
     }

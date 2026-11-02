@@ -2,7 +2,7 @@
 // and OJ2 `testFocusOrdersStarters` (onboarding packet, Journey steps; OB-6),
 // and XJ-SS `testOpenEverySample` (sample-files packet, SS-7): each app's
 // Open sample opens its sample (shot `onboarding-sample-<app>`, audited once
-// the app has Switch To), a sample not in the bundle is disabled with its
+// the app has Switch To; Library's grid shows Sunset.png's cell), a sample not in the bundle is disabled with its
 // reason, and RECENT lists the opened samples (shot `onboarding-samples-home`).
 // Both launch AfterGlow on `firstLaunch` without `-SuiteSkipOnboarding`, so
 // the "Welcome to AfterGlow" window presents itself over the home. Every
@@ -78,7 +78,8 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
         launcher.shot("onboarding-focus")
 
         // 2. Photos, then Continue.
-        launcher.click("Photos", in: .window)
+        // By identifier: the chip reads "Photos: Library, Photo" since #3021.
+        Self.chip(.photos, in: welcome).click()
         XCTAssert(Self.waitFor { Self.chip(.photos, in: welcome).isSelected }, "the Photos chip isn't selected after a click")
         launcher.click("Continue", in: .window)
 
@@ -172,6 +173,12 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
                 : opened.app.windows.matching(NSPredicate(format: "title BEGINSWITH %@", stem)).firstMatch
             if adopted {
                 XCTAssert(window.waitForExistence(timeout: 10), "\(app.displayName)'s window isn't \(stem)")
+                if app == .library {
+                    // The import landed: the grid has the sample's cell, not "No Photos" (#5947).
+                    let cell = window.descendants(matching: .any).matching(NSPredicate(
+                        format: "identifier BEGINSWITH 'library.grid.cell.' AND identifier ENDSWITH %@", "/" + file)).firstMatch
+                    XCTAssert(cell.waitForExistence(timeout: 15), "Library's catalog has no \(file) after Open sample")
+                }
                 listed.append(file)
             }
             opened.shot("onboarding-sample-" + app.rawValue, element: adopted ? window : opened.app.windows.firstMatch, audit: adopted)
@@ -186,7 +193,8 @@ final class AfterGlowOnboardingJourneys: XCTestCase {
                       "RECENT reads \(AfterGlowJourneyTests.cardNames(launcher)), without \(file)")
         }
         launcher.shot("onboarding-samples-home")
-        if !missing.isEmpty { throw XCTSkip("waits on #4113: \(missing.joined(separator: ", ")) isn't in Bundle/Samples") }
+        // Every sample ships (beach.ora since #5947), so a missing one is a failure, not a skip.
+        XCTAssert(missing.isEmpty, "\(missing.joined(separator: ", ")) isn't in the bundle's Samples")
     }
 
     // MARK: - Helpers

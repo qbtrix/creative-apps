@@ -14,7 +14,7 @@ import Testing
 
     @Test func letterPicksTool() {
         let keys: [(String, PhotoTool)] = [
-            ("v", .move), ("m", .marquee), ("b", .brush), ("e", .eraser), ("s", .clone), ("j", .spotHeal),
+            ("v", .select), ("m", .marquee), ("b", .brush), ("e", .eraser), ("s", .clone), ("j", .spotHeal),
             ("c", .crop), ("i", .eyedropper), ("g", .bucket),
         ]
         for (typed, tool) in keys {
@@ -36,7 +36,7 @@ import Testing
     }
 
     @Test func shiftLetterCyclesTheGroup() {
-        let shiftJ: [(PhotoTool, PhotoTool)] = [(.move, .spotHeal), (.spotHeal, .heal), (.heal, .remove), (.remove, .spotHeal)]
+        let shiftJ: [(PhotoTool, PhotoTool)] = [(.select, .spotHeal), (.spotHeal, .heal), (.heal, .remove), (.remove, .spotHeal)]
         for (from, to) in shiftJ {
             #expect(PhotoTool.picked(byTyped: "J", help: open, cyclingFrom: from) == to)
         }
@@ -47,6 +47,12 @@ import Testing
         #expect(PhotoTool.picked(byTyped: "B", help: open, cyclingFrom: .brush) == .brush)
         let noHeal: (PhotoTool) -> String? = { $0 == .heal ? "Open an image to heal it." : nil }
         #expect(PhotoTool.picked(byTyped: "J", help: noHeal, cyclingFrom: .spotHeal) == .remove)
+    }
+
+    /// V is Select in every app (#6012), so Photo's Select wears the arrow Flare's Select, Design's V tool and
+    /// Halo's move tool wear, not a look that reads as its own tool.
+    @Test func selectWearsTheSuitesSelectArrow() {
+        #expect(PhotoTool.select.systemImage == "cursorarrow")
     }
 
     @Test func disabledToolIsNotPicked() {

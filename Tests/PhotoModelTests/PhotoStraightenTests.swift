@@ -50,7 +50,7 @@ import Testing
         stroke(&workspace, .marquee, from: point(0, 0), to: point(8, 8))
         workspace.fillSelection()
         workspace.deselect()
-        stroke(&workspace, .move, from: point(1, 1), to: point(21, 13))
+        stroke(&workspace, .select, from: point(1, 1), to: point(21, 13))
         #expect(workspace.selectedLayer?.offsetX == 20 && workspace.selectedLayer?.offsetY == 12)
         let expected = try workspace.composite().rotated(degrees: 10, filter: .lanczos3)
         try workspace.straighten(degrees: 10, cropToFit: false)

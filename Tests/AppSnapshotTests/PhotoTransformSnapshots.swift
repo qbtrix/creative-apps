@@ -28,7 +28,7 @@ import Testing
         model.drag(from: Mask.Point(x: 200, y: 200), to: Mask.Point(x: 200, y: 200))
         model.drag(from: Mask.Point(x: 200, y: 200), to: Mask.Point(x: 600, y: 400))
         model.endDrag()
-        model.selectTool(.move)
+        model.selectTool(.select)
         try model.beginTransform()
         return model
     }

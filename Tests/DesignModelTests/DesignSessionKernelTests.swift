@@ -81,8 +81,8 @@ import Testing
     }
 
     @Test func aNewerFileIsRefusedWithItsVersion() throws {
-        #expect(throws: DesignFileError.unsupportedVersion(2)) {
-            try LiveFiling().decode(try file(version: ",\"version\":2"))
+        #expect(throws: DesignFileError.unsupportedVersion(3)) {
+            try LiveFiling().decode(try file(version: ",\"version\":3"))
         }
         #expect(throws: DesignFileError.unreadable) { try LiveFiling.probeVersion(Data("[]".utf8)) }
         #expect(try LiveFiling.probeVersion(try file(version: ",\"version\":1")) == 1)

@@ -79,7 +79,16 @@ extension DesignWorkspace {
 
     /// `selectionBadge` with an open text edit's box fitted to `extent`, the draft's measured size.
     public func selectionBadge(draft extent: DesignTextExtent?) -> String? {
+        sizeBadge(draft: extent)?.text
+    }
+
+    /// `selectionBadge` and `selectionBadgeAnchor` from one walk of the page: the canvas asks per drag sample.
+    public func sizeBadge(draft extent: DesignTextExtent?) -> (text: String, anchor: DesignPoint)? {
         guard let bounds = liveSelectionBounds(extent) else { return nil }
+        return (badgeText(bounds), DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY))
+    }
+
+    private func badgeText(_ bounds: DesignRect) -> String {
         if case .move? = gesture?.route {
             return "X \(wholePoints(bounds.x)), Y \(wholePoints(bounds.y))"
         }
@@ -89,8 +98,14 @@ extension DesignWorkspace {
     /// `node`'s frame as the canvas shows it now: the box of the open text edit fitted to the
     /// draft's measured `extent` the way its commit fits it (#3335), else the node's own frame.
     public func liveFrame(of node: DesignNode, draft extent: DesignTextExtent?) -> DesignRect {
-        node.id == editingTextID ? Self.fitted(node.frame, node.textStyle, extent) : node.frame
+        let node = shown(node)
+        return node.id == editingTextID ? Self.fitted(node.frame, node.textStyle, extent) : node.frame
     }
+
+    /// `node` as the canvas shows it: sampled at the playhead when one is set, so the inspector's X, Y and Opacity
+    /// read what is on screen rather than the rest pose.
+    // ponytail: samples the node alone, exact unless a keyed group around it also moves it; shownPage is the upgrade.
+    public func shown(_ node: DesignNode) -> DesignNode { playhead.map { node.sampled(at: Double($0)) } ?? node }
 
     /// The selection's bounds with the open edit's box fitted to `extent` (the edited node is then
     /// the whole selection); `selectionBounds` otherwise.
@@ -135,8 +150,7 @@ extension DesignWorkspace {
 
     /// `selectionBadgeAnchor` with an open text edit's box fitted to `extent`.
     public func selectionBadgeAnchor(draft extent: DesignTextExtent?) -> DesignPoint? {
-        guard let bounds = liveSelectionBounds(extent) else { return nil }
-        return DesignPoint(x: bounds.x + bounds.width / 2, y: bounds.maxY)
+        sizeBadge(draft: extent)?.anchor
     }
 }
 

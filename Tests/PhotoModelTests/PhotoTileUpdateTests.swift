@@ -35,7 +35,7 @@ import Testing
         stroke(&workspace, .eraser, from: point(300, 300), to: point(420, 330))
         addFilledLayer(&workspace, red: 30, green: 90, blue: 200)
         workspace.setOpacity(try #require(workspace.selectedLayerID), percent: 40)
-        stroke(&workspace, .move, from: point(0, 0), to: point(37, 23))
+        stroke(&workspace, .select, from: point(0, 0), to: point(37, 23))
         var shown = Shown()
         let first = try await PhotoRenderer.update(workspace, since: nil)
         #expect(first.isComplete && first.tiles.count == 9)

@@ -4,7 +4,7 @@
 // stored (style-rows ST-5): corner radius, a stroke centered on the edge, and its
 // opacity times every enclosing layer's, so a frame fades its contents. The shape
 // and stroke geometry are small functions (artworkPath, artworkStroke) the tests
-// read; paintArtwork draws a list of them, for DesignArtwork and DesignPastEdge. DesignMarqueeMark
+// read; paintArtwork draws a list of them, for DesignArtwork and DesignPastEdge. SuiteUI's SelectBoxMark
 // is the rectangle a marquee drag covers, from the Model's `marquee`, drawn as a
 // shape in the overlay. Frame names (DesignFrameLabels) and the selection
 // (DesignSelectionMarks) have their own files. None takes clicks: the canvas
@@ -197,7 +197,9 @@ struct DesignArtwork: View {
 /// the page as it was (a marquee, a hover) repaints nothing. During a move drag (`lift`) it draws
 /// the page as it was at the press in three parts: the nodes under the moved run, the run, and
 /// the nodes over it. Each part is its own DesignArtwork with unchanged inputs, so a step only
-/// moves the run's view by the drag's offset and paints no node (render contract rule 3).
+/// moves the run's view by the drag's offset and paints no node (render contract rule 3). The
+/// parts are overlaid in a ZStack, each the artboard's size; left bare, the ForEach would be laid
+/// out as a vertical stack, a third of the page each.
 struct DesignPageArtwork: View, Equatable {
     let page: DesignPage
     let zoom: Double
@@ -207,11 +209,13 @@ struct DesignPageArtwork: View, Equatable {
     var body: some View {
         if let lift {
             let scale = usable(zoom)
-            ForEach([DesignLiftPart.Part.under, .run, .over], id: \.self) { part in
-                DesignLiftPart(page: lift.page, firstID: lift.firstID, lastID: lift.lastID, part: part, zoom: zoom,
-                               editingTextID: editingTextID)
-                .equatable()
-                .offset(x: part == .run ? lift.offset.x * scale : 0, y: part == .run ? lift.offset.y * scale : 0)
+            ZStack(alignment: .topLeading) {
+                ForEach([DesignLiftPart.Part.under, .run, .over], id: \.self) { part in
+                    DesignLiftPart(page: lift.page, firstID: lift.firstID, lastID: lift.lastID, part: part, zoom: zoom,
+                                   editingTextID: editingTextID)
+                    .equatable()
+                    .offset(x: part == .run ? lift.offset.x * scale : 0, y: part == .run ? lift.offset.y * scale : 0)
+                }
             }
         } else {
             DesignArtwork(painted: page.painted, zoom: zoom, editingTextID: editingTextID)
@@ -280,23 +284,5 @@ func paintArtwork(
             faded.scaleBy(x: scale, y: scale)
             DesignTextArtwork.draw(node, in: faded)
         }
-    }
-}
-
-/// The marquee under way: `rect` (page points) at `zoom`, a 1 pt accent edge over a 10 % accent
-/// fill. A shape, not a Canvas, so a marquee dragged past the page's edge still shows.
-struct DesignMarqueeMark: View {
-    let rect: DesignRect
-    let zoom: Double
-
-    var body: some View {
-        let scale = usable(zoom)
-        let box = Path(rect.cgRect.applying(CGAffineTransform(scaleX: scale, y: scale)))
-        ZStack(alignment: .topLeading) {
-            box.fill(SuiteColor.accent.opacity(0.1))
-            box.stroke(SuiteColor.accent, lineWidth: 1)
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 }

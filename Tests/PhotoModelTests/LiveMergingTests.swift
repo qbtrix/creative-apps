@@ -25,7 +25,7 @@ import Testing
         let upper = try #require(workspace.selectedLayerID)
         workspace.setBlendMode(upper, .screen)
         workspace.setOpacity(upper, percent: 60)
-        stroke(&workspace, .move, from: point(40, 40), to: point(47, 45))
+        stroke(&workspace, .select, from: point(40, 40), to: point(47, 45))
         return workspace
     }
 

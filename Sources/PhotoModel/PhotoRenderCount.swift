@@ -2,7 +2,7 @@
 // tests (AppSnapshotTests' IdleWorkTests). `regions` is every region a canvas route composites (a CPU tile,
 // a GPU band) and `layerComposites` every layer laid onto one; `rows` and `rowLayers` are the same for the
 // reference path (a Curves histogram row, an export, a snapshot); `bases` and `hits` are the canvas's
-// PhotoCompositeCache's; `resamples` counts Free Transform's CPU resamples of the draft layer. The histogram composites its rows through the canvas routes' seam with a cache of its
+// PhotoCompositeCache's; `resamples` counts Free Transform's CPU resamples of the draft layer, `paintedBoxes` the reads of a layer's painted box for a Select move or the Transform rows. The histogram composites its rows through the canvas routes' seam with a cache of its
 // own, so it counts inside `asRows`, where a region, a layer and a cache lookup land on the reference path's
 // counters: a test tells a drag's work from a recount's. The counters are process-wide, so a suite that reads
 // them nests in BodyCountSuites like the body counters. A test that drives the renderer itself reads a `Tally`
@@ -22,6 +22,9 @@ public enum PhotoRenderCount {
     /// Free Transform's CPU resamples of the draft's layer: an exact frame or commit (`draftPlaced`), or a drag
     /// frame's draw through the matrix (`compositeDraft`). A drag the compositor moves makes none.
     public static let resamples = Mutex(0)
+    /// Reads of a layer's painted box for the Select move's lift and the Transform rows
+    /// (`paintedBounds(of:in:reusing:)`): one per layer pixels, not per show.
+    public static let paintedBoxes = Mutex(0)
     /// True inside `asRows`.
     @TaskLocal static var countingRows = false
 
@@ -87,6 +90,14 @@ public enum PhotoRenderCount {
     @inline(__always) static func resample() {
         #if DEBUG
         resamples.withLock { $0 += 1 }
+        #endif
+    }
+
+    /// One more read of a layer's painted box.
+    @inline(__always) static func paintedBox() {
+        #if DEBUG
+        paintedBoxes.withLock { $0 += 1 }
+        tally?.add("paintedBoxes")
         #endif
     }
 

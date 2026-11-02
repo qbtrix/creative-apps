@@ -37,13 +37,22 @@ extension PhotoWindow {
     }
 }
 
-/// The Type tool's field at its box's origin, at `zoom`; nothing, and no clicks, with no box open.
+/// The Type tool's field at its box's origin, at `zoom`; nothing, and no clicks, with no box open. In a
+/// window it reads the box through the `textBox` facet, so a typed key re-runs this body and not the editor's.
 struct PhotoTextBoxOverlay: View {
-    let model: PhotoWorkspace
+    private let given: PhotoWorkspace
     let zoom: Double
     var perform: PhotoPerform = { _ in }
+    @Environment(PhotoSession.self) private var session: PhotoSession?
+
+    init(model: PhotoWorkspace, zoom: Double, perform: @escaping PhotoPerform = { _ in }) {
+        (given, self.zoom, self.perform) = (model, zoom, perform)
+    }
+
+    private var model: PhotoWorkspace { session?.workspace(reading: .textBox) ?? given }
 
     var body: some View {
+        let model = model
         ZStack(alignment: .topLeading) {
             if let box = model.textBox {
                 PhotoTextBoxField(draft: box.draft, perform: perform)

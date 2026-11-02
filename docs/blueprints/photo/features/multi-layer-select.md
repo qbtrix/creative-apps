@@ -3,8 +3,8 @@
 **Feature:** Photo selects several layers at once and acts on all of them.
 The Layers list picks with Shift-click (a range, in stack order) and ⌘-click
 (toggle), Select > All Layers (⌥⌘A) picks every layer, and the selection is
-SuiteKernel's `Selection<PhotoLayer.ID>`, primary last. Move (the Move tool
-and arrow nudges), Hide and Show, Delete and Opacity apply to every selected
+SuiteKernel's `Selection<PhotoLayer.ID>`, primary last. Move (a Select drag
+pressed on a picked layer, the Move tool it folded in, and arrow nudges), Hide and Show, Delete and Opacity apply to every selected
 layer, each as one undo step through the kernel `History`, and each is a
 catalog command, so the CLI and an agent do it the way the panel does. A last,
 separable slice groups the selected layers (⌘G).
@@ -77,7 +77,8 @@ On the `layered` fixture (four layers; rows counted from the top), in
 3. Click row 1's eye: rows 1 and 3 hide in one "Hide Layers" step (PM-5).
 4. Drag the Opacity slider to 50 %: both are at 50 %, one "Layer Opacity"
    step (PM-5).
-5. Move tool, drag the canvas 40 px right: both move, one "Move Layers" step;
+5. Select (V), Shift-drag the canvas 40 px right: the layer under the press joins
+   the pick and they move, one "Move Layers" step;
    ⌘Z puts both back (PM-6).
 6. ⌥⌘A (Select > All Layers): all four rows picked (PM-3, PM-4).
 7. Delete Layer: refused with "At least one layer must stay."; ⌘-click row 4
@@ -154,7 +155,7 @@ toggleVisibility(id):                                           # PM-5
 setOpacity(id, percent): targets as above; one step "Layer Opacity", coalesced "opacity-selection" for a slider run
 removeSelectedLayers(): guard selection.count < layers.count else refuse(removeSelectedHelp)
   record(.stack) "Delete Layers"; remove each; select the layer that took the top one's place
-Move tool and moveSelectedLayers (PM-6): every selected layer's offset moves by the same delta; one "Move Layers" step per drag
+A Select move and moveSelectedLayers (PM-6): every selected layer's offset moves by the same delta; one "Move Layers" step per drag
 ```
 
 ## Tasks
@@ -218,7 +219,7 @@ task (PM-13) moves `feature-done` to itself.
 | render: ⌥⌘A on the 100-layer `stress` document | ≤ 1 window body; p95 ≤ 16 ms | `RenderBudgetPhotoMultiLayerTests.selectAllInOneBody` |
 | Stress gate: ⌥⌘A on `stress` (`select-layers`) | a11y answer ≤ 2 s; main-thread surface allocation ≤ 20 %; idle CPU < 10 % 3 s after | `PhotoStressPerfJourneyTests.testStress` (perf run, `Tests/render-budgets.md`) |
 | Stress gate: every eye on screen toggled with all 100 layers selected (`toggle-visibility`) | each click one "Hide Layers" or "Show Layers" step; a11y ≤ 2 s; idle CPU < 10 % | `PhotoStressPerfJourneyTests.testStress` |
-| Stress gate: Move tool drag with all 100 layers selected, ⌘Z (`move`, series `canvas-drag`) | step p95 ≤ 33 ms; main-thread surface allocation ≤ 20 %; a11y ≤ 2 s; idle CPU < 10 % | `PhotoStressPerfJourneyTests.testStress` |
+| Stress gate: Select drag on a picked layer with all 100 layers selected, ⌘Z (`move`, series `canvas-drag`) | step p95 ≤ 33 ms; main-thread surface allocation ≤ 20 %; a11y ≤ 2 s; idle CPU < 10 % | `PhotoStressPerfJourneyTests.testStress` |
 | Model: one Move step with 100 layers selected (`stress`) | ≤ 8 ms on Linux | `PhotoSeveralLayersTests.moveHundredInBudget` |
 | One gesture, one step | eye click, slider run, Move drag, Delete, Group | `PhotoSeveralLayersTests.oneStepForSeveral` |
 | No dead controls; mouse and keyboard parity | All Layers in the Select menu and ⌥⌘A; Delete disabled with its help | `testSelectSeveralLayers` |

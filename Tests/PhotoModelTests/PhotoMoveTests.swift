@@ -1,6 +1,6 @@
-// PhotoMoveTests.swift: the move tool moves the selected layer (#197), and a
-// move damages the canvas only where the layer was and is. Runs on Linux and
-// macOS.
+// PhotoMoveTests.swift: a Select drag pressed on the selected layer moves it
+// (#197; Move folded into Select), and a move damages the canvas only where the
+// layer was and is. Runs on Linux and macOS.
 import CoreRaster
 import Testing
 
@@ -20,7 +20,7 @@ import Testing
 
     @Test func movingShiftsTheLayerOnTheCanvas() throws {
         var workspace = try square()
-        stroke(&workspace, .move, from: point(30, 30), to: point(35, 33))
+        stroke(&workspace, .select, from: point(10, 10), to: point(15, 13))
         let own = try #require(try layerPixel(workspace, 10, 10))
         #expect(try canvasPixel(workspace, 15, 13) == own)
         #expect(try canvasPixel(workspace, 9, 9) == RGBA(r: 1, g: 1, b: 1, a: 1))
@@ -30,14 +30,14 @@ import Testing
     @Test func movingBackRestoresTheCanvasBitForBit() throws {
         var workspace = try square()
         let before = try workspace.composite()
-        stroke(&workspace, .move, from: point(30, 30), to: point(35, 33))
-        stroke(&workspace, .move, from: point(35, 33), to: point(30, 30))
+        stroke(&workspace, .select, from: point(10, 10), to: point(15, 13))
+        stroke(&workspace, .select, from: point(15, 13), to: point(10, 10))
         #expect(try workspace.composite() == before)
     }
 
     @Test func undoPutsTheOffsetBack() throws {
         var workspace = try square()
-        stroke(&workspace, .move, from: point(30, 30), to: point(35, 33))
+        stroke(&workspace, .select, from: point(10, 10), to: point(15, 13))
         #expect(workspace.selectedLayer?.offsetX == 5 && workspace.selectedLayer?.offsetY == 3)
         workspace.undo()
         #expect(workspace.selectedLayer?.offsetX == 0 && workspace.selectedLayer?.offsetY == 0)
@@ -51,7 +51,7 @@ import Testing
         (workspace.layers[at].offsetX, workspace.layers[at].offsetY) = (8, 8)
         workspace.selectLayer(id)
         let start = workspace.revision
-        stroke(&workspace, .move, from: point(10, 10), to: point(50, 30))
+        stroke(&workspace, .select, from: point(10, 10), to: point(50, 30))
         // The square was at (8, 8) and is at (48, 28): the canvas changed in the box around both, nowhere else.
         #expect(workspace.damage(since: start) == .region(PixelRect(x: 8, y: 8, width: 56, height: 36)))
         #expect(workspace.selectedLayer?.offsetX == 48 && workspace.selectedLayer?.offsetY == 28)
@@ -63,7 +63,7 @@ import Testing
         workspace.applyCrop()
         // The square's corner was at canvas (8, 8); after the crop it is at (4, 4).
         #expect(try canvasPixel(workspace, 4, 4).g == 0)
-        stroke(&workspace, .move, from: point(10, 10), to: point(12, 10))
+        stroke(&workspace, .select, from: point(10, 10), to: point(12, 10))
         #expect(try canvasPixel(workspace, 6, 4).g == 0)
         #expect(try canvasPixel(workspace, 5, 4).g == 1)
     }

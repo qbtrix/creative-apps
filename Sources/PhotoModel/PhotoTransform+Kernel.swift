@@ -5,18 +5,23 @@
 // bounds of the selected pixel layer's painted pixels (alpha above 0), cut to
 // the selection when one is set; a clear layer refuses "Nothing to transform.".
 // Availability reads only `transformArea` (layer and selection, no pixel scan).
+// The painted box is read once per layer pixels by a caller that keeps a
+// `PaintedBox` (the Transform rows, the canvas's Select move), not per redraw.
 // A scale, turn or move edits the draft as one step whose undo puts the
-// previous draft back (a drag's steps fold under its token). The canvas shows
-// the draft live: a still frame draws `transformPreview`, the workspace with
-// the draft's layer resampled (`draftPlaced`), and commit lays that same
-// resample as one "Free Transform" step, so Return shows nothing new; a box on
-// part of the layer keeps the layer's extent, so later strokes outside it still
-// land. A drag whose layer lifts (PhotoTransformLift+Kernel.swift) draws no frames:
-// the compositor moves the layer's pixels. Any other drag's frames
-// (`transformPreview(live:)`) draw the layer through the draft's matrix region
-// by region (PhotoRenderRoute.swift, bilinear); the exact frame follows at the release.
-// A flip mirrors the layer's pixels in place at once, never a draft. Canvas
-// Size is PhotoImageOps'. Linux-safe.
+// previous draft back (a drag's steps fold under its token). Only the pixels in
+// the draft's box change (`boxChanged`): they are cut out, resampled and laid
+// back over the rest of the layer, which stays put on a layer grown to hold
+// both, so a selection never erases the paint outside it. The canvas shows the
+// draft live: a still frame draws `transformPreview`, the workspace with the
+// draft's layer swapped for that result (`draftPlaced`), and commit lays the
+// same pixels as one "Free Transform" step, so Return shows nothing new. A drag
+// whose layer lifts (PhotoTransformLift+Kernel.swift) draws no frames: the
+// compositor moves the box's pixels over the rest (`boxCut`). Any other drag's
+// frames (`transformPreview(live:)`) draw the rest, then the box's pixels
+// through the draft's matrix region by region (PhotoRenderRoute.swift,
+// bilinear); the exact frame follows at the release. A flip mirrors the layer's
+// pixels in place at once, never a draft. Canvas Size is PhotoImageOps'.
+// Linux-safe.
 import CoreRaster
 import SuiteKernel
 
@@ -25,13 +30,20 @@ extension PhotoWorkspace: TransformTarget {
     /// layer's painted bounds (in the selection when one is set); nil with no
     /// pixel layer or nothing painted there.
     public var transformSelection: TransformBox? {
+        var none: PaintedBox?
+        return transformSelection(reusing: &none)
+    }
+
+    /// `transformSelection` with the painted box kept in `known` across calls,
+    /// for a caller that reads it on every change (the Transform rows).
+    public func transformSelection(reusing known: inout PaintedBox?) -> TransformBox? {
         if let draft = transformDraft {
             let b = draft.box, t = draft.transform
             let (x, y) = (Double(b.x) + t.dx, Double(b.y) + t.dy)
             let box = Rect(minX: x, minY: y, maxX: x + Double(b.width) * t.scaleX, maxY: y + Double(b.height) * t.scaleY)
             return TransformBox(box: box, degrees: t.degrees)
         }
-        guard let rect = transformBounds else { return nil }
+        guard let rect = transformBounds(reusing: &known) else { return nil }
         return TransformBox(box: Rect(minX: Double(rect.x), minY: Double(rect.y),
                                       maxX: Double(rect.x + rect.width), maxY: Double(rect.y + rect.height)))
     }
@@ -93,10 +105,42 @@ extension PhotoWorkspace: TransformTarget {
     /// layer's pixels with alpha above 0 inside `transformArea`, on the canvas;
     /// nil without a pixel layer or when nothing is painted there.
     var transformBounds: PixelRect? {
-        guard let layer = selectedLayer, let area = transformArea, let tiles = pixels[layer.id],
-            let painted = try? tiles.paintedBounds(in: area.offsetBy(-layer.offsetX, -layer.offsetY))
+        var none: PaintedBox?
+        return transformBounds(reusing: &none)
+    }
+
+    /// `transformBounds` with the painted box kept in `known` across calls.
+    func transformBounds(reusing known: inout PaintedBox?) -> PixelRect? {
+        guard let layer = selectedLayer, let area = transformArea,
+            let painted = paintedBounds(of: layer.id, in: area.offsetBy(-layer.offsetX, -layer.offsetY), reusing: &known)
         else { return nil }
         return painted.offsetBy(layer.offsetX, layer.offsetY)
+    }
+
+    /// A layer's painted bounds and the pixels and window they were read from.
+    /// A caller that reads the box on every change (the canvas's Select move,
+    /// the Transform rows) keeps one, so the box is read once per layer pixels,
+    /// not per show: the pixels compare by storage first, so an unchanged
+    /// layer costs one compare. Holding one holds the layer's tiles, so a
+    /// caller drops it once its tool is put down.
+    public struct PaintedBox: Sendable {
+        let layerID: PhotoLayer.ID
+        let source: TiledPixels
+        let window: PixelRect?
+        let painted: PixelRect?
+    }
+
+    /// `id`'s painted bounds inside `window` (layer pixels; nil reads the whole
+    /// layer), from `known` when it was read from the same layer, pixels and
+    /// window, else read (`TiledPixels.paintedBounds`) into it; nil when that
+    /// part is clear.
+    func paintedBounds(of id: PhotoLayer.ID, in window: PixelRect?, reusing known: inout PaintedBox?) -> PixelRect? {
+        guard let tiles = pixels[id] else { return nil }
+        if known?.layerID != id || known?.window != window || known?.source != tiles {
+            PhotoRenderCount.paintedBox()
+            known = PaintedBox(layerID: id, source: tiles, window: window, painted: try? tiles.paintedBounds(in: window))
+        }
+        return known?.painted
     }
 
     /// Where Free Transform looks for pixels: the selected pixel layer's
@@ -121,26 +165,14 @@ extension PhotoWorkspace {
         transformDraft = TransformDraft(layerID: id, box: box)
     }
 
-    /// Return: resamples the layer once into its new bounds as one "Free
-    /// Transform" step; a box on part of the layer keeps the layer's extent
-    /// (grown to the new bounds). The identity records nothing. No draft: nothing.
+    /// Return: resamples the box's pixels once into their new bounds as one "Free Transform" step
+    /// (`draftPlaced`); the rest of the layer stays. The identity records nothing. No draft: nothing.
     /// A resample that fails keeps the draft and throws.
     public mutating func commitTransform() throws {
         guard let draft = transformDraft else { return }
-        guard let done = try draftPlaced() else {
+        guard let (at, placed) = try draftPlaced() else {
             transformDraft = nil
             return touch(.all)
-        }
-        let at = done.at
-        var placed = done.placed
-        // A box on part of the layer (its painted pixels) keeps the layer's extent, so later strokes outside
-        // the box still land: the placed pixels go, exactly, onto a clear layer over both bounds.
-        if let was = bounds(of: layers[at]), draft.box != was {
-            let all = was.union(PixelRect(x: placed.x, y: placed.y, width: placed.pixels.width,
-                                          height: placed.pixels.height))
-            var kept = try TiledPixels(width: all.width, height: all.height)
-            try kept.replace(with: placed.pixels.flattened(), x: placed.x - all.x, y: placed.y - all.y)
-            placed = PlacedPixels(pixels: kept, x: all.x, y: all.y)
         }
         record(.group([.stack(stackState), .draft(draft)]), named: "Free Transform")
         pixels[draft.layerID] = placed.pixels
@@ -158,16 +190,55 @@ extension PhotoWorkspace {
         touch(.all)
     }
 
-    /// The draft's layer resampled through the draft into its new bounds (`services.transform.applied`), with
-    /// the layer's index: what Return lays and what the canvas previews. Nil with no draft, the identity, or a
-    /// layer without pixels.
+    /// The draft's box resampled through the draft into its new bounds (`services.transform.applied`) over the
+    /// rest of its layer (`boxChanged`), with the layer's index: what Return lays and what the canvas previews.
+    /// Nil with no draft, the identity, or a layer without pixels.
     func draftPlaced() throws -> (at: Int, placed: PlacedPixels)? {
         guard let draft = transformDraft, draft.transform != .identity, let at = index(of: draft.layerID),
-            let tiles = pixels[draft.layerID]
+            pixels[draft.layerID] != nil
         else { return nil }
-        let content = PlacedPixels(pixels: tiles, x: layers[at].offsetX, y: layers[at].offsetY)
         PhotoRenderCount.resample()
-        return (at, try services.transform.applied(draft, to: content))
+        return try boxChanged(at, in: draft.box) { try services.transform.applied(draft, to: $0) }.map { (at, $0) }
+    }
+
+    /// The layer at `at` with only its pixels in `box` (canvas pixels) run through `change` and laid back over
+    /// the rest, which stays put, on a layer grown to hold both. A box over the whole layer changes the whole
+    /// layer. Nil for a layer without pixels.
+    func boxChanged(_ at: Int, in box: PixelRect, _ change: (PlacedPixels) throws -> PlacedPixels) throws -> PlacedPixels? {
+        let layer = layers[at]
+        guard let tiles = pixels[layer.id] else { return nil }
+        guard let (part, rest) = try boxCut(of: layer, in: box) else {
+            return try change(PlacedPixels(pixels: tiles, x: layer.offsetX, y: layer.offsetY))
+        }
+        let changed = try change(PlacedPixels(pixels: TiledPixels(tiles.flattened(part)),
+                                              x: layer.offsetX + part.x, y: layer.offsetY + part.y))
+        let was = PixelRect(x: layer.offsetX, y: layer.offsetY, width: tiles.width, height: tiles.height)
+        let all = was.union(PixelRect(x: changed.x, y: changed.y, width: changed.pixels.width, height: changed.pixels.height))
+        var out = rest
+        if all != was {
+            out = try laid(PlacedPixels(pixels: rest, x: was.x, y: was.y),
+                           onto: TiledPixels(width: all.width, height: all.height), at: all)
+        }
+        return PlacedPixels(pixels: try laid(changed, onto: out, at: all), x: all.x, y: all.y)
+    }
+
+    /// The part of `layer`'s pixels in `box` (canvas pixels in, layer pixels out) and the layer with that part
+    /// cleared; nil when the box holds the whole layer, misses it, or the layer has no pixels.
+    func boxCut(of layer: PhotoLayer, in box: PixelRect) throws -> (part: PixelRect, rest: TiledPixels)? {
+        guard let tiles = pixels[layer.id] else { return nil }
+        let whole = PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)
+        guard let part = box.offsetBy(-layer.offsetX, -layer.offsetY).intersection(whole), part != whole else { return nil }
+        var rest = tiles
+        try rest.replace(with: PixelBuffer(width: part.width, height: part.height), x: part.x, y: part.y)
+        return (part, rest)
+    }
+
+    /// `top` over `below`, a layer whose top-left is canvas pixel (`at.x`, `at.y`): a plain over, tile by tile.
+    private func laid(_ top: PlacedPixels, onto below: TiledPixels, at: PixelRect) throws -> TiledPixels {
+        var plain = PhotoLayer(id: "", name: "")
+        (plain.offsetX, plain.offsetY) = (top.x, top.y)
+        return try PhotoLayerComposite.composite(LayerContent(layer: plain, pixels: top.pixels), onto: below, origin: (at.x, at.y),
+                                                 adjusting: services.adjustmentLayers, masking: services.masking)
     }
 
     /// The workspace as the canvas shows it while Free Transform is up: the draft's layer swapped for
@@ -175,8 +246,7 @@ extension PhotoWorkspace {
     /// history stay as they are. Self with no draft, and when the resample fails (the layer shows as it is,
     /// and Return reports the failure).
     var transformPreview: PhotoWorkspace {
-        guard let done = (try? draftPlaced()) ?? nil else { return self }
-        let (at, placed) = done
+        guard let (at, placed) = (try? draftPlaced()) ?? nil else { return self }
         var shown = self
         shown.pixels[layers[at].id] = placed.pixels
         shown.layers[at].offsetX = placed.x

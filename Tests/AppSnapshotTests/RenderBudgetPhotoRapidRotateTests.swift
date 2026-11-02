@@ -37,7 +37,7 @@ extension BodyCountSuites {
         func rapidRotationsThenReturnApplyOneCommit(_ route: Route, backToBack: Bool) async throws {
             let choice = route.choice
             var model = try PhotoWorkspace.fixture(ProcessInfo.processInfo.environment["RAPID_LARGE"] == nil ? .sample : .large)
-            model.selectTool(.move)
+            model.selectTool(.select)
             try model.beginTransform()
             let fixture = model
             // Another Photo window drawing alongside, as the suites running in parallel on CI do: none of its work

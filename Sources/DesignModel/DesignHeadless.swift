@@ -2,8 +2,9 @@
 // window, for the afterglow CLI, MCP and the real jobs. It is the workspace on its live services: `open` and `save`
 // go through the file codec (DesignFile), every command through Design's catalog (DesignCommandCatalog), and SVG
 // export writes the scope its options name (every visible top-level frame of every page by default, each page, or the
-// selection) through the export plan and its SVG (DesignExport+Kernel), names unique across the file; any other
-// option is refused in words. PNG waits on a Linux PNG writer (the App rasterizes it today). Linux-safe.
+// selection) through the export plan and its SVG (DesignExport+Kernel), names unique across the file, at the options'
+// `frame` (the rest pose without one); any other option is refused in words. PNG waits on a Linux PNG writer (the App
+// rasterizes it today). Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -53,14 +54,17 @@ public struct DesignHeadless: HeadlessDocument {
 
     /// `svg` at `options.scope`: `frame` (the default) writes one file per visible top-level frame of every page,
     /// `page` one file per page, `selection` the selected page's selected layers, in page order, each named after
-    /// its layer or page and unique across the file. An option other than `scope`, or a scope it doesn't name,
-    /// throws `failed` in words; so does a file with nothing to export. `png` is not built on Linux yet.
+    /// its layer or page and unique across the file; each page as it shows at `options.frame` (left out: the rest
+    /// pose). An option other than `scope` or `frame`, or a scope it doesn't name, throws `failed` in words; so does
+    /// a file with nothing to export. `png` is not built on Linux yet.
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         guard format == "svg" else {
             if format == "png" { throw CatalogError.notBuilt(id: "export.png", feature: "a Linux PNG writer for Design's raster path") }
             throw CatalogError.failed(id: "export", message: "Design exports \(Self.exportFormats.joined(separator: ", ")), not \(format).")
         }
         let scope = try Self.scope(options)
+        var frame: Int?
+        if case .object(let fields) = options, case .number(let value)? = fields["frame"], value.isFinite { frame = Int(value) }
         var files: [ExportedFile] = [], taken = Set<String>()
         let pages = scope == .selection ? workspace.selectedPage.map { [$0] } ?? [] : workspace.pages
         for page in pages {
@@ -73,7 +77,7 @@ public struct DesignHeadless: HeadlessDocument {
             catch { throw CatalogError.failed(id: "export", message: error.help) }
             for item in items {
                 let svg: String
-                do throws(DesignRefusal) { svg = try onPage.exportSVG(item) } catch { throw CatalogError.failed(id: "export", message: error.help) }
+                do throws(DesignRefusal) { svg = try onPage.exportSVG(item, at: frame) } catch { throw CatalogError.failed(id: "export", message: error.help) }
                 files.append(ExportedFile(suggestedName: item.fileName, format: format, data: Data(svg.utf8)))
                 taken.insert(item.fileName)
             }
@@ -82,14 +86,14 @@ public struct DesignHeadless: HeadlessDocument {
         return files
     }
 
-    /// The scope `options` names (`{"scope": "page"}`), `.frame` when absent; any other key or value throws `failed`.
+    /// The scope `options` names (`{"scope": "page"}`), `.frame` when absent; any key but `scope` and `frame` (read apart) or bad value throws `failed`.
     static func scope(_ options: JSONValue) throws -> DesignExportScope {
         let names = DesignExportScope.allCases.map(\.rawValue).joined(separator: ", ")
         guard case .object(let keys) = options else {
             if options == .null { return .frame }
             throw CatalogError.failed(id: "export", message: "Design's export options are an object, such as {\"scope\": \"page\"}.")
         }
-        if let other = keys.keys.sorted().first(where: { $0 != "scope" }) {
+        if let other = keys.keys.sorted().first(where: { $0 != "scope" && $0 != "frame" }) {
             throw CatalogError.failed(id: "export", message: "Design's SVG export takes one option, scope (\(names)), not \(other).")
         }
         guard let value = keys["scope"] else { return .frame }

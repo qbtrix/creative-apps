@@ -18,9 +18,10 @@
 // window open opens one (`.suiteReopenWindow`).
 //
 // Hand-offs: a .design opened from Finder, the home's Recent or another app's
-// Open In reaches DesignShell.host (a DesignDocumentHost), which hands each
+// Open In, and a `.new` from the home's New Design or the welcome's Blank,
+// reach DesignShell.host (a DesignDocumentHost), which hands each file or new
 // file to DesignShell.openQueue (SuiteUI's SuiteOpenQueue): an empty window
-// opens it in place, else it opens in a new window.
+// takes it in place, else it opens in a new window.
 import DesignModel
 import SuiteModel
 import SuiteShell
@@ -45,14 +46,19 @@ struct DesignLaunch: Codable, Hashable, Sendable {
     /// The files waiting for a window: an empty window takes one in place, else a new window opens.
     static let openQueue = SuiteOpenQueue(windowID: DesignLaunch.windowID)
 
-    /// Design's hand-off host: an open hands each file to `openQueue`; every other verb is refused.
+    /// Design's hand-off host: an open or a new hands each file or new file to `openQueue`.
     static let host = host(opening: openQueue)
 
-    /// A host that hands each opened file to `queue` (tests pass their own queue).
+    /// A host that hands each opened file and new file to `queue` (tests pass their own queue).
     static func host(opening queue: SuiteOpenQueue) -> DesignDocumentHost {
-        DesignDocumentHost { paths in
+        DesignDocumentHost { requests in
             await MainActor.run {
-                for path in paths { queue.open(URL(fileURLWithPath: path)) }
+                for request in requests {
+                    switch request {
+                    case .open(let path): queue.open(URL(fileURLWithPath: path))
+                    case .newFile: queue.openNew()
+                    }
+                }
             }
         }
     }

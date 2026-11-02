@@ -26,5 +26,19 @@
     "find": "base.layers[at].isVisible = false",
     "replace": "base.layers[at].isVisible = true",
     "tests": "PhotoTransformLiftTests/theLiftIsTheLayersPixelsOverTheWorkspaceWithoutIt"
+  },
+  {
+    "label": "liftBaseLosesRest: the picture under a selection's lift hides the whole layer, so its rest vanishes mid-drag (#5813)",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "            base.pixels[layers[at].id] = rest\n            base.layers[at].isVisible = true\n",
+    "replace": "            _ = rest\n",
+    "tests": "PhotoTransformLiftTests/theBaseUnderASelectionsLiftKeepsTheRestOfTheLayer"
+  },
+  {
+    "label": "liftsAloneOverRest: a selection's lift skips the picture under it, so the rest of the layer vanishes mid-drag (#5813)",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "part == PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)",
+    "replace": "part == part",
+    "tests": "PhotoTransformLiftTests/theBaseUnderASelectionsLiftKeepsTheRestOfTheLayer"
   }
 ]

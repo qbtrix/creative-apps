@@ -182,6 +182,18 @@ private func required(_ schema: JSONValue) -> [String]? {
         #expect(try #require(workspace.pixels[id]).width == before.width)
     }
 
+    @Test func theLayerNameFollowsTheWordsUntilRenamed() throws {
+        var workspace = try opened()
+        let id = try addSale(&workspace)
+        _ = try #require(catalog).run("text.set-words", params: .object(["words": .string("DEALS")]), on: &workspace)
+        #expect(workspace.selectedLayer?.name == "DEALS")
+        workspace.undo()
+        #expect(workspace.selectedLayer?.name == "SALE")
+        workspace.renameLayer(id, to: "Title")
+        _ = try #require(catalog).run("text.set-words", params: .object(["words": .string("DEALS")]), on: &workspace)
+        #expect(workspace.selectedLayer?.name == "Title", "an edit overwrote the name the user gave the layer")
+    }
+
     @Test func styleChangeRedraws() throws {
         var workspace = try opened()
         let id = try addSale(&workspace)
