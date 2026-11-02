@@ -128,8 +128,8 @@ struct LibraryWindow: View, BodyCounted {
         .environment(\.libraryAdjust, adjustControls)
         .libraryControlsProbe()
         .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
-        // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
-        .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
+        // The export area (LibraryWindow+Export.swift) moves `exportRun` off `.idle`.
+        .sheet(isPresented: Binding(get: { model.exportRun != .idle }, set: { _ in })) { exportSheet }
         .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
         .modifier(trashArea)  // Photo > Delete Rejected Photos… and its confirm (LibraryWindow+Trash.swift)
         .modifier(filesArea)  // Remove from Catalog… and Locate… (LibraryWindow+Files.swift)

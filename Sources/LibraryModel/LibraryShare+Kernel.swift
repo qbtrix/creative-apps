@@ -64,7 +64,7 @@ extension LibraryCatalog {
 
     /// Why Share can't run now: an export running, nothing selected, or no exporter; nil when it can.
     public var shareHelp: String? {
-        if case .running = exportState { return "An export is already running." }
+        if case .running = exportRun { return "An export is already running." }
         if exportTargets.isEmpty { return "Select a photo to share it." }
         return services.unavailable["exporter"]
     }

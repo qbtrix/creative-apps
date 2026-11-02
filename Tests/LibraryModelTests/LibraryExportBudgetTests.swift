@@ -16,7 +16,7 @@ import Testing
         #expect(catalog.order.count == 10_000)
         #expect(catalog.exportTargets.count == 10_000)
         let cost = Budget.measure("export begin-10000") { _ = catalog.beginExport(folder: "/out") }
-        #expect(catalog.exportState == .editing(ExportOptions(folder: "/out")))
+        #expect(catalog.exportRun == .editing(ExportOptions(folder: "/out")))
         #expect(cost.median <= 10, "beginExport on 10,000 took \(cost.median) ms (median), over 10 ms")
     }
 
