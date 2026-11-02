@@ -9,6 +9,7 @@
 // The strip is `flare.timeline.track`; its timelineIdentifierPrefix `flare.timeline` gives each name button
 // `flare.timeline.name.<id>`, each lane `flare.timeline.lane.<id>` and each key `flare.timeline.key.<id>.<frame>`,
 // so the app audit's identifier check finds none of them unnamed (#262).
+// The strip is at most `visibleLanes` (8) lanes tall; more scroll under its ruler, so a 50-layer file keeps the stage.
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -31,9 +32,12 @@ struct FlareTimelineEdit: View {
             }
         }
         .frame(height: (labels.isEmpty ? .zero : SuiteSize.timelineRuler) + SuiteSize.timelineRuler
-            + SuiteSize.timelineLane * CGFloat(rows.count))
+            + SuiteSize.timelineLane * CGFloat(min(rows.count, Self.visibleLanes)))
         .popover(isPresented: $namingLabel) { labelField }
     }
+
+    /// The most lanes the strip shows at once; more scroll under the ruler, so a long file keeps the stage.
+    static let visibleLanes = 8
 
     private func strip(_ rows: [TimelineRow], lastFrame: Int, frameWidth: CGFloat) -> some View {
         let picked = Dictionary(grouping: model.selectedKeys.filter { $0.property == nil }, by: \.layerID)
