@@ -1,11 +1,13 @@
 // LauncherCommands+Home.swift: the home feature's launcher menus (blueprint
 // suite.md 6.2, HM-2c), rendered from HomeMenu over the focused window's
 // HomeModel. File: New ▸ (replacing the system's New), Open… ⌘O and Open
-// Recent ▸; Edit: Undo Remove from Recents after the system's Undo and Redo,
-// and Delete, titled for the page, after the clipboard group the assets stub
-// owns; View: Show Sidebar, Show Inspector ⌥⌘I and the thumbnail sizes,
-// before the system's Enter Full Screen. With no window, New and Open… open
-// it. No SidebarCommands, so Show Sidebar appears once.
+// Recent ▸ ending in Clear Menu, which empties the recents; Edit: Undo Remove
+// from Recents after the system's Undo and Redo, and Remove from Recents after
+// the clipboard group, on the Home page only (HomeMenu gives no Delete on the
+// assets page); View: the thumbnail sizes, before the sidebar group. Show
+// Sidebar and Show Inspector ⌥⌘I are the system's SidebarCommands and
+// InspectorCommands (AfterGlowApp.swift), which toggle SuiteWindow's columns.
+// With no window, New and Open… open it.
 import SuiteModel
 import SuiteUI
 import SwiftUI
@@ -43,21 +45,21 @@ struct LauncherCommandsHome: Commands {
                     }
                 }
                 Divider()
-                MenuCommand(item: menu.clearMenu) {}
+                MenuCommand(item: menu.clearMenu) { if let model { Task { await model.clearRecents(now: Date()) } } }
             }
         }
         CommandGroup(after: .undoRedo) {
             MenuCommand(item: menu.undo) { if let model { Task { await model.undoRemove(now: Date()) } } }
         }
         CommandGroup(after: .pasteboard) {
-            MenuCommand(item: menu.delete) { if let model { Task { await model.removeSelection(now: Date()) } } }
+            if let delete = menu.delete {
+                MenuCommand(item: delete) { if let model { Task { await model.removeSelection(now: Date()) } } }
+            }
         }
         CommandGroup(before: .sidebar) {
-            MenuCommand(item: menu.showSidebar) {}
-            MenuCommand(item: menu.showInspector) {}.keyboardShortcut("i", modifiers: [.option, .command])
-            Divider()
             MenuCommand(item: menu.larger) { model?.larger() }.keyboardShortcut("+")
             MenuCommand(item: menu.smaller) { model?.smaller() }.keyboardShortcut("-")
+            Divider()
         }
     }
 }
