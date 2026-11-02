@@ -3,8 +3,9 @@
 // shifted by the sideways scroll; under it a vertical scroll view holds the
 // track names (a fixed left column) and, to their right, a horizontal scroll
 // view of one lane per track (TimelineLaneRow: the lane and its input). Both
-// stacks are lazy, but the lanes' sits in a horizontal scroll view, so it
-// builds every row, not only those in view (#5804). Each stack sits behind one
+// stacks are lazy, but the lanes' sits in a horizontal scroll view, which
+// builds every row, so the strip builds only the lanes in the vertical scroll's
+// view plus a few (TimelineStripLayout.lanesBuilt, #6183). Each stack sits behind one
 // `.equatable()` (TimelineNameRows, TimelineLaneRows) over the tracks and the
 // mapping, and a row compares only its track and mapping; the playhead and the
 // closures a press needs sit in one unobserved TimelineLaneContext the body
@@ -171,7 +172,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                     Divider()
                     GeometryReader { proxy in
                         lanes(width: layout.lanesWidth(
-                            contentWidth: mapping.contentWidth, offered: proxy.size.width, snapshot: true))
+                            contentWidth: mapping.contentWidth, offered: proxy.size.width, snapshot: true),
+                              rows: 0..<tracks.count)
                     }
                     .clipped()
                 }
@@ -183,7 +185,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                         names
                         Divider()
                         ScrollView(.horizontal) {
-                            lanes(width: layout.lanesWidth(contentWidth: mapping.contentWidth, offered: 0, snapshot: false))
+                            lanes(width: layout.lanesWidth(contentWidth: mapping.contentWidth, offered: 0, snapshot: false),
+                                  rows: layout.lanesBuilt(visibleY: visibleY))
                         }
                         .scrollIndicators(.never)
                         .onScrollGeometryChange(for: ClosedRange<Double>.self) { geometry in
@@ -333,16 +336,17 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             .frame(width: SuiteSize.timelineLabelColumn)
     }
 
-    private func lanes(width: CGFloat) -> some View {
-        TimelineLaneRows(tracks: tracks, mapping: mapping, context: laneContext, width: width).equatable()
+    private func lanes(width: CGFloat, rows: Range<Int>) -> some View {
+        TimelineLaneRows(tracks: tracks, mapping: mapping, context: laneContext, width: width, rows: rows).equatable()
             // Only the lanes' access modifiers read it, so a scroll re-runs those, never a lane's Canvas.
             .environment(\.timelineVisibleX, snapshot ? nil : visibleX)
             .simultaneousGesture(pinchGesture, isEnabled: !snapshot)
     }
 }
 
-/// The lane rows, one per track, behind one `.equatable()`: Equatable over the
-/// tracks, the mapping and the width, so a frame change never re-evaluates the
+/// The lane rows `rows` builds (TimelineStripLayout.lanesBuilt), each at its
+/// track's height, behind one `.equatable()`: Equatable over the tracks, the
+/// mapping, the width and the rows, so a frame change never re-evaluates the
 /// ForEach. A re-evaluated ForEach is not free even when every row compares
 /// equal: when the hosting view lays out before SwiftUI's own flush (a frame
 /// tick right before AppKit's layout, which a loaded Mac makes common), the
@@ -353,6 +357,8 @@ struct TimelineLaneRows<ID: Hashable & Sendable>: View, Equatable {
     let mapping: FrameMapping
     let context: TimelineLaneContext<ID>
     let width: CGFloat
+    /// The rows built; the rest are empty room at their lanes' height (#6183).
+    let rows: Range<Int>
     #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
     #endif
@@ -361,16 +367,19 @@ struct TimelineLaneRows<ID: Hashable & Sendable>: View, Equatable {
         #if DEBUG
         bodyTally.ran(TimelineLaneRowsBodies.self)
         #endif
+        let built = rows.clamped(to: tracks.indices)
         return LazyVStack(alignment: .leading, spacing: 0) {
-            ForEach(tracks) { track in
+            ForEach(tracks[built]) { track in
                 TimelineLaneRow(track: track, mapping: mapping, context: context).equatable()
             }
         }
-        .frame(width: width, alignment: .leading)
+        .padding(.top, SuiteSize.timelineLane * CGFloat(built.lowerBound))
+        .frame(width: width, height: SuiteSize.timelineLane * CGFloat(tracks.count), alignment: .topLeading)
     }
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.tracks == rhs.tracks && lhs.mapping == rhs.mapping && lhs.context === rhs.context && lhs.width == rhs.width
+            && lhs.rows == rhs.rows
     }
 }
 
@@ -504,6 +513,21 @@ struct TimelineStripLayout: Equatable, Sendable {
         let y = scrollY.isNaN ? 0 : min(max(scrollY, 0), maxScroll)
         let first = min(Int((y / SuiteSize.timelineLane).rounded(.down)), trackCount)
         let end = min(Int(((y + viewport) / SuiteSize.timelineLane).rounded(.up)), trackCount)
+        return first..<max(first, end)
+    }
+
+    /// Lanes built past each edge of the view, so a scroll shows built rows before the next report.
+    static let overscan = 4
+    /// Lanes built before the vertical scroll view first reports what it shows.
+    static let firstLanes = 16
+
+    /// The lane rows the strip builds (#6183): those in the lanes' visible y, `overscan` more either side;
+    /// before the first report (nil), the first `firstLanes`. A scroll past the end keeps the last rows.
+    func lanesBuilt(visibleY: ClosedRange<Double>?) -> Range<Int> {
+        guard let visibleY else { return 0..<min(trackCount, Self.firstLanes) }
+        let shown = TimelinePlayhead.rows(showing: visibleY, count: trackCount)
+        let end = min(shown.upperBound + Self.overscan, trackCount)
+        let first = max(min(shown.lowerBound, end - 1) - Self.overscan, 0)
         return first..<max(first, end)
     }
 
