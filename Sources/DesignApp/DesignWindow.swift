@@ -5,11 +5,12 @@
 // publishes a DesignMenu to the menu bar. Only this file calls the workspace's
 // methods. An open text edit is committed, its box fitted to the measured draft,
 // before any intent but a draft or a cancel acts (canvas-basics CB-6). The zoom
-// keeps the handle tolerance a constant size on screen, and
-// the page is fitted whenever the selected page changes or a file opens, and
-// refitted as the canvas resizes until the user zooms, through
-// EditorDetailLayout so the fitted page and its handles stay clear of the
-// floating palette. The window's title is SuiteWindow's (DesignEditor).
+// keeps the handle tolerance a constant size on screen. The zoom is a
+// ZoomLevel (SuiteKernel's one zoom model): the page is fitted whenever the
+// selected page changes or a file opens, and stays fitted as the canvas
+// resizes until the user picks another level (ZoomMath.scale, through
+// EditorDetailLayout's palette fit so the fitted page and its handles stay
+// clear of the floating palette); the canvas's pinch and keys hand it a level. The window's title is SuiteWindow's (DesignEditor).
 //
 // Files: Open and Save As use AppKit's panels. Open fills this window only while
 // it holds no file (DesignWorkspace.takesOpenedFile); otherwise the chosen file
@@ -69,11 +70,10 @@ struct DesignWindow: View, BodyCounted {
     @State private var live = DesignLiveDrag()
     /// A test's starting workspace: the window opens it as it is and skips the launch steps.
     private let seeded: Bool
-    @State private var zoom = 1.0
+    /// The page's zoom; `.fit` follows the canvas's size, as the split view lays it out a few times
+    /// on the way up, until the user picks another level.
+    @State private var zoomLevel = ZoomLevel.actual
     @State private var viewport = CGSize.zero
-    /// The page follows the canvas's size: fitted now and again whenever the canvas resizes, as
-    /// the split view lays it out a few times on the way up. The user's own zoom ends it.
-    @State private var fitting = false
     /// The status line's message ("Saved sample.design"); it goes at the next edit.
     @State private var note: String?
     @State private var problem: DesignFileProblem?
@@ -125,13 +125,10 @@ struct DesignWindow: View, BodyCounted {
         #endif
         DesignEditor(
             model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom,
-            onViewport: viewportChanged, onZoom: userZoom, perform: perform
+            onViewport: viewportChanged, onZoomLevel: setZoom, perform: perform
         )
         .focusedSceneValue(\.designMenu, DesignMenu(model: model, perform: perform))
-        .onChange(of: model.selectedPageID) {
-            fitting = true
-            fit()
-        }
+        .onChange(of: model.selectedPageID) { setZoom(.fit) }
         .onChange(of: model.pages) { note = nil }
         .alert(
             problem?.title ?? "",
@@ -214,11 +211,9 @@ struct DesignWindow: View, BodyCounted {
         case .textDraft(let text): model.setTextDraft(text)
         case .commitText: break  // committed above
         case .cancelText: model.cancelTextEdit()
-        case .zoomIn: userZoom(ZoomMath.zoomedIn(from: zoom))
-        case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
-        case .fit:
-            fitting = true
-            fit()
+        case .zoomIn: setZoom(ZoomKey.zoomIn.level(from: zoom, steps: ZoomMath.steps))
+        case .zoomOut: setZoom(ZoomKey.zoomOut.level(from: zoom, steps: ZoomMath.steps))
+        case .fit: setZoom(.fit)
         case .command(let command):
             do { try model.run(command) } catch { note = error.help }
         // The adapter makes and reads the representations; the bridge carries them. A refusal goes to the status line.
@@ -305,34 +300,29 @@ struct DesignWindow: View, BodyCounted {
 
     // MARK: Zoom
 
-    /// Sets the zoom within ZoomMath's range (10% to 3200%), and resizes the handle grab area to match.
-    private func setZoom(_ scale: Double) {
-        zoom = ZoomMath.clamped(scale.isFinite ? scale : 1)
-        model.setHandleTolerance(Double(SuiteSpacing.s) / zoom)
+    /// The zoom the canvas draws at: the level against the viewport, fitted to the selected page clear
+    /// of the floating palette (which shows every tool while a page is open).
+    private var zoom: Double {
+        let page = model.selectedPage.map { CGSize(width: $0.frameWidth, height: $0.frameHeight) } ?? .zero
+        return ZoomMath.scale(zoomLevel, document: page, in: viewport, using: Self.paletteFit)
     }
 
-    /// A zoom the user chose (Zoom In, Zoom Out, a pinch): the page stops following the canvas's size.
-    private func userZoom(_ scale: Double) {
-        fitting = false
-        setZoom(scale)
+    /// Moves the zoom to `level`; the handle grab area follows a changed zoom.
+    private func setZoom(_ level: ZoomLevel) {
+        let before = zoom
+        zoomLevel = level
+        if zoom != before { model.setHandleTolerance(Double(SuiteSpacing.s) / zoom) }
     }
 
-    /// Zooms to show the whole selected page clear of the floating palette, once the canvas has been
-    /// laid out. The palette shows every tool while a page is open.
-    private func fit() {
-        guard let page = model.selectedPage, viewport != .zero else { return }
-        let size = CGSize(width: page.frameWidth, height: page.frameHeight)
-        setZoom(ZoomMath.fit(document: size, in: viewport, using: paletteFit))
+    /// A fitted page follows the canvas's new size, and the handle grab area with it.
+    private func viewportChanged(_ size: CGSize) {
+        let before = zoom
+        viewport = size
+        if zoom != before { model.setHandleTolerance(Double(SuiteSpacing.s) / zoom) }
     }
 
-    /// The fit EditorDetail hands Command-0: clear of the floating palette, which shows every tool
-    /// while a page is open.
-    private var paletteFit: @Sendable (CGSize, CGSize) -> Double {
-        let toolCount = DesignTool.allCases.count
-        return { viewport, artboard in
-            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
-        }
-    }
+    /// The fit EditorDetail hands Command-0: clear of the floating palette.
+    private static let paletteFit = EditorDetailLayout.paletteFit(toolCount: DesignTool.allCases.count)
 
     /// Zooms to fit the selection clear of the palette and keeps its rect for the canvas to
     /// scroll to; a refusal (nothing selected, or not built yet) goes to the status line.
@@ -341,13 +331,9 @@ struct DesignWindow: View, BodyCounted {
             note = model.zoomToSelectionHelp
             return
         }
-        userZoom(ZoomMath.fit(document: CGSize(width: rect.width, height: rect.height), in: viewport, using: paletteFit))
+        let size = CGSize(width: rect.width, height: rect.height)
+        setZoom(ZoomLevel(scale: ZoomMath.scale(.fit, document: size, in: viewport, using: Self.paletteFit)))
         show = rect
-    }
-
-    private func viewportChanged(_ size: CGSize) {
-        viewport = size
-        if fitting { fit() }
     }
 
     // MARK: Files
@@ -389,8 +375,8 @@ struct DesignWindow: View, BodyCounted {
         Self.liveAdopt = (read: { model }, write: { perform(.adoptLive($0)) })
         #endif
         if seeded {
-            fitting = true
-            return fit()
+            setZoom(.fit)
+            return
         }
         let options = DesignWindowOptions(arguments: ProcessInfo.processInfo.arguments)
         model.useServices(options.services)
@@ -411,8 +397,7 @@ struct DesignWindow: View, BodyCounted {
         Self.launchOptionsApplied = true
         if let name = options.fixture {
             if model.openFixture(name) {
-                fitting = true
-                fit()
+                setZoom(.fit)
             } else {
                 note = "No fixture named \(name)."
             }
@@ -449,8 +434,7 @@ struct DesignWindow: View, BodyCounted {
     private func open(_ url: URL) {
         do {
             try model.open(Data(contentsOf: url), at: url)
-            fitting = true
-            fit()
+            setZoom(.fit)
         } catch {
             problem = .opening(url.lastPathComponent, Self.reason(error))
         }
