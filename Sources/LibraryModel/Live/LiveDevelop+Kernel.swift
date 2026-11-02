@@ -47,7 +47,7 @@ extension LiveDevelop {
 
     /// `work(0) ... work(count - 1)` across the cores, in index order;
     /// rethrows the error of the lowest index that threw.
-    private static func inParallel<T: Sendable>(_ count: Int, _ work: @Sendable (Int) throws -> T) throws -> [T] {
+    static func inParallel<T: Sendable>(_ count: Int, _ work: @Sendable (Int) throws -> T) throws -> [T] {
         let results = Mutex<[Int: Result<T, any Error>]>([:])
         DispatchQueue.concurrentPerform(iterations: count) { i in
             let result = Result { try work(i) }
