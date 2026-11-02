@@ -9,8 +9,8 @@
   {
     "label": "the turn is skipped: a straightened crop cuts the upright pixels",
     "file": "Sources/LibraryModel/Live/LiveDevelop.swift",
-    "find": "let turned = crop.angle == 0 ? b : try b.rotated(degrees: crop.angle, filter: .lanczos3)",
-    "replace": "let turned = true ? b : try b.rotated(degrees: crop.angle, filter: .lanczos3)",
+    "find": "if crop.angle == 0 { return try b.cropped(",
+    "replace": "if true { return try b.cropped(",
     "tests": "LibraryCropRenderTests"
   },
   {
@@ -61,5 +61,26 @@
     "find": "return ImagingProgram.adjustments(adjust, tone: tone)",
     "replace": "return ImagingProgram.adjustments(adjust, tone: ToneRules.adjustments(s.tone.setting(.saturation, to: 0))) + (s.vibrance != 0 ? [.vibrance(Float(s.vibrance))] : [])",
     "tests": "LibraryDevelopColorTests"
+  },
+  {
+    "label": "the turned crop turns the other way",
+    "file": "Sources/LibraryModel/Live/LiveDevelop+Kernel.swift",
+    "find": "AffineMatrix(a: c, b: s, c: -s, d: c,",
+    "replace": "AffineMatrix(a: c, b: -s, c: s, d: c,",
+    "tests": "LibraryCropRenderTests"
+  },
+  {
+    "label": "every band reads the frame's top rows",
+    "file": "Sources/LibraryModel/Live/LiveDevelop+Kernel.swift",
+    "find": "ty: ty - Double(y0))",
+    "replace": "ty: ty)",
+    "tests": "LibraryCropRenderTests"
+  },
+  {
+    "label": "the frame's origin is dropped: the turned crop reads the canvas's top left",
+    "file": "Sources/LibraryModel/Live/LiveDevelop+Kernel.swift",
+    "find": "turnedW / 2 - Double(f.x) -",
+    "replace": "turnedW / 2 -",
+    "tests": "LibraryCropRenderTests"
   }
 ]
