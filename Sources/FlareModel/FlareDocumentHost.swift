@@ -4,8 +4,8 @@
 // File > Open Recent ▸, Open In from another app) becomes one
 // `FlareFileRequest.open(path:)` per animation, which the app opens in a new
 // window; an open with nothing in it is refused. `.new` is accepted and asks
-// for nothing: launching Flare already shows a window. A placed SVG is
-// refused with "Flare can't import SVG yet." until SVG import (E11), and
+// for nothing: launching Flare already shows a window. A placed SVG from
+// another app is refused with where to place it instead (`svgRefusal`), and
 // every other verb with Flare's reason; a refusal delivers nothing.
 // Linux-safe, Sendable.
 import SuiteModel

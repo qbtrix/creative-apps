@@ -1,8 +1,8 @@
 // RenderBudgetFlarePlaceTests.swift (svg-place quality row "place: a 2,000-path SVG on a live stage"): one place
 // of a 2,000-path SVG, sent through FlareWindow's debug-only `placeProbe` as the menu and drop send it, on a new
 // document with the stage live. `bodies` gates the window body at most 3 runs (target 1) and the status line's
-// report; `timing` gates the place step at 200 ms (svg-place.md's budget) and runs only with
-// FLARE_PLACE_TIMING=1 until Tests/perf-suites.txt lists it, so a loaded CI Mac can't redden the merge gate.
+// report; `timing` gates the place step at 200 ms (svg-place.md's budget) and is disabled until
+// Tests/perf-suites.txt lists it, so a loaded CI Mac can't redden the merge gate.
 // In BodyCountSuites: a global counter. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -31,7 +31,7 @@ extension BodyCountSuites {
             expectBodies(step, atMost: 3, target: 1)
         }
 
-        @Test(.timeLimit(.minutes(2)), .enabled(if: ProcessInfo.processInfo.environment["FLARE_PLACE_TIMING"] == "1"))
+        @Test(.timeLimit(.minutes(2)), .disabled("waits on its Tests/perf-suites.txt line"))
         func timing() async throws {
             guard let (step, _) = try await Self.run() else { return }
             expectP95(step, atMost: 200, target: 100)
