@@ -1,7 +1,8 @@
 // LibraryLoupeZoomTests.swift: the loupe's zoom (loupe-viewport LV-1, #724):
 // fit, 100% and the steps between 12.5% and 800%, stepped from the scale the
 // loupe draws at now, and the View menu's zoom titles following the browse
-// mode. Runs on Linux and macOS.
+// mode. The loupe steps its own stop table on the suite's zoom model
+// (LibraryCatalog.loupeZoomSteps, SuiteKernel's ZoomSteps). Runs on Linux and macOS.
 import LibraryModel
 import Testing
 
@@ -18,7 +19,7 @@ private func loupeCatalog() throws -> LibraryCatalog {
     #expect(LoupeZoom.fit.scale(fit: 0.3) == 0.3)
     #expect(LoupeZoom.actual.scale(fit: 0.3) == 1)
     #expect(LoupeZoom.scale(4).scale(fit: 0.3) == 4)
-    #expect(LoupeZoom.steps == [0.125, 0.25, 0.5, 1, 2, 4, 8])
+    #expect(LibraryCatalog.loupeZoomSteps.stops == [0.125, 0.25, 0.5, 1, 2, 4, 8])
 }
 
 @Test func aFitThatIsNotAScaleDrawsAtActualSize() {
@@ -41,6 +42,22 @@ private func loupeCatalog() throws -> LibraryCatalog {
     #expect(catalog.loupeZoom == .scale(8))
     catalog.stepZoom(by: 1, fitScale: 0.3)
     #expect(catalog.loupeZoom == .scale(8))
+}
+
+@Test func aPinchPastEitherEndStaysPutOnTheStepTowardIt() throws {
+    var catalog = try loupeCatalog()
+    // A pinch can go past 800% (to 3200%) or under 12.5% (to 10%); stepping further that way changes nothing.
+    catalog.zoomLoupe(.scale(20))
+    catalog.stepZoom(by: 1, fitScale: 0.3)
+    #expect(catalog.loupeZoom == .scale(20))
+    catalog.stepZoom(by: -1, fitScale: 0.3)
+    #expect(catalog.loupeZoom == .scale(8))
+    catalog.zoomLoupe(.scale(0.1))
+    catalog.stepZoom(by: -1, fitScale: 0.3)
+    #expect(catalog.loupeZoom == .scale(0.1))
+    #expect(catalog.help(.zoomIn(fitScale: 0.3)) == nil)
+    catalog.zoomLoupe(.scale(20))
+    #expect(catalog.help(.zoomIn(fitScale: 0.3)) != nil)
 }
 
 @Test func zoomingOutFromActualGivesHalfAndStopsAtTheFirst() throws {

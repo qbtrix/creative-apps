@@ -13,7 +13,9 @@
 // "Preview data" warning pill, then
 // `model.statusPills` from the canvas's `measuredFPS` (IT-9): aspect and rate, the rate shown while playing (a warning
 // while frames drop), "Text not shown (n)" and, under Direct Select, why no points can be edited (`pathHelp`). A drag out of a ruler pulls a guide (FlareStageGuides, SE-2); the hidden
-// `flare.stage.zoom` reads the zoom for journeys. It only reads `model`; every change goes through `perform`.
+// `flare.stage.zoom` reads the zoom for journeys. A pinch zooms about the pointer and the viewport's zoom keys step
+// Flare's stops (the shared CanvasViewport over FlareWorkspace.zoomSteps), handed to the window through `onZoom`.
+// It only reads `model`; every change goes through `perform`.
 // A file dropped on the stage follows the suite's drop rule (file-flow FL-2, `suiteFileDrop`): a .flare opens
 // through the app's document host, another app's file goes to that app, and the mark at the bottom says which
 // before the drop. A Lottie .json, which no suite type names, is planned as Flare's own open (`opens`), so the
@@ -21,6 +23,7 @@
 import AppKit
 import FlareCore
 import FlareModel
+import enum SuiteKernel.ZoomLevel
 import SuiteShell
 import SuiteUI
 import SwiftUI
@@ -40,6 +43,8 @@ struct FlareStage: View {
     var guideDrag: FlareGuideDrag? = nil
     /// The fit's zoom, reported as the viewport changes, so Zoom In from the fit steps from it.
     var onFit: @MainActor (Double) -> Void = { _ in }
+    /// A zoom the stage asks for itself (pinch, its zoom keys): nil to fit, else the scale.
+    var onZoom: @MainActor (Double?) -> Void = { _ in }
     @State private var liveGuide: FlareGuideDrag?
     /// The gesture under way's first point, in scene points; nil between drags.
     @State private var dragStart: CGPoint?
@@ -54,7 +59,7 @@ struct FlareStage: View {
             let fit = ZoomMath.fit(document: size, in: viewport)
             let scale = zoom ?? fit
             VStack(spacing: 0) {
-                stage(size: size, scale: scale)
+                stage(size: size, scale: scale, fit: fit)
                 ViewerStatusBar(zoom: scale, size: Self.sizeText(size)) {
                     if let status = model.saveStatus {
                         // Its tooltip is why the save failed.
@@ -69,7 +74,7 @@ struct FlareStage: View {
                 }
             }
             .overlay(alignment: .topLeading) {
-                ProbeElement(Self.zoomIdentifier, label: FlareZoom.readout(zoom), size: CGSize(width: 1, height: 1))
+                ProbeElement(Self.zoomIdentifier, label: FlareWorkspace.zoomReadout(zoom), size: CGSize(width: 1, height: 1))
             }
             .onChange(of: fit, initial: true) { _, fit in onFit(fit) }
             .accessibilityElement(children: .contain)
@@ -130,9 +135,10 @@ struct FlareStage: View {
 
     /// The viewport with the art, the marks and the floating palette. The palette starts inside the vertical
     /// ruler, so it never covers the ruler's numbers.
-    private func stage(size: CGSize, scale: Double) -> some View {
+    private func stage(size: CGSize, scale: Double, fit: Double) -> some View {
         CanvasViewport(
             documentSize: size, zoom: scale, checkerboard: false, showsRulers: showsRulers, onSize: { viewport = $0 },
+            onZoomLevel: { onZoom($0 == .fit ? nil : $0.scale(fit: fit)) }, zoomSteps: FlareWorkspace.zoomSteps,
             onDrag: { previous, current in drag(from: previous, to: current, scale: scale) },
             onDragEnd: endDrag, onKey: key, onRulerDrag: { rulerDrag($0) }
         ) {

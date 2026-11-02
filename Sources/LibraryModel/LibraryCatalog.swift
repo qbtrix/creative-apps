@@ -21,11 +21,8 @@ public enum ImportState: Hashable, Sendable {
     case running(ImportProgress)
 }
 
-/// The loupe's zoom: fit to the window, 100%, or a scale (1 is 100%).
-public enum LoupeZoom: Hashable, Sendable {
-    case fit, actual
-    case scale(Double)
-}
+/// The loupe's zoom: fit to the window, 100%, or a scale (1 is 100%); the suite's ZoomLevel.
+public typealias LoupeZoom = ZoomLevel
 
 /// A thumbnail asked of the services; `token` lets a stale answer be dropped.
 public struct ThumbnailRequest: Hashable, Sendable {
