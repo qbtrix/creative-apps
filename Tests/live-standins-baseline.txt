@@ -9,7 +9,6 @@ Sources/FlareModel/FlareServices.swift: machines: NotBuilt(reason: "Not connecte
 Sources/FlareModel/FlareServices.swift: preview: NotBuilt(reason: "Not connected yet (IN-6)."),  ## Flare IN-6 state machines
 Sources/FlareModel/FlareServices.swift: assist: NotBuilt(reason: "Assist needs the suite's model provider."),  ## Flare IN-8 #389
 Sources/HaloModel/HaloServices.swift: text: (any TextRasterizing)? = nil  ## #5280 (Halo headless runs .live with no text)
-Sources/LibraryApp/LibraryApp.swift: static let host = LibraryCatalog(services: .fake())  ## file-flow (Library) #3479
 Sources/LibraryModel/LibraryHeadless.swift: var services = LibraryServices.fake()  ## kept: the headless catalog decodes its own file's images (PNG.read); live culling and coding replace the fakes
 Sources/LibraryModel/LibraryLaunch.swift: looks: any PresetStoring = FakePresetStore(),  ## adjust-everywhere #3777 (LibraryWindow passes the suite's PresetStore; the default stays for headless runs)
 Sources/LibraryModel/LibraryLaunch.swift: sidecars: any SidecarWriting = UnconnectedSidecars()) -> LibraryServices {  ## metadata-more #1555 (LibraryWindow passes XMPSidecarWriter; the default stays off)
