@@ -352,4 +352,34 @@ python3 "$ts" perf-report "$tmp/died.log" >/dev/null 2>"$tmp/warnings"
 check "a run with no result line warns" '::warning title=Perf::the perf run printed no result line; it died or timed out' \
   "$(cat "$tmp/warnings")"
 
+# slow: a --no-parallel run's xUnit file against the slow baseline.
+cat >"$tmp/slow.xml" <<'XML'
+<testsuites><testsuite name="TestResults">
+<testcase classname="PhotoModelTests.PhotoPlaceTests" name="largeFitsCanvas()" time="12.5"/>
+<testcase classname="LibraryModelTests.LibraryHeadlessTests" name="realJobPasses(job:)" time="6"/>
+<testcase classname="LibraryModelTests.LibraryHeadlessTests" name="realJobPasses(job:)" time="6"/>
+<testcase classname="AfterGlowCLITests.RealJobsTests" name="listed()" time="30"/>
+<testcase classname="SuiteModelTests" name="aFreeTest()" time="0.2"/>
+<testcase classname="SuiteModelTests.QuickTests" name="fast()" time="0.01"/>
+</testsuite></testsuites>
+XML
+printf '%s\n' '# slow' 'AfterGlowCLITests.RealJobsTests/listed' 'SuiteModelTests.aFreeTest' 'SuiteModelTests.GoneTests/gone' >"$tmp/slow-baseline.txt"
+slow=$(SLOW_BASELINE="$tmp/slow-baseline.txt" python3 "$ts" slow "$tmp/slow.xml"); status=$?
+check "slow fails on an unlisted test over 10 s" 1 "$status"
+check "slow names each new offender with its heavy-list line, and only those" \
+  "::error title=Slow test::PhotoModelTests.PhotoPlaceTests/largeFitsCanvas took 12.5 s alone (over 10 s) in the shared parallel pass, where it starves the time-limited suites (#5321). Shrink its fixture, or add 'photo PhotoModelTests.PhotoPlaceTests/largeFitsCanvas' to Tests/heavy-suites.txt;::error title=Slow test::LibraryModelTests.LibraryHeadlessTests/realJobPasses took 12.0 s alone (over 10 s) in the shared parallel pass, where it starves the time-limited suites (#5321). Shrink its fixture, or add 'library LibraryModelTests.LibraryHeadlessTests/realJobPasses' to Tests/heavy-suites.txt" \
+  "$(grep '^::error' <<<"$slow" | paste -sd';' -)"
+check "slow only notes baseline lines that got fast or are gone" \
+  "note: Tests/slow-baseline.txt: SuiteModelTests.GoneTests/gone did not run: drop its line if it is gone;note: Tests/slow-baseline.txt: SuiteModelTests.aFreeTest now takes 0.2 s: drop its line" \
+  "$(grep '^note' <<<"$slow" | paste -sd';' -)"
+check "slow prints the would-be baseline, a CLI test under the suite scope" \
+  "AfterGlowCLITests.RealJobsTests/listed  # 30.0 s;LibraryModelTests.LibraryHeadlessTests/realJobPasses  # 12.0 s;PhotoModelTests.PhotoPlaceTests/largeFitsCanvas  # 12.5 s" \
+  "$(sed -n '/as Tests\/slow-baseline.txt lines:$/,$p' <<<"$slow" | sed 1d | paste -sd';' -)"
+printf '%s\n' 'AfterGlowCLITests.RealJobsTests/listed' 'PhotoModelTests.PhotoPlaceTests/largeFitsCanvas' 'LibraryModelTests.LibraryHeadlessTests/realJobPasses' >"$tmp/slow-baseline.txt"
+SLOW_BASELINE="$tmp/slow-baseline.txt" python3 "$ts" slow "$tmp/slow.xml" >/dev/null; status=$?
+check "slow passes when every test over 10 s is listed" 0 "$status"
+printf '<testsuites/>\n' >"$tmp/empty.xml"
+SLOW_BASELINE="$tmp/slow-baseline.txt" python3 "$ts" slow "$tmp/empty.xml" >/dev/null 2>&1; status=$?
+check "slow fails when the run wrote no test cases" 1 "$status"
+
 exit $fail
