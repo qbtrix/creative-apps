@@ -166,7 +166,6 @@ struct StageRasterizer: FrameRasterizing {
         return CGGradient(colorsSpace: space, colors: colors, locations: locations)
     }
 
-    /// `image` as PNG bytes through ImageIO.
     /// Whether an item carries a mask or a matte, which only FlareRaster draws.
     static func isGated(_ list: StageDrawList) -> Bool {
         list.items.contains { !$0.isText && (!$0.clips.isEmpty || $0.matte != nil) }
@@ -184,6 +183,7 @@ struct StageRasterizer: FrameRasterizing {
         return image
     }
 
+    /// `image` as PNG bytes through ImageIO.
     private static func encodePNG(_ image: CGImage) throws -> Data {
         let data = NSMutableData()
         guard let destination = CGImageDestinationCreateWithData(data, "public.png" as CFString, 1, nil) else {
