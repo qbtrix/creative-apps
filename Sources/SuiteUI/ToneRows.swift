@@ -10,6 +10,7 @@
 // once under their section).
 import Foundation
 import SuiteImaging
+import SuiteKernel
 import SwiftUI
 
 /// `hidden` drops sliders an app shows elsewhere (Photo keeps its own Exposure section).
@@ -70,7 +71,7 @@ public struct ToneRows: View {
 
     /// One gesture sample: the open token (opened on the first sample), then the one intent it asks for.
     private func sample(_ intent: (String) -> ToneIntent?) {
-        let token = ToneRowsRules.token(drag)
+        let token = CoalesceKey.token(drag)
         if drag == nil { drag = token }
         if let intent = intent(token) { onIntent(intent) }
     }
@@ -128,9 +129,6 @@ struct ToneRowsRules: Sendable {
     }
 
     var auto: ToneIntent? { autoReason == nil ? .auto : nil }
-
-    /// The open gesture's token, or a new one for its first sample.
-    nonisolated static func token(_ open: String?) -> String { open ?? UUID().uuidString }
 
     /// A whole step shows no decimals; Exposure two, Radius one.
     nonisolated static func decimals(_ slider: ToneSlider) -> Int { slider.step < 0.1 ? 2 : slider.step < 1 ? 1 : 0 }

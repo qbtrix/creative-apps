@@ -78,7 +78,7 @@ public struct TransformRows: View {
     /// One row edit: the gesture's token (made on its first change), then the one intent it asks for.
     private func edit(_ row: TransformRow, to value: Double) {
         guard let selection else { return }
-        let token = drag ?? UUID().uuidString
+        let token = CoalesceKey.token(drag)
         drag = token
         guard let intent = Self.intent(row, to: value, from: selection, drag: token, mixed: rotationMixed, turned: turned)
         else { return }
