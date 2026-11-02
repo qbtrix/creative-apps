@@ -48,6 +48,21 @@ private func threeRectangles() -> DesignWorkspace {
     #expect(workspace.selectedNodeIDs == ["node-3"])
 }
 
+/// #5838: a plain click without a move on one layer of several selected picks that layer alone (dev journey
+/// testGroupAndUngroup's ⌘-click then added a third layer); a drag from it still moves them all.
+@Test func aPlainClickOnOneOfSeveralSelectedPicksItAlone() {
+    var workspace = threeRectangles()
+    workspace.toggleSelection("node-2")
+    workspace.toggleSelection("node-3")
+    workspace.gesture(.move, pt(150, 150), pt(160, 150))
+    #expect(workspace.selectedNodeIDs == ["node-2", "node-3"])
+    #expect(workspace.frame("node-3") == rc(410, 100, 200, 200))
+    workspace.gesture(.move, pt(160, 150), pt(160, 150))
+    #expect(workspace.selectedNodeIDs == ["node-2"])
+    workspace.toggleSelection("node-4")
+    #expect(workspace.selectedNodeIDs == ["node-2", "node-4"])
+}
+
 @Test func theLastLayerAddedIsThePrimaryUntilItLeaves() {
     var workspace = threeRectangles()
     for id in ["node-4", "node-2", "node-3"] { workspace.toggleSelection(id) }
