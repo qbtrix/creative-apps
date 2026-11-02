@@ -1,0 +1,6 @@
+[
+  {"label": "onceEndsOnArrival: play-once ends as soon as the last frame shows, not after its time", "file": "Sources/SuiteKernel/Playback/PlaybackTiming.swift", "find": ">= Double(durationFrames)", "replace": ">= Double(last)", "tests": "PlaybackTimingTests"},
+  {"label": "startIgnored: the start frame's time is not added, so a late start plays from frame 0", "file": "Sources/SuiteKernel/Playback/PlaybackTiming.swift", "find": "let seconds = elapsed + rate.seconds(ofFrame: start)", "replace": "let seconds = elapsed", "tests": "PlaybackTimingTests"},
+  {"label": "pingPongNoReflect: ping-pong wraps like a loop instead of running back", "file": "Sources/SuiteKernel/Playback/PlaybackTiming.swift", "find": "frame: m <= last ? m : period - m", "replace": "frame: min(m, last)", "tests": "PlaybackTimingTests"},
+  {"label": "wholeRate: the clock counts the nominal whole rate, so 29.97 drifts to 30", "file": "Sources/SuiteKernel/Playback/PlaybackTiming.swift", "find": "SceneRate(numerator: rate.numerator, denominator: rate.denominator)", "replace": "SceneRate(whole: rate.nominal)", "tests": "PlaybackTimingTests"}
+]

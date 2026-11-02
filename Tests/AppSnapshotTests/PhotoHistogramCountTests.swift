@@ -27,7 +27,7 @@ import Testing
         try await counts.waitForStarts(1)
         for step in 1...4 {
             model.adjust(.exposure(Float(step) / 10))
-            w.host.rootView = AdjustmentsPanel(model: model, perform: { _ in }, count: counts.count)
+            w.rootView = AdjustmentsPanel(model: model, perform: { _ in }, count: counts.count)
             try await counts.waitForStarts(step + 1)
         }
         counts.release()

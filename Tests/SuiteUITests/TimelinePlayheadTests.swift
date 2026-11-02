@@ -70,6 +70,9 @@ import Testing
         let lane = Double(SuiteSize.timelineLane)
         #expect(TimelinePlayhead.rows(showing: lane * 2...lane * 5, count: 300) == 2..<5)
         #expect(TimelinePlayhead.rows(showing: nil, count: 3) == 0..<3)
+        // A range taller than the tracks, or reported before they shrank, stops at the last row (the lanes slice it).
+        #expect(TimelinePlayhead.rows(showing: 0...lane * 9, count: 3) == 0..<3)
+        #expect(TimelinePlayhead.rows(showing: lane * 5...lane * 9, count: 3) == 3..<3)
     }
 
     /// A row half under the ruler or half off the bottom is still in view, so its key draws keyed (#1745).

@@ -1,7 +1,7 @@
 {
   "id": "imaging-adjust-kinds",
   "name": "Adjust kinds, filters and looks",
-  "description": "The adjust-everywhere part of Adjust/: AdjustKinds (GrayWeights, ImagingKind's Black & White and Invert compiled to a GPU tone program and its CPU twin, and ImagingFilter's five filters with their ranges), FilterRules (each filter over creative-core on a layer's padded bounds, mixed by a selection's coverage), LookPresets (LookPreset and the six BuiltInLooks) and AdjustCommands, the adjust.*, filter.* and look.* commands an app adds on an AdjustTarget, each edit one undo step. adjust-everywhere AJ-1 and AJ-2 declare them as stubs; AJ-5, AJ-5f and AJ-6 fill the bodies.",
+  "description": "The adjust-everywhere part of Adjust/: AdjustKinds (GrayWeights, ImagingKind's Black & White and Invert compiled to a GPU tone program and its CPU twin, and ImagingFilter's five filters with their ranges), FilterRules (each filter over creative-core on a layer's padded bounds, mixed by a selection's coverage), LookPresets (LookPreset and the six BuiltInLooks) and AdjustCommands, the adjust.*, filter.* and look.* commands an app adds on an AdjustTarget, each edit one undo step. Photo (PhotoAdjust+Kernel: filters on the selected pixel layer inside the selection, B&W and Invert as adjustments and layer kinds), Library (LibraryLooks+Kernel: Black & White and looks on whole photos, filters unavailable) and Halo (HaloFilters+Kernel: a per-layer list drawn live and in the render) adopt them through their catalogs.",
   "technology": "Swift 6, CoreRaster, CoreRender and SuiteKernel, Linux and macOS",
   "paths": [
     "Sources/SuiteImaging/Adjust/AdjustKinds.swift",

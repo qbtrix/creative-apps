@@ -12,7 +12,9 @@
 // that row selected (a row already picked keeps every pick, as Delete and Hide
 // act on all of them), and a pick selects an unpicked row, then runs. Every
 // picked layer draws selected, and a row click leaves as `pickLayer` with its
-// mode (multi-layer-select PM-3). Values in, intents out.
+// mode (multi-layer-select PM-3). Values in, intents out. In a window it reads
+// the PhotoSession's `document` facet; without one (the snapshots) the
+// workspace it was given.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -20,10 +22,20 @@ import SwiftUI
 
 /// The layer rows, then the row of layer commands.
 struct PhotoLayerList: View {
-    let model: PhotoWorkspace
+    private let given: PhotoWorkspace
     let perform: PhotoPerform
+    @Environment(PhotoSession.self) private var session: PhotoSession?
+
+    init(model: PhotoWorkspace, perform: @escaping PhotoPerform) {
+        (given, self.perform) = (model, perform)
+    }
+
+    /// The window's workspace now, read through the `document` facet; the given one outside a window.
+    private var model: PhotoWorkspace { session?.workspace(reading: .document) ?? given }
 
     var body: some View {
+        let model = self.model
+        let menu = PhotoMenu(model: model, perform: perform)
         VStack(alignment: .leading, spacing: 0) {
             LayerTreeList(
                 rows: model.layerRows, childCount: { _ in 0 }, selected: Self.selected(model),
@@ -43,9 +55,6 @@ struct PhotoLayerList: View {
             LayerActionBar(Self.bar(menu))
         }
     }
-
-    /// The Layer menu's target over this panel's workspace.
-    private var menu: PhotoMenu { PhotoMenu(model: model, perform: perform) }
 
     /// The rows drawn picked: every selected layer's id.
     nonisolated static func selected(_ model: PhotoWorkspace) -> Set<String> {

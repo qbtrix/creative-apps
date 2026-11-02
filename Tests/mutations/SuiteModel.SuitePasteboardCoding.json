@@ -19,5 +19,19 @@
   "find": ".heic, .svg, .fileURL],",
   "replace": ".heic, .svg, .plainText, .fileURL],",
   "tests": "SuitePasteboardCodingTests"
+ },
+ {
+  "label": "styleTypeRead: any type on offer read as a style",
+  "file": "Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift",
+  "find": "offered.first { $0.type == .layerStyle }?.data",
+  "replace": "offered.first?.data",
+  "tests": "SuitePasteboardCodingTests"
+ },
+ {
+  "label": "styleGoesAsText: a copied style written as plain text",
+  "file": "Sources/SuiteModel/Pasteboard/SuitePasteboardCoding.swift",
+  "find": "[TypedData(type: .layerStyle, data: json)]",
+  "replace": "[TypedData(type: .plainText, data: json)]",
+  "tests": "SuitePasteboardCodingTests"
  }
 ]

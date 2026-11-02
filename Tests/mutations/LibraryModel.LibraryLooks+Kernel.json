@@ -1,0 +1,7 @@
+[
+  {"label": "a look changes only the first selected photo (.wholeSelection)", "file": "Sources/LibraryModel/LibraryLooks+Kernel.swift", "find": "developStep(name, ids: ids)", "replace": "developStep(name, ids: Set(ids.prefix(1)))", "tests": "LibraryLooksTests"},
+  {"label": "an old catalog gains a null bw key (.oldCatalogBytesUnchanged)", "file": "Sources/LibraryModel/Contracts/DevelopValues.swift", "find": "if let bw { try c.encode(bw, forKey: .bw) }", "replace": "try c.encode(bw, forKey: .bw)", "tests": "LibraryLooksTests"},
+  {"label": "Invert is written as false on every photo (.oldCatalogBytesUnchanged)", "file": "Sources/LibraryModel/Contracts/DevelopValues.swift", "find": "if invert { try c.encode(true, forKey: .invert) }", "replace": "try c.encode(invert, forKey: .invert)", "tests": "LibraryLooksTests"},
+  {"label": "a weight drag drops Invert (.weightDragIsOneStep)", "file": "Sources/LibraryModel/LibraryLooks+Kernel.swift", "find": "[.blackAndWhite(weights)] + $0.develop.kinds.filter { $0 == .invert }", "replace": "[.blackAndWhite(weights)]", "tests": "LibraryLooksTests"},
+  {"label": "each weight sample is its own step (.weightDragIsOneStep)", "file": "Sources/LibraryModel/LibraryLooks+Kernel.swift", "find": "recordEdit(\"Black & White\", coalesceKey: coalesceKey,", "replace": "recordEdit(\"Black & White\", coalesceKey: nil,", "tests": "LibraryLooksTests"}
+]

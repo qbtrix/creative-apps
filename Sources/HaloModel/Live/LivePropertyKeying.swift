@@ -1,7 +1,7 @@
 // Live/LivePropertyKeying.swift: the live PropertyKeying (#38). Its rows,
-// typed values, stopwatch, key diamond and parent picker are real, all from
-// HaloKeyRules (values sampled by FlareCore, section 2's not-animated rule,
-// a new parent keeping the child on screen). Linux-safe.
+// typed values, stopwatch, key diamond, batch key delete and parent picker
+// are real, all from HaloKeyRules (values sampled by FlareCore, section 2's
+// not-animated rule, a new parent keeping the child on screen). Linux-safe.
 
 public struct LivePropertyKeying: PropertyKeying {
     public init() {}
@@ -29,5 +29,8 @@ public struct LivePropertyKeying: PropertyKeying {
         _ parentID: String?, of layerID: String, at frame: Int, in composition: inout HaloComposition
     ) throws {
         try HaloKeyRules.setParent(parentID, of: layerID, at: frame, in: &composition)
+    }
+    public func deleteKeys(_ keys: Set<HaloKeyRef>, in composition: inout HaloComposition) {
+        HaloKeyRules.deleteKeys(keys, in: &composition)
     }
 }

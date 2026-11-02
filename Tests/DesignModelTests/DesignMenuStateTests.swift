@@ -68,6 +68,14 @@ struct DesignMenuStateTests {
         #expect(spec.availability(DesignMenuState()).why == "Open a Design window to see its history.")
     }
 
+    /// The timeline's collapse button drives the window, not the file: a view command with no catalog entry.
+    @Test func timelineCollapseNeedsAWindow() {
+        let spec = DesignMenuState.spec("view.timeline")
+        #expect(spec.title == "Hide Timeline" && DesignWorkspace.catalog.spec("view.timeline") == nil)
+        #expect(spec.availability(DesignMenuState(hasWindow: true)).why == nil)
+        #expect(spec.availability(DesignMenuState()).why == "Open a Design window to see its timeline.")
+    }
+
     @Test func runGoesThroughTheCatalog() throws {
         var state = DesignMenuState(workspace: DesignFixtures.cards, hasWindow: true)
         let pages = state.workspace.pages.count

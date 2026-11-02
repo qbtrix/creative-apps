@@ -105,6 +105,8 @@ public enum DesignControlID {
     /// so it is left out of `all`.
     public static let layers = "design.layers"
     public static let pageAdd = "design.page.add"
+    /// The sidebar's Layers | AI switch (DesignSidebarTabs); each segment is `<id>.<tab>`.
+    public static let sidebarTabs = "design.sidebar.tabs"
     public static let pageDelete = "design.page.delete"
     public static let inspectorHeader = "design.inspector.header"
     public static let inspectorFill = "design.inspector.fill"
@@ -133,6 +135,7 @@ public enum DesignControlID {
     public static let exportFormat = "design.export.format"
     public static let exportScale = "design.export.scale"
     public static let exportScope = "design.export.scope"
+    public static let exportFrame = "design.export.frame"
     public static let exportItems = "design.export.items"
     public static let exportRun = "design.export.start"
     public static let exportCancel = "design.export.cancel"
@@ -148,6 +151,10 @@ public enum DesignControlID {
     /// A Distribute button: "design.distribute.horizontal".
     public static func distribute(_ axis: DesignDistributeAxis) -> String { "design.distribute.\(axis.rawValue)" }
 
+    /// The key button beside an inspector row (one-document OD-13): "design.inspector.key.x". Its diamond's id is
+    /// SuiteUI's KeyframeButton.diamondID of this one.
+    public static func inspectorKey(_ property: DesignKeyProperty) -> String { "design.inspector.key.\(property.rawValue)" }
+
     /// A Transform section flip button, by the kernel's FlipDirection raw value: "design.inspector.flip-horizontal".
     public static func inspectorFlip(_ axis: String) -> String { "design.inspector.flip-\(axis)" }
 
@@ -155,6 +162,7 @@ public enum DesignControlID {
     public static let all: [String] = [
         canvas, canvasSelection, canvasHover, canvasBadge, canvasGuides, canvasMarquee,
         statusTool, statusSave, statusSelection, statusNote, pageAdd, pageDelete,
+        sidebarTabs, sidebarTabs + ".layers", sidebarTabs + ".ai",
         inspectorHeader, inspectorFill, inspectorFillType, inspectorCornerRadius, inspectorOpacity,
         inspectorStrokeColor, inspectorStrokeWidth, inspectorStrokeAdd, inspectorStrokeRemove,
         inspectorTextFamily, inspectorTextSize,
@@ -164,5 +172,5 @@ public enum DesignControlID {
         exportCancel, exportDone, exportResult,
     ] + DesignToolbarItem.allCases.map(\.identifier) + DesignTool.allCases.map(tool)
         + DesignFrameField.allCases.map(frameField) + DesignAlignEdge.allCases.map(align)
-        + DesignDistributeAxis.allCases.map(distribute)
+        + DesignDistributeAxis.allCases.map(distribute) + DesignKeyProperty.allCases.map(inspectorKey)
 }

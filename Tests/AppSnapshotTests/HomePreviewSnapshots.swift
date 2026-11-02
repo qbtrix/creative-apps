@@ -19,7 +19,7 @@ import Testing
         await previews.load(refs, from: thumbnails)
         #expect(model.state.cards.map { previews.kind(for: $0.item.ref) } == [.preview, .preview, .preview, .mark])
         for appearance in [SnapshotAppearance.light, .dark] {
-            assertGolden(HomePreviewFixture.grid(model, services, previews: previews), size: CGSize(width: 800, height: 420),
+            assertGolden(HomePreviewFixture.grid(model, services, previews: previews), size: CGSize(width: 800, height: 460),
                          name: "home-recents-previews", area: "afterglow", appearance: appearance)
         }
     }

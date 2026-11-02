@@ -115,9 +115,9 @@ struct GalleryCanvasDocument: CanvasContentProviding {
 }
 
 /// CanvasHost on the gallery document, its event log and status line under it.
-struct CanvasHostPage: View {
+struct CanvasHostPage: View, BodyCounted {
     #if DEBUG
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     @State private var log: CanvasHostLog
     @State private var document: GalleryCanvasDocument
@@ -131,7 +131,7 @@ struct CanvasHostPage: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(spacing: 0) {
             CanvasHost(content: document, delegate: log)

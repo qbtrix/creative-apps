@@ -54,5 +54,26 @@
     "find": "        hasher.combine(undone)\n",
     "replace": "",
     "tests": "SuiteKernelTests.HistoryHashTests"
+  },
+  {
+    "label": "an agent step drops its open request, so a span's steps carry none",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "origin = .agent(client: client, request: openRequest)",
+    "replace": "origin = .agent(client: client, request: nil)",
+    "tests": "SuiteKernelTests.HistoryOriginTests/agentStepsInsideARequestCarryItsName"
+  },
+  {
+    "label": "a run folds across origins, so a user drag folds into an agent's step",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "if let key, key == openKey, done.last?.origin == origin {",
+    "replace": "if let key, key == openKey, !done.isEmpty {",
+    "tests": "SuiteKernelTests.HistoryOriginTests/aRunFoldsOnlyAcrossOneOrigin"
+  },
+  {
+    "label": "a step forgets its origin, so every step reads as the user's",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "idAfter: after, origin: origin))",
+    "replace": "idAfter: after))",
+    "tests": "SuiteKernelTests.HistoryOriginTests/stepsAreTheUsersUnlessALiveCallSetsTheOrigin"
   }
 ]

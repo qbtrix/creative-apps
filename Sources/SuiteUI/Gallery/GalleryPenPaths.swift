@@ -91,12 +91,11 @@ struct GalleryPenPathsPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-            Picker("Tool", selection: $tool) {
-                ForEach(PenTool.allCases, id: \.self) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
+            SegmentedTabs(
+                "Tool", tabs: PenTool.allCases.map { InspectorOption(id: $0, title: $0.title) }, selection: tool,
+                id: "suite.gallery.pen-tool"
+            ) { tool = $0 }
             .fixedSize()
-            .accessibilityIdentifier("suite.gallery.pen-tool")
             SuiteColor.artboard
                 .frame(width: SuiteSize.contentMinimum.width, height: SuiteSize.contentMinimum.height)
                 .overlay(alignment: .topLeading) {

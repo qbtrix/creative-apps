@@ -1,8 +1,10 @@
 // HaloHistoryArea.swift (autosave-history HA-2): the History panel and the
 // autosave hooks on Halo's window (packet
 // docs/blueprints/halo/features/autosave-history.md). `historyScene(_:)`, one
-// line in HaloWindow's hooks, puts SuiteUI's HistoryPanel over the window's
-// bottom trailing corner while the HaloHistoryShelf says so, reading the
+// line in HaloWindow's hooks, hands the window's HaloHistoryShelf and its
+// jump down the environment, and HaloHistoryOverlay, which HaloViewer lays over
+// the viewer's bottom trailing corner (never over the status row or timeline,
+// #5844), draws SuiteUI's HistoryPanel while the shelf says so, reading the
 // Model's `historyListing` (the kernel `History.listing`) and sending a row's
 // jump to the Model's `jumpHistory(to:)`; and `.autosaveRecovery` with the
 // hooks the Model gives: the file name, the unsaved mark and HaloFiles' bytes,
@@ -32,6 +34,29 @@ import SwiftUI
 extension EnvironmentValues {
     /// The window's History shelf; nil outside a Halo window, where the History button is disabled.
     @Entry var haloHistoryShelf: HaloHistoryShelf?
+    /// Where the History panel sends a row's jump: the window's `jumpHistory(_:)`.
+    @Entry var haloHistoryJump: @MainActor (Int) -> Void = { _ in }
+}
+
+/// The History panel while the shelf says so, at the bottom trailing corner of
+/// whatever it overlays: the viewer, so it never covers its own button, the
+/// status row or the timeline (#5844, H-J13). It reads `model`'s listing and
+/// shrinks to a short viewer rather than spill out of it.
+struct HaloHistoryOverlay: View {
+    let model: HaloProject
+    @Environment(\.haloHistoryShelf) private var shelf
+    @Environment(\.haloHistoryJump) private var jump
+
+    var body: some View {
+        if shelf?.shown == true {
+            HistoryPanel(listing: model.historyListing, onJump: jump)
+                .frame(maxWidth: SuiteSize.editorPanelWidth, maxHeight: SuiteSize.editorPanelWidth)
+                .background(SuiteColor.panel, in: RoundedRectangle(cornerRadius: SuiteRadius.large))
+                .overlay(RoundedRectangle(cornerRadius: SuiteRadius.large).stroke(SuiteColor.outline))
+                .padding(SuiteSpacing.m)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        }
+    }
 }
 
 extension HaloWindow {
@@ -61,7 +86,7 @@ extension HaloWindow {
     }
 }
 
-/// The panel over the window and the autosave hooks; it reads `model` and sends each jump to `onJump` once.
+/// The shelf, the jump and the autosave hooks over the window; HaloHistoryOverlay draws the panel from them.
 struct HaloHistoryArea: ViewModifier {
     let model: HaloProject
     /// Puts a recovered copy's bytes in the window; the snapshots' host keeps no copies, so never calls it.
@@ -72,18 +97,9 @@ struct HaloHistoryArea: ViewModifier {
     @State private var own = HaloHistoryShelf()
 
     func body(content: Content) -> some View {
-        let shelf = given ?? own
         content
-            .overlay(alignment: .bottomTrailing) {
-                if shelf.shown {
-                    HistoryPanel(listing: model.historyListing, onJump: onJump)
-                        .frame(width: SuiteSize.editorPanelWidth, height: SuiteSize.editorPanelWidth)
-                        .background(SuiteColor.panel, in: RoundedRectangle(cornerRadius: SuiteRadius.large))
-                        .overlay(RoundedRectangle(cornerRadius: SuiteRadius.large).stroke(SuiteColor.outline))
-                        .padding(SuiteSpacing.m)
-                }
-            }
-            .environment(\.haloHistoryShelf, shelf)
+            .environment(\.haloHistoryShelf, given ?? own)
+            .environment(\.haloHistoryJump, onJump)
             .autosaveRecovery(hooks, folder: Self.folder, delay: 2, edits: model.historyListing.hashValue)
     }
 

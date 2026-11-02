@@ -168,7 +168,7 @@ public enum PlaceCommands {
         guard let data = Data(base64Encoded: base64) else { throw CatalogError.failed(id: id, message: "The file's bytes aren't base64.") }
         guard data.count <= PlaceRules.maxBytes else { throw CatalogError.unavailable(id: id, why: PlaceRules.sizeHelp) }
         guard let format = PlaceRules.format(of: data), target.placeFormats.contains(format) else {
-            throw CatalogError.unavailable(id: id, why: PlaceRules.formatHelp)
+            throw CatalogError.unavailable(id: id, why: PlaceRules.formatHelp(for: target.placeFormats))
         }
         let natural = format == .svg ? try PlaceRules.vector(data, name: name).size : try target.rasterSize(data, format: format)
         return PlacedAsset(id: PlaceRules.assetID(of: data), name: name, format: format, natural: natural, data: data)

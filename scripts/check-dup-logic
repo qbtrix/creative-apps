@@ -4,6 +4,13 @@
 # marquee, transform and the rest belong in SuiteModel (the editor kernel),
 # never as one more copy in an app.
 #
+# It checks NAMES only: a file or type named for a concept. Two behaviours for
+# one gesture under different names pass it (lesson 358: Photo's Move drag
+# rewrote layer offsets per sample while Free Transform rode the live layer).
+# The behaviour check is the gesture contract, Tests/AppSnapshotTests/
+# GestureContractTests.swift: every PaletteTool declares its ToolGesture, and
+# every tool of a class owes that class's budget on its app's real window.
+#
 # Scope: Swift files under Sources/<X>Model/ and Sources/<X>App/, SuiteModel
 # excluded (it is the canonical home). A file is a concept file when its name
 # or its primary type (the first struct, class, enum, protocol or actor it

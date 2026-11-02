@@ -1,9 +1,8 @@
 // HaloTransformSnapshots.swift: Halo's viewer handles while transforming
 // (transform HT-4), on `keyed` (fake services) at frame 12 with Ball
-// selected. `turned`: Ball's rotation set to 30°, the layer drawn turned
-// (the handles stay unturned until HT-5 reads the turn into
-// transformSelection). `scaling`: a handle drag mid-way, the window's
-// HaloLiveEdit showing Ball at 1.5 × while the Model still holds 1 ×, so the
+// selected. `turned`: Ball's rotation set to 30°, the layer and its handles
+// drawn turned, with no upright outline of its own under them. `scaling`: a
+// handle drag mid-way, the window's HaloLiveEdit showing Ball at 1.5 × while the Model still holds 1 ×, so the
 // handles follow the preview, not the Model. Light and Dark. Writes
 // halo-viewer-handles-turned-*.png and halo-viewer-handles-scaling-*.png.
 // macOS only.
@@ -20,6 +19,8 @@ import Testing
         project.setProperty(.rotation, to: 30)
         project.endPropertyScrub()
         #expect(project.transformSelection != nil)
+        // The handles draw Ball's turned box; a dashed upright outline under them read as a second selection.
+        #expect(HaloLiveLayers.outlinedLayer(project) == nil, "the canvas outlines Ball under its handles")
         try snapshot(HaloViewer(model: project), name: "halo-viewer-handles-turned-light", scheme: .light)
         try snapshot(HaloViewer(model: project), name: "halo-viewer-handles-turned-dark", scheme: .dark)
     }

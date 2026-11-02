@@ -49,7 +49,7 @@ public protocol FrameRasterizing: Sendable {
 }
 
 extension FrameRasterizing {
-    /// Until a rasterizer draws movie frames itself (StageRasterizer's is export-pack's FV-7).
+    /// For a rasterizer that draws no movie frames (StageRasterizer draws them since export-pack's FV-7).
     public func frame(_: StageDrawList, width _: Int, height _: Int, transparent _: Bool) throws -> MediaFrame {
         throw NotBuilt(reason: "This rasterizer can't draw movie frames yet.")
     }
@@ -67,4 +67,10 @@ public protocol Exporting: Sendable {
     func writeVideo(_ document: Document, sceneID: String, plan: FlareVideoPlan, to path: String,
                     media: any MediaEncoding, rasterizer: any FrameRasterizing,
                     progress: @Sendable (Double) -> Void) async throws -> String
+    /// Why this exporter can't write MP4 or GIF yet; nil once it can. `exportProblem` refuses Export with it.
+    var videoUnbuiltReason: String? { get }
+}
+
+extension Exporting {
+    public var videoUnbuiltReason: String? { nil }
 }

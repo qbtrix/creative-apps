@@ -16,8 +16,8 @@
   {
     "label": "oneStepPerRun: setPath called per anchor in anchor-move, so moving three points records three steps",
     "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
-    "find": "{ t, p in try edit(&t, \"Move Points\", drag: p.drag) { AnchorEdit.moved($0.path, $1, dx: p.dx, dy: p.dy) } }",
-    "replace": "{ t, p in for ref in t.anchorSelection.ordered { _ = try edit(&t, \"Move Points\", drag: p.drag) { e, _ in AnchorEdit.moved(e.path, [ref], dx: p.dx, dy: p.dy) } }; return .object([:]) }",
+    "find": "                  try edit(&t, \"Move Points\", drag: p.drag) { e, refs in\n                      let back = try local(e, \"path.anchor-move\"), o = back.apply(Point(x: 0, y: 0)), d = back.apply(Point(x: p.dx, y: p.dy))\n                      return AnchorEdit.moved(e.path, refs, dx: d.x - o.x, dy: d.y - o.y)\n                  }\n",
+    "replace": "                  for ref in t.anchorSelection.ordered {\n                      _ = try edit(&t, \"Move Points\", drag: p.drag) { e, _ in\n                          let back = try local(e, \"path.anchor-move\"), o = back.apply(Point(x: 0, y: 0)), d = back.apply(Point(x: p.dx, y: p.dy))\n                          return AnchorEdit.moved(e.path, [ref], dx: d.x - o.x, dy: d.y - o.y)\n                      }\n                  }\n                  return .object([:])\n",
     "tests": "PathCommandsTests"
   },
   {
@@ -39,6 +39,55 @@
     "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
     "find": "guard anchors.count >= 2 else",
     "replace": "guard anchors.count >= 1 else",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "moveIsADocumentDeltaOnATransformedLayer: a move maps its delta through the layer's translation too",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "o = back.apply(Point(x: 0, y: 0))",
+    "replace": "o = Point(x: 0, y: 0)",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "handleIsADocumentPointOnATransformedLayer: a handle drag lands its document point in path space unmapped",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "to: try local(e, \"path.handle-move\").apply(Point(x: p.x, y: p.y))",
+    "replace": "to: Point(x: p.x, y: p.y)",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "readIsDocumentSpaceOnATransformedLayer: path.read writes the path's own space",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "t.pathInEdit.map({ $0.path.transformed(by: $0.toDocument).contours })",
+    "replace": "t.pathInEdit.map({ $0.path.contours })",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "aLayerScaledToNothingRefusesPointEdits: a singular layer edits in document space instead of refusing",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "guard let back = try? e.toDocument.inverted() else { throw refused(id, flatHelp) }",
+    "replace": "let back = (try? e.toDocument.inverted()) ?? .identity",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "openEndHandleRefuses: an open path's last out handle is taken, so the move reports a step the path drops",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "ref.index < contour.anchors.count - 1",
+    "replace": "ref.index < contour.anchors.count",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "openEndHandleRefuses: an open path's first in handle is taken",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "p.end == .handleIn ? ref.index > 0 :",
+    "replace": "p.end == .handleIn ? ref.index >= 0 :",
+    "tests": "PathCommandsTests"
+  },
+  {
+    "label": "openEndHandleRefuses: a closed path's end handles refused too",
+    "file": "Sources/SuiteKernel/Paths/PathCommands.swift",
+    "find": "guard contour.closed ||",
+    "replace": "guard false ||",
     "tests": "PathCommandsTests"
   }
 ]

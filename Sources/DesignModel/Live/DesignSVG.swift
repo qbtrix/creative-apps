@@ -4,13 +4,15 @@
 //
 // The rules come from the W3C SVG 2 recommendation only (clean-room): the
 // outermost <svg> with `viewBox` and `width`/`height`, basic shapes (<rect>,
-// <ellipse>), <path> for a shape layer (shape-tools DS-6: the kernel's path of
+// <ellipse>, or for a dashed ellipse the kernel's path, which starts at 12 o'clock as the canvas dashes it),
+// <path> for a shape layer (shape-tools DS-6: the kernel's path of
 // its spec in its frame, closed with Z only when the path closes), <text> with `text-anchor`, <g> with `opacity`, and <clipPath>
 // referenced by `clip-path="url(#…)"`. One element per visible layer in paint
 // order (a node, then its children); a hidden node drops its whole subtree.
 // Coordinates are page points minus the box's origin. An attribute whose value
-// is the SVG default (opacity 1, no stroke, stroke-width 1, rx 0, font-weight
-// 400, text-anchor start) is left out. Text and attribute values are escaped
+// is the SVG default (opacity 1, no stroke, stroke-width 1, miter join, butt
+// cap, dash offset 0, rx 0, font-weight 400, text-anchor start) is left out.
+// A stroke writes SuiteKernel's StrokeSVG.attributes (stroke-style DK-7). Text and attribute values are escaped
 // by SuiteModel's XMLText, the suite's one XML escaper.
 // Each element sits on its own line, indented two spaces per depth. A gradient
 // (gradient-fill DG-5) is a <linearGradient> or <radialGradient> in a <defs>
@@ -21,6 +23,16 @@
 // `translate(cx cy) scale(±1 ±1) translate(-cx -cy)`, TransformRules.matrix's
 // order. As on the canvas, a frame's clip and background turn and its children
 // keep their own; a group has no shape of its own.
+// A rectangle's or frame's picture (placed-images PD-6) is an <image> between its
+// fill and its stroke, its file inline as a `data:` URI in `href`, at the kernel's
+// cover crop (PlaceRules.drawnRect), so it keeps its aspect, in a <clipPath> of the
+// rounded box. One <g> holds the node's opacity once; the stroke sits outside the
+// clip at full width, and a frame's children follow in the same clip.
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
+import Foundation
+#endif
 import SuiteKernel
 import SuiteModel
 
@@ -52,6 +64,21 @@ enum DesignSVG {
         let box = "x=\"\(number(x))\" y=\"\(number(y))\" width=\"\(number(f.width))\" height=\"\(number(f.height))\""
         let turned = turn(node, x: x, y: y)
         if node.kind != .group, let defs = gradient(node, x: x, y: y) { lines.append(pad + defs) }
+        if let image = picture(node, x: x, y: y, then: turned) {
+            let clip = XMLText.escaped((node.kind == .frame ? "clip-" : "pic-") + node.id), inClip = "<g clip-path=\"url(#\(clip))\">"
+            lines.append(pad + "<clipPath id=\"\(clip)\"><rect \(box)\(turned)\(corner(node))/></clipPath>")
+            lines.append(pad + "<g\(alpha(node))>")
+            lines.append(pad + "  <rect \(box)\(corner(node))\(fill(node))\(turned)/>")
+            lines.append(pad + "  " + inClip + image + "</g>")
+            if !paint(node).isEmpty { lines.append(pad + "  <rect \(box)\(corner(node)) fill=\"none\"\(paint(node))\(turned)/>") }
+            if node.kind == .frame {
+                lines.append(pad + "  " + inClip)
+                for child in node.children { write(child, origin: origin, depth: depth + 2, into: &lines) }
+                lines.append(pad + "  </g>")
+            }
+            lines.append(pad + "</g>")
+            return
+        }
         switch node.kind {
         case .rectangle, .instance:
             lines.append(pad + "<rect \(box)\(corner(node))\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
@@ -63,6 +90,12 @@ enum DesignSVG {
             }
             lines.append(pad + "<path d=\"\(data(path))\"\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
         case .ellipse:
+            // Dashed: the kernel's outline, from 12 o'clock clockwise, so the dashes start where the canvas's do (#4940).
+            let outline = Rect(minX: x, minY: y, maxX: x + f.width, maxY: y + f.height)
+            if node.stroke?.dash.isEmpty == false, let path = try? ShapeRules.path(ShapeSpec(kind: .ellipse), in: outline) {
+                lines.append(pad + "<path d=\"\(data(path))\"\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
+                return
+            }
             let (rx, ry) = (f.width / 2, f.height / 2)
             let at = "cx=\"\(number(x + rx))\" cy=\"\(number(y + ry))\" rx=\"\(number(rx))\" ry=\"\(number(ry))\""
             lines.append(pad + "<ellipse \(at)\(fill(node))\(paint(node))\(alpha(node))\(turned)/>")
@@ -80,6 +113,18 @@ enum DesignSVG {
             for child in node.children { write(child, origin: origin, depth: depth + 1, into: &lines) }
             lines.append(pad + "</g>")
         }
+    }
+
+    /// `node`'s picture as an `<image>` at the cover crop of its frame at `x`, `y` (box-relative), its file a
+    /// `data:` URI, `then` appended; nil when it shows none.
+    private static func picture(_ node: DesignNode, x: Double, y: Double, then: String) -> String? {
+        guard let asset = node.placedAsset else { return nil }
+        let frame = Rect(minX: x, minY: y, maxX: x + node.frame.width, maxY: y + node.frame.height)
+        let drawn = PlaceRules.drawnRect(PlacedImage(assetID: asset.id, box: frame, focus: node.placedFocus), natural: asset.natural)
+        let at = "x=\"\(number(drawn.minX))\" y=\"\(number(drawn.minY))\" width=\"\(number(drawn.width))\" height=\"\(number(drawn.height))\""
+        // A raster's media type is image/<its id> (image/png, image/jpeg); an SVG's is image/svg+xml.
+        let type = asset.format == .svg ? "image/svg+xml" : "image/" + asset.format.rawValue
+        return "<image \(at) href=\"data:\(type);base64,\(asset.data.base64EncodedString())\"\(then)/>"
     }
 
     /// A path's `d`: absolute M, L, Q and C commands, and Z only where the path closes (an open line or arrow
@@ -156,11 +201,19 @@ enum DesignSVG {
         return radius > 0 ? " rx=\"\(number(radius))\"" : ""
     }
 
-    /// ` stroke="#rrggbb"`, plus ` stroke-width` when not 1; empty with no stroke or a width that draws nothing.
+    /// The canvas's miter limit, SwiftUI StrokeStyle's default; SVG's own default is 4 (#4941).
+    static let miterLimit = 10.0
+
+    /// The stroke's `StrokeSVG.attributes` (colour, opacity, width, join, cap, dash), each left out at its SVG
+    /// default (width 1, miter join, butt cap, offset 0); a miter join writes `stroke-miterlimit`, the canvas's
+    /// limit, in its place. Empty with no stroke or a width that draws nothing.
     private static func paint(_ node: DesignNode) -> String {
         guard let stroke = node.stroke, stroke.width.isFinite, stroke.width > 0 else { return "" }
-        let width = stroke.width == 1 ? "" : " stroke-width=\"\(number(stroke.width))\""
-        return " stroke=\"\(hex(stroke.color))\"" + width
+        let defaults = ["stroke-width": "1", "stroke-linejoin": "miter", "stroke-linecap": "butt", "stroke-dashoffset": "0"]
+        let limit = (name: "stroke-miterlimit", value: number(miterLimit))
+        return StrokeSVG.attributes(stroke).map { $0.name == "stroke-linejoin" && $0.value == "miter" ? limit : $0 }
+            .filter { defaults[$0.name] != $0.value }
+            .map { " \($0.name)=\"\(XMLText.escaped($0.value))\"" }.joined()
     }
 
     /// ` opacity="o"` (kept within 0...1) when the layer is not fully opaque; empty otherwise.

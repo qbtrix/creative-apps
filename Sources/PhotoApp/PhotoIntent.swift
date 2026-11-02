@@ -18,6 +18,8 @@ enum PhotoIntent {
     case newImage, open, save, saveAs, imageSize
     case openFile(URL)
     case rotate(QuarterTurn)
+    /// Image > Flip Canvas: mirrors every layer across the canvas through `image.flip`.
+    case flipCanvas(FlipDirection)
     /// Opens the Straighten sheet; `applyStraighten` turns the image by its choices.
     case straighten
     case applyStraighten(degrees: Double, cropToFit: Bool)
@@ -26,6 +28,8 @@ enum PhotoIntent {
     case drag(CGPoint, CGPoint)
     case endDrag
     case toolOption(ToolOptionEdit)
+    /// One change to the Paint Bucket's options (PhotoRetouchOptions).
+    case bucketOption(BucketOptionEdit)
     /// One GradientEditor gesture on the Gradient tool's fill (PhotoFillToolOptions).
     case gradientOption(GradientIntent)
     case adjust(AdjustmentEdit)
@@ -36,6 +40,8 @@ enum PhotoIntent {
     /// A Layers row click with its mode (Shift extends, Command toggles); Select > All Layers picks every layer.
     case pickLayer(PhotoLayer.ID, Pick), selectAllLayers
     case toggleVisibility(PhotoLayer.ID)
+    /// A gesture in the sidebar's AI tab (SuiteUI AgentActivityList).
+    case agent(AgentActivityAction)
     case opacity(PhotoLayer.ID, Double)
     case blendMode(PhotoLayer.ID, CoreRaster.BlendMode)
     case moveLayers(IndexSet, Int)
@@ -44,7 +50,7 @@ enum PhotoIntent {
     // One case per v2 area; each area's enum lives in its PhotoWindow+<Area>.swift.
     case file(FileIntent), edit(EditIntent), crop(CropIntent), history(HistoryIntent), select(SelectIntent)
     case adjustmentLayer(AdjustmentLayerIntent), transform(TransformIntent), export(ExportIntent), sample(SampleIntent)
-    case place(PhotoPlaceIntent), text(TypeIntent)
+    case place(PhotoPlaceIntent), text(TypeIntent), filter(FilterIntent)
     /// A tone row's change, run as its tone.* command (PhotoWindow+Tone).
     case tone(ToneIntent)
     /// One Pen or point-editor gesture from PhotoPenOverlay, run through the catalog.
@@ -61,14 +67,21 @@ typealias PhotoPerform = @MainActor (PhotoIntent) -> Void
 extension PhotoTool: PaletteTool {
     public var title: String {
         switch self {
-        case .move: "Move"
+        case .select: "Select"
         case .marquee: "Marquee"
+        case .ellipse: "Ellipse"
+        case .lasso: "Lasso"
+        case .polygon: "Polygon Lasso"
+        case .wand: "Magic Wand"
         case .brush: "Brush"
         case .eraser: "Eraser"
         case .clone: "Clone"
+        case .spotHeal: "Spot Heal"
         case .heal: "Heal"
+        case .remove: "Remove"
         case .crop: "Crop"
         case .eyedropper: "Eyedropper"
+        case .bucket: "Paint Bucket"
         case .gradient: "Gradient"
         case .text: "Type"
         case .pen: "Pen"
@@ -77,14 +90,21 @@ extension PhotoTool: PaletteTool {
 
     public var systemImage: String {
         switch self {
-        case .move: "arrow.up.and.down.and.arrow.left.and.right"
+        case .select: "cursorarrow"
         case .marquee: "rectangle.dashed"
+        case .ellipse: "circle.dashed"
+        case .lasso: "lasso"
+        case .polygon: "hexagon"
+        case .wand: "wand.and.stars"
         case .brush: "paintbrush.pointed"
         case .eraser: "eraser"
         case .clone: "square.on.square"
+        case .spotHeal: "bandage.fill"
         case .heal: "bandage"
+        case .remove: "wand.and.stars"
         case .crop: "crop"
         case .eyedropper: "eyedropper"
+        case .bucket: "drop.fill"
         case .gradient: "square.bottomhalf.filled"
         case .text: "textformat"
         case .pen: "pencil.tip"
@@ -93,14 +113,20 @@ extension PhotoTool: PaletteTool {
 
     public var shortcut: Character? {
         switch self {
-        case .move: "v"
+        case .select: "v"
         case .marquee: "m"
+        case .ellipse, .polygon: nil
+        case .lasso: "l"
+        case .wand: "w"
         case .brush: "b"
         case .eraser: "e"
         case .clone: "s"
+        case .spotHeal: "j"
         case .heal: "j"
+        case .remove: "j"
         case .crop: "c"
         case .eyedropper: "i"
+        case .bucket: "g"
         case .gradient: "g"
         case .text: "t"
         case .pen: "p"
@@ -109,6 +135,6 @@ extension PhotoTool: PaletteTool {
 
     /// The pointer over the canvas while this tool is active.
     var pointer: PointerStyle {
-        self == .move ? .grabIdle : .rectSelection
+        self == .select ? .default : .rectSelection
     }
 }

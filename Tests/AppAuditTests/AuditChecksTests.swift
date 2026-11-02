@@ -30,6 +30,16 @@ private func count(
     #expect(count(AppAudit.Identifier(), [button("Undo", rect(40, 30, 40, 20))]).counts["identifier"] == 0)
 }
 
+/// AppKit's own alert keeps unnamed text parts ("_NS:58", 2 pt wide) that read as text with no ink (#2486). They are
+/// the system's chrome, so contrast skips them; an app's own faint text beside them still fails.
+@Test func contrastSkipsAppKitsOwnTextParts() {
+    let alertPart = Node(type: "staticText", frame: rect(10, 40, 60, 14), identifier: "_NS:58")
+    let own = Node(type: "staticText", frame: rect(100, 40, 60, 14), identifier: "flare.status", name: "faint")
+    let report = count(
+        AppAudit.TextContrast(), [alertPart, own], paint: [(rect(12, 42, 30, 10), 0xAA), (rect(102, 42, 30, 10), 0xAA)])
+    #expect(report.violations.map(\.element) == ["staticText 'flare.status'"])
+}
+
 @Test func pixelChecksSkipTheWindowBehindAModal() {
     let text = Node(type: "staticText", frame: rect(10, 40, 60, 14), name: "dimmed")
     var fixture = AppAudit.Fixture(nodes: [text], paint: [(rect(12, 42, 30, 10), 0xAA)])

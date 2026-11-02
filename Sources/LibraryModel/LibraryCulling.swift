@@ -83,6 +83,13 @@ extension LibraryCatalog {
         }
     }
 
+    /// The change a single key makes now: `cullChange(for:)`, except X while a crop draft is open,
+    /// which belongs to the crop's orientation swap and never rejects the photo.
+    public func cullChange(forKey key: LibraryKey) -> CullChange? {
+        if case .reject = key, cropDraft != nil { return nil }
+        return Self.cullChange(for: key)
+    }
+
     public mutating func setAutoAdvance(_ on: Bool) {
         autoAdvance = on
     }

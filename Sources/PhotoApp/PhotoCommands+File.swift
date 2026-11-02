@@ -3,7 +3,7 @@
 // (PhotoPlace.swift), Close, Save, Save As…, Export…. Save, Save As and Export
 // are off with no image. Close (Command-W) is the system's, which replacing
 // `.saveItem` drops: it sends performClose: to the key window, so an unsaved
-// window asks first (PhotoWindowCloseGuard). Open Recent and Open In are
+// window asks first (SuiteUI's `.unsavedChangesGuard`). Open Recent and Open In are
 // SuiteFileCommands over the process's documents bridge (PhotoShell): Open
 // Recent lists Photo's files from the suite's one recents list, newest first,
 // with Clear Menu, or a disabled "No Recent Files"; Open In hands the focused
@@ -23,10 +23,9 @@ extension PhotoCommands {
             menu.item("file.open", shortcut: KeyboardShortcut("o")) { menu.perform(.open) }
         }
         SuiteFileCommands(app: .photo, bridge: PhotoShell.bridge, document: menu.workspace.suiteDocument)
-        CommandGroup(before: .saveItem) {
-            menu.placeItem
-        }
         CommandGroup(replacing: .saveItem) {
+            // Place… shares the replaced group: a separate `before: .saveItem` group never showed (#4333).
+            menu.placeItem
             // `.saveItem` holds the system's Close, so replacing it brings Close back here.
             Button("Close") { NSApp.sendAction(#selector(NSWindow.performClose(_:)), to: nil, from: nil) }
                 .keyboardShortcut("w")

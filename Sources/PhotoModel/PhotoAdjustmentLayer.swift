@@ -33,7 +33,7 @@ extension PhotoLayerKind {
 }
 
 /// Where the inspector's adjustment edits go (PV-6).
-public enum AdjustTarget: Hashable, Sendable {
+public enum PhotoAdjustTarget: Hashable, Sendable {
     case image
     case layer(PhotoLayer.ID, AdjustmentSettings)
 }
@@ -54,6 +54,7 @@ extension PhotoWorkspace {
         guard addAdjustmentLayerHelp == nil, adjustmentLayerKinds.contains(kind) else { return }
         var settings = AdjustmentSettings()
         for other in AdjustmentKind.allCases where other != kind { settings.apply(.setEnabled(other, false)) }
+        settings.apply(.setEnabled(kind, true))  // Black & White and Invert start as their kind
         var number = 1
         while layers.contains(where: { $0.name == "\(kind.title) \(number)" }) { number += 1 }
         record(.stack(stackState), named: "New Adjustment Layer")
@@ -64,7 +65,7 @@ extension PhotoWorkspace {
     }
 
     /// The selected adjustment layer and its settings, or the whole image.
-    public var adjustTarget: AdjustTarget {
+    public var adjustTarget: PhotoAdjustTarget {
         guard let layer = selectedLayer, case .adjustment(let settings) = layer.kind else { return .image }
         return .layer(layer.id, settings)
     }
@@ -95,7 +96,7 @@ extension PhotoWorkspace {
     /// own, or all five for the whole image.
     public var adjustSections: [AdjustmentKind] {
         switch adjustTarget {
-        case .image: AdjustmentKind.allCases
+        case .image: AdjustmentKind.sections
         case .layer(_, let settings): AdjustmentKind.allCases.filter { settings.isEnabled($0) }
         }
     }

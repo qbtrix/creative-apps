@@ -30,10 +30,13 @@
 // History panel (View > Show History) and the autosave hooks; a jump and a restore come
 // back here as workspace methods.
 //
-// Cut, Copy and Paste: the Model makes and reads the bytes and the window moves
-// them through DesignPasteboardBridge under the Model's `pasteboardType`; a
-// refusal (nothing selected, nothing of Design's to paste) goes to the status
-// line.
+// Cut, Copy and Paste (clipboard-interop CB-6): DesignPasteboardAdapter makes the
+// representations (own layers, SVG, a PNG at 2x drawn by DesignRasterizer) and
+// takes the best one offered; SuiteShell's PasteboardBridge carries them. A plain
+// image or SVG lands as a picture centred on the page (the window has no visible
+// rect to centre on yet). A refusal (nothing selected, nothing Design can paste)
+// goes to the status line. Copy As writes one representation; Paste as Image
+// takes only an image or SVG.
 //
 // Unsaved changes: SuiteUI's `.unsavedChangesGuard` sits on the root with Design's hooks
 // (`unsavedHooks`, buttons `design.close.*`): a close of an edited window, and File > New File
@@ -51,18 +54,21 @@
 import AppKit
 import DesignModel
 import SuiteKernel
+import SuiteModel
 import SuiteShell
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct DesignWindow: View {
+struct DesignWindow: View, BodyCounted {
     /// What the window starts with; nil starts empty.
     var launch: DesignLaunch?
 
     @State private var model = DesignWorkspace()
     /// The drag or scrub shown on a copy until it ends; the canvas reads it from the environment.
     @State private var live = DesignLiveDrag()
+    /// Playback on the suite's display link; a tick changes nothing this body reads (DesignPlayer+Kernel.swift).
+    @State private var player = DesignPlayer()
     /// A test's starting workspace: the window opens it as it is and skips the launch steps.
     private let seeded: Bool
     @State private var zoom = 1.0
@@ -79,8 +85,10 @@ struct DesignWindow: View {
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
     @Environment(\.openWindow) private var openWindow
-    /// Cut, Copy and Paste carry Design's bytes on the general pasteboard.
-    private let bridge = DesignPasteboardBridge()
+    /// Cut, Copy and Paste through the suite's coder; the PNG is drawn here, on the main actor.
+    private let pasteboard = DesignPasteboardAdapter(png: { raster in
+        try MainActor.assumeIsolated { try DesignRasterizer.png(raster) }
+    })
 
     /// The launch file opens in the first window only.
     @MainActor private static var launchFileOpened = false
@@ -92,13 +100,20 @@ struct DesignWindow: View {
     private static let fileType = UTType(filenameExtension: "design") ?? .data
 
     #if DEBUG
-    /// How many times a window's body ran; RenderBudgetDesignTests counts an interaction's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     /// The workspace after the last intent; DesignLiveDragTests reads it.
     static var lastWorkspace: DesignWorkspace?
     /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
     // view-static: main-actor
     static var openExport: (@MainActor () -> Void)?
+    /// The last started window's intents; RenderBudgetDesignAnimateTests plays through it.
+    // view-static: main-actor
+    static var lastPerform: DesignPerform?
+    /// Reads the last started window's workspace and adopts one as a live command's result would
+    /// (`.adoptLive`); RenderBudgetDesignAgentWorkingTests drives agent steps through it (the off-screen
+    /// window never becomes active, so it never joins DesignShell.front).
+    // view-static: main-actor
+    static var liveAdopt: (read: @MainActor () -> DesignWorkspace, write: @MainActor (DesignWorkspace) -> Void)?
     #endif
 
     /// A window for `launch`; `seed` (tests) starts it on that workspace instead, and `live` is its drag box.
@@ -111,7 +126,7 @@ struct DesignWindow: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         DesignEditor(
             model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom,
@@ -132,7 +147,12 @@ struct DesignWindow: View {
         } message: { shown in
             Text(shown.message)
         }
-        .task { start() }
+        .task {
+            #if DEBUG
+            Self.lastPerform = perform
+            #endif
+            start()
+        }
         // The key window is the one live commands act on (EM-4).
         .suiteLiveWindow(DesignShell.front, read: { DesignHeadless(model) }, write: { perform(.adoptLive($0.workspace)) })
         // A file handed to Design (Finder, the home's Recent, Open In) or a new file (New Design,
@@ -140,9 +160,10 @@ struct DesignWindow: View {
         .suiteOpenQueue(DesignShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) },
                         newDocument: { perform(.newFile) })
         .unsavedChangesGuard(Self.unsavedHooks(model: { model }, perform: perform))
-        .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }))
+        .modifier(DesignExportArea(model: model, request: exportRequest, onNote: { note = $0 }, remember: { perform(.rememberExport($0)) }))
         .modifier(DesignHistoryArea(model: model, jump: { try model.jumpHistory(to: $0) }, restore: { try model.restoreRecovered(from: $0, name: $1) }, onNote: { note = $0 }))
         .environment(\.designLiveDrag, live)
+        .modifier(RefreshLinkHandoff(player: player))
         // The outermost call publishes `suite.perf` and `suite.controls` under -SuitePerfProbe;
         // SuiteWindow's inner one then adds nothing, so the menus' and alert's hosts share one inventory.
         .suiteProbes()
@@ -152,9 +173,14 @@ struct DesignWindow: View {
         #if DEBUG
         defer { Self.lastWorkspace = model }
         #endif
+        // Anything but a transport intent pauses playback first, so it acts at the frame on screen.
+        switch intent {
+        case .play, .pause, .stop, .playPause, .scrub, .loop: break
+        default: if player.isActive { model.setPlayhead(player.halt(stopping: false, live: live)) }
+        }
         // An open text edit ends, fitted to its text, before anything else acts (canvas-basics CB-6).
         switch intent {
-        case .textDraft, .cancelText: break
+        case .textDraft, .cancelText, .rememberExport: break
         default: commitText()
         }
         switch intent {
@@ -163,6 +189,7 @@ struct DesignWindow: View {
         case .save: save()
         case .saveAs: saveAs()
         case .export: exportRequest += 1
+        case .rememberExport(let options): model.rememberExport(options)
         case .undo: model.undo()
         case .redo: model.redo()
         case .tool(let tool): model.selectTool(tool)
@@ -197,29 +224,59 @@ struct DesignWindow: View {
         case .setHidden(let id, let hidden): try? model.setNodeHidden(id, hidden)
         case .setLocked(let id, let locked): try? model.setNodeLocked(id, locked)
         case .toggleFlag(let id, let flag): try? model.toggleNodeFlag(id, flag)
+        case .agent(.setHidden(let ids, let hidden)): model.setLayersHidden(ids, hidden: hidden)
+        case .agent(.select(let ids)): model.selectLayers(ids)
+        case .agent(.undoRequest(let title)):
+            do { _ = try DesignWorkspace.catalog.run("history.undo-request", params: .object(["name": .string(title)]), on: &model) } catch { note = error.description }
         case .editText(let id): try? model.beginTextEdit(id)
         case .textDraft(let text): model.setTextDraft(text)
         case .commitText: break  // committed above
         case .cancelText: model.cancelTextEdit()
         case .zoomIn: userZoom(ZoomMath.zoomedIn(from: zoom))
+        case .playPause: perform(player.isPlaying ? .pause : .play)
+        case .play:
+            guard !model.isStill, !player.isPlaying else { break }
+            if player.isActive { model.setPlayhead(player.halt(stopping: false, live: live)) }
+            player.play(model, live: live) { model.setPlayhead($0) }
+        case .pause: if player.isPlaying { model.setPlayhead(player.halt(stopping: false, live: live)) }
+        case .stop: model.setPlayhead(player.halt(stopping: true, live: live))
+        case .scrub(let frame): player.scrub(to: frame, live: live) { model.setPlayhead($0) }
+        case .loop(let on): live.playLoops = on
+        case .keys(let commands):
+            var refusal: String?
+            for command in commands {
+                do { _ = try DesignWorkspace.catalog.run(command.id, params: command.params, on: &model) } catch {
+                    refusal = refusal ?? error.description
+                }
+            }
+            if let refusal { note = refusal }
         case .zoomOut: userZoom(ZoomMath.zoomedOut(from: zoom))
         case .fit:
             fitting = true
             fit()
         case .command(let command):
             do { try model.run(command) } catch { note = error.help }
-        // The Model makes and reads the bytes; the bridge carries them. A refusal goes to the status line.
+        // The adapter makes and reads the representations; the bridge carries them. A refusal goes to the status line.
         case .copy:
-            do { bridge.write(try model.copySelection(), type: model.pasteboardType) } catch { note = error.help }
+            do { PasteboardBridge().write(try pasteboard.copy(model)) } catch { note = error.help }
         case .cut:
-            do { bridge.write(try model.cutSelection(), type: model.pasteboardType) } catch { note = error.help }
-        case .paste: paste()
+            do {
+                let offered = try pasteboard.copy(model)
+                _ = try model.cutSelection()
+                PasteboardBridge().write(offered)
+            } catch { note = error.help }
+        case .paste: paste(PasteboardBridge().offered())
+        case .copyAs(let format): copyAs(format)
+        case .pasteAsImage: paste(PasteboardBridge().offered().filter { Self.pictureTypes.contains($0.type) })
         case .selectAll: model.selectAll()
         case .zoomToSelection: zoomToSelection()
         case .moveLayer(let id, let parent, let index):
             do { try model.moveLayer(id, into: parent, at: index) } catch { note = error.help }
         case .setStyle(let change):
-            do { try model.setStyle(change) } catch { note = error.help }
+            do {
+                try model.setStyle(change)
+                if case .textStyle = change { fitStyledText() }
+            } catch { note = error.help }
         case .renamePage(let id, let name):
             do { try model.renamePage(id, to: name) } catch {
                 // The page ids come from the model's own rows; only the name can be refused.
@@ -249,6 +306,12 @@ struct DesignWindow: View {
         model.commitTextEdit(extent: extent)
     }
 
+    /// Fits each selected text box to its text in the style just set, in that style's step (#3339).
+    private func fitStyledText() {
+        let texts = model.selectedNodes.filter { $0.kind == .text }
+        model.fitTextStyle(Dictionary(texts.map { ($0.id, DesignTextFont.measure($0.text, in: $0)) }) { first, _ in first })
+    }
+
     /// Lands a live drag or scrub in the workspace as one step; with none live, `otherwise`.
     private func endLive(otherwise: () -> Void) {
         guard live.isLive else { return otherwise() }
@@ -257,14 +320,22 @@ struct DesignWindow: View {
         if let refusal { note = refusal.help }
     }
 
-    /// Pastes Design's bytes from the pasteboard; with none (or another type), the Model's reason.
-    private func paste() {
-        let data = bridge.read(type: model.pasteboardType)
-        if let help = model.pasteHelp(data) {
-            note = help
-        } else if let data {
-            do { try model.paste(data) } catch { note = error.help }
+    /// The types Paste as Image takes: an image or an SVG, never Design's own layers.
+    private static let pictureTypes = Set(DesignPasteboardAdapter.pictureTypes)
+
+    /// Pastes the best of `offered`; with nothing Design takes, the coder's sentence.
+    private func paste(_ offered: [TypedData]) {
+        do { try pasteboard.paste(offered, into: &model, centredOn: nil) } catch { note = error.help }
+    }
+
+    /// Copy As: only `format`'s representation of the selection goes on the pasteboard.
+    private func copyAs(_ format: CopyAsFormat) {
+        let type: SuiteTypeID = switch format {
+        case .png: .png
+        case .svg: .svg
+        case .own: .designLayers
         }
+        do { PasteboardBridge().write(try pasteboard.copy(model).filter { $0.type == type }) } catch { note = error.help }
     }
 
     // MARK: Zoom
@@ -350,6 +421,7 @@ struct DesignWindow: View {
         started = true
         #if DEBUG
         Self.openExport = { perform(.export) }
+        Self.liveAdopt = (read: { model }, write: { perform(.adoptLive($0)) })
         #endif
         if seeded {
             fitting = true
@@ -455,5 +527,17 @@ struct DesignWindow: View {
 
     private static func reason(_ error: Error) -> String {
         (error as? DesignFileError)?.reason ?? error.localizedDescription
+    }
+}
+
+/// Hands the window's `designRefreshLink` to `player` once it appears. Only this modifier's body reads the
+/// closure, so an environment change (a sheet opening) re-runs it, not DesignWindow's body
+/// (RenderBudgetDesignExportTests' sheet budget).
+private struct RefreshLinkHandoff: ViewModifier {
+    let player: DesignPlayer
+    @Environment(\.designRefreshLink) private var makeLink
+
+    func body(content: Content) -> some View {
+        content.onAppear { player.makeLink = makeLink }
     }
 }

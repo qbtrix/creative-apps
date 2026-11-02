@@ -4,7 +4,9 @@
 // frames, so a smaller page can cut a layer. contentBounds is DesignRect.union of
 // the visible layers' frames (a hidden layer hides its subtree), which the canvas's
 // past-the-edge overlay lays itself out over, and isPastEdge says whether one
-// layer reaches outside the page's rectangle at (0, 0). Linux-safe: no UI imports.
+// layer reaches outside the page's rectangle at (0, 0). pastEdgeNote is the Page
+// Size section's line saying which visible top-level layers reach past and show
+// dimmed, nil when all fit. Linux-safe: no UI imports.
 
 extension DesignWorkspace {
     /// The smallest and largest a page side can be, in points.
@@ -48,5 +50,15 @@ extension DesignPage {
     public func isPastEdge(_ node: DesignNode) -> Bool {
         let frame = node.frame
         return frame.x < 0 || frame.y < 0 || frame.maxX > frameWidth || frame.maxY > frameHeight
+    }
+
+    /// The Page Size section's note when visible top-level layers reach past the page: one is
+    /// named, more are counted. Nil when every visible layer fits.
+    public var pastEdgeNote: String? {
+        let past = nodes.filter { !$0.isHidden && isPastEdge($0) }
+        guard let first = past.first else { return nil }
+        return past.count == 1
+            ? "\(first.name) reaches past the page, so the part outside shows dimmed."
+            : "\(past.count) layers reach past the page, so the parts outside show dimmed."
     }
 }

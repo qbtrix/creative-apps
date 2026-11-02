@@ -9,7 +9,8 @@
 // It also hands the handles `haloCommitTransform`: a handle drag's release
 // reaches `setTransform` as one step (transform HT-3). It supplies
 // `haloPlace` (placed-images PH-3) as `runPlace`, to the window's views and as
-// the focused value File > Place… reads.
+// the focused value File > Place… reads, and `haloFilter` (adjust-everywhere AJ-13) as `runFilter`, the same way
+// for FILTERS and Layer > Add Filter.
 import HaloModel
 import SuiteKernel
 import SwiftUI
@@ -39,6 +40,9 @@ extension HaloWindow {
             // The viewer's drops and the inspector read it; File > Place… reads the focused value.
             .environment(\.haloPlace, { runPlace($0, fill: $1) })
             .focusedSceneValue(\.haloPlace, { runPlace($0, fill: $1) })
+            // FILTERS reads it; Layer > Add Filter reads the focused value.
+            .environment(\.haloFilter, { runFilter($0) })
+            .focusedSceneValue(\.haloFilter, { runFilter($0) })
             .onAppear {
                 shapes.draw = {
                     takePlayback()
@@ -52,6 +56,12 @@ extension HaloWindow {
     func runPlace(_ intent: PlaceIntent, fill: Bool) {
         takePlayback()
         model.runPlace(intent, fill: fill)
+    }
+
+    /// The window's `haloFilter` (HaloFilterSection.swift): one FILTERS gesture on the selected layer.
+    func runFilter(_ intent: HaloFilterIntent) {
+        takePlayback()
+        model.runFilter(intent)
     }
 
     /// A handle drag's release, as one step; the Model refuses what it can't do.

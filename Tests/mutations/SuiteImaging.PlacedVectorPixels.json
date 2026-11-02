@@ -1,0 +1,23 @@
+[
+  {
+    "label": "the vector ignores the box and draws at its own size",
+    "file": "Sources/SuiteImaging/PlacedVectorPixels.swift",
+    "find": "let sx = Double(width) / vector.size.width, sy = Double(height) / vector.size.height",
+    "replace": "let sx = 1.0, sy = 1.0",
+    "tests": "SuiteImagingTests.PlacedVectorPixelsTests/aVectorScalesIntoItsBoxAndFillsEvenOdd"
+  },
+  {
+    "label": "an item's opacity is dropped",
+    "file": "Sources/SuiteImaging/PlacedVectorPixels.swift",
+    "find": "let alpha = c.a * item.opacity",
+    "replace": "let alpha = c.a",
+    "tests": "SuiteImagingTests.PlacedVectorPixelsTests/opacityScalesAndANilFillPaintsNothing"
+  },
+  {
+    "label": "an SVG's contours fill one by one, so the ring loses its hole",
+    "file": "Sources/SuiteImaging/PlacedVectorPixels.swift",
+    "find": "item.contours.flatMap { $0 + $0.prefix(1) }",
+    "replace": "item.contours.prefix(1).flatMap { $0 + $0.prefix(1) }",
+    "tests": "HaloPlaceRenderTests/svgRingKeepsHole"
+  }
+]

@@ -20,7 +20,9 @@ final class LibraryShareJourneyTests: XCTestCase {
         addTeardownBlock { for url in [folder, catalog] { try? FileManager.default.removeItem(at: url) } }
         try LibraryFiles.writeShoot(in: folder)
         let library = Journey("Library", self, arguments: [
-            "-LibraryImportFolder", folder.path, "-LibraryImportOnLaunch", "-LibraryCatalogDir", catalog.path,
+            // The switch goes last: AppKit reads `-Key value` pairs, so mid-list it would swallow
+            // `-LibraryCatalogDir` and leave the catalog path to open as a document (#4823).
+            "-LibraryImportFolder", folder.path, "-LibraryCatalogDir", catalog.path, "-LibraryImportOnLaunch",
         ])
         XCTAssert(library.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(gridCell("IMG_0024", library).waitForExistence(timeout: 60), "no grid cell for IMG_0024")

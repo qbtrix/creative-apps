@@ -3,7 +3,7 @@
 // (LiveCatalogCoding) and the photos under `images/`. Opening it imports every image the catalog doesn't list yet.
 // Commands are `LibraryCatalog.catalog`'s, lifted; saving writes the zip back; export writes the catalog file
 // ("json") or the picks as PNGs at a long side through CoreRaster's codec, which refuses until core's PNG lands
-// (qbtrix/creative-core#562). The catalog (about 1.7 KB inline) lives in a copy-on-write box, so copying the document
+// (qbtrix/creative-core#562); any other export failure is a plain sentence naming the photo. The catalog (about 1.7 KB inline) lives in a copy-on-write box, so copying the document
 // is a pointer copy and fits a small thread stack (#5032). Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -67,7 +67,22 @@ public struct LibraryHeadless: HeadlessDocument {
             }
             return LibraryHeadless(photos: photos, images: images, stem: fileStem(name))
         } catch let error as CatalogError { throw error } catch {
-            throw CatalogError.failed(id: "open", message: "\(name) isn't a Library file: \(error)")
+            throw CatalogError.failed(id: "open", message: openWords(error, name: name))
+        }
+    }
+
+    /// Why `name` didn't open, in words a person reads, never an error's case dump. Core's `ZipStore` reads stored
+    /// entries only, so a re-zipped (deflated) library is refused with the way to fix it.
+    static func openWords(_ error: any Error, name: String) -> String {
+        switch error {
+        case CodecError.compressedEntry(let entry):
+            "Couldn't open \(name): \(entry) is compressed inside it, and Library reads only uncompressed .library "
+                + "files. Zip it again with no compression (zip -0)."
+        case CodecError.notThisFormat: "\(name) isn't a Library file."
+        case CodecError.unsupported: "\(name) holds an encrypted file, which Library can't open."
+        case CodecError.tooLarge: "\(name) is too large to open."
+        case is LibraryError, is DecodingError: "Couldn't open \(name): its catalog can't be read."
+        default: "\(name) is damaged and can't be opened."
         }
     }
 
@@ -109,14 +124,24 @@ public struct LibraryHeadless: HeadlessDocument {
                 throw CatalogError.failed(id: "export.png", message: "\(item.photoID) has no image in the library.")
             }
             do {
-                var buffer = try LiveDevelop().render(PNG.read(data), settings: photo.develop)
-                if buffer.width != item.size.width || buffer.height != item.size.height {
-                    buffer = try buffer.resized(width: item.size.width, height: item.size.height, filter: .lanczos3)
-                }
+                let buffer = try LiveExporter.developed(PNG.read(data), photo: photo, longSide: item.size.longSide,
+                                                        develop: LiveDevelop())
                 return ExportedFile(suggestedName: item.fileName, format: format, data: try PNG.write(buffer))
             } catch CodecError.unsupported {
                 throw CatalogError.notBuilt(id: "export.png", feature: Self.pngFeature)
+            } catch {
+                throw CatalogError.failed(id: "export.png", message: "Couldn't export \(item.photoID): \(Self.plainWords(error))")
             }
+        }
+    }
+
+    /// Why an export failed, in words a person reads, never an error's case dump.
+    static func plainWords(_ error: any Error) -> String {
+        switch error {
+        case let e as LibraryError: e.message
+        case CodecError.notThisFormat, CodecError.damaged: "its image file is damaged."
+        case CodecError.tooLarge: "its image is too large to write."
+        default: "the picture couldn't be drawn."
         }
     }
 

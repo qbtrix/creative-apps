@@ -10,9 +10,15 @@
 // an arrow key and at the end of a drag, never per drag sample (rule 1;
 // DW-b's live preview replaces the wait). The rows are disabled with the
 // Model's `styleHelp(.textStyle)` as their tooltip and as a hint line ("A
-// isn't a text layer."). Values in, intents out.
+// isn't a text layer."). Values in, intents out. Below them, while a text
+// layer is selected, SuiteUI's TextStyleRows (text-style TS-3) over the
+// layer's style as the kernel's TextStyle, the font picker listing this
+// Mac's families; disabled with `textStylesHelp` until TS-8 routes their
+// intents to Design's text commands, when they replace the rows above.
 import AppKit
 import DesignModel
+import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
@@ -91,8 +97,38 @@ struct DesignInspectorText: View {
                     commit { $0.fixedWidth = fixed }
                 }
                 if let help { InspectorNote(help) }
+                if let kernel = textStyle {
+                    TextStyleRows(style: kernel, families: Self.fontFamilies, help: Self.textStylesHelp) { _ in }
+                }
             }
         }
+    }
+
+    /// Why the shared text style rows can't act yet: their intents reach Design's text commands in TS-8.
+    nonisolated static let textStylesHelp = "Text styles aren't connected in this window yet."
+
+    /// The font families the shared rows' picker lists: this Mac's, read once.
+    nonisolated static let fontFamilies = FontCatalog().families()
+
+    /// The selected text layers' style as the kernel's (the first text layer's when mixed); nil with no text layer.
+    var textStyle: TextStyle? {
+        guard let first = model.selectedNodes.first(where: { $0.kind == .text }) else { return nil }
+        return Self.kernelStyle(model.sharedTextStyle ?? first.textStyle)
+    }
+
+    /// Design's text style as the kernel's: same family, weight, size and alignment; black, line height 1.2, no
+    /// tracking, which Design doesn't store yet.
+    nonisolated static func kernelStyle(_ style: DesignTextStyle) -> TextStyle {
+        var kernel = TextStyle.standard
+        kernel.family = style.family
+        kernel.weight = style.weight
+        kernel.size = style.size
+        switch style.alignment {
+        case .leading: kernel.paragraph.alignment = .leading
+        case .center: kernel.paragraph.alignment = .center
+        case .trailing: kernel.paragraph.alignment = .trailing
+        }
+        return kernel
     }
 
     /// The Family picker; a mixed selection shows "Mixed" until a family is picked.

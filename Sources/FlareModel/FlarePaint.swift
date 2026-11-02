@@ -63,7 +63,7 @@ extension FlareWorkspace {
     /// one undo step.
     public mutating func scrubStrokeWidth(_ width: Double) {
         let items = paintShapes.map(\.0)
-        editStroke(coalesceKey: "stroke-width-\(items)-\(propertyScrubSerial)") { $0.width = width }
+        editStroke(coalesceKey: CoalesceKey.key("stroke.width", on: items.map { "\($0)" }, drag: "\(propertyScrubSerial)")) { $0.width = width }
     }
 
     /// Sets the stroke cap.

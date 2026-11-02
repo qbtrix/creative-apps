@@ -106,8 +106,10 @@ final class FlareLottieOpenJourneyTests: XCTestCase {
         let note = flare.element("flare.import.note")
         XCTAssert(note.waitForExistence(timeout: 20), "the Lottie open showed no note (flare.import.note)")
         for text in texts {
-            // A SwiftUI Text reaches XCUITest as its value or its label (as the other journeys match).
-            let row = note.staticTexts.matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text))
+            // Each row is an InspectorNote, one element with its children ignored and its text as the label, so it
+            // need not reach XCUITest as a static text: match any descendant by label or value (#4954).
+            let row = note.descendants(matching: .any)
+                .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text))
             XCTAssert(row.firstMatch.waitForExistence(timeout: 5), "the note doesn't read \"\(text)\"")
         }
     }

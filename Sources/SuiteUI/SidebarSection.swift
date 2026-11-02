@@ -8,6 +8,8 @@
 // `contextActions` gives its id, reached through the environment
 // (`sidebarContextActions`): a disabled action shows greyed with its
 // unavailableHelp as help, and a row with no actions gets no menu (LL-8a).
+// An app's `SidebarRow.renameMenuItem` opens that row's own inline rename
+// field, as a double-click does; a row that can't rename leaves it out.
 // A group's expansion can be the app's: with the window's `expanded` and
 // `onExpand` (the environment's `sidebarExpansion`), the disclosure shows the
 // app's set and a click calls onExpand; without onExpand the group keeps its
@@ -67,6 +69,8 @@ struct SidebarNode: View {
     @Environment(\.sidebarContextActions) private var contextActions
     /// The window's `expanded` and `onExpand`; nil keeps `isOpen` (LL-9).
     @Environment(\.sidebarExpansion) private var expansion
+    /// Bumped by the menu's Rename; the row opens its field on each change.
+    @State private var renameAsk = 0
     /// The group's own open state, while the app doesn't own it.
     @State private var isOpen = false
 
@@ -98,16 +102,20 @@ struct SidebarNode: View {
         if let onToggle { toggle = { onToggle(id, $0) } }
         var rename: (@MainActor (String) -> String?)?
         if let onRename { rename = { onRename(id, $0) } }
-        return SidebarRow(item, onToggle: toggle, refusableRename: rename)
-            .modifier(SidebarContextMenu(items: Self.menu(for: id, from: contextActions)))
+        var ask: (@MainActor () -> Void)?
+        if onRename != nil { ask = { renameAsk += 1 } }
+        return SidebarRow(item, onToggle: toggle, refusableRename: rename, renameAsk: renameAsk)
+            .modifier(SidebarContextMenu(items: Self.menu(for: id, from: contextActions, rename: ask)))
             .tag(id)
     }
 
     /// The menu for the row `id`: nil when the window gives no actions for it.
     /// Main actor on purpose: it calls the app's main-actor closure.
-    @MainActor static func menu(for id: SidebarItem.ID, from actions: SidebarContextActions?) -> [SidebarMenuItem]? {
+    @MainActor static func menu(
+        for id: SidebarItem.ID, from actions: SidebarContextActions?, rename: (@MainActor () -> Void)? = nil
+    ) -> [SidebarMenuItem]? {
         guard let actions else { return nil }
-        return SidebarContextMenu.items(for: actions.actions(id))
+        return SidebarContextMenu.items(for: actions.actions(id), rename: rename)
     }
 
     /// The Void rename form as one that never refuses.
@@ -132,13 +140,13 @@ struct SidebarMenuItem: Identifiable {
     let help: String?
     let perform: @MainActor () -> Void
 
-    init(_ action: ToolbarAction) {
+    init(_ action: ToolbarAction, perform: (@MainActor () -> Void)? = nil) {
         id = action.id
         title = action.title
         systemImage = action.systemImage
         isDisabled = !action.isEnabled
         help = action.unavailableHelp
-        perform = action.perform
+        self.perform = perform ?? action.perform
     }
 }
 
@@ -146,9 +154,13 @@ struct SidebarMenuItem: Identifiable {
 struct SidebarContextMenu: ViewModifier {
     let items: [SidebarMenuItem]?
 
-    /// The menu `actions` build; nil when there are none.
-    static func items(for actions: [ToolbarAction]) -> [SidebarMenuItem]? {
-        actions.isEmpty ? nil : actions.map(SidebarMenuItem.init)
+    /// The menu `actions` build, `rename` running the Rename item (left out when nil); nil when there are none.
+    static func items(for actions: [ToolbarAction], rename: (@MainActor () -> Void)? = nil) -> [SidebarMenuItem]? {
+        let items = actions.compactMap { action -> SidebarMenuItem? in
+            guard action.identifier == SidebarRow.renameMenuIdentifier else { return SidebarMenuItem(action) }
+            return rename.map { SidebarMenuItem(action, perform: $0) }
+        }
+        return items.isEmpty ? nil : items
     }
 
     /// The menu's system buttons, one per item.
@@ -216,4 +228,14 @@ extension EnvironmentValues {
 
 private struct SidebarExpansionKey: EnvironmentKey {
     static let defaultValue: SidebarExpansion? = nil
+}
+
+extension SidebarRow {
+    /// A context menu item that opens the row's own inline rename field, as a double-click does.
+    /// An app puts it in a row's `contextActions`; a row that can't rename leaves it out.
+    @MainActor public static var renameMenuItem: ToolbarAction {
+        ToolbarAction(renameActionName, systemImage: "pencil", identifier: renameMenuIdentifier)
+    }
+
+    nonisolated static let renameMenuIdentifier = "suite.sidebar.menu.rename"
 }

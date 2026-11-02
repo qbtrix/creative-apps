@@ -1,5 +1,5 @@
 // FlareTimeline.swift: the timeline under the stage (draw-key-save DK-10).
-// The transport (FlareTransport, DK-11) and the readouts (`timecode` and
+// The transport (FlareTransportAdapter, DK-11) and the readouts (`timecode` and
 // `frameReadout`) sit on one row above a TimelineStrip with one lane per row
 // of `timelineRows`: its name and its key frames as diamonds, the playhead on
 // `currentFrame`; FlareTimelineEdit draws it and edits keys and labels (IT-7), and
@@ -7,9 +7,9 @@
 // the last frame, and its frames are fitted to the width it is offered less
 // the name column, the divider and the trailing room, so every frame shows and
 // the lanes never scroll sideways. With no rows it shows `timelineEmptyText`.
-// The strip's track name buttons come from SuiteUI with no identifier of their
-// own (`flare.timeline.track` on the strip doesn't reach them), so journeys
-// find a track by its name inside `flare.timeline`.
+// The strip's name buttons, lanes and keys take identifiers under
+// `flare.timeline` (FlareTimelineEdit); journeys still find a track by its
+// name inside `flare.timeline`.
 // The row never asks for more than the narrowest content column: the transport
 // is only its controls (fixed size) and each readout stays on one line, so a
 // squeezed readout can't wrap and push the window past the display (#2101).
@@ -36,7 +36,7 @@ struct FlareTimeline: View {
             // No Spacer: its two gaps made the row 14 pt wider than the narrowest column (#2259). The readouts
             // take the room left and sit at its trailing edge, `s` from the transport at the least.
             HStack(spacing: SuiteSpacing.s) {
-                FlareTransport(model: model, perform: perform)
+                FlareTransportAdapter(model: model, perform: perform)
                 HStack(spacing: SuiteSpacing.s) {
                     readout(
                         model.timecodeParts, label: model.timecode, help: model.timecodeHelp,

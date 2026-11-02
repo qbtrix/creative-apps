@@ -82,9 +82,9 @@ New, in `UITests/DesignJourneyTests+Shell.swift`:
    Open are enabled and Save, Undo, Redo and zoom are disabled with their
    reasons. The canvas shows its empty state with New File and no palette.
    The inspector reads "No Selection". Shot `shell-empty`.
-2. [DS-4, DS-J2] ⌘N. The page fits in the canvas, the floating palette (Move, Frame,
+2. [DS-4, DS-J2] ⌘N. The page fits in the canvas, the floating palette (Select, Frame,
    Rectangle, Ellipse, Text, Pen) sits at the canvas's leading edge, the
-   title is "Untitled" and the status line shows zoom, page size and "Move".
+   title is "Untitled" and the status line shows zoom, page size and "Select".
    Shot `shell-open`.
 3. [DS-4, DS-J3] Pick Rectangle and drag from 2% to 25% across the page, starting at its
    left edge, so the shape's left handles sit on the page's edge. Then

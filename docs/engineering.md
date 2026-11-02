@@ -193,7 +193,13 @@ every step.
   it and its owner keeps the proof while `main` can promote. `scripts/ui-test`
   lists every entry in its output and the job summary, and `scripts/ci` fails
   once an entry expires, its owner issue closes, or its test is gone, so the
-  list can't grow quietly. Agents never edit the file. Gate: `scripts/ci`.
+  list can't grow quietly. A swift test goes in the same file in the perf
+  list's form (`Target.Suite/test`) and `scripts/ci` skips it. Agents never
+  edit the file; the fast lane adds and removes its own entries (a `lane`
+  block: the dev-red issue, the culprit range, a 24 h expiry) when dev is red
+  with no culprit to revert, through its `lane-quarantine` PR that changes
+  that file alone (docs/fast-lane.md, Auto-quarantine); `scripts/quarantine
+  release` fails while one is in. Gate: `scripts/ci`.
 - **Key-press journeys run on the local Mac only.** A journey that posts key
   events as CGEvents (a held Space, Escape mid-drag) needs the test runner's
   Accessibility access, which GitHub's hosted macOS runners don't have. Those

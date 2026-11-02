@@ -69,6 +69,16 @@ struct ShapeBoard: ShapeTarget {
         #expect(drawn.box == Rect(minX: 0, minY: 0, maxX: 100, maxY: 100) && drawn.spec.head == 20)
         #expect(drawn.spec.start == Point(x: 0, y: 1) && drawn.spec.end == Point(x: 1, y: 0) && drawn.spec.points == 5)
     }
+    /// #5842: a line's ends are fractions of its box, so a pixel value is refused, not drawn off the canvas.
+    @Test func lineEndsAreFractionsOfTheBox() throws {
+        let catalog = try #require(ShapeBoard.catalog)
+        var board = ShapeBoard()
+        let pixels = ShapeBoard.draw("line", ["x1": .number(0), "y1": .number(0), "x2": .number(400), "y2": .number(0)])
+        #expect(throws: CatalogError.self) { try catalog.run("shape.draw", params: pixels, on: &board) }
+        #expect(board.shapes.isEmpty)
+        let schema = try #require(catalog.spec("shape.draw")).params.json
+        #expect("\(schema)".contains("fraction of the box"))
+    }
     @Test func intentsChangeOneOption() {
         let spec = ShapeSpec.defaults(.rectangle)
         #expect(ShapeIntent.kind(.star).applied(to: spec).kind == .star && ShapeIntent.sides(7).applied(to: spec).sides == 7)

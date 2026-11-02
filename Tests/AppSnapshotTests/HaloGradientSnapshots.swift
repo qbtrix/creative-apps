@@ -1,9 +1,10 @@
 // HaloGradientSnapshots.swift (gradient-fill HG-3): Halo's FILL section (HaloFillInspector) in its states. A radial
-// fill shows the Solid / Linear / Radial switch on Radial and SuiteUI's GradientEditor with the fill's stops and no
+// fill shows SuiteUI's GradientEditor, its one Solid / Linear / Radial switch on Radial, with the fill's stops and no
 // angle row (halo-fill-radial); a linear fill adds the angle (halo-fill-linear); both from values, white to black.
 // A text layer shows no FILL in the whole layer inspector: text keeps its colour row in TEXT
 // (halo-fill-text-layer). Also: on a new solid the section reads the project's solid fill in its layer's colour,
 // the switch live on Solid over the layer's colour row. Light and Dark. macOS only.
+import AppKit
 import HaloModel
 import SuiteKernel
 import SuiteUI
@@ -24,7 +25,7 @@ import Testing
     @Test func linear() throws {
         let section = Self.section(Self.linear)
         #expect(section.type == .linear, "the switch reads Linear")
-        #expect(HaloFillInspector.options.map(\.id) == FillType.allCases, "FILL offers Solid, Linear and Radial")
+        #expect(Self.typeSwitches(section) == [FillType.allCases.count], "FILL holds one Solid / Linear / Radial switch")
         try Self.both(Self.panel(section), name: "halo-fill-linear")
     }
 
@@ -84,6 +85,17 @@ import Testing
             .padding(.vertical, SuiteSpacing.m)
             .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .top)
             .background(SuiteColor.panel)
+    }
+
+    /// The segment counts of the system segmented controls FILL hosts: one switch, SuiteUI's, never an app-local copy.
+    private static func typeSwitches(_ section: HaloFillInspector) -> [Int] {
+        let host = NSHostingView(rootView: panel(section))
+        host.frame = CGRect(x: 0, y: 0, width: SuiteSize.inspectorWidth.ideal, height: 400)
+        host.layoutSubtreeIfNeeded()
+        func segmented(in view: NSView) -> [NSSegmentedControl] {
+            (view as? NSSegmentedControl).map { [$0] } ?? view.subviews.flatMap(segmented)
+        }
+        return segmented(in: host).map(\.segmentCount)
     }
 
     /// Writes `<name>-light` and `<name>-dark`.

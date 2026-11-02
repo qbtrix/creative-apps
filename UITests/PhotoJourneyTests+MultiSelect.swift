@@ -7,8 +7,9 @@
 // Shift-click row 3 (rows 1-3 picked, the inspector on row 3's Curves 1, the
 // primary); Command-click row 2 off; row 1's eye hides rows 1 and 3 in one
 // "Hide Layers" step; the Opacity slider to 50 sets both, one "Layer Opacity"
-// step; the Move tool drags the canvas 40 px right, one "Move Layers" step
-// that Command-Z takes back; Option-Command-A (Select > All Layers) picks all
+// step; a Shift-drag with Select (V) on the canvas adds the layer under it to
+// the pick and moves them 40 px right, one "Move Layers" step that Command-Z
+// takes back; Option-Command-A (Select > All Layers) picks all
 // four; Delete Layer is refused with "At least one layer must stay."; row 4
 // Command-clicked off, Delete Layers takes three in one step and Command-Z
 // brings them back. Rows are `photo.layer.row.<id>` (PM-3), picked while
@@ -69,15 +70,18 @@ final class PhotoMultiLayerJourneyTests: XCTestCase {
             "rows 1 and 3 don't both read 50%")
         photo.shot("multi-4-opacity")
 
-        // 5. Move tool, the canvas dragged 40 px right: one Move Layers step; Command-Z puts both back.
-        photo.element("suite.tools").buttons["Move"].click()
+        // 5. Select (V), the canvas Shift-dragged 40 px right: the layer under the press joins the pick and they
+        // move as one Move Layers step; Command-Z puts them back.
+        photo.element("suite.tools").buttons["Select"].click()
         let canvas = photo.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 5), "no canvas (suite.canvas)")
         let before = canvas.screenshot().pngRepresentation
         let grab = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-        grab.press(forDuration: 0.1, thenDragTo: grab.withOffset(CGVector(dx: 40, dy: 0)))
-        expect("Undo Move Layers", photo, "the Move drag made no Move Layers step")
-        XCTAssert(waitUntil { canvas.screenshot().pngRepresentation != before }, "the Move drag didn't change the canvas")
+        XCUIElement.perform(withKeyModifiers: .shift) {
+            grab.press(forDuration: 0.1, thenDragTo: grab.withOffset(CGVector(dx: 40, dy: 0)))
+        }
+        expect("Undo Move Layers", photo, "the Select drag made no Move Layers step")
+        XCTAssert(waitUntil { canvas.screenshot().pngRepresentation != before }, "the Select drag didn't change the canvas")
         photo.shot("multi-5-moved")
         photo.press(character: "z", .command)
         expect("Redo Move Layers", photo, "Command-Z didn't take the Move Layers step back")

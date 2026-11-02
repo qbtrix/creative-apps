@@ -5,7 +5,8 @@
 // document with three layers, one hidden and one locked; `bounce` with Shadow
 // hidden (Background is locked); two scenes; and `empty`, whose LAYERS has no
 // rows and its New Layer button. `rowsFromTree` checks LAYERS is the
-// kernel's `layerRows` (adopt-kernel-layers AL-f2).
+// kernel's `layerRows` (adopt-kernel-layers AL-f2); hidden and locked rows
+// read dimmed (LF-1d) and `rowMenus` checks each row's context menu (LF-2).
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -21,6 +22,10 @@ import Testing
         for _ in 0..<3 { model.addLayer() }
         model.toggleLayerFlag("layer-1", .visible)
         model.toggleLayerFlag("layer-2", .locked)
+        // The hidden and the locked row read dimmed; the third doesn't (LF-1d).
+        let dimmed = model.layerRows.filter { LayerTreeOptions(dimsLocked: true).dims($0) }.map(\.id)
+        #expect(Set(dimmed) == ["layer-1", "layer-2"])
+        #expect(model.layerRows.filter { LayerTreeOptions().dims($0) }.map(\.id) == ["layer-1"])
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(LayersRows(model: model), name: "flare-layers-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
@@ -40,6 +45,18 @@ import Testing
         model.addScene()
         #expect(model.scenes.count == 2)
         try snapshot(LayersRows(model: model), name: "flare-sidebar-scenes", scheme: .light)
+    }
+
+    /// Each row's context menu (LF-2): Rename opens the row's field, a layer's other four items act, and the last
+    /// scene's Delete is off and says why.
+    @Test func rowMenus() {
+        let model = fixture("bounce")
+        let layer = FlareRowMenu.actions(model.layerRowMenu("shadow"), perform: { _ in })
+        #expect(layer.map(\.title) == ["Rename", "Hide Layer", "Lock Layer", "Duplicate Layer", "Delete Layer"])
+        #expect(layer.allSatisfy { $0.unavailableHelp == nil })
+        let scene = FlareRowMenu.actions(model.sceneRowMenu("scene-1"), perform: { _ in })
+        #expect(scene.map(\.title) == ["Rename", "Delete Scene"])
+        #expect(scene.last?.unavailableHelp == "An animation needs at least one scene.")
     }
 
     @Test func emptyLayers() throws {

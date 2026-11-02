@@ -149,15 +149,14 @@ extension BodyCountSuites {
 }
 
 /// The fake document's window: its name and "Edited" over an empty canvas. Counts its bodies in debug.
-struct UnsavedSheetDocument: View {
+struct UnsavedSheetDocument: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Poster").font(SuiteFont.sectionCaps)

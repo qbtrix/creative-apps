@@ -1,6 +1,7 @@
 // ToolKeysTests.swift: ToolKeys (EK-31). A letter picks the enabled
 // PaletteTool on that shortcut, in either case, never a disabled one, and
-// nothing when no tool has it; KeyModifiers from AppKit's flags keeps Shift,
+// nothing when no tool has it; Shift steps through the enabled tools sharing a
+// letter, wrapping; KeyModifiers from AppKit's flags keeps Shift,
 // Option and Command and drops the rest. macOS only.
 import AppKit
 import SuiteUI
@@ -10,6 +11,7 @@ private enum KeyTool: String, PaletteTool, CaseIterable {
     case move, brush, eraser, hand
     var title: String { rawValue.capitalized }
     var systemImage: String { "circle" }
+    var gesture: ToolGesture { .none }
     var unavailableHelp: String? { self == .eraser ? "Open a layer to erase." : nil }
     var shortcut: Character? {
         switch self {
@@ -33,6 +35,22 @@ private enum KeyTool: String, PaletteTool, CaseIterable {
         #expect(ToolKeys.tool(forKey: "e", in: all) == nil)
         #expect(ToolKeys.tool(forKey: "x", in: all) == nil)
         #expect(ToolKeys.tool(forKey: "b", in: [KeyTool]()) == nil)
+    }
+
+    @Test func shiftCyclesASharedLetter() {
+        let faces = ["a", "b", "c", "d"].map { ToolFace(id: $0, title: $0, shortcut: $0 == "d" ? "x" : "j") }
+        #expect(ToolKeys.id(forKey: "j", in: faces) == "a")
+        #expect(ToolKeys.id(forKey: "J", in: faces, after: "a") == "b")
+        #expect(ToolKeys.id(forKey: "J", in: faces, after: "c") == "a")
+        #expect(ToolKeys.id(forKey: "J", in: faces, after: "d") == "a")
+        var waiting = faces
+        waiting[1].unavailableHelp = "Not yet."
+        #expect(ToolKeys.id(forKey: "J", in: waiting, after: "a") == "c")
+        #expect(ToolKeys.id(forKey: "x", in: faces, after: "d") == "d")
+        #expect(ToolKeys.id(forKey: "q", in: faces, after: "a") == nil)
+        let all = KeyTool.allCases
+        #expect(ToolKeys.tool(forKey: "B", in: all, cyclingFrom: { $0 == .brush }) == .brush)
+        #expect(ToolKeys.tool(forKey: "B", in: all, cyclingFrom: { $0 == .move }) == .brush)
     }
 
     @Test func modifiersFromFlags() {

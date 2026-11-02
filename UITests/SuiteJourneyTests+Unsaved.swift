@@ -23,7 +23,7 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
     }
 
     /// The editors whose leg runs; each slice adds its app here and deletes its skip.
-    private static let live: Set<String> = ["Design"]
+    private static let live: Set<String> = ["Design", "Photo"]
 
     /// UnsavedPrompt.message(for:).
     private static func message(for name: String) -> String {
@@ -134,7 +134,9 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
         saveButton.click()
         XCTAssert(saveButton.waitForNonExistence(timeout: 5), "\(editor.app): Save left the unsaved sheet up")
         XCTAssert(savePanel(journey).exists, "\(editor.app): Save on Untitled opened no Save panel")
-        journey.shot("unsaved-save-panel")
+        // The Save panel is the system's: its title-bar text fails the contrast check on the runner (#4231),
+        // so the shot skips the audit, as for another app's element (Journey.shot(_:element:audit:)).
+        journey.shot("unsaved-save-panel", element: journey.app.windows.firstMatch, audit: false)
         journey.press(.escape)
         XCTAssert(journey.app.windows.firstMatch.waitForExistence(timeout: 5), "\(editor.app): cancelling the panel closed the document")
         XCTAssert(journey.element("suite.canvas").exists, "\(editor.app): cancelling the panel replaced the document")

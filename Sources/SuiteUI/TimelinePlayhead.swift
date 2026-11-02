@@ -17,7 +17,7 @@
 import SuiteKernel
 import SwiftUI
 
-struct TimelinePlayhead: View {
+struct TimelinePlayhead: View, BodyCounted {
     let mapping: FrameMapping
     let playhead: Int
     let unit: TimeUnit
@@ -34,8 +34,7 @@ struct TimelinePlayhead: View {
     @State private var sender = TimelineScrubSender()
 
     #if DEBUG
-    /// How many times a playhead's body ran; the real-window budget tests count a scrub's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     /// What the pill reads: the playhead in the host's unit.
@@ -43,7 +42,7 @@ struct TimelinePlayhead: View {
 
     var body: some View {
         #if DEBUG
-        Self.bodyRuns += 1
+        bodyTally.ran(Self.self)
         #endif
         return GeometryReader { proxy in
             let lineX = tickX(mapping, mapping.clamp(playhead)) - scroll.x
@@ -105,12 +104,14 @@ struct TimelinePlayhead: View {
         }
     }
 
-    /// The rows a lanes' visible y range shows; every row before it reports.
+    /// The rows a lanes' visible y range shows, inside `count` (a range reported before the tracks shrank, or
+    /// one taller than them, stops at the last row); every row before it reports.
     static func rows(showing visibleY: ClosedRange<Double>?, count: Int) -> Range<Int> {
-        guard let visibleY else { return 0..<max(count, 0) }
+        let count = max(count, 0)
+        guard let visibleY else { return 0..<count }
         let lane = Double(SuiteSize.timelineLane)
-        let first = max(Int((visibleY.lowerBound / lane).rounded(.down)), 0)
-        let end = max(Int((visibleY.upperBound / lane).rounded(.up)), first)
+        let first = min(max(Int((visibleY.lowerBound / lane).rounded(.down)), 0), count)
+        let end = min(max(Int((visibleY.upperBound / lane).rounded(.up)), first), count)
         return first..<end
     }
 }

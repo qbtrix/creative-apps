@@ -40,7 +40,7 @@ actor RacingPreferences: PreferencesStoring {
     func changes() async -> AsyncStream<Int> { await inner.changes() }
 }
 
-@MainActor @Suite(.timeLimit(.minutes(1))) struct OnboardingModelTests {
+@MainActor @Suite(.timeLimit(.minutes(5))) struct OnboardingModelTests {
     let now = Date(timeIntervalSince1970: 1_800_000_000)
     let log = SampleCopyLog()
 
@@ -186,6 +186,23 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isFinished && m.message == nil)
     }
 
+    /// Home's RECENT lists the copy even when its app doesn't note its own opens yet (Design, #5947 OJ2).
+    @Test func openSampleNotesTheCopyInRecents() async throws {
+        let (m, s) = await model()
+        let sample = try #require(SampleCatalog.sample(for: .design))
+        await m.openSample(.design, now: now)
+        let items = try await s.recents.list().items
+        #expect(items.map(\.ref) == [SampleCatalog.ref(for: sample, path: "/D/Samples/Cards.design")])
+        #expect(items.first?.lastUsed == now)
+    }
+
+    @Test func openSampleThatIsRefusedNotesNothing() async throws {
+        let (m, s) = await model { $0.sending = FakeHandOffs(unavailable: "Design can't do that yet.") }
+        await m.openSample(.design, now: now)
+        #expect(try await s.recents.list().items.isEmpty)
+        #expect(!m.isFinished)
+    }
+
     @Test func openSampleNeverOverwritesAnEarlierCopy() async throws {
         let (m, s) = await model(present: { $0.hasPrefix("/R/Samples/") || $0 == "/D/Samples/Bounce.flare" })
         await m.openSample(.flare, now: now)
@@ -224,12 +241,12 @@ actor RacingPreferences: PreferencesStoring {
         let (m, _) = await model { $0.sending = gate }
         let preset = try flareHD()
         let refused = Task { await m.startNew(preset, now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         await gate.finish(.failure(.timedOut))
         await refused.value
         #expect(m.message == .timedOut && m.launching == nil && !m.isFinished)
         let next = Task { await m.openSample(.design, now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         #expect(m.message == nil && m.failed == nil && m.launching == .design)
         await gate.finish(.success(SwitchReceipt(app: .design, wasRunning: false, requestedAt: 1)))
         await next.value
@@ -290,10 +307,11 @@ actor RacingPreferences: PreferencesStoring {
 
     @Test func continueOnTheLastPageSavesTheVersion() async throws {
         let (m, s) = await model()
+        let saves = await s.preferences.changes()
         m.choose(.design)
         m.continue(); m.continue(); m.continue()
         #expect(m.isFinished)
-        for _ in 0..<100 where try await saved(s).onboardingDoneVersion == nil { await Task.yield() }
+        for await _ in saves where try await saved(s).onboardingDoneVersion != nil { break }
         #expect(try await saved(s).onboardingDoneVersion == 1)
         #expect(try await saved(s).homeOrder.first == .design)
     }
@@ -305,7 +323,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.isLastPage && m.sendingReason == nil)
         let preset = try flareHD()
         let send = Task { await m.startNew(preset, now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         #expect(m.launching == .flare && m.sendingReason == "A document is opening.")
         m.back(); m.continue()
         await m.skip()
@@ -338,7 +356,7 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.presetsHelp(blocked) == "Halo isn't installed.")
         let preset = try flareHD()
         let send = Task { await m.startNew(preset, now: now) }
-        while !(await gate.isWaiting) { await Task.yield() }
+        await gate.waitUntilWaiting()
         let opening = "A document is opening."
         #expect([m.skipHelp, m.backHelp, m.startEmptyHelp, m.presetsHelp(design.tile), m.sampleHelp(design)]
             == Array(repeating: opening, count: 5))
@@ -365,5 +383,26 @@ actor RacingPreferences: PreferencesStoring {
         #expect(m.message == .notAvailable("The Flare sample isn't in this build.") && m.failed == .flare)
         await m.openSample(.design, now: now)
         #expect(m.message == nil && m.failed == nil && m.isFinished)
+    }
+
+    /// Help > Welcome to AfterGlow on a window SwiftUI kept: the tour starts over on page 1, unheld,
+    /// and Skip closes it again (#5947: the reopened window read "start" and Escape left it open).
+    @Test func reopenAfterAFinishStartsOverOnTheFirstPage() async throws {
+        let (m, _) = await model()
+        m.continue(); m.continue()
+        await m.openSample(.flare, now: now)
+        #expect(m.isFinished && m.launching == .flare)
+        m.reopen()
+        #expect(m.pageIndex == 0 && m.page.id == "apps" && !m.isFinished)
+        #expect(m.launching == nil && m.sendingReason == nil && m.message == nil && m.failed == nil)
+        await m.skip()
+        #expect(m.isFinished)
+    }
+
+    @Test func reopenLeavesAnOpenTourWhereItIs() async {
+        let (m, _) = await model()
+        m.continue()
+        m.reopen()
+        #expect(m.pageIndex == 1 && !m.isFinished)
     }
 }

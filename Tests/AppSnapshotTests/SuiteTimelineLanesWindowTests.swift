@@ -54,10 +54,9 @@ extension BodyCountSuites {
 @MainActor private final class LanesDragSent { var moves: [Int] = []; var ends = 0 }
 
 /// The strip on the sample, applying each move to its picked keys as a host does, counting its own bodies.
-private struct LanesDragHost: View {
+private struct LanesDragHost: View, BodyCounted {
     let sent: LanesDragSent
-    /// How many times the host's body ran: the window bodies the budget counts.
-    @MainActor static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     @State private var tracks: [TimelineTrack<String>] = (0..<300).map { lane in
         TimelineTrack(
             id: "lane-\(lane)", name: "Lane \(lane)",
@@ -67,7 +66,7 @@ private struct LanesDragHost: View {
     @State private var playhead = 0
 
     var body: some View {
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         TimelineStrip(
             tracks: tracks, duration: 10_000, frameWidth: 4, playhead: playhead,
             onScrub: { playhead = $0 },

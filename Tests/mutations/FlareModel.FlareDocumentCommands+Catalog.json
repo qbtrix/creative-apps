@@ -1,9 +1,9 @@
 [
   {
-    "label": ".lockedLayerUnavailable: the dry run is skipped, so every command reads available",
+    "label": ".notBuiltAvailable: a command FlareCore hasn't built reads available",
     "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
-    "find": "        return copy.layerError.map { .unavailable($0.message) } ?? .available\n",
-    "replace": "        return .available\n",
+    "find": "        case .noDocument?, .command(.notBuilt)?: return .unavailable(copy.layerError?.message ?? \"\")\n",
+    "replace": "        case .noDocument?: return .unavailable(copy.layerError?.message ?? \"\")\n",
     "tests": "FlareCoreCommandCatalogTests"
   },
   {
@@ -33,5 +33,12 @@
     "find": "        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }\n",
     "replace": "",
     "tests": "FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": "exampleTargetsJudged: a refusal about the example's layer-1 makes the id unavailable (#5841)",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "        default: return .available\n",
+    "replace": "        default: return copy.layerError.map { .unavailable($0.message) } ?? .available\n",
+    "tests": "FlareCoreCommandCatalogTests|FlareLayersFilesGateTests"
   }
 ]

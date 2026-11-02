@@ -339,6 +339,7 @@ extension FakeCanvasDocument: ShapeTarget {
 /// `jumpEndingRun`, so a jump records no step and the next edit never folds into the step it landed on.
 extension FakeCanvasDocument: HistoryJumping {
     public var historyListing: HistoryListing { history.listing(base: "Open") }
+    public mutating func setHistoryRequest(_ name: String?) -> Bool { history.setRequest(name) }
     /// Undoes or redoes until `index` steps are applied; an index outside `0...steps.count` throws and changes nothing.
     public mutating func jumpHistory(to index: Int) throws {
         guard (0...history.steps.count).contains(index) else {

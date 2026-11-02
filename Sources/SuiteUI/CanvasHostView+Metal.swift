@@ -1,6 +1,6 @@
 // CanvasHostView+Metal.swift: the canvas host's GPU path (canvas-host CH-10).
 // Under `.gpu` or `.automatic` with a Metal device the tile container hides
-// and a `CAMetalLayer` (sRGB colour space) takes its place under the overlay;
+// and a `CAMetalLayer` (sRGB colour space) takes its place under the live layer and the overlay;
 // the presenter is handed every tile shown and fills each drawable
 // (CanvasTilePresenter live, the clearing fake in tests). `.cpu` or a nil
 // device keep the tile layers. On the Metal path the tile layers get no
@@ -12,11 +12,14 @@
 // artboard (a zero-size host) nothing is presented. A layout
 // presents a new drawable only for a new picture or a new drawable size, so a
 // pan or a rotation moves the one shown. The overlay stays on top on both
-// paths. macOS only.
+// paths. A live layer dropped on the Metal path stays until the drawable that
+// replaces it is presented, so the release never flashes the picture without
+// the layer. macOS only.
 import AppKit
 import Combine
 import Metal
 import QuartzCore
+import SuiteImaging
 import SwiftUI
 
 /// Fills a host's Metal drawable. The host never draws into it itself.
@@ -81,6 +84,15 @@ extension CanvasHostView {
     /// The presenter filling the Metal layer; nil on the tile path.
     public var metalPresenter: (any MetalPresenting)? { presenter }
 
+    /// Where a resident render on `backend` writes a `width` x `height` picture: the live presenter's document
+    /// texture, so the app names no texture type. Nil off the Metal path or with another presenter.
+    public func residentTarget(on backend: ImagingGPU.Backend, width: Int, height: Int) -> ImagingGPU.Target? {
+        guard let presenter = presenter as? CanvasTilePresenter,
+            let texture = presenter.residentTexture(on: backend.device, width: width, height: height)
+        else { return nil }
+        return ImagingGPU.Target(texture, on: backend)
+    }
+
     /// The installed Metal layer; nil on the tile path.
     public var metalLayer: CAMetalLayer? {
         layer?.sublayers?.lazy.compactMap { $0 as? CAMetalLayer }.first
@@ -111,7 +123,7 @@ extension CanvasHostView {
         metal.framebufferOnly = false
         // Not opaque (its default): a clear pixel shows the viewport's checkerboard, as a tile layer's does.
         metal.isOpaque = false
-        if metal.superlayer == nil { layer?.insertSublayer(metal, below: overlay) }
+        if metal.superlayer == nil { layer?.insertSublayer(metal, below: liftSpace) }
         container.isHidden = true
         self.presenter = presenter
         presenter.show(shown(), documentSize: documentSize)
@@ -141,6 +153,10 @@ extension CanvasHostView {
         metal.drawableSize = size
         guard let drawable = metal.nextDrawable() else { return }
         (pictureChanged, presentedSize) = (false, size)
+        // A dropped live layer goes once this drawable, the picture that replaces it, is on screen.
+        if droppedLift != nil {
+            drawable.addPresentedHandler { [weak self] _ in Task { @MainActor in self?.removeDroppedLift() } }
+        }
         presenter.present(drawable, on: metal)
     }
 

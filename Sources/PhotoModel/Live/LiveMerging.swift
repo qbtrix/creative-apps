@@ -62,7 +62,7 @@ struct LiveMerging: LayerMerging {
     ) throws -> TiledPixels {
         try PhotoLayerComposite.composite(
             content, onto: below, origin: origin,
-            adjusting: LiveAdjustmentLayers.make(), masking: LiveSelection.masking())
+            adjusting: LiveAdjustmentLayers.make(), masking: LiveEdit.masking())
     }
 
     /// Where `content`'s pixels sit on the canvas; nil for an adjustment layer.

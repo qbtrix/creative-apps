@@ -235,6 +235,16 @@ struct MCPProtocolTests {
         #expect(CLI.run(["mcp", "--app", "fake", "--root", Self.root], io: FakeIO()) == 0)
     }
 
+    /// `--live` alone needs no `--root` (#6028): it parses with no roots, and a file tool then refuses saying why.
+    @Test func liveAloneNeedsNoRoot() throws {
+        let options = try MCPServer.parse(["--live"], apps: [Apps.fake])
+        #expect(options.live && options.roots.isEmpty)
+        #expect(throws: Refusal.self) { try MCPServer.parse(["--app", "fake"], apps: [Apps.fake]) }
+        var sessions = MCPSessions(options, io: FakeIO())
+        let opened = sessions.call(.open(app: "fake"), .object(["path": .string("/tmp/mcp/a.fake")]), now: 0)
+        #expect(opened.isError && opened.text.contains("start afterglow mcp with --root <dir> to use files"), "\(opened.text)")
+    }
+
     @Test func theRateWindowAdmitsTheLimitPerSecondAndRecordsNoRefusal() {
         var window = RateWindow()
         #expect([0, 0.5].map { window.admit(at: $0, limit: 2) } == [true, true])

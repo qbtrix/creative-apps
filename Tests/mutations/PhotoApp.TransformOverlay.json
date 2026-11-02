@@ -1,0 +1,9 @@
+[
+  {
+    "label": "dragNeverHolds: a handle drag doesn't hold the live transform, so a resting pointer hands it back",
+    "file": "Sources/PhotoApp/TransformOverlay.swift",
+    "find": "        live?.hold()\n",
+    "replace": "",
+    "tests": "RenderBudgetPhotoTransformTests"
+  }
+]

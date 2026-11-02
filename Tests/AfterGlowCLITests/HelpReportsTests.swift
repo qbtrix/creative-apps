@@ -92,4 +92,38 @@ import Testing
         #expect(try Self.run(["suite", "open", "bad.suitehelp"], io).0 == CLI.Exit.data)
         #expect(try Self.run(["suite", "open", "app.suitehelp"], io).0 == CLI.Exit.data, "an app the suite doesn't have")
     }
+
+    /// A file that lists no crashes reads this machine's crash folder under its home, as the sheet does: the suite's
+    /// recent `.ips` and `.crash` files, not another app's (the 10-26 audit: `suite new` reported no crashes).
+    @Test func aFileWithoutCrashesReadsTheCrashFolder() throws {
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("help-home-\(UUID().uuidString)")
+        let folder = home.appendingPathComponent("Library/Logs/DiagnosticReports")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: home) }
+        try Data(Self.ips("Photo", "fromDisk").utf8).write(to: folder.appendingPathComponent("Photo-2026-10-21-101010.ips"))
+        try Data("Process:   Photo [7]\nlegacyCrash".utf8).write(to: folder.appendingPathComponent("Photo_2026-10-21_Mac.crash"))
+        try Data(Self.ips("Browser", "web").utf8).write(to: folder.appendingPathComponent("Browser-2026-10-21-101010.ips"))
+        let file = #"{"app":"photo","version":"0.9","build":"42","home":"\#(home.path)","user":"tester","host":"testers-mac"}"#
+        let io = FakeIO(files: ["in.suitehelp": Data(file.utf8)])
+        let (code, out) = try Self.run(["suite", "help.report-problem", "--in", "in.suitehelp", "--out", "o.suitehelp"], io)
+        #expect(code == 0, "\(io.stderr)")
+        guard case .object(let result)? = out["result"], case .string(let text)? = result["text"] else {
+            Issue.record("no text in \(out)"); return
+        }
+        #expect(text.contains("fromDisk") && text.contains("legacyCrash"), "the crash folder's Photo crashes are missing: \(text)")
+        #expect(!text.contains("Browser") && !text.contains(home.path))
+    }
+
+    /// Bad input is refused in plain words, never a Swift DecodingError dump or an NSCocoaErrorDomain code.
+    @Test func badInputIsRefusedInPlainWords() throws {
+        let io = FakeIO(files: ["bad.suitehelp": Data("not json".utf8)])
+        #expect(try Self.run(["suite", "new", "--out", "n.suitehelp", "--json", "{}"], io).0 == CLI.Exit.data)
+        #expect(try Self.run(["suite", "open", "bad.suitehelp"], io).0 == CLI.Exit.data)
+        let printed = (io.stdout + io.stderr).joined(separator: "\n")
+        for dump in ["DecodingError", "keyNotFound", "NSCocoaErrorDomain", "Code=", "CodingKeys"] {
+            #expect(!printed.contains(dump), "\(dump) in \(printed)")
+        }
+        #expect(printed.contains("has no \"app\""), "\(printed)")
+        #expect(printed.contains("isn't JSON"), "\(printed)")
+    }
 }

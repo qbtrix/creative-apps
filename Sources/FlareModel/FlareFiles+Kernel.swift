@@ -4,7 +4,7 @@
 // so `isDirty` is the session's and undoing back to the save reads clean. `autosaveDue` asks the kernel with Flare's
 // 30 s delay. A save ends the open coalescing run, as the kernel's `History.endRun` does, so a scrub that goes on
 // after a save is its own step and undo lands on the saved document. The launch offer is the kernel's
-// `RecoveryOffer`. Recents stay Flare's own (SuiteModel's `RecentsList` is date-ordered and capped at 200).
+// `RecoveryOffer`. Open Recent is the suite's `RecentsList` (FlareFileFlow+Kernel.swift).
 // Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -44,8 +44,9 @@ extension FlareWorkspace {
         endCoalescing()
     }
 
-    /// Ends every coalescing run: property scrubs, easing handle drags, guide drags and key drags.
+    /// Ends every coalescing run: property scrubs, easing handle drags, guide drags, key drags and path drags.
     mutating func endCoalescing() {
+        pathDrag = nil
         propertyScrubSerial &+= 1
         easingDragSerial &+= 1
         guideDragSerial &+= 1

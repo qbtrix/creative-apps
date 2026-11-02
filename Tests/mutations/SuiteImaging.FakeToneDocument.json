@@ -1,0 +1,16 @@
+[
+  {
+    "label": ".neutralWritesNothing: tone encoded when neutral",
+    "file": "Sources/SuiteImaging/Fakes/FakeToneDocument.swift",
+    "find": "Saved(tone: tone.isNeutral(nil) ? nil : tone)",
+    "replace": "Saved(tone: tone)",
+    "tests": "FakeToneTests"
+  },
+  {
+    "label": ".dragIsOneStep: setTone ignores the drag token",
+    "file": "Sources/SuiteImaging/Fakes/FakeToneDocument.swift",
+    "find": "history.record(name, tone, key: drag.map { \"tone:\\($0)\" })",
+    "replace": "history.record(name, tone, key: nil)",
+    "tests": "FakeToneTests"
+  }
+]

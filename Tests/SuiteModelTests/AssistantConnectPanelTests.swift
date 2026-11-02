@@ -1,6 +1,6 @@
 // AssistantConnectPanelTests.swift (cli-bundle CB-5): the Connect an AI Assistant sheet shows AssistantConnect's
-// text for the running bundle, says why when there is none, disables each Copy that has nothing to copy and
-// Install until it is built, and finds AfterGlow.app from the launcher's or a helper's own path. Linux-safe.
+// text for the running bundle, says why when there is none, disables each Copy that has nothing to copy, enables
+// Install once a bundle is known (CB-6), and finds AfterGlow.app from the launcher's or a helper's own path. Linux-safe.
 import SuiteModel
 import Testing
 
@@ -31,9 +31,9 @@ import Testing
         #expect(onlyConfig.copyCommandUnavailable != nil && onlyConfig.copyConfigUnavailable == nil)
     }
 
-    @Test func installSaysWhyUntilBuilt() {
-        #expect(AssistantConnectPanel(bundle: Self.bundle).installUnavailable == AssistantConnectPanel.installNotBuilt)
-        #expect(AssistantConnectPanel(command: "x", configJSON: "y", installUnavailable: nil).installUnavailable == nil)
+    @Test func installRunsWhenABundleIsKnown() {
+        #expect(AssistantConnectPanel(bundle: Self.bundle).installUnavailable == nil)
+        #expect(AssistantConnectPanel(command: "x", configJSON: "y").installUnavailable == AssistantConnectPanel.installNeedsBundle)
     }
 
     @Test func findsTheBundleFromItsOwnOrAHelpersPath() {

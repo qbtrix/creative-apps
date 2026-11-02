@@ -5,7 +5,8 @@
 // pointing at the layers. A drag shows its value in the row alone and sends
 // `.setPageSize` once at its end; a typed value or a key press sends it once,
 // so each change is one "Change Page Size" step. Layers past a smaller page
-// stay, dimmed on the canvas (DesignPastEdge).
+// stay, dimmed on the canvas (DesignPastEdge), and the Model's pastEdgeNote
+// under the rows says so.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -31,6 +32,7 @@ struct DesignPageProperties: View {
                         perform(.setPageSize(width: width, height: $0))
                     }
                 }
+                if let note = page.pastEdgeNote { InspectorNote(note) }
                 InspectorNote("Select a layer to edit its properties.")
             }
         }

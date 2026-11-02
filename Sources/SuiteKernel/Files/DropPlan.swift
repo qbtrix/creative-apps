@@ -36,12 +36,16 @@ public enum DropPlan {
 
     /// The rule for one file. A type only this app reads is its own document and opens, even into an open
     /// document; content this app places goes into an open document; a type this app reads opens; another
-    /// app's goes to its default app; a type no app reads is refused.
+    /// app's goes to its default app; a type no app reads is refused, unless this app places it into an open document.
     static func action(for path: String, into app: String, hasDocument: Bool, places: Set<String>,
                        readers: (String) -> [String]) -> DropAction {
         let ext = fileExtension(path)
         let apps = readers(ext)
-        guard let first = apps.first else { return .refuse(path: path, reason: "AfterGlow can't open .\(ext) files.") }
+        guard let first = apps.first else {
+            // A type no suite row lists but this app's codec reads (.psd in Photo) still goes into an open document.
+            if places.contains(ext) && hasDocument { return .place(path: path) }
+            return .refuse(path: path, reason: "AfterGlow can't open .\(ext) files.")
+        }
         if apps == [app] { return .open(path: path) }
         if hasDocument && places.contains(ext) { return .place(path: path) }
         if apps.contains(app) { return .open(path: path) }

@@ -3,8 +3,6 @@
 // (`"…/AfterGlow.app/Contents/Helpers/afterglow" mcp`), Copy puts it on the pasteboard, Install Command-Line Tool…
 // asks and Install makes the link in a temp home's `.local/bin` (`-SuiteHomeDir`), and Close shuts the sheet.
 // Every click is a mouse click; the menu item is found by title, since SwiftUI carries no id onto a menu item.
-// Until CB-6 builds the install (and CB-4 the command), the journey opens the sheet, checks its controls, and
-// skips the rest.
 import AppKit
 import XCTest
 
@@ -29,8 +27,6 @@ extension AfterGlowHelpJourneyTests {
         }
         launcher.shot("help-connect")
 
-        try XCTSkipIf(true, "waits on CB-6")
-
         // The command names the CLI inside the bundle, quoted.
         let command = sheet.descendants(matching: .any)["suite.help.connect.command"]
         let shown = command.label.isEmpty ? (command.value as? String) ?? "" : command.label
@@ -47,6 +43,8 @@ extension AfterGlowHelpJourneyTests {
         XCTAssertFalse(FileManager.default.fileExists(atPath: link.path), "the link was written before Install")
         launcher.shot("help-install-alert")
         launcher.click("Install", in: .sheet, step: "help-install")
+        // OK on the result: the alert that says it's installed comes after the write.
+        launcher.click("OK", in: .sheet)
         let target = try? FileManager.default.destinationOfSymbolicLink(atPath: link.path)
         XCTAssert(target?.hasSuffix("/AfterGlow.app/Contents/Helpers/afterglow") == true, "no link at \(link.path): \(target ?? "nothing")")
 

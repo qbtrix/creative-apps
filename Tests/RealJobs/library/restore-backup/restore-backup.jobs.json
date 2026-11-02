@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "app": "library",
+  "why": "RJ-L54 (catalog-backup BK-5): rates the 30 photos of a catalog ten at a time, saving after each rating on the job's clock (1790000000, then an hour and two hours later), so each save keeps a backup; then truncates catalog.json and relaunches, which opens the newest good backup with all 30 ratings and names it; restoring the oldest backup brings back its ten ratings, and catalog.backups then lists the pre-restore catalog as the newest backup. Pending #3741: the CLI keeps file commands window-only and has no clock, truncation or relaunch; LibraryBackupJobTests runs these steps on Linux, saving after each metadata.set-rating.",
+  "pending": "#3741",
+  "inputs": ["input/*.library"],
+  "steps": [
+    {"id": "edit.select", "params": {"ids": ["p01", "p02", "p03", "p04", "p05", "p06", "p07", "p08", "p09", "p10"]}},
+    {"id": "metadata.set-rating", "params": {"stars": 3}},
+    {"id": "edit.select", "params": {"ids": ["p11", "p12", "p13", "p14", "p15", "p16", "p17", "p18", "p19", "p20"]}},
+    {"id": "metadata.set-rating", "params": {"stars": 4}},
+    {"id": "edit.select", "params": {"ids": ["p21", "p22", "p23", "p24", "p25", "p26", "p27", "p28", "p29", "p30"]}},
+    {"id": "metadata.set-rating", "params": {"stars": 5}},
+    {"id": "catalog.restore-backup", "params": {"name": "1790000000-catalog.json"}},
+    {"id": "catalog.backups", "params": {}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-catalog", "format": "json", "options": {}},
+  "expect": {
+    "relaunch": {"opens": "1790007200-catalog.json", "rated": 30, "notice": "Opened the backup from"},
+    "out/thirty-catalog.json": {"rated": 10},
+    "catalog.backups": {"rows": 4, "newestRated": 30}
+  },
+  "platforms": []
+}

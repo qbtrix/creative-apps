@@ -20,6 +20,7 @@ enum GalleryEditorKernelChrome {
         var systemImage: String { self == .move ? "cursorarrow" : "paintbrush.pointed" }
         var unavailableHelp: String? { nil }
         var shortcut: Character? { self == .move ? "v" : "b" }
+        var gesture: ToolGesture { self == .move ? .movesContent : .paints }
     }
 
     static func fakeSteps(_ pick: ExportPick) -> [ExportRun<ExportPick>] {

@@ -11,14 +11,15 @@
 // by the Straighten preview's angle. On the resident GPU path
 // (`residentTarget`) the renderer writes the picture into the view's Metal
 // presenter's texture instead, and an update brings no tiles, only the
-// present; its target also runs a tone program in that write (Metal's
-// `display_tone`), the live route's one pass per slider step. Mouse input stays with CanvasViewport,
+// present; its target (SuiteImaging's ImagingGPU.Target) also runs a tone
+// program in that write, the live route's one pass per slider step. A Free Transform drag's lifted layer
+// goes to the view's live layer (SuiteUI's CanvasLiveLayer) through `lift`, `moveLift` and `dropLift`. Mouse input stays with CanvasViewport,
 // which owns focus and Space-pan: the embedded view never takes a click.
 // Presentation state only.
 import AppKit
-import CoreRenderMetal
+import CoreRaster
 import IOSurface
-import Metal
+import SuiteImaging
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -33,6 +34,10 @@ import SwiftUI
     /// Bytes of the images the last update handed to the view.
     private(set) var handedBytes = 0
     private weak var view: CanvasHostView?
+    #if DEBUG
+    /// Tile surfaces this canvas has handed its view (the budget tests count one window's work with it).
+    private(set) var surfacesHanded = 0
+    #endif
 
     /// Keeps `update`'s tiles, dropping every older one when it is complete
     /// or the canvas changed size, and shows them in the attached view.
@@ -50,6 +55,9 @@ import SwiftUI
             handedBytes += tile.image.bytesPerRow * tile.image.height
         }
         images.merge(changed) { $1 }
+        #if DEBUG
+        surfacesHanded += made.values.filter { $0.surface != nil }.count
+        #endif
         view?.show(Shown(width: width, height: height, images: changed, surfaces: surfaces))
     }
 
@@ -78,24 +86,37 @@ import SwiftUI
     }
 
     /// Where a resident GPU render writes a `width` x `height` picture: the attached view's Metal presenter's
-    /// document texture, through `metal`'s display encode (premultiplied sRGB, no readback). `isNew` when the
+    /// document texture, through `gpu`'s display encode (premultiplied sRGB, no readback). `isNew` when the
     /// texture holds none of the picture yet, so the render must draw every tile. Nil off the Metal path.
-    func residentTarget(width: Int, height: Int, on metal: MetalBackend) -> (target: PhotoDisplayTarget, isNew: Bool)? {
-        guard let presenter = view?.metalPresenter as? CanvasTilePresenter,
-            let texture = presenter.residentTexture(on: metal.device, width: width, height: height)
-        else { return nil }
-        let id = ObjectIdentifier(texture)
+    func residentTarget(width: Int, height: Int, on gpu: ImagingGPU.Backend) -> (target: PhotoDisplayTarget, isNew: Bool)? {
+        guard let resident = view?.residentTarget(on: gpu, width: width, height: height) else { return nil }
+        let id = resident.id
         defer { targetTexture = id }
-        let held = TextureBox(texture: texture)
         let target = PhotoDisplayTarget(
-            write: { surface, rect in
-                try metal.display(surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true)
-            },
-            writeToned: { surface, rect, tone in
-                try metal.display(
-                    surface, into: held.texture, x: rect.x, y: rect.y, colorSpace: .sRGB, premultiplied: true, tone: tone)
-            })
+            write: { surface, rect in try resident.write(surface, x: rect.x, y: rect.y) },
+            writeToned: { surface, rect, tone in try resident.write(surface, x: rect.x, y: rect.y, tone: tone) })
         return (target, targetTexture != id)
+    }
+
+    /// Free Transform's lifted layer (PhotoTransformLift) above the picture in the attached view (its live layer), at `placement`.
+    /// `hidingPicture`: the layer is all the picture has, so the picture hides while it is lifted.
+    func lift(_ surface: IOSurface, width: Int, height: Int, opacity: Double, placement: AffineMatrix, hidingPicture: Bool = false) {
+        view?.showLiveLayer(CanvasLiveLayer(contents: surface, size: CGSize(width: width, height: height), opacity: Float(opacity)),
+                            at: Self.affine(placement), hidingPicture: hidingPicture)
+    }
+
+    /// The view the tiles show in; nil before `attach`.
+    var attachedView: CanvasHostView? { view }
+
+    /// Moves the lifted layer to `placement`: a transaction on one CALayer, no pixels.
+    func moveLift(_ placement: AffineMatrix) { view?.moveLiveLayer(Self.affine(placement)) }
+
+    /// Drops the lifted layer.
+    func dropLift() { view?.dropLiveLayer() }
+
+    /// A canvas matrix (y down) as Core Graphics' affine transform, the same convention.
+    nonisolated static func affine(_ m: AffineMatrix) -> CGAffineTransform {
+        CGAffineTransform(a: m.a, b: m.b, c: m.c, d: m.d, tx: m.tx, ty: m.ty)
     }
 
     /// Clears the picture (no image open).
@@ -138,9 +159,4 @@ import SwiftUI
         tiles.apply(try PhotoRenderer.completeUpdate(workspace))
         return tiles
     }
-}
-
-/// A texture handed to the render task: Metal textures are safe to use from any thread, the type just isn't Sendable.
-private struct TextureBox: @unchecked Sendable {
-    let texture: any MTLTexture
 }

@@ -13,7 +13,10 @@
 // floor, so it draws at the committed size and the text doesn't jump on commit
 // (#268). A commit with the app's measured extent fits the box in the same
 // step (canvas-basics CB-5): an auto-width box takes both sides, a fixed-width
-// one only the height, each rounded up to a whole point, at least 1. Linux-safe.
+// one only the height, each rounded up to a whole point, at least 1. A text
+// style change fits the same way: the app measures each selected text in its new
+// style and `fitTextStyle` lands the fit in the "Change Text Style" step, so a
+// wider font or weight never clips the text (#3339). Linux-safe.
 
 /// A text's measured size in points, as the app lays it out.
 public struct DesignTextExtent: Sendable, Hashable {
@@ -73,6 +76,22 @@ extension DesignWorkspace {
             _ = pages.update(id, edit)
             record("Edit Text", before: before)
         }
+    }
+
+    /// Fits each selected, unlocked text layer's box to `extents` (measured in its new style) inside
+    /// the "Change Text Style" step the style change just made, as `commitTextEdit(extent:)` fits.
+    /// A layer with no extent, an unselected or non-text one keeps its box; a fit that changes
+    /// nothing records nothing.
+    public mutating func fitTextStyle(_ extents: [String: DesignTextExtent]) {
+        guard editingTextID == nil else { return }
+        let before = snapshot
+        for id in selectedNodeIDs where !isLockedInTree(id) {
+            guard let extent = extents[id] else { continue }
+            _ = pages.update(id) { node in
+                if node.kind == .text { node.frame = Self.fitted(node.frame, node.textStyle, extent) }
+            }
+        }
+        record("Change Text Style", before: before, coalescing: DesignEdit.runKey("text-style", selectedNodeIDs))
     }
 
     /// `frame` fitted to `extent`: both sides for an auto-width box, the height for a fixed-width

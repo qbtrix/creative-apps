@@ -19,12 +19,5 @@
     "find": "offsets = -half...half",
     "replace": "offsets = half...half",
     "tests": "SampleRulesTests"
-  },
-  {
-    "label": "hexRounds: each channel is truncated instead of rounded",
-    "file": "Sources/SuiteKernel/Sample/SampleRules.swift",
-    "find": "Int((min(max(channel, 0), 1) * 255).rounded())",
-    "replace": "Int(min(max(channel, 0), 1) * 255)",
-    "tests": "SampleRulesTests"
   }
 ]

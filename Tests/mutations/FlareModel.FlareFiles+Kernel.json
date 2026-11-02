@@ -1,0 +1,9 @@
+[
+  {
+    "label": ".aSaveEndsTheDragTokensStep: a save leaves the path drag open, so the next edit folds into the saved step",
+    "file": "Sources/FlareModel/FlareFiles+Kernel.swift",
+    "find": "        pathDrag = nil\n",
+    "replace": "",
+    "tests": "FlareAnchorEditTests"
+  }
+]

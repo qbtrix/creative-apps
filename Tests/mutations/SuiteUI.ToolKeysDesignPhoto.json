@@ -33,5 +33,19 @@
     "find": "let wanted = key.lowercased()",
     "replace": "let wanted = String(key)",
     "tests": "DesignToolsKeyTests|PhotoToolsKeyTests"
+  },
+  {
+    "label": "noStep: Shift on a shared letter stays on the current tool, so Shift-J never reaches Heal or Remove",
+    "file": "Sources/SuiteUI/ToolKeys.swift",
+    "find": "return group[(at + 1) % group.count]",
+    "replace": "return group[at]",
+    "tests": "ToolKeysTests|PhotoToolsKeyTests|ToolbarPickingTests"
+  },
+  {
+    "label": "cycleIgnoresHelp: the Shift cycle counts disabled tools, so Shift-J lands on a tool that can't act",
+    "file": "Sources/SuiteUI/ToolKeys.swift",
+    "find": "let group = faces.filter { picking.tool(forKey: key, in: [$0]) != nil }.map(\\.id)",
+    "replace": "let group = faces.filter { $0.shortcut?.lowercased() == key.lowercased() }.map(\\.id)",
+    "tests": "ToolKeysTests|PhotoToolsKeyTests"
   }
 ]

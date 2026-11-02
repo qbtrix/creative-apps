@@ -1,0 +1,30 @@
+[
+  {
+    "label": ".copiesDeveloped: the copy skips the photo's develop settings",
+    "file": "Sources/LibraryModel/LibraryPasteboardAdapter.swift",
+    "find": "        let (item, photo) = planned\n",
+    "replace": "        var (item, photo) = planned\n        photo.develop = .neutral\n",
+    "tests": "LibraryPasteboardAdapterTests.swift"
+  },
+  {
+    "label": ".stripsLocation: the copy keeps the GPS properties",
+    "file": "Sources/LibraryModel/LibraryPasteboardAdapter.swift",
+    "find": "metadataFrom: photo.path, dropping: item.dropping)",
+    "replace": "metadataFrom: photo.path, dropping: [])",
+    "tests": "LibraryPasteboardAdapterTests.swift"
+  },
+  {
+    "label": "the copy is planned with every property kept",
+    "file": "Sources/LibraryModel/LibraryPasteboardAdapter.swift",
+    "find": "format: .png, metadata: .noLocation)",
+    "replace": "format: .png, metadata: .all)",
+    "tests": "LibraryPasteboardAdapterTests.swift"
+  },
+  {
+    "label": "the copy is scaled down from full size",
+    "file": "Sources/LibraryModel/LibraryPasteboardAdapter.swift",
+    "find": "ExportOptions(longEdge: nil,",
+    "replace": "ExportOptions(longEdge: 30,",
+    "tests": "LibraryPasteboardAdapterTests.swift"
+  }
+]

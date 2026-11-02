@@ -25,4 +25,7 @@ extension PhotoWorkspace: HistoryJumping {
         endAdjust()
         jumpToHistoryStep(index)
     }
+
+    /// Opens the request span `name` (nil closes it) on the kernel history.
+    public mutating func setHistoryRequest(_ name: String?) -> Bool { history.kernel.setRequest(name) }
 }

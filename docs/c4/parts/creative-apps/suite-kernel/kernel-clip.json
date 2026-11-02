@@ -1,0 +1,8 @@
+{
+  "id": "kernel-clip",
+  "name": "Clipping rule",
+  "description": "Layers/Clip*.swift: ClipRules, the clipping rule on LayerTree's nodes: base(of:in:isClipped:) finds the layer a clipped layer clips to (the nearest unclipped sibling below it; nil for the bottom layer or only clipped layers below, and never across a group's edge), clipped(onto:in:isClipped:) lists the run of clipped layers right above a base, and noBaseHelp is the clip command's unavailable help. The kernel half of Photo's clipping groups; layer-styles LS-10 writes it.",
+  "technology": "Swift 6, Linux and macOS",
+  "paths": ["Sources/SuiteKernel/Layers/Clip*.swift"],
+  "order": 41
+}

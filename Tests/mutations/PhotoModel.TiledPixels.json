@@ -1,0 +1,6 @@
+[
+  {"label": "lastTileWins: the painted box is the last painted tile's, not the union across tiles", "file": "Sources/PhotoModel/TiledPixels.swift", "find": "found = found?.union(r) ?? r", "replace": "found = r", "tests": "PhotoTransformBoundsTests"},
+  {"label": "windowIgnored: each tile is scanned whole, so painted pixels outside the selection widen the box", "file": "Sources/PhotoModel/TiledPixels.swift", "find": "PhotoLayerComposite.paintedRect(of: tile, in: area.offsetBy(-rect.x, -rect.y))", "replace": "PhotoLayerComposite.paintedRect(of: tile, in: nil)", "tests": "PhotoTransformBoundsTests"},
+  {"label": "anyClearSkips: once one clear tile is seen every later tile is skipped, so paint in a later tile is missed", "file": "Sources/PhotoModel/TiledPixels.swift", "find": "if clear.contains(tile) { continue }", "replace": "if !clear.isEmpty { continue }", "tests": "PhotoTransformBoundsTests"},
+  {"label": "partialTileSkipped: a tile the placed pixels only partly cover is left clear, so the square loses its edge", "file": "Sources/PhotoModel/TiledPixels.swift", "find": "try tiles[i].setPixel(x: px - rect.x, y: py - rect.y, buffer.pixel(x: px - x, y: py - y))", "replace": "_ = (px, py)", "tests": "PhotoTransformBoundsTests"}
+]

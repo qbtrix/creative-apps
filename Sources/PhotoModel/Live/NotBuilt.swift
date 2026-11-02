@@ -52,17 +52,6 @@ struct NotBuiltMerging: LayerMerging {
     }
 }
 
-struct NotBuiltSelection: SelectionShaping {
-    let not = NotBuilt(feature: "PV-5")
-    var unavailableHelp: String? { not.help }
-    func mask(for shape: SelectionShape, canvas: CanvasSize) throws -> Mask { throw not.refuse() }
-    func combine(_ current: Mask?, with new: Mask, _ mode: SelectionCombine) throws -> Mask? { throw not.refuse() }
-    func inverted(_ mask: Mask?, canvas: CanvasSize) throws -> Mask? { throw not.refuse() }
-    func feathered(_ mask: Mask, radius: Double) throws -> Mask { throw not.refuse() }
-    func bounds(of mask: Mask) -> PixelRect? { nil }
-    func outline(of mask: Mask) -> [[Mask.Point]] { [] }
-}
-
 struct NotBuiltAdjustmentLayers: AdjustmentLayering {
     let not = NotBuilt(feature: "PV-6")
     var unavailableHelp: String? { not.help }

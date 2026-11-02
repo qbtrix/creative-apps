@@ -2,15 +2,15 @@
   {
     "label": "a drag's samples don't coalesce, so one drag is many steps",
     "file": "Sources/LibraryModel/LibraryDevelop.swift",
-    "find": "recordEdit(slider.rawValue, coalesceKey: coalesceKey, ids: ids)",
-    "replace": "recordEdit(slider.rawValue, coalesceKey: nil, ids: ids)",
+    "find": "recordEdit(slider.title, coalesceKey: coalesceKey, ids: ids)",
+    "replace": "recordEdit(slider.title, coalesceKey: nil, ids: ids)",
     "tests": "LibraryDevelopTests"
   },
   {
     "label": "a section reset resets every slider",
     "file": "Sources/LibraryModel/LibraryDevelop.swift",
-    "find": "let sliders = group?.sliders ?? DevelopSlider.allCases",
-    "replace": "let sliders = DevelopSlider.allCases",
+    "find": "let sliders = group?.sliders ?? ToneSlider.allCases",
+    "replace": "let sliders = ToneSlider.allCases",
     "tests": "LibraryDevelopTests"
   },
   {

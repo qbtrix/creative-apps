@@ -169,9 +169,9 @@ pixel painting to Photo.
 | Viewer | Draws the composition at the playhead, fitted, with the layer under the pointer selectable and draggable; selection box | Zoom and pan beyond fit; guides; safe-area overlays |
 | Playback | Play and pause (Space), loop, step a frame, go to start and end; holds the composition rate | Cached full-resolution preview; audio |
 | Undo | Every edit one named step, 100 steps; scrubs and drags coalesce | History panel |
-| Files | Save, Save As, Open, Open Recent; `.halo` JSON; damaged, newer and oversized files refused with a message | Autosave and crash recovery (first Later item); collect files |
+| Files | Save, Save As, Open, Open Recent; `.halo` JSON; damaged, newer and oversized files refused with a message. Open Recent, Clear Menu and Open In ▸ come from the suite's File commands and list the suite's shared recents, Halo's files only (file-flow); a file dropped on the window opens when it is a `.halo` and otherwise goes to the app that reads it, a mark at the window's bottom saying which first | Autosave and crash recovery (first Later item); collect files |
 | Blend | The 16 W3C blend modes per layer (shipped in the Model) | Track mattes (H8); masks |
-| Render | Render Frame (⌘R) into the viewer; Render… to a PNG sequence or an H.264 movie, full or half size, with progress and Cancel | Other codecs; render queue; alpha movie |
+| Render | Render Frame (⌘R) into the viewer; Render… to a PNG sequence, an H.264 movie or a ProRes 4444 movie, full or half size, with progress and Cancel; a transparent background keeps alpha in PNG and ProRes 4444, and the sheet says H.264 can't carry it (export-pack) | Other codecs; render queue |
 | Text | One-line text layers: string, size, the layer's color | Fonts, paragraph text, per-character animation |
 | Effects | – | Effects stack (#39): blur, fill, levels; motion blur (H9) |
 
@@ -391,8 +391,8 @@ its span) does not hide children. A parent cycle can't be made
    rendered file is made from, and HF-1 holds the viewer to it.
 3. A viewer drag changes only `viewerDrag`; the viewer redraws
    `drawList.offsetting(layer, by: delta)`. Mouse-up commits once.
-4. Playback is driven by a display link in `HaloPlaybackDriver.swift` that
-   calls `model.tick(now:)`; the frame math is `PlaybackClock` (FlareCore's
+4. Playback is driven by the suite's display link, SuiteUI's
+   `SuitePlaybackDriver`, which `HaloTransport` runs to call `model.tick(now:)`; the frame math is `PlaybackClock` (FlareCore's
    `Timeline.playbackFrame` in the live type), tested on Linux.
 
 **Commands and availability.** `HaloCommand` (Model, W0) lists every

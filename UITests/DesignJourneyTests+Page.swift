@@ -14,6 +14,8 @@
 // ScrubField stops selecting its value on open or committing on focus loss.
 // A ScrubField reads its number as its value, spoken with its unit, and a
 // plain Text its words as its value, so both are read by label or value.
+// DJ-DS (document-setup DS-design): File > New opens the suite's New Document
+// sheet on Design's frame presets; Story and Create make one page of 1080 × 1920.
 import XCTest
 
 final class DesignPageJourneyTests: XCTestCase {
@@ -22,6 +24,33 @@ final class DesignPageJourneyTests: XCTestCase {
     /// CB-c: Width and Height in the inspector, one undo step each, Desktop dimmed past the page.
     @MainActor func testPageSizeAndPastThePage() throws {
         try walkPageSize()
+    }
+
+    /// DJ-DS: File > New, the Story preset, Create: the new file's one page is 1080 × 1920.
+    @MainActor func testNewDocumentFromPreset() throws {
+        let design = Journey("Design", self, arguments: Self.arguments)
+        XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "the cards fixture showed no page")
+
+        // 1. File > New File: the New Document sheet opens on Design's presets.
+        let file = design.app.menuBars.firstMatch.menuBarItems["File"]
+        file.click()
+        let new = file.menuItems["New File"]
+        XCTAssert(new.waitForExistence(timeout: 3), "the File menu shows no New File")
+        new.click()
+        XCTAssert(design.element("suite.newdoc").waitForExistence(timeout: 5), "File > New File opened no New Document sheet")
+        design.shot("new-document-sheet")
+
+        // 2. Pick Story: the readout says 1080 × 1920 px.
+        design.element("suite.newdoc.preset").click()
+        design.app.menuItems["Story"].firstMatch.click()
+        XCTAssertEqual(design.element("suite.newdoc.pixels").value as? String, "1080 × 1920 px")
+
+        // 3. Create: the sheet goes and the new file's one page is 1080 × 1920.
+        design.element("suite.newdoc.create").click()
+        XCTAssert(waitUntil { !design.element("suite.newdoc").exists }, "Create left the New Document sheet open")
+        XCTAssert(statusReads(design.element("suite.status"), "1080 × 1920 pt"), "the status line doesn't read 1080 × 1920 pt")
+        design.shot("new-document-story")
     }
 
     /// The journey itself.
@@ -100,8 +129,9 @@ final class DesignPageJourneyTests: XCTestCase {
         return words == number || words.hasPrefix(number + " ")
     }
 
-    /// What an element reads: its value where macOS puts a field's number or a Text's words, else its label.
+    /// What an element reads: a field's number (macOS gives a slider's value as a number), a Text's words, else its label.
     @MainActor private func text(_ element: XCUIElement) -> String {
+        if let number = element.value as? NSNumber { return number.stringValue }
         let value = element.value as? String ?? ""
         return value.isEmpty ? element.label : value
     }

@@ -1,6 +1,7 @@
 // HaloStatusRowTests.swift: the viewer status row's shapes, widest first,
-// each keeping the transport's History button, the layer count dropping
-// first and the zoom pill before the timecode (#4449). Linux and macOS.
+// each keeping the transport's History button, the transport leaving its
+// pill before the layer count drops (#3925) and the zoom pill before the
+// timecode (#4449). Linux and macOS.
 @testable import HaloModel
 import Testing
 
@@ -17,7 +18,7 @@ private func shown(_ row: HaloStatusRow) -> Set<String> {
 
 @Test func everyStatusRowKeepsHistory() {
     let rows = HaloStatusRow.fallbacks
-    #expect(rows == [.wide, .noLayers, .leading, .leadingNoZoom, .bare])
+    #expect(rows == [.wide, .leadingLayers, .leading, .leadingNoZoom, .bare])
     for (index, row) in rows.enumerated() {
         #expect(row.history, "row \(index) drops History, so it can't be opened at that width")
     }
@@ -34,10 +35,10 @@ private func shown(_ row: HaloStatusRow) -> Set<String> {
     }
 }
 
-@Test func statusRowDropsLayersThenPillThenZoomThenTimecode() {
+@Test func statusRowDropsPillThenLayersThenZoomThenTimecode() {
     let rows = HaloStatusRow.fallbacks.map(shown)
     let dropped = zip(rows, rows.dropFirst()).flatMap { $0.subtracting($1).sorted() }
-    #expect(dropped == ["layers", "inBar", "zoom", "timecode"])
+    #expect(dropped == ["inBar", "layers", "zoom", "timecode"])
 }
 
 @Test func statusRowPillsHelpNamesOnlyShownPills() {

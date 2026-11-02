@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "app": "photo",
+  "why": "RJ-X50, pending SR-7 (shared-raw): opens tiny-bayer.dng (a byte copy of SuiteImagingTests' raw fixture, written by TinyDNG: a 64 x 48 Bayer scene stored with Orientation 6, two highlight patches at 0.70 and 0.90 linear under a +1 stop baseline), pulls exposure down one stop and exports a PNG at full size. Assertion: the PNG is 48 x 64, upright, not the embedded preview's 24 x 32, within 3 levels of the reference, and its two highlight patches differ by more than 20 levels (an 8-bit decode clips both to white). The trap: the export is the preview's size, or the decode went through 8 bits so the highlights come back flat. Only macOS decodes RAW files (Linux refuses with the unavailable sentence), so platforms is [] until SR-7, which adds expected/tiny-bayer-ev-1.png and sets platforms to macos.",
+  "pending": "SR-7",
+  "waits_on": "SR-7",
+  "inputs": ["input/*.dng"],
+  "steps": [
+    {"id": "doc.open", "params": {}},
+    {"id": "tone.set", "params": {"slider": "exposure", "value": -1}},
+    {"id": "file.export", "params": {"format": "png"}}
+  ],
+  "atomic": true,
+  "output": {"dir": "out", "name": "{stem}-ev-1", "format": "png", "options": {}},
+  "expect": {
+    "out/tiny-bayer-ev-1.png": {"pixels": {"tolerance": 3, "reference": "expected/tiny-bayer-ev-1.png"}}
+  },
+  "platforms": []
+}

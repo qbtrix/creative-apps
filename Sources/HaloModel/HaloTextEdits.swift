@@ -73,11 +73,11 @@ extension HaloProject {
         endCoalescing()
     }
 
-    /// `content` with the box `rasterizer` measures; the estimate without one.
-    private static func measured(_ content: HaloTextContent, by rasterizer: (any TextRasterizing)?) -> HaloTextContent {
-        guard let rasterizer else { return HaloTextContent(string: content.string, fontSize: content.fontSize) }
-        let box = rasterizer.measure(content)
-        return HaloTextContent(string: content.string, fontSize: content.fontSize, width: box.width, height: box.height)
+    /// `content`, its style kept, with the box `rasterizer` measures; the estimate without one.
+    static func measured(_ content: HaloTextContent, by rasterizer: (any TextRasterizing)?) -> HaloTextContent {
+        var measured = HaloTextContent(string: content.string, fontSize: content.fontSize, style: content.style)
+        if let box = rasterizer?.measure(content) { (measured.width, measured.height) = (box.width, box.height) }
+        return measured
     }
 }
 

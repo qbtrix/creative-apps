@@ -1,0 +1,6 @@
+[
+{"label":".pageSize: the new page swaps width and height","file":"Sources/DesignModel/DesignNewDocument+Kernel.swift","find":"(page.frameWidth, page.frameHeight) = (Double(width), Double(height))","replace":"(page.frameWidth, page.frameHeight) = (Double(height), Double(width))","tests":"DesignNewDocumentTests"},
+{"label":".transparentFrame: transparent fills the frame white","file":"Sources/DesignModel/DesignNewDocument+Kernel.swift","find":"case .transparent: return (.white, .solid(FillColor(r: 1, g: 1, b: 1, a: 0)))","replace":"case .transparent: return (.white, nil)","tests":"DesignNewDocumentTests"},
+{"label":".limits: a size past the limits still makes a new file","file":"Sources/DesignModel/DesignNewDocument+Kernel.swift","find":"            throw CatalogError.failed(id: \"file.new\", message: problem.text)\n","replace":"            _ = problem\n","tests":"DesignNewDocumentTests"},
+{"label":".liveShape: the live new file ignores a refused shape","file":"Sources/DesignModel/DesignNewDocument+Kernel.swift","find":"        guard next.shapeNewFile(setup) else { return nil }\n","replace":"        next.shapeNewFile(setup)\n","tests":"DesignNewDocumentTests"}
+]

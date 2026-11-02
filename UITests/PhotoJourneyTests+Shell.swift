@@ -3,7 +3,7 @@
 // PS-J1..PS-J6), one test per step, each launched with -SuiteWindowSize. J1
 // checks the empty window (title, layer list, toolbar items enabled or not,
 // the canvas's Open… empty state, the inspector's no-image state, the app
-// switcher centred with Photo current). J2 opens the 800 × 600 test photo with
+// switcher between the leading and trailing toolbar items with Photo current). J2 opens the 800 × 600 test photo with
 // -PhotoOpenFile and checks the title (the file's name beside the save-state
 // subtitle, which the accessibility title carries too, #1910), one layer row, the palette at
 // the canvas's leading edge and the inspector's header and sections. J3 drags
@@ -184,13 +184,26 @@ final class PhotoShellJourneyTests: XCTestCase {
         XCTAssert(found.isEmpty, "the palette covers a ruler or the selection's edge:\n" + found.joined(separator: "\n"))
     }
 
-    /// The app switcher, centred in the toolbar with Photo current, inside the window.
+    /// The app switcher with Photo current, between the leading toolbar items
+    /// (the sidebar toggle, Open, Save, Export) and the trailing ones (Undo
+    /// onward), inside the window. The system doesn't centre a principal item
+    /// on the window (#1561), as Design's shell journey says.
     @MainActor private func expectSwitcher(_ photo: Journey) {
         let switcher = photo.element("suite.switcher")
         XCTAssert(switcher.waitForExistence(timeout: 5), "no app switcher (suite.switcher)")
-        XCTAssertEqual(switcher.frame.midX, photo.app.windows.firstMatch.frame.midX, accuracy: 2, "the switcher isn't centred in the toolbar")
+        let window = photo.app.windows.firstMatch.frame, frame = switcher.frame
+        let leading = ["suite.sidebarToggle", "photo.bar.open", "photo.bar.save", "photo.bar.export"]
+            .map { photo.element($0).frame.maxX }.max() ?? window.minX
+        let trailing = ["photo.bar.undo", "photo.bar.redo", "photo.bar.zoom-out", "photo.bar.fit", "photo.bar.zoom-in"]
+            .map { photo.element($0).frame.minX }.min() ?? window.maxX
+        XCTAssert(frame.minX >= leading, "the switcher starts at \(frame.minX), before Export ends (\(leading))")
+        XCTAssert(frame.maxX <= trailing, "the switcher ends at \(frame.maxX), past Undo's start (\(trailing))")
+        XCTAssert(window.contains(frame), "the switcher \(frame) isn't inside the window \(window)")
         XCTAssert(switcher.buttons["Photo"].isSelected, "Photo isn't the switcher's current item")
-        photo.expectShellGeometry(minimums: ["suite.switcher": (width: 1, height: 1)], regions: ["suite.switcher": switcher])
+        // The empty window has no palette, which the shell geometry requires; J1 checks its regions one by one.
+        if photo.element("suite.tools").exists {
+            photo.expectShellGeometry(minimums: ["suite.switcher": (width: 1, height: 1)], regions: ["suite.switcher": switcher])
+        }
     }
 
     // MARK: Reading

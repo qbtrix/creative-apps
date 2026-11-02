@@ -6,15 +6,23 @@
 // asks ReopenRule (editor-menus EM-2, #1081): with no window visible it opens
 // one through `openWindow` when a scene registered it, or lets the system's
 // own reopen run; while a hand-off is still being accepted (the app was
-// brought up hidden for it) it opens none.
+// brought up hidden for it) it opens none. The scene's setup (host, receiver,
+// app) reaches the delegate through SuiteAppRegistry whichever comes first.
 import AppKit
 import SuiteModel
 
 /// The process's suite delegate, set when it is created, so the `.suiteApp(_:host:)`
-/// scene modifier can reach it from a scene.
+/// scene modifier can reach it from a scene. SwiftUI builds the scene before
+/// `NSApplicationDelegateAdaptor` creates the delegate, so the scene leaves its
+/// setup in `configure`, which runs once both are here, in either order.
 @MainActor
 public enum SuiteAppRegistry {
-    public static var delegate: SuiteAppDelegate?
+    public static var delegate: SuiteAppDelegate? { didSet { apply() } }
+    public static var configure: (@MainActor (SuiteAppDelegate) -> Void)? { didSet { apply() } }
+
+    private static func apply() {
+        if let delegate, let configure { configure(delegate) }
+    }
 }
 
 @MainActor

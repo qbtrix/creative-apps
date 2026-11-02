@@ -65,7 +65,7 @@ extension BodyCountSuites {
                     send(.adjust(.saturation(Double(i) * 2)))
                 })
                 send(.endAdjust)
-                send(.tool(.move))
+                send(.tool(.select))
                 report("move", try await BodyCountSuites.PhotoZoomBudgetTests.stalls(w, 30) { i in
                     send(.drag(CGPoint(x: 2000, y: 2000), CGPoint(x: 2000 + Double(i * 3), y: 2000 + Double(i))))
                 })

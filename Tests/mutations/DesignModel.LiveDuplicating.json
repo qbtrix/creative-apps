@@ -2,8 +2,8 @@
   {
     "label": "the copies are not selected",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
-    "find": "return DesignEdit(name: \"Duplicate\", nodes: nodes, selection: copies)",
-    "replace": "return DesignEdit(name: \"Duplicate\", nodes: nodes, selection: [])",
+    "find": "return DesignEdit(name: \"Duplicate\", nodes: placed(page.nodes), selection: selection)",
+    "replace": "return DesignEdit(name: \"Duplicate\", nodes: placed(page.nodes), selection: [])",
     "tests": "DesignDuplicateTests"
   },
   {
@@ -17,21 +17,35 @@
     "label": "the copy keeps the lock",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
     "find": "copy.isLocked = false",
-    "replace": "copy.isLocked = copy.isLocked",
+    "replace": "copy.isLocked = original.isLocked",
     "tests": "DesignDuplicateTests"
   },
   {
     "label": "the offset is ignored",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
-    "find": "copy.translate(by: offset)",
+    "find": "copy.translate(by: offset, carryingKeys: true)",
     "replace": "copy.translate(by: DesignPoint(x: 0, y: 0))",
     "tests": "DesignDuplicateTests"
   },
   {
     "label": "a selected child is copied twice",
     "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
-    "find": "guard !path.contains(where: wanted.contains) else { continue }",
-    "replace": "",
+    "find": "if wanted.contains(node.id) { out[node.id] = node } else { walk(node.children) }",
+    "replace": "if wanted.contains(node.id) { out[node.id] = node }; walk(node.children)",
     "tests": "DesignDuplicateTests"
+  },
+  {
+    "label": "track offset: a duplicate's keys stay at the original (the copy shows on top)",
+    "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "find": "copy.translate(by: offset, carryingKeys: true)",
+    "replace": "copy.translate(by: offset)",
+    "tests": "DesignTrackOffsetTests"
+  },
+  {
+    "label": "track offset: a copy drops its time",
+    "file": "Sources/DesignModel/Live/LiveDuplicating.swift",
+    "find": "var copy = DesignNode(id: id, copying: node)",
+    "replace": "var copy = DesignNode(id: id, copying: node); copy.time = nil",
+    "tests": "DesignTrackOffsetTests"
   }
 ]

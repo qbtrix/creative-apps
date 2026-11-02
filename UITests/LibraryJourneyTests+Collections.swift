@@ -88,10 +88,15 @@ final class LibraryCollectionsJourneyTests: XCTestCase {
             .matching(NSPredicate(format: "elementType IN %@", types))
             .containing(NSPredicate(format: "label == %@ OR value == %@", title, title)).firstMatch
     }
-    /// The sidebar row `title` exists and shows `count`.
+    /// The sidebar row `title` exists and shows `count`; an empty one shows no count at all (SidebarRow: 0 shows none).
     @MainActor private func expectRow(_ title: String, _ count: Int, _ library: Journey) {
         let found = row(title, library)
         XCTAssert(found.waitForExistence(timeout: 10), "the sidebar has no \(title) row")
+        guard count > 0 else {
+            let numbers = found.descendants(matching: .any).matching(NSPredicate(format: "label MATCHES '[0-9]+'"))
+            XCTAssertEqual(numbers.count, 0, "\(title) shows a count while empty")
+            return
+        }
         let badge = found.descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@ OR value == %@", "\(count)", "\(count)")).firstMatch
         XCTAssert(badge.waitForExistence(timeout: 10), "\(title) doesn't count \(count)")

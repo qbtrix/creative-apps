@@ -13,8 +13,11 @@
 // decodes off the main actor and ends in `finishOpen`; meanwhile
 // `halo.file.progress` reads "Opening <name>…". A failed open or save shows
 // the Model's message in one system alert; the project stays as it was.
-// At launch the window restores Open Recent from the "HaloRecentFiles"
-// default (and writes it back on every change) and opens `-HaloOpenFile`
+// Each open and save is noted in the suite's shared recents through
+// SuiteDocumentsBridge (`bridge`), whose list for Halo the window hands the
+// Model (`updateFileFlow`); the file-flow commands' requests (open, hand off,
+// Clear Menu) run here. At launch the window moves the old "HaloRecentFiles"
+// default into the suite's recents once and opens `-HaloOpenFile`
 // once, and runs every suite hand-off HaloShell's inbox holds (New
 // Composition, or an open through Open Recent's path). The hidden `halo.file` element's label and value are
 // `model.saveStatus` (journeys read the label: XCUITest reads SwiftUI values
@@ -23,10 +26,27 @@
 // "Not saved" while the work isn't on disk, else empty. SwiftUI offers no hook to confirm a window
 // close, so closing is not guarded yet (#1065 asks SuiteWindow for one).
 import HaloModel
+import SuiteModel
+import SuiteShell
 import SuiteUI
 import SwiftUI
 
 extension HaloWindow {
+    #if DEBUG
+    /// The suite's recents for the hosted-window tests; nil uses HaloShell's.
+    @MainActor static var bridgeOverride: SuiteDocumentsBridge?
+    /// The last window's `perform`, for the hosted-window tests to drive.
+    @MainActor static var shownPerform: ((HaloCommand) -> Void)?
+    #endif
+
+    /// The suite's shared recents and hand-offs.
+    @MainActor static var bridge: SuiteDocumentsBridge {
+        #if DEBUG
+        if let bridgeOverride { return bridgeOverride }
+        #endif
+        return HaloShell.bridge
+    }
+
     func filePerform(_ command: HaloCommand) {
         switch command {
         case .save, .saveAs: save(saveAs: command == .saveAs)
@@ -37,7 +57,10 @@ extension HaloWindow {
     }
 
     func fileScene(_ content: some View) -> some View {
-        content
+        #if DEBUG
+        Self.shownPerform = { perform($0) }
+        #endif
+        return content
             .navigationSubtitle(model.windowSubtitle ?? "")
             .background { ProbeElement("halo.file", label: model.saveStatus, value: model.saveStatus) }
             .overlay { if let note = model.openingNote { BusyNote(note, identifier: "halo.file.progress") } }
@@ -49,7 +72,9 @@ extension HaloWindow {
             ) { result in
                 request = nil
                 switch result {
-                case .success(let url): model.didSave(name: HaloProject.fileName(fromPath: url.path), path: url.path)
+                case .success(let url):
+                    model.didSave(name: HaloProject.fileName(fromPath: url.path), path: url.path)
+                    noteSuite(.saved)
                 case .failure(let error):
                     model.didFailSave("\(model.windowTitle).halo can't be saved. \(error.localizedDescription)")
                 }
@@ -73,7 +98,8 @@ extension HaloWindow {
             }
             .modifier(HaloFileAlert(message: model.file.error))
             .task { launchFiles() }
-            .onChange(of: model.recent) { _, recent in Self.storeRecent(recent) }
+            .onChange(of: Self.bridge.items, initial: true) { model.updateFileFlow(recents: Self.bridge.recents(for: .halo)) }
+            .onChange(of: model.fileFlow, initial: true) { drainFileRequests() }
             .onChange(of: HaloShell.inbox.pending, initial: true) { for command in HaloShell.inbox.take() { perform(command) } }
     }
 
@@ -128,26 +154,43 @@ extension HaloWindow {
         Task {
             let result = await Task.detached { HaloOpenDecoder.decode(path, files: files, scoped: scoped) }.value
             model.finishOpen(result)
+            if model.file.path == path, model.file.error == nil { noteSuite(.opened) }
         }
     }
 
-    /// Open Recent from the defaults; `-HaloOpenFile` once per process.
-    private func launchFiles() {
-        if let data = UserDefaults.standard.data(forKey: Self.recentKey),
-            let recent = try? JSONDecoder().decode([HaloRecentFile].self, from: data) {
-            model.setRecent(recent)
+    /// Notes the project on disk in the suite's recents.
+    private func noteSuite(_ event: RecentEvent) {
+        if let ref = model.suiteDocument { Self.bridge.noted(ref, event) }
+    }
+
+    /// Runs what the file-flow commands left for the window. A missing file's
+    /// `.forget` needs no call: the suite's list drops it on its next read.
+    private func drainFileRequests() {
+        for request in model.takeFileRequests() {
+            switch request {
+            case .open(let path): perform(.openRecent(path))
+            case .handOff(let path, let app): Task { await Self.bridge.handOff([.handOff(path: path, app: app)]) }
+            case .clearRecent: Task { await Self.bridge.clear(app: .halo) }
+            case .forget: continue
+            }
         }
+    }
+
+    /// The old Open Recent list into the suite's recents, once; `-HaloOpenFile`
+    /// once per process.
+    private func launchFiles() {
+        var stored = UserDefaults.standard.data(forKey: Self.recentKey)
+            .flatMap { try? JSONDecoder().decode([HaloFileRef].self, from: $0) }
+        let refs = HaloProject.takeOldRecents(&stored), bridge = Self.bridge
+        UserDefaults.standard.removeObject(forKey: Self.recentKey)
+        // One task, each note awaited, so the oldest is noted first and the newest stays on top.
+        Task { for ref in refs { await bridge.note(ref, .opened) } }
         guard !HaloLaunchFile.opened, let path = HaloLaunch.current.openFile else { return }
         HaloLaunchFile.opened = true
         openFile(at: path)
     }
 
     private static let recentKey = "HaloRecentFiles"
-
-    private static func storeRecent(_ recent: [HaloRecentFile]) {
-        guard let data = try? JSONEncoder().encode(recent) else { return }
-        UserDefaults.standard.set(data, forKey: recentKey)
-    }
 
     /// ponytail: written on the main actor, as Design does; move it off when
     /// large projects make Save stall.
@@ -156,6 +199,7 @@ extension HaloWindow {
         do {
             try model.fileData().write(to: url, options: .atomic)
             model.didSave(name: HaloProject.fileName(fromPath: path), path: path)
+            noteSuite(.saved)
             return true
         } catch {
             model.didFailSave("\(url.lastPathComponent) can't be saved. \(error.localizedDescription)")
@@ -195,10 +239,9 @@ private enum HaloOpenDecoder {
 
 extension HaloProject {
     /// `halo.file.progress`'s BusyNote text, "Opening <name>…", from `beginOpen`
-    /// until `finishOpen`; nil otherwise. The pending file rides at the head of
-    /// `file.recent` while it opens.
+    /// until `finishOpen`; nil otherwise.
     var openingNote: String? {
-        file.opening ? "Opening \(file.recent.first?.name ?? "project")…" : nil
+        file.opening ? "Opening \(file.pending?.name ?? "project")…" : nil
     }
 }
 

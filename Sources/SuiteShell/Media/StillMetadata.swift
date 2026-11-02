@@ -8,10 +8,12 @@
 // move. The copy goes through SuiteImageIO, the one ImageIO adapter: first
 // `CGImageDestinationCopyImageSource` with the source's tags for the kept
 // properties, which leaves the still's compressed pixels and profile as they
-// are; when that can't copy the format, or the copy lost a kept path or let
-// a dropped one through, the still is encoded again at full quality with the
-// kept properties. An unreadable source copies nothing; an unreadable still
-// throws `.readFailed`.
+// are; when that can't copy the format, or the copy lost a kept path, reads
+// back another orientation value (a HEIC copy keeps the still's own 1, since
+// HEIC reads orientation from its transform, not the TIFF tag) or lets a
+// dropped path through, the still is encoded again at full quality with the
+// kept properties, which sets that transform. An unreadable source copies
+// nothing; an unreadable still throws `.readFailed`.
 import Foundation
 import SuiteModel
 
@@ -23,8 +25,10 @@ public struct StillMetadata: MetadataCarrying {
         guard let origin = try? SuiteImageIO.properties(source) else { return still }
         let kept = Self.kept(origin, dropping: dropping)
         let wanted = Self.paths(kept).union(own.intersection(["ProfileName"]))
+        let orientation = kept["Orientation"] as? Int
         if let copy = SuiteImageIO.copyingTags(still, from: source, keeping: Self.pairs(kept)),
-            let got = try? Self.paths(SuiteImageIO.properties(copy)),
+            let copied = try? SuiteImageIO.properties(copy), orientation == nil || copied["Orientation"] as? Int == orientation,
+            case let got = Self.paths(copied),
             wanted.isSubset(of: got), !got.subtracting(own).contains(where: { Self.isDropped($0, dropping) }) {
             return copy
         }

@@ -4,7 +4,8 @@
 // below" and the inspector shows only that layer's Curves section, with no enable
 // switch (the row's eye turns the layer off), under the Layer section with
 // its Blend Mode and Opacity, as the inspector shows it (#1713). With Background selected the
-// target is the whole image, under "Image", with all five sections. Writes
+// target is the whole image, under "Image", with the five sections that hold
+// values (AdjustmentKind.sections; Black & White and Invert are kinds, AJ-8). Writes
 // photo-adjust-target-light.png and photo-adjust-target-dark.png. macOS only.
 import PhotoModel
 import SuiteUI
@@ -44,14 +45,15 @@ import Testing
         }
     }
 
-    /// Background selected: the whole image, under "Image", every section
-    /// with its enable switch, as the v1 inspector draws it.
+    /// Background selected: the whole image, under "Image", the five sections
+    /// with values, each with its enable switch, as the v1 inspector draws it.
+    /// Black & White and Invert are kinds (AJ-8), not sections the image shows.
     @Test func backgroundTargetsTheImage() throws {
         let model = try layered(selecting: "Background")
         #expect(model.adjustTarget == .image)
         #expect(model.adjustHeader.title == "Image")
         #expect(model.adjustHeader.info == "Adjusts the whole image")
-        #expect(model.adjustSections == AdjustmentKind.allCases)
+        #expect(model.adjustSections == [.exposure, .levels, .curves, .blur, .hueSaturation])
         #expect(AdjustmentsPanel.showsEnable(for: model.adjustTarget))
     }
 }

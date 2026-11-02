@@ -1,0 +1,30 @@
+[
+  {
+    "label": "timeLeftNeedsAFileDone",
+    "file": "Sources/LibraryModel/Contracts/LibraryValues.swift",
+    "find": "guard done > 0, done < total, elapsed >= 1 else { return nil }",
+    "replace": "guard done < total, elapsed >= 1 else { return nil }",
+    "tests": "LibraryImportTimeLeftTests"
+  },
+  {
+    "label": "timeLeftStopsWhenDone",
+    "file": "Sources/LibraryModel/Contracts/LibraryValues.swift",
+    "find": "guard done > 0, done < total, elapsed >= 1 else { return nil }",
+    "replace": "guard done > 0, done <= total, elapsed >= 1 else { return nil }",
+    "tests": "LibraryImportTimeLeftTests"
+  },
+  {
+    "label": "timeLeftPace",
+    "file": "Sources/LibraryModel/Contracts/LibraryValues.swift",
+    "find": "return elapsed * Double(total - done) / Double(done)",
+    "replace": "return elapsed * Double(total) / Double(done)",
+    "tests": "LibraryImportTimeLeftTests"
+  },
+  {
+    "label": "timeLeftRoundsUp",
+    "file": "Sources/LibraryModel/Contracts/LibraryValues.swift",
+    "find": "let minutes = Int((left / 60).rounded(.up))",
+    "replace": "let minutes = Int((left / 60).rounded())",
+    "tests": "LibraryImportTimeLeftTests"
+  }
+]

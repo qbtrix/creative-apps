@@ -11,7 +11,7 @@
 // `dragSamples` drives one gesture and counts the editor;
 // later drag checks (D0-9d) call it. The window is hosted off screen through
 // the render-budget harness (RenderBudgetHarness.swift); DesignEditor.bodyRuns
-// is a process-global debug counter, so the suite nests in BodyCountSuites.
+// is a debug body counter, so the suite nests in BodyCountSuites.
 // macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -62,6 +62,10 @@ extension BodyCountSuites {
 
         static let page = CGSize(width: 1440, height: 1024)
 
+        /// The control's samples per gesture. Without the box each sample re-lays out all 2,000 layers
+        /// (about 200 ms), so 120 samples took 20+ s a gesture; 12 still shows one run per sample.
+        static let controlSamples = 12
+
         // One case per gesture, so each drag gets the whole time limit (a hang guard, not a budget).
         @Test(.timeLimit(.minutes(3)), arguments: Gesture.allCases)
         func aDragRunsTheEditorAtMostThreeTimes(_ gesture: Gesture) async throws {
@@ -81,9 +85,9 @@ extension BodyCountSuites {
             #if DEBUG
             let w = RenderBudgetWindow(DesignEditorWithoutBox(model: gesture.seed))
             defer { w.close() }
-            let step = try await Self.dragSamples(gesture, in: w)
-            // About 120: one run per sample. Over 60 leaves room for a coalesced event.
-            #expect((step.bodies ?? 0) > 60, "without the box the \(gesture) ran the editor too few times: \(step)")
+            let step = try await Self.dragSamples(gesture, in: w, samples: Self.controlSamples)
+            // About `controlSamples`: one run per sample. Over half leaves room for a coalesced event.
+            #expect((step.bodies ?? 0) > Self.controlSamples / 2, "without the box the \(gesture) ran the editor too few times: \(step)")
             #endif
         }
 

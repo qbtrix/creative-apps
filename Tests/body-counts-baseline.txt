@@ -1,0 +1,10 @@
+# Tests/body-counts-baseline.txt: process-wide counts a test still reads, grandfathered
+# (factory lesson 345). Written by scripts/check-body-counts --update-baseline, never by
+# hand. It only shrinks: count on the window or object under test (SuiteUI's BodyTally)
+# and drop the line in the same PR. Line: `path::Type.member`.
+Tests/AppSnapshotTests/HaloHistoryAreaTests.swift::HaloWindow.historyJumps
+Tests/AppSnapshotTests/IdleWorkTests.swift::CanvasRenderer.inFlight
+Tests/AppSnapshotTests/IdleWorkTests.swift::CanvasRenderer.pictures
+Tests/AppSnapshotTests/RenderBudgetHaloHistoryTests.swift::HaloWindow.historyJumps
+Tests/AppSnapshotTests/RenderBudgetPhotoLiveTransformTests.swift::CanvasRenderer.inFlight
+Tests/SuiteUITests/TimelineLanesInputTests.swift::TimelineLane.bodyRuns

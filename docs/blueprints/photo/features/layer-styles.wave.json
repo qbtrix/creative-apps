@@ -35,7 +35,9 @@
     "Tests/RealJobs/photo/style-drop-shadow/input/cutout.ora",
     "Sources/PhotoModel/PhotoRenderRoute.swift",
     "docs/blueprints/photo.md",
-    "docs/blueprints/photo/features/layer-styles.wave.json"
+    "docs/blueprints/photo/features/layer-styles.wave.json",
+    "Sources/PhotoApp/PhotoLayerList.swift",
+    "Tests/AppSnapshotTests/PhotoLayerRowSnapshots.swift"
   ],
   "slices": [
     {
@@ -66,7 +68,9 @@
         "Tests/PhotoModelTests/PhotoLayerStyleTests.swift",
         "Sources/PhotoApp/PhotoCommands+Layer.swift",
         "Sources/PhotoApp/PhotoWindow+Styling.swift",
-        "Sources/PhotoApp/PhotoWindow.swift"
+        "Sources/PhotoApp/PhotoWindow.swift",
+        "Sources/PhotoApp/PhotoLayerList.swift",
+        "Tests/AppSnapshotTests/PhotoLayerRowSnapshots.swift"
       ]
     },
     {

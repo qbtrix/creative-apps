@@ -1,12 +1,11 @@
 // LibraryJourneyTests+Backup.swift: LJ-BK (packet docs/blueprints/library/features/catalog-backup.md, Journey
 // steps; BK-2 written, BK-5 turned on live). On a catalog with fixture backups, rate a photo, File > Restore
 // Catalog Backup…, pick yesterday's, confirm; the rating is yesterday's; reopen the sheet: today's catalog is now
-// a backup. Skipped until BK-5 puts the sheet on the live rotation.
+// a backup. -LibraryFixtureBackups seeds three backups of the samples in a scratch folder (LibraryLaunch.backups).
 import XCTest
 
 final class LibraryBackupJourneyTests: XCTestCase {
     @MainActor func testRestoreBackup() throws {
-        try XCTSkipIf(true, "waits on BK-5")
         // Step 1: launch Library with the sample catalog and its fixture backups.
         let library = Journey("Library", self, arguments: ["-LibraryFixture", "samples", "-LibraryFixtureBackups", "1"])
         XCTAssert(library.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")

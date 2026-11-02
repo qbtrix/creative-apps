@@ -40,5 +40,19 @@
     "find": "if !isKnownUniquelyReferenced(&box) { box = CatalogBox(box.value) }",
     "replace": "_ = isKnownUniquelyReferenced(&box)",
     "tests": "LibraryHeadlessStackTests"
+  },
+  {
+    "label": "failedExportSaysWhyInPlainWords: a damaged image's export fails with the codec's case dump",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "case CodecError.notThisFormat, CodecError.damaged: \"its image file is damaged.\"",
+    "replace": "case CodecError.notThisFormat: \"its image file is damaged.\"",
+    "tests": "LibraryHeadlessTests"
+  },
+  {
+    "label": "failedExportSaysWhyInPlainWords: a render failure drops the LibraryError's message",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "case let e as LibraryError: e.message",
+    "replace": "case let e as LibraryError: \"\\(e)\"",
+    "tests": "LibraryHeadlessTests"
   }
 ]

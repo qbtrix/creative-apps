@@ -10,9 +10,11 @@
 // Editor menus (EM-7): the delegate is a SuiteAppDelegate and `.suiteEditor`
 // adds Window > Switch To, AI Access… and the suite's Help group, and starts
 // LibraryShell.live, a live command channel over the window's catalog
-// (`afterglow run --live library`). Closing the window quits (D2), so a Dock
+// (`afterglow run --live library`). An open hand-off (the welcome's Open
+// sample, a photo the home routes here) imports its photos (LibraryDocumentHost). Closing the window quits (D2), so a Dock
 // click relaunches; `.suiteReopenWindow` opens the window if the app is still
 // running with none.
+// The window's loupe draws develop steps on the GPU (`\.libraryLoupeGPU`, suite-imaging IM-11).
 // Launch empties the last session's share copies (share-sheet SH-5).
 import Foundation
 import LibraryModel
@@ -34,12 +36,22 @@ import SwiftUI
 
     static let bridge = SuiteDocumentsBridge(app: .library, services: services)
 
-    /// The hand-off host; the catalog's file-flow answers don't depend on its photos until LF-3.
-    static let host = LibraryCatalog(services: .fake())
+    /// The hand-off host: an open or place hand-off's photos go to the window's catalog, or wait in
+    /// `handedOff` until the window takes them (a hand-off that launched the app comes before it).
+    static let host = LibraryDocumentHost { paths in
+        await MainActor.run {
+            if let receive { receive(paths) } else { handedOff += paths }
+        }
+    }
+    static var handedOff: [String] = []
+    static var receive: (@MainActor ([String]) -> Void)?
 
     /// How to read the window's catalog, and land a live result in it (LibraryWindow keeps both current).
     static var read: (@MainActor () -> LibraryCatalog)?
     static var take: (@MainActor (LibraryHeadless) -> Void)?
+    /// The window that set `read`, `take` and `receive`; only it clears them, so a closing window's late
+    /// `onDisappear` never clears the next window's (#6123).
+    static var owner: UUID?
 
     /// Live commands on the window's catalog; a client runs only on a grant it already holds.
     static let live = LiveCommandChannel(
@@ -58,7 +70,9 @@ struct LibraryApp: App {
     init() { try? SharePrep.cleanup(support: CatalogStore().folder.path(percentEncoded: false)) }
 
     var body: some Scene {
-        Window("Library", id: "library") { LibraryWindow().suiteReopenWindow(id: "library") }
+        Window("Library", id: "library") {
+            LibraryWindow().suiteReopenWindow(id: "library").environment(\.libraryLoupeGPU, .shared)
+        }
             .commands {
                 LibraryCommands()
                 LibraryBackupCommands()

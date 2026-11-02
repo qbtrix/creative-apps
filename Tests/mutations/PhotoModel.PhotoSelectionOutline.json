@@ -1,0 +1,30 @@
+[
+  {
+    "label": ".retraceOnChange: the outline keeps an old mask's",
+    "file": "Sources/PhotoModel/PhotoWorkspace.swift",
+    "find": "didSet { if selectionMask != oldValue { maskOutline = Self.outline(selectionMask) } }",
+    "replace": "didSet { if selectionMask == nil { maskOutline = Self.outline(selectionMask) } }",
+    "tests": "PhotoAreaOutlineTests"
+  },
+  {
+    "label": ".maskFirst: a masked selection is outlined by its box",
+    "file": "Sources/PhotoModel/PhotoSelectionMask.swift",
+    "find": "if selectionMask != nil { return maskOutline }",
+    "replace": "if selectionMask == nil { return maskOutline }",
+    "tests": "PhotoAreaOutlineTests"
+  },
+  {
+    "label": ".cornersInOrder: the rectangle's corners cross",
+    "file": "Sources/PhotoModel/PhotoSelectionMask.swift",
+    "find": "Point(x: x1, y: y0), Point(x: x1, y: y1), Point(x: x0, y: y1)",
+    "replace": "Point(x: x1, y: y1), Point(x: x1, y: y0), Point(x: x0, y: y1)",
+    "tests": "PhotoAreaOutlineTests"
+  },
+  {
+    "label": ".menuEllipsis: Feather's menu title asks for nothing",
+    "file": "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "find": "\"select.feather\": \"Feather…\"",
+    "replace": "\"select.feather\": \"Feather\"",
+    "tests": "PhotoAreaOutlineTests"
+  }
+]

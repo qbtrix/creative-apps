@@ -6,7 +6,10 @@
 // 1 ms; HB-4: an inspector scrub step (`setProperty(_:to:)` with `edit`'s copy
 // and coalesced record, `propertyRows`) under 1 ms. Key editing (KE-4) adds
 // `moveFiveThousandKeys` on `crowd` (5,000 keys): one `moveKeys(by:dragStart:)`
-// step of a drag over every key under 8 ms. Ten times each in debug CI. Runs
+// step of a drag over every key under 8 ms, and on `crowd` ⌘A
+// (`selectAllKeysOnCrowd`) and ⌫ of every key (`deleteEveryKeyOnCrowd`, #5949),
+// each with its redrawn lanes, under 16 ms. Ten times
+// each in debug CI. Runs
 // on Linux and macOS.
 @testable import HaloModel
 import Testing
@@ -116,5 +119,47 @@ struct HaloKeysBudgetTests {
         #expect(project.selectedKeys.count == 5_000)
         #expect(project.history.undo.count == 1)
         #expect(project.history.undo.last?.name == "Move Keyframes")
+    }
+
+    /// ⌘A on `crowd` (300 lanes, 5,000 keys): the pick and the redrawn lanes.
+    @Test func selectAllKeysOnCrowd() throws {
+        var project = HaloProject(services: .fake)
+        project.restore(try #require(HaloFixtures.project("crowd")))
+        let budget = haloBudget(device: 16)
+        var lanes = 0
+        let cost = haloP95("selectAllKeysOnCrowd", budget: budget) {
+            project.selectAllKeys()
+            lanes = project.timelineRows.count
+        }
+        #expect(cost <= budget)
+        #expect(lanes > 0)
+        #expect(project.selectedKeys.count == 5_000)
+    }
+
+    /// ⌫ with every key of `crowd` picked: Delete Keyframes and the redrawn,
+    /// empty lanes (#5949). Only the delete is timed; the pick and undo are set-up.
+    @Test func deleteEveryKeyOnCrowd() throws {
+        var project = HaloProject(services: .fake)
+        project.restore(try #require(HaloFixtures.project("crowd")))
+        let budget = haloBudget(device: 16)
+        let clock = ContinuousClock()
+        var lanes = 0
+        var p95s: [Duration] = []
+        for _ in 0..<3 {
+            let costs = (0..<100).map { _ in
+                project.selectAllKeys()
+                let cost = clock.measure {
+                    project.deleteKeys()
+                    lanes = project.timelineRows.reduce(0) { $0 + $1.keyFrames.count }
+                }
+                project.undo()
+                return cost
+            }.sorted()
+            p95s.append(costs[94])
+            print("HaloBudget deleteEveryKeyOnCrowd p50 \(costs[49]) p95 \(costs[94]) budget \(budget)")
+        }
+        #expect((p95s.min() ?? budget * 2) <= budget)
+        #expect(lanes == 0)
+        #expect(project.history.redoTitle == "Redo Delete Keyframes")
     }
 }

@@ -1,14 +1,12 @@
 // HaloFiles.swift: the project's file state (#209). The bytes a save writes,
 // an open from `beginOpen` to `finishOpen` (which replaces the document and
 // clears history, or leaves the project as it was), what a save or a failed
-// save leaves, the recent list (newest first, 10 at most, no repeated path),
-// the window title, subtitle and save status, and where Save writes (`saveTarget`,
-// HF-9). The only writer of `file`, besides `edit`, undo and redo marking it
-// unsaved. The status and subtitle read through the kernel's session and the
-// version through its probe (HaloFiles+Kernel.swift); a save or open puts its
-// file first through `setRecent`, the list's one dedupe and cap.
-// W0's `HaloFileState.opening` is a Bool, so the file being opened rides at
-// the head of `file.recent` until `finishOpen`; `recent` hides it.
+// save leaves, the window title, subtitle and save status, and where Save
+// writes (`saveTarget`, HF-9). The only writer of `file`, besides `edit`, undo
+// and redo marking it unsaved. The status and subtitle read through the
+// kernel's session and the version through its probe (HaloFiles+Kernel.swift).
+// The file being opened waits in `file.pending` until `finishOpen`. Open
+// Recent is the suite's one list (HaloFileFlow+Kernel.swift); Halo keeps none.
 // Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -23,9 +21,6 @@ public enum HaloSaveTarget: Equatable, Sendable {
 }
 
 extension HaloProject {
-    /// How many projects Open Recent lists.
-    public static let recentLimit = 10
-
     /// The project file's bytes, as Save writes them.
     public func fileData() throws -> Data {
         try services.files.encode(document)
@@ -34,19 +29,18 @@ extension HaloProject {
     /// Starts opening the file `name` at `path`; the window shows its progress
     /// until `finishOpen`.
     public mutating func beginOpen(name: String, path: String) {
-        let pending = HaloRecentFile(name: name, path: path)
-        file.recent = file.opening ? [pending] + file.recent.dropFirst() : [pending] + file.recent
+        file.pending = HaloFileRef(name: name, path: path)
         file.opening = true
         file.error = nil
     }
 
     /// Ends the open `beginOpen` started. A decoded document replaces this one
-    /// with no undo steps and nothing unsaved, and the file goes first in the
-    /// recent list; an error keeps the project as it was and sets its message.
+    /// with no undo steps and nothing unsaved; an error keeps the project as it
+    /// was and sets its message.
     public mutating func finishOpen(_ result: Result<HaloDocumentState, HaloFileError>) {
-        guard file.opening, let pending = file.recent.first else { return }
+        guard file.opening, let pending = file.pending else { return }
         file.opening = false
-        file.recent.removeFirst()
+        file.pending = nil
         switch result {
         case .success(let state):
             restore(state)
@@ -55,7 +49,6 @@ extension HaloProject {
             file.path = pending.path
             file.unsaved = false
             file.error = nil
-            setRecent([pending] + recent)
         case .failure(let error):
             file.error = error.message
         }
@@ -68,7 +61,6 @@ extension HaloProject {
         file.unsaved = false
         file.error = nil
         sessionDidSave()
-        setRecent([HaloRecentFile(name: name, path: path)] + recent)
     }
 
     /// The save failed with `message`: the project reads "Not saved" until a
@@ -76,19 +68,6 @@ extension HaloProject {
     public mutating func didFailSave(_ message: String) {
         file.error = message
         file.unsaved = true
-    }
-
-    /// File > Open Recent: newest first, 10 at most.
-    public var recent: [HaloRecentFile] {
-        Array(file.opening ? file.recent.dropFirst() : file.recent[...])
-    }
-
-    /// Sets the recent list (from the app's saved defaults), keeping the
-    /// first of any repeated path and 10 at most.
-    public mutating func setRecent(_ files: [HaloRecentFile]) {
-        var seen = Set<String>()
-        let kept = Array(files.filter { seen.insert($0.path).inserted }.prefix(Self.recentLimit))
-        file.recent = file.opening ? Array(file.recent.prefix(1)) + kept : kept
     }
 
     /// "Halo" with no composition, "Untitled Project" before a save or open,

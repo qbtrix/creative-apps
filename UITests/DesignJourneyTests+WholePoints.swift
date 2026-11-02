@@ -66,12 +66,13 @@ final class DesignWholePointsJourneyTests: XCTestCase {
         for label in labels {
             let field = inspector.descendants(matching: .any).matching(NSPredicate(format: "label == %@", label)).firstMatch
             XCTAssert(field.waitForExistence(timeout: 5), "no \(label) row in the inspector after \(action)")
-            let value = field.value as? String ?? ""
+            // A Frame row is a slider, so macOS gives its value as a number (#4822).
+            let value = (field.value as? NSNumber)?.stringValue ?? field.value as? String ?? ""
             XCTAssert(Self.isWhole(value), "\(label) reads \"\(value)\" after \(action), not a whole number")
         }
     }
 
-    /// Whether a spoken value ("212 points", "-4 points") starts with a whole number.
+    /// Whether a value ("212", "-4", "212 points") starts with a whole number.
     private static func isWhole(_ spoken: String) -> Bool {
         guard let number = spoken.split(separator: " ").first, !number.contains(".") else { return false }
         return Int(number) != nil

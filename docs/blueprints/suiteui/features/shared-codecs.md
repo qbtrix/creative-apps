@@ -82,7 +82,15 @@ and `PhotoFileKind.kind(forFileName:)`'s switch (`LibraryValues.swift`), and
 `JPEGWriter`'s UTI switch. These are baseline deletions:
 `FormatListRatchetTests` (SC-13) starts with every file above in
 `Tests/format-lists-baseline.txt`, each adopting task removes its lines, and
-SC-16 deletes the file and makes the ratchet strict. Then
+SC-16 deletes the file and makes the ratchet strict. The baseline holds 25
+files; SC-4, SC-15 and SC-16 clear theirs, and SC-16 takes `SuiteTypes.swift`'s
+(its `SuiteTypeID.png/.jpeg/.heic` go). The other 16 lines (Design's export
+files and `StyleTypes`, SuiteKernel's `Placed`, SuiteModel's pasteboard files,
+SuiteShell's `PasteboardBridge`, SuiteUI's `GalleryEditorKernelChrome` and
+`PlaceDrop`, Photo's catalog, file flow, place and pasteboard, and
+`LibraryFileFlow+Kernel`) have no owning task: SC-16 keeps the file with
+exactly those lines, shrink-only, and the gap #5792 makes the ratchet strict
+(Packet-Review 2, amendment 4). Then
 `Sources/HaloModel/HaloFramePNG.swift` and its
 plan `Tests/mutations/HaloModel.HaloFramePNG.json` (SC-11), and the
 `writePNG`/`readPNG` fallback inside `Sources/PhotoModel/CoreRasterImageCodec.swift`
@@ -105,13 +113,13 @@ library.md (import, export); halo.md (render-out).
 
 | slice | behavior (one sentence) | tasks | journeys | waits on |
 |---|---|---|---|---|
-| SC-f | One registry in SuiteModel lists every image format the suite reads and the four it writes, the plists and the type registry are built from it, and Photo's and Library's panels, import kinds, export formats and the CLI's lists derive from it with the per-app lists deleted and their ratchet strict. | SC-13, SC-14, SC-15, SC-16 | MJ-SC-f, PJ-SC | – (first; AC-export-sheet and AK-8 wait on it) |
+| SC-f | One registry in SuiteModel lists every image format the suite reads and the four it writes, the plists and the type registry are built from it, and Photo's and Library's panels, import kinds, export formats and the CLI's lists derive from it with the per-app lists deleted and their ratchet strict. | SC-13, SC-14, SC-15, SC-16 | MJ-SC-f, PJ-SC | – (first; AC-export-sheet and AK-8 wait on it); SC-16 waits on shared-thumbnails:ST-m and clipboard-interop:CB-library, which also own `LibraryCommandCatalog.swift` |
 | SC-a | Core's PNG is proven to round-trip what both local writers write, the ImageIO import ratchet is live with today's files baselined, and `SuiteImageIO` is declared as stubs in SuiteShell, which links CoreRaster. | SC-1, SC-2 | MJ-SC | suite-imaging:IM-a (SC-2: `Package.swift`, `project.yml`, A/C first) |
 | SC-photo | Photo decodes and encodes PNG and JPEG through core and everything else through `SuiteImageIO`, its own ImageIO code and PNG fallback are gone, and the pasteboard uses the same adapter. | SC-3, SC-4 | MJ-SC-photo, PJ-SC | SC-a; photo/export-pack PX-m (SC-4, cross-line hand-off); suite-imaging:IM-m (SC-4, `ImagingColor`) |
 | SC-halo | Halo's rendered frames and PNG sequences are core's PNG bytes, so the headless render, the sequence sink and the viewer agree. | SC-5, SC-6 | MJ-SC-halo, HJ-SC | SC-a |
 | SC-library | Library scans, decodes, orients and writes through `SuiteImageIO` and core's JPEG, with the same pixel size, capture date and metadata as before. | SC-7, SC-8 | MJ-SC-library, LJ-SC | SC-a; SC-f (SC-8, `JPEGWriter.swift`); library spine, metadata-more, raw, export, export-pack (SC-8, cross-line hand-offs) |
 | SC-raster | Design's and Flare's rasterizers hand their pixels to `SuiteImageIO` for PNG instead of their own `CGImageDestination` code. | SC-9, SC-10 | MJ-SC-raster | SC-a |
-| SC-z | `HaloFramePNG.swift` is deleted with the baseline shrunk, only `SuiteImageIO.swift` imports ImageIO, and the feature is built. | SC-11, SC-12 | MJ-SC, HJ-SC | SC-photo, SC-halo, SC-library, SC-raster; adopt-kernel-autosave:AK-z (SC-11, `canonical-baseline.txt`, A/C first) |
+| SC-z | `HaloFramePNG.swift` is deleted with the baseline shrunk, only `SuiteImageIO.swift` imports ImageIO, and the feature is built. | SC-11, SC-12 | MJ-SC, HJ-SC | SC-photo, SC-halo, SC-library, SC-raster; adopt-kernel-autosave:AK-z (SC-11, `canonical-baseline.txt`, A/C first); SC-12 waits on clipboard-interop:CB-s (`PasteboardBridge.swift`) and placed-images:PL-u and PL-z (`PlacedImageView.swift`, `GalleryPlaceImage.swift`) |
 
 SC-f runs first: it needs no adapter and waits on nothing. SC-library's
 JPEGWriter edit, adopt-kernel-autosave's AK-8 (`PhotoWindow+File.swift`)
@@ -233,7 +241,7 @@ public enum SuiteImageIO {
 ```
 
 `ImageIOImportRatchetTests` (SC-1): `import ImageIO` only in
-`Sources/SuiteShell/SuiteImageIO.swift`, with today's seven files in
+`Sources/SuiteShell/SuiteImageIO.swift`, with today's ten files in
 `Tests/imageio-baseline.txt` (shrink-only) until SC-12 deletes it.
 
 ## Pseudocode
@@ -243,19 +251,35 @@ public enum SuiteImageIO {
   same types as Alternate readers (`PlistShapeAppsTests` reads them from the
   registry instead of its own literal). OpenEXR's and TGA's type ids are
   ImageIO's (`com.ilm.openexr-image`, `com.truevision.tga-image`).
+  `SuiteTypeID.png/.jpeg/.heic` copy the registry's ids: SC-16 deletes them
+  (callers use `SuiteImageFormat.png.typeID`) and `SuiteTypes.swift`'s
+  baseline line, since SC-14 merged without it (#5792).
 - **Photo** (SC-15). Open panel: `.ora` plus each readable format's
-  `UTType(filenameExtension:)`; save and export panels: the writable formats
-  `SuiteImageIO.writable` holds (PNG and JPEG until SC-4's encoder adds HEIC
-  and TIFF, so nothing dead is offered); `PhotoHeadless.openExtensions` is
+  `UTType(filenameExtension:)`; save and export panels: the
+  `SuiteImageFormats.writable` that Photo's codec encodes (PNG and JPEG until
+  SC-4; never `SuiteImageIO.writable`, which is `[]` until SC-4, so nothing
+  dead is offered); `PhotoHeadless.openExtensions` is
   `["ora"] + SuiteImageFormats.readExtensions`, `exportFormats` the writable
   ids its codec encodes. `ImageFormat` is a typealias, so call sites keep
-  `.png` and `.jpeg`.
+  `.png` and `.jpeg`. SC-15 also owns `PhotoDocumentFile.swift`:
+  `fileKind(forName:)` maps only formats the codec encodes to `.image`, any
+  other to `.readOnly` (a `.tif` or `.webp` must never save JPEG bytes under
+  its name), and the export sheet's filter in `PhotoWindow+Export.swift` uses
+  the same set.
 - **Library** (SC-16). `PhotoFileKind` and `ExportFormat` are typealiases of
   `SuiteImageFormat`; the catalog's coding keeps its two spellings (a kind as
   the id, `"jpeg"`; an export preset's format as the title, `"JPEG"`), so
   every catalog fixture re-encodes byte for byte. The scan accepts every
   readable format; the export sheet offers the writable ones this Mac
-  writes.
+  writes. The typealias drops `usesQuality`, `help(writable:)`,
+  `forFileName` and the `allCases` `LibraryCommandCatalog` reads (it yields
+  `"JPEG"`): SC-16 owns `LibraryCommandCatalog.swift` and
+  `LibraryExportSheet.swift`, moves them onto `ExportFormats.all` and
+  `SuiteImageFormat(fileName:)`, and keeps the catalog's `oneOf` titles.
+  `kind(forFileName:)`'s callers (`LibraryStatusText`, `XMPSidecarWriter`,
+  `FakeSidecars`, `ImageIODecoder`) move to `SuiteImageFormat(fileName:)`
+  under SC-16; a `.heif` file is still stored as kind `heic`, and a stored
+  `heic` still decodes.
 - **High bit depth and wide gamut (beta).** `decode` reads the file's ICC
   profile (core `ColorProfile(iccData:)`; none means sRGB) and its samples
   at their own depth: a source with more than 8 bits per component (EXR,
@@ -285,9 +309,9 @@ public enum SuiteImageIO {
 |---|---|---|---|---|---|
 | SC-13 | – | **Format tests first.** `SuiteImageFormatsTests` (the rows, ids, extensions in any case, writable set, TIFF's bit depths, the type registry's public rows equal the image rows), `FormatListRatchetTests` live (no image-format literal list under `Sources/` outside `SuiteImageFormats.swift`, today's files in `Tests/format-lists-baseline.txt`), `ImageFormatParityTests` (writable ids equal `ExportFormats.all`'s `.still` ids), all but the ratchet disabled (`waits on SC-14`) | `Tests/SuiteModelTests/SuiteImageFormatsTests.swift`, `Tests/SuiteModelTests/FormatListRatchetTests.swift`, `Tests/format-lists-baseline.txt`, `Tests/AfterGlowCLITests/ImageFormatParityTests.swift` | – | ~260, 4 |
 | SC-14 | – | **The registry.** `SuiteImageFormats`; `SuiteTypeRegistry.standard`'s public rows from it; Photo's and Library's plists list every readable type; `PlistShapeAppsTests` reads the registry; the C4 description; turns on SC-13's suites | `Sources/SuiteModel/Values/SuiteImageFormats.swift`, `Sources/SuiteModel/Values/SuiteTypes.swift`, `Bundle/Info/Photo.plist`, `Bundle/Info/Library.plist`, `Tests/SuiteModelTests/PlistShapeAppsTests.swift`, `Tests/SuiteModelTests/SuiteImageFormatsTests.swift`, `Tests/AfterGlowCLITests/ImageFormatParityTests.swift`, `Tests/mutations/SuiteModel.SuiteImageFormats.json`, `docs/c4/parts/creative-apps/suite-model/suite-identity.json` | SC-13 | ~320, 9 |
-| SC-15 | – | **Photo derives.** Open, save and export panels and `PhotoHeadless`' lists from the registry; `ImageFormat`'s enum body goes (a typealias); its baseline lines go | `Sources/PhotoModel/PhotoImageFile.swift`, `Sources/PhotoModel/PhotoHeadless.swift`, `Sources/PhotoApp/PhotoWindow+File.swift`, `Sources/PhotoApp/PhotoWindow+Export.swift`, `Tests/PhotoModelTests/PhotoFormatsTests.swift`, `Tests/format-lists-baseline.txt`, `Tests/mutations/PhotoModel.PhotoHeadless.json` | SC-14 | ~260, 7 |
-| SC-16 | – | **Library derives, and the ratchet goes strict.** `PhotoFileKind` and `ExportFormat` as typealiases with the catalog's spellings kept; `Contracts/ExportFormats.swift` deleted; `JPEGWriter`'s UTIs from the registry; `Tests/format-lists-baseline.txt` deleted | `Sources/LibraryModel/Contracts/LibraryValues.swift`, `Sources/LibraryModel/Contracts/ExportFormats.swift`, `Sources/LibraryModel/Contracts/ExportPresets.swift`, `Sources/LibraryApp/Platform/JPEGWriter.swift`, `Tests/LibraryModelTests/LibraryFormatsTests.swift`, `Tests/format-lists-baseline.txt`, `Tests/SuiteModelTests/FormatListRatchetTests.swift`, `Tests/mutations/LibraryModel.LibraryValues.json` | SC-15 | ~280, 8 |
-| SC-1 | – | **Tests first.** `CorePNGParityTests` (live, Linux): core's PNG round-trips 8-bit RGB and RGBA buffers and reads `HaloFramePNG`'s and `CoreRasterImageCodec.writePNG`'s output pixel for pixel; `ImageIOImportRatchetTests` live with the seven files in `Tests/imageio-baseline.txt`; `SuiteImageIOTests` (macOS) written, disabled | `Tests/PhotoModelTests/CorePNGParityTests.swift`, `Tests/SuiteModelTests/ImageIOImportRatchetTests.swift`, `Tests/imageio-baseline.txt`, `Tests/AppSnapshotTests/SuiteImageIOTests.swift`, `Tests/PhotoModelTests/Fixtures/png-parity/` | – | ~260, 5 |
+| SC-15 | – | **Photo derives.** Open, save and export panels and `PhotoHeadless`' lists from the registry; `ImageFormat`'s enum body goes (a typealias); its baseline lines go | `Sources/PhotoModel/PhotoImageFile.swift`, `Sources/PhotoModel/PhotoHeadless.swift`, `Sources/PhotoApp/PhotoWindow+File.swift`, `Sources/PhotoApp/PhotoWindow+Export.swift`, `Sources/PhotoModel/PhotoDocumentFile.swift`, `Tests/PhotoModelTests/PhotoFormatsTests.swift`, `Tests/format-lists-baseline.txt`, `Tests/mutations/PhotoModel.PhotoHeadless.json` | SC-14 | ~300, 8 |
+| SC-16 | – | **Library derives, and the ratchet goes strict.** `PhotoFileKind` and `ExportFormat` as typealiases with the catalog's spellings kept; `Contracts/ExportFormats.swift` deleted; `JPEGWriter`'s UTIs from the registry; `Tests/format-lists-baseline.txt` deleted | `Sources/LibraryModel/Contracts/LibraryValues.swift`, `Sources/LibraryModel/Contracts/ExportFormats.swift`, `Sources/LibraryModel/Contracts/ExportPresets.swift`, `Sources/LibraryApp/Platform/JPEGWriter.swift`, `Sources/LibraryModel/LibraryCommandCatalog.swift`, `Sources/LibraryApp/LibraryExportSheet.swift`, `Sources/LibraryModel/LibraryStatusText.swift`, `Sources/LibraryApp/Platform/XMPSidecarWriter.swift`, `Sources/LibraryModel/Fakes/FakeSidecars.swift`, `Sources/SuiteModel/Values/SuiteTypes.swift`, `Tests/LibraryModelTests/LibraryFormatsTests.swift`, `Tests/format-lists-baseline.txt`, `Tests/SuiteModelTests/FormatListRatchetTests.swift`, `Tests/mutations/LibraryModel.LibraryValues.json` | SC-15 | ~380, 14 (split at the typealiases if it passes 400; `ImageIODecoder`'s caller rides SC-8) |
+| SC-1 | – | **Tests first.** `CorePNGParityTests` (live, Linux): core's PNG round-trips 8-bit RGB and RGBA buffers and reads `HaloFramePNG`'s and `CoreRasterImageCodec.writePNG`'s output pixel for pixel; `ImageIOImportRatchetTests` live with the ten files in `Tests/imageio-baseline.txt`; `SuiteImageIOTests` (macOS) written, disabled | `Tests/PhotoModelTests/CorePNGParityTests.swift`, `Tests/SuiteModelTests/ImageIOImportRatchetTests.swift`, `Tests/imageio-baseline.txt`, `Tests/AppSnapshotTests/SuiteImageIOTests.swift`, `Tests/PhotoModelTests/Fixtures/png-parity/` | – | ~260, 5 |
 | SC-2 | – | `SuiteImageIO` as stubs; SuiteShell links CoreRaster in `Package.swift` and `project.yml`; the C4 part. A supervisor merge (`Package.swift`) | `Sources/SuiteShell/SuiteImageIO.swift`, `Package.swift`, `project.yml`, `docs/c4/parts/creative-apps/suite-shell/shell-imageio.json` | SC-1 | ~200, 4 |
 | SC-3 | – | **Photo, test first.** `PhotoCodecRouteTests` (Linux), disabled (`waits on SC-4`); RJ-X46's job folder | `Tests/PhotoModelTests/PhotoCodecRouteTests.swift`, `Tests/RealJobs/photo/rotated-photo/rotated-photo.jobs.json`, `Tests/RealJobs/photo/rotated-photo/input/rotated-6.jpg`, `Tests/RealJobs/photo/rotated-photo/input/rotated-6.heic` | SC-2 | ~200, 4 |
 | SC-4 | – | **`SuiteImageIO` bodies and Photo on them.** The adapter's decode, encode, info and png; `ImageIOCodec` becomes a conformance over it; `CoreRasterImageCodec` loses its PNG fallback; `PhotoPasteboard` encodes TIFF through it; `readable`/`writable` from ImageIO's type lists, 16-bit TIFF and the float decode for high-bit sources; turns on `PhotoCodecRouteTests` and `SuiteImageIOTests`, and writes and runs `SuiteImageIOFormatsTests` | `Sources/SuiteShell/SuiteImageIO.swift`, `Sources/PhotoApp/ImageIOCodec.swift`, `Sources/PhotoModel/CoreRasterImageCodec.swift`, `Sources/PhotoApp/PhotoPasteboard.swift`, `Tests/PhotoModelTests/PhotoCodecRouteTests.swift`, `Tests/AppSnapshotTests/SuiteImageIOTests.swift`, `Tests/AppSnapshotTests/SuiteImageIOFormatsTests.swift`, `Tests/mutations/PhotoModel.CoreRasterImageCodec.json` | SC-3, SC-14 | ~380, 8 |
@@ -298,7 +322,7 @@ public enum SuiteImageIO {
 | SC-9 | – | **Design and Flare, test first.** `RasterizerPNGTests` (macOS), disabled (`waits on SC-10`) | `Tests/AppSnapshotTests/RasterizerPNGTests.swift` | SC-2 | ~150, 1 |
 | SC-10 | – | `DesignRasterizer` and `StageRasterizer` encode through `SuiteImageIO.png`; their ImageIO imports go; turns on the test | `Sources/DesignApp/DesignRasterizer.swift`, `Sources/FlareApp/StageRasterizer.swift`, `Tests/AppSnapshotTests/RasterizerPNGTests.swift` | SC-9, SC-4 | ~120, 3 |
 | SC-11 | – | **Halo delete.** Removes `HaloFramePNG.swift`, its plan and `CorePNGParityTests`' reference to it; `scripts/check-dup-logic --update-baseline` drops its line | `Sources/HaloModel/HaloFramePNG.swift`, `Tests/mutations/HaloModel.HaloFramePNG.json`, `Tests/PhotoModelTests/CorePNGParityTests.swift`, `Tests/canonical-baseline.txt` | SC-6 | ~120, 4 |
-| SC-12 | – | The ratchet strict (`Tests/imageio-baseline.txt` deleted); the C4 part names the adopters; `status: built`; `feature-done` | `Tests/imageio-baseline.txt`, `Tests/SuiteModelTests/ImageIOImportRatchetTests.swift`, `docs/c4/parts/creative-apps/suite-shell/shell-imageio.json`, `docs/blueprints/suiteui/features/shared-codecs.wave.json` | SC-4, SC-8, SC-10 | ~40, 4 |
+| SC-12 | – | The ratchet strict (`Tests/imageio-baseline.txt` deleted): `PasteboardBridge` reads and writes through `SuiteImageIO`, and SuiteUI's `GalleryPlaceImage` and `PlacedImageView` (SuiteUI can't see SuiteShell) through AppKit's `NSBitmapImageRep`/`NSImage`; `noHandRolledPNG` with its five baselined files; the C4 part names the adopters; `status: built`; `feature-done` | `Sources/SuiteShell/PasteboardBridge.swift`, `Sources/SuiteUI/Gallery/GalleryPlaceImage.swift`, `Sources/SuiteUI/PlacedImageView.swift`, `Tests/imageio-baseline.txt`, `Tests/SuiteModelTests/ImageIOImportRatchetTests.swift`, `docs/c4/parts/creative-apps/suite-shell/shell-imageio.json`, `docs/blueprints/suiteui/features/shared-codecs.wave.json` | SC-4, SC-8, SC-10 | ~200, 7 |
 
 ## Build waves
 
@@ -319,7 +343,7 @@ Longest chain: SC-13 → SC-14 → SC-15 → SC-16 → SC-8 → SC-12 (6), tied 
 | SC-14 | `SuiteImageFormatsTests`: TIFF reads `a.TIF` and `a.tiff`, writes 8 and 16 bits; WebP, GIF, BMP, EXR, TGA and HEIF are readable, not writable; `SuiteTypeRegistry.standard.type(forExtension: "webp")` is Photo's and Library's; `PlistShapeAppsTests` green on the new rows; `ImageFormatParityTests` | a format is missing, a read-only format is offered for writing, or the plists drift from the registry | `SuiteModel.SuiteImageFormats`: `tif` dropped from TIFF → `.tiffBothExtensions`; EXR marked writable → `.writableIsFour`; extension compared case-sensitively → `.anyCase` |
 | SC-15 | `PhotoFormatsTests` (Linux): `PhotoHeadless.openExtensions` holds `ora` and every readable extension; `exportFormats` only what its codec writes; `ImageFormat(fileName: "a.TIFF")` is `.tiff`; Photo's journeys unchanged; the ratchet with four fewer baseline lines | a panel or the CLI keeps its own list, or offers a format nothing writes | `PhotoModel.PhotoHeadless`: export list from `writable` without the codec filter → `.noDeadFormats` |
 | SC-16 | `LibraryFormatsTests`: every catalog fixture re-encodes byte for byte; a folder with `.tif`, `.webp` and `.exr` scans all three; the export formats equal the registry's writable ones this Mac writes; the ratchet strict | a catalog's spelling changes, a readable file is skipped, or a list survives | `LibraryModel.LibraryValues`: kind from a local switch → `.kindFromRegistry`; preset coded as the id → `.presetSpelling` |
-| SC-1 | `CorePNGParityTests` green at the pin; the ratchet fails a fixture `import ImageIO` in `Sources/HaloModel/` | core's PNG can't replace the local writers (then the slice stops for a core bump), or an eighth ImageIO file passes | – (tests; the parity test is the oracle for the deletes) |
+| SC-1 | `CorePNGParityTests` green at the pin; the ratchet fails a fixture `import ImageIO` in `Sources/HaloModel/` | core's PNG can't replace the local writers (then the slice stops for a core bump), or an eleventh ImageIO file passes | – (tests; the parity test is the oracle for the deletes) |
 | SC-2 | builds on macOS; `swift build` on Linux unchanged; `SuiteImageIOTests` disabled by name | SuiteShell can't see `PixelBuffer` | – (stubs) |
 | SC-3 | compiles, disabled; `scripts/jobs check` | – | – (tests) |
 | SC-4 | `SuiteImageIOTests` (Exif 6 upright, a P3 PNG converted to sRGB, HEIC round trip); `SuiteImageIOFormatsTests` (each readable format's fixture decodes, each writable one round-trips, a 16-bit TIFF keeps a 1/1000 step that 8 bits loses, an EXR value above 1 survives decode, a Display P3 PNG's out-of-sRGB red decodes outside sRGB and a 16-bit TIFF written with the P3 profile reads back within 1/1000); `PhotoCodecRouteTests` (PNG never falls back); RJ-X46 on the macOS job | a sideways or colour-shifted decode, or the fallback still runs | `PhotoModel.CoreRasterImageCodec`: JPEG routed to the PNG reader → `.formatSniff`; core error swallowed into an empty buffer → `.errorsSurface` |
@@ -343,6 +367,11 @@ Longest chain: SC-13 → SC-14 → SC-15 → SC-16 → SC-8 → SC-12 (6), tied 
 | one format list | no image-format literal list under `Sources/` outside the registry | `FormatListRatchetTests` (strict from SC-16) |
 | no dead formats | a panel, sheet or the CLI offers only formats this Mac reads or writes | `PhotoFormatsTests`, `LibraryFormatsTests`, `SuiteImageIOFormatsTests` |
 | one PNG writer | no PNG chunk literals (`"IHDR"`, `"IDAT"`) under `Sources/` | `ImageIOImportRatchetTests.noHandRolledPNG` (SC-12) |
+
+`noHandRolledPNG` starts with five files baselined: the three fake PNG
+writers (`FakeThumbnails`, `FakeCanvasDocument`, `FakeRasterizer`) and the
+two IHDR size readers (`SuitePasteboardCoding`, `LibraryHeadless`). The
+readers move to core's `PNG.info`, as `RasterSize` does, under #5792.
 
 ## Done check
 

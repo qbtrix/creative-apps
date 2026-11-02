@@ -102,37 +102,41 @@ public enum PhotoLayerComposite {
         // An adjustment layer never gets here; a text layer draws its tiles.
         guard layer.kind == .pixels || layer.kind.textLayer != nil, let own = content.pixels else { return [] }
         let region = PixelRect(x: origin.x - layer.offsetX, y: origin.y - layer.offsetY, width: width, height: height)
-        var shown = own
-        if let mask = content.mask {
-            let under = own.tileIndices(in: region).filter { own.tiles.indices.contains($0) }
-            let masked = try inParallel(under.count) { k in
-                let r = own.tileRect(under[k])
-                return try masking.masked(own.tiles[under[k]], at: (r.x, r.y), by: mask)
+        // Each layer tile under the region, in picture pixels. A masked layer's tile is masked first, over the
+        // part of it under the region only: a histogram row is one pixel high, so masking the whole 256 px tile
+        // for it cost 256 times the pixels. Tiles mask across the cores.
+        let under = own.tileIndices(in: region).filter { own.tiles.indices.contains($0) }
+        let placed: [(tile: PixelBuffer, at: PixelRect)] = try inParallel(under.count) { k -> (PixelBuffer, PixelRect)? in
+            let i = under[k], r = own.tileRect(i)
+            var (tile, part) = (own.tiles[i], r)
+            if let mask = content.mask {
+                guard let inside = r.intersection(region) else { return nil }
+                if inside != r {
+                    tile = try tile.cropped(x: inside.x - r.x, y: inside.y - r.y, width: inside.width, height: inside.height)
+                }
+                (tile, part) = (try masking.masked(tile, at: (inside.x, inside.y), by: mask), inside)
             }
-            for (i, tile) in zip(under, masked) { shown.tiles[i] = tile }
-        }
-        let tiled = shown
-        // Each layer tile under the region, in picture pixels, filed under
-        // every picture tile it overlaps.
+            return (tile, part.offsetBy(layer.offsetX - origin.x, layer.offsetY - origin.y))
+        }.compactMap { $0 }
+        // Each placed tile filed under every picture tile it overlaps.
         let size = PixelBuffer.tileSize
-        var hits: [Int: [(tile: Int, at: PixelRect)]] = [:]
-        for i in tiled.tileIndices(in: region) where tiled.tiles.indices.contains(i) {
-            let at = tiled.tileRect(i).offsetBy(layer.offsetX - origin.x, layer.offsetY - origin.y)
-            guard let area = at.intersection(PixelRect(x: 0, y: 0, width: width, height: height)) else { continue }
+        var hits: [Int: [Int]] = [:]
+        for (k, p) in placed.enumerated() {
+            guard let area = p.at.intersection(PixelRect(x: 0, y: 0, width: width, height: height)) else { continue }
             for row in (area.y / size)...((area.maxY - 1) / size) {
                 for column in (area.x / size)...((area.maxX - 1) / size) {
-                    hits[row * columns + column, default: []].append((i, at))
+                    hits[row * columns + column, default: []].append(k)
                 }
             }
         }
         let jobs = hits.sorted { $0.key < $1.key }
         let mode = layer.blendMode, opacity = Float(layer.opacity)
         let pieces = try inParallel(jobs.count) { job in
-            let (index, placed) = jobs[job]
+            let (index, over) = jobs[job]
             let x = index % columns * size, y = index / columns * size
             var piece = try read(index)
-            for hit in placed {
-                let tile = tiled.tiles[hit.tile], dx = hit.at.x - x, dy = hit.at.y - y
+            for k in over {
+                let (tile, at) = placed[k], dx = at.x - x, dy = at.y - y
                 guard (0...1).contains(opacity) else {
                     // CoreRaster throws for this opacity.
                     piece = try CoreRaster.composite(tile, onto: piece, x: dx, y: dy, mode: mode, opacity: opacity)

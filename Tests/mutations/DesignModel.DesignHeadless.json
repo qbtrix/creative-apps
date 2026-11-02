@@ -2,8 +2,8 @@
   {
     "label": "exportSelectedPageOnly",
     "file": "Sources/DesignModel/DesignHeadless.swift",
-    "find": "for page in workspace.pages {",
-    "replace": "for page in workspace.pages where page.id == workspace.selectedPageID {",
+    "find": "for page in pages {",
+    "replace": "for page in pages where page.id == workspace.selectedPageID {",
     "tests": "DesignHeadlessTests/realJobPasses"
   },
   {

@@ -3,7 +3,7 @@
 // Edit: Undo and Redo named for the edit, then after the stock Cut, Copy, Paste,
 // Delete and Select All, Duplicate (DesignEditMenu); Page: Add Page,
 // Rename Page…, Delete Page; Object: Group, Ungroup, Arrange, Align and
-// Distribute (DesignObjectMenu); View: Zoom In, Zoom Out, Fit Page, Snap to
+// Distribute (DesignObjectMenu); Animate: Play/Pause, Stop, Set Key and Remove Key (DesignAnimateMenu); View: Zoom In, Zoom Out, Fit Page, Snap to
 // Layers (a checked preference in user defaults, DesignSnapToLayersItem), Zoom to Selection, Show History
 // (the trailing History panel, DesignHistoryArea; Hide History while it shows). Every top bar command is here too. Every item Design adds carries
 // its SF Symbol, the toolbar's where the toolbar has the same command.
@@ -12,7 +12,8 @@
 // it) as a focused scene value. Each item is built from its catalog spec over DesignMenuState
 // (`menu.item`, AC-d3): one that can't run is disabled, never hidden, and its tooltip says why.
 // With no Design window focused only New File acts: it opens a window that starts
-// with a new file. Edit > Undo and Redo replace the system pair. They go where the
+// with a new file. With one, New File opens SuiteUI's New Document sheet on Design's
+// frame presets (DesignNewDocumentSheet, document-setup DS-10) and its Create makes the file. Edit > Undo and Redo replace the system pair. They go where the
 // Model's `undoTarget(textFieldFocused:)` says: while a text field has keyboard focus,
 // to the field's own undo (undo: and redo: down the responder chain, titled "Undo
 // Typing" from its undo manager; DesignFieldUndo watches the key window's focus),
@@ -22,6 +23,7 @@
 // selected layers while the canvas or the Layers list has focus (`canDeleteLayer`).
 import AppKit
 import DesignModel
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 
@@ -86,9 +88,10 @@ struct DesignMenu {
         canDeletePage = model.canDeletePage
         canDeleteLayer = Self.deletesLayer(model)
         alignHelp = model.alignHelps
-        arrangeMenuHelp = model.arrangeMenuHelp
         alignMenuHelp = model.alignMenuHelp
         commandHelp = Self.helps(model)
+        // Each arrange help is a whole trial on the page's tree, so the submenu reuses the four above.
+        arrangeMenuHelp = DesignWorkspace.submenuHelp(DesignArrangeStep.allCases.map { commandHelp[.arrange($0)] })
         zoomToSelectionHelp = model.zoomToSelectionHelp
         noFileHelp = model.addPageHelp
         deletePageHelp = model.deletePageHelp
@@ -153,6 +156,7 @@ struct DesignCommands: Commands {
         }
         CommandMenu("Page") { DesignPageMenu(menu: menu) }
         CommandMenu("Object") { DesignObjectMenu(menu: menu) }
+        CommandMenu("Animate") { DesignAnimateMenu(menu: menu) }
         CommandGroup(after: .toolbar) {
             DesignViewMenu(menu: menu)
             DesignShowHistoryItem(panel: historyPanel)
@@ -167,7 +171,7 @@ struct DesignFileMenu: View {
 
     var body: some View {
         menu.item("file.new", systemImage: DesignToolbarItem.newFile.systemImage, shortcut: KeyboardShortcut("n")) {
-            menu.perform(.newFile)
+            if menu.hasWindow, let window = NSApp.keyWindow { DesignNewDocumentSheet.begin(on: window, perform: menu.perform) } else { menu.perform(.newFile) }
         }
         menu.item("file.open", systemImage: DesignToolbarItem.open.systemImage, shortcut: KeyboardShortcut("o")) {
             menu.perform(.open)
@@ -184,6 +188,36 @@ struct DesignFileMenu: View {
         menu.item("file.export", systemImage: "square.and.arrow.up", shortcut: KeyboardShortcut("e", modifiers: [.command, .shift])) {
             menu.perform(.export)
         }
+    }
+}
+
+/// File > New's sheet on the key window: Design's presets; Create runs New File (and its unsaved guard),
+/// then gives the new page the setup's size and background inside that step (`shapeNewFile`).
+@MainActor enum DesignNewDocumentSheet {
+    static func begin(on window: NSWindow, perform: @escaping DesignPerform) {
+        var panel: NSWindow?
+        let sheet = NewDocumentSheet(.new(presets: DesignWorkspace.newDocumentPresets, clipboard: nil),
+                                     setup: DesignWorkspace.newDocumentSetup, limits: DesignWorkspace.newDocumentLimits,
+                                     onDone: { setup, _ in
+                                         if let panel { window.endSheet(panel) }
+                                         Task { await create(setup, on: window, perform: perform) }
+                                     },
+                                     onCancel: { if let panel { window.endSheet(panel) } })
+        let made = NSWindow(contentViewController: NSHostingController(rootView: sheet))
+        panel = made
+        window.beginSheet(made)
+    }
+
+    /// New File, then, once its unsaved guard (an alert on `window`) has gone, the setup on the file it made;
+    /// a guard the person cancelled leaves their file, which `shapeNewFile` refuses to reshape.
+    /// The window is the live front's (`DesignShell.front`), which reads its file and adopts the shaped one.
+    private static func create(_ setup: DocumentSetup, on window: NSWindow, perform: @escaping DesignPerform) async {
+        guard let id = DesignShell.front.window else { return }
+        perform(.newFile)
+        try? await Task.sleep(for: .milliseconds(200))
+        while window.attachedSheet != nil { try? await Task.sleep(for: .milliseconds(100)) }
+        guard DesignShell.front.window == id, let next = DesignShell.front.document()?.shapingNewFile(setup) else { return }
+        DesignShell.front.apply(next)
     }
 }
 

@@ -1,0 +1,7 @@
+[
+  {"label": "colorNotSet: text.set-color keeps the old colour", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": "        style.rgba = rgba\n", "replace": "", "tests": "PhotoTextColorTests"},
+  {"label": "dragNotPassed: every colour under one drag is its own undo step", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": "try w.setTextColor(p.rgba.map { UInt8(clamping: $0) }, drag: p.drag)", "replace": "try w.setTextColor(p.rgba.map { UInt8(clamping: $0) }, drag: nil)", "tests": "PhotoTextColorTests"},
+  {"label": "rangeUnchecked: a value over 255 is taken", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": ".integer(\"0 to 255.\", minimum: 0, maximum: 255)", "replace": ".integer(\"0 to 255.\", minimum: 0, maximum: 999)", "tests": "PhotoTextColorTests"},
+  {"label": "rowDragDropped: the colour row's picks are each their own step", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": "        if let drag { fields[\"drag\"] = .string(drag) }\n", "replace": "", "tests": "PhotoTextColorTests"},
+  {"label": "rowRefusalSilent: a refused colour pick says nothing", "file": "Sources/PhotoModel/PhotoTextColor.swift", "find": "            statusMessage = textHelp ?? why\n", "replace": "            statusMessage = nil\n", "tests": "PhotoTextColorTests"}
+]

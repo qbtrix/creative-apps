@@ -23,7 +23,7 @@ import Testing
 
     /// The size the transport row asks for, laid out as the status bar does.
     private func size(_ project: HaloProject) -> CGSize {
-        let row = HaloTransport(model: project).controlSize(SuiteSize.compactControl)
+        let row = HaloTransportAdapter(model: project).controlSize(SuiteSize.compactControl)
         return NSHostingController(rootView: row).sizeThatFits(in: CGSize(width: 2000, height: 2000))
     }
 

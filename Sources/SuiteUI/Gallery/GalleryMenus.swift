@@ -65,17 +65,16 @@ struct GalleryClipDocument: CopyAsTarget {
 }
 
 /// Internal, not private, so RenderBudgetCopyAsMenuTests reads `bodyRuns`.
-struct GalleryMenuCommandPage: View {
+struct GalleryMenuCommandPage: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     @State private var doc = GalleryClipDocument()
     @State private var log: [String] = []
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         let copyAs = CopyAsMenu(on: doc, ownTitle: "Gallery Layers", copy: copy, pasteAsImage: paste)
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {

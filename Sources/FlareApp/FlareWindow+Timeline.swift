@@ -32,8 +32,8 @@ extension FlareWindow {
     static func timelineHelp(_ intent: FlareIntent.Timeline, in model: FlareWorkspace) -> String? {
         let noDocument = model.document == nil ? "Open an animation to edit its timeline." : nil
         switch intent {
-        case .scrub, .togglePlay, .setLoops: return model.canPlay ? nil : FlareTransport.cannotPlay
-        case .goToStart, .goToEnd, .step: return FlareTransport.help(for: intent, in: model)
+        case .scrub, .togglePlay, .setLoops: return model.canPlay ? nil : FlareTransportAdapter.cannotPlay
+        case .goToStart, .goToEnd, .step: return FlareTransportAdapter.help(for: intent, in: model)
         case .toggleAutoKey: return model.document == nil ? "Open an animation to key it." : nil
         case .selectKey, .insertFrames, .removeFrames: return noDocument
         case .moveKeys, .removeKeys: return noDocument ?? (model.selectedKeys.isEmpty ? FlareWorkspace.selectKeyFirst : nil)

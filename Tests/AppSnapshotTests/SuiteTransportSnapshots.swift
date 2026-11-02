@@ -5,7 +5,9 @@
 // Golden/chrome/transport-<appearance>.png in the four appearances (EC-12
 // commits the baselines). Each button registers `suite.transport.<id>` with
 // the reason its tooltip shows, and the timecode's tooltip is the face's
-// `timecodeHelp`. SwiftUI builds no accessibility tree for a hosting view
+// `timecodeHelp`. A host that words its own controls (`control:`) gets each
+// reason as that control's tooltip and inventory reason, no timecode, and Play
+// and Loop reading Playing/Paused and On/Off. SwiftUI builds no accessibility tree for a hosting view
 // without an assistive client, so the inventory and the capsule's own items
 // stand in for it. macOS only.
 import SwiftUI
@@ -56,7 +58,32 @@ import Testing
         let play = capsule.items.first { $0.id == "suite.transport.play" }
         #expect(play?.title == "Pause")
         #expect(play?.systemImage == "pause.fill")
-        #expect(capsule.face.timecodeHelp == HelpedStepping.help)
+        #expect(capsule.face?.timecodeHelp == HelpedStepping.help)
+    }
+
+    @Test func aHostWordsEachControlAndItsReason() throws {
+        let reasons: [TransportButton: String] = [.start: "Already at the first frame.", .previous: "Already at the first frame."]
+        let capsule = TransportCapsule(
+            isPlaying: true, loops: true, pill: false,
+            control: { TransportControl(id: "host.\($0)", title: "\($0)", reason: reasons[$0]) },
+            onPlay: {}, onStep: { _ in }, onStart: {}, onEnd: {}, onLoop: { _ in })
+        #expect(capsule.face == nil)
+        #expect(capsule.items.map(\.id) == TransportButton.allCases.map { "host.\($0)" })
+        #expect(capsule.items.map(\.tooltip) == ["Already at the first frame.", "Already at the first frame.",
+                                                 "play", "next", "end", "loop"])
+        #expect(capsule.items.first { $0.button == .play }?.systemImage == "pause.fill")
+        #expect(capsule.value(.play) == "Playing" && capsule.value(.loop) == "On" && capsule.value(.start).isEmpty)
+        let paused = TransportStack.capsule(TransportStack.paused)
+        #expect(paused.value(.play) == "Paused" && paused.value(.loop) == "Off")
+        let store = SuiteControlStore()
+        _ = try #require(render(capsule.environment(\.suiteControlStore, store), scheme: .light))
+        let entries = store.inventory.document().controls
+        #expect(entries.map(\.id) == capsule.items.map(\.id).sorted())
+        for item in capsule.items {
+            let entry = entries.first { $0.id == item.id }
+            #expect(entry?.reason == reasons[item.button], "\(item.id)")
+            #expect(entry?.enabled == (reasons[item.button] == nil), "\(item.id)")
+        }
     }
 
     @Test func theTimecodeSplitsIntoCurrentAndTotal() {

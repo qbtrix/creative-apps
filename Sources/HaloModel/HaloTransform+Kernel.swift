@@ -49,7 +49,7 @@ extension HaloProject: TransformTarget {
         guard let id = selectedLayerID, let compID = selectedCompositionID else { throw HaloEditError.noLayerSelected }
         let (placing, keying) = (services.placing, services.keying)
         var failure: (any Error)?
-        edit(name, control: "halo.viewer.artboard", coalesceKey: drag.map { "\(id).transform.\($0)" }) { doc in
+        edit(name, control: "halo.viewer.artboard", coalesceKey: drag.map { CoalesceKey.key("transform", on: [id], drag: $0) }) { doc in
             do {
                 guard let i = doc.compositions.firstIndex(where: { $0.id == compID }) else { throw HaloEditError.noComposition }
                 let f = doc.compositions[i].playheadFrame

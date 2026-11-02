@@ -26,9 +26,10 @@
 // typing changes nothing, and a typed number commits even when it matches the
 // opening text (NumericInput.committed). Under a probe host a drag reports
 // series `exact-field` on the field and `bar-slider` on the bar, and a bar's
-// key step `slider-key` (ScrubProbe). The bar is a real slider to VoiceOver
-// and XCUI (an accessibility representation) whose value is the row's text,
-// spoken with its unit, and its increment and decrement step as the arrows do.
+// key step `slider-key` (ScrubProbe). Both looks are a real slider to
+// VoiceOver and XCUI (an accessibility representation): XCUI reads the number,
+// VoiceOver hears the row's text with its unit spelled out, and increment and
+// decrement step as the arrows do; while typing it is the text field.
 // Owns presentation state only: the typed draft and whether it was edited,
 // the drag anchor, the gesture's run, hover.
 import AppKit
@@ -139,8 +140,8 @@ public struct ScrubField: View {
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: anchor == nil)
         .help(label)
         .modifier(ScrubAccessibility(
-            label: label, spoken: NumericInput.spoken(value, decimals: decimals, unit: unit), isBar: bar != nil,
-            editing: editing, track: track, position: track.position(value), adjust: adjust))
+            label: label, spoken: NumericInput.spoken(value, decimals: decimals, unit: unit), editing: editing,
+            track: track, position: track.position(value), adjust: adjust))
     }
 
     /// The bar slider, drawn as the Studio editor's number row (Flare's easing
@@ -239,6 +240,8 @@ public struct ScrubField: View {
                     .labelsHidden()
                     .multilineTextAlignment(.trailing)
                     .focused($isTyping)
+                    // One field types at a time, so one id finds it (the audit's identifier check).
+                    .accessibilityIdentifier("suite.scrub.typing")
                     .task { await takeFocus() }
                     .onSubmit { commit(refocus: true) }
                     .onExitCommand {
@@ -449,22 +452,23 @@ private struct ScrubProbeKey: EnvironmentKey {
     static let defaultValue: ScrubProbe? = nil
 }
 
-/// The field is one adjustable element; the bar is a real slider over its
-/// track (so XCUI finds `sliders[label]`), except while typing, when the
-/// text field shows through. The slider takes no `step:`: a stepped Slider
+/// Both looks are a real slider over the track (so XCUI finds `sliders[label]`
+/// and reads the number as AXValue; a plain element sent its value only as the
+/// description, so XCUI read "" and VoiceOver heard no value, #4822), spoken
+/// with the unit, except while typing, when the text field shows through, as
+/// a text field. The slider takes no `step:`: a stepped Slider
 /// builds one tick per step on every body pass (200,001 for Halo's X), so it
 /// snaps a set value itself and steps through its adjustable action.
 struct ScrubAccessibility: ViewModifier {
     let label: String
     let spoken: String
-    let isBar: Bool
     let editing: Bool
     let track: ScrubTrack
     let position: Double
     let adjust: @MainActor (Double) -> Void
 
     func body(content: Content) -> some View {
-        if isBar && !editing {
+        if !editing {
             content.accessibilityRepresentation {
                 Slider(
                     value: Binding(get: { position }, set: { adjust(ScrubValue.snapped($0, to: track.step, in: track.positions)) }),
@@ -476,11 +480,7 @@ struct ScrubAccessibility: ViewModifier {
                 .accessibilityAdjustableAction(step)
             }
         } else {
-            content
-                .accessibilityElement(children: editing ? .contain : .ignore)
-                .accessibilityLabel(label)
-                .accessibilityValue(spoken)
-                .accessibilityAdjustableAction(step)
+            content.accessibilityElement(children: .contain).accessibilityLabel(label)
         }
     }
 

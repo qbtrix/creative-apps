@@ -64,10 +64,9 @@ private struct SuiteFontListingKey: EnvironmentKey {
 }
 
 /// Internal, not private, so FP-4's snapshots and render budget can build it.
-struct GalleryFontPickerPage: View {
+struct GalleryFontPickerPage: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     private let families: [FontFamily]
     @State private var pick: FontPick
@@ -80,7 +79,7 @@ struct GalleryFontPickerPage: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         let text = log.joined(separator: "\n")
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {

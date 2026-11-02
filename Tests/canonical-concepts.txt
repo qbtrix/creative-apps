@@ -16,6 +16,7 @@ Snap: Snap Snapping
 Easing: Easing
 Keyframe: Keyframe
 Layers: Layers LayerTree
+Clipping: ClipRules ClipBase ClippingMask
 Crop: Crop Cropping Cropper
 Export: Export Exporter Exporting
 Clipboard: Clipboard
@@ -25,6 +26,7 @@ Bones: Bone
 Gradient: Gradient
 Autosave: Autosave
 Pen: PenDraft PenRules PenTool
+Path editing: PathCommand PathIntent AnchorEdit AnchorIndex AnchorMove
 Placed image: PlacedImage PlacedAsset ImageLayer PlaceImage
 Tone settings: AdjustmentSettings DevelopSettings DevelopValues DevelopLevels ToneCurve HueSaturation LiveTone LiveDevelop GammaTrack LevelsFormat
 Tone: ToneSettings ToneSlider
@@ -43,3 +45,11 @@ Launch flags: FlareLaunch HaloLaunch LibraryLaunch PhotoLaunch ProjectLaunch Lau
 File envelope: FileEnvelope FileFormat Filing
 Layer style: LayerStyle LayerEffect StyleEffect DropShadow InnerShadow OuterGlow InnerGlow Bevel Emboss ColorOverlay GradientOverlay EffectStack
 Raster size: RasterSize ImageHeader
+# Path: the vector path model and its point editing live in SuiteKernel/Paths (PathCommands, AnchorEdit,
+# AnchorIndex) over FlareCore's Path. Bare Path and Anchor aren't stems: they'd catch drawing adapters
+# (FlareApp StagePath), transform-anchor views and packet files such as DesignPathArtwork. Copies the stems
+# can't see: Flare's runPath in FlareAnchors+Kernel (#5329), Design's DesignPath, DesignAnchor and
+# PathDrawing (pen-paths DP-2, #3517) and Photo's PhotoPath (#5072).
+Path: Paths PathEdit PathEditing PathDrawing PathCommands PathModel AnchorEdit AnchorIndex
+# Clip: clipping masks and clip groups. Clip never matches Clipboard (the next letter is lowercase).
+Clip: Clip Clipping

@@ -3,8 +3,10 @@
 // rows (`ExportSheetRows`) for Flare's five formats and `sheetScale` as the
 // Size row (the shared size for MP4 and GIF, `setSize`); Flare has no quality.
 // Its ids hang off `flare.export`. The options slot holds FlareExportOptionRows:
-// the Frame row (SVG), From, To and Step (PNG sequence), or Frame rate and, for
-// GIF, Loop forever (MP4 and GIF); 1x and 2x scale chips and the Transparent
+// the Frame row (SVG), From, To and Step (PNG sequence), or (MP4 and GIF) the
+// Scale / Long edge / Pixels chips with the mode's px fields (a placeholder for
+// SuiteUI's shared Size row, #5024), Frame rate in fps, GIF's Loop forever and
+// the live "W × H px · N frames · T s" readout; 1x and 2x scale chips and the Transparent
 // background checkbox (SVG and PNG), the scan's warnings, the PNG file count and, in
 // the error color, `exportProblem`, which Export is refused on. A finished run
 // reads `exportSummary`. Every control sends a FlareIntent.Export: a format
@@ -57,7 +59,7 @@ struct FlareExportSheetAdapter: ViewModifier {
             formats: Self.formats,
             idPrefix: "flare.export",
             onFormat: { id in if let format = ExportFormat(rawValue: id) { perform(.export(.setFormat(format))) } },
-            onScale: { scale in perform(.export(model.exportingOptions?.format.writesVideo == true ? .setSize(scale) : .setScale(scale))) },
+            onScale: { scale in perform(.export(model.exportingOptions?.format.writesVideo == true ? .setSize(.scale(scale)) : .setScale(scale))) },
             onQuality: { _ in },
             onExport: { perform(.export(.start)) },
             onClose: close,
@@ -87,7 +89,7 @@ struct FlareExportOptionRows: View {
     var body: some View {
         let last = max((model.scenes.first { $0.id == options.sceneID }?.durationFrames ?? 1) - 1, 0)
         let (from, to) = (options.frames.lowerBound, options.frames.upperBound)
-        VStack(spacing: SuiteSpacing.xs) {
+        VStack(spacing: SuiteSpacing.s) {
             switch options.format {
             case .svgFrame:
                 frameRow("Frame", "frame", from, max(last, from)) { perform(.export(.setFrames(from: $0, to: max($0, to)))) }
@@ -99,12 +101,13 @@ struct FlareExportOptionRows: View {
                 }
                 .accessibilityIdentifier("flare.export.step")
             case .mp4, .gif:
-                InspectorStepperRow("Frame rate", value: Double(model.exportFrameRate ?? 30), in: 1...60) {
+                sizeRows
+                InspectorStepperRow("Frame rate", value: Double(model.exportFrameRate ?? 30), in: 1...(options.format == .gif ? 50 : 60), unit: "fps") {
                     perform(.export(.setFrameRate(Int($0.rounded()))))
                 }
                 .accessibilityIdentifier("flare.export.fps")
                 if options.format == .gif {
-                    InspectorRow("") {
+                    InspectorRow("Loop") {
                         Toggle("Loop forever", isOn: Binding(get: { options.loop }, set: { perform(.export(.setLoop($0))) }))
                             .toggleStyle(.checkbox)
                             .accessibilityIdentifier("flare.export.loop")
@@ -137,8 +140,32 @@ struct FlareExportOptionRows: View {
             } else if editing, options.format == .pngSequence {
                 let count = model.exportFileCount
                 InspectorNote(count == 1 ? "1 file" : "\(count) files", identifier: "flare.export.count")
+            } else if editing, let summary = model.exportVideoSummary {
+                InspectorNote(summary, identifier: "flare.export.summary")
             }
         }
+    }
+
+    /// MP4 and GIF's size mode chips and, for Long edge or Pixels, its px fields, each sending a whole `setSize`.
+    @ViewBuilder private var sizeRows: some View {
+        ChoiceChips(
+            options: ExportSizeMode.allCases.map { InspectorOption(id: $0, title: $0.title, identifier: "flare.export.size.\($0.rawValue)") },
+            selected: options.sizeMode
+        ) { perform(.export(.setSize(model.exportSize($0)))) }
+        switch options.size {
+        case .scale: EmptyView()
+        case .longEdge(let edge):
+            pixelRow("Long edge", "longedge", edge) { perform(.export(.setSize(.longEdge($0)))) }
+        case .pixels(let width, let height, let stretch):
+            pixelRow("Width", "width", width) { perform(.export(.setSize(.pixels(width: $0, height: height, stretch: stretch)))) }
+            pixelRow("Height", "height", height) { perform(.export(.setSize(.pixels(width: width, height: $0, stretch: stretch)))) }
+        }
+    }
+
+    /// A whole-pixel row 1...8192 called `flare.export.<id>`.
+    private func pixelRow(_ label: String, _ id: String, _ value: Int, set: @escaping @MainActor (Int) -> Void) -> some View {
+        InspectorStepperRow(label, value: Double(value), in: 1...8192, unit: "px") { set(Int($0.rounded())) }
+            .accessibilityIdentifier("flare.export.\(id)")
     }
 
     /// A whole-frame row 0...`upper` called `flare.export.<id>`.

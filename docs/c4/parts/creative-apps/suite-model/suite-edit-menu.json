@@ -1,0 +1,10 @@
+{
+  "id": "suite-edit-menu",
+  "name": "Edit menu routing",
+  "description": "Where an editor's Edit item goes while a text field has focus: the field's own cut:, copy:, paste:, selectAll:, undo:, redo: or the app's action (TextFieldEditRouting).",
+  "technology": "Swift 6, Linux and macOS",
+  "paths": [
+    "Sources/SuiteModel/EditMenu/"
+  ],
+  "order": 220
+}

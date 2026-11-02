@@ -33,5 +33,54 @@
     "find": "        if o.scale != 1, o.scale != 2 { return \"Scale must be 1x or 2x.\" }\n",
     "replace": "",
     "tests": "FlareExportOptionsTests"
+  },
+  {
+    "label": "a video rate of exactly 1 is refused",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "let fps = o.fps, fps < 1 {",
+    "replace": "let fps = o.fps, fps <= 1 {",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "PNG, SVG and Lottie are refused on the video rate",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "if o.format.writesVideo, let fps = o.fps,",
+    "replace": "if let fps = o.fps,",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "an exporter without video doesn't refuse MP4 and GIF",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "        if o.format.writesVideo, let reason = services.export.videoUnbuiltReason { return reason }\n",
+    "replace": "",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "the video readout's length ignores the export rate",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "* 10 / Double(plan.fps)",
+    "replace": "* 10 / 30",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "a taken video name keeps the writer's own error",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "        return ExportWriteRefusal.alreadyThere(name: name, folder: folder)\n",
+    "replace": "        return error\n",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "a GIF at 51 frames a second passes",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "let fps = o.fps, fps > 50 {",
+    "replace": "let fps = o.fps, fps > 51 {",
+    "tests": "FlareVideoExportTests"
+  },
+  {
+    "label": "MP4 is held to the GIF rate cap",
+    "file": "Sources/FlareModel/FlareExport.swift",
+    "find": "if o.format == .gif, let fps = o.fps, fps > 50",
+    "replace": "if o.format.writesVideo, let fps = o.fps, fps > 50",
+    "tests": "FlareVideoExportTests"
   }
 ]

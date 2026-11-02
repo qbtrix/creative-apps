@@ -6,7 +6,8 @@
 // on the CPU, CoreRender's CPU backend returning tile bytes. Cases: Hue/Saturation's Saturation, Levels' Gamma,
 // Curves' midpoint, a Levels and a Hue/Saturation adjustment layer at the top of the stack, and the Move tool
 // dragging the top layer 3 px a step (also a whole-canvas redraw that changes no tile's pixels), alone and under
-// a Levels adjustment layer. Each case warms
+// a Levels adjustment layer, and a Free Transform rotate drag on the Fill layer (the whole 8K canvas), 1 degree
+// a step, rendered as drag frames (`live`: the draft through its matrix per region, no whole-layer resample). Each case warms
 // with a full picture and one untimed step, then times `events` steps. The target is p95 <= 16 ms per step at
 // 8K on the GPU route (one display frame): a step over it is a known issue; one over `budget` fails a release run.
 // `breakdown` shows where one GPU step's time goes on the live route: the plan (tone programs), the composites
@@ -19,6 +20,7 @@ import CoreRender
 import CoreRenderMetal
 import Foundation
 import Metal
+import SuiteKernel
 import Testing
 
 @testable import PhotoModel
@@ -30,8 +32,9 @@ import Testing
     static let target = 16.0
     /// The GPU route's p95 budget per step in release, a little above what it measures (render-budgets.md):
     /// an adjustment step re-encodes the cached composite (12 to 24 ms measured), a Move step composites every
-    /// layer again (33 ms p50, up to 69 ms p95 on a busy machine).
-    static func budget(_ name: String) -> Double { name.hasPrefix("move") ? 80 : 30 }
+    /// layer again (33 ms p50, up to 69 ms p95 on a busy machine), and a Free Transform drag frame resamples the
+    /// 33 MP layer on the CPU in chunks (308 ms p50, 416 ms p95 measured; no Metal affine kernel yet).
+    static func budget(_ name: String) -> Double { name.hasPrefix("transform") ? 500 : name.hasPrefix("move") ? 80 : 30 }
 
     /// A case: its name, how it sets the document up (returns the adjustment layer's id, if any), and step `i`
     /// (an adjustment edit, or a Move tool drag sample).
@@ -39,6 +42,10 @@ import Testing
         let name: String
         let setUp: @Sendable (inout PhotoWorkspace) throws -> PhotoLayer.ID?
         let step: @Sendable (inout PhotoWorkspace, PhotoLayer.ID?, Int) -> Void
+        /// The steps are a drag's samples: each renders a drag frame (`PhotoRenderer.update(live: true)`).
+        var live = false
+        /// Steps to time; nil for the suite's `events`.
+        var steps: Int? = nil
 
         init(name: String, setUp: @escaping @Sendable (inout PhotoWorkspace) throws -> PhotoLayer.ID? = { _ in nil },
              edit: @escaping @Sendable (Int) -> AdjustmentEdit) {
@@ -48,8 +55,9 @@ import Testing
         }
 
         init(name: String, setUp: @escaping @Sendable (inout PhotoWorkspace) throws -> PhotoLayer.ID?,
-             step: @escaping @Sendable (inout PhotoWorkspace, PhotoLayer.ID?, Int) -> Void) {
-            (self.name, self.setUp, self.step) = (name, setUp, step)
+             step: @escaping @Sendable (inout PhotoWorkspace, PhotoLayer.ID?, Int) -> Void, live: Bool = false,
+             steps: Int? = nil) {
+            (self.name, self.setUp, self.step, self.live, self.steps) = (name, setUp, step, live, steps)
         }
     }
 
@@ -65,7 +73,7 @@ import Testing
         // The Move tool on the top layer (one brush stroke), 3 px a step.
         Case(name: "move layer", setUp: { workspace in
             workspace.selectLayer(try #require(workspace.layers.first?.id))
-            workspace.selectTool(.move)
+            workspace.selectTool(.select)
             return nil
         }, step: { workspace, _, i in
             workspace.drag(from: Mask.Point(x: 2000, y: 2000), to: Mask.Point(x: 2000 + Double(i * 3), y: 2000 + Double(i)))
@@ -74,11 +82,21 @@ import Testing
         Case(name: "move under levels layer", setUp: { workspace in
             _ = try layer(.levels, in: &workspace)
             workspace.selectLayer(workspace.layers[1].id)
-            workspace.selectTool(.move)
+            workspace.selectTool(.select)
             return nil
         }, step: { workspace, _, i in
             workspace.drag(from: Mask.Point(x: 2000, y: 2000), to: Mask.Point(x: 2000 + Double(i * 3), y: 2000 + Double(i)))
         }),
+        // Free Transform on the Fill layer (the whole 8K canvas): a rotate drag's frames, 1 degree a step, 60 steps.
+        Case(name: "transform turn drag", setUp: { workspace in
+            workspace.selectLayer(workspace.layers[1].id)
+            workspace.selectTool(.select)
+            try workspace.beginTransform()
+            return nil
+        }, step: { workspace, _, _ in
+            guard let box = workspace.transformSelection else { return }
+            try? workspace.setTransform(TransformRules.rotated(box, by: 1), name: "Rotate", drag: "turn")
+        }, live: true, steps: config == "release" ? 60 : nil),
     ]
 
     /// An adjustment layer of `kind` added above the selected (top) layer.
@@ -114,11 +132,11 @@ import Testing
                 let layer = try slider.setUp(&workspace)
                 var shown = try await PhotoRenderer.update(workspace, since: nil, route: route, target: target).revision
                 var steps: [Double] = []
-                for i in 0...Self.events {
+                for i in 0...(slider.steps ?? Self.events) {
                     let clock = ContinuousClock()
                     let t0 = clock.now
                     slider.step(&workspace, layer, i)
-                    let update = try await PhotoRenderer.update(workspace, since: shown, route: route, target: target)
+                    let update = try await PhotoRenderer.update(workspace, since: shown, route: route, target: target, live: slider.live)
                     let ms = milliseconds(clock.now - t0)
                     #expect(update.revision == workspace.revision)
                     shown = update.revision
@@ -150,7 +168,7 @@ import Testing
     static func breakdown() async throws -> [String] {
         guard try gpu() != nil else { return [] }
         var lines: [String] = []
-        for slider in cases {
+        for slider in cases where !slider.live {
             // A route of its own: resident tiles keyed by another document's layer ids would compare pixels.
             guard let (_, route, target) = try gpu() else { return [] }
             var workspace = try PhotoRenderBudgetTests.document()

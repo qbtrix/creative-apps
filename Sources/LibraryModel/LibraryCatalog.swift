@@ -5,6 +5,7 @@
 // the collection shows, and the loupe only a photo it shows. The selection is
 // SuiteKernel's `Selection<String>` (LibrarySelectionAdapter.swift), the export
 // sheet's run its `ExportRun<ExportOptions>` (LibraryExportAdapter.swift).
+import CoreRender
 import SuiteKernel
 
 /// A sidebar collection: a fixed source of photos.
@@ -74,6 +75,9 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var order: [String] = []  // the shown ids in sort order (LibraryOrder.swift)
     public internal(set) var importState = ImportState.idle
     public internal(set) var importNotice: ImportNotice?
+    /// The copy choice of the import `file.import-folder` began (catalog-files LC-5), which the window hands
+    /// to `services.importer.copying(_:)`; `copyTo` nil adds in place.
+    public internal(set) var importCopy = ImportCopyOptions()
     /// The import notice whose failures are listed (CS-5); `showsImportFailures` reads it.
     public internal(set) var failuresShownFor: ImportNotice?
     /// Its own thumbnails; `thumbnails` and the rest forward to it (LibraryThumbnails.swift).
@@ -84,6 +88,10 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var loupeRenderToken = 0
     /// The token the shown `loupeRender` landed under (the focus change's for the held thumbnail).
     public internal(set) var loupeShownToken = 0
+    /// The develop program the loupe's view writes over `loupeRender` on the GPU route (suite-imaging IM-11); nil when it is plain pixels.
+    public internal(set) var loupeSteps: [ToneProgram.Operation]?
+    /// The token of the GPU frame whose histogram `loupeRender` shows (`showLoupeHistogram`).
+    public internal(set) var loupeHistogramToken = 0
     public internal(set) var loupeError: String?
     public internal(set) var copiedSettings: DevelopSettings?
     public internal(set) var cropDraft: CropSettings?  // non-nil while cropping
@@ -99,6 +107,7 @@ public struct LibraryCatalog: Sendable, Equatable {
     public internal(set) var showsTestValues = false  // -LibraryTestValues
     public internal(set) var cullError: String?  // a refused cull change
     public internal(set) var fileRequests: [LibraryFileRequest] = []  // file-flow work for the window
+    var handedOff: [String] = []  // hand-off photos waiting for the launch read (importHandedOff)
     /// The filter bar's rules outside a smart collection (LibraryFilter.swift).
     public internal(set) var filter = LibraryFilter.all
     /// The collections you made and the smart ones, in sidebar order.
@@ -129,7 +138,8 @@ public struct LibraryCatalog: Sendable, Equatable {
             && lhs.exportState == rhs.exportState && lhs.fileRequests == rhs.fileRequests
         let loupe = lhs.loupeZoom == rhs.loupeZoom && lhs.loupeRender == rhs.loupeRender
             && lhs.loupeRenderToken == rhs.loupeRenderToken && lhs.loupeShownToken == rhs.loupeShownToken
-            && lhs.loupeError == rhs.loupeError
+            && lhs.loupeError == rhs.loupeError && lhs.loupeSteps == rhs.loupeSteps
+            && lhs.loupeHistogramToken == rhs.loupeHistogramToken
             && lhs.copiedSettings == rhs.copiedSettings && lhs.cropDraft == rhs.cropDraft && lhs.originalPhotoID == rhs.originalPhotoID
         let file = lhs.catalogState == rhs.catalogState && lhs.saveRevision == rhs.saveRevision
             && lhs.savedRevision == rhs.savedRevision && lhs.saveError == rhs.saveError

@@ -1,5 +1,7 @@
 // PhotoCommands+Select.swift: Photo's Select menu: All (Command-A, see
-// PhotoMenu.selectAll), Deselect, and All Layers (Option-Command-A), which
+// PhotoMenu.selectAll), Deselect, Invert (Shift-Command-I), Feather…, Expand…
+// and Contract… (each asks for a radius, PhotoWindow+Select.swift), Reselect
+// (Shift-Command-D), and All Layers (Option-Command-A), which
 // picks every row in the Layers list (multi-layer-select PM-3) and is off
 // with its reason when no image is open or a sheet is up. All Layers' spec is
 // local until PM-5 registers `layer.select-all` in Photo's catalog.
@@ -15,6 +17,16 @@ extension PhotoCommands {
             // not carry the focused value, and its field still needs Command-A (PhotoMenuState).
             menu.selectAllItem
             menu.item("select.deselect", shortcut: KeyboardShortcut("d")) { menu.perform(.deselect) }
+            menu.item("select.invert", shortcut: KeyboardShortcut("i", modifiers: [.command, .shift])) {
+                menu.perform(.select(.run("select.invert")))
+            }
+            Divider()
+            ForEach(["select.feather", "select.expand", "select.contract"], id: \.self) { id in
+                menu.item(id) { menu.perform(.select(.ask(id))) }
+            }
+            menu.item("select.reselect", shortcut: KeyboardShortcut("d", modifiers: [.command, .shift])) {
+                menu.perform(.select(.run("select.reselect")))
+            }
             Divider()
             menu.allLayersItem
         }

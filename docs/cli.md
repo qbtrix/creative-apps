@@ -83,6 +83,11 @@ Parsing is strict. Each form knows its own flags and nothing else:
 - `--out` to a file that exists is 73 (`<path> already exists; pass --force
   to replace it`). `--force` replaces it. `--in-place` writes back to `--in`
   and needs no `--force`.
+- `new` and a command save the app's native format, so their `--out` (or
+  the `--in` of `--in-place`) must end in the app's native extension
+  (`.flare`, `.ora`, ...), `--force` or not; anything else is 64. Use
+  `export` for another format. A Lottie `.json` or a PNG you opened is never
+  overwritten with the native format.
 - Everything is checked, and the command runs, before anything is written:
   a refused run writes nothing.
 - Writes are atomic: the data goes to a temp file beside the target, then
@@ -298,7 +303,7 @@ absolute paths: the client picks the working directory, and a relative
 
 | flag | meaning |
 |---|---|
-| `--root <dir>` | a folder the tools may read and write. Required; give it more than once for more folders. |
+| `--root <dir>` | a folder the tools may read and write. Required unless `--live` is given; give it more than once for more folders. With `--live` and no root, the file tools refuse. |
 | `--app <name>` | serve only this app's tools (`photo`, `design`, `flare`, `halo`, `library` or `fake`); repeat for more. Left out, every app. |
 | `--live` | also list the running apps' tools (Live mode below). macOS only. |
 
@@ -307,7 +312,7 @@ before serving, with the usual one JSON object:
 
 | when | message | exit |
 |---|---|---|
-| no `--root` | `afterglow mcp needs --root <dir>, the folder its tools may read and write` | 64 |
+| no `--root` and no `--live` | `afterglow mcp needs --root <dir>, the folder its tools may read and write` | 64 |
 | an unknown flag or app | `unknown flag --port`, `unknown app paint` | 64 |
 | `--app <name>` or `--live` given twice | `--app fake is given twice`, `--live is given twice` | 64 |
 | `--live` off macOS | `afterglow mcp --live runs only on macOS, where the apps listen` (kind `unavailable`) | 69 |
@@ -392,6 +397,31 @@ handle table, a dead handle, a file that exists. Only an unknown tool and
 **Rate limit:** at most 50 calls a second. One more is the tool error
 `slow down: at most 50 calls a second`, and it runs nothing.
 
+### Design's key commands
+
+Design keys a layer's `x`, `y` and `opacity` with these ids, so a script or a
+model can animate a file without the window, for example
+`afterglow design keyframe.set --in ui.design --in-place --json '{"node":"node-2","property":"x","frame":60,"value":47}'`;
+over MCP the tool is `design.keyframe.set`.
+Every key edit is one undo step named its title, and the three that edit a
+key are off with `Set a key first.` on a file with no keys. Easing names are
+`linear`, `ease`, `easeIn`, `easeOut`, `easeInOut` and `hold`.
+
+| id | does |
+|---|---|
+| `keyframe.set` | sets a key on `property` at `frame` to `value`, replacing one there; the rest pose stays |
+| `keyframe.remove` | removes the key at `frame`; the other keys stay |
+| `keyframe.move` | moves the key at `frame` to `to`; refused when a key is there |
+| `keyframe.set-easing` | sets the easing from the key at `frame` to the next one |
+| `time.sample` | returns `{x, y, opacity}` of `node` as the canvas shows it at `frame`, its containers' keys included |
+| `time.playhead` | shows the file at `frame` (left out: the rest pose); no undo step, the file is unchanged |
+
+`file.export` takes an optional `frame`: an animated file is written as it
+shows at that frame, a still file the same at any frame. Design's SVG export
+reads `frame` from its options the same way, for example
+`afterglow design export ui.design --format svg --out out --json '{"frame":60}'`;
+PNG export stays in the window for now.
+
 ### Handles
 
 `<app>.open` and `<app>.new` hold the document in the server and return
@@ -455,7 +485,7 @@ Every path a tool takes, to open, save or export, must lie inside a
 
 ### Live mode (macOS)
 
-`afterglow mcp --live --root <dir>` also bridges the apps running on this
+`afterglow mcp --live [--root <dir>]` also bridges the apps running on this
 Mac, so a client edits the document in an open window, each edit an
 ordinary undo step there. In `.mcp.json`, add `"--live"` to `args`. Off
 macOS it exits 69 (above).
@@ -484,6 +514,27 @@ this section is what the code does once an app passes a channel.
   the tool error `Photo is not running; open it with a document, then list
   the tools again`; with no document open, `Photo has no document open; open
   one, then call again`.
+- **Who made a step.** Every undo step a live call records is the
+  agent's: `history.read` lists `origins` beside `steps`, each
+  `{"kind": "user"}` or `{"kind": "agent", "client": "<clientInfo.name>",
+  "request": "<name>"}`, plus the `openRequest`. Flare's engine history
+  doesn't track origins yet.
+- **Requests.** `history.begin {name}` opens a named request ("AI:
+  Birds") and `history.end` closes it; each step an agent records in
+  between keeps its own entry and carries the name.
+  `history.undo-request {name}` undoes the request's steps in one call. It
+  is refused when any later step follows them, by the person or anyone
+  else, so undo those first.
+- **Seeing and painting (Photo).** `live.photo.document.read` lists the
+  canvas size, the layers top-first (id, name, kind, box, hidden, opacity)
+  and the selected ids. `live.photo.view.snapshot {maxSide, region?}`
+  returns `{png, width, height}`: the canvas, or one region of it, as the
+  window shows it, scaled so its longer side is at most `maxSide` (16 to
+  2048), base64 PNG. Both change nothing. `live.photo.paint.stroke
+  {points: [{x, y}], size, hardness, color: {r, g, b, a}, opacity}` paints
+  one brush stroke on the selected image layer as one undo step, "Brush
+  Stroke", with Photo's own brush; hardness, colour and opacity run 0 to 1,
+  and the person's brush and tool are left as they were.
 
 #### Approval
 

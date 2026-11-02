@@ -11,26 +11,28 @@
 // and holding no closure, so the strip's `.equatable()` skips a lane whose
 // track and mapping didn't change, and a hover change redraws only its own
 // lane. Accessibility is in TimelineLaneAccess; the geometry is
-// TimelineLaneGeometry, with no view.
+// TimelineLaneGeometry, with no view. In debug builds every lane counts its
+// body runs through BodyTally under one key (TimelineLaneBodies) whatever its
+// ID type, so a budget test counts its own window's lanes.
 import SwiftUI
 
 struct TimelineLane<ID: Hashable & Sendable>: View {
     let track: TimelineTrack<ID>
     let mapping: FrameMapping
     @Environment(\.timelineLaneHover) private var hover
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
 
     #if DEBUG
     /// How many times a lane's body ran, over every ID type; the real-window
     /// budget tests count a scrub's.
-    static var bodyRuns: Int {
-        get { timelineLaneBodyRuns }
-        set { timelineLaneBodyRuns = newValue }
-    }
+    static var bodyRuns: Int { BodyTally.runs(of: TimelineLaneBodies.self) }
     #endif
 
     var body: some View {
         #if DEBUG
-        Self.bodyRuns += 1
+        bodyTally.ran(TimelineLaneBodies.self)
         #endif
         return TimelineLanes(lanes: [TimelineLaneDrawing(track, mapping: mapping, hover: hover)])
             .frame(height: SuiteSize.timelineLane)
@@ -90,7 +92,5 @@ extension TimelineLane: Equatable {
     }
 }
 
-#if DEBUG
-/// TimelineLane.bodyRuns' count: a generic type can't hold a static stored property.
-@MainActor private var timelineLaneBodyRuns = 0
-#endif
+/// The key every TimelineLane<ID> counts its body runs under in BodyTally.
+enum TimelineLaneBodies {}

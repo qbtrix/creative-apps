@@ -1,8 +1,7 @@
 {
   "version": 1,
   "app": "photo",
-  "why": "Drops logo.png (see-through edges) on an open sunset.png: one centred layer named logo in one Place step; Undo takes it back and a second drop puts it again. Pending #3741: the CLI keeps file commands window-only and reads through its own IO, and its pixel check waits on image-codecs; PhotoFileFlowTests runs these steps on Linux.",
-  "pending": "#3741",
+  "why": "Drops logo.png (see-through edges) on an open sunset.png: one centred layer named logo in one Place step; Undo takes it back and a second drop puts it again. The CLI reads the dropped file through its own IO and hands its bytes to the drop; the pixel check waits on image-codecs.",
   "inputs": ["input/sunset.png"],
   "steps": [
     {"id": "file.drop", "params": {"paths": ["input/logo.png"]}},
@@ -14,5 +13,5 @@
   "expect": {
     "out/drop-layer.png": {"pixels": {"tolerance": 2, "reference": "expected/drop-layer.png"}}
   },
-  "platforms": []
+  "platforms": ["linux", "macos"]
 }

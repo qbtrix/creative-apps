@@ -1,0 +1,4 @@
+[
+  {"label": "firstTickCounts: the first tick after a reset counts from 0, so a pause counts as play time", "file": "Sources/SuiteKernel/Playback/PlaybackTicker.swift", "find": "guard let last = lastTarget else { lastTarget = target; return nil }", "replace": "let last = lastTarget ?? 0", "tests": "PlaybackTimingTests"},
+  {"label": "lateTargetRebases: a target not later than the last moves the baseline back", "file": "Sources/SuiteKernel/Playback/PlaybackTicker.swift", "find": "guard target > last else { return nil }", "replace": "guard target > last else { lastTarget = target; return nil }", "tests": "PlaybackTimingTests"}
+]

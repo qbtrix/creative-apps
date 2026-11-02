@@ -44,8 +44,8 @@ final class PhotoPerfJourneyTests: XCTestCase {
         let tools = photo.element("suite.tools").buttons
         let canvas = photo.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 10), "no canvas (suite.canvas)")
-        // A Move click gives the canvas the keyboard and moves nothing; then B picks the brush.
-        tools["Move"].click()
+        // A Select click gives the canvas the keyboard and moves nothing; then B picks the brush.
+        tools["Select"].click()
         canvas.click()
         var series = [Series]()
         photo.press(character: "b")
@@ -56,10 +56,10 @@ final class PhotoPerfJourneyTests: XCTestCase {
         expectPicked("Crop", photo)
         series.append(canvasDrag("crop", photo, step: "perf-crop"))
 
-        // Escape drops the pending crop; Move keeps a drag without Space from painting.
+        // Escape drops the pending crop; Select keeps a drag without Space from painting.
         photo.press(.escape)
-        tools["Move"].click()
-        expectPicked("Move", photo)
+        tools["Select"].click()
+        expectPicked("Select", photo)
         photo.press(character: "=", .command)
         let unpanned = canvas.frame
         Self.postSpace(down: true)

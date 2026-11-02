@@ -1,5 +1,0 @@
-[
-  {"label": "exportWritesTheRenderedFrame...: rows lose their filter byte", "file": "Sources/HaloModel/HaloFramePNG.swift", "find": "scanlines.append(0)", "replace": "_ = 0", "tests": "HaloHeadlessTests"},
-  {"label": "exportWritesTheRenderedFrame...: the CRC skips the chunk type", "file": "Sources/HaloModel/HaloFramePNG.swift", "find": "word(Int(checksum(tagged)))", "replace": "word(Int(checksum(body)))", "tests": "HaloHeadlessTests"},
-  {"label": "exportWritesTheRenderedFrame...: the CRC is not inverted at the end", "file": "Sources/HaloModel/HaloFramePNG.swift", "find": "return ~crc", "replace": "return crc", "tests": "HaloHeadlessTests"}
-]

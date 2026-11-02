@@ -1,5 +1,5 @@
 // FlareHeadless.swift (adopt-command-catalog AC-f3): Flare's document with no window, for the afterglow CLI, MCP and
-// the real jobs. It opens and saves Flare's own file (.flare) through FlareFormat, opens a Lottie .json untitled, makes a one-scene document, runs
+// the real jobs. It opens and saves Flare's own file (.flare) through FlareFormat, opens a Lottie .json untitled, makes a one-scene document from file.new's params, runs
 // `FlareWorkspace.catalog` lifted onto itself, and exports a scene as SVG frames or Lottie through FlareCore's
 // exporters, on a copy without text as the window's export does. PNG frames need a rasterizer only macOS has, so
 // they are refused here. Linux-safe: no UI imports.
@@ -45,13 +45,12 @@ public struct FlareHeadless: HeadlessDocument {
         return FlareHeadless(workspace: workspace)
     }
 
-    /// One scene "scene-1": the Web preset (550 x 400, 24 fps, 48 frames) with any of `width`, `height`, `fps` and
-    /// `durationFrames` given instead.
+    /// One scene "scene-1" from `file.new`'s params: the named `preset` (the Web preset, 550 x 400, 24 fps, 48
+    /// frames, with none), then any `width`, `height`, `fps`, `durationFrames` and `background` given. An unknown
+    /// preset or a bad background is refused, as the window's New refuses it.
     public static func new(_ options: JSONValue) throws -> FlareHeadless {
-        let o = try options.decode(NewOptions.self)
-        var spec = NewDocumentSpec(preset: .web)
-        spec.setSize(width: o.width ?? spec.width, height: o.height ?? spec.height)
-        (spec.fps, spec.durationFrames) = (o.fps.map(FrameRate.init(whole:)) ?? spec.fps, o.durationFrames ?? spec.durationFrames)
+        let o = options == .null ? FlareWorkspace.NewParams() : try options.decode(FlareWorkspace.NewParams.self)
+        let spec = try FlareWorkspace.newSpec(o, base: .web, id: "new")
         if let problem = spec.problem { throw CatalogError.failed(id: "new", message: problem) }
         var workspace = FlareWorkspace(services: .built)
         workspace.newDocument(spec)
@@ -116,6 +115,5 @@ public struct FlareHeadless: HeadlessDocument {
         }
     }
 
-    struct NewOptions: Decodable { var width, height: Double?; var fps, durationFrames: Int? }
     struct ExportOptions: Decodable { var scene: String?; var frames: [Int]? }
 }

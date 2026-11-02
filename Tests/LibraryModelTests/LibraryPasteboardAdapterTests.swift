@@ -4,8 +4,7 @@
 // export's pipeline (`PhotoExporting.render`, the plan's `dropping`), so the copy is a clean export: the PNG
 // is the developed pixels, and the file the URL names is written with the location properties left out.
 //
-// Disabled until CB-12: `LibraryPasteboardAdapter` doesn't exist yet, so its call goes through `Seam`, which
-// CB-12 points at the adapter (and deletes) when it turns these on. The PNG is made by `echo`, an encoder
+// The PNG is made by `echo`, an encoder
 // whose bytes spell out the size and checksum of the pixels it was given, so the picture can be read on Linux.
 // That the coder hands a real PNG to Photo and Design as an image is SuitePasteboardCodingTests' (CB-3).
 #if canImport(FoundationEssentials)
@@ -19,15 +18,6 @@ import SuiteModel
 import Testing
 
 @testable import LibraryModel
-
-/// The adapter's call as CB-12 builds it. Until then a copy offers nothing.
-private enum Seam {
-    /// CB-12: `LibraryPasteboardAdapter(encode: encode).copy(catalog, folder: folder)`, richest first: the
-    /// selected photo through `catalog.services.exporter` at full size, its PNG bytes, and a file URL to the
-    /// copy written into `folder` by `catalog.services.writer` with the plan's `dropping`.
-    static func copy(_ catalog: LibraryCatalog, folder: String,
-                     encode: @Sendable (DisplayImage) throws -> Data) async throws -> [TypedData] { [] }
-}
 
 /// A PNG "encoder" whose bytes are the pixels' size and checksum, so a test can tell which picture it got.
 @Sendable private func echo(_ image: DisplayImage) -> Data {
@@ -54,7 +44,7 @@ private func catalog(_ item: PhotoItem, selected: Bool = true) -> LibraryCatalog
 }
 
 private func copied(_ item: PhotoItem) async throws -> [TypedData] {
-    try await Seam.copy(catalog(item), folder: clipFolder, encode: echo)
+    try await LibraryPasteboardAdapter(encode: echo).copy(catalog(item), folder: clipFolder)
 }
 
 /// What export's pipeline renders for `item` at full size, echoed: what the copy's PNG must be.
@@ -68,13 +58,13 @@ private func exported(_ item: PhotoItem) async throws -> Data {
 
 @Suite struct LibraryPasteboardAdapterTests {
     /// The copy offers a PNG, then a file URL, and nothing else.
-    @Test(.disabled("waits on CB-12")) func copyOffersPngThenFileURL() async throws {
+    @Test func copyOffersPngThenFileURL() async throws {
         let offered = try await copied(photo())
         #expect(offered.map(\.type) == [.png, .fileURL])
     }
 
     /// Mutation `.copiesDeveloped`: exposure +1 copies as the developed pixels at full size, never the original.
-    @Test(.disabled("waits on CB-12")) func pngIsTheDevelopedPhotoAtFullSize() async throws {
+    @Test func pngIsTheDevelopedPhotoAtFullSize() async throws {
         let brighter = photo(DevelopSettings.neutral.setting(.exposure, to: 1))
         let png = try #require(try await copied(brighter).first { $0.type == .png })
         let text = String(decoding: png.data, as: UTF8.self)
@@ -87,11 +77,11 @@ private func exported(_ item: PhotoItem) async throws -> Data {
 
     /// Mutation `.stripsLocation`: the file URL names a copy written by the writer without the location
     /// properties, never the original file (which may carry GPS).
-    @Test(.disabled("waits on CB-12")) func fileURLIsACleanCopyWithoutLocation() async throws {
+    @Test func fileURLIsACleanCopyWithoutLocation() async throws {
         let item = photo()
         let library = catalog(item)
         let writer = try #require(library.services.writer as? FakeJPEGWriter)
-        let offered = try await Seam.copy(library, folder: clipFolder, encode: echo)
+        let offered = try await LibraryPasteboardAdapter(encode: echo).copy(library, folder: clipFolder)
         let url = try #require(offered.first { $0.type == .fileURL })
         let text = String(decoding: url.data, as: UTF8.self)
         #expect(text.hasPrefix("file://\(clipFolder)/"), "the URL isn't in the copy's folder: \(text)")
@@ -105,10 +95,10 @@ private func exported(_ item: PhotoItem) async throws -> Data {
     }
 
     /// With nothing selected, Copy offers nothing and writes no file.
-    @Test(.disabled("waits on CB-12")) func nothingSelectedCopiesNothing() async throws {
+    @Test func nothingSelectedCopiesNothing() async throws {
         let library = catalog(photo(), selected: false)
         let writer = try #require(library.services.writer as? FakeJPEGWriter)
-        let offered = try await Seam.copy(library, folder: clipFolder, encode: echo)
+        let offered = try await LibraryPasteboardAdapter(encode: echo).copy(library, folder: clipFolder)
         let files = await writer.files
         #expect(offered.isEmpty)
         #expect(files.isEmpty)

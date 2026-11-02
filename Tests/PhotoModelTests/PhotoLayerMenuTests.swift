@@ -119,13 +119,13 @@ import Testing
         #expect(empty == PhotoWorkspace())
     }
 
-    @Test func newAdjustmentLayerOffersFourKindsDisabledUntilAnImageIsOpen() throws {
+    @Test func newAdjustmentLayerOffersItsKindsDisabledUntilAnImageIsOpen() throws {
         let empty = PhotoWorkspace()
-        #expect(empty.adjustmentLayerKinds == [.exposure, .levels, .curves, .hueSaturation])
+        #expect(empty.adjustmentLayerKinds == [.exposure, .levels, .curves, .hueSaturation, .blackAndWhite, .invert])
         #expect(!empty.adjustmentLayerKinds.contains(.blur))
         #expect(empty.addAdjustmentLayerHelp == "Open an image first.")
         var workspace = try whiteImage(4, 4)
-        #expect(workspace.adjustmentLayerKinds.map(\.title) == ["Exposure", "Levels", "Curves", "Hue/Saturation"])
+        #expect(workspace.adjustmentLayerKinds.map(\.title) == ["Exposure", "Levels", "Curves", "Hue/Saturation", "Black & White", "Invert"])
         #expect(workspace.addAdjustmentLayerHelp == nil)
         workspace.addAdjustmentLayer(.curves)
         #expect(workspace.selectedLayer?.name == "Curves 1")

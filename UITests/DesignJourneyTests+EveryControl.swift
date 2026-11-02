@@ -35,6 +35,10 @@ final class DesignEveryControlJourneyTests: XCTestCase {
                 XCTAssertFalse((entry.reason ?? "").isEmpty, "\(id) is disabled and doesn't say why")
                 continue
             }
+            // A segment already selected (its container's click picked it) has nothing to change; a toggle that is
+            // simply on still gets its click. A segment is an entry whose parent id is also listed.
+            let parent = String(entry.id[..<(entry.id.lastIndex(of: ".") ?? entry.id.startIndex)])
+            guard !(entry.selected == true && listed.contains { $0.id == parent }) else { continue }
             let control = Self.onScreen(id, design)
             XCTAssert(control.waitForExistence(timeout: 5), "\(id) is listed but not on screen")
             if id.hasPrefix("design.status.") {

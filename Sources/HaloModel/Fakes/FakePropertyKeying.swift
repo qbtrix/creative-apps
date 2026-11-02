@@ -31,4 +31,7 @@ public struct FakePropertyKeying: PropertyKeying {
     ) throws {
         try live.setParent(parentID, of: layerID, at: frame, in: &composition)
     }
+    public func deleteKeys(_ keys: Set<HaloKeyRef>, in composition: inout HaloComposition) {
+        live.deleteKeys(keys, in: &composition)
+    }
 }

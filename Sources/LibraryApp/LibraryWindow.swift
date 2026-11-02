@@ -1,5 +1,6 @@
 // LibraryWindow.swift: the Library window. It is SuiteWindow with the
-// collections in the sidebar, LibraryBrowser as content (with LibraryStatusBar
+// sidebar's Library and AI tabs (SuiteUI AgentSidebarTabs: the collections
+// list, and the agent's requests, list only), LibraryBrowser as content (with LibraryStatusBar
 // under it in the loupe and on preview data), LibraryInspector in the inspector, and
 // LibraryExportSheet while an export is under way. It owns the LibraryCatalog, hands its values and methods
 // to the views, publishes the menu bar's LibraryMenu as a focused value, and
@@ -41,36 +42,39 @@ final class LibraryAreas {
     let filters = FiltersAreaState()
 }
 
-struct LibraryWindow: View {
+struct LibraryWindow: View, BodyCounted {
     @State var model: LibraryCatalog
     @State var areas = LibraryAreas()
+    @State private var shellOwner = UUID()
+    /// The loupe's GPU route (suite-imaging IM-11); nil in a test window.
+    @Environment(\.libraryLoupeGPU) var loupeGPU
 
     /// `arguments` are the launch arguments (LibraryLaunch); a test passes a fixture's.
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         let launch = LibraryLaunch(arguments: arguments)
+        // The live grid keeps its thumbnails in <support>/Library/Thumbnails (ST-7); fixtures stay on fakes.
         let services = launch.services(
             decoder: ImageIODecoder(), writer: JPEGWriter(metadata: LibraryShell.services.metadata),
-            store: CatalogStore(), sidecars: XMPSidecarWriter())
+            store: CatalogStore(), looks: PresetStore(folder: SuiteLocations.processSupportFolder),
+            sidecars: XMPSidecarWriter())
+            .withThumbnailDisk(folder: LibraryServices.thumbnailFolder(arguments: arguments, home: NSHomeDirectory()))
         _model = State(initialValue: LibraryCatalog(launch: launch, services: services))
     }
 
+    /// What the drop mark calls the catalog photos go into: "Place in Library", not "the document".
+    nonisolated static let dropTarget = "Library"
+
     #if DEBUG
-    /// How many times a window's body ran; RenderBudgetLibraryTests counts an interaction's.
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         let filters = filtersMenu
         SuiteWindow(
             title: "Library",
-            sections: sidebarSections(filters),
-            selection: model.sidebarSelection,
-            // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
-            onSelect: { model.selectSidebarRow($0) },
-            onRename: filters.renameCollection,
             contextActions: { id in
                 guard LibraryFolders.isRowID(id) else { return [] }
                 return LibraryFoldersSection.actions(
@@ -78,6 +82,19 @@ struct LibraryWindow: View {
                     toggleSubfolders: { model.toggleFolderSubfolders(row: id) })
             }
         ) {
+            AgentSidebarTabs("Library", id: LibraryCatalog.sidebarTabsID, work: { model.agentWork }) {
+                SuiteSidebarList(
+                    sections: sidebarSections(filters),
+                    selection: model.sidebarSelection,
+                    // A FOLDERS row's click shows its folder (view.show-folder); any other row's selects its collection.
+                    onSelect: { model.selectSidebarRow($0) },
+                    onRename: filters.renameCollection)
+            } ai: {
+                // List only: a catalog has no layer to show, hide or select, and no span to undo.
+                AgentActivityList(requests: model.agentRequests, layerNames: [:], hidden: [], showsEye: false,
+                                  undoHelp: LibraryCatalog.agentUndoHelp, work: model.agentWork) { _ in }
+            }
+        } content: {
             VStack(spacing: 0) {
                 LibraryFilterBar(
                     filter: model.activeFilter, value: model.filterValue, caption: model.filterCaption, menu: filters)
@@ -103,19 +120,27 @@ struct LibraryWindow: View {
         .focusedSceneValue(\.libraryCatalog, model)
         .focusedSceneValue(\.libraryFilters, filters)
         .suiteFileDrop(.library, bridge: LibraryShell.bridge, hasDocument: model.hasDocument,
-                       places: model.placesExtensions, perform: { try? model.perform($0) })
+                       places: model.placesExtensions, documentName: Self.dropTarget,
+                       perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
+        // The Develop tab's LOOKS and BLACK & WHITE run their commands through this (AJ-11).
+        .environment(\.libraryAdjust, adjustControls)
         .libraryControlsProbe()
         .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
         // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
         .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
         .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
         .modifier(trashArea)  // Photo > Delete Rejected Photos… and its confirm (LibraryWindow+Trash.swift)
+        .modifier(filesArea)  // Remove from Catalog… and Locate… (LibraryWindow+Files.swift)
         .task {
             importAreaLaunch()
             persistAreaLaunch()
             filtersAreaLaunch()
+            // After beginRestore, so a hand-off that launched the app imports after the launch read.
+            LibraryShell.receive = { model.importHandedOff($0) }
+            model.importHandedOff(LibraryShell.handedOff)
+            LibraryShell.handedOff = []
         }
         .onChange(of: model.saveRevision) { _, _ in
             persistAreaChanged()
@@ -130,12 +155,17 @@ struct LibraryWindow: View {
         .onChange(of: model.collectionsRevision) { _, _ in filtersAreaChanged(areas.filters) }
         // The live command channel (editor-menus EM-7) reads this window's catalog and lands a result in it.
         .onAppear {
+            LibraryShell.owner = shellOwner
             LibraryShell.read = { model }
             LibraryShell.take = { model.takeLive($0) }
+            loupeGPU?.onFailure = { loupeAreaRender(.full) }
         }
         .onDisappear {
+            guard LibraryShell.owner == shellOwner else { return }
+            LibraryShell.owner = nil
             LibraryShell.read = nil
             LibraryShell.take = nil
+            LibraryShell.receive = nil
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             persistAreaFlush()
@@ -151,6 +181,8 @@ struct LibraryWindow: View {
         photo.cropTitle = crop.cropTitle
         photo.applyCrop = crop.applyCrop
         photo.resetCrop = crop.resetCrop
+        (photo.rotateLeft, photo.rotateRight) = (crop.rotateLeft, crop.rotateRight)
+        (photo.flipHorizontal, photo.flipVertical) = (crop.flipHorizontal, crop.flipVertical)
         return LibraryMenu(
             edit: editMenu, file: fileMenu, thumbnails: thumbnailsMenu, cull: cullMenu, persist: persistMenu,
             view: viewMenu, photo: photo, export: exportMenu, share: shareMenu,
@@ -166,7 +198,8 @@ struct LibraryWindow: View {
         let action: LibraryMenu.Action?
         switch key {
         case .rating, .pick, .reject, .unflag, .label:
-            guard let cull = current.cull.key else { return .ignored }
+            // X with a crop draft open falls through to the aspect picker's swap.
+            guard let cull = current.cull.key, model.cullChange(forKey: key) != nil else { return .ignored }
             cull(key)
             return .handled
         case .first: action = current.view.first

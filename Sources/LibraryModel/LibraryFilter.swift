@@ -120,18 +120,18 @@ extension LibraryCatalog {
         selectedUserCollection?.isSmart != true && order.isEmpty && !collectionItems.isEmpty
     }
 
-    public var filterHelp: String? {
+    public var libraryFilterHelp: String? {
         LibraryFilter.unavailable ?? (items.isEmpty ? "Import or load photos to filter them." : nil)
     }
 
     public var clearFilterHelp: String? {
-        filterHelp ?? (activeFilter.isActive ? nil : "No filter is on.")
+        libraryFilterHelp ?? (activeFilter.isActive ? nil : "No filter is on.")
     }
 
     /// Why New Smart Collection from Filter can't run: it needs photos, a
     /// filter on, and no smart collection selected (the bar edits its rules).
     public var newSmartCollectionHelp: String? {
-        if let unavailable = UserCollection.smartUnavailable ?? filterHelp { return unavailable }
+        if let unavailable = UserCollection.smartUnavailable ?? libraryFilterHelp { return unavailable }
         if selectedUserCollection?.isSmart == true {
             return "The filter bar edits this smart collection's rules. Select another collection first."
         }
@@ -145,7 +145,7 @@ extension LibraryCatalog {
     /// bar edits its rules instead, as one "Edit Rules" step, and `filter`
     /// stays as it was.
     public mutating func setFilter(_ filter: LibraryFilter) {
-        guard filterHelp == nil else { return }
+        guard libraryFilterHelp == nil else { return }
         if let smart = selectedUserCollection, smart.isSmart {
             recordCollectionsEdit("Edit Rules") { collections in
                 guard let index = collections.firstIndex(where: { $0.id == smart.id }) else { return }

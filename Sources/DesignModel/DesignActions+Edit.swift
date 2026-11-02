@@ -98,7 +98,9 @@ extension DesignWorkspace {
     /// Moves layer `id` into `parentID` (nil: the top level) at `index`, as one "Move Layer" step.
     public mutating func moveLayer(_ id: String, into parentID: String?, at index: Int) throws(DesignRefusal) {
         guard let page = selectedPage, editingTextID == nil, gesture == nil else { throw .unchanged }
-        apply(try services.ordering.move(id, into: parentID, at: index, on: page))
+        var edit = try services.ordering.move(id, into: parentID, at: index, on: page)
+        edit.nodes = edit.nodes.rebased(from: page.nodes, at: playhead)
+        apply(edit)
     }
 
     /// Why the inspector's `property` row is off for the selection; nil when it can be set.
@@ -120,11 +122,11 @@ extension DesignWorkspace {
         }
         let styling = services.styling
         let edit = switch change {
-        case .frame(let field, let value): try styling.setFrame(field, to: value, ids, on: page)
+        case .frame(let field, let value): try styling.setFrame(field, to: value, ids, on: page, at: playhead)
         case .fill(let color): try styling.setFill(color, ids, on: page)
         case .cornerRadius(let radius): try styling.setCornerRadius(radius, ids, on: page)
-        case .opacity(let opacity): try styling.setOpacity(opacity, ids, on: page)
-        case .stroke(let stroke): try styling.setStroke(stroke, ids, on: page)
+        case .opacity(let opacity): try styling.setOpacity(opacity, ids, on: page, at: playhead)
+        case .stroke(let stroke): try strokeEdit(stroke, on: page)
         case .textStyle(let style): try styling.setTextStyle(style, ids, on: page)
         }
         apply(edit)
@@ -136,7 +138,7 @@ extension DesignWorkspace {
         do throws(DesignTreeError) {
             switch change {
             case .frame(let field, let value):
-                let f = node.frame
+                let f = shownPage?.nodes.node(node.id)?.frame ?? node.frame  // the row shows the playhead's frame
                 try setNodeFrame(
                     node.id, x: field == .x ? value : f.x, y: field == .y ? value : f.y,
                     width: field == .width ? value : f.width, height: field == .height ? value : f.height)

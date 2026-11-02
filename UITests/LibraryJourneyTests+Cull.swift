@@ -8,7 +8,7 @@
 // (`library.loupe.position`) reads "<name>  ·  <n> of 24  ·  <cull summary>"
 // (#1678); a photo's cull state is that summary ("3 stars, Picked"), else
 // the loupe photo's value, which ends in it, or a grid cell's label, which
-// names its badges ("2 stars", "Flagged"). The photo element
+// names its badges ("2 stars", "Picked"). The photo element
 // (`library.loupe.photo`) is drawn only when its pixels decode, so the journey
 // clicks the loupe (`library.loupe`) when it is missing and reads the cull
 // summary from the readout. In the loupe Escape goes back to the grid, so a
@@ -111,7 +111,7 @@ extension LibraryJourneyTests {
         // Step 7: P picks both, U clears them; Undo names Clear Flag.
         library.press(character: "p")
         for name in ["IMG_0005", "IMG_0006"] {
-            XCTAssert(cullCell(name, library, marked: "Flagged").waitForExistence(timeout: 5), "P didn't pick \(name)")
+            XCTAssert(cullCell(name, library, marked: "Picked").waitForExistence(timeout: 5), "P didn't pick \(name)")
         }
         library.press(character: "u")
         let edit = library.app.menuBars.firstMatch.menuBarItems["Edit"]

@@ -11,7 +11,7 @@
   "atomic": true,
   "output": {"dir": "out", "name": "{stem}-shown", "format": "json", "options": {"contents": "shown"}},
   "expect": {
-    "out/trips-shown.json": {"json": {"folder": "/trips", "subfolders": false, "shown": ["coast.png"]}}
+    "out/trips-shown.json": {"json": {"folder": "/trips", "original": false, "subfolders": false, "shown": ["coast.png"]}}
   },
   "platforms": ["linux", "macos"]
 }

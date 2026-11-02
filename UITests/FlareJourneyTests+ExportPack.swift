@@ -2,17 +2,16 @@
 // docs/blueprints/flare/features/export-pack.md, Journey steps), on `-FlareSample bounce` (550 × 400, 24 fps,
 // 48 frames, scene `scene-1`) with `-FlareExportTo` on this test's own temp folder, so Export writes with no panel.
 // File > Export… shows the MP4 and GIF chips; GIF with Loop forever writes scene-1.gif, 48 frames that loop
-// forever; MP4 writes scene-1.mp4 (an `ftyp` box); Cancel on a running MP4 leaves no file. One shot per step,
-// `flare-export-pack-<step>`. Skipped until FV-7 puts it on the live services.
+// forever; MP4 writes scene-1.mp4 (an `ftyp` box). Steps 1 to 3 run on the live services (LiveMedia) since FV-7.
+// Step 4 relaunches on `-FlareFixture bounce` (the fakes, 20 ms per frame) because live frames have no pause, so
+// Cancel on a running MP4 is only reachable there; it closes the sheet and leaves the folder empty (the fakes keep
+// MP4 bytes in memory, so the empty folder is a floor, not the proof; FakeVideoMedia's cancel log is, in the Model
+// tests). Hovering the GIF chip shows its hover state (#5019). One shot per step, `flare-export-pack-<step>`.
 import ImageIO
 import XCTest
 
 final class FlareExportPackJourneyTests: XCTestCase {
-    /// FV-7 turns this on once the run writes on the live services.
-    private static let live = false
-
     @MainActor func testExportLoopAsGIFAndMP4() throws {
-        guard Self.live else { throw XCTSkip("waits on FV-7") }
         let folder = FileManager.default.temporaryDirectory.appending(path: "flare-export-pack-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
@@ -25,6 +24,10 @@ final class FlareExportPackJourneyTests: XCTestCase {
             XCTAssert(flare.element(id).waitForExistence(timeout: 5), "the sheet has no \(id)")
         }
         flare.shot("export-pack-1-sheet")
+
+        // 1b. Hover the GIF chip: its hover state, before the click.
+        flare.element("flare.export.format.gif").hover()
+        flare.shot("export-pack-1-hover-gif")
 
         // 2. GIF, Loop forever on: scene-1.gif, 48 frames, loop count 0.
         flare.element("flare.export.format.gif").click()
@@ -53,18 +56,22 @@ final class FlareExportPackJourneyTests: XCTestCase {
         XCTAssertEqual(Array(head.suffix(4)), Array("ftyp".utf8), "scene-1.mp4 has no ftyp box")
         flare.shot("export-pack-3-mp4")
 
-        // 4. Done; the MP4 file moved away; Export then Cancel at once: no scene-1.mp4 is left.
+        // 4. On the fakes, a fresh folder; MP4; Export; Cancel within the run: the sheet goes, the folder stays empty.
         close(flare)
-        try FileManager.default.removeItem(at: mp4)
-        let again = openSheet(flare)
-        flare.element("flare.export.format.mp4").click()
+        let fresh = folder.appending(path: "Fresh")
+        try FileManager.default.createDirectory(at: fresh, withIntermediateDirectories: true)
+        let fakes = Journey("Flare", self, arguments: ["-FlareFixture", "bounce", "-FlareExportTo", fresh.path])
+        XCTAssert(fakes.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened on the fakes")
+        let again = openSheet(fakes)
+        fakes.element("flare.export.format.mp4").click()
         again.click()
-        let cancel = flare.element("flare.export.cancel")
-        XCTAssert(cancel.waitForExistence(timeout: 5), "the running sheet has no Cancel (flare.export.cancel)")
+        XCTAssert(fakes.element("flare.export.progress").waitForExistence(timeout: 5), "the MP4 run showed no progress")
+        let cancel = fakes.element("flare.export.cancel")
+        XCTAssert(cancel.exists, "the running sheet has no Cancel (flare.export.cancel)")
         cancel.click()
-        XCTAssert(flare.app.sheets.firstMatch.waitForNonExistence(timeout: 10), "Cancel left the sheet open")
-        XCTAssertFalse(FileManager.default.fileExists(atPath: mp4.path), "a cancelled MP4 left scene-1.mp4")
-        flare.shot("export-pack-4-cancelled")
+        fakes.shot("export-pack-4-cancelled")
+        XCTAssert(fakes.app.sheets.firstMatch.waitForNonExistence(timeout: 10), "Cancel left the sheet open")
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: fresh.path), [], "a cancelled MP4 left a file")
     }
 
     // MARK: - Helpers

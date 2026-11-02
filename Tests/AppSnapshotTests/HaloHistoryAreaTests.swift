@@ -9,7 +9,7 @@
 // panel follows the undo: the undone step reads "not applied" and the
 // selection moves to the step before it, with no jump sent. Presses go
 // through the accessibility tree, as VoiceOver's do. Nested in
-// BodyCountSuites: it reads a process-global debug counter. macOS only.
+// BodyCountSuites: it reads a debug counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import HaloModel
@@ -44,6 +44,38 @@ extension BodyCountSuites {
             let hidden = try await hosted.press("halo.history.show")
             #expect(hidden, "the History button can't be pressed a second time")
             #expect(hosted.frame(of: "suite.history") == nil, "the History button didn't hide the panel")
+        }
+
+        /// #5844, H-J13: at the journeys' 1000 by 640 window the shown panel sits over the viewer, clear of its
+        /// own button, the status row and the timeline, so the button still hides it and the playhead stays readable.
+        @Test(.timeLimit(.minutes(2))) func thePanelCoversNeitherItsButtonNorTheTimeline() async throws {
+            let hosted = try await HostedHaloWindow(try Self.edited(4), size: CGSize(width: 1000, height: 640))
+            defer { hosted.close() }
+            let shown = try await hosted.press("halo.history.show")
+            #expect(shown, "no halo.history.show button by the transport")
+            let panel = try #require(hosted.frame(of: "suite.history"), "the History button didn't show the panel")
+            for id in ["halo.history.show", "halo.timeline", "halo.transport.play"] {
+                let other = try #require(hosted.frame(of: id), "no \(id) with the panel shown")
+                #expect(!panel.intersects(other), "the History panel \(panel) covers \(id) \(other)")
+            }
+            let canvas = try #require(hosted.frame(of: "halo.viewer"), "no halo.viewer")
+            #expect(canvas.contains(panel), "the History panel \(panel) spills out of the viewer \(canvas)")
+            // The real window as drawn, for review: halo-history-panel-window-light/dark.png.
+            for (scheme, name) in [(NSAppearance.Name.aqua, "light"), (.darkAqua, "dark")] {
+                hosted.window.appearance = NSAppearance(named: scheme)
+                try await Task.sleep(for: .milliseconds(300))
+                try Self.write(hosted.host, name: "halo-history-panel-window-\(name)")
+            }
+        }
+
+        /// `view` as drawn, a PNG in .build/snapshots.
+        static func write(_ view: NSView, name: String) throws {
+            guard let image = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { throw SnapshotError.render(name) }
+            view.cacheDisplay(in: view.bounds, to: image)
+            guard let png = image.representation(using: .png, properties: [:]) else { throw SnapshotError.encode(name) }
+            let folder = try packageRoot().appending(path: ".build/snapshots")
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try png.write(to: folder.appending(path: "\(name).png"))
         }
 
         @Test(.timeLimit(.minutes(2))) func aRowPressSendsOneJump() async throws {
@@ -107,6 +139,7 @@ struct HaloHistoryAreaHost: View {
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .overlay { HaloHistoryOverlay(model: model) }
         .modifier(HaloHistoryArea(model: model) { _ in jumps.count += 1 })
         .environment(\.haloHistoryShelf, shelf)
     }

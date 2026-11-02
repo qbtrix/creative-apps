@@ -10,21 +10,19 @@ import SuiteKernel
 import SuiteUI
 import SwiftUI
 
-struct DesignSampleLoupe: View {
+struct DesignSampleLoupe: View, BodyCounted {
     let model: DesignWorkspace
     let zoom: Double
     var perform: DesignPerform
     /// The store the canvas this overlay belongs to reads and writes.
     let store = DesignCanvasHover.current
     #if DEBUG
-    /// How many times the overlay's body ran: once per pointer sample that moved the loupe.
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         if model.tool == .eyedropper {
             ZStack(alignment: .topLeading) {

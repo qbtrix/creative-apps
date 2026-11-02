@@ -22,6 +22,9 @@ final class SuiteEyedropperJourneyTests: XCTestCase {
         XCTAssert(button.waitForExistence(timeout: 5), "no eyedropper button on the colour row")
         button.click()
         red.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+        // The sampler answers asynchronously: the row reads red a moment after the click (#3852 read it at once).
+        let picked = XCTNSPredicateExpectation(predicate: NSPredicate(format: "value == %@", "#FF0000"), object: hex)
+        _ = XCTWaiter().wait(for: [picked], timeout: 5)
         XCTAssertEqual(value(hex), "#FF0000", "the row after picking red")
         XCTAssertEqual(lines(log), ["change #FF0000", "end"], "the log after picking red")
         gallery.shot("eyedropper-picked")

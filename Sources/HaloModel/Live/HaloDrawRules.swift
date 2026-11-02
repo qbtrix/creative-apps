@@ -1,7 +1,10 @@
 // Live/HaloDrawRules.swift: the one draw-list rule (#37), shared by
 // LiveFrameDrawing and FakeFrameDrawing so the two can't drift apart, plus
-// the draw list's summary and world boxes the viewer reads. Linux-safe.
+// the draw list's summary and world boxes the viewer reads. Each item's
+// style has its keyable numbers sampled at the frame (layer-styles HY-6).
+// Linux-safe.
 import FlareCore
+import SuiteImaging
 
 enum HaloDrawRules {
     /// Bottom first; nulls and out-of-span layers left out. A nil matrix or
@@ -14,9 +17,21 @@ enum HaloDrawRules {
                 opacity: placing.value(.opacity, of: layer.id, in: c, at: frame) ?? layer.opacity,
                 color: layer.color, blendMode: layer.blendMode, text: layer.text, gradient: layer.gradient,
                 shape: layer.shape, stroke: HaloOutlines.stroke(of: layer, in: c, at: frame),
-                placedAsset: layer.kind == .solid ? layer.placedAsset : nil, placedImage: layer.placedImage(in: c))
+                placedAsset: layer.kind == .solid ? layer.placedAsset : nil, placedImage: layer.placedImage(in: c),
+                filters: layer.filters, style: style(of: layer, in: c, at: frame, placing: placing))
         }
         return HaloDrawList(width: c.width, height: c.height, frame: frame, items: items)
+    }
+
+    /// `layer`'s style with each shown style property at its value at `frame`
+    /// (its track's, else the style's own); nil for an unstyled layer.
+    static func style(of layer: HaloLayer, in c: HaloComposition, at frame: Int, placing: any LayerPlacing) -> LayerStyle? {
+        guard layer.style != nil else { return nil }
+        var sampled = layer
+        for p in layer.styleProperties {
+            if let v = placing.value(p, of: layer.id, in: c, at: frame) { sampled.setStyleValue(v, p) }
+        }
+        return sampled.style
     }
 }
 

@@ -83,8 +83,12 @@ public struct Script: Codable, Hashable, Sendable {
         let name = (output?.name ?? "{stem}").replacing("{stem}", with: stem)
             .replacing("{ext}", with: ext).replacing("{index}", with: padded)
             .replacing("{app}", with: app)
-        return name + "." + format
+        return name + "." + (Self.fileExtensions[format] ?? format)
     }
+
+    /// The file extension of a format whose id isn't its extension: a Lottie export is JSON (.lottie is dotLottie's
+    /// zip).
+    static let fileExtensions = ["lottie": "json"]
 
     /// A JSON value in a message.
     static func words(_ value: JSONValue) -> String {

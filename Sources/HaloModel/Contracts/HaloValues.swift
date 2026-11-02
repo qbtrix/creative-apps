@@ -38,6 +38,9 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
     /// A layer style's keyable values (HY-1); their rows show only while the layer has that effect.
     public static let styles: [HaloProperty] = [.shadowDistance, .shadowSize, .shadowOpacity, .glowSize, .glowOpacity]
 
+    /// What `key.*`, the property commands, the lane and the easing pick list: the transforms, then the styles.
+    public static let keyable: [HaloProperty] = allCases + styles
+
     /// The inspector row's label.
     public var title: String {
         switch self {
@@ -68,7 +71,7 @@ public enum HaloProperty: String, CaseIterable, Codable, Sendable {
         case .rotation: -36_000...36_000
         case .opacity, .trimStart, .trimEnd, .shadowOpacity, .glowOpacity: 0...1
         case .trimOffset: -100...100
-        case .shadowDistance: 0...30_000
+        case .shadowDistance: 0...1_000
         case .shadowSize, .glowSize: 0...250
         }
     }
@@ -188,17 +191,22 @@ public enum HaloEasingPreset: String, CaseIterable, Sendable {
 /// the words or size last changed (HaloTextEdits sets them through
 /// `services.text`), so the viewer, hit testing, the default anchor and the
 /// rendered pixels all use one box, and a saved file keeps its layout.
-public struct HaloTextContent: Codable, Sendable, Hashable {
+public struct HaloTextContent: Sendable, Hashable {
     public var string: String
     /// In composition pixels.
     public var fontSize: Double
-    /// The measured line box; an estimate (0.6 em a character) until measured.
+    /// The measured box; an estimate (0.6 em a character, line height for each line after the first) until measured.
     public var width: Double
     public var height: Double
-    public init(string: String = "Text", fontSize: Double = 72, width: Double? = nil, height: Double? = nil) {
-        self.string = string; self.fontSize = fontSize
-        self.width = width ?? fontSize * 0.6 * Double(max(string.count, 1))
-        self.height = height ?? fontSize
+    /// The face and paragraph (TS-9); the size is `fontSize` and the colour the layer's. Its file keys are in
+    /// HaloText+Kernel.swift.
+    public var style: TextStyle
+    public init(string: String = "Text", fontSize: Double = 72, width: Double? = nil, height: Double? = nil,
+                style: TextStyle = .standard) {
+        self.string = string; self.fontSize = fontSize; self.style = Self.face(style)
+        let estimate = Self.estimate(string, fontSize: fontSize, style: self.style)
+        self.width = width ?? estimate.width
+        self.height = height ?? estimate.height
     }
 }
 

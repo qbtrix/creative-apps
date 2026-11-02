@@ -1,8 +1,7 @@
 // PhotoImageOps.swift: the Image menu's whole-image changes. Image Size
 // resamples every layer by the same factors (CoreRaster's resized, bilinear)
-// and scales its offset; Rotate turns every layer a quarter or half turn
-// (CoreRaster's rotated) and moves its offset with it, so layers keep their
-// places on the turned canvas. Canvas Size (transform PT-6) moves every layer
+// and scales its offset; Rotate is the kernel's Orientation
+// (PhotoOrientation+Kernel.swift turns every layer, mask and offset). Canvas Size (transform PT-6) moves every layer
 // by the anchor's share of the change (SuiteKernel's anchoredOrigin, rounded
 // down as CoreRaster's padded is) and pads or crops the background layer to
 // the new canvas, its new border in the background colour (white). Each drops
@@ -115,29 +114,12 @@ extension PhotoWorkspace {
         }
     }
 
-    /// Turns the whole image clockwise by `turn`.
+    /// Turns the whole image clockwise by `turn` through the kernel's
+    /// Orientation (PhotoOrientation+Kernel.swift), as one "Rotate" step.
+    /// No image, or Free Transform open: nothing.
     public mutating func rotateImage(_ turn: QuarterTurn) {
-        guard let canvas else { return }
-        record(.stack(stackState), named: "Rotate")
-        let (w, h) = (canvas.width, canvas.height)
-        for (at, layer) in layers.enumerated() {
-            // A layer's own size always flattens, so this never skips one.
-            guard let buffer = try? pixels[layer.id]?.flattened() else { continue }
-            let (x, y, lw, lh) = (layer.offsetX, layer.offsetY, buffer.width, buffer.height)
-            let offset = switch turn {
-            case .degrees90: (h - (y + lh), x)
-            case .degrees180: (w - (x + lw), h - (y + lh))
-            case .degrees270: (y, w - (x + lw))
-            }
-            pixels[layer.id] = TiledPixels(buffer.rotated(turn))
-            layers[at].offsetX = offset.0
-            layers[at].offsetY = offset.1
-        }
-        for layer in layers { layerGeometryChanged(layer.id, .rotated(turn)) }
-        if turn != .degrees180 { self.canvas = CanvasSize(width: h, height: w) }
-        selection = nil
-        pendingCrop = nil
-        touch(.all)
+        let o: Orientation = turn == .degrees90 ? .right : turn == .degrees180 ? .down : .left
+        try? setOrientation(o, name: "Rotate")
     }
 }
 

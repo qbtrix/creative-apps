@@ -19,7 +19,7 @@ extension HaloProject {
         for key in keys { byLayer[key.layerID, default: [:]][key.property.rawValue, default: []].insert(key.frame) }
         var refused: (KeyRefusal, String)?
         let range = 0...comp.lastFrame
-        let moved = edit("Move Keyframes", control: "halo.timeline", coalesceKey: "keys-\(dragStart)-\(keyDragSerial)") { doc in
+        let moved = edit("Move Keyframes", control: "halo.timeline", coalesceKey: CoalesceKey.key("keys", drag: "\(dragStart)-\(keyDragSerial)")) { doc in
             guard let c = doc.compositions.firstIndex(where: { $0.id == doc.selectedCompositionID })
             else { throw HaloEditError.noComposition }
             for l in doc.compositions[c].layers.indices {

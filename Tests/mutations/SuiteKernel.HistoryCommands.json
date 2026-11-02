@@ -19,5 +19,19 @@
     "find": "        endRun()\n        jump(to: index, apply)",
     "replace": "        jump(to: index, apply)",
     "tests": "SuiteKernelTests.HistoryCommandsTests/jumpEndsRun"
+  },
+  {
+    "label": "undo-request ignores a later step and undoes it too",
+    "file": "Sources/SuiteKernel/History/HistoryCommands.swift",
+    "find": "guard tail > 0, !applied.dropLast(tail).contains(where: { $0.request == name }) else {",
+    "replace": "guard tail >= 0 else {",
+    "tests": "SuiteKernelTests.HistoryCommandsTests/undoRequestRefusesWhenALaterStepFollows"
+  },
+  {
+    "label": "undo-request undoes one step short of the request",
+    "file": "Sources/SuiteKernel/History/HistoryCommands.swift",
+    "find": "try doc.jumpHistory(to: listing.index - tail)",
+    "replace": "try doc.jumpHistory(to: listing.index - tail + 1)",
+    "tests": "SuiteKernelTests.HistoryCommandsTests/undoRequestUndoesItsStepsInOneCall"
   }
 ]

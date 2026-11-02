@@ -62,6 +62,9 @@ public protocol LayerTransforming: PhotoUseCase {
     /// The layer's pixels with the transform applied (lanczos3), placed at
     /// their new bounds. The identity gives back `content` bit for bit.
     func applied(_ draft: TransformDraft, to content: PlacedPixels) throws -> PlacedPixels
+    /// The matrix `applied` resamples through: a layer pixel's coordinates (the layer's top-left at `origin`,
+    /// canvas pixels) to canvas pixel coordinates. A drag frame draws each region through it.
+    func matrix(_ draft: TransformDraft, origin: (x: Int, y: Int)) throws -> AffineMatrix
     /// `content` mirrored across its own center line, exactly (no filtering);
     /// twice gives back the input bit for bit.
     func flipped(_ content: PlacedPixels, _ axis: FlipAxis) throws -> PlacedPixels

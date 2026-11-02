@@ -110,10 +110,10 @@ private let svgFrame = ExportOptions(format: .svgFrame, sceneID: "scene-1", fram
     w.machinePreview = MachinePreview(machineID: "button", stateID: "idle", frame: 3, inputs: [:])
     (w.machineError, w.exportState, w.assist.prompt) = ("No machine.", .running(svgFrame, done: 1, total: 2), "bounce higher")
     (w.fileName, w.savedDocument, w.saveError, w.loadState) = ("bounce.flare", nil, "Disk full.", .failed("Bad file."))
-    (w.loops, w.autoKey, w.onion.isOn, w.showsMotionPath, w.recent) = (false, true, true, true, ["a.flare"])
+    (w.loops, w.autoKey, w.onion.isOn, w.showsMotionPath, w.filePath) = (false, true, true, true, "/a.flare")
     w.load(FlareFixtures.bounce)
     var fresh = workspace(FlareFixtures.bounce, .select)
-    (fresh.loops, fresh.autoKey, fresh.onion.isOn, fresh.showsMotionPath, fresh.recent) = (false, true, true, true, ["a.flare"])
+    (fresh.loops, fresh.autoKey, fresh.onion.isOn, fresh.showsMotionPath, fresh.filePath) = (false, true, true, true, "/a.flare")
     #expect(w == fresh && w.currentFrame == 0 && !w.isPlaying && w.editingSymbolID == nil && w.machinePreview == nil)
 }
 
@@ -125,7 +125,7 @@ private let svgFrame = ExportOptions(format: .svgFrame, sceneID: "scene-1", fram
         { $0.machineID = "button" }, { $0.machineError = "No machine." }, { $0.exportState = .failed(svgFrame, "Disk full.") },
         { $0.machinePreview = MachinePreview(machineID: "m", stateID: "idle", frame: 0, inputs: [:]) },
         { $0.assist.error = .timedOut }, { $0.fileName = "bounce.flare" }, { $0.savedDocument = nil },
-        { $0.saveError = "Disk full." }, { $0.loadState = .loading }, { $0.recent = ["a.flare"] },
+        { $0.saveError = "Disk full." }, { $0.loadState = .loading }, { $0.filePath = "/a.flare" },
     ]
     for (i, change) in changes.enumerated() {
         var other = base

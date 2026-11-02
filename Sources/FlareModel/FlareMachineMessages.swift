@@ -3,12 +3,15 @@
 // label and the format error's debug text, are read back into the broken rule. A message the fake wrote for a person
 // passes through, and anything else gets a generic line, so a raw debug description never reaches the Inspector. The
 // rule is unescaped first, so a quote, backslash or tab in a label or input name reads as typed (#680). The
-// per-refusal sentences are `commandSentence`, which FlareLayerError's messages share (#800).
+// per-refusal sentences are `commandSentence`, which FlareLayerError's messages share (#800); a command FlareCore
+// hasn't built says so.
 import FlareCore
 
 extension FlareWorkspace {
     static let machineRefused = "The machine could not be changed."
     static let framesOutsideScene = "The state\u{2019}s frames must be inside the scene."
+    /// A command FlareCore lists but hasn't built, so a caller can tell a missing feature from a bad param (#5283).
+    static let notBuiltSentence = "That isn\u{2019}t built in Flare yet."
 
     static func machineMessage(_ error: any Error) -> String {
         switch error {
@@ -53,8 +56,9 @@ extension FlareWorkspace {
         case .inputTypeChange: "An input keeps the type of its default value."
         case .invalidMachine: "That change would break the state machine."
         case .matteCycle: "A layer can\u{2019}t use itself, or a layer it mattes, as its matte."
+        case .notBuilt: notBuiltSentence
         case .invalidDocument, .notExecuted, .nothingToUndo, .nothingToRedo, .groupInProgress, .unknownCommand,
-             .malformedCommand, .notBuilt:
+             .malformedCommand:
             nil
         }
     }

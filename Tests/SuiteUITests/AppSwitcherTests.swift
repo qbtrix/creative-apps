@@ -31,6 +31,17 @@ import Testing
         }
     }
 
+    /// The current item draws selected, never dimmed, even while switching can't run (#4670); the rest stay
+    /// disabled with their reason.
+    @Test func theCurrentItemIsNeverDisabled() {
+        let state = AppSwitcherState.placeholder(processName: "DesignApp")
+        for item in state.items {
+            #expect(item.isDisabled(current: state.current) == (item.id != "design"), "\(item.id)")
+        }
+        let ready = AppSwitcherItem(id: "photo", title: "Photo", app: .photo, shortcut: "⌃⌘3")
+        #expect(!ready.isDisabled(current: "design"))
+    }
+
     @Test func theCurrentItemIsTheRunningApp() {
         #expect(AppSwitcherState.placeholder(processName: "DesignApp").current == "design")
         #expect(AppSwitcherState.placeholder(processName: "LibraryApp").current == "library")

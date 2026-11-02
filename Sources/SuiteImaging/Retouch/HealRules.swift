@@ -24,10 +24,26 @@ public enum HealRules {
 
     /// `pixels` with the texture `sourceOffset` away cloned through
     /// `coverage` and its tone solved to meet the edge: pixel (x, y) takes
-    /// its texture from (x + dx, y + dy). Throws when a source pixel lies off
-    /// the buffer or the mask's size differs from the pixels'.
+    /// its texture from (x + dx, y + dy). Covered pixels whose source lies
+    /// off the buffer are skipped and stay as they are, so a stroke that runs
+    /// past the edge heals the rest. Throws when the mask's size differs from
+    /// the pixels'.
     public static func heal(_ pixels: PixelBuffer, through coverage: Mask, sourceOffset: (dx: Int, dy: Int)) throws -> PixelBuffer {
-        try pixels.healed(offset: (dx: sourceOffset.dx, dy: sourceOffset.dy), through: coverage)
+        var reachable = coverage
+        try reachable.intersect(sourceOnCanvas(width: pixels.width, height: pixels.height, offset: sourceOffset))
+        guard reachable.coveredBounds != nil else { return pixels }
+        return try pixels.healed(offset: (dx: sourceOffset.dx, dy: sourceOffset.dy), through: reachable)
+    }
+
+    /// The `width` x `height` mask covering exactly the pixels whose source,
+    /// `offset` away, lies on the buffer. An offset past the buffer's size
+    /// covers nothing.
+    static func sourceOnCanvas(width: Int, height: Int, offset: (dx: Int, dy: Int)) throws -> Mask {
+        let dx = min(max(offset.dx, -width), width), dy = min(max(offset.dy, -height), height)
+        let x0 = max(0, -dx), x1 = min(width, width - dx)
+        let y0 = max(0, -dy), y1 = min(height, height - dy)
+        return try Mask.rectangle(width: width, height: height, x: Double(x0), y: Double(y0),
+                                  w: Double(max(0, x1 - x0)), h: Double(max(0, y1 - y0)))
     }
 
     /// `pixels` with what `coverage` covers, grown by about 2 px so no edge

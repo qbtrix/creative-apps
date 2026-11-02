@@ -7,11 +7,23 @@
 // popover's open state is presentation state.
 // HS-3: an option turns the tool on (HaloShapeDrawing); a viewer drag then
 // sets its draft, which only HaloShapeDraftView reads, and the release draws once.
+// HaloTool names the viewer's two canvas gestures as palette tools (the plain
+// viewer drag moves a layer; Shape draws one), so Halo declares each tool's
+// ToolGesture like every app; the Shape button takes its face from it.
 import HaloModel
 import Observation
 import SuiteKernel
 import SuiteUI
 import SwiftUI
+
+/// The viewer's canvas tools: a plain drag moves the layer under it; with Shape on it draws one.
+enum HaloTool: String, CaseIterable, PaletteTool {
+    case move, shape
+    var title: String { self == .move ? "Move" : "Shape" }
+    var systemImage: String { self == .move ? "cursorarrow" : "star" }
+    var unavailableHelp: String? { nil }
+    var gesture: ToolGesture { self == .move ? .movesContent : .creates }
+}
 
 struct HaloShapeTool: View {
     let model: HaloProject
@@ -23,7 +35,7 @@ struct HaloShapeTool: View {
     /// The button, off with the Model's reason while it can't draw.
     nonisolated static func action(_ model: HaloProject, isOn: Bool = false, perform: @escaping @MainActor () -> Void) -> ToolbarAction {
         ToolbarAction(
-            "Shape", systemImage: "star", isSelected: isOn, unavailableHelp: model.shapeHelp, identifier: "halo.viewer.shape",
+            HaloTool.shape.title, systemImage: HaloTool.shape.systemImage, isSelected: isOn, unavailableHelp: model.shapeHelp, identifier: "halo.viewer.shape",
             perform: perform)
     }
 

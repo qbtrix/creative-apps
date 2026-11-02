@@ -44,11 +44,11 @@ extension HaloProject {
     }
 
     /// Every key of the selected composition's animated tracks: layers top
-    /// first, then `HaloProperty.allCases` order, then by frame.
+    /// first, then `HaloProperty.keyable` order, then by frame.
     var compositionKeys: [HaloKeyRef] {
         let layers = selectedComposition?.layers ?? []
         return layers.flatMap { layer in
-            HaloProperty.allCases.flatMap { property -> [HaloKeyRef] in
+            HaloProperty.keyable.flatMap { property -> [HaloKeyRef] in
                 guard let track = layer.tracks[property.rawValue], track.count >= 2 else { return [] }
                 return track.map(\.frame).sorted().map { HaloKeyRef(layerID: layer.id, property: property, frame: $0) }
             }

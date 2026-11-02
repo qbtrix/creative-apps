@@ -276,6 +276,12 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         get { extras.value.shape }
         set { extras.value.shape = newValue }
     }
+    /// Keyed properties (DesignNodeTime.swift); nil for a still node, and a time with no keys is stored as nil, so a
+    /// still node saves with no `time` key. Boxed with the extras, so `init(id:copying:)` copies it.
+    public var time: DesignNodeTime? {
+        get { extras.value.time }
+        set { extras.value.time = newValue?.isEmpty == true ? nil : newValue }
+    }
     /// The stroke, gradient, shape spec and picture, on the heap so a node stays small on a thread's stack (DesignNodeExtras).
     private var extras = DesignNodeExtrasBox()
 
@@ -332,6 +338,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         flipX = try container.decodeIfPresent(Bool.self, forKey: .flipX) ?? false
         flipY = try container.decodeIfPresent(Bool.self, forKey: .flipY) ?? false
         if let shape = try container.decodeIfPresent(ShapeSpec.self, forKey: .shape) { self.shape = shape }
+        if let time = try container.decodeIfPresent(DesignNodeTime.self, forKey: .time) { self.time = time }
     }
 
     /// The stroke as saved now (the kernel's), else as a file written before stroke-style saved it: a colour in
@@ -347,7 +354,7 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
     /// The file's keys, one per stored field.
     enum CodingKeys: String, CodingKey {
         case id, name, kind, frame, children, isHidden, isLocked, fill, text, cornerRadius, opacity, stroke, textStyle
-        case gradient, placedAsset, placedFocus, rotation, flipX, flipY, shape
+        case gradient, placedAsset, placedFocus, rotation, flipX, flipY, shape, time
     }
 
     /// Encodes a node as before transforms, adding the turn, each mirror, a shape's spec, a picture and a moved
@@ -374,13 +381,32 @@ public struct DesignNode: Identifiable, Sendable, Hashable, Codable {
         if flipX { try container.encode(flipX, forKey: .flipX) }
         if flipY { try container.encode(flipY, forKey: .flipY) }
         try container.encodeIfPresent(shape, forKey: .shape)
+        try container.encodeIfPresent(time, forKey: .time)
     }
 
-    /// Shifts this node and everything under it by `delta`.
-    mutating func translate(by delta: DesignPoint) {
+    /// Shifts this node and everything under it by `delta`. Only frames move unless `carryingKeys`: then each keyed
+    /// node's x and y keys move too, so its animation shows at the same offset at every frame (duplicate, paste and
+    /// rest-pose moves). The sampled tree and scratch copies move frames only.
+    mutating func translate(by delta: DesignPoint, carryingKeys: Bool = false) {
         frame.x += delta.x
         frame.y += delta.y
-        for index in children.indices { children[index].translate(by: delta) }
+        if carryingKeys, let time { self.time = time.translated(by: delta) }
+        for index in children.indices { children[index].translate(by: delta, carryingKeys: carryingKeys) }
+    }
+}
+
+extension DesignNodeTime {
+    /// These keys moved by `delta`: every x key by its x, every y key by its y; opacity keys are unchanged.
+    public func translated(by delta: DesignPoint) -> DesignNodeTime {
+        var time = self
+        for (property, by) in [(DesignKeyProperty.x, delta.x), (.y, delta.y)] where by != 0 {
+            time.tracks[property] = time.tracks[property]?.map { key in
+                var key = key
+                key.value += by
+                return key
+            }
+        }
+        return time
     }
 }
 
@@ -393,12 +419,28 @@ public struct DesignRow: Identifiable, Sendable, Hashable {
 }
 
 /// Why a tree or page edit was refused.
-public enum DesignTreeError: Error, Equatable, Sendable {
+public enum DesignTreeError: Error, Equatable, Sendable, CustomStringConvertible {
     case unknownID(String), notAContainer(String), intoItself(String)
     case emptyName, lastPage, alreadyExists(String)
     case locked(String), notText(String), emptyText
     /// The node's kind has no corners to round (DesignCorners).
     case noCorners(String)
+
+    /// Plain words for a command catalog's refusal (the CLI, MCP), never the case name.
+    public var description: String {
+        switch self {
+        case .unknownID(let id): DesignRefusal.unknownID(id).help
+        case .notAContainer(let id): DesignRefusal.notAContainer(id).help
+        case .intoItself(let id): DesignRefusal.intoItself(id).help
+        case .emptyName: DesignRefusal.emptyName.help
+        case .lastPage: "A file keeps at least one page."
+        case .alreadyExists(let id): "\(id) is already in this file."
+        case .locked(let id): DesignRefusal.locked(id).help
+        case .notText(let id): DesignRefusal.notText(id).help
+        case .emptyText: "Text can't be empty."
+        case .noCorners(let id): DesignRefusal.noCorners(id).help
+        }
+    }
 }
 
 /// Modifier keys that change a drag: Shift constrains (square, aspect), Option works from the center.
@@ -456,6 +498,16 @@ extension [DesignNode] {
         return nil
     }
 
+    /// Whether `id` or a node enclosing it passes `test`, in one walk that copies nothing; nil when
+    /// `id` is not in the tree. The lock and hide cascades read it on every drag step.
+    func onPath(to id: String, where test: (DesignNode) -> Bool) -> Bool? {
+        for node in self {
+            if node.id == id { return test(node) }
+            if let found = node.children.onPath(to: id, where: test) { return found || test(node) }
+        }
+        return nil
+    }
+
     /// The ids of the nodes enclosing `id`, outermost first; nil when `id` is not in the tree.
     func ancestors(of id: String) -> [String]? {
         for node in self {
@@ -463,6 +515,23 @@ extension [DesignNode] {
             if let path = node.children.ancestors(of: id) { return [node.id] + path }
         }
         return nil
+    }
+
+    /// The ids of every node that encloses any of `ids`, in one walk of the tree, however many
+    /// ids there are (a marquee or a duplicate of thousands of layers asks for them all at once).
+    func ancestors(ofAny ids: Set<String>) -> Set<String> {
+        var found = Set<String>(), path: [String] = []
+        func walk(_ nodes: [DesignNode]) {
+            for node in nodes {
+                if ids.contains(node.id) { found.formUnion(path) }
+                guard !node.children.isEmpty else { continue }
+                path.append(node.id)
+                walk(node.children)
+                path.removeLast()
+            }
+        }
+        walk(self)
+        return found
     }
 
     /// Applies `change` to the node with `id`; returns whether it was found.

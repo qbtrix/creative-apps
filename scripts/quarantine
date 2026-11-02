@@ -1,28 +1,34 @@
 #!/usr/bin/env bash
-# scripts/quarantine: the journey quarantine, UITests/quarantine.json. Each
-# entry skips one UI journey that fails on dev for a known reason while its
-# owner fixes it:
-#   {"test": "Target/Class/testName", "owner": "#<open issue>",
-#    "reason": "why it fails", "expires": "YYYY-MM-DD", "scope": "all"|"full"}
-# scope is optional: `all` (the default) skips the journey in every run;
-# `full` skips it only in full runs, so a scoped run (journeys.yml's `app`)
-# still runs it and its owner keeps the proof while main can promote. An
-# entry is live while TODAY is before its expires date; from that day on the
-# journey runs again and `check` fails until the entry is renewed or removed.
-# The file is PROTECTED (scripts/fast-lane.sh), so only the supervisor
-# quarantines.
+# scripts/quarantine: the test quarantine, UITests/quarantine.json. Each entry
+# skips one test that fails on dev for a known reason while its owner fixes it:
+#   {"test": <id>, "owner": "#<open issue>", "reason": "why it fails",
+#    "expires": "YYYY-MM-DD", "scope": "all"|"full", "lane": {...}}
+# test is a UI journey, Target/Class/testName (scripts/ui-test skips it with
+# -skip-testing), or a swift test in Tests/perf-suites.txt's form,
+# Target.Suite/test or Target.freeTest (scripts/ci skips it through `skip`).
+# scope (journeys only) is optional: `all` (the default) skips the journey in
+# every run; `full` only in full runs, so a scoped run (journeys.yml's `app`)
+# still runs it. An entry is live while TODAY is before its expires date; from
+# that day on the test runs again and `check` fails until the entry is renewed
+# or removed. The file is PROTECTED (scripts/fast-lane.sh): the supervisor
+# edits it by hand, and the fast lane adds and removes its own entries, each
+# with a `lane` block {red: "#<dev-red issue>", range: "main..<sha>", until:
+# "<ISO timestamp>"} (docs/fast-lane.md, "Auto-quarantine"). A lane entry
+# never un-quarantines into a red: past its expiry, or with a closed owner, it
+# stays live and `check` passes with a note, since the lane labels the owner a
+# blocker and opens the PR that removes the entry itself.
 #
-#   check [FILE [TODAY]]  fails on an expired entry, an expiry more than 7
+#   check [FILE [TODAY]]  fails on an expired hand entry, an expiry more than 7
 #                         days after TODAY, an owner that isn't #<number>, an
-#                         empty reason, a scope other than all or full, or a
-#                         test that isn't in UITests/ (the folder FILE sits
-#                         in). With gh, it also fails when an owner issue is
-#                         closed or missing; without gh, or when gh can't
-#                         reach GitHub, it prints SKIP for that part.
-#                         scripts/ci runs it.
-#   live [FILE [TODAY]]   prints each live entry as
-#                         test<TAB>owner<TAB>expires<TAB>scope<TAB>reason.
-#                         scripts/ui-test skips these with -skip-testing.
+#                         empty reason, a scope other than all or full, a lane
+#                         block without red and until, or a test that isn't in
+#                         UITests/ or Tests/ (beside FILE's folder). With gh, a
+#                         closed or missing owner fails a hand entry; without
+#                         gh, or when gh can't reach GitHub, it prints SKIP.
+#   live [FILE [TODAY]]   each live journey as test<TAB>owner<TAB>expires<TAB>scope<TAB>reason.
+#   skip [FILE [TODAY]]   the live swift tests as one swift-testing --skip regex
+#                         (^(id|id)(/|\()); nothing when there are none.
+#   release [FILE]        fails while any lane entry is in: a release gate.
 # Defaults: UITests/quarantine.json and today's UTC date. Needs jq. Tested by
 # Tests/quarantine. bash 3.2 compatible.
 set -uo pipefail
@@ -31,33 +37,49 @@ mode=${1:-}
 file=${2:-"$(cd "$(dirname "$0")/.." && pwd)/UITests/quarantine.json"}
 today=${3:-$(date -u +%Y-%m-%d)}
 REPO="${GH_REPO:-qbtrix/creative-apps}"
-[[ "$mode" == check || "$mode" == live ]] || { echo "usage: scripts/quarantine check|live [FILE [TODAY]]" >&2; exit 2; }
+case "$mode" in check|live|skip|release) ;; *) echo "usage: scripts/quarantine check|live|skip|release [FILE [TODAY]]" >&2; exit 2 ;; esac
 jq -e 'type == "array"' "$file" >/dev/null 2>&1 || { echo "$file: not a JSON array of entries" >&2; exit 1; }
+JOURNEY='^[A-Za-z0-9_]+/[A-Za-z0-9_]+/test[A-Za-z0-9_]+$'
+SWIFT='^[A-Za-z0-9_]+\.[A-Za-z0-9_]+(/[A-Za-z0-9_]+){0,2}$'
+# A lane entry stays live past its expiry (the lane removes it; see the header).
+LIVE='select(.expires > $today or (.lane | type) == "object")'
 
-if [[ "$mode" == live ]]; then
-  jq -r --arg today "$today" '.[] | select(.expires > $today) | [.test, .owner, .expires, .scope // "all", .reason] | @tsv' "$file"
-  exit
-fi
+case "$mode" in
+  live) jq -r --arg today "$today" --arg j "$JOURNEY" ".[] | select(.test | strings | test(\$j)) | $LIVE | [.test, .owner, .expires, .scope // \"all\", .reason] | @tsv" "$file"; exit ;;
+  skip) jq -r --arg today "$today" --arg s "$SWIFT" '[.[] | select(.test | strings | test($s)) | select(.expires > $today or (.lane | type) == "object")
+    | .test | gsub("\\."; "\\.")] | if length == 0 then "" else "^(" + join("|") + ")(/|\\()" end' "$file"; exit ;;
+  release)
+    lane=$(jq -r '[.[] | select((.lane | type) == "object") | "\(.test) (owner \(.owner), until \(.lane.until))"] | if length == 0 then "" else "\(length)\t" + join("; ") end' "$file")
+    [[ -n "$lane" ]] || { echo "release: no lane quarantine entries"; exit 0; }
+    n="${lane%%	*}"; s=ies; (( n != 1 )) || s=y
+    echo "release: $n lane quarantine entr$s still skips a test: ${lane#*	}; fix it or let the supervisor own it before a release"
+    exit 1 ;;
+esac
 
 # Field checks in jq: one "test: why" line per problem. Noon keeps a
 # timezone-buggy mktime from moving the date.
 max=$(jq -rn --arg d "$today" '$d + "T12:00:00Z" | fromdate + 7 * 86400 | strftime("%Y-%m-%d")') || exit 1
-problems=$(jq -r --arg today "$today" --arg max "$max" '.[] | (.test // "(no test)" | tostring) as $t |
-  (if (.test | type) == "string" and (.test | test("^[A-Za-z0-9_]+/[A-Za-z0-9_]+/test[A-Za-z0-9_]+$")) then empty
-   else "\($t): test must be Target/Class/testName" end),
+problems=$(jq -r --arg today "$today" --arg max "$max" --arg j "$JOURNEY" --arg s "$SWIFT" '.[] | (.test // "(no test)" | tostring) as $t |
+  ((.lane | type) == "object") as $lane |
+  (if (.test | type) == "string" and ((.test | test($j)) or (.test | test($s))) then empty
+   else "\($t): test must be Target/Class/testName (a journey) or Target.Suite/test (a swift test)" end),
   (if (.owner | type) == "string" and (.owner | test("^#[0-9]+$")) then empty
    else "\($t): owner must be an open issue, #<number>" end),
   (if (.reason | type) == "string" and (.reason | test("[^[:space:]]")) then empty
    else "\($t): reason is empty: say why it fails" end),
   (if (.expires | type) != "string" or (.expires | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}$") | not) then
      "\($t): expires must be YYYY-MM-DD"
-   elif .expires <= $today then "\($t): expired on \(.expires): fix it, or renew with a new date and reason"
+   elif .expires <= $today and ($lane | not) then "\($t): expired on \(.expires): fix it, or renew with a new date and reason"
    elif .expires > $max then "\($t): expires \(.expires), more than 7 days out (latest \($max))"
    else empty end),
   (if (.scope // "all") == "all" or .scope == "full" then empty
-   else "\($t): scope must be all or full (full: skipped in full runs only)" end)' "$file") || exit 1
+   else "\($t): scope must be all or full (full: skipped in full runs only)" end),
+  (if (.lane == null) or ($lane and ((.lane.red // "") | tostring | test("^#[0-9]+$")) and ((.lane.until // "") | tostring | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:]{8}Z$"))) then empty
+   else "\($t): a lane entry needs lane.red (#<dev-red issue>) and lane.until (an ISO timestamp)" end)' "$file") || exit 1
+notes=$(jq -r --arg today "$today" '.[] | select((.lane | type) == "object" and .expires <= $today)
+  | "note: \(.test): the lane quarantine expired \(.lane.until) and \(.owner) is still open, so \(.owner) is a blocker (scripts/fast-lane.sh labels it)"' "$file")
 
-# Each test must exist: UITests/<Target>.swift is the target's main file, and
+# Each journey must exist: UITests/<Target>.swift is the target's main file, and
 # one of its files declares or extends Class and defines func testName(.
 dir=$(dirname "$file")
 while IFS=/ read -r target class name; do
@@ -71,9 +93,26 @@ while IFS=/ read -r target class name; do
     done
   fi
   [[ -n "$found" ]] || problems+="${problems:+$'\n'}$target/$class/$name: no such test in $dir"
-done < <(jq -r '.[].test | strings | select(test("^[A-Za-z0-9_]+/[A-Za-z0-9_]+/test[A-Za-z0-9_]+$"))' "$file")
+done < <(jq -r --arg j "$JOURNEY" '.[].test | strings | select(test($j))' "$file")
 
-# Each owner issue must be open: needs gh and GitHub.
+# Each swift test must exist under Tests/<Target> (the way Tests/test_scope
+# checks the perf list): every suite part a struct/enum/class/actor, the last
+# part a func of the suite before it, or a free func for Target.freeTest.
+tests="$dir/../Tests"
+while IFS=. read -r target rest; do
+  [[ -n "$target" && -n "$rest" ]] || continue
+  found=1; dirt="$tests/$target"
+  IFS=/ read -r p1 p2 p3 <<<"$rest"
+  if [[ -z "$p2" ]]; then grep -rqE "(struct|func)[[:space:]]+${p1}[[:space:](<:{]" "$dirt" 2>/dev/null || found=""
+  else
+    last="$p1"; for p in $p2 ${p3:-}; do [[ -z "$p" ]] || { grep -rqE "(struct|enum|class|actor)[[:space:]]+${last}[[:space:]:{<(]" "$dirt" 2>/dev/null || found=""; last="$p"; }; done
+    grep -rqE "(struct|enum|class|actor|func)[[:space:]]+${last}[[:space:]:{<(]" "$dirt" 2>/dev/null || found=""
+  fi
+  [[ -n "$found" ]] || problems+="${problems:+$'\n'}$target.$rest: no such test in $(cd "$tests" 2>/dev/null && pwd || echo "$tests")"
+done < <(jq -r --arg s "$SWIFT" '.[].test | strings | select(test($s))' "$file")
+
+# Each owner issue must be open: needs gh and GitHub. A lane entry's closed
+# owner is a note: the lane opens the PR that removes it.
 owners=$(jq -r '[.[].owner | strings | select(test("^#[0-9]+$"))] | unique | .[]' "$file")
 if [[ -n "$owners" ]]; then
   if ! command -v gh >/dev/null 2>&1; then
@@ -84,7 +123,12 @@ if [[ -n "$owners" ]]; then
         if [[ "$state" == *"Could not resolve"* ]]; then state=MISSING
         else echo "SKIP owner issues not checked: gh can't read $o from $REPO"; break; fi
       fi
-      [[ "$state" == OPEN ]] || problems+="${problems:+$'\n'}owner $o is $state, not open: remove its entries or name an open owner"
+      [[ "$state" != OPEN ]] || continue
+      hand=$(jq -r --arg o "$o" '.[] | select(.owner == $o and (.lane | type) != "object") | .test' "$file")
+      if [[ -n "$hand" ]]; then problems+="${problems:+$'\n'}owner $o is $state, not open: remove its entries or name an open owner"; fi
+      lane_notes=$(jq -r --arg o "$o" --arg st "$state" '.[] | select(.owner == $o and (.lane | type) == "object")
+        | "note: \(.test): its owner \($o) is \($st); the lane opens the PR that removes this entry"' "$file")
+      [[ -z "$lane_notes" ]] || notes+="${notes:+$'\n'}$lane_notes"
     done
   fi
 fi
@@ -93,7 +137,10 @@ if [[ -n "$problems" ]]; then
   echo "$problems"
   exit 1
 fi
+[[ -z "$notes" ]] || echo "$notes"
 full=$(jq '[.[] | select(.scope == "full")] | length' "$file")
+lane=$(jq '[.[] | select((.lane | type) == "object")] | length' "$file")
 note=""
 (( full == 0 )) || note=", $full skipped in full runs only"
+(( lane == 0 )) || note+=", $lane by the lane"
 echo "$(jq length "$file") quarantined, all owned and unexpired$note"

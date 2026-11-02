@@ -9,7 +9,7 @@
 // document as it was at the start, so nothing drifts, and `endDrag` records the
 // one undo step. A click is a drag that never moves.
 //
-//   move    a press on a handle of the selected node resizes it (Shift keeps the
+//   move    Design's one pointer tool (V), its Select: a press on a handle of the selected node resizes it (Shift keeps the
 //           aspect, Option works from the center; a small node shows only its
 //           corners, outside it, and a press inside it moves it); otherwise it selects the node
 //           under the pointer (none deselects) and a drag moves it with its
@@ -75,7 +75,8 @@ struct DesignGesture: Sendable, Equatable {
         case move(String)
         /// Resize the node by the drag from the frame it had at the start.
         case resize(String, DesignHandle, DesignRect)
-        /// Select what `services.marquee` picks among the children of this frame (nil: the top level).
+        /// Select what `services.marquee` picks among the children of this frame (nil: the top level), through
+        /// SuiteKernel's shared `SelectTool.box`.
         case marquee(String?)
         /// Move these selected layers through `services.transforming`.
         case moveSeveral([String])
@@ -100,6 +101,8 @@ struct DesignGesture: Sendable, Equatable {
     var before: DesignSnapshot
     /// Whether the node under a Move press was already selected before it.
     var wasSelected: Bool
+    /// The layer a press on one of several selected hit: a release without a move picks it alone.
+    var pressed: String?
     /// Whether any call left the start.
     var moved = false
     /// The undo history at the start; a service step puts it back before it applies.
@@ -109,9 +112,9 @@ struct DesignGesture: Sendable, Equatable {
 }
 
 extension DesignWorkspace {
-    /// The topmost visible, unlocked node on the selected page under `point`.
+    /// The topmost visible, unlocked node on the shown page (`shownPage`) under `point`.
     public func hitTest(_ point: DesignPoint) -> String? {
-        selectedPage?.nodes.hit(at: point)
+        shownPage?.nodes.hit(at: point)
     }
 
     /// The handle of the selected node outside any lock and any hidden group (the canvas draws no
@@ -121,7 +124,8 @@ extension DesignWorkspace {
     /// a handle: its handles sit outside it, so the press moves it. `point` is taken into the node's
     /// unturned frame first, so a turned node's handles, knob included, hit where they show.
     public func handle(at point: DesignPoint) -> DesignHandle? {
-        guard !hasMultipleSelection, let node = selectedNode, !isLockedInTree(node.id), !isHiddenInTree(node.id)
+        guard !hasMultipleSelection, let id = selectedNodeID, let node = shownPage?.nodes.node(id),
+            !isLockedInTree(node.id), !isHiddenInTree(node.id)
         else { return nil }
         let local = TransformRules.local(Point(x: point.x, y: point.y), in: node.transformBox)
         return handle(on: node.frame, at: DesignPoint(x: local.x, y: local.y))
@@ -174,7 +178,7 @@ extension DesignWorkspace {
         let step = Nudge.delta(direction.kernel, large: shift)
         let delta = DesignPoint(x: step.x, y: step.y)
         // A locked node is refused and stays put; the selection's id always exists.
-        try? editNode(id, named: "Nudge", coalescing: Nudge.runKey("nudge", [id])) { $0.translate(by: delta) }
+        try? editNode(id, named: "Nudge", coalescing: Nudge.runKey("nudge", [id])) { [playhead] in $0 = $0.moved(by: delta, at: playhead) }
     }
 
     /// Drags `handle` of a node's frame by `delta` (see DesignRect.resized). Children stay where
@@ -216,10 +220,11 @@ extension DesignWorkspace {
         case .move(let id):
             restorePages(current.before)
             current.guides = .empty
-            guard current.moved, let frame = selectedPage?.nodes.node(id)?.frame else { break }
-            // Snap first, whole points second (DesignWholePoints).
+            guard current.moved, let frame = shownPage?.nodes.node(id)?.frame else { break }
+            // The box as it shows snaps first, whole points second (DesignWholePoints); a keyed axis keys at the
+            // playhead (LiveKeying).
             let moveBy = frame.wholeDelta(snapMove(delta, box: frame, modifiers: modifiers, current))
-            _ = pages.update(id) { $0.translate(by: moveBy) }
+            _ = pages.update(id) { [playhead] in $0 = $0.moved(by: moveBy, at: playhead) }
             current.guides = landedGuides(frame, by: moveBy, modifiers: modifiers, current)
         case .resize(let id, let handle, let original):
             restorePages(current.before)
@@ -235,13 +240,13 @@ extension DesignWorkspace {
             _ = pages.update(id) { $0.frame = frame }
             current.guides = landedGuides(on: frame, modifiers: modifiers, current)
         case .marquee(let parent):
-            guard current.moved, let page = selectedPage else { break }
+            guard current.moved, let page = shownPage else { break }
             let box = Marquee.rect(enclosing: Point(x: current.start.x, y: current.start.y), Point(x: end.x, y: end.y))
             let rect = DesignRect(x: box.minX, y: box.minY, width: box.maxX - box.minX, height: box.maxY - box.minY)
             marquee = rect
             let found = services.marquee.layers(touching: rect, in: parent, on: page)
-            selectedNodeIDs = Marquee.union(selectedNodeIDs, found, extending: false)
-            for id in selectedNodeIDs { expandAncestors(of: id, in: page.nodes) }
+            selectedNodeIDs = SelectTool.box(selection, found: found, extending: false).ordered
+            expandAncestors(of: selectedNodeIDs, in: page.nodes)
         case .moveSeveral, .resizeSeveral, .optionCopy, .turn:
             applyStep(&current, delta: delta, modifiers: modifiers)
         case .draw(let kind):
@@ -270,13 +275,15 @@ extension DesignWorkspace {
         current.guides = .empty
         guard current.moved, let page = selectedPage else { return }
         let transforming = services.transforming
-        // A move snaps the selection box, then lands its top-left on a whole point (DesignWholePoints).
-        let bounds = selectionBounds
+        // A move snaps the selection box as it shows, then lands its top-left on a whole point (DesignWholePoints);
+        // a resize keeps the rest box, as it writes the rest pose.
+        let resizing = if case .resizeSeveral = current.route { true } else { false }
+        let bounds = resizing ? selectionBounds : shownSelectionBounds
         let moveBy = bounds?.wholeDelta(snapMove(delta, box: bounds, modifiers: modifiers, current)) ?? delta
         do throws(DesignRefusal) {
             switch current.route {
             case .moveSeveral(let ids):
-                apply(try transforming.move(ids, by: moveBy, on: page))
+                apply(try transforming.move(ids, by: moveBy, on: page, at: playhead))
             case .resizeSeveral(let ids, let handle):
                 let snapped = snapResize(delta, box: bounds, handle: handle, modifiers: modifiers, current)
                 apply(try transforming.resize(ids, handle: handle, by: snapped, modifiers: modifiers, on: page))
@@ -310,7 +317,7 @@ extension DesignWorkspace {
         } catch {
             return
         }
-        current.guides = landedGuides(on: selectionBounds, modifiers: modifiers, current)
+        current.guides = landedGuides(on: resizing ? selectionBounds : shownSelectionBounds, modifiers: modifiers, current)
     }
 
     /// Turns every selected layer by `degrees` about its own centre as one "Rotate" step (#4224); a layer
@@ -412,13 +419,13 @@ extension DesignWorkspace {
         switch current.route {
         case .move(let id), .resize(let id, _, _): moving = [id]
         case .moveSeveral(let ids), .optionCopy(let ids, _), .resizeSeveral(let ids, _): moving = ids
-        case .draw, .shape, .text: parent = selectedPage?.nodes.deepestFrame(containing: current.start)
+        case .draw, .shape, .text: parent = shownPage?.nodes.deepestFrame(containing: current.start)
         default: return
         }
         var candidates = snapCandidates(moving: moving, drawingInto: parent)
         // A draw outside every frame lines up with the page's top level, which the kernel's
         // candidates give only for a moving layer there.
-        if moving.isEmpty, parent == nil, let page = selectedPage {
+        if moving.isEmpty, parent == nil, let page = shownPage {
             let roots = page.nodes.filter { !$0.isHidden }.map { DesignSnapCandidate(id: $0.id, frame: $0.frame.snapRect) }
             candidates.insert(contentsOf: roots, at: 0)
         }
@@ -451,7 +458,10 @@ extension DesignWorkspace {
         case .marquee(let frame):
             // A click without moving: the frame's background selects it; outside, nothing.
             if !done.moved, let frame { selectItem(frame) }
-        case .moveSeveral, .resizeSeveral, .optionCopy, .turn:
+        case .moveSeveral:
+            // A click on one of several selected picks it alone; a drag moved them all.
+            if !done.moved, let id = done.pressed { selectItem(id) }
+        case .resizeSeveral, .optionCopy, .turn:
             break
         case .draw(let kind):
             record("Add \(kind.defaultName)", before: done.before)
@@ -477,6 +487,7 @@ extension DesignWorkspace {
         let (shift, option) = (modifiers.contains(.shift), modifiers.contains(.option))
         var route = DesignGesture.Route.none
         var wasSelected = false
+        var pressed: String?
         let ids = selectedNodeIDs
         switch tool {
         case .move:
@@ -497,6 +508,7 @@ extension DesignWorkspace {
                 route = .optionCopy(ids, mint())
             } else if let id = hit, ids.contains(id), ids.count > 1 {
                 route = .moveSeveral(ids)
+                pressed = id
             } else if let id = hit, !ids.contains(id), selectedPage?.nodes.node(id)?.kind == .frame {
                 route = .marquee(id)
             } else if let id = hit {
@@ -518,7 +530,8 @@ extension DesignWorkspace {
         case .pen:
             break
         }
-        var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected, history: history)
+        var gesture = DesignGesture(route: route, start: start, before: snapshot, wasSelected: wasSelected,
+                                    pressed: pressed, history: history)
         buildSnap(&gesture)
         return gesture
     }

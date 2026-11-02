@@ -1,12 +1,14 @@
 // HaloJourneyTests+FileFlow.swift: HFJ1 (packet docs/blueprints/halo/features/file-flow.md, Journey steps;
-// HF-6 written and skipped, HF-7 turns it on live). Halo launches on the suite's `weekOfWork` store with
+// HF-6 written, HF-7 on live). Halo launches on the suite's `weekOfWork` store with
 // Intro.halo open:
 // 1. File > Open Recent ▸ lists Intro.halo and no other app's documents.
-// 2. Promo.halo dropped on the viewer opens in a new window.
-// 3. Sunset.png dropped on the viewer: the mark says what Halo's drop rule makes of it (Halo places no
-//    images until S20) and no Halo window opens.
-// 4. Bounce.flare dropped on the viewer: a composition with the scene, as Open In ▸ Halo makes, in this
-//    window.
+// 2. Promo.halo dropped on the viewer opens in this window (the host sends `.openRecent`, which asks
+//    about unsaved changes first; Intro.halo has none), so no window is added.
+// 3. Sunset.png dropped on the canvas: placed-images' PH-3 places it, or off the canvas it goes to Photo;
+//    either way no Halo window opens.
+// 4. Bounce.flare dropped on the viewer: Flare reads it and Halo doesn't yet (flare-in-halo adds that),
+//    so the mark says "Open in Flare", the file goes to Flare (rule 20: the existing hand-off), and
+//    Halo opens no window.
 // The files are dragged from a small floating window the test runner shows, as a person drags from a
 // folder window (`dragFile`, Journey+FileDrag.swift). Every file lives in this test's own temp folder;
 // Promo.halo is a copy of the suite's Intro.halo. One shot per step, `halo-file-flow-<step>`.
@@ -23,9 +25,8 @@ final class HaloFileFlowJourneyTests: XCTestCase {
     /// weekOfWork's files of other apps, which Halo's Open Recent never lists.
     private static let others = ["Logo.design", "Cards.design", "Bounce.flare", "Title.flare", "beach.ora", "Sunset.png"]
 
-    /// HFJ1: Open Recent lists Halo's files; a .halo drop opens, a PNG is refused, a .flare comes in as a scene.
+    /// HFJ1: Open Recent lists Halo's files; a .halo drop opens here, a PNG places, a .flare goes to Flare.
     @MainActor func testOpenRecentAndDrop() throws {
-        throw XCTSkip("waits on HF-7")
         let folder = FileManager.default.temporaryDirectory.appending(path: "halo-file-flow-\(UUID().uuidString)")
         let support = folder.appending(path: "Support")
         try FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
@@ -60,26 +61,27 @@ final class HaloFileFlowJourneyTests: XCTestCase {
         halo.press(.escape)
         halo.press(.escape)
 
-        // 2. Promo.halo dropped on the viewer: it opens in a new window.
+        // 2. Promo.halo dropped on the viewer: it opens in this window.
         let windows = halo.app.windows.count
         dragFile(folder.appending(path: "Promo.halo"), onto: viewer)
-        XCTAssert(halo.app.windows["Promo"].waitForExistence(timeout: 15), "dropping Promo.halo opened no Promo window")
-        XCTAssertEqual(halo.app.windows.count, windows + 1, "Promo.halo didn't open in a window of its own")
+        XCTAssert(halo.app.windows["Promo"].waitForExistence(timeout: 15), "dropping Promo.halo didn't open Promo")
+        XCTAssertEqual(halo.app.windows.count, windows, "Promo.halo opened another window instead of this one")
         halo.shot("file-flow-2-dropped-halo")
 
-        // 3. Sunset.png: Halo places no images yet, so the mark says where it goes, and no Halo window opens.
+        // 3. Sunset.png on the canvas: PH-3 places it there, and no Halo window opens.
         let front = halo.element("halo.viewer")
         dragFile(folder.appending(path: "Sunset.png"), onto: front)
-        let mark = halo.app.descendants(matching: .any)[Self.dropMark]
-        XCTAssert(mark.waitForExistence(timeout: 5), "dropping Sunset.png showed no mark")
         halo.shot("file-flow-3-png")
-        XCTAssertEqual(halo.app.windows.count, windows + 1, "dropping Sunset.png opened a Halo window")
+        XCTAssertEqual(halo.app.windows.count, windows, "dropping Sunset.png opened a Halo window")
 
-        // 4. Bounce.flare: a composition with the scene in the front window, as Open In ▸ Halo makes.
+        // 4. Bounce.flare: Halo hands it to Flare, so the mark says so and no Halo window opens.
         dragFile(folder.appending(path: "Bounce.flare"), onto: front)
-        XCTAssert(halo.app.descendants(matching: .any)["Bounce"].waitForExistence(timeout: 15),
-                  "dropping Bounce.flare made no Bounce composition")
-        XCTAssertEqual(halo.app.windows.count, windows + 1, "Bounce.flare opened a window instead of a composition")
-        halo.shot("file-flow-4-flare-scene")
+        let mark = halo.app.descendants(matching: .any)[Self.dropMark]
+        XCTAssert(mark.waitForExistence(timeout: 5), "dropping Bounce.flare showed no mark")
+        let toFlare = NSPredicate(format: "label == %@", "Open in Flare")
+        XCTAssertEqual(XCTWaiter.wait(for: [expectation(for: toFlare, evaluatedWith: mark)], timeout: 5), .completed,
+                       "dropping Bounce.flare didn't say it opens in Flare")
+        XCTAssertEqual(halo.app.windows.count, windows, "Bounce.flare opened a Halo window")
+        halo.shot("file-flow-4-flare-hand-off")
     }
 }

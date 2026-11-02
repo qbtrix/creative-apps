@@ -40,5 +40,26 @@
     "find": "guard let extent, extent.width.isFinite, extent.height.isFinite else",
     "replace": "guard let extent else",
     "tests": "DesignTextFitTests"
+  },
+  {
+    "label": "a style fit records its own step instead of joining the style's (#3339)",
+    "file": "Sources/DesignModel/DesignText.swift",
+    "find": "record(\"Change Text Style\", before: before, coalescing: DesignEdit.runKey(\"text-style\", selectedNodeIDs))",
+    "replace": "record(\"Change Text Style\", before: before)",
+    "tests": "DesignTextFitTests"
+  },
+  {
+    "label": "a style fit reaches unselected layers (#3339)",
+    "file": "Sources/DesignModel/DesignText.swift",
+    "find": "for id in selectedNodeIDs where !isLockedInTree(id) {",
+    "replace": "for id in extents.keys where !isLockedInTree(id) {",
+    "tests": "DesignTextFitTests"
+  },
+  {
+    "label": "a style fit resizes a non-text layer (#3339)",
+    "file": "Sources/DesignModel/DesignText.swift",
+    "find": "if node.kind == .text { node.frame = Self.fitted(node.frame, node.textStyle, extent) }",
+    "replace": "node.frame = Self.fitted(node.frame, node.textStyle, extent)",
+    "tests": "DesignTextFitTests"
   }
 ]

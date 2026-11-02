@@ -59,14 +59,14 @@ extension BodyCountSuites {
 }
 
 /// The canvas and its loupe layer; the page's body is the window body the budget counts.
-private struct LoupeBudgetPage: View {
-    @MainActor static var bodyRuns = 0
+private struct LoupeBudgetPage: View, BodyCounted {
+    @Environment(\.bodyTally) private var bodyTally
     static let side = SuiteSize.toolButton * 4
     static let colors = [HexColor(255, 0, 0), HexColor(0, 255, 0), HexColor.black]
     let pointer: LoupePointer
 
     var body: some View {
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         ZStack(alignment: .topLeading) {
             HStack(spacing: 0) {
                 ForEach(Self.colors, id: \.self) { Rectangle().fill($0.color) }

@@ -6,8 +6,9 @@
 // turn and flips); a knob drag asks for `.set` with the box turned from where
 // the drag began. Every sample of one drag carries one token, so the draft
 // records one step per gesture. Mid-drag it draws the window's live
-// transform (LiveTransformCopy+Kernel.swift) when there is one, and the release sends
-// `endDrag` so the window takes it back. Values in, intents out.
+// transform (LiveTransformCopy+Kernel.swift) when there is one and holds it
+// with every sample, so a resting pointer doesn't hand it back; the release
+// sends `endDrag` so the window takes it back. Values in, intents out.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -24,9 +25,9 @@ struct TransformOverlay: View {
     /// The transform box's element; nil without a transform draft.
     var mark: PhotoCanvasMark? { Self.box(model).map { PhotoCanvasMark.transformBox(Self.rect($0.box)) } }
 
-    /// The draft's box as the kernel sees it; nil without a draft.
+    /// The draft's box as the kernel sees it; nil without a draft, or on a Select move's implied one.
     private nonisolated static func box(_ model: PhotoWorkspace) -> TransformBox? {
-        model.transformDraft == nil ? nil : model.transformSelection
+        model.showsTransformBox ? model.transformSelection : nil
     }
 
     var body: some View {
@@ -61,8 +62,10 @@ struct TransformOverlay: View {
         perform(.transform(.kernel(.set(TransformRules.rotated(start, by: degrees), drag: token))))
     }
 
-    /// The running drag's token, starting one (from `current`'s turn) on its first sample.
+    /// The running drag's token, starting one (from `current`'s turn) on its first sample; holds the live
+    /// transform until the release, pointer down.
     private func token(_ current: TransformBox) -> String {
+        live?.hold()
         if let gesture { return gesture.token }
         let token = UUID().uuidString
         gesture = (token, current.degrees)

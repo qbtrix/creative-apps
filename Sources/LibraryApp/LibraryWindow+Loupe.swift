@@ -7,7 +7,11 @@
 // thumbnail as a preview at once, then the screen-size render runs on the
 // loupe service through a RenderQueue (one running, the latest waiting) off
 // the main actor; its result goes back through showLoupeRender or
-// failLoupeRender, which keep only the current token's (latest wins). The
+// failLoupeRender, which keep only the current token's (latest wins). On the
+// GPU route (suite-imaging IM-11) the result is a GPU frame instead, through
+// showLoupeFrame, and a failed GPU write renders again on the CPU. A frame's
+// histogram runs after it on a second queue (latest wins) and lands through
+// showLoupeHistogram, so a slider step never waits on a CPU develop. The
 // neighbours decode ahead behind that render on the same queue, and a newer
 // step drops an older step's pending ones (LG-6). Every state change is a
 // LibraryCatalog method; each menu item runs a `LibraryAction`.
@@ -15,10 +19,38 @@ import AppKit
 import LibraryModel
 import SwiftUI
 
-/// A finished loupe render (or its failure) under the token it was asked for.
+/// A finished loupe render (or its failure), or a GPU frame's histogram, under the token it was asked for.
 struct LoupeRenderResult: Sendable {
     let token: Int
-    let result: Result<RenderedPhoto, LibraryError>
+    let result: Result<LoupePicture, LibraryError>
+}
+
+/// A GPU frame's developed histogram under its frame's token.
+struct LoupeHistogramResult: Sendable {
+    let token: Int
+    let histogram: HistogramBins
+}
+
+/// What the loupe shows: CPU pixels, or a GPU frame the loupe's view writes.
+enum LoupePicture: Sendable {
+    case render(RenderedPhoto), frame(LoupeGPUFrame)
+
+    /// `request`'s picture at `settings`: the GPU frame when `preferGPU` and the
+    /// steps allow it (suite-imaging IM-11), else the CPU render. `failure` is
+    /// the reason when an error says none.
+    static func make(_ request: LoupeRequest, settings: DevelopSettings, preferGPU: Bool,
+                     service: any LoupeImaging, failure: String) async -> Result<LoupePicture, LibraryError> {
+        do {
+            if let frame = try await service.gpuFrame(
+                request.photo, settings: settings, longSide: request.longSide, preferGPU: preferGPU) {
+                return .success(.frame(frame))
+            }
+            return .success(.render(try await service.render(
+                request.photo, settings: settings, longSide: request.longSide, quality: request.quality)))
+        } catch {
+            return .failure(error as? LibraryError ?? .renderFailed(failure))
+        }
+    }
 }
 
 /// Observable for `fitScale` alone, so the zoom pill and the menu's zoom
@@ -26,11 +58,16 @@ struct LoupeRenderResult: Sendable {
 @Observable final class LoupeAreaState {
     /// Runs the renders one at a time; a newer one replaces an older waiting one.
     @ObservationIgnored let queue = RenderQueue()
+    /// Runs GPU frames' histograms apart from `queue`, so a frame never waits on one.
+    @ObservationIgnored let histograms = RenderQueue()
     /// The fit scale the loupe view last measured; Zoom In and Out step from it.
     var fitScale = 1.0
     /// Finished renders, handed to the catalog on the main actor.
     @ObservationIgnored let results: AsyncStream<LoupeRenderResult>
     @ObservationIgnored let deliver: AsyncStream<LoupeRenderResult>.Continuation
+    /// Finished histograms, handed to the catalog on the main actor.
+    @ObservationIgnored let histogramResults: AsyncStream<LoupeHistogramResult>
+    @ObservationIgnored let deliverHistogram: AsyncStream<LoupeHistogramResult>.Continuation
     /// True once the main-actor task reading `results` runs.
     @ObservationIgnored var listening = false
 
@@ -38,9 +75,15 @@ struct LoupeRenderResult: Sendable {
         let made = AsyncStream.makeStream(of: LoupeRenderResult.self)
         results = made.stream
         deliver = made.continuation
+        let histograms = AsyncStream.makeStream(of: LoupeHistogramResult.self)
+        histogramResults = histograms.stream
+        deliverHistogram = histograms.continuation
     }
 
-    deinit { deliver.finish() }
+    deinit {
+        deliver.finish()
+        deliverHistogram.finish()
+    }
 }
 
 extension LibraryWindow {
@@ -91,22 +134,25 @@ extension LibraryWindow {
         loupeAreaListen(state)
         let service = model.services.loupe
         let deliver = state.deliver
-        let queue = state.queue
+        let queue = state.queue, histograms = state.histograms, deliverHistogram = state.deliverHistogram
+        let preferGPU = loupeGPU?.prefersGPU ?? false
         let longSide = request.longSide
         let ahead = neighbours.map { photos in
             RenderQueue.Ahead(photos) { await service.prefetch([$0], longSide: longSide) }
         }
         Task.detached(priority: .userInitiated) {
             await queue.submit(token: request.token, prefetching: ahead) {
-                let result: Result<RenderedPhoto, LibraryError>
-                do {
-                    result = .success(try await service.render(
-                        request.photo, settings: request.settings, longSide: request.longSide,
-                        quality: request.quality))
-                } catch {
-                    result = .failure(error as? LibraryError ?? .renderFailed("the photo couldn't be drawn"))
-                }
+                let result = await LoupePicture.make(
+                    request, settings: request.settings, preferGPU: preferGPU, service: service,
+                    failure: "the photo couldn't be drawn")
                 deliver.yield(LoupeRenderResult(token: request.token, result: result))
+                guard case .success(.frame) = result else { return }
+                Task.detached(priority: .utility) {
+                    await histograms.submit(token: request.token) {
+                        guard let bins = try? await service.histogram(request.photo, settings: request.settings) else { return }
+                        deliverHistogram.yield(LoupeHistogramResult(token: request.token, histogram: bins))
+                    }
+                }
             }
         }
     }
@@ -115,11 +161,15 @@ extension LibraryWindow {
     private func loupeAreaListen(_ state: LoupeAreaState) {
         guard !state.listening else { return }
         state.listening = true
-        let results = state.results
+        let results = state.results, histograms = state.histogramResults
+        Task {
+            for await finished in histograms { model.showLoupeHistogram(finished.histogram, token: finished.token) }
+        }
         Task {
             for await finished in results {
                 switch finished.result {
-                case .success(let render): model.showLoupeRender(render, token: finished.token)
+                case .success(.render(let render)): model.showLoupeRender(render, token: finished.token)
+                case .success(.frame(let frame)): model.showLoupeFrame(frame, token: finished.token)
                 case .failure(let error): model.failLoupeRender(error, token: finished.token)
                 }
             }

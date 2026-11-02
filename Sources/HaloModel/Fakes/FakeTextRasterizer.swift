@@ -1,13 +1,14 @@
 // Fakes/FakeTextRasterizer.swift: a small, predictable TextRasterizing
 // (#430). Simpler than HaloApp's CoreText one: it measures with
-// HaloTextContent's estimate (0.6 em a character, one em tall) and draws a
+// HaloTextContent's estimate (0.6 em a character, one em a line plus
+// line height for each line after the first) and draws a
 // box of the layer's color, its sides rounded up to whole pixels. Linux-safe; never used by `.live`.
 import CoreRaster
 
 public struct FakeTextRasterizer: TextRasterizing {
     public init() {}
     public func measure(_ text: HaloTextContent) -> HaloLayerRect {
-        let estimate = HaloTextContent(string: text.string, fontSize: text.fontSize)
+        let estimate = HaloTextContent(string: text.string, fontSize: text.fontSize, style: text.style)
         return HaloLayerRect(x: 0, y: 0, width: estimate.width, height: estimate.height)
     }
     public func rasterize(_ text: HaloTextContent, color: HaloLayerColor) throws -> PixelBuffer {

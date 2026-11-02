@@ -3,9 +3,7 @@
 // 1920 x 1080 composition offers one PNG of the whole frame at the composition's size, never half; Paste of a
 // 160 x 100 px PNG adds one layer whose in point is the playhead (frame 30, never 0), selected, one undo step.
 // An SVG pastes as one layer too; plain text alone is refused with the coder's sentence.
-//
-// Disabled until CB-10: `HaloPasteboardAdapter` doesn't exist yet, so the two calls below go through `Seam`,
-// which CB-10 points at the adapter (and deletes) when it turns these on. Linux-safe.
+// Linux-safe.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -14,14 +12,6 @@ import Foundation
 @testable import HaloModel
 import SuiteModel
 import Testing
-
-/// The adapter's two calls as CB-10 builds them. Until then Copy Frame offers nothing and a paste does nothing.
-private enum Seam {
-    /// CB-10: `try HaloPasteboardAdapter().copyFrame(project)`, the frame at the playhead, richest first.
-    static func copyFrame(_ project: HaloProject) throws -> [TypedData] { [] }
-    /// CB-10: `try HaloPasteboardAdapter().paste(item, into: &project)`, a placed image layer at the playhead.
-    static func paste(_ item: SuiteClipItem, into project: inout HaloProject) throws {}
-}
 
 /// A new 1920 x 1080, 30 fps, 10 s composition with its playhead at frame 30.
 private func compAtFrame30() throws -> HaloProject {
@@ -48,8 +38,8 @@ private let png160x100 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
 
 @Suite struct HaloPasteboardAdapterTests {
     /// Copy Frame offers the frame as a PNG, and Photo, Design and Flare can each take it.
-    @Test(.disabled("waits on CB-10")) func copyFrameOffersAPng() throws {
-        let offered = try Seam.copyFrame(compAtFrame30())
+    @Test func copyFrameOffersAPng() throws {
+        let offered = try HaloPasteboardAdapter().copyFrame(compAtFrame30())
         #expect(offered.map(\.type) == [.png], "Copy Frame offers \(offered.map(\.type.rawValue)), not one PNG")
         for app in [SuiteApp.photo, .design, .flare] {
             #expect(SuitePasteboardCoding().pasteRefusal(for: offered, in: app) == nil, "\(app)'s Paste is off for Halo's frame")
@@ -57,17 +47,17 @@ private let png160x100 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
     }
 
     /// Mutation `.frameFullSize`: the PNG is the whole composition at 1x, 1920 x 1080, never the preview's half size.
-    @Test(.disabled("waits on CB-10")) func copyFrameIsTheCompositionsSize() throws {
-        let png = try #require(try Seam.copyFrame(compAtFrame30()).first { $0.type == .png })
+    @Test func copyFrameIsTheCompositionsSize() throws {
+        let png = try #require(try HaloPasteboardAdapter().copyFrame(compAtFrame30()).first { $0.type == .png })
         let size = try #require(pngSize(png.data), "the frame bytes aren't a PNG")
         #expect(size.width == 1920 && size.height == 1080, "the frame is \(size.width) x \(size.height), not 1920 x 1080")
     }
 
     /// Mutation `.pasteAtPlayhead`: a pasted PNG is one new layer starting at frame 30, selected, one undo step.
-    @Test(.disabled("waits on CB-10")) func pastedPngIsOneLayerAtThePlayhead() throws {
+    @Test func pastedPngIsOneLayerAtThePlayhead() throws {
         var project = try compAtFrame30()
         let before = project.selectedComposition?.layers.count ?? 0
-        try Seam.paste(.image(png: png160x100, pixelWidth: 160, pixelHeight: 100), into: &project)
+        try HaloPasteboardAdapter().paste(.image(png: png160x100, pixelWidth: 160, pixelHeight: 100), into: &project)
         let layers = project.selectedComposition?.layers ?? []
         #expect(layers.count == before + 1, "the paste added \(layers.count - before) layers, not 1")
         let placed = try #require(project.selectedLayer, "the pasted layer isn't selected")
@@ -79,17 +69,21 @@ private let png160x100 = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0
     }
 
     /// An SVG on the pasteboard pastes as one layer at the playhead too.
-    @Test(.disabled("waits on CB-10")) func pastedSvgIsOneLayerAtThePlayhead() throws {
+    @Test func pastedSvgIsOneLayerAtThePlayhead() throws {
         var project = try compAtFrame30()
         let svg = #"<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40"><rect width="80" height="40" fill="red"/></svg>"#
-        try Seam.paste(.vector(svg: svg, name: "Logo"), into: &project)
+        try HaloPasteboardAdapter().paste(.vector(svg: svg, name: "Logo"), into: &project)
         #expect(project.selectedComposition?.layers.count == 1, "an SVG paste didn't add one layer")
         #expect(project.selectedLayer?.inFrame == 30)
     }
 
-    /// Plain text on the pasteboard: Halo's Paste is off and says why in the coder's sentence.
-    @Test(.disabled("waits on CB-10")) func textAloneIsRefused() {
+    /// Plain text on the pasteboard: Halo's Paste is off and says why in the coder's sentence. The coder hands Halo
+    /// text as an item, so the adapter is what refuses it; a paste of it changes nothing.
+    @Test func textAloneIsRefused() throws {
         let text = [TypedData(type: .plainText, data: Data("hello".utf8))]
-        #expect(SuitePasteboardCoding().pasteRefusal(for: text, in: .halo) != nil)
+        #expect(HaloPasteboardAdapter().pasteRefusal(for: text)?.message == "Halo can't paste text yet.")
+        var project = try compAtFrame30()
+        #expect(throws: (any Error).self) { try HaloPasteboardAdapter().paste(text, into: &project) }
+        #expect(project.selectedComposition?.layers.isEmpty == true, "a refused paste added a layer")
     }
 }

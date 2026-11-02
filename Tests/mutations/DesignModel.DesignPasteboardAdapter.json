@@ -1,0 +1,4 @@
+[
+{"label":".pngAtTwoX","file":"Sources/DesignModel/DesignPasteboardAdapter.swift","find":"static let pngScale = 2","replace":"static let pngScale = 1","tests":"DesignPasteboardAdapterTests"},
+{"label":".pasteCentres","file":"Sources/DesignModel/DesignPasteboardAdapter.swift","find":"PlaceRules.fitted(natural: natural, in: canvas, at: point)","replace":"Rect(minX: point?.x ?? 0, minY: point?.y ?? 0, maxX: (point?.x ?? 0) + natural.width, maxY: (point?.y ?? 0) + natural.height)","tests":"DesignPasteboardAdapterTests"}
+]

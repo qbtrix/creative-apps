@@ -1,6 +1,8 @@
 [
 {"label":"the narrow row drops History","file":"Sources/HaloModel/HaloStatusRow.swift","find":"zoom: false, timecode: true, history: true)","replace":"zoom: false, timecode: true, history: false)","tests":"HaloModelTests\\..*[Ss]tatusRow"},
 {"label":"the timecode drops before the zoom pill","file":"Sources/HaloModel/HaloStatusRow.swift","find":"transportInBar: false, zoom: false, timecode: true,","replace":"transportInBar: false, zoom: true, timecode: false,","tests":"HaloModelTests\\..*[Ss]tatusRow"},
-{"label":"the bare row skips the zoom-less shape","file":"Sources/HaloModel/HaloStatusRow.swift","find":"[wide, noLayers, leading, leadingNoZoom, bare]","replace":"[wide, noLayers, leading, bare]","tests":"HaloModelTests\\..*[Ss]tatusRow"},
-{"label":"the size-only tooltip still names zoom","file":"Sources/HaloModel/HaloStatusRow.swift","find":"zoom ? HaloComposition.viewerPillsHelp :","replace":"true ? HaloComposition.viewerPillsHelp :","tests":"HaloModelTests\\..*[Ss]tatusRow"}
+{"label":"the bare row skips the zoom-less shape","file":"Sources/HaloModel/HaloStatusRow.swift","find":"[wide, leadingLayers, leading, leadingNoZoom, bare]","replace":"[wide, leadingLayers, leading, bare]","tests":"HaloModelTests\\..*[Ss]tatusRow"},
+{"label":"the size-only tooltip still names zoom","file":"Sources/HaloModel/HaloStatusRow.swift","find":"zoom ? HaloComposition.viewerPillsHelp :","replace":"true ? HaloComposition.viewerPillsHelp :","tests":"HaloModelTests\\..*[Ss]tatusRow"},
+{"label":"the layer count drops with the transport's pill","file":"Sources/HaloModel/HaloStatusRow.swift","find":"leadingLayers = HaloStatusRow(layers: true,","replace":"leadingLayers = HaloStatusRow(layers: false,","tests":"HaloModelTests\\..*[Ss]tatusRow"},
+{"label":"the row skips the shape that keeps the layer count","file":"Sources/HaloModel/HaloStatusRow.swift","find":"[wide, leadingLayers, leading,","replace":"[wide, leading,","tests":"HaloModelTests\\..*[Ss]tatusRow"}
 ]

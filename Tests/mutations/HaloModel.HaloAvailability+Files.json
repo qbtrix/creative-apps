@@ -1,0 +1,16 @@
+[
+  {
+    "label": "Open Recent reads the wrong side of the suite's list: on with nothing listed, off with a project",
+    "file": "Sources/HaloModel/Availability/HaloAvailability+Files.swift",
+    "find": "fileFlow.recents.isEmpty ? \"No recent projects.\" : nil",
+    "replace": "!fileFlow.recents.isEmpty ? \"No recent projects.\" : nil",
+    "tests": "HaloFileFlowTests"
+  },
+  {
+    "label": "Open Recent is always on: no reason with nothing listed",
+    "file": "Sources/HaloModel/Availability/HaloAvailability+Files.swift",
+    "find": "fileFlow.recents.isEmpty ? \"No recent projects.\" : nil",
+    "replace": "nil",
+    "tests": "HaloFileFlowTests"
+  }
+]

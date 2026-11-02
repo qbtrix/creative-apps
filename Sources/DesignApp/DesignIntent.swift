@@ -13,6 +13,8 @@ import SwiftUI
 
 enum DesignIntent {
     case newFile, open, save, saveAs, export
+    /// A finished export's options, which the next Export sheet opens with (`rememberExport`).
+    case rememberExport(DesignExportOptions)
     case undo, redo
     case tool(DesignTool)
     case drag(CGPoint, CGPoint, DesignModifiers)
@@ -38,13 +40,24 @@ enum DesignIntent {
     case endEditRun
     case setHidden(String, Bool), setLocked(String, Bool)
     case toggleFlag(String, DesignLayerFlag)
+    /// A gesture in the sidebar's AI tab (SuiteUI AgentActivityList).
+    case agent(AgentActivityAction)
     case editText(String)
     case textDraft(String), commitText, cancelText
     case zoomIn, zoomOut, fit
+    /// Playback on the one clock (DesignPlayer+Kernel.swift): shown state, never an edit.
+    case play, pause, stop, playPause
+    /// The timeline's ruler, steps and ends: show `frame` now, land it as the playhead once the scrub rests.
+    case scrub(Int)
+    case loop(Bool)
+    /// A key button or an Animate menu item: these keyframe.set and keyframe.remove commands, run in order.
+    case keys([(id: String, params: JSONValue)])
     /// A selection command (DesignCommand): duplicate, group, ungroup, delete, nudge, align,
     /// distribute or arrange; a refusal's help goes to the status line.
     case command(DesignCommand)
     case copy, cut, paste, selectAll
+    /// Edit > Copy As (one representation) and Paste as Image (an image or SVG only), clipboard-interop CB-6.
+    case copyAs(CopyAsFormat), pasteAsImage
     /// View > Zoom to Selection: the zoom that fits the selection, and the rect to show.
     case zoomToSelection
     /// A Layers panel drag: the layer, its new parent (nil: the page's top level) and index.
@@ -86,9 +99,18 @@ extension DesignToolbarItem {
 }
 
 extension DesignTool: PaletteTool {
+    public var gesture: ToolGesture {
+        switch self {
+        case .move: .selects
+        case .frame, .rectangle, .ellipse, .shape, .text: .creates
+        case .pen: .editsPoints
+        case .eyedropper: .inspects
+        }
+    }
+
     public var title: String {
         switch self {
-        case .move: "Move"
+        case .move: "Select"
         case .frame: "Frame"
         case .rectangle: "Rectangle"
         case .ellipse: "Ellipse"

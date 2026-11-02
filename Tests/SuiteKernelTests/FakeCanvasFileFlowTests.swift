@@ -38,6 +38,6 @@ struct FakeCanvasFileFlowTests {
     @Test func theOldCommandsAreUnchanged() {
         let ids = FakeCanvasDocument.catalog.describeAll().map(\.id)
         #expect(Set(ids).isSuperset(of: ["rect.add", "rect.move", "rect.remove", "rect.select", "rect.list", "doc.export-json",
-                                         "edit.undo", "edit.redo"]) && ids.count == 46)
+                                         "edit.undo", "edit.redo"]) && ids.count == 49)
     }
 }

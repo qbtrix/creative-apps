@@ -1,0 +1,93 @@
+// NewCompositionSheet+Suite.swift: the sheet New Composition opens: name, width,
+// height, frame rate and duration in seconds, in a system Form. The sheet owns
+// only its draft (presentation state). The numeric fields bind through text
+// (HaloModel's CompositionDraft), so validation and Create always see the
+// latest keystroke, not the value from the last Return or focus change.
+// CompositionSettings says what is valid and why not, and Create stays
+// disabled until it is. Each problem shows right under the field it's about
+// (CompositionDraft.problems(for:)), as error InspectorNotes.
+// Width and Height end in "px", their unit, inset beside the field. Create,
+// `composition.new`'s spec on the window's state (command-state CS-8), hands the settings to `onCreate`; the window turns them into a composition.
+// Each field is a form row of its own whose accessibility label is its column
+// label (the columns form draws the title apart from the field, #286), so no
+// LabeledContent wraps it, and every control has a
+// `halo.composition.sheet.*` identifier (#290). The rate is SuiteUI's
+// FrameRateMenu over the kernel's list (frame-rates FR-8), held beside the draft.
+// The frame and Cancel / Create are SuiteUI's SuiteSheet.
+import HaloModel
+import SuiteKernel
+import SuiteUI
+import SwiftUI
+
+struct NewCompositionSheet: View {
+    /// The window's project as its menus see it, so Create is `composition.new`'s spec; with none, Create is off.
+    let state: HaloMenuState
+    var onCreate: @MainActor (CompositionSettings) -> Void
+    var onCancel: @MainActor () -> Void
+    @State private var draft: CompositionDraft
+    @State private var frameRate: FrameRate
+
+    init(
+        settings: CompositionSettings, state: HaloMenuState = HaloMenuState(project: nil), onCreate: @escaping @MainActor (CompositionSettings) -> Void = { _ in },
+        onCancel: @escaping @MainActor () -> Void = {}
+    ) {
+        self._draft = State(initialValue: CompositionDraft(settings))
+        self._frameRate = State(initialValue: settings.frameRate)
+        self.state = state
+        self.onCreate = onCreate
+        self.onCancel = onCancel
+    }
+
+    var body: some View {
+        SuiteSheet(
+            "New Composition", cancelID: "halo.composition.sheet.cancel", onCancel: onCancel,
+            action: MenuCommand(HaloMenuState.spec("composition.new"), on: state, title: "Create") {
+                if draft.isValid { onCreate(draft.settings.withFrameRate(frameRate)) }
+            },
+            actionID: "halo.composition.sheet.create", reason: draft.isValid ? nil : createHelp
+        ) {
+            Form {
+                // Each field is the form row itself, as before #1009: wrapping it
+                // in LabeledContent took "Width" off the field's own accessibility
+                // label, so XCUITest's textFields["Width"] found nothing (#286).
+                // Its problems follow as an unlabeled row, which the columns form
+                // puts in the value column right under the field.
+                TextField("Name", text: $draft.name)
+                    .accessibilityLabel("Name")
+                    .haloControl(id: "halo.composition.sheet.name", enabled: true, help: nil)
+                problems(for: .name)
+                TextField("Width", text: $draft.widthText)
+                    .safeAreaInset(edge: .trailing, spacing: SuiteSpacing.s) { Text(HaloComposition.sizeUnit) }
+                    .accessibilityLabel("Width")
+                    .haloControl(id: "halo.composition.sheet.width", enabled: true, help: nil)
+                problems(for: .width)
+                TextField("Height", text: $draft.heightText)
+                    .safeAreaInset(edge: .trailing, spacing: SuiteSpacing.s) { Text(HaloComposition.sizeUnit) }
+                    .accessibilityLabel("Height")
+                    .haloControl(id: "halo.composition.sheet.height", enabled: true, help: nil)
+                problems(for: .height)
+                LabeledContent("Frame Rate") { FrameRateMenu(rate: frameRate) { frameRate = $0 } }
+                    .haloControl(id: "halo.composition.sheet.frameRate", enabled: true, help: nil)
+                problems(for: .frameRate)
+                TextField("Duration (seconds)", text: $draft.durationText)
+                    .accessibilityLabel("Duration (seconds)")
+                    .haloControl(id: "halo.composition.sheet.duration", enabled: true, help: nil)
+                problems(for: .duration)
+            }
+            .formStyle(.columns)
+        }
+    }
+
+    /// The problems about `field`, one line each, or nothing while it's valid.
+    @ViewBuilder private func problems(for field: CompositionField) -> some View {
+        let lines = draft.problems(for: field)
+        if !lines.isEmpty {
+            VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+                ForEach(lines, id: \.self) { InspectorNote($0, kind: .error) }
+            }
+        }
+    }
+
+    /// Why Create is off: the first problem while the settings can't be used.
+    private var createHelp: String { draft.problems.first ?? "Fix the settings above to create it." }
+}

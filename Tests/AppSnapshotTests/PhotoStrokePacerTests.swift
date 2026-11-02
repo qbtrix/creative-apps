@@ -86,7 +86,7 @@ import Testing
         #expect(PhotoCanvasOverlay(model: model, zoom: 1, hover: nil).marks.isEmpty, "no cursor off the canvas")
         let ring = PhotoCanvasOverlay(model: model, zoom: 2, hover: CGPoint(x: 100, y: 50)).marks
         #expect(ring == [.brushCursor(CGRect(x: 80, y: 30, width: 40, height: 40))])
-        model.selectTool(.move)
+        model.selectTool(.select)
         #expect(PhotoCanvasOverlay(model: model, zoom: 2, hover: CGPoint(x: 100, y: 50)).marks.isEmpty, "no cursor for Move")
     }
 }

@@ -21,10 +21,22 @@
 // commits, and the next keystroke starts a draft for the selected one. A new
 // selection, or an Undo or Redo that changes the words, drops the draft, ends
 // editing and rebuilds the field (keyed by `textFieldKey`, #4310), so a stale
-// edit buffer never shows over the stored words.
+// edit buffer never shows over the stored words. Above the colour row,
+// SuiteUI's TextStyleRows (text-style TS-4) over the layer's style
+// (`model.textStyle`, TS-9), the font picker listing this Mac's families;
+// each gesture goes to the window's `haloText` action (TS-10), which runs it
+// as the catalog's text command. Disabled with `model.textHelp`, or
+// `textStylesHelp` in a window that wires no action.
 import HaloModel
+import SuiteKernel
+import SuiteShell
 import SuiteUI
 import SwiftUI
+
+extension EnvironmentValues {
+    /// The window's text style action: one rows gesture through `HaloProject.runText`; nil outside a window.
+    @Entry var haloText: (@MainActor (TextIntent) -> Void)?
+}
 
 struct HaloTextInspector: View {
     let model: HaloProject
@@ -32,10 +44,24 @@ struct HaloTextInspector: View {
     /// The field's words while typing and their layer; nil shows the stored words.
     @State private var draft: HaloTextDraft?
     @FocusState private var editing: Bool
+    @Environment(\.haloText) private var runText
 
     static let stringID = "halo.inspector.text.string"
     static let sizeID = "halo.inspector.text.size"
     static let colorID = "halo.inspector.text.color"
+
+    /// Why the shared text style rows can't act: the window wires no `haloText` action.
+    nonisolated static let textStylesHelp = "Text styles aren't connected in this window yet."
+
+    /// The font families the shared rows' picker lists: this Mac's, read once.
+    nonisolated static let fontFamilies = FontCatalog().families()
+
+    /// The layer's style as the kernel's: its face and paragraph at the layer's size.
+    nonisolated static func kernelStyle(_ text: HaloTextContent) -> TextStyle {
+        var style = text.style
+        style.size = text.fontSize
+        return style
+    }
 
     /// Whether `refusal` names a TEXT control, so it shows here and only here.
     static func owns(_ refusal: HaloRefusal) -> Bool { HaloProject.textOwns(refusal) }
@@ -47,6 +73,9 @@ struct HaloTextInspector: View {
                 caption(Self.stringID)
                 size(text)
                 caption(Self.sizeID)
+                TextStyleRows(
+                    style: model.textStyle ?? Self.kernelStyle(text), families: Self.fontFamilies,
+                    help: model.textHelp ?? (runText == nil ? Self.textStylesHelp : nil)) { runText?($0) }
                 if let current = model.selectedLayerColor {
                     color(current)
                     caption(Self.colorID)

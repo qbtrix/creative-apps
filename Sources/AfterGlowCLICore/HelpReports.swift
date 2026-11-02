@@ -1,7 +1,8 @@
-// HelpReports.swift (report-problem RP-5): the CLI's Help provider. A `.suitehelp` file names the app and holds
+// HelpReports.swift (report-problem RP-5): the CLI's Help provider. A `.suitehelp` file names the app and may hold
 // what the sheet reads on a Mac: the version, build, macOS and model, the crash files and the home, user and host
-// names to redact. `afterglow suite help.report-problem --in <file>` answers with SuiteModel's ProblemReport for
-// those values, the sheet's text, and reads nothing else: no crash folder, no network.
+// names to redact. A value the file leaves out is this machine's, read as the sheet reads it (SuiteModel's ThisMac
+// and CrashFolderReader), so `afterglow suite new --json '{"app":"photo"}'` then `help.report-problem` reports
+// this Mac's recent Photo crashes; a fixture that lists `crashes` reads no crash folder. Never the network.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -58,18 +59,24 @@ public struct HelpReports: HelpProviding, Hashable {
         return try document(decoder.decode(File.self, from: data))
     }
 
-    /// A new document for `options`' app with no crashes: `{"app": "photo"}`.
+    /// A new document for `options`' app, reading this Mac: `{"app": "photo"}`.
     static func new(_ options: JSONValue) throws -> SuiteHelpDocument { try document(options.decode(File.self)) }
 
     /// A file naming an app the suite doesn't have.
-    struct UnknownApp: Error, CustomStringConvertible { let name: String; var description: String { "the suite has no app \(name)" } }
+    struct UnknownApp: Error, CustomStringConvertible {
+        let name: String
+        var description: String { "the suite has no app \(name); name one of \(SuiteApp.allCases.map(\.rawValue).joined(separator: ", "))" }
+    }
 
     static func document(_ file: File) throws -> SuiteHelpDocument {
         guard SuiteApp(rawValue: file.app) != nil else { throw UnknownApp(name: file.app) }
+        let now = file.now ?? Date(), home = file.home ?? ThisMac.home
+        let crashes = file.crashes.map { $0.map { CrashFile(name: $0.name, modified: $0.modified, text: $0.text) } }
+            ?? CrashFolderReader.read(arguments: [], home: home, now: now)
         let reports = HelpReports(
-            version: file.version ?? "", build: file.build ?? "", macOS: file.macOS ?? "", model: file.model ?? "",
-            crashes: (file.crashes ?? []).map { CrashFile(name: $0.name, modified: $0.modified, text: $0.text) },
-            now: file.now ?? Date(), home: file.home ?? "", user: file.user ?? "", host: file.host ?? "")
+            version: file.version ?? ThisMac.version, build: file.build ?? ThisMac.build, macOS: file.macOS ?? ThisMac.macOS,
+            model: file.model ?? ThisMac.model, crashes: crashes, now: now, home: home,
+            user: file.user ?? ThisMac.user, host: file.host ?? ThisMac.host)
         return SuiteHelpDocument(app: file.app, provider: reports)
     }
 }

@@ -17,6 +17,7 @@
 // refits its box by the size's ratio in the same step (canvas-basics CB-5):
 // auto width both sides, fixed width the height, rounded up, at least 1. A
 // switch to auto keeps the width until the next edit measures the text.
+// At a playhead X, Y and opacity are what the canvas shows: a keyed one keys there (LiveKeying.swift).
 // Linux-safe.
 
 public struct LiveStyling: StyleEditing {
@@ -32,11 +33,22 @@ public struct LiveStyling: StyleEditing {
     }
 
     public func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
-        try change("frame", "Change Frame", ids, on: page) { node in
+        try setFrame(field, to: value, ids, on: page, at: nil)
+    }
+
+    public func setFrame(_ field: DesignFrameField, to value: Double, _ ids: [String], on page: DesignPage,
+                         at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
+        let shown = page.shown(at: playhead)
+        return try change("frame", "Change Frame", ids, on: page) { node in
             guard value.isFinite else { return }
-            let frame = node.frame
+            // This node's frame (moved already when a selected parent moved it) plus its playhead offset.
+            let (seen, rest) = (shown.nodes.node(node.id)?.frame ?? node.frame, page.nodes.node(node.id)?.frame ?? node.frame)
+            let frame = DesignRect(x: node.frame.x + seen.x - rest.x, y: node.frame.y + seen.y - rest.y,
+                                   width: node.frame.width, height: node.frame.height)
             switch field {
-            case .x, .y: node.translate(by: DesignPoint(x: field == .x ? value - frame.x : 0, y: field == .y ? value - frame.y : 0))
+            case .x, .y:
+                let delta = DesignPoint(x: field == .x ? value - frame.x : 0, y: field == .y ? value - frame.y : 0)
+                node = node.moved(by: delta, at: playhead)
             case .width: node.frame.width = Swift.max(value, 1)
             case .height: node.frame.height = Swift.max(value, 1)
             }
@@ -55,9 +67,13 @@ public struct LiveStyling: StyleEditing {
     }
 
     public func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage) throws(DesignRefusal) -> DesignEdit {
+        try setOpacity(opacity, ids, on: page, at: nil)
+    }
+
+    public func setOpacity(_ opacity: Double, _ ids: [String], on page: DesignPage, at playhead: Int?) throws(DesignRefusal) -> DesignEdit {
         try change("opacity", "Change Opacity", ids, on: page) { node in
             guard opacity.isFinite else { return }
-            node.opacity = Swift.min(Swift.max(opacity, 0), 1)
+            node = node.writing(.opacity, Swift.min(Swift.max(opacity, 0), 1), at: playhead)
         }
     }
 

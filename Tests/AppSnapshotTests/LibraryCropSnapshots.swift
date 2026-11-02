@@ -2,11 +2,15 @@
 // the shoot fixture's IMG_0001, a 6000 × 4000 photo, Light and Dark: the
 // browser with the frame overlay beside the CROP section, on 1:1 at 0°
 // (`library-crop`, the frame "4000 × 4000 at 1000, 0") and straightened to
-// 5° (`library-crop-straightened`, a smaller square on the turned photo).
+// 5° (`library-crop-straightened`, a smaller square on the turned photo), and
+// on 4:5 turned portrait through the catalog's crop.set-aspect
+// (`library-loupe-crop-portrait`, orientation-crop OC-10: a tall frame and the
+// aspect picker's portrait toggle).
 // The crop controls come in through `\.libraryCrop`, filled from the catalog
 // as LibraryWindow's `cropControls` fills them, with closures that do
 // nothing. Also the overlay's handle hit test, which the loupe's drags use.
 // macOS only.
+import SuiteKernel
 import SuiteUI
 import SwiftUI
 import Testing
@@ -47,6 +51,7 @@ import Testing
         crop.levelHelp = catalog.levelHelp
         let none: LibraryMenu.Action = {}
         crop.setAspect = { (_: CropAspect) in }
+        crop.pick = { (_: CropPick) in }
         crop.drag = { (_: CropHandle, _: Double, _: Double) in }
         crop.setAngle = { (_: Double) in }
         if catalog.levelHelp == nil { crop.level = none }
@@ -86,6 +91,16 @@ import Testing
         let frame = try #require(catalog.cropFrame)
         #expect(frame.width < 4000 && frame.width == frame.height)
         try shoot(catalog, "library-crop-straightened")
+    }
+
+    @Test func portrait() throws {
+        var catalog = try cropping(angle: 0)
+        let params: JSONValue = .object(["aspect": .string("4:5"), "orientation": .string("portrait")])
+        _ = try LibraryCatalog.catalog.run("crop.set-aspect", params: params, on: &catalog)
+        let frame = try #require(catalog.cropFrame)
+        #expect(catalog.cropDraft != nil, "set-aspect closed the draft")
+        #expect(abs(Double(frame.width) / Double(frame.height) - 0.8) < 0.01, "4:5 portrait framed \(frame)")
+        try shoot(catalog, "library-loupe-crop-portrait")
     }
 
     /// A press within half a hit target of a corner or edge midpoint grabs

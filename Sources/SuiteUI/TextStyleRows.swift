@@ -81,7 +81,8 @@ public struct TextStyleRows: View {
         if let intent = Self.intent(field, to: value, from: style, drag: token) { onIntent(intent) }
     }
 
-    nonisolated static let noText = "Select a text layer to set its type."
+    /// The kernel's words for no text layer (TextCommands), so the rows and the commands say the same.
+    nonisolated static let noText = "Select a text layer first."
     nonisolated static let noItalic = "This family has no italic."
     nonisolated static let noUpright = "This family has no upright face."
 

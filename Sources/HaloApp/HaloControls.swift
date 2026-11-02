@@ -34,6 +34,12 @@ extension View {
             .transformPreference(HaloControlsKey.self) { entries in entry.map { entries.append($0) } }
     }
 
+    /// Lists `entries` in `halo.controls` for a SuiteUI view whose parts identify and
+    /// register themselves with `.suiteControl` (the transport).
+    func haloControls(_ entries: [ControlEntry]) -> some View {
+        transformPreference(HaloControlsKey.self) { $0 += entries }
+    }
+
     /// Publishes the `halo.controls` element over this view when `requested`.
     func haloControlsProbe(_ requested: Bool) -> some View {
         modifier(HaloControlsProbe(requested: requested))

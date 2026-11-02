@@ -9,10 +9,9 @@ enum GalleryCrop {
     static let photo = Rect(minX: 0, minY: 0, maxX: 6000, maxY: 4000)
 }
 
-struct GalleryCropPage: View {
+struct GalleryCropPage: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     @State private var aspect: CropAspect
     @State private var orientation: CropOrientation
@@ -25,7 +24,7 @@ struct GalleryCropPage: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Crop").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText).accessibilityAddTraits(.isHeader)

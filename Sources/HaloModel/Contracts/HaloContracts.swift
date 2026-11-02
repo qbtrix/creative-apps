@@ -73,6 +73,27 @@ public protocol PropertyKeying: HaloService {
     /// its position is rewritten in the new parent's space through `setValue`.
     func setParent(
         _ parentID: String?, of layerID: String, at frame: Int, in composition: inout HaloComposition) throws
+    /// Delete Keyframes: removes every key in `keys` in one pass, as
+    /// `toggleKey` on each would. A track left with one key goes static at
+    /// that key's value, one left with none at its first key's. Keys that
+    /// aren't there, and unknown layers, are skipped.
+    func deleteKeys(_ keys: Set<HaloKeyRef>, in composition: inout HaloComposition) throws
+}
+
+extension PropertyKeying {
+    /// `toggleKey` on each key, each track's last frame first.
+    public func deleteKeys(_ keys: Set<HaloKeyRef>, in composition: inout HaloComposition) throws {
+        let ordered = keys.sorted {
+            $0.property == $1.property ? $0.frame > $1.frame : $0.property.rawValue < $1.property.rawValue
+        }
+        for key in ordered {
+            let layer = composition.layers.first { $0.id == key.layerID }
+            // A static track keeps one key at 0; toggling a key that's gone would add it back.
+            guard layer?.tracks[key.property.rawValue]?.contains(where: { $0.frame == key.frame }) == true
+            else { continue }
+            try toggleKey(key.property, of: key.layerID, at: key.frame, in: &composition)
+        }
+    }
 }
 
 /// #207: drag a layer in the viewer to key its position.

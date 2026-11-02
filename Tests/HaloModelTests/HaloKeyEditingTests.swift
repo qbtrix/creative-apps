@@ -102,3 +102,17 @@ private func picked(_ project: HaloProject, _ layerID: String) -> Set<Int> {
     #expect(project.refusal?.message == "A key can't move past frame 47.")
     #expect(project.history.undo.isEmpty)
 }
+
+/// MJ-KE step 7 (#5949): after Select All Keys and ⌫, no lane draws a key. A
+/// track left with one key is static, so its leftover value is no diamond.
+@Test func deletingEveryKeyLeavesNoDiamond() throws {
+    var (project, ball, rig) = try parentedKeys()
+    project.selectAllKeys()
+    #expect(project.deleteCommand == .deleteKeys)
+    project.deleteKeys()
+    #expect(project.timelineRows.allSatisfy { $0.keyFrames.isEmpty })
+    #expect(project.pickedFrames(of: ball).isEmpty && project.pickedFrames(of: rig).isEmpty)
+    project.undo()
+    let rows = Dictionary(uniqueKeysWithValues: project.timelineRows.map { ($0.id, $0.keyFrames) })
+    #expect(rows[ball] == [0, 12, 24] && rows[rig] == [0, 47])
+}

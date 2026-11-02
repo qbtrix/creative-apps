@@ -8,6 +8,10 @@
 // from SuiteUI's top bar pieces (EditorBarItem, EditorBarMenu with
 // MenuCommand items, EditorBarDivider) and its bar slider
 // (InspectorStepperRow); no single-key handling, so the grid keeps its keys.
+// The row never asks for more than the content column: when the full row
+// doesn't fit (the 880 pt window with both side columns open), it drops the
+// photo count, draws Sort, Import and Export as symbols and shortens the Size
+// bar, and the title truncates (LibraryGridHeaderFitTests).
 // The filter bar's removable chips take the slot after the title once the
 // filter model lands (filters-collections FC-4, FC-7); on dev it is a stub.
 import LibraryModel
@@ -25,19 +29,9 @@ struct LibraryGridToolbar: View {
     static let identifier = "library.grid.toolbar"
 
     var body: some View {
-        HStack(spacing: SuiteSpacing.s) {
-            Text(model.selectedCollection?.name ?? "All Photos").font(SuiteFont.headline)
-            Text(LibraryCatalog.photoCountText(model.order.count))
-                .font(SuiteFont.caption)
-                .foregroundStyle(SuiteColor.textSecondary)
-            // The filter chips' slot (FC-4).
-            Spacer(minLength: SuiteSpacing.s)
-            sizeBar
-            EditorBarDivider()
-            sortMenu
-            EditorBarDivider()
-            EditorBarItem(importAction).libraryControl(importAction)
-            EditorBarItem(exportAction).libraryControl(exportAction)
+        ViewThatFits(in: .horizontal) {
+            row(compact: false)
+            row(compact: true)
         }
         .padding(.horizontal, SuiteSpacing.m)
         .padding(.vertical, SuiteSpacing.xs)
@@ -53,24 +47,44 @@ struct LibraryGridToolbar: View {
         ) { _, _ in JSONValue.object([:]) }
     }
 
+    /// The row; `compact` drops the count, draws the commands as symbols and shortens the Size bar.
+    private func row(compact: Bool) -> some View {
+        HStack(spacing: SuiteSpacing.s) {
+            Text(model.selectedCollection?.name ?? "All Photos").font(SuiteFont.headline).lineLimit(1)
+            if !compact {
+                Text(LibraryCatalog.photoCountText(model.order.count))
+                    .font(SuiteFont.caption)
+                    .foregroundStyle(SuiteColor.textSecondary)
+            }
+            // The filter chips' slot (FC-4).
+            Spacer(minLength: SuiteSpacing.s)
+            sizeBar(width: compact ? SuiteSize.sidebarWidth.min : SuiteSize.inspectorWidth.ideal)
+            EditorBarDivider()
+            sortMenu(compact: compact)
+            EditorBarDivider()
+            EditorBarItem(importAction, showsTitle: !compact).libraryControl(importAction)
+            EditorBarItem(exportAction, showsTitle: !compact).libraryControl(exportAction)
+        }
+    }
+
     /// view.thumbnail-size: the cell size in its steps, through the window's route.
-    private var sizeBar: some View {
+    private func sizeBar(width: CGFloat) -> some View {
         let range = LibraryCatalog.cellSizeRange
         return InspectorStepperRow(
             "Size", value: Double(model.cellSize), in: Double(range.lowerBound)...Double(range.upperBound),
             step: Double(LibraryCatalog.cellSizeStep), unit: "pt"
         ) { size in menu.view.setCellSize?(Int(size)) }
-            .frame(width: SuiteSize.inspectorWidth.ideal)
+            .frame(width: width)
             .help(Self.spec("view.thumbnail-size").summary)
             .libraryControl(id: "library.grid.toolbar.size", enabled: true, help: nil)
     }
 
     /// view.sort: one item per order, the current one checked.
-    private var sortMenu: some View {
+    private func sortMenu(compact: Bool) -> some View {
         let spec = Self.spec("view.sort"), why = spec.availability(model).why
         return EditorBarMenu(
             "Sort: \(model.sort.rawValue)", systemImage: "arrow.up.arrow.down",
-            unavailableHelp: why.map { "\(spec.title): \($0)" }
+            unavailableHelp: why.map { "\(spec.title): \($0)" }, showsTitle: !compact
         ) {
             ForEach(LibrarySort.allCases, id: \.self) { sort in
                 MenuCommand(spec, on: model, title: sort.rawValue, systemImage: sort == model.sort ? "checkmark" : nil) {

@@ -1,0 +1,16 @@
+[
+  {
+    "label": "windowReadsOptions: the window's body also reads the toolOptions facet, so every brush-size step re-runs the window and its editor",
+    "file": "Sources/PhotoApp/PhotoWindow.swift",
+    "find": "session.workspace(reading: .document, .tool, .adjust, .history, .status, .canvas, .file)",
+    "replace": "session.workspace(reading: .document, .tool, .toolOptions, .adjust, .history, .status, .canvas, .file)",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  },
+  {
+    "label": "windowSkipsDocument: the window's body stops reading the document facet, so a layer pick leaves the inspector's Layer section on the old layer",
+    "file": "Sources/PhotoApp/PhotoWindow.swift",
+    "find": "session.workspace(reading: .document, .tool, .adjust,",
+    "replace": "session.workspace(reading: .tool, .adjust,",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  }
+]

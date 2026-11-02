@@ -1,0 +1,23 @@
+[
+  {
+    "label": "settingsKeepBackground: the background is dropped on settings",
+    "file": "Sources/FlareModel/FlareDocumentSetup+Kernel.swift",
+    "find": "background: background, in: &$0)",
+    "replace": "background: .white, in: &$0)",
+    "tests": "FlareDocumentSetupTests"
+  },
+  {
+    "label": "durationKeepsSeconds: the duration is set in frames at the old rate",
+    "file": "Sources/FlareModel/FlareDocumentSetup+Kernel.swift",
+    "find": "let frames = setup.durationSeconds.map { rate.frames(forDuration: $0) } ?? scene.durationFrames",
+    "replace": "let frames = setup.durationSeconds.map { scene.frameRate.frames(forDuration: $0) } ?? scene.durationFrames",
+    "tests": "FlareDocumentSetupTests"
+  },
+  {
+    "label": "settingsKeepKeys: the change is not named Document Settings on the undo stack",
+    "file": "Sources/FlareModel/FlareDocumentSetup+Kernel.swift",
+    "find": "applyGroup(\"Document Settings\")",
+    "replace": "applyGroup(\"Set Scene Canvas\")",
+    "tests": "FlareDocumentSetupTests"
+  }
+]

@@ -2,7 +2,7 @@
   "title": "Orientation and crop on SuiteKernel: rotate 90, flip and a crop whose aspect can swap to portrait, one kernel Crop module (#3117) with Library and Photo adopting, and Photo's Flip Canvas restored",
   "wave": "XK4",
   "order": 50,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 C9 (Library rows 1 and 2, Photo row 7); #3117; feature map suiteui/orientation-crop (new); real jobs RJ-L70, RJ-P70 (new)",

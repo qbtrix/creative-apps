@@ -161,6 +161,20 @@ import Testing
         }
     }
 
+    /// The inspector's stroke edit skips a locked layer behind the primary, as the catalog does, and keeps it selected
+    /// (#4919).
+    @Test func theInspectorSkipsALockedLayerToo() throws {
+        var w = DesignFixtures.cards
+        w.selectItem("node-2")
+        w.toggleSelection("node-3")
+        try w.setNodeLocked("node-2", true)
+        let add = try #require(w.strokeChange(.add), "the editor is enabled")
+        try w.setStyle(add.change)
+        #expect(Self.stroke(w, "node-3") == .default)
+        #expect(Self.stroke(w, "node-2") == nil, "the locked layer took a stroke")
+        #expect(Set(w.selectedNodeIDs) == ["node-2", "node-3"])
+    }
+
     /// A hidden layer takes no stroke from either path, and the editor says why (#4919).
     @Test func aHiddenLayerRefusesWithItsHelp() throws {
         var w = DesignFixtures.cards

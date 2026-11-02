@@ -1,12 +1,14 @@
 // HaloPlaceSnapshots.swift (placed-images PH-u): a placed picture in Halo's viewer and inspector, from values (the
 // draw list fills a solid's picture, so each fixture is built by hand rather than placed through the commands).
-// halo-place-logo: a 480 x 160 logo.svg on a solid centred in a 1920 x 1080 composition (an SVG draws SuiteUI's
-// grey placeholder with its name until PL-8). halo-place-fill: a 1200 x 800 JPEG, red left and blue right, filling
-// a full-frame solid. halo-place-inspector: the layer inspector on `three-layers` with Background holding
-// logo.svg: IMAGE reads "logo.svg · SVG · 480 × 160" with live Replace… and Reset Size over the Place row's
-// "Into the selected solid" checkbox, no note (the place commands run since PH-6), and FILL is off with the note
-// that the picture covers the solid's colour. Also the pure mappings: the ⌥-drag's focus pan and the drop point.
+// halo-place-logo: a 480 x 160 logo.svg, red left half and blue right, on a solid centred in a 1920 x 1080
+// composition. halo-place-fill: a 1200 x 800 JPEG, red left and blue right under a yellow top band, filling a
+// full-frame solid by cover, which crops the band (a top focus shows it, `fillCoversAndPansTheBand`).
+// halo-place-inspector: the layer inspector on `three-layers` with Background holding logo.svg: IMAGE reads
+// "logo.svg · SVG · 480 × 160" with live Replace… and Reset Size over the Place row's "Into the selected solid"
+// checkbox, no note (the place commands run since PH-6), and FILL is off with the note that the picture covers the
+// solid's colour. Also the pure mappings: the ⌥-drag's focus pan and the drop point.
 // Light and Dark. macOS only.
+import AppKit
 import CoreGraphics
 import HaloModel
 import ImageIO
@@ -26,10 +28,17 @@ import UniformTypeIdentifiers
     }
 
     @Test func fill() throws {
-        let asset = PlacedAsset(
-            id: "photo", name: "photo-1200x800.jpg", format: .jpeg, natural: Size(width: 1200, height: 800),
-            data: try Self.jpeg(width: 1200, height: 800))
-        try Self.both(Self.viewer(Self.item(asset, box: Rect(minX: 0, minY: 0, maxX: 1920, maxY: 1080))), name: "halo-place-fill")
+        try Self.both(Self.viewer(Self.item(Self.photoAsset(), box: Self.frame)), name: "halo-place-fill")
+    }
+
+    /// Cover crops the photo's yellow top band while its focus is centred, and a focus at the top shows it, so a
+    /// stretch to the solid or a pan that draws nothing can't pass (#4748, #5003).
+    @Test func fillCoversAndPansTheBand() throws {
+        let asset = try Self.photoAsset()
+        let centred = try #require(render(Self.viewer(Self.item(asset, box: Self.frame)), scheme: .light))
+        let top = try #require(render(Self.viewer(Self.item(asset, box: Self.frame, focusY: 0)), scheme: .light))
+        #expect(Self.yellowPixels(centred) == 0, "the centred cover shows the band it should crop")
+        #expect(Self.yellowPixels(top) > 100, "a focus at the top doesn't show the band")
     }
 
     @Test func inspector() throws {
@@ -70,12 +79,32 @@ import UniformTypeIdentifiers
     }
 
     /// A 480 x 160 SVG: a dark rounded bar with a light circle.
-    static let logoSVG = ##"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160"><rect width="480" height="160" rx="24" fill="#202840"/><circle cx="80" cy="80" r="48" fill="#F0C040"/></svg>"##
+    static let logoSVG = ##"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="160"><rect width="240" height="160" fill="#FF0000"/><rect x="240" width="240" height="160" fill="#0000FF"/></svg>"##
     static let logoAsset = PlacedAsset(
         id: "logo", name: "logo.svg", format: .svg, natural: Size(width: 480, height: 160), data: Data(logoSVG.utf8))
 
-    /// A solid over `box` showing `asset`, on a grey full-frame solid.
-    private static func item(_ asset: PlacedAsset, box: Rect) -> [HaloDrawItem] {
+    static let frame = Rect(minX: 0, minY: 0, maxX: 1920, maxY: 1080)
+
+    static func photoAsset() throws -> PlacedAsset {
+        PlacedAsset(
+            id: "photo", name: "photo-1200x800.jpg", format: .jpeg, natural: Size(width: 1200, height: 800),
+            data: try jpeg(width: 1200, height: 800))
+    }
+
+    /// Pixels near pure yellow, every other row and column.
+    private static func yellowPixels(_ image: NSBitmapImageRep) -> Int {
+        var count = 0
+        for y in stride(from: 0, to: image.pixelsHigh, by: 2) {
+            for x in stride(from: 0, to: image.pixelsWide, by: 2) {
+                guard let c = image.colorAt(x: x, y: y)?.usingColorSpace(.sRGB) else { continue }
+                if c.redComponent > 0.8, c.greenComponent > 0.8, c.blueComponent < 0.3 { count += 1 }
+            }
+        }
+        return count
+    }
+
+    /// A solid over `box` showing `asset` at focus (0.5, `focusY`), on a grey full-frame solid.
+    private static func item(_ asset: PlacedAsset, box: Rect, focusY: Double = 0.5) -> [HaloDrawItem] {
         let frame = HaloLayerRect(x: 0, y: 0, width: 1920, height: 1080)
         let rect = HaloLayerRect(x: box.minX, y: box.minY, width: box.width, height: box.height)
         return [
@@ -85,7 +114,7 @@ import UniformTypeIdentifiers
             HaloDrawItem(
                 layerID: "placed", kind: .solid, bounds: rect, matrix: .identity, opacity: 1,
                 color: HaloLayerColor(red: 0, green: 1, blue: 0), blendMode: .normal,
-                placedAsset: asset, placedImage: PlacedImage(assetID: asset.id, box: box)),
+                placedAsset: asset, placedImage: PlacedImage(assetID: asset.id, box: box, focus: Point(x: 0.5, y: focusY))),
         ]
     }
 
@@ -96,7 +125,8 @@ import UniformTypeIdentifiers
             .background(SuiteColor.panel)
     }
 
-    /// A `width` x `height` JPEG, red on the left half and blue on the right.
+    /// A `width` x `height` JPEG, red on the left half and blue on the right, with a yellow band over its top 40
+    /// rows: cover into 1920 x 1080 crops 62.5 rows off the top, so only a top focus (or a stretch) shows the band.
     static func jpeg(width: Int, height: Int) throws -> Data {
         let data = NSMutableData()
         guard let space = CGColorSpace(name: CGColorSpace.sRGB),
@@ -108,6 +138,8 @@ import UniformTypeIdentifiers
         context.fill(CGRect(x: 0, y: 0, width: width / 2, height: height))
         context.setFillColor(CGColor(srgbRed: 0, green: 0, blue: 1, alpha: 1))
         context.fill(CGRect(x: width / 2, y: 0, width: width - width / 2, height: height))
+        context.setFillColor(CGColor(srgbRed: 1, green: 1, blue: 0, alpha: 1))
+        context.fill(CGRect(x: 0, y: height - 40, width: width, height: 40))
         guard let image = context.makeImage(),
             let destination = CGImageDestinationCreateWithData(data, UTType.jpeg.identifier as CFString, 1, nil)
         else { throw CocoaError(.fileWriteUnknown) }

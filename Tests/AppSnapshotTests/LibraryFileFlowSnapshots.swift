@@ -41,7 +41,8 @@ extension BodyCountSuites {
                 readers: { SuiteDocumentsBridge.readers(in: .standard, ofExtension: $0) })
             #expect(actions.count == 3)
             #expect(!SuiteDropMark.refuses(actions), "Library refuses JPEGs: \(actions)")
-            let sentence = try #require(SuiteDropMark.sentence(for: actions, app: .library), "no mark for JPEGs")
+            let sentence = try #require(SuiteDropMark.sentence(for: actions, app: .library, documentName: LibraryWindow.dropTarget), "no mark for JPEGs")
+            #expect(sentence == "Place in Library", "the mark doesn't name Library: \(sentence)")
             let window = LibraryWindow(arguments: ["Library", "-LibraryFixture", "samples"])
                 .overlay(alignment: .bottom) {
                     SuiteDropMarkView(sentence: sentence, refused: false)

@@ -1,19 +1,5 @@
 [
   {
-    "label": ".onlyPickedAnchorsMove: a move takes every anchor, not the picked ones",
-    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
-    "find": "AnchorEdit.moved(edit.path, anchorSelection.set, dx:",
-    "replace": "AnchorEdit.moved(edit.path, Set(Self.anchorRefs(edit.path)), dx:",
-    "tests": "FlareAnchorEditTests"
-  },
-  {
-    "label": ".scaledLayerDrag: a move skips the layer's scale and lands twice as far",
-    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
-    "find": "            let local = back.apply(Point(x: dx, y: dy))\n",
-    "replace": "            let local = Point(x: dx, y: dy)\n",
-    "tests": "FlareAnchorEditTests"
-  },
-  {
     "label": "a multi-item pick puts the first item's path in edit",
     "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
     "find": "guard tool == .directSelect, selection.count == 1,",
@@ -42,17 +28,31 @@
     "tests": "FlareAnchorEditTests"
   },
   {
-    "label": ".shiftAddsAnchorsToTheSelection: an extending select replaces the picked anchors",
-    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
-    "find": "(extend ? anchorSelection.ordered : []) + (anchors ?? [])",
-    "replace": "[] + (anchors ?? [])",
-    "tests": "FlareAnchorEditTests"
-  },
-  {
     "label": ".shiftAddsAnchorsToTheSelection: a Shift-press on an anchor replaces the picked anchors",
     "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
     "find": "(modifiers.contains(.shift) ? anchorSelection.ordered : []) + [ref]",
     "replace": "[ref]",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".oneDragTokenIsOneStepUntilTheDocumentChanges: a drag token folds into its old step after an undo took that step away",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "let folds = key != nil && pathDrag?.key == key && pathDrag?.document == engine?.document",
+    "replace": "let folds = key != nil && pathDrag?.key == key",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".oneDragTokenIsOneStepUntilTheDocumentChanges: each edit under one drag token is a step of its own",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "if folds { try engine.undo() }",
+    "replace": "if folds {}",
+    "tests": "FlareAnchorEditTests"
+  },
+  {
+    "label": ".aLockedLayerRefusesWithItsHelp: a refused path gesture says nothing",
+    "file": "Sources/FlareModel/FlareAnchors+Kernel.swift",
+    "find": "case .unavailable(_, let why): refuse(.refused(why))",
+    "replace": "case .unavailable: break",
     "tests": "FlareAnchorEditTests"
   }
 ]

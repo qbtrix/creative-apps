@@ -1,0 +1,6 @@
+[
+  {"label": "cancelDeletesTheMovie: a cancelled movie is kept", "file": "Sources/HaloModel/HaloMovieSink.swift", "find": "        movie?.cancel()\n", "replace": "", "tests": "HaloMovieSinkTests.cancelDeletesTheMovie"},
+  {"label": "everyFrameReachesTheMovieInOrder: the written count never moves", "file": "Sources/HaloModel/HaloMovieSink.swift", "find": "        written += 1\n", "replace": "", "tests": "HaloMovieSinkTests.everyFrameReachesTheMovieInOrder"},
+  {"label": "everyFrameReachesTheMovieInOrder: the movie never closes", "file": "Sources/HaloModel/HaloMovieSink.swift", "find": "        try await movie?.finish()\n", "replace": "", "tests": "HaloMovieSinkTests.everyFrameReachesTheMovieInOrder"},
+  {"label": "proResAndHevcNeedAWholeFrameRate: ProRes plans a 29.97 fps movie", "file": "Sources/HaloModel/Live/HaloRenderRules.swift", "find": "            } else if s.codec != .h264 {\n", "replace": "            } else if s.codec == .hevc {\n", "tests": "HaloMovieSinkTests.proResAndHevcNeedAWholeFrameRate"}
+]

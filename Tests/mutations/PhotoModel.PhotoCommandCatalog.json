@@ -26,5 +26,19 @@
     "find": "quality: p.quality ?? w.exportOptions.quality",
     "replace": "quality: w.exportOptions.quality",
     "tests": "PhotoCommandPathTests"
+  },
+  {
+    "label": "offWithReasonUntilTheAdapter: Paste as Image turns on with an image open",
+    "file": "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "find": "availability: menu { _ in pasteAsImageHelp })",
+    "replace": "availability: menu())",
+    "tests": "PhotoPasteAsImageCommandTests"
+  },
+  {
+    "label": "catalogListsPasteAsImage: the id is misspelt",
+    "file": "Sources/PhotoModel/PhotoCommandCatalog.swift",
+    "find": ".typed(\"edit.paste-as-image\", title:",
+    "replace": ".typed(\"edit.paste-as-imge\", title:",
+    "tests": "PhotoPasteAsImageCommandTests"
   }
 ]

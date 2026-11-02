@@ -1,5 +1,5 @@
 // Fakes/FakeGeometry.swift: the geometry fakes (blueprint 5.2): crop (PV-3),
-// selection and layer masks (PV-5), adjustment layers (PV-6) and the free
+// layer masks (PV-5), adjustment layers (PV-6) and the free
 // transform (PV-7). Deterministic and stateless; each does the least that
 // still changes something a journey can see. Linux-safe.
 import CoreRaster
@@ -30,42 +30,6 @@ public struct FakeCrop: CropSizing {
     public func swapped(_ aspect: CropAspect, canvas: CanvasSize) -> CropAspect { aspect }
 }
 
-/// Every shape selects its bounding rectangle.
-public struct FakeSelection: SelectionShaping {
-    public var unavailableHelp: String? { nil }
-    public init() {}
-    public func mask(for shape: SelectionShape, canvas: CanvasSize) throws -> Mask {
-        let rect: PixelRect
-        switch shape {
-        case .rectangle(let r), .ellipse(let r): rect = r
-        case .lasso(let points):
-            guard let first = points.first else { throw PhotoRefusal("Draw around the area to select.") }
-            rect = points.reduce(PixelRect(from: first, to: first)) { $0.union(PixelRect(from: $1, to: $1)) }
-        }
-        return try Mask.rectangle(width: canvas.width, height: canvas.height, x: Double(rect.x), y: Double(rect.y),
-                                  w: Double(rect.width), h: Double(rect.height))
-    }
-    public func combine(_ current: Mask?, with new: Mask, _ mode: SelectionCombine) throws -> Mask? {
-        guard var current, mode != .replace else { return mode == .subtract ? current : new }
-        if mode == .add { try current.add(new) } else { try current.subtract(new) }
-        return current
-    }
-    public func inverted(_ mask: Mask?, canvas: CanvasSize) throws -> Mask? {
-        guard var mask else { return try Mask(width: canvas.width, height: canvas.height, fill: 1) }
-        mask.invert()
-        return mask
-    }
-    public func feathered(_ mask: Mask, radius: Double) throws -> Mask { mask }
-    public func bounds(of mask: Mask) -> PixelRect? {
-        mask.area > 0 ? PixelRect(x: 0, y: 0, width: mask.width, height: mask.height) : nil
-    }
-    public func outline(of mask: Mask) -> [[Mask.Point]] {
-        guard let b = bounds(of: mask) else { return [] }
-        let (x0, y0, x1, y1) = (Double(b.x), Double(b.y), Double(b.maxX), Double(b.maxY))
-        return [[.init(x: x0, y: y0), .init(x: x1, y: y0), .init(x: x1, y: y1), .init(x: x0, y: y1)]]
-    }
-}
-
 /// Masks reveal everything; nothing is hidden.
 public struct FakeMasking: LayerMasking {
     public var unavailableHelp: String? { nil }
@@ -82,7 +46,7 @@ public struct FakeMasking: LayerMasking {
 /// An adjustment layer brightens by one stop, whatever its settings.
 public struct FakeAdjustmentLayers: AdjustmentLayering {
     public var unavailableHelp: String? { nil }
-    public var kinds: [AdjustmentKind] { [.exposure, .levels, .curves, .hueSaturation] }
+    public var kinds: [AdjustmentKind] { [.exposure, .levels, .curves, .hueSaturation, .blackAndWhite, .invert] }
     public init() {}
     public func applying(_ settings: AdjustmentSettings, to below: PixelBuffer, opacity: Double,
                          blendMode: BlendMode, mask: PixelBuffer?) throws -> PixelBuffer {
@@ -117,4 +81,10 @@ public struct FakeTransform: LayerTransforming {
                             y: content.y + Int(t.dy.rounded()))
     }
     public func flipped(_ content: PlacedPixels, _ axis: FlipAxis) throws -> PlacedPixels { content }
+    /// The move `applied` makes, as a matrix.
+    public func matrix(_ draft: TransformDraft, origin: (x: Int, y: Int)) throws -> AffineMatrix {
+        let t = draft.transform
+        let (dx, dy) = t.dx.isFinite && t.dy.isFinite && abs(t.dx) < 1e6 && abs(t.dy) < 1e6 ? (t.dx.rounded(), t.dy.rounded()) : (0, 0)
+        return AffineMatrix(a: 1, b: 0, c: 0, d: 1, tx: Double(origin.x) + dx, ty: Double(origin.y) + dy)
+    }
 }

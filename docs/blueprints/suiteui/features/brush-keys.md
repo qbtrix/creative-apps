@@ -110,12 +110,15 @@ public struct OpacityDigits: Sendable {
     public mutating func type(_ digit: Int, at now: Double) -> Double         // percent: 1 → 10, 0 → 100, 4 then 5 → 45
 }
 // Sources/SuiteKernel/Stroke/BrushKeyCommands.swift (BK-1).
-public protocol BrushKeyTarget: AnyObject {
+public protocol BrushKeyTarget: Sendable {                                   // the app's workspace, a value type
     var activeBrush: BrushSettings? { get }                                    // nil with no brush tool
-    func setActiveBrush(_ s: BrushSettings) throws
-    func setSelectedOpacity(_ percent: Double) throws                          // one undo step for the whole selection
+    var layerOpacityHelp: String? { get }                                      // why layer.set-opacity can't run now; default nil
+    mutating func setActiveBrush(_ s: BrushSettings) throws
+    mutating func setSelectedOpacity(_ percent: Double) throws                 // one undo step for the whole selection
 }
-public enum BrushKeyCommands { public static let specs: [CommandSpec] }       // brush.size-up/-down, brush.hardness-up/-down, brush.set-opacity, layer.set-opacity
+public enum BrushKeyCommands {                                                 // an app registers them with `+ BrushKeyCommands.specs(<X>Workspace.self)`
+    public static func specs<T: BrushKeyTarget>(_ target: T.Type) -> [CommandSpec<T>]  // brush.size-up/-down, brush.hardness-up/-down, brush.set-opacity, layer.set-opacity
+}
 // Sources/SuiteUI/ToolKeys.swift (BK-5): one new entry point.
 extension ToolKeys { public static func brushAction(for event: NSEvent, settings: BrushSettings?, digits: inout OpacityDigits) -> BrushKeyAction? }
 ```

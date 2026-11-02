@@ -14,6 +14,20 @@
     "tests": "ExportOptionsTests"
   },
   {
+    "label": "shapeLoose: the shape tolerance is a whole long side, not half of one (#5326)",
+    "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "find": "abs(Double(w) * sh - Double(h) * sw) * 2 <= max(sw, sh)",
+    "replace": "abs(Double(w) * sh - Double(h) * sw) <= max(sw, sh)",
+    "tests": "ExportOptionsTests"
+  },
+  {
+    "label": "shapeTight: the shape tolerance reads the short side, refusing a rounded size (#5326)",
+    "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
+    "find": "abs(Double(w) * sh - Double(h) * sw) * 2 <= max(sw, sh)",
+    "replace": "abs(Double(w) * sh - Double(h) * sw) * 2 <= min(sw, sh)",
+    "tests": "ExportOptionsTests"
+  },
+  {
     "label": "gpsKept: All but location keeps the GPS dictionary",
     "file": "Sources/SuiteKernel/Export/ExportOptions.swift",
     "find": "static let location: Set<String> = [\"{GPS}\", ",

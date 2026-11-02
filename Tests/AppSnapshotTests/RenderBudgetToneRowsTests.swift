@@ -56,15 +56,14 @@ extension BodyCountSuites {
 }
 
 /// The counted window around the page, which owns the settings.
-private struct ToneRowsBudgetWindow: View {
+private struct ToneRowsBudgetWindow: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         ToneRowsBudgetPage()
             .padding(SuiteSpacing.m)

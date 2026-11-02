@@ -125,3 +125,23 @@ private func liftedCards(_ change: (inout [DesignNode]) -> Void) -> DesignPage {
     #expect(page.contentBounds == rc(-30, -40, 290, 290))
     #expect(DesignRect.union([]) == nil)
 }
+
+@Test func thePastEdgeNoteNamesWhatShowsDimmed() {
+    var workspace = DesignFixtures.cards
+    #expect(cardsPage(workspace)?.pastEdgeNote == nil)
+    workspace.setPageSize(width: 800, height: 1024)
+    #expect(cardsPage(workspace)?.pastEdgeNote == "Desktop reaches past the page, so the part outside shows dimmed.")
+    let lifted = liftedCards { $0 = $0.map { var node = $0; node.frame.x += 1300; return node } }
+    let count = lifted.nodes.filter { !$0.isHidden }.count
+    #expect(count > 1 && count < lifted.nodes.count, "the hidden layer isn't counted")
+    #expect(lifted.pastEdgeNote == "\(count) layers reach past the page, so the parts outside show dimmed.")
+    let hidden = liftedCards { nodes in
+        nodes = nodes.enumerated().map { index, node in
+            var node = node
+            if index == 0 { node.frame.x = -50 } else if index == 1 { node.frame.x = -50; node.isHidden = true }
+            return node
+        }
+    }
+    #expect(hidden.pastEdgeNote == "\(hidden.nodes[0].name) reaches past the page, so the part outside shows dimmed.")
+}
+

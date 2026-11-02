@@ -3,9 +3,11 @@
 // (`setText`, HaloTextEdits.swift, refused under `halo.inspector.text.string`
 // when blank), the size bar's samples (`setFontSize`, coalesced until
 // `endTextSizeScrub`), and the layer color (`setLayerColor`,
-// HaloTextEdits+Color.swift). `textScene(_:)` is a pass-through: the text
-// area shows no dialog.
+// HaloTextEdits+Color.swift). `textScene(_:)` hands the window's views the
+// `haloText` action (HaloTextInspector.swift, text-style TS-10): a text style
+// rows gesture through `HaloProject.runText`; the text area shows no dialog.
 import HaloModel
+import SuiteKernel
 import SwiftUI
 
 extension HaloWindow {
@@ -19,5 +21,10 @@ extension HaloWindow {
         }
     }
 
-    func textScene(_ content: some View) -> some View { content }
+    func textScene(_ content: some View) -> some View {
+        content.environment(\.haloText, { intent in
+            takePlayback()
+            model.runText(intent)
+        })
+    }
 }

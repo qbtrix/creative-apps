@@ -7,7 +7,9 @@
 // while not animated, a hollow diamond to add a key at the playhead, a filled
 // one to remove it. Hover fills the circle; disabled draws at 40%, and with
 // `unavailableHelp` both buttons show that reason as their tooltip, so a
-// mouse user learns why the pair does nothing (`help(_:state:unavailable:)`). KeyState
+// mouse user learns why the pair does nothing (`help(_:state:unavailable:)`);
+// `unavailableHelp` also disables the pair itself, so with `registers` a host
+// passes only its intents and wires nothing by hand (#4824). KeyState
 // carries the symbol, color and VoiceOver value of each state. Given an `id`,
 // the stopwatch reads it as its accessibility identifier and the diamond reads
 // `diamondID(id)`. Set the id here, never on the KeyframeButton from outside:
@@ -143,8 +145,9 @@ public struct KeyframeButton: View {
     public var body: some View {
         let help = Self.help(property, state: state, unavailable: unavailableHelp)
         let face = facing.face(for: state.presence)
+        let enabled = isEnabled && unavailableHelp == nil
         let entries = id.map {
-            Self.stateEntries(property, id: $0, state: state, enabled: isEnabled, unavailable: unavailableHelp)
+            Self.stateEntries(property, id: $0, state: state, enabled: enabled, unavailable: unavailableHelp)
         }
         return HStack(spacing: 0) {
             Button(action: onToggle) {
@@ -153,7 +156,7 @@ public struct KeyframeButton: View {
                     .foregroundStyle(state.color)
                     .frame(width: SuiteSize.keyframeButton, height: SuiteSize.keyframeButton)
                     .background(
-                        state == .keyedHere ? SuiteColor.keyedTint : hovering && isEnabled ? SuiteColor.field : SuiteColor.panelRaised,
+                        state == .keyedHere ? SuiteColor.keyedTint : hovering && enabled ? SuiteColor.field : SuiteColor.panelRaised,
                         in: Circle())
                     .contentShape(Circle())
             }
@@ -182,7 +185,8 @@ public struct KeyframeButton: View {
             }
             .frame(width: SuiteSize.keyframeButton, height: SuiteSize.keyframeButton)
         }
-        .opacity(isEnabled ? 1 : SuiteColor.disabledOpacity)
+        .disabled(unavailableHelp != nil)
+        .opacity(enabled ? 1 : SuiteColor.disabledOpacity)
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: hovering)
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: state)
     }

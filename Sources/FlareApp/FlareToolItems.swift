@@ -1,12 +1,20 @@
 // FlareToolItems.swift: the stage palette's items. FlareTool conforms to
 // SuiteUI's PaletteTool: each tool's title, SF Symbol and one-key shortcut
 // (V Select, A Direct Select, R Rectangle, E Ellipse, P Pen, U Shape), with
-// its Model's `unavailableHelp` as the reason a tool that can't act yet shows
+// its behaviour class (`gesture`), and its Model's `unavailableHelp` as the reason a tool that can't act yet shows
 // disabled. Shape's options are FlareShapeOptions in the inspector.
 import FlareModel
 import SuiteUI
 
 extension FlareTool: PaletteTool {
+    public var gesture: ToolGesture {
+        switch self {
+        case .select: .movesContent
+        case .directSelect, .pen: .editsPoints
+        case .rectangle, .ellipse, .shape: .creates
+        }
+    }
+
     public var title: String {
         switch self {
         case .select: "Select"

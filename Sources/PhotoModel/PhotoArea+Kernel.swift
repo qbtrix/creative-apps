@@ -28,8 +28,12 @@ extension PhotoWorkspace: AreaSelectTarget {
 
     /// Renders `recipe` at the canvas's size and makes it the selection: one undo step named for the command.
     public mutating func setAreaRecipe(_ recipe: AreaRecipe) throws {
+        try setArea(recipe, command: Self.areaCommand(from: areaRecipe, to: recipe, last: area.last))
+    }
+
+    /// `setAreaRecipe` with the undo step named for command `id` (the area tools name theirs by tool).
+    mutating func setArea(_ recipe: AreaRecipe, command id: String) throws {
         let before = PhotoEdit.group([.selection(selection, selectionMask), .area(area)])
-        let id = Self.areaCommand(from: areaRecipe, to: recipe, last: area.last)
         try showArea(recipe)
         record(before, named: Self.catalog.spec(id)?.title ?? "Select")
     }

@@ -2,7 +2,8 @@
 // Folder… takes `-LibraryImportFolder` or a folder from the open panel (a
 // folder dropped on the empty catalog skips the panel),
 // begins the import on the catalog, runs the importer off the main actor and
-// hands its progress, batches and result back to the catalog in order.
+// hands its progress (stamped with the seconds since it began, so the row
+// can say the time left), batches and result back to the catalog in order.
 // `-LibraryImportOnLaunch` imports once, as soon as the catalog has loaded.
 import AppKit
 import Foundation
@@ -85,10 +86,14 @@ extension LibraryWindow {
             sink.finish()
         }
         // On the main actor: one stream keeps the batches before the result.
+        let started = ContinuousClock.now
         Task {
             for await event in events {
                 switch event {
-                case .progress(let progress): model.showImportProgress(progress)
+                case .progress(var progress):
+                    let since = started.duration(to: .now).components
+                    progress.elapsed = Double(since.seconds) + Double(since.attoseconds) / 1e18
+                    model.showImportProgress(progress)
                 case .added(let batch): model.appendImported(batch)
                 case .finished(let result): model.finishImport(result, folder: name)
                 case .failed(let error): model.failImport(error, folder: name)
@@ -104,6 +109,9 @@ extension LibraryWindow {
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
         panel.prompt = "Import"
+        // Add in place or copy to a folder (catalog-files LC-3, LibraryImportOptions.swift).
+        panel.accessoryView = NSHostingView(rootView: LibraryImportOptions())
+        panel.isAccessoryViewDisclosed = true
         guard panel.runModal() == .OK, let url = panel.url else { return nil }
         return url.path(percentEncoded: false)
     }

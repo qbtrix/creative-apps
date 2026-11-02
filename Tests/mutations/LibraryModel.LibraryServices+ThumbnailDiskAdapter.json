@@ -1,0 +1,16 @@
+[
+  {
+    "label": "the live thumbnails get no disk tier",
+    "file": "Sources/LibraryModel/Live/LibraryServices+ThumbnailDiskAdapter.swift",
+    "find": "develop: live.develop, disk: disk)",
+    "replace": "develop: live.develop)",
+    "tests": "LibraryServicesThumbnailDiskTests"
+  },
+  {
+    "label": "the store lands in Library's folder, not its Thumbnails",
+    "file": "Sources/LibraryModel/Live/LibraryServices+ThumbnailDiskAdapter.swift",
+    "find": "home: home) + \"/Thumbnails\"",
+    "replace": "home: home)",
+    "tests": "LibraryServicesThumbnailDiskTests"
+  }
+]

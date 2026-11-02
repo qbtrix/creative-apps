@@ -91,11 +91,18 @@ final class LibraryShellJourneyTests: XCTestCase {
         for id in Self.onScreenControlIDs(library) {
             XCTAssertNotNil(entries[id], "\(id) is on screen but in neither library.controls nor suite.controls")
         }
-        for entry in entries.values.sorted(by: { $0.id < $1.id }) {
+        for listed in entries.values.sorted(by: { $0.id < $1.id }) {
+            // Judge each control as listed now: an earlier click (a segmented control's own) can change it.
+            let probe = Self.decode(library.element("library.controls"))?.controls.first { $0.id == listed.id }
+            let entry = probe ?? Self.decode(library.element("suite.controls"))?.controls.first { $0.id == listed.id } ?? listed
             guard entry.enabled else {
                 XCTAssertFalse((entry.reason ?? "").isEmpty, "\(entry.id) is disabled and doesn't say why")
                 continue
             }
+            // A segment already selected (its container's click picked it) has nothing to change; a toggle that is
+            // simply on still gets its click. A segment is an entry whose parent id is also listed.
+            let parent = String(entry.id[..<(entry.id.lastIndex(of: ".") ?? entry.id.startIndex)])
+            guard !(entry.selected == true && entries[parent] != nil) else { continue }
             let control = library.element(entry.id)
             XCTAssert(control.waitForExistence(timeout: 5), "\(entry.id) is listed but not on screen")
             let before = library.app.windows.firstMatch.screenshot().pngRepresentation

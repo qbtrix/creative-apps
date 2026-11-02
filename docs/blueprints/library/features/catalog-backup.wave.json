@@ -2,7 +2,7 @@
   "title": "Catalog backups: rolling copies of Library's catalog in the suite store, and File > Restore Catalog Backup",
   "wave": 7,
   "order": 30,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 Library must-haves (audit row 9); real job RJ-L54 (new)",

@@ -1,7 +1,10 @@
 // FlareLottieOpen: opens a Lottie JSON file as an untitled Flare document,
 // plus one sentence for each part the reader had to leave out (feature
 // lottie-open LO-3, docs/blueprints/flare/features/lottie-open.md). The reader is
-// FlareCore's `LottieImport`; nothing here parses Lottie. Over-limit bytes are
+// FlareCore's `LottieImport`. Its report counts skipped parts by kind; a
+// precomp, image or text layer is named from the file's top-level layer `nm`
+// ("The precomp "Logo" ..."), one sentence each, until core#808 names them in
+// the report itself. Nothing else here reads the JSON. Over-limit bytes are
 // refused before the reader sees them, and the reader's errors become named
 // refusals. The document never carries the JSON's name, so Save asks for a
 // .flare (`saveName`) and the JSON is never written.
@@ -58,7 +61,34 @@ public enum FlareLottieOpen {
         }
         var document = read.0
         document.metadata.title = stem(name)
-        return (document, read.1.skipped.map(sentence))
+        let entries = read.1.skipped
+        let named = entries.contains { skippedLayerKinds.values.contains(String(parse($0).kind)) }
+        return (document, sentences(entries, layers: named ? layerKinds(data) : []))
+    }
+
+    /// The Lottie layer types (`ty`) the reader always leaves out, and the kind its report counts each as.
+    static let skippedLayerKinds: [Double: String] = [0: "precomp", 2: "image", 5: "text"]
+
+    /// The report's entries as sentences: a skipped layer kind whose count matches the file's layers of that type
+    /// gets one sentence per layer, named when the layer has a name; every other entry gets `sentence`.
+    static func sentences(_ entries: [String], layers: [(Double, String?)]) -> [String] {
+        // ponytail: names come from the JSON here until core#808 puts them in ImportReport; then drop `layers`.
+        entries.flatMap { entry -> [String] in
+            let (kind, count) = parse(entry)
+            guard let type = skippedLayerKinds.first(where: { $0.value == kind })?.key else { return [sentence(entry)] }
+            let names = layers.filter { $0.0 == type }.map { $0.1 }
+            guard names.count == count else { return [sentence(entry)] }
+            return names.map { name in
+                name.map { "The \(kind) \"\($0)\" isn't supported yet and was left out." } ?? sentence(String(kind))
+            }
+        }
+    }
+
+    /// Each top-level layer's type and name (nil when it has none); empty when the JSON doesn't decode so.
+    static func layerKinds(_ data: Data) -> [(Double, String?)] {
+        struct File: Decodable { struct Layer: Decodable { var ty: Double?; var nm: String? }; var layers: [Layer] }
+        let layers = (try? JSONDecoder().decode(File.self, from: data))?.layers ?? []
+        return layers.compactMap { layer in layer.ty.map { ($0, layer.nm.flatMap { $0.isEmpty ? nil : $0 }) } }
     }
 
     /// The refusal for a file of `byteCount` bytes, nil when the reader takes it; the app checks a file's size
@@ -72,6 +102,13 @@ public enum FlareLottieOpen {
 
     /// One report entry ("precomp (1)", "expression (3)") as a sentence.
     static func sentence(_ entry: String) -> String {
+        let (kind, count) = parse(entry)
+        return count == 1 ? "The \(kind) isn't supported yet and was left out."
+            : "\(count) parts of the kind \"\(kind)\" aren't supported yet and were left out."
+    }
+
+    /// One report entry's kind and count: "precomp (2)" is ("precomp", 2), "dash" is ("dash", 1).
+    static func parse(_ entry: String) -> (kind: Substring, count: Int) {
         var kind = Substring(entry), count = 1
         if entry.hasSuffix(")"), let open = entry.lastIndex(of: "("),
            let n = Int(entry[entry.index(after: open)..<entry.index(before: entry.endIndex)]) {
@@ -79,8 +116,7 @@ public enum FlareLottieOpen {
             count = n
             while kind.last == " " { kind.removeLast() }
         }
-        return count == 1 ? "The \(kind) isn't supported yet and was left out."
-            : "\(count) parts of the kind \"\(kind)\" aren't supported yet and were left out."
+        return (kind, count)
     }
 
     /// The reader's error as the refusal the app shows.

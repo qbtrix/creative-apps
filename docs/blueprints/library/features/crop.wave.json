@@ -10,7 +10,7 @@
     425
   ],
   "owned": [
-    "Sources/LibraryModel/LibraryCrop.swift",
+    "Sources/LibraryModel/LibraryCrop+Kernel.swift",
     "Sources/LibraryModel/LibraryLoupeImage.swift",
     "Tests/LibraryModelTests/LibraryCropTests.swift",
     "Tests/mutations/LibraryModel.LibraryCrop.json",
@@ -64,7 +64,7 @@
         "MJ6"
       ],
       "owned": [
-        "Sources/LibraryModel/LibraryCrop.swift",
+        "Sources/LibraryModel/LibraryCrop+Kernel.swift",
         "Sources/LibraryModel/LibraryLoupeImage.swift",
         "Tests/LibraryModelTests/LibraryCropTests.swift",
         "Tests/mutations/LibraryModel.LibraryCrop.json",

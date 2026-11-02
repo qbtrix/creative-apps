@@ -2,9 +2,12 @@
 // (lists-and-layers LL-6, #577). SidebarRenameField is the row's rename state:
 // a refused commit keeps the draft as typed and sets the message, typing
 // clears the message, an accepted commit closes the field, and Escape or focus
-// lost while refused cancels and clears. The Void `onRename` forms of
+// lost while refused cancels and clears. Each refusal shakes the field once
+// (its refusal count goes up by one, never down) and the reason shows on one
+// line, whole in its tooltip (#3462). The Void `onRename` forms of
 // SidebarRow, SuiteSidebarList and SuiteWindow still rename and never refuse.
 // macOS only.
+import AppKit
 import SwiftUI
 import Testing
 @testable import SuiteUI
@@ -38,6 +41,34 @@ import Testing
         #expect(field.draft == " Sky ", "the draft stays exactly as typed")
         #expect(field.message == Self.taken)
         #expect(renamer.asked == ["Sky"], "the app is asked with the trimmed name")
+    }
+
+    /// Each refusal shakes the field once (#3462): the count the shake keys on goes up on a refusal
+    /// only, so the same message refused twice shakes twice, and it never goes back down (a drop
+    /// would shake too).
+    @Test func eachRefusalShakesTheFieldOnce() {
+        let renamer = Renamer()
+        var field = opened(typed: "Sky")
+        #expect(field.refusals == 0)
+        field.commit(original: "Layer 1", rename: renamer.rename)
+        #expect(field.refusals == 1)
+        field.commit(original: "Layer 1", rename: renamer.rename)
+        #expect(field.refusals == 2, "the same refusal again shakes again")
+        field.type("Ground")
+        field.commit(original: "Layer 1", rename: renamer.rename)
+        #expect(!field.isOpen)
+        #expect(field.refusals == 2, "an accepted name doesn't shake")
+        field.open("Ground")
+        field.cancel()
+        #expect(field.refusals == 2, "opening and closing the field don't shake")
+    }
+
+    /// The reason shows on one line however narrow the row, and whole in its tooltip (#3462).
+    @Test func theReasonShowsOnOneLine() {
+        let long = "A layer named “Sky” already exists in this composition, so pick another name."
+        let line = NSHostingView(rootView: SidebarRenameMessage("Sky", identifier: "m").fixedSize()).fittingSize.height
+        let narrow = NSHostingView(rootView: SidebarRenameMessage(long, identifier: "m").frame(width: 120)).fittingSize
+        #expect(narrow.height <= line + 0.5, "the reason wraps: \(narrow.height) pt for a \(line) pt line")
     }
 
     @Test func typingClearsTheMessage() {

@@ -10,7 +10,7 @@ import SwiftUI
 import Testing
 
 @MainActor @Suite struct RenderBudgetWindowLifetimeTests {
-    @Test(.timeLimit(.minutes(1))) func keyCapableWindowsAreFreedCleanly() async throws {
+    @Test(.timeLimit(.minutes(3))) func keyCapableWindowsAreFreedCleanly() async throws {
         for round in 0..<10 {
             weak var freed: NSWindow?
             do {
@@ -23,15 +23,19 @@ import Testing
                 try await w.settle(20)
                 autoreleasepool { w.close() }
             }
-            // AppKit drops its last references to a closed window on a later run-loop turn: turn the run loop,
-            // each turn in its own pool, until the window is freed or 5 s pass. A window something really
-            // keeps alive still fails below.
+            // AppKit drops its last references to a closed window a few run-loop turns later (2 to 4 here):
+            // turn the run loop, each turn in its own pool, until the window is freed. On a loaded Mac one
+            // turn can take seconds, so a wall-clock deadline alone ran out before the turn that frees it
+            // (#5033): call it leaked only after 5 s AND 50 turns. A window something really keeps alive
+            // still fails below.
             let deadline = Date().addingTimeInterval(5)
-            while freed != nil, Date() < deadline {
+            var turns = 0
+            while freed != nil, Date() < deadline || turns < 50 {
                 autoreleasepool { _ = RunLoop.main.run(mode: .default, before: Date().addingTimeInterval(0.01)) }
                 await Task.yield()
+                turns += 1
             }
-            #expect(freed == nil, "round \(round): the closed window is still alive after 5 s, so it leaked")
+            #expect(freed == nil, "round \(round): the closed window is still alive after 5 s and \(turns) run-loop turns, so it leaked")
         }
     }
 }

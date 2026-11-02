@@ -3,7 +3,8 @@
 // SuiteWindow's toolbar (Home, Flare, Design, Photo, Library, Halo), no labels
 // and no bar behind it (docs/blueprints/suiteui.md section 6).
 // The current app's item sits in a capsule of SuiteUI glass (`suiteGlass`, the
-// row's one glass shape) with its icon in textPrimary; the others are
+// row's one glass shape, drawn behind the row so no item's frame grows past
+// its slot) with its icon in textPrimary; the others are
 // textSecondary. Item centers sit `spacing` apart, one of `spacingSteps`
 // (80, 64, 48, 40: from `switcherSpacing` down by SuiteSpacing.l to
 // `switcherSpacingMinimum`), or the last step, `compactSpacing` (toolButton,
@@ -20,13 +21,15 @@
 // current app selected, and no action goes into the overflow. The capsule narrows with the step (`capsuleWidth(spacing:)`, and at the compact
 // step `capsuleHeight(spacing:)` too) so it never reaches a neighbour's icon. An item
 // that can't switch yet is disabled and its tooltip says why after the app's
-// name and shortcut ("Design (⌃⌘2)", then the reason on a new line). The row is
-// the container `suite.switcher`; each item is `suite.switcher.<id>` and lists
-// itself in `suite.controls`. AppSwitcherState is what a SuiteWindow shows:
+// name and shortcut ("Design (⌃⌘2)", then the reason on a new line); the current
+// item is never disabled, so it draws selected, not dimmed, and clicking it does
+// nothing. The row is the container `suite.switcher`; each item is
+// `suite.switcher.<id>` and lists itself in `suite.controls`, the current one
+// with `selected` true. AppSwitcherState is what a SuiteWindow shows:
 // the environment's `suiteSwitcher`, or `placeholder(processName:)` until the
 // switching feature wires it, with every item disabled and the current one
 // picked from the running executable's name. Tested in AppSwitcherTests and
-// SuiteAppSwitcherSnapshots.
+// SuiteAppSwitcherSnapshots, AppSwitcherFrameTests.
 import SuiteModel
 import SwiftUI
 
@@ -49,6 +52,10 @@ public struct AppSwitcherItem: Identifiable, Sendable {
         self.shortcut = shortcut
         self.unavailableHelp = unavailableHelp
     }
+
+    /// Whether the item draws disabled while `current` is the window's app: never the current one, which
+    /// draws selected rather than dimmed even while switching can't run (its tooltip still says why).
+    public func isDisabled(current: ID?) -> Bool { unavailableHelp != nil && id != current }
 
     /// The tooltip: "Design (⌃⌘2)", then the reason on a new line when unavailable.
     public var help: String {
@@ -226,7 +233,7 @@ public struct AppSwitcher: View {
             ForEach(items) { item in
                 let isCurrent = item.id == current
                 Button {
-                    onSelect(item.id)
+                    if !isCurrent { onSelect(item.id) }
                 } label: {
                     AppMark(app: item.app, style: .line)
                         .frame(width: SuiteSize.switcherIcon, height: SuiteSize.switcherIcon)
@@ -235,21 +242,29 @@ public struct AppSwitcher: View {
                         .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
-                .background {
-                    if isCurrent {
-                        Color.clear
-                            .frame(
-                                width: Self.capsuleWidth(spacing: spacing), height: Self.capsuleHeight(spacing: spacing))
-                            .suiteGlass(in: Capsule())
-                    }
-                }
-                .disabled(item.unavailableHelp != nil)
+                .disabled(item.isDisabled(current: current))
                 // After .disabled, so the tooltip still shows on a disabled item.
                 .help(item.help)
                 .accessibilityLabel(item.title)
                 .accessibilityAddTraits(isCurrent ? .isSelected : [])
                 .suiteControl(
-                    id: "suite.switcher.\(item.id)", enabled: item.unavailableHelp == nil, reason: item.unavailableHelp)
+                    entry: ControlEntry(
+                        id: "suite.switcher.\(item.id)", enabled: !item.isDisabled(current: current),
+                        reason: item.isDisabled(current: current) ? item.unavailableHelp : nil
+                    ).selecting(isCurrent),
+                    identifies: true)
+            }
+        }
+        // The capsule is the row's background, centered on the current slot: as a button's background it is
+        // wider than the slot and widened that button's frame over its neighbours (#6011).
+        .background(alignment: .leading) {
+            if let index = items.firstIndex(where: { $0.id == current }) {
+                let width = Self.capsuleWidth(spacing: spacing)
+                Color.clear
+                    .frame(width: width, height: Self.capsuleHeight(spacing: spacing))
+                    .suiteGlass(in: Capsule())
+                    .offset(x: CGFloat(index) * spacing + (spacing - width) / 2)
+                    .accessibilityHidden(true)
             }
         }
         .accessibilityElement(children: .contain)

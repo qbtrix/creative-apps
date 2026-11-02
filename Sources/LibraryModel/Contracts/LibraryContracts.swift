@@ -77,6 +77,13 @@ public protocol PhotoImporting: Sendable {
     func importFolder(_ folder: String, known: Set<String>,
                       progress: @escaping @Sendable (ImportProgress) -> Void,
                       added: @escaping @Sendable ([PhotoItem]) -> Void) async throws -> ImportResult
+    /// This importer copying each new photo under `options.copyTo` before it is added (catalog-files LC-5); one
+    /// that can't copy returns itself and adds in place.
+    func copying(_ options: ImportCopyOptions) -> any PhotoImporting
+}
+
+extension PhotoImporting {
+    public func copying(_ options: ImportCopyOptions) -> any PhotoImporting { self }
 }
 
 /// J2. Grid thumbnails. Live: `LiveThumbnails(decoder:develop:)`, an actor
@@ -125,6 +132,22 @@ public protocol LoupeImaging: Sendable {
                 quality: RenderQuality) async throws -> RenderedPhoto
     /// Decodes `photos` ahead (the neighbours of the focused photo).
     func prefetch(_ photos: [PhotoItem], longSide: Int) async
+    /// The GPU route's frame for `render(.full)` (suite-imaging IM-11), or nil
+    /// for the CPU route; a loupe with no GPU route (the default) hands back nil.
+    func gpuFrame(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
+                  preferGPU: Bool) async throws -> LoupeGPUFrame?
+    /// The developed histogram a GPU frame shows, taken after the frame lands
+    /// so a slider step never waits on it; by default the `.preview` render's.
+    func histogram(_ photo: PhotoItem, settings: DevelopSettings) async throws -> HistogramBins
+}
+
+extension LoupeImaging {
+    public func gpuFrame(_ photo: PhotoItem, settings: DevelopSettings, longSide: Int,
+                         preferGPU: Bool) async throws -> LoupeGPUFrame? { nil }
+
+    public func histogram(_ photo: PhotoItem, settings: DevelopSettings) async throws -> HistogramBins {
+        try await render(photo, settings: settings, longSide: 512, quality: .preview).histogram
+    }
 }
 
 /// J5, J7. Develop settings to pixels. Live: `LiveDevelop` over CoreRaster:

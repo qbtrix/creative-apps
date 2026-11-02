@@ -50,11 +50,11 @@ extension BodyCountSuites {
 }
 
 /// The window around the stroke pad, counting its own bodies: the window bodies the budget counts.
-private struct StrokePadBudgetHost: View {
-    @MainActor static var bodyRuns = 0
+private struct StrokePadBudgetHost: View, BodyCounted {
+    @Environment(\.bodyTally) private var bodyTally
 
     var body: some View {
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         GalleryStrokePad()
             .allowsWindowActivationEvents()
             .frame(maxWidth: .infinity, maxHeight: .infinity)

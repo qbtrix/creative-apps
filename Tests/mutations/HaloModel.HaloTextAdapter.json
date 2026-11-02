@@ -1,0 +1,7 @@
+[
+  {"label": "eachGraphemeSitsAfterTheOnesBeforeItOnTheBaseline: the baseline sits at the ascent, not descent above the bottom", "file": "Sources/HaloModel/HaloTextAdapter.swift", "find": "let baseline = Double(box.height) - m.descent", "replace": "let baseline = m.ascent", "tests": "HaloTextAdapterTests"},
+  {"label": "eachGraphemeSitsAfterTheOnesBeforeItOnTheBaseline: every grapheme drawn at x 0", "file": "Sources/HaloModel/HaloTextAdapter.swift", "find": "defer { x += advance }", "replace": "_ = advance", "tests": "HaloTextAdapterTests"},
+  {"label": "theSpanIsOneLineInTheSystemFamilyAndTheLayersColour: newlines sent as they are", "file": "Sources/HaloModel/HaloTextAdapter.swift", "find": "String(content.string.map { $0.isNewline ? \" \" : $0 })", "replace": "content.string", "tests": "HaloTextAdapterTests"},
+  {"label": "theSpanIsOneLineInTheSystemFamilyAndTheLayersColour: a size past 1,600 sent unclamped", "file": "Sources/HaloModel/HaloTextAdapter.swift", "find": "min(max(content.fontSize, TextRules.sizes.lowerBound), TextRules.sizes.upperBound)", "replace": "content.fontSize", "tests": "HaloTextAdapterTests"},
+  {"label": "theBoxIsTheAdvancesByAscentPlusDescentRoundedUp: the height leaves out the descent", "file": "Sources/HaloModel/HaloTextAdapter.swift", "find": "FakeTextRasterizer.side(m.ascent + m.descent)", "replace": "FakeTextRasterizer.side(m.ascent)", "tests": "HaloTextAdapterTests"}
+]

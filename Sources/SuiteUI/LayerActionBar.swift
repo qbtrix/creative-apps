@@ -9,9 +9,10 @@
 // the CLI and MCP run one command path. The bar draws with
 // SidebarActionRow; a List-based panel that isn't LayerTreeList (Design's)
 // uses this bar and `layerContextMenu(forSelection:)`, which builds the menu
-// only when it opens, for the rows it opened on. fx is shown disabled with
-// `effectsPending` until shared layer styles land; that feature replaces
-// `effects(identifier:)` with its own spec's item.
+// only when it opens, for the rows it opened on. fx is `styles(on:...)`, built
+// from `style.panel`'s spec; `effects(identifier:)` stays, disabled with
+// `effectsPending`, until no app calls it (layer-styles LS-13).
+import SuiteImaging
 import SwiftUI
 
 /// The row of layer commands at the bottom of a Layers panel.
@@ -28,6 +29,14 @@ public struct LayerActionBar: View {
     /// The fx button until shared layer styles land: disabled, saying why.
     nonisolated public static func effects(identifier: String?) -> ToolbarAction {
         ToolbarAction("Layer Effects", systemImage: "fx", unavailableHelp: effectsPending, identifier: identifier)
+    }
+
+    /// The fx button: `style.panel`'s spec on `target`, so its title and reason are the menu item's; `perform` opens it.
+    nonisolated public static func styles<T: LayerStyleTarget>(
+        on target: T, identifier: String?, perform: @escaping @MainActor () -> Void
+    ) -> ToolbarAction {
+        guard let spec = StyleCommands.specs(T.self).first(where: { $0.id == "style.panel" }) else { return effects(identifier: identifier) }
+        return ToolbarAction(spec, on: target, systemImage: "fx", identifier: identifier, perform: perform)
     }
 
     public var body: some View {

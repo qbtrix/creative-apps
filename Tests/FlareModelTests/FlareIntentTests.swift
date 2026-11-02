@@ -41,7 +41,7 @@ struct FlareIntentTests {
 
     static let exportCases: [FlareIntent.Export] = [
         .showSheet, .setFormat(.svgFrame), .setFrames(from: 0, to: 47), .setStep(1), .setScale(2),
-        .setTransparent(true), .start, .cancel, .dismiss, .tryAgain, .reveal, .setSize(0.5), .setFrameRate(15),
+        .setTransparent(true), .start, .cancel, .dismiss, .tryAgain, .reveal, .setSize(.scale(0.5)), .setFrameRate(15),
         .setLoop(false),
     ]
 

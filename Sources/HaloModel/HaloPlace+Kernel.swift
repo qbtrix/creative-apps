@@ -92,7 +92,7 @@ extension HaloProject: PlacedImageTarget {
     public mutating func setPlaced(_ image: PlacedImage, asset: PlacedAsset?, name: String, drag: String?) throws {
         if let help = placeFillHelp { throw CatalogError.unavailable(id: "place", why: help) }
         let box = placeFillBox
-        let key = drag.flatMap { drag in selectedLayerID.map { "\($0).place.\(drag)" } }
+        let key = drag.flatMap { drag in selectedLayerID.map { CoalesceKey.key("place", on: [$0], drag: drag) } }
         let set = edit(name, control: "halo.place", coalesceKey: key) { doc in
             let (c, l) = try doc.selectedLayerIndices()
             if image.box != box { doc.compositions[c].layers[l].rect = image.box.layerRect }

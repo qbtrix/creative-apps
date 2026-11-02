@@ -1,11 +1,12 @@
 // AfterGlowJourneyTests+Help.swift (report-problem RP-2, on in RP-5b): XJ-RP, the suite Help menu in the
 // launcher. Help lists Report a Problem…, Beta Notes and Welcome to AfterGlow; Welcome opens the tour; Report a
 // Problem… opens the sheet with a crash from a fixture folder (`-SuiteCrashDir`), the home path shown as `~`,
-// takes a typed note, copies note plus report to the pasteboard and closes; Beta Notes opens the known-issues
-// window and Close closes it. Every click is a mouse click on a
-// menu item found by title, and only by title: SwiftUI doesn't carry `.accessibilityIdentifier` onto a menu
-// item, so a live item reads AppKit's "menuAction:" (#4647). The menu shot is a screen shot, since an open menu
-// sits outside the window.
+// takes a typed note (its home path redacted too), copies note plus report to the pasteboard and closes. With
+// the note being typed in, ⌘C copies note plus report and Escape closes (the Tab walk is in +HelpTab, since it
+// needs keyboard navigation on). Beta Notes opens the known-issues window and Close closes it. Every menu
+// click is a mouse click on an item found by title, and only by title: SwiftUI doesn't carry
+// `.accessibilityIdentifier` onto a menu item, so a live item reads AppKit's "menuAction:" (#4647).
+// The menu shot is a screen shot, since an open menu sits outside the window.
 import AppKit
 import XCTest
 
@@ -50,17 +51,41 @@ final class AfterGlowHelpJourneyTests: XCTestCase {
         let note = sheet.descendants(matching: .any)["suite.help.report.note"]
         XCTAssert(note.waitForExistence(timeout: 5), "the sheet has no note field")
         note.click()
-        note.typeText("The brush lagged.")
+        note.typeText("The brush lagged in \(Self.home)/Pictures.")
         launcher.shot("help-report")
         NSPasteboard.general.clearContents()
         sheet.descendants(matching: .any)["suite.help.report.copy"].click()
         let pasted = NSPasteboard.general.string(forType: .string) ?? ""
-        XCTAssert(pasted.hasPrefix("The brush lagged."), "Copy didn't put the note on top: \(pasted.prefix(80))")
+        XCTAssert(pasted.hasPrefix("The brush lagged in ~/Pictures."), "Copy didn't put the note on top: \(pasted.prefix(80))")
         XCTAssert(pasted.contains("Photo-journey.ips"), "Copy left the crash out of the report")
+        XCTAssert(pasted.contains("~/Pictures") && !pasted.contains(Self.home + "/"), "the note's home path isn't redacted")
 
         // Close, by mouse, leaves the sheet (#4664).
         sheet.descendants(matching: .any)["suite.help.report.close"].click()
         XCTAssert(sheet.waitForNonExistence(timeout: 5), "Close left the report sheet open")
+    }
+
+    /// The packet's keyboard row, its shortcuts: with the note being typed in, ⌘C copies the note plus the report
+    /// (not the note's own selection) and Escape closes the sheet. Neither needs keyboard navigation.
+    @MainActor func testReportAProblemShortcuts() throws {
+        let crashes = try Self.crashFolder()
+        defer { try? FileManager.default.removeItem(at: crashes) }
+        let launcher = SuiteHarness(self).launch(fixture: "firstLaunch", arguments: ["-SuiteCrashDir", crashes.path])
+        Self.openHelp(launcher).menuItems["Report a Problem…"].click()
+        let sheet = launcher.app.sheets.firstMatch
+        XCTAssert(sheet.waitForExistence(timeout: 10), "Help > Report a Problem… opened no sheet")
+        let note = sheet.descendants(matching: .any)["suite.help.report.note"]
+        XCTAssert(note.waitForExistence(timeout: 5), "the sheet has no note field")
+        note.click()
+        note.typeText("Typed, then copied by keyboard.")
+        NSPasteboard.general.clearContents()
+        launcher.press(character: "c", .command)
+        let pasted = NSPasteboard.general.string(forType: .string) ?? ""
+        XCTAssert(pasted.hasPrefix("Typed, then copied by keyboard."), "⌘C didn't put the note on top: \(pasted.prefix(80))")
+        XCTAssert(pasted.contains("Photo-journey.ips"), "⌘C didn't copy the report: \(pasted.prefix(80))")
+        launcher.shot("help-report-shortcuts")
+        launcher.press(.escape)
+        XCTAssert(sheet.waitForNonExistence(timeout: 5), "Escape left the report sheet open")
     }
 
     /// The app's home: built from the user name, since a sandboxed runner's NSHomeDirectory() is its container.

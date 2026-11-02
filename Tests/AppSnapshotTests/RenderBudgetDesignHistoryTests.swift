@@ -11,6 +11,7 @@
 #if canImport(AppKit)
 import AppKit
 import DesignModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -63,10 +64,9 @@ extension BodyCountSuites {
 }
 
 /// The counted window: Design's editor with its History panel shown, counting the jumps it is sent.
-private struct DesignHistoryBudgetWindow: View {
+private struct DesignHistoryBudgetWindow: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     // view-static: main-actor
     static var jumps = 0
@@ -74,7 +74,7 @@ private struct DesignHistoryBudgetWindow: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         DesignEditor(model: model, zoom: 0.5)
             .modifier(

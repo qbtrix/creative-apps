@@ -104,4 +104,18 @@ import Testing
         }
         return drawn ? bytes : nil
     }
+
+    /// The resize cursor's strip on the canvas (view points) is exactly where a drag grabs the right edge.
+    @Test func theEdgeStripIsWhereADragGrabs() throws {
+        let board = try Self.placed(.png)
+        let image = try #require(board.placedSelection?.image)
+        let strip = GalleryPlaceImage.edgeStrip(image)
+        let scale = GalleryPlaceImage.scale
+        func grab(_ x: Double, _ y: Double) -> GalleryPlaceBoard.Grab? {
+            GalleryPlaceBoard.grab(image, at: Point(x: x / scale, y: y / scale), option: false)
+        }
+        #expect(grab(strip.midX, strip.midY) == .edge)
+        #expect(grab(strip.minX + 0.5, strip.minY + 0.5) == .edge && grab(strip.maxX - 0.5, strip.maxY - 0.5) == .edge)
+        #expect(grab(strip.minX - 1, strip.midY) == nil && grab(strip.maxX + 1, strip.midY) == nil)
+    }
 }

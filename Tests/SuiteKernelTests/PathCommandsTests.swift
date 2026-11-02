@@ -1,6 +1,7 @@
 // PathCommandsTests.swift (pen-paths PN-1 written, PN-7 turns on): the twelve commands on a test target with a kernel
 // `History`. Each edit run records one step named its title, a drag is one step, every why-not reads, `path.draw`
-// round-trips `path.read`. Mutations: Tests/mutations/SuiteKernel.PathCommands.json.
+// round-trips `path.read`, and on a scaled, turned and moved layer every param and `path.read` are document space.
+// Mutations: Tests/mutations/SuiteKernel.PathCommands.json.
 import Testing
 import SuiteKernel
 /// One path in edit, its history folding steps by drag token (`FillDoc`'s pattern).
@@ -96,6 +97,28 @@ struct PathDoc: PathEditTarget {
         _ = try Self.run(.handle(AnchorRef(contour: 0, index: 0), .handleOut, to: Point(x: 9, y: 9), breaking: true, drag: nil), &doc)
         #expect(doc.history.undoSteps.count == 1)
     }
+    /// #5284: an open path's first in handle and last out handle shape no segment, so the path can't keep them. The
+    /// move refuses, even breaking, and records nothing; a closed path's ends keep theirs; the example edits the path.
+    @Test func openEndHandleRefuses() throws {
+        var doc = PathDoc.editing
+        let why = "An open path's end point has no segment on that side, so it can't keep a handle there."
+        for (index, end) in [(2, HandleEnd.handleOut), (0, HandleEnd.handleIn)] {
+            #expect(throws: CatalogError.unavailable(id: "path.handle-move", why: why)) {
+                try Self.run(.handle(AnchorRef(contour: 0, index: index), end, to: Point(x: 9, y: 9), breaking: true, drag: nil), &doc)
+            }
+        }
+        #expect(doc.history.undoSteps.isEmpty && doc.pathInEdit == PathDoc.editing.pathInEdit)
+        var closed = PathDoc.editing
+        closed.pathInEdit?.path = VectorPath(contours: [VectorContour(anchors: AnchorEditTests.path().contours[0].anchors, closed: true)])
+        _ = try Self.run(.handle(AnchorRef(contour: 0, index: 2), .handleOut, to: Point(x: 9, y: 9), breaking: true, drag: nil), &closed)
+        #expect(closed.history.undoSteps.count == 1 && closed.pathInEdit?.path.contours.first?.anchors.dropFirst(2).first?.handleOut == Point(x: 9, y: 9))
+        var drawn = PathDoc()
+        let catalog = try #require(Self.catalog)
+        _ = try catalog.run("path.draw", params: try #require(catalog.spec("path.draw")).example, on: &drawn)
+        let before = drawn.pathInEdit?.path
+        _ = try catalog.run("path.handle-move", params: try #require(catalog.spec("path.handle-move")).example, on: &drawn)
+        #expect(drawn.pathInEdit?.path != before && drawn.history.undoSteps.map(\.name) == ["Add Path", "Move Handle"])
+    }
     @Test func drawRefusesFewerThanTwo() throws {
         var doc = PathDoc()
         let one: JSONValue = .object(["contours": .array([.object(["closed": .bool(false), "anchors": .array([.object(["x": .number(0), "y": .number(0), "kind": .string("corner")])])])])])
@@ -118,6 +141,51 @@ struct PathDoc: PathEditTarget {
         #expect(fields["selected"] == .array([.array([.number(0), .number(1)])]))
         _ = try Self.catalog?.run("path.draw", params: .object(["contours": contours]), on: &doc)
         #expect(doc.pathInEdit?.path == AnchorEditTests.path() && doc.history.undoSteps.map(\.name) == ["Add Path"])
+    }
+    /// A layer scaled 2 by 0.5, turned 30 degrees and moved (30, -20), so a transpose, a skipped translation or a
+    /// skipped scale each land somewhere else.
+    static let turned = Matrix(a: 2 * cos30, b: 2 * 0.5, c: -0.5 * 0.5, d: 0.5 * cos30, tx: 30, ty: -20)
+    static let cos30 = 3.0.squareRoot() / 2
+    static func onTurned() -> PathDoc { var doc = PathDoc.editing; doc.pathInEdit?.toDocument = turned; return doc }
+    static func middle(_ doc: PathDoc) -> VectorAnchor? { doc.pathInEdit?.path.contours.first?.anchors.dropFirst().first }
+    static func near(_ a: Point?, _ b: Point, within e: Double = 1e-9) -> Bool { a.map { abs($0.x - b.x) <= e && abs($0.y - b.y) <= e } ?? false }
+    @Test func moveIsADocumentDeltaOnATransformedLayer() throws {
+        var doc = Self.onTurned()
+        let before = try #require(Self.middle(doc)).point
+        _ = try Self.run(.move(dx: 10, dy: 5, drag: nil), &doc)
+        let start = Self.turned.apply(before)
+        #expect(Self.near(Self.middle(doc).map { Self.turned.apply($0.point) }, Point(x: start.x + 10, y: start.y + 5)), "\(String(describing: Self.middle(doc)))")
+    }
+    @Test func handleIsADocumentPointOnATransformedLayer() throws {
+        var doc = Self.onTurned()
+        let to = Point(x: 260, y: 40)
+        _ = try Self.run(.handle(AnchorEditTests.mid, .handleOut, to: to, breaking: true, drag: nil), &doc)
+        #expect(Self.near(Self.middle(doc)?.handleOut.map(Self.turned.apply), to), "\(String(describing: Self.middle(doc)))")
+    }
+    @Test func insertIsADocumentPointOnATransformedLayer() throws {
+        var doc = Self.onTurned()
+        // (150, 0) is on the path in its own space, nearly 50 points off it in the document. A point lands within
+        // the nearest-point search's tolerance, `insertReach / 8`.
+        #expect(throws: CatalogError.self) { try Self.run(.insert(Point(x: 150, y: 0)), &doc) }
+        let on = Self.turned.apply(Point(x: 150, y: 0))
+        _ = try Self.run(.insert(on), &doc)
+        let added = doc.pathInEdit?.path.contours.first?.anchors.dropFirst(2).first
+        #expect(doc.anchorSelection.ordered == [AnchorRef(contour: 0, index: 2)] && Self.near(added.map { Self.turned.apply($0.point) }, on, within: 0.75))
+    }
+    @Test func readIsDocumentSpaceOnATransformedLayer() throws {
+        var doc = Self.onTurned()
+        guard case .object(let fields)? = try Self.catalog?.run("path.read", params: .object([:]), on: &doc).result,
+              case .array(let contours)? = fields["contours"], case .object(let contour)? = contours.first,
+              case .array(let anchors)? = contour["anchors"], case .object(let first)? = anchors.first,
+              case .number(let x)? = first["x"], case .number(let y)? = first["y"] else { Issue.record("no anchors"); return }
+        #expect(Self.near(Point(x: x, y: y), Self.turned.apply(Point(x: 0, y: 0))))
+    }
+    @Test func aLayerScaledToNothingRefusesPointEdits() throws {
+        var doc = PathDoc.editing
+        doc.pathInEdit?.toDocument = Matrix.scale(x: 0, y: 1)
+        #expect(throws: CatalogError.self) { try Self.run(.move(dx: 1, dy: 0, drag: nil), &doc) }
+        #expect(throws: CatalogError.self) { try Self.run(.handle(AnchorEditTests.mid, .handleOut, to: Point(x: 1, y: 1), breaking: true, drag: nil), &doc) }
+        #expect(doc.history.undoSteps.isEmpty && doc.pathInEdit?.path == AnchorEditTests.path())
     }
     @Test func intentCommandRoundTrips() throws {
         let intents: [PathIntent] = [.penAdd(Point(x: 1, y: 2), handleOut: nil), .close, .finish, .cancel, .selectAll, .move(dx: 1, dy: 2, drag: "d"),

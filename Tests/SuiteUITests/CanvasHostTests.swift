@@ -10,12 +10,13 @@ import Testing
 @Suite(.serialized) struct CanvasHostTests {
     @Test func dragOf120SamplesCallsTheDelegateAndRunsAtMostOneBody() throws {
         let log = CanvasHostLog()
-        let window = host(CanvasHostPage(log: log))
+        let tally = BodyTally()
+        let window = host(CanvasHostPage(log: log), tally: tally)
         defer { window.close() }
         let canvas = try #require(canvasView(in: window.contentView))
         let board = canvas.artboard
         #if DEBUG
-        let bodiesBefore = CanvasHostPage.bodyRuns
+        let bodiesBefore = tally.runs(of: CanvasHostPage.self)
         #endif
         canvas.press(at: CGPoint(x: board.minX + 10, y: board.midY))
         for step in 1...120 {
@@ -28,7 +29,9 @@ import Testing
         settle()
         #expect(log.drags == 120 && log.endDrags == 1)
         #if DEBUG  // the body counter exists only in debug builds
-        #expect(CanvasHostPage.bodyRuns - bodiesBefore <= 1, "a drag ran \(CanvasHostPage.bodyRuns - bodiesBefore) bodies")
+        // This window's own count: a parallel suite's canvas host pages never move it.
+        let ran = tally.runs(of: CanvasHostPage.self) - bodiesBefore
+        #expect(ran <= 1, "a drag ran \(ran) bodies")
         #endif
         #expect(canvas.live.isEmpty)
         #expect(pathPoints(canvas.overlay.path) == 0)
@@ -60,11 +63,11 @@ import Testing
 }
 
 /// The page in a 960 x 600 window on screen, laid out.
-@MainActor private func host(_ page: CanvasHostPage) -> NSWindow {
+@MainActor private func host(_ page: CanvasHostPage, tally: BodyTally = .process) -> NSWindow {
     let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 960, height: 600), styleMask: [.titled],
                           backing: .buffered, defer: false)
     window.isReleasedWhenClosed = false
-    window.contentView = NSHostingView(rootView: page.frame(width: 960, height: 600))
+    window.contentView = NSHostingView(rootView: page.frame(width: 960, height: 600).environment(\.bodyTally, tally))
     window.orderFrontRegardless()
     settle()
     return window

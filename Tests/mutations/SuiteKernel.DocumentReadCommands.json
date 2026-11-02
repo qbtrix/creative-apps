@@ -1,0 +1,16 @@
+[
+  {
+    "label": "the fit upscales nothing but also never downscales",
+    "file": "Sources/SuiteKernel/Document/DocumentReadCommands.swift",
+    "find": "guard longest > maxSide, longest > 0 else { return (width, height) }",
+    "replace": "guard longest > 0 else { return (width, height) }; return (width, height)",
+    "tests": "PhotoModelTests.PhotoAgentCommandsTests/snapshotIsADownscaledPNGAndRecordsNothing"
+  },
+  {
+    "label": "document.read runs with no document open",
+    "file": "Sources/SuiteKernel/Document/DocumentReadCommands.swift",
+    "find": "let open: @Sendable (T) -> Availability = { $0.documentOutline == nil ? .unavailable(noDocumentHelp) : .available }",
+    "replace": "let open: @Sendable (T) -> Availability = { _ in .available }",
+    "tests": "PhotoModelTests.PhotoAgentCommandsTests/readListsTheCanvasLayersTopFirstAndTheSelection"
+  }
+]

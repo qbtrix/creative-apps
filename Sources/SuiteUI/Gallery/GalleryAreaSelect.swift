@@ -66,10 +66,9 @@ struct GalleryAreaBoard: AreaSelectTarget {
     func take() -> [Point] { defer { points = [] }; return points }
 }
 
-struct GalleryAreaSelectPage: View {
+struct GalleryAreaSelectPage: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     @State private var board = GalleryAreaBoard()
     @State private var options = AreaOptions()
@@ -78,7 +77,7 @@ struct GalleryAreaSelectPage: View {
 
     var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Text("Area select").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText).accessibilityAddTraits(.isHeader)

@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+# scripts/check-app-local-surfaces: heavy AppKit surfaces and tab controls live only in
+# the shared layer (Sources/SuiteUI, plus Sources/SuiteShell for window plumbing), never
+# in an app (docs/engineering/swiftui-rules.md rules 5 and 12). A file under
+# Sources/*App/ that names one of TOKENS is a hit. Comments and string contents are
+# ignored. Use SuiteUI's hosts instead: CanvasHost, TimelineLanesView, SegmentedTabs.
+#
+# Tests/app-local-surfaces-baseline.txt lists today's hits (grandfathered), one per line:
+#   `<path>: <token>`
+#   scripts/check-app-local-surfaces                    fail on a hit the baseline doesn't
+#                                                       list, and on a listed one that is gone
+#   scripts/check-app-local-surfaces --update-baseline  rewrite it; refuses to add a line
+#                                                       unless --allow-increase (it only shrinks)
+# --root DIR runs against another tree (the tests). Exit 0 clean, 1 on a hit, 2 on bad
+# input. Python 3 stdlib only.
+import argparse
+import pathlib
+import re
+import sys
+
+HERE = pathlib.Path(__file__).resolve().parent.parent
+SCOPE = re.compile(r"^Sources/[A-Za-z0-9_]+App/.+\.swift$")
+TOKENS = ["NSOutlineView", "NSTableView", "NSCollectionView", "NSTabView", "NSSegmentedControl",
+          "NSViewRepresentable", "NSViewControllerRepresentable", ".pickerStyle(.segmented)", "TabView"]
+TOKEN_RE = re.compile("|".join(r"(?<![\w.])" + re.escape(t) + r"(?!\w)" if t[0] != "." else re.escape(t)
+                               for t in TOKENS))
+LEX = re.compile(r'"""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|//[^\n]*|/\*[\s\S]*?\*/')
+BASELINE = "Tests/app-local-surfaces-baseline.txt"
+HEADER = """# Tests/app-local-surfaces-baseline.txt: heavy AppKit surfaces and tab controls inside an
+# app (Sources/*App), grandfathered (docs/engineering/swiftui-rules.md rules 5 and 12).
+# Written by scripts/check-app-local-surfaces --update-baseline, never by hand. It only
+# shrinks: move the surface into SuiteUI and drop its line in the same PR.
+# Line: `path: token`.
+"""
+
+
+def blank(text):
+    """Comments and string contents become spaces."""
+    def sub(m):
+        t = m.group()
+        if t.startswith("/"):
+            return re.sub(r"[^\n]", " ", t)
+        q = 3 if t.startswith('"""') else 1
+        return t[:q] + re.sub(r"[^\n]", " ", t[q:-q]) + t[-q:]
+    return LEX.sub(sub, text)
+
+
+def scan(root):
+    hits = set()
+    for f in sorted((root / "Sources").rglob("*.swift")):
+        rel = f.relative_to(root).as_posix()
+        if SCOPE.match(rel):
+            hits |= {f"{rel}: {m.group()}" for m in TOKEN_RE.finditer(blank(f.read_text(errors="replace")))}
+    return hits
+
+
+def main():
+    ap = argparse.ArgumentParser(description="no AppKit surfaces or tab controls in an app (swiftui-rules.md 5, 12)")
+    ap.add_argument("--root", type=pathlib.Path, default=HERE)
+    ap.add_argument("--update-baseline", action="store_true")
+    ap.add_argument("--allow-increase", action="store_true")
+    a = ap.parse_args()
+    current = scan(a.root)
+    path = a.root / BASELINE
+    base = ({l.strip() for l in path.read_text().splitlines() if l.strip() and not l.startswith("#")}
+            if path.exists() else None)
+
+    if a.update_baseline:
+        grew = sorted(current - base) if base is not None else []
+        if grew and not a.allow_increase:
+            print("check-app-local-surfaces: refusing to grow the baseline (it only shrinks):", file=sys.stderr)
+            for k in grew:
+                print(f"  {k}", file=sys.stderr)
+            return 1
+        path.write_text(HEADER + "".join(k + "\n" for k in sorted(current)))
+        print(f"check-app-local-surfaces: baseline written, {len(current)} grandfathered hits.")
+        return 0
+
+    if base is None:
+        print(f"check-app-local-surfaces: {BASELINE} is missing; run --update-baseline", file=sys.stderr)
+        return 2
+    new, gone = sorted(current - base), sorted(base - current)
+    for k in new:
+        print(f"{k}: app-local surface (new)")
+    for k in gone:
+        print(f"{k}: listed in {BASELINE} but no longer hits")
+    if new:
+        print("Heavy AppKit surfaces and tab controls live in the shared layer, never in an app\n"
+              "(docs/engineering/swiftui-rules.md rules 5 and 12). Use SuiteUI's hosts: CanvasHost,\n"
+              "TimelineLanesView, SegmentedTabs. Window plumbing goes in SuiteShell. A missing host is a\n"
+              "`needs-ui` issue plus a SuiteUI PR first.")
+    if gone:
+        print("Ratchet down: scripts/check-app-local-surfaces --update-baseline")
+    if new or gone:
+        return 1
+    print(f"ok ({len(current)} grandfathered app-local surfaces, none new)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

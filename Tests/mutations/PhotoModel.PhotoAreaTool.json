@@ -1,0 +1,30 @@
+[
+  {
+    "label": ".heldKeysWin: the options' mode wins over the held keys",
+    "file": "Sources/PhotoModel/PhotoAreaTool.swift",
+    "find": "return held.isEmpty ? areaOptions.mode : AreaCombine(held)",
+    "replace": "return held.isEmpty || true ? areaOptions.mode : AreaCombine(held)",
+    "tests": "PhotoAreaToolTests"
+  },
+  {
+    "label": ".featherEachShape: a shape never takes the options' feather",
+    "file": "Sources/PhotoModel/PhotoAreaTool.swift",
+    "find": "if areaOptions.feather > 0 { recipe.apply(.feather(areaOptions.feather)) }",
+    "replace": "if areaOptions.feather < 0 { recipe.apply(.feather(areaOptions.feather)) }",
+    "tests": "PhotoAreaToolTests"
+  },
+  {
+    "label": ".polygonCloses: the polygon closes on a click anywhere",
+    "file": "Sources/PhotoModel/PhotoAreaTool.swift",
+    "find": "Self.distance(end, first) * done.zoom <= 8",
+    "replace": "Self.distance(end, first) * done.zoom <= 800",
+    "tests": "PhotoAreaToolTests"
+  },
+  {
+    "label": ".lassoNeedsArea: a lasso along a line selects",
+    "file": "Sources/PhotoModel/PhotoAreaTool.swift",
+    "find": "return Self.area(stroke.points) >= 1 ?",
+    "replace": "return Self.area(stroke.points) >= 0 ?",
+    "tests": "PhotoAreaToolTests"
+  }
+]

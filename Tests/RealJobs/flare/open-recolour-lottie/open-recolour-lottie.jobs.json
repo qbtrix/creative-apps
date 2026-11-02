@@ -10,7 +10,7 @@
   "atomic": true,
   "output": {"dir": "out", "name": "{stem}-recoloured", "format": "lottie"},
   "expect": {
-    "out/bounce-recoloured.lottie": {"sha256": "304330e358c951e38a4406f5118dce08642391ca9d82a7d30fade2710149bba4"},
+    "out/bounce-recoloured.json": {"sha256": "304330e358c951e38a4406f5118dce08642391ca9d82a7d30fade2710149bba4"},
     "input/bounce.json": {"sha256": "8868a87f2afa682228fe032bf22a0bbcce9d3e669aaccd53e2eab2873803d4a6"}
   },
   "platforms": ["linux", "macos"]

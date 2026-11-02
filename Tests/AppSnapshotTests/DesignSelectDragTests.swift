@@ -5,7 +5,7 @@
 // marquee is design-window D0-8b's `dragSamples(.marquee)`; the resize selects
 // Frame 1 and Frame 2 and drags their box's bottom-right handle, which the
 // canvas gesture routes to the several-layer resize. Nested in BodyCountSuites,
-// as DesignEditor.bodyRuns is a process-global debug counter. macOS only.
+// as DesignEditor.bodyRuns is a debug body counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel

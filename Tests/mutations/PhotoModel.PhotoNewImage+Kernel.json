@@ -1,0 +1,23 @@
+[
+  {
+    "label": "resolutionSaved: newImage never keeps the setup's resolution, so a 300 ppi image reads 72",
+    "file": "Sources/PhotoModel/PhotoNewImage+Kernel.swift",
+    "find": "        resolution = setup.resolution\n",
+    "replace": "",
+    "tests": "PhotoNewImageTests"
+  },
+  {
+    "label": "transparentBackground: a transparent background fills white, so the new image has no alpha",
+    "file": "Sources/PhotoModel/PhotoNewImage+Kernel.swift",
+    "find": "        case .transparent: return .clear\n",
+    "replace": "        case .transparent: return RGBA(r: 1, g: 1, b: 1, a: 1)\n",
+    "tests": "PhotoNewImageTests"
+  },
+  {
+    "label": "limitsIgnored: a setup past the limits is not refused before the open image is replaced",
+    "file": "Sources/PhotoModel/PhotoNewImage+Kernel.swift",
+    "find": "        if let problem = setup.problems(Self.documentLimits).first { throw PhotoRefusal(problem.text) }\n",
+    "replace": "",
+    "tests": "PhotoNewImageTests"
+  }
+]

@@ -8,10 +8,9 @@ import SuiteModel
 import SwiftUI
 
 /// The Connect an AI Assistant sheet over `panel`.
-public struct AssistantConnectSheet: View {
+public struct AssistantConnectSheet: View, BodyCounted {
     #if DEBUG
-    // view-static: main-actor
-    static var bodyRuns = 0
+    @Environment(\.bodyTally) private var bodyTally
     #endif
     /// The controls, each with its `identifier(_:)`.
     nonisolated static let controls = ["command", "copyCommand", "config", "copyConfig", "install", "aiAccess", "close"]
@@ -34,7 +33,7 @@ public struct AssistantConnectSheet: View {
 
     public var body: some View {
         #if DEBUG
-        let _ = Self.bodyRuns += 1
+        let _ = bodyTally.ran(Self.self)
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
@@ -64,7 +63,7 @@ public struct AssistantConnectSheet: View {
     }
 
     /// Why Install is disabled: the panel's reason, or that the host passed no install.
-    private var installWhy: String? { panel.installUnavailable ?? (onInstall == nil ? AssistantConnectPanel.installNotBuilt : nil) }
+    private var installWhy: String? { panel.installUnavailable ?? (onInstall == nil ? AssistantConnectPanel.installNeedsBundle : nil) }
 
     /// A titled read-only box of `text` with a Copy that hands `copy` to the host, or is disabled saying `why`.
     private func block(_ title: String, text: String, id: String, copy: String, why: String?, copyID: String) -> some View {

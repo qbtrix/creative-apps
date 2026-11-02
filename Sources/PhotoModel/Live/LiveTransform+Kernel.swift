@@ -6,9 +6,10 @@
 // about its top-left and moved, turned about its centre; points reach the
 // box's own frame through `TransformRules.local` and leave it through
 // `TransformRules.matrix`. Commit resamples once with CoreRaster's
-// `transformed` (lanczos3) through the matrix that takes the old box to the
-// new one; a flip is CoreRaster's exact `flipped`. Linux-safe; libm comes from
-// Glibc/Musl/Darwin as in PhotoStraighten.
+// `transformed` (lanczos3) through `matrix`, the one that takes the old box to
+// the new one; a drag frame draws each canvas region through the same matrix
+// (PhotoRenderRoute.swift); a flip is CoreRaster's exact `flipped`.
+// Linux-safe; libm comes from Glibc/Musl/Darwin as in PhotoStraighten.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -60,26 +61,30 @@ struct KernelTransform: LayerTransforming {
         TransformRules.corners(of: KernelBox(draft).kernel).map { Mask.Point(x: $0.x, y: $0.y) }
     }
 
-    /// One lanczos3 resample of `content` through the matrix that takes the
-    /// draft's box to its transformed box, into the transformed bounds (whole
-    /// pixels around them). The identity is `content` itself.
+    /// One lanczos3 resample of `content` through `matrix`, into the
+    /// transformed bounds (whole pixels around them). The identity is
+    /// `content` itself.
     func applied(_ draft: TransformDraft, to content: PlacedPixels) throws -> PlacedPixels {
         guard draft.transform != .identity else { return content }
+        let (x0, y0, x1, y1) = try Self.pixelBounds(TransformRules.bounds(of: KernelBox(draft).kernel))
+        var affine = try matrix(draft, origin: (content.x, content.y))
+        (affine.tx, affine.ty) = (affine.tx - Double(x0), affine.ty - Double(y0))  // to the output's top-left
+        let out = try content.pixels.flattened().transformed(affine, width: x1 - x0, height: y1 - y0, filter: .lanczos3)
+        return PlacedPixels(pixels: TiledPixels(out), x: x0, y: y0)
+    }
+
+    /// Layer pixel to canvas, to the old box's unit square, to the new box: the matrix that takes the draft's
+    /// box to its transformed box, for a layer whose top-left is at `origin`.
+    func matrix(_ draft: TransformDraft, origin: (x: Int, y: Int)) throws -> AffineMatrix {
         let b = draft.box
         let before = TransformBox(box: Rect(minX: Double(b.x), minY: Double(b.y),
                                             maxX: Double(b.x + b.width), maxY: Double(b.y + b.height)))
-        let after = KernelBox(draft).kernel
-        let (x0, y0, x1, y1) = try Self.pixelBounds(TransformRules.bounds(of: after))
-        let (forward, back) = try (TransformRules.matrix(of: after), TransformRules.matrix(of: before).inverted())
-        // Source pixel to canvas, to the old box's unit square, to the new box, to the output's top-left.
+        let (forward, back) = try (TransformRules.matrix(of: KernelBox(draft).kernel), TransformRules.matrix(of: before).inverted())
         func mapped(_ x: Double, _ y: Double) -> Point {
-            let p = forward.apply(back.apply(Point(x: x + Double(content.x), y: y + Double(content.y))))
-            return Point(x: p.x - Double(x0), y: p.y - Double(y0))
+            forward.apply(back.apply(Point(x: x + Double(origin.x), y: y + Double(origin.y))))
         }
         let (o, i, j) = (mapped(0, 0), mapped(1, 0), mapped(0, 1))
-        let affine = AffineMatrix(a: i.x - o.x, b: i.y - o.y, c: j.x - o.x, d: j.y - o.y, tx: o.x, ty: o.y)
-        let out = try content.pixels.flattened().transformed(affine, width: x1 - x0, height: y1 - y0, filter: .lanczos3)
-        return PlacedPixels(pixels: TiledPixels(out), x: x0, y: y0)
+        return AffineMatrix(a: i.x - o.x, b: i.y - o.y, c: j.x - o.x, d: j.y - o.y, tx: o.x, ty: o.y)
     }
 
     /// `content` mirrored in place by CoreRaster's exact `flipped`.
