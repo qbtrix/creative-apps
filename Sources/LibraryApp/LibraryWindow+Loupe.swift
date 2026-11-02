@@ -17,6 +17,7 @@
 // LibraryCatalog method; each menu item runs a `LibraryAction`.
 import AppKit
 import LibraryModel
+import SuiteUI
 import SwiftUI
 
 /// A finished loupe render (or its failure), or a GPU frame's histogram, under the token it was asked for.
@@ -109,12 +110,6 @@ extension LibraryWindow {
             fitMeasured: { fit in if areas.loupe.fitScale != fit { areas.loupe.fitScale = fit } })
     }
 
-    #if DEBUG
-    /// Loupe renders started, for the render budget tests (a straighten step starts none).
-    // view-static: main-actor
-    static var loupeRenders = 0
-    #endif
-
     /// Called when `model.focusedItemID` or `model.mode` changes (the loupe's
     /// photo, or the loupe opening on the photo the grid had focused): the held
     /// thumbnail as a preview, then the full render and the neighbours.
@@ -136,9 +131,7 @@ extension LibraryWindow {
     /// replace the queue's pending decodes ahead; nil keeps them.
     func loupeAreaRender(_ quality: RenderQuality, prefetching neighbours: [PhotoItem]? = nil) {
         guard let request = model.loupeRequest(longSide: loupeLongSide, quality: quality) else { return }
-        #if DEBUG
-        Self.loupeRenders += 1
-        #endif
+        bodyTally.ran(LibraryLoupeRenders.self)
         let state = areas.loupe
         loupeAreaListen(state)
         let service = model.services.loupe
@@ -185,3 +178,6 @@ extension LibraryWindow {
         }
     }
 }
+
+/// The key loupe renders count under in the window's BodyTally, for the render budget tests (a straighten step starts none).
+enum LibraryLoupeRenders {}

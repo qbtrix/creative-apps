@@ -6,13 +6,14 @@
 // (`library.crop.straighten`) 120 times at 120 Hz through its adjustable
 // action. The loupe turns its unturned picture with a compositor transform,
 // so `bodies` gates that the steps start no loupe render
-// (`LibraryWindow.loupeRenders`) and caps the window bodies. `timing` gates
+// (`LibraryLoupeRenders` in BodyTally) and caps the window bodies. `timing` gates
 // the step p95 on one frame; it is a wall-clock test, so it stays disabled
 // until Tests/perf-suites.txt lists it. Nested in BodyCountSuites, as every
 // suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import LibraryModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -64,9 +65,7 @@ extension BodyCountSuites {
             RenderBudgetBrushKeysTests.press("r", in: w.window)
             #expect(await w.element("library.crop.frame") != nil, "R showed no crop frame")
             try await w.settle(untilStable: bodies, turns: 8)
-            #if DEBUG
-            let before = LibraryWindow.loupeRenders
-            #endif
+            let before = BodyTally.runs(of: LibraryLoupeRenders.self)
             var adjustable = false
             let step = try await w.measure("library crop straighten, 120 steps, 24 MP", bodies: bodies) {
                 adjustable = try await w.adjust("library.crop.straighten", steps: 120)
@@ -75,11 +74,7 @@ extension BodyCountSuites {
             #expect(adjustable, "Straighten isn't adjustable")
             let angle = w.value("library.crop.straighten") ?? ""
             #expect(!angle.isEmpty && !angle.hasPrefix("0"), "120 steps left Straighten at \(angle)")
-            #if DEBUG
-            return (step, LibraryWindow.loupeRenders - before)
-            #else
-            return (step, 0)
-            #endif
+            return (step, BodyTally.runs(of: LibraryLoupeRenders.self) - before)
         }
     }
 }
