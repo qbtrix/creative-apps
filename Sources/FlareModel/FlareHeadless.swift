@@ -3,8 +3,9 @@
 // `FlareWorkspace.catalog` lifted onto itself, and exports a scene as SVG frames (text included) or Lottie through
 // FlareCore's exporters, or as PNG frames drawn by FlareRaster (masks, mattes and symbol animation included) through
 // the `pngEncoder` the host hands in. Lottie and PNG can't hold text, so a scene with text refuses them unless
-// `dropText` asks to export the rest: never a silent drop. Of the window's file commands only `file.drop` runs here,
-// placing the SVGs the host handed over (`receiveDropped`). Linux-safe: no UI imports.
+// `dropText` asks to export the rest: never a silent drop. Options failing `exportSchema` are malformed params,
+// so the CLI exits 65 with the issues. Of the window's file commands only `file.drop` runs here, placing the SVGs
+// the host handed over (`receiveDropped`). Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -77,6 +78,10 @@ public struct FlareHeadless: HeadlessDocument {
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
         guard Self.exportFormats.contains(format) else { throw CatalogError.unavailable(id: "export", why: "Flare exports svg, lottie and png.") }
         if format == "png", pngEncoder == nil { throw CatalogError.unavailable(id: "export", why: Self.pngHelp) }
+        if options != .null {
+            let issues = Self.exportSchema.validate(options)
+            guard issues.isEmpty else { throw CatalogError.malformedParams(id: "export", issues) }
+        }
         let o = options == .null ? ExportOptions() : try options.decode(ExportOptions.self)
         guard let document = workspace.document else { throw CatalogError.failed(id: "export", message: "No animation is open.") }
         let id = o.scene ?? workspace.selectedSceneID
@@ -152,6 +157,15 @@ public struct FlareHeadless: HeadlessDocument {
     struct ExportOptions: Decodable {
         var scene: String?; var frames: [Int]?; var dropText: Bool?; var scale: Double?; var transparent: Bool?
     }
+    /// `ExportOptions`' keys, all optional; any other key or a wrong type fails it, so the CLI exits 65 with the
+    /// issues (docs/cli.md) and writes nothing.
+    static let exportSchema = ParamSchema.object([
+        "scene": .optional(.string("The scene id; the selected scene when absent.")),
+        "frames": .optional(.array(of: .integer(minimum: 0))),
+        "dropText": .optional(.boolean),
+        "scale": .optional(.number("PNG frames' scale of the scene's size.")),
+        "transparent": .optional(.boolean),
+    ], required: [])
 }
 
 extension FlareHeadless: HeadlessDropReceiver {
