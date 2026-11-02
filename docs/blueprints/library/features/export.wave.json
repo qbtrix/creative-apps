@@ -2,8 +2,8 @@
   "title": "Export JPEG at a set long edge and quality, never overwriting",
   "wave": 4,
   "order": 20,
-  "status": "planned",
-  "feature_issue": "file when ready",
+  "status": "built",
+  "feature_issue": "#1554",
   "covers": "#424 (closes with EX-13); gaps the lead files: other formats, presets and name templates, XMP sidecars",
   "waits_on": "develop, import; in wave 4, EX-1 after crop's CR-a and EX-6 after crop's CR-c (shared spine files), EX-14 after crop; P8: #782; the progress row: #781 (soft)",
   "issues": [
