@@ -117,7 +117,7 @@ struct LargeCatalogModelBudgetTests {
             catalog.closeExport()
             _ = catalog.beginExport(folder: "/out")
         }
-        #expect(catalog.exportState == .editing(ExportOptions(folder: "/out")))
+        #expect(catalog.exportRun == .editing(ExportOptions(folder: "/out")))
         #expect(cost.median <= 10, "beginExport took \(cost.median) ms (median), over 10 ms")
     }
 }

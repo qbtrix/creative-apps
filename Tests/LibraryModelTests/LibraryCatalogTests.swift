@@ -37,7 +37,7 @@ import Testing
     #expect(catalog.services.isPreview)
     #expect(catalog.autoAdvance)
     #expect(catalog.catalogState == .ready)
-    #expect(catalog.importState == .idle && catalog.exportState == .idle && catalog.loupeZoom == .fit)
+    #expect(catalog.importState == .idle && catalog.exportRun == .idle && catalog.loupeZoom == .fit)
     #expect(catalog.order.isEmpty && catalog.saveRevision == catalog.savedRevision)
 }
 
@@ -72,7 +72,7 @@ private func storedPropertyChanges() -> [(String, (inout LibraryCatalog) -> Void
         ("loupeError", { $0.loupeError = "No" }),
         ("copiedSettings", { $0.copiedSettings = .neutral }),
         ("cropDraft", { $0.cropDraft = crop }),
-        ("exportState", { $0.exportState = .running(done: 0, total: 1) }),
+        ("exportRun", { $0.exportRun = .running(ExportOptions(folder: ""), done: 0, total: 1) }),
         ("catalogState", { $0.catalogState = .damaged }),
         ("saveRevision", { $0.saveRevision = 1 }),
         ("savedRevision", { $0.savedRevision = 1 }),

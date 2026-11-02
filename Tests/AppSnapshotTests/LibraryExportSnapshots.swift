@@ -1,7 +1,9 @@
 // LibraryExportSnapshots.swift: the export sheet (export EX-6) editing, running,
-// failed, done and cancelled, in Light and Dark: library-export, library-exporting,
-// library-export-failed, library-export-done and library-export-cancelled. macOS only.
+// failed, done, cancelled and a run that failed as a whole, in Light and Dark:
+// library-export, library-exporting, library-export-failed, library-export-done,
+// library-export-cancelled and library-export-error. macOS only.
 import LibraryModel
+import SuiteKernel
 import SwiftUI
 import Testing
 
@@ -11,17 +13,20 @@ import Testing
 @Suite struct LibraryExportSnapshots {
     @Test func exportStates() throws {
         let failures = [FileFailure(path: "/Out/IMG_0001.jpg", reason: "The folder is read-only.")]
-        let states: [(String, ExportState)] = [
-            ("library-export", .editing(ExportOptions(folder: "/Users/me/Pictures/Export"))),
-            ("library-exporting", .running(done: 1, total: 3)),
-            ("library-export-failed", .finished(ExportSummary(total: 1, written: [], failures: failures, failedIDs: ["1"]))),
-            ("library-export-done", .finished(ExportSummary(total: 3, written: ["a.jpg", "b.jpg", "c.jpg"]))),
-            ("library-export-cancelled", .finished(ExportSummary(total: 24, written: ["a.jpg"], cancelled: true))),
+        let options = ExportOptions(folder: "/Users/me/Pictures/Export")
+        let summaries: [(String, ExportSummary)] = [
+            ("library-export-failed", ExportSummary(total: 1, written: [], failures: failures, failedIDs: ["1"])),
+            ("library-export-done", ExportSummary(total: 3, written: ["a.jpg", "b.jpg", "c.jpg"])),
+            ("library-export-cancelled", ExportSummary(total: 24, written: ["a.jpg"], cancelled: true)),
         ]
+        let states: [(String, ExportRun<ExportOptions>, ExportSummary?)] = [
+            ("library-export", .editing(options), nil), ("library-exporting", .running(options, done: 1, total: 3), nil),
+            ("library-export-error", .failed(options, "The export folder is gone."), nil),
+        ] + summaries.map { ($0.0, .finished(options, $0.1.written), $0.1) }
         for scheme in [ColorScheme.light, .dark] {
-            for (name, state) in states {
+            for (name, run, summary) in states {
                 let sheet = LibraryExportSheet(
-                    state: state, count: 3, preview: "IMG_0001.jpg · 2048 × 1365", writable: [.jpeg], exportHelp: nil,
+                    run: run, summary: summary, count: 3, preview: "IMG_0001.jpg · 2048 × 1365", writable: [.jpeg], exportHelp: nil,
                     presets: [], progressDelay: .zero)
                 try snapshot(sheet, name: "\(name)-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
             }

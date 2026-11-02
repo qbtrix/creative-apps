@@ -149,8 +149,11 @@ import SuiteKernel
         let stretch = try SuiteExportOptions(json: Self.json(#"{"size":{"pixels":[10,20],"stretch":true},"alpha":true}"#), defaults: defaults)
         #expect(stretch.size == .pixels(width: 10, height: 20, stretch: true) && stretch.alpha)
         #expect(try SuiteExportOptions(json: .null, defaults: defaults) == defaults)
-        #expect(throws: ExportOptionRefusal.self) { try SuiteExportOptions(json: Self.json(#"{"colour":"red"}"#), defaults: defaults) }
-        #expect(throws: ExportOptionRefusal.self) {
+        #expect(throws: CatalogError.malformedParams(id: "export", [SchemaIssue(path: "/colour", message: "unexpected key")])) {
+            try SuiteExportOptions(json: Self.json(#"{"colour":"red"}"#), defaults: defaults)
+        }
+        #expect(throws: CatalogError.malformedParams(id: "export", [SchemaIssue(path: "/size",
+            message: "give one of scale, pixels or longEdge; stretch goes with pixels")])) {
             try SuiteExportOptions(json: Self.json(#"{"size":{"scale":2,"longEdge":10}}"#), defaults: defaults)
         }
     }

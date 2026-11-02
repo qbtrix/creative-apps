@@ -43,29 +43,29 @@ extension LibraryWindow {
 
     /// The sheet for the current export state, every control wired to the catalog.
     var exportSheet: LibraryExportSheet {
-        let options: ExportOptions? = LibraryExportSheet.options(model.exportState)
+        let options: ExportOptions? = model.exportRun.editingOptions
         let editing = options != nil
         var actions = LibraryExportSheet.Actions()
         actions.setOptions = enabled(editing) { (next: ExportOptions) -> Void in model.setExportOptions(next) }
         actions.chooseFolder = enabled(editing) { () -> Void in exportChooseFolder() }
         actions.export = enabled(editing) { () -> Void in startExport() }
-        actions.cancel = enabled(model.exportState.isRunning) { () -> Void in cancelExport() }
+        actions.cancel = enabled(model.exportRun.isRunning) { () -> Void in cancelExport() }
         actions.retry = enabled(areas.export.last != nil) { () -> Void in retryExport() }
-        actions.close = enabled(!model.exportState.isRunning) { () -> Void in closeExportSheet() }
-        actions.showInFinder = enabled(!model.exportState.isRunning) { () -> Void in exportShowInFinder() }
+        actions.close = enabled(!model.exportRun.isRunning) { () -> Void in closeExportSheet() }
+        actions.showInFinder = enabled(!model.exportRun.isRunning) { () -> Void in exportShowInFinder() }
         let presetsReady: Bool = editing && ExportPresets.unavailable == nil
         actions.applyPreset = enabled(presetsReady) { (preset: ExportPreset) -> Void in
-            guard let current = LibraryExportSheet.options(model.exportState) else { return }
+            guard let current = model.exportRun.editingOptions else { return }
             model.setExportOptions(preset.applied(to: current))
         }
         actions.savePreset = enabled(presetsReady) { (name: String) -> Void in
-            guard let current = LibraryExportSheet.options(model.exportState) else { return }
+            guard let current = model.exportRun.editingOptions else { return }
             areas.export.presets = ExportPresets.adding(ExportPreset(name: name, options: current), to: areas.export.presets)
             saveExportPresets()
         }
         let help: String? = model.services.unavailable["exporter"] ?? options?.naming.help
         return LibraryExportSheet(
-            state: model.exportState, count: model.exportTargets.count, preview: model.exportPreview,
+            run: model.exportRun, summary: model.exportFinished, count: model.exportTargets.count, preview: model.exportPreview,
             writable: JPEGWriter.writableFormats(), exportHelp: help, presets: areas.export.presets, actions: actions,
             catalog: model)
     }
@@ -84,7 +84,7 @@ extension LibraryWindow {
     }
 
     private func startExport() {
-        guard let options = LibraryExportSheet.options(model.exportState) else { return }
+        guard let options = model.exportRun.editingOptions else { return }
         areas.export.last = options
         saveExportPresets()
         planExport(options) { (names: Set<String>) -> ExportPlan? in model.exportPlan(existingNames: names) }
@@ -132,7 +132,7 @@ extension LibraryWindow {
 
     /// Cancel or Done: options still being edited become the last ones.
     private func closeExportSheet() {
-        if let options = LibraryExportSheet.options(model.exportState) {
+        if let options = model.exportRun.editingOptions {
             areas.export.last = options
             saveExportPresets()
         }
@@ -149,7 +149,7 @@ extension LibraryWindow {
 
     /// Choose…: the open panel, folders only; the editing options take its folder.
     private func exportChooseFolder() {
-        guard var options = LibraryExportSheet.options(model.exportState) else { return }
+        guard var options = model.exportRun.editingOptions else { return }
         let panel = NSOpenPanel()
         (panel.canChooseFiles, panel.canChooseDirectories, panel.canCreateDirectories) = (false, true, true)
         panel.directoryURL = URL(fileURLWithPath: options.folder)
@@ -160,13 +160,9 @@ extension LibraryWindow {
 
     /// Show in Finder: the written files selected, else their folder.
     private func exportShowInFinder() {
-        guard case .finished(let summary) = model.exportState, let folder = areas.export.last?.folder else { return }
+        guard let summary = model.exportFinished, let folder = areas.export.last?.folder else { return }
         let base = URL(fileURLWithPath: folder)
         let files = summary.written.map { base.appendingPathComponent($0) }
         NSWorkspace.shared.activateFileViewerSelecting(files.isEmpty ? [base] : files)
     }
-}
-
-private extension ExportState {
-    var isRunning: Bool { if case .running = self { return true }; return false }
 }
