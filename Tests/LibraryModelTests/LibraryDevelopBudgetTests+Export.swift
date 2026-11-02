@@ -1,7 +1,8 @@
 // LibraryDevelopBudgetTests+Export.swift: the headless export's real-size budget (quality gate #6205). Two
 // 6000 x 4000 picks export as PNGs at full size within 8 s and at a 1,200 px long side within 4 s, in a release
 // build; a debug build only reports (the CLI ships release). Before the fix they took 21.5 s and 4.17 s: Deflate
-// level 6 spent 11 s on each full-size write. The 1,200 row is the decode plus the lanczos3 shrink, which is
+// level 6 spent 11 s on each full-size write. P8's model half: ten such picks at a 2,048 px long side within
+// P8's whole-run gate, 15 s (its 100 ms progress mark waits on S-L8, #782). The 1,200 row is the decode plus the lanczos3 shrink, which is
 // core's resample loop (creative-core#825); tighten it when that lands. It sits in the develop budget suite, which the perf list runs
 // nightly, so a busy CI runner never judges it. Prints a `LIBRARY-BUDGET export …` line per row.
 @testable import LibraryModel
@@ -44,5 +45,21 @@ extension LibraryDevelopBudgetTests {
         print("LIBRARY-BUDGET export two 6000x4000 picks at \(longSide.map(String.init) ?? "full"): \(elapsed) s (budget \(budget) s)")
         #expect(files.map { LibraryHeadless.pngSize($0.data)?.longSide } == [longSide ?? 6000, longSide ?? 6000])
         if !_isDebugAssertConfiguration() { #expect(elapsed <= budget) }
+    }
+
+    /// P8 model half: ten 6000 x 4000 picks at 2048, the journey's workload, within its 15 s whole-run gate.
+    @Test func tenFullSizePicksAt2048WithinP8() throws {
+        let png = try Self.photoPNG()
+        var doc = try LibraryHeadless.new(.object([:]))
+        for n in 1...10 { try doc.importImage(png, name: String(format: "IMG_%04d.png", n)) }
+        _ = try LibraryHeadless.catalog.run("edit.select-all", params: .object([:]), on: &doc)
+        _ = try LibraryHeadless.catalog.run("metadata.pick", params: .object([:]), on: &doc)
+        let clock = ContinuousClock()
+        var files: [ExportedFile] = []
+        let took = clock.measure { files = (try? doc.export("png", options: .object(["longSide": .number(2048)]))) ?? [] }
+        let elapsed = Double(took.components.seconds) + Double(took.components.attoseconds) / 1e18
+        print("LIBRARY-BUDGET export ten 6000x4000 picks at 2048: \(elapsed) s (budget 15.0 s)")
+        #expect(files.map { LibraryHeadless.pngSize($0.data)?.longSide } == Array(repeating: 2048, count: 10))
+        if !_isDebugAssertConfiguration() { #expect(elapsed <= 15) }
     }
 }

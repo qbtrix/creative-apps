@@ -3,7 +3,9 @@
 // steps. Live (L): ten landscape 6000 × 4000 `shoot` JPEGs at 2048, three runs;
 // each run's time and `progress` mark (S-L8, #782) go to
 // .build/ui-screens/perf-testExportThroughput.json. Report-only: it asserts
-// the files, never the gates. Skips "waits on EX-13" (then "waits on #782").
+// the files, never the gates. Until S-L8 (#782) lands the mark reads "no
+// progress mark"; the whole time is reported either way, and its model half is
+// gated in LibraryDevelopBudgetTests+Export.swift.
 import Foundation
 import XCTest
 
@@ -13,7 +15,6 @@ extension LibraryExportBatchJourneyTests {
 
     /// P8: three exports of ten 6000 × 4000 JPEGs at 2048; report each run's mark and time.
     @MainActor func testExportThroughput() throws {
-        throw XCTSkip("waits on #782")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         let out = try LibraryFiles.freshPhotoFolder()
