@@ -15,6 +15,7 @@ import HaloModel
 import LibraryModel
 import PhotoModel
 import SuiteImaging
+import SuiteModel
 
 /// One app's headless document type, erased so the router can list it and open files with it.
 public struct HeadlessApp: Sendable {
@@ -108,9 +109,18 @@ struct TypedSession<D: HeadlessDocument>: SessionBox {
 public enum Apps {
     /// The five apps, in the suite's order: photo, design, flare, halo, library.
     public static let all: [HeadlessApp] = [
-        HeadlessApp(PhotoHeadless.self), HeadlessApp(DesignHeadless.self), HeadlessApp(FlareHeadless.self),
+        HeadlessApp(PhotoHeadless.self), HeadlessApp(DesignHeadless.self), flare,
         HeadlessApp(HaloHeadless.self), HeadlessApp(LibraryHeadless.self),
     ]
+    /// Flare, its documents given CoreRaster's PNG encoder (through Photo's codec) so `export png` writes frames.
+    static let flare = HeadlessApp(FlareHeadless.self, open: { data, name in
+        var flare = try FlareHeadless.open(data, name: name); flare.pngEncoder = flarePNG; return flare
+    }, new: { options in var flare = try FlareHeadless.new(options); flare.pngEncoder = flarePNG; return flare })
+    /// A Flare frame as PNG bytes.
+    static let flarePNG: @Sendable (MediaFrame) throws -> Data = { frame in
+        try CoreRasterImageCodec().encode(DecodedImage(rgba8: frame.rgba, width: frame.width, height: frame.height),
+                                          as: .png, quality: 1)
+    }
     /// The suite's Help commands ("suite"), over the `.suitehelp` files `HelpReports` reads. Never in `all`.
     public static let suite = HeadlessApp(SuiteHelpDocument.self, open: { data, _ in try HelpReports.open(data) }, new: HelpReports.new)
     /// The fake app ("fake", SuiteKernel's FakeCanvasDocument). Never in `all`; the tests add it.

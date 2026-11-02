@@ -2,7 +2,9 @@
 // FlareCore's render list (`Scene.renderList(at:symbols:)`, or the edited symbol's own), mapped item for item to
 // `StageItem`s: visible layers in paint order, outlines as stored (cubics stay cubics), matrices and opacity already
 // multiplied down, each shape as the render list samples it at the frame. A stroke paints `RenderItem.strokePath`, the
-// outline trimmed and dashed as the SVG export draws it. Text is listed with an empty path and counted in `hiddenTextCount`. No scene with that id gives
+// outline trimmed and dashed as the SVG export draws it. Each item keeps its masks and matte link, and hidden matte
+// sources list in `matteItems`, indices as FlareCore gives them, for the PNG frames (FlareRaster); the on-screen
+// stage doesn't draw them yet. Text is listed with an empty path and counted in `hiddenTextCount`. No scene with that id gives
 // a 0 × 0 list with no items.
 import FlareCore
 
@@ -22,8 +24,10 @@ public struct LiveStage: StageRendering {
             render = scene.renderList(at: at, symbols: document.symbols)
         }
         let items = (render?.items ?? []).map(Self.item)
-        return StageDrawList(width: scene.width, height: scene.height, background: scene.background,
-                             items: items, hiddenTextCount: items.count(where: \.isText))
+        var list = StageDrawList(width: scene.width, height: scene.height, background: scene.background,
+                                 items: items, hiddenTextCount: items.count(where: \.isText))
+        list.matteItems = (render?.matteItems ?? []).map(Self.item)
+        return list
     }
 
     /// One render item as a stage item. An item inside instances is addressed by the top instance it sits in, with
@@ -43,7 +47,10 @@ public struct LiveStage: StageRendering {
         // outline) strokes the whole outline.
         let cut = render.stroke.map { !$0.dash.isEmpty || !($0.trim?.isWhole ?? true) } ?? false
         let painted = cut ? try? render.strokePath(tolerance: SVGExporter.strokeTolerance) : nil
-        return StageItem(address: address, path: render.outline, fill: render.fill, stroke: render.stroke,
-                         transform: render.matrix, opacity: render.opacity, isText: render.isText, strokePath: painted)
+        var item = StageItem(address: address, path: render.outline, fill: render.fill, stroke: render.stroke,
+                             transform: render.matrix, opacity: render.opacity, isText: render.isText, strokePath: painted)
+        item.clips = render.clips
+        item.matte = render.matte
+        return item
     }
 }

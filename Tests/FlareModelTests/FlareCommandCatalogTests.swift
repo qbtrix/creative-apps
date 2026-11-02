@@ -87,9 +87,9 @@ struct FlareCommandCatalogTests {
         if id.hasPrefix("path.") { return problem.contains("exampleRuns") }
         if ["file.clear-recent", "file.open-in", "file.open-recent", "import.report"].contains(id) { return problem.contains("exampleRuns") }
         if ["recovery.restore", "recovery.discard", "timeline.delete-keys"].contains(id) { return problem.contains("exampleRuns") }
-        // Copy As's shared example asks for PNG, which needs the window's rasterizer: FlarePasteboardAdapterTests runs
-        // its SVG and own-layers forms and the PNG refusal.
-        if id == "edit.copy-as" { return problem.contains("exampleRuns") && problem.contains("rasterizer") }
+        // Copy As's shared example asks for PNG, which the fixture has no PNG encoder for: FlarePasteboardAdapterTests
+        // runs its SVG and own-layers forms and the PNG refusal.
+        if id == "edit.copy-as" { return problem.contains("exampleRuns") && problem.contains(FlareHeadless.pngHelp) }
         return ["timeline.insert-frames", "timeline.remove-frames"].contains(id)
             && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes"].contains { problem.contains($0) }
     }

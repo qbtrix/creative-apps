@@ -1,6 +1,6 @@
 // LiveExportAdapter.swift: the live `Exporting` (docs/blueprints/flare/features/flare-export.md, FX-6): FlareCore's
-// exporters over any `StageRendering`, on a copy of the document without text (the exporters throw on it), every
-// result carrying `ExportScan`'s warnings. SVG writes the range's first frame (a transparent export clears the
+// exporters over any `StageRendering`, every result carrying `ExportScan`'s warnings. SVG writes text; Lottie and the
+// stage can't, so they get a copy without text. SVG writes the range's first frame (a transparent export clears the
 // background's alpha), Lottie the scene, PNG each `PNGExportPlan` frame from `stage` through the rasterizer, with a
 // `frameDelay` pause after each so Cancel is reachable; a cancel throws between frames, so no files come back.
 // MP4 and GIF (export-pack FV-4) don't come back as data: `writeVideo` streams each `FlareVideoPlan` frame of the
@@ -32,7 +32,7 @@ public struct LiveExportAdapter: Exporting {
     public func export(_ document: Document, options: ExportOptions, rasterizer: any FrameRasterizing,
                        progress: @Sendable (Double) -> Void) async throws -> ExportResult {
         let clean = ExportScan.withoutText(document)
-        guard var scene = clean.scenes.first(where: { $0.id == options.sceneID }) else {
+        guard let scene = clean.scenes.first(where: { $0.id == options.sceneID }) else {
             throw CommandError.sceneNotFound(options.sceneID)
         }
         var files: [ExportFile] = []
@@ -40,8 +40,11 @@ public struct LiveExportAdapter: Exporting {
         case .mp4, .gif:
             throw ExportOptionRefusal.invalid("MP4 and GIF write their file through writeVideo.")
         case .svgFrame:
-            if options.transparentBackground { scene.background.a = 0 }
-            let svg = try SVGExporter.export(scene: scene, frame: Double(options.frames.lowerBound), symbols: clean.symbols)
+            guard var whole = document.scenes.first(where: { $0.id == options.sceneID }) else {
+                throw CommandError.sceneNotFound(options.sceneID)
+            }
+            if options.transparentBackground { whole.background.a = 0 }
+            let svg = try SVGExporter.export(scene: whole, frame: Double(options.frames.lowerBound), symbols: document.symbols)
             files = [ExportFile(name: "\(scene.id).svg", data: Data(svg.utf8))]
         case .lottie:
             files = [ExportFile(name: "\(scene.id).json", data: try LottieExporter.export(scene: scene, symbols: clean.symbols))]
