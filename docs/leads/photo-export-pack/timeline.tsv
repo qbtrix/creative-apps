@@ -600,3 +600,4 @@ utc	stage	event	ref	note
 2026-11-02T17:57Z	check-in	new dev-red #6220 (macos, real on rerun, range #6212 #6214 #6215 #6217, all captain's; not ours); #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-02T18:32Z	check-in	dev-red #6220 still open (macos real, captain's range; not ours); captain merged #6197 (photo 8K text sampling, for #5951) and #6213 (flare); #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-02T19:04Z	check-in	dev-red #6220 still open; now linux OnboardingCopyTests red at dfde7b3, lane rerunning (not ours); #5353 open clean a92b4651; no new findings; 52 photo findings
+2026-11-02T19:37Z	check-in	dev-red #6220 still open; linux OnboardingCopyTests red was a flake (#6223, not ours); captain merged #6224 (journeys ci); #5353 open clean a92b4651; no new findings; 52 photo findings
