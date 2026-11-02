@@ -348,3 +348,4 @@ utc	stage	event	ref	note
 2026-11-02T07:37Z	3	check-in	pending	halo 41395624304 and full 41401804027 waiting; full 41397555548 cancelled, 0 cases
 2026-11-02T09:12Z	3	check-in	pending	halo job 125154364035 running; fulls 41401804027, 41409381204 cancelled, 0 cases
 2026-11-02T10:45Z	3	check-in	scanned	halo 26f25bfd 92 cases; known failures only; PlayHittable passed; nothing filed
+2026-11-02T12:54Z	3	check-in	quiet	fulls 41425757279, 41434558978 cancelled, 0 cases; no halo run
