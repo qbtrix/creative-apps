@@ -20,7 +20,7 @@ import Testing
         #expect(scene.fps == 24 && scene.durationFrames == 48)
         let view = FlareInspectorScene(model: model, perform: { _ in })
             .padding(SuiteSpacing.m)
-            .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .top)
+            .frame(width: FlareWindow.inspectorWidth, alignment: .top)
             .background(SuiteColor.panel)
         try snapshot(view, name: "flare-scene-section", scheme: .light)
     }
