@@ -67,9 +67,8 @@ public struct FlarePasteboardAdapter: Sendable {
         guard workspace.editHelp(.copy) == nil, let document = workspace.document,
               let sceneID = workspace.selectedSceneID else { return (nil, nil) }
         let frame = workspace.currentFrame
-        let clean = ExportScan.withoutText(document)
-        let svg = clean.scenes.first { $0.id == sceneID }.flatMap { scene in
-            (try? SVGExporter.export(scene: scene, frame: Double(frame), symbols: clean.symbols)).map { Data($0.utf8) }
+        let svg = document.scenes.first { $0.id == sceneID }.flatMap { scene in
+            (try? SVGExporter.export(scene: scene, frame: Double(frame), symbols: document.symbols)).map { Data($0.utf8) }
         }
         let services = workspace.services, editing = workspace.editingSymbolID
         var list = services.stage.drawList(document, sceneID: sceneID, frame: frame, editing: editing)

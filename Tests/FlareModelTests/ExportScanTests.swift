@@ -32,21 +32,23 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     var w = FlareWorkspace(services: .fake()); w.load(document); return w
 }
 
-@Test func aTextLayerIsNamedAndCountedInEveryFormat() {
+@Test func aTextLayerIsNamedAndCountedWhereTheFormatDropsIt() {
     var document = FlareFixtures.bounce
     let title = TextShape(string: "Hi", fontFamily: "System", fontSize: 24, position: Point(x: 10, y: 10))
     document.scenes[0].layers.append(Layer(id: "title", name: "Title", texts: [title]))
-    #expect(ExportScan.warnings(document, options: options(.svgFrame)) == [text])
+    #expect(ExportScan.warnings(document, options: options(.svgFrame)).isEmpty)
     #expect(ExportScan.warnings(document, options: options(.pngSequence)) == [text])
+    #expect(ExportScan.warnings(document, options: options(.lottie, transparent: true)) == [text])
     document.scenes[0].layers[0].texts = [title, title]
-    #expect(ExportScan.warnings(document, options: options(.svgFrame)) == ["Text isn't exported yet (2 layers)."])
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Text isn't exported yet (2 layers)."])
+    #expect(ExportScan.textLayers(in: document, sceneID: "scene-1") == 2)
 }
 
 @Test func anAnimatedSymbolInstanceIsNamedButAStillOneIsNot() {
-    #expect(ExportScan.warnings(FlareFixtures.character, options: options(.svgFrame)) == [symbol])
+    #expect(ExportScan.warnings(FlareFixtures.character, options: options(.lottie, transparent: true)) == [symbol])
     var held = FlareFixtures.character
     held.scenes[0].layers[2].instances[0].loop = .singleFrame
-    #expect(ExportScan.warnings(held, options: options(.svgFrame)).isEmpty)
+    #expect(ExportScan.warnings(held, options: options(.lottie, transparent: true)).isEmpty)
 }
 
 @Test func aMachineIsNamed() {
@@ -66,7 +68,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     try FlareFormat.validate(showcase)
     #expect(showcase.scenes[0].layers.map(\.name) == ["Background", "Shadow", "Ball", "Spinner", "Title"])
     #expect(showcase.symbols.map(\.name) == ["Spin"] && showcase.stateMachines.count == 1)
-    #expect(ExportScan.warnings(showcase, options: options(.svgFrame)) == [text, symbol, machine])
+    #expect(ExportScan.warnings(showcase, options: options(.svgFrame)) == [machine])
     #expect(ExportScan.warnings(showcase, options: options(.lottie)) == [text, symbol, machine, background])
 }
 
@@ -126,7 +128,7 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     let o = try #require(w.exportingOptions)
     #expect(o == options(.svgFrame, 0...47))
     let result = try await run(document, o)
-    #expect(result.warnings == [text, symbol, machine])
+    #expect(result.warnings == [machine])
     w.endExport(.success(result.files.map(\.name)))
     #expect(w.exportState == .finished(o, ["scene-1.svg"]))
     w.dismissExport()
@@ -161,30 +163,38 @@ private func workspace(_ document: Document) -> FlareWorkspace {
     #expect(w.exportState == .failed(o, "Not connected yet (IN-7)."))
 }
 
-// QB-L8's Linux gate: SVG frame < 1 s, Lottie of 300 frames < 10 s, 48 PNG frames at 1080p < 10 s. The fake's
-// 20 ms pause per PNG frame only makes Cancel reachable, so the budget runs without it.
+// QB-L8: SVG frame < 1 s, Lottie of 300 frames < 10 s, 48 PNG frames at 1080p < 10 s, timed on the real writers
+// (LiveExportAdapter over LiveStage, FlareRaster drawing the showcase's mask, symbol and gradients). The encoder
+// here only copies the pixels; the CLI's CoreRaster PNG encode is timed by its own drive. Run it on a release
+// build (perf-suites, not the gate): `swift test -c release --filter svgFrameLottieAndPNGSequenceStayInsideQBL8`.
 @Test func svgFrameLottieAndPNGSequenceStayInsideQBL8() async throws {
-    let straight = FakeExport(frameDelay: .zero), clock = ContinuousClock()
+    let live = LiveExportAdapter(stage: LiveStage()), clock = ContinuousClock()
+    let raster = FlareRaster(encode: { Data($0.rgba) })
     func hd(_ frames: Int) -> Document {
         var document = FlareFixtures.showcase
         (document.scenes[0].width, document.scenes[0].height, document.scenes[0].durationFrames) = (1920, 1080, frames)
         return document
     }
-    let svg = try await clock.measure { _ = try await run(hd(48), options(.svgFrame, 24...24), using: straight) }
-    let lottie = try await clock.measure { _ = try await run(hd(300), options(.lottie, 0...299), using: straight) }
-    var files = 0
-    let png = try await clock.measure { files = try await run(hd(48), options(.pngSequence, 0...47), using: straight).files.count }
-    #expect(svg < .seconds(1) && lottie < .seconds(10) && png < .seconds(10) && files == 48)
+    func real(_ document: Document, _ o: ExportOptions) async throws -> ExportResult {
+        try await live.export(document, options: o, rasterizer: raster) { _ in }
+    }
+    let svg = try await clock.measure { _ = try await real(hd(48), options(.svgFrame, 24...24)) }
+    let lottie = try await clock.measure { _ = try await real(hd(300), options(.lottie, 0...299)) }
+    var files: [ExportFile] = []
+    let png = try await clock.measure { files = try await real(hd(48), options(.pngSequence, 0...47)).files }
+    print("QB-L8 svg \(svg) lottie \(lottie) png48@1080p \(png)")
+    #expect(files.count == 48 && files.allSatisfy { $0.data.count == 1920 * 1080 * 4 })
+    #expect(svg < .seconds(1) && lottie < .seconds(10) && png < .seconds(10))
 }
 
-/// The PNG frames draw the stage's picture, which has no masks or mattes yet; SVG and Lottie write them.
-@Test func aMaskOrMatteIsNamedForPNGOnly() {
+/// No format drops masks or mattes now: SVG writes them and PNG frames draw them (FlareRaster).
+@Test func aMaskOrMatteNeedsNoWarningSincePNGDrawsThem() {
     var document = FlareFixtures.bounce
     let square = [Point(x: 0, y: 0), Point(x: 10, y: 0), Point(x: 10, y: 10)]
     document.scenes[0].layers[0].masks = [LayerMask(path: FlarePath(polyline: square, closed: true))]
-    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Masks and mattes aren't drawn in PNG yet (1 layer)."])
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)).isEmpty)
     #expect(ExportScan.warnings(document, options: options(.svgFrame)).isEmpty)
     #expect(ExportScan.warnings(document, options: options(.lottie, transparent: true)).isEmpty)
     document.scenes[0].layers.append(Layer(id: "m", name: "M", matte: TrackMatte(sourceLayerID: document.scenes[0].layers[0].id)))
-    #expect(ExportScan.warnings(document, options: options(.pngSequence)) == ["Masks and mattes aren't drawn in PNG yet (2 layers)."])
+    #expect(ExportScan.warnings(document, options: options(.pngSequence)).isEmpty)
 }

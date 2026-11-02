@@ -1,8 +1,9 @@
 // ExportScan.swift: the warnings every export carries, shared by the fake and live exporters (docs/blueprints/flare.md,
-// 6.2 and 6.3). v1's exporters can't write text, symbol animation (instances flatten to their first frame), state
-// machines or, in Lottie, the background color, so each one present gets a named warning: never a silent drop. PNG
-// frames are the stage's picture, which has no masks or mattes yet, so a PNG export names those layers too. Text and
-// masks count every layer holding one, hidden or not, in the scene or a symbol its instances reach.
+// 6.2 and 6.3). What a format drops gets a named warning, never a silent drop: text in Lottie and PNG (core's SVG
+// writes it; Lottie can't, and PNG frames draw no glyphs), symbol animation in Lottie (its instances hold their first
+// frame; SVG and PNG play them), state machines everywhere, and the background color in Lottie. Text counts every
+// layer holding one, hidden or not, in the scene or a symbol its instances reach. Masks and mattes need no warning:
+// SVG and PNG (FlareRaster) both draw them. `maskedLayers` feeds the stage's own "Masks not shown" pill.
 import FlareCore
 
 public enum ExportScan {
@@ -11,22 +12,23 @@ public enum ExportScan {
         guard let scene = document.scenes.first(where: { $0.id == options.sceneID }) else { return [] }
         var warnings: [String] = []
         let texts = textLayers(scene.layers, document.symbols, seen: [])
-        if texts > 0 { warnings.append("Text isn't exported yet (\(count(texts, "layer"))).") }
+        if texts > 0, options.format != .svgFrame { warnings.append("Text isn't exported yet (\(count(texts, "layer"))).") }
         let instances = scene.layers.flatMap(\.instances).filter { isAnimated($0, document.symbols) }.count
-        if instances > 0 { warnings.append("Symbol animation exports as its first frame (\(count(instances, "instance"))).") }
+        if instances > 0, options.format == .lottie { warnings.append("Symbol animation exports as its first frame (\(count(instances, "instance"))).") }
         let machines = document.stateMachines.count
         if machines > 0 { warnings.append("Interactions aren't exported (\(count(machines, "machine"))).") }
-        let masked = maskedLayers(scene.layers, document.symbols)
-        if options.format == .pngSequence, masked > 0 {
-            warnings.append("Masks and mattes aren't drawn in PNG yet (\(count(masked, "layer"))).")
-        }
         if options.format == .lottie, !options.transparentBackground {
             warnings.append("Background color isn't part of Lottie.")
         }
         return warnings
     }
 
-    /// `document` with every text removed, scene and symbol layers alike, so v1's exporters can write the rest.
+    /// The number of layers holding text among `scene`'s layers and the symbols its instances reach.
+    public static func textLayers(in document: Document, sceneID: String) -> Int {
+        document.scenes.first { $0.id == sceneID }.map { textLayers($0.layers, document.symbols, seen: []) } ?? 0
+    }
+
+    /// `document` with every text removed, scene and symbol layers alike, so Lottie and video can write the rest.
     public static func withoutText(_ document: Document) -> Document {
         func strip(_ layers: [Layer]) -> [Layer] { layers.map { var layer = $0; layer.texts = []; return layer } }
         var clean = document

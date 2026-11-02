@@ -14,9 +14,10 @@
 // windows, its status message, and the frames of a Photo crash report
 // written meanwhile. Then it drives, about 3 s each: the Levels Black slider,
 // the Hue slider, the Move tool across the canvas, a scroll-wheel pan at
-// 300%, and ⌘= / ⌘− zoom steps. Pinch isn't driven: XCUITest on macOS can't
-// make a magnify gesture, so the zoom keys stand in. Every gesture goes
-// through Journey.health (Journey+Health.swift). Only `scripts/ui-test perf`
+// 300%, ⌘= / ⌘− zoom steps, then text-layers' two: key repeats into a Type
+// tool box and, once Return adds the layer, a drag of its Size field. Pinch
+// isn't driven: XCUITest on macOS can't make a magnify gesture, so the zoom
+// keys stand in. Every gesture goes through Journey.health (Journey+Health.swift). Only `scripts/ui-test perf`
 // runs these (nightly, from perf-nightly.sh); Tests/render-budgets.md records
 // what they measured.
 import AppKit
@@ -74,6 +75,32 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
         }
         photo.health("\(backend) zoom", pid: pid, series: nil) {
             Journey.repeatFor(seconds: 3) { step in photo.press(character: step.isMultiple(of: 2) ? "-" : "=", .command) }
+        }
+        text(photo, backend: backend, pid: pid)
+    }
+
+    /// text-layers (#5951): a Type tool box on the 8K photo takes key repeats, then Return adds the layer
+    /// and its Text section's Size is dragged both ways. Typing has no probe series, so its round trips
+    /// are report-only; the sample, hang and idle checks still hold it. Size reports `exact-field`.
+    @MainActor private func text(_ photo: Journey, backend: String, pid: pid_t) {
+        photo.element("suite.tools").buttons["Type"].click()
+        photo.element("suite.viewport").coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3)).click()
+        let box = photo.element("photo.text.box")
+        guard box.waitForExistence(timeout: 10) else { return XCTFail("\(backend): the Type tool click opened no box (photo.text.box)") }
+        photo.health("\(backend) type", pid: pid, series: nil) {
+            Journey.repeatFor(seconds: 3) { step in photo.app.typeText(step.isMultiple(of: 5) ? " " : "a") }
+        }
+        photo.press(.return)
+        let size = photo.element("suite.inspector").descendants(matching: .any)["photo.text.size"].firstMatch
+        guard size.waitForExistence(timeout: 10) else { return XCTFail("\(backend): Return added no text layer (no photo.text.size)") }
+        photo.reveal(size)
+        let from = size.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        photo.health("\(backend) text size", pid: pid, series: "exact-field") {
+            for dx: CGFloat in [300, -300] {
+                from.click(forDuration: 0.05, thenDragTo: from.withOffset(CGVector(dx: dx, dy: 0)),
+                           withVelocity: XCUIGestureVelocity(400), thenHoldForDuration: 0.05)
+            }
+            return []
         }
     }
 

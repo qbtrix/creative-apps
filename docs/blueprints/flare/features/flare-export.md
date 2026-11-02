@@ -147,7 +147,7 @@ animated symbol instance and a machine):
 
 | # | step (mouse) | expect |
 |---|---|---|
-| 1 | click the toolbar's Export… (`flare.export.showSheet`) | the sheet; the SVG frame chip (`flare.export.format.svgFrame`) selected; the warnings list reads "Text isn't exported yet (1 layer).", "Symbol animation exports as its first frame (1 instance).", "Interactions aren't exported (1 machine)."; Export (`flare.export.start`) enabled |
+| 1 | click the toolbar's Export… (`flare.export.showSheet`) | the sheet; the SVG frame chip (`flare.export.format.svgFrame`) selected; the warnings list reads "Interactions aren't exported (1 machine)." (SVG writes text and plays symbols); Export (`flare.export.start`) enabled |
 | 2 | click Export | the finished row "Exported scene-1.svg." with Reveal in Finder (`flare.export.reveal`) enabled; `scene-1.svg` exists, starts `<svg`, `XMLParser` parses it and the root's `width` is "550" and `height` "400" |
 | 3 | click Done (`flare.export.dismiss`); click Export…; click the Lottie chip | the fourth warning "Background color isn't part of Lottie." joins the list |
 | 4 | click Export | "Exported scene-1.json."; `scene-1.json` is JSON with `fr` 24, `w` 550, `h` 400, `op` 48 |
