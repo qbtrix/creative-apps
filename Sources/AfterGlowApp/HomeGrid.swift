@@ -9,9 +9,9 @@
 // caption carries the card's age and its tooltip the app. The recents take
 // the height left between the New row and the running strip and clip to it
 // (ThumbnailGrid scrolls itself live). Each card shows its document's
-// published preview, asked once through HomePreviews when the cards change
-// and kept for the window's life; a document without one shows its app's mark
-// (shared-thumbnails ST-3).
+// published preview, asked through HomePreviews when the cards change: once
+// per document, and again when its recents entry gets newer (a save, #5211);
+// a document without one shows its app's mark (shared-thumbnails ST-3).
 import AppKit
 import SuiteModel
 import SuiteUI
@@ -55,8 +55,8 @@ struct HomeGrid: View, BodyCounted {
         }
         .frame(maxWidth: .infinity, minHeight: .zero, maxHeight: .infinity, alignment: .topLeading)
         .clipped()
-        .task(id: model.state.cards.map(\.item.ref.fileID)) {
-            await previews.load(model.state.cards.map(\.item.ref), from: model.thumbnails)
+        .task(id: model.state.cards.map(\.item)) {
+            await previews.load(model.state.cards.map(\.item), from: model.thumbnails)
         }
     }
 
