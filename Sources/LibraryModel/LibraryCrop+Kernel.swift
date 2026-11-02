@@ -3,7 +3,8 @@
 // faces the pixels before the crop; a turn or flip carries the stored crop with the picture. The
 // crop's bounds are the oriented photo's straightened canvas in pixels, so a ratio frames the photo
 // as it stands, and a frame set with no draft open is stored as one named step. The loupe's crop
-// draft lives here too (OC-z): Library keeps no crop copy of its own beside this adapter. Linux-safe.
+// draft lives here too (OC-z): Library keeps no crop copy of its own beside this adapter. crop.set-frame
+// takes those pixels, says so in its schema, and refuses a side under 16 px. Linux-safe.
 import CoreRaster
 import SuiteKernel
 
@@ -51,6 +52,12 @@ struct LibraryCropDocument: OrientationTarget, CropTarget {
         guard let f else { return library.resetCrop() }
         guard let photo = library.loupeItem, let canvas = canvas(photo, angle: f.angle),
               canvas.width > 0, canvas.height > 0 else { return }
+        let shortest = (min(Self.minimumSide, canvas.width), min(Self.minimumSide, canvas.height))
+        guard f.rect.width >= shortest.0, f.rect.height >= shortest.1 else {
+            throw CatalogError.failed(id: "crop.set-frame", message: "A crop frame is in pixels of the "
+                + "\(Int(canvas.width)) × \(Int(canvas.height)) straightened photo, each side at least 16; "
+                + "\(f.rect.width) × \(f.rect.height) is smaller.")
+        }
         let rect = UnitRect(x: f.rect.minX / canvas.width, y: f.rect.minY / canvas.height,
                             width: f.rect.width / canvas.width, height: f.rect.height / canvas.height)
         let kept = aspect ?? (library.cropDraft ?? photo.develop.crop)?.aspect ?? .free
@@ -76,10 +83,24 @@ struct LibraryCropDocument: OrientationTarget, CropTarget {
         (try? CommandCatalog(app: "library", CropCommands.specs(LibraryCropDocument.self),
                              history: { LibraryCatalogSteps(catalog: $0.library) })) ?? .empty(app: "library")
 
+    /// crop.set-frame's params in Library's words: the straightened photo's pixels, each side at
+    /// least `minimumSide`, so a unit-square guess like `w: 0.4` is refused, not stored (#5954).
+    static let frameSchema = ParamSchema.object(
+        ["x": .number("Left edge, in pixels of the straightened photo (0 is its left side).", minimum: 0),
+         "y": .number("Top edge, in pixels of the straightened photo (0 is its top).", minimum: 0),
+         "w": .number("Width in pixels, at least 16.", minimum: minimumSide),
+         "h": .number("Height in pixels, at least 16.", minimum: minimumSide),
+         "angle": .optional(.number("Straighten, degrees.", minimum: -45, maximum: 45))],
+        required: ["x", "y", "w", "h", "angle"])
+    static let frameExample = JSONValue.object(["x": .number(0), "y": .number(0), "w": .number(64), "h": .number(64)])
+    /// The shortest side a frame set by command may have, in pixels (a drag keeps the same).
+    static let minimumSide = 16.0
+
     /// The nine specs on the catalog: each runs its kernel spec on the document and keeps the result.
     static let specs: [CommandSpec<LibraryCatalog>] = CropCommands.specs(LibraryCropDocument.self).map { spec in
-        .typed(spec.id, title: spec.title, summary: spec.summary, kind: spec.kind, params: JSONValue.self, schema: spec.params,
-               result: spec.result, example: spec.example,
+        let frame = spec.id == "crop.set-frame"
+        return .typed(spec.id, title: spec.title, summary: spec.summary, kind: spec.kind, params: JSONValue.self,
+               schema: frame ? frameSchema : spec.params, result: spec.result, example: frame ? frameExample : spec.example,
                availability: { spec.availability(LibraryCropDocument(library: $0)) }) { c, json in
             var doc = LibraryCropDocument(library: c, aspect: aspect(in: json))
             let outcome = try catalog.run(spec.id, params: json, on: &doc)
@@ -260,11 +281,13 @@ extension LibraryCatalog {
         cropFrame.map { "\($0.width) × \($0.height) at \($0.x), \($0.y)" }
     }
 
-    /// What the loupe renders while cropping: the photo's tone, the draft's
-    /// angle, the whole straightened photo. Nil when not cropping.
+    /// What the loupe renders while cropping: the photo's tone on the whole
+    /// photo, unturned. The loupe turns that picture by the draft's angle
+    /// itself (a compositor transform), so a straighten step renders nothing.
+    /// Nil when not cropping.
     public var cropLoupeSettings: DevelopSettings? {
         guard let draft = cropDraft, let photo = loupeItem else { return nil }
-        return photo.develop.setting(crop: CropSettings(angle: draft.angle, rect: .full, aspect: draft.aspect))
+        return photo.develop.setting(crop: CropSettings(angle: 0, rect: .full, aspect: draft.aspect))
     }
 
     /// `photo`'s size after its stored crop; its own size without one.

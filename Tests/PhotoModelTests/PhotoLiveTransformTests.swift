@@ -116,6 +116,24 @@ import Testing
         #expect(route.composites.made == regions * 2, "a later step composited the layers under the Logo again")
     }
 
+    /// A drag frame of a selection moves only the selected part; the rest of the layer stays put (#5813).
+    @Test func aDragFrameMovesOnlyTheSelectedPart() async throws {
+        var workspace = try Self.transforming()
+        workspace.cancelTransform()
+        workspace.selection = PixelRect(x: 120, y: 80, width: 30, height: 40)
+        try workspace.beginTransform()
+        let route = Self.route(.cpu)
+        let before = try await PhotoRenderer.update(workspace, since: nil, route: route)
+        try workspace.setTransform(TransformBox(box: Rect(minX: 120, minY: 130, maxX: 150, maxY: 170)), name: "Move", drag: "m")
+        let frame = try await PhotoRenderer.update(workspace, since: before.revision, route: route, live: true)
+        let (a, b) = (PhotoRenderRouteTests.laid(before), PhotoRenderRouteTests.laid(frame))
+        func at(_ bytes: [UInt8], _ x: Int, _ y: Int) -> ArraySlice<UInt8> { bytes[((y * 300 + x) * 4)...].prefix(4) }
+        #expect(at(b, 170, 100) == at(a, 170, 100), "the Logo's right half stays where it was")
+        #expect(at(b, 130, 100) == at(a, 10, 10), "the left half moved off")
+        #expect(at(b, 130, 150) == at(a, 130, 100), "the left half is on its new box")
+        #expect(at(b, 170, 150) == at(a, 170, 150), "the right half didn't move along")
+    }
+
     /// A drag's frames never resample the whole layer: each draws the draft through its matrix and changes the
     /// canvas; the exact frame after the drag resamples once, and Return lays exactly that frame.
     @Test(arguments: [PhotoRenderRoute.cpu, PhotoRenderRouteTests.standIn, resident])
