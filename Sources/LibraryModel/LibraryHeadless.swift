@@ -43,7 +43,8 @@ public struct LibraryHeadless: HeadlessDocument {
 
     init(photos: [PhotoItem], images: [String: Data], stem: String) {
         var services = LibraryServices.fake()
-        services.culling = LiveCulling(); services.coding = LiveCatalogCoding(); services.isPreview = false
+        services.culling = LiveCulling(); services.coding = LiveCatalogCoding(); services.crop = LiveCrop()
+        services.isPreview = false
         box = CatalogBox(LibraryCatalog(services: services))
         self.images = images; self.stem = stem
         library.restore(photos)

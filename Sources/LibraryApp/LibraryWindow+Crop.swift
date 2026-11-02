@@ -5,9 +5,11 @@
 // `LibraryMenu.Crop` hands the frame overlay and the CROP section their
 // values and closures: every closure is nil without a draft. After a change
 // the loupe renders again through the loupe area's RenderQueue (crop adds no
-// render path of its own); a straighten or reset sends a quick `.preview`
-// first, then `.full`. Auto measures the loupe's current picture off the main
-// actor and adds the leveler's turn to the draft. Every state change is a
+// render path of its own); Reset Crop sends a quick `.preview` first, then
+// `.full`. A straighten, Auto or a reset inside the draft renders nothing:
+// the loupe's picture is the unturned photo, which the loupe turns itself.
+// Auto measures that picture off the main actor and sets the draft to the
+// leveler's turn. Every state change is a
 // LibraryCatalog method. The window merges this half with the develop half.
 // Orientation (orientation-crop OC-9): Rotate Left, Rotate Right and Flip
 // Horizontal and Vertical run the catalog's image.rotate-* and image.flip on
@@ -113,9 +115,9 @@ extension LibraryWindow {
                 model.dragCrop(handle, dx: dx, dy: dy)
             }
         }
+        // The loupe turns its picture itself, so an angle needs no render.
         let setAngle: (@MainActor (Double) -> Void)? = enabled(cropping) { (degrees: Double) in
             model.setCropAngle(degrees)
-            cropAreaRender(preview: true)
         }
         let level: LibraryMenu.Action? = enabled(cropping && model.levelHelp == nil) { () in
             cropAreaLevel()
@@ -130,7 +132,6 @@ extension LibraryWindow {
         }
         let reset: LibraryMenu.Action? = enabled(cropping) { () in
             model.resetCrop()
-            cropAreaRender(preview: true)
         }
         return LibraryMenu.Crop(
             draft: model.cropDraft,
@@ -153,15 +154,16 @@ extension LibraryWindow {
     /// Auto: the leveler's turn for the loupe's current picture, measured off
     /// the main actor, added to the draft (nil, no horizon, changes nothing).
     private func cropAreaLevel() {
-        guard let leveler = model.leveler, let image = model.loupeRender?.image else { return }
+        guard let leveler = model.leveler, let image = model.loupeRender?.image,
+              let turned = model.cropDraft?.angle else { return }
         Task {
             let delta = await Task.detached(priority: .userInitiated) { () -> Double? in
                 guard let buffer = try? PixelBuffer(
                     rgba8: image.rgba8, width: image.size.width, height: image.size.height) else { return nil }
                 return try? leveler.levelAngle(buffer)
             }.value
-            model.levelCrop(by: delta)
-            cropAreaRender(preview: true)
+            // The picture is unturned while cropping, so the level turn is absolute.
+            model.levelCrop(by: delta.map { $0 - turned })
         }
     }
 }
