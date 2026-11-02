@@ -11,7 +11,7 @@
 // ViewerStatusBar shows the zoom percent, the scene size, after a failed save "Not saved" in the error color
 // (`flare.saveStatus`, its tooltip the failure, as Design's and Photo's status lines carry theirs), on the fakes a
 // "Preview data" warning pill, then
-// `model.statusPills` from the canvas's `measuredFPS` (IT-9): aspect and rate, the rate shown while playing (a warning
+// `model.statusPills` from the canvas's `measuredFPS` (IT-9): aspect and rate (each its own element labelled with its text), the rate shown while playing (a warning
 // while frames drop), "Text not shown (n)" and, under Direct Select, why no points can be edited (`pathHelp`). A drag out of a ruler pulls a guide (FlareStageGuides, SE-2); the hidden
 // `flare.stage.zoom` reads the zoom for journeys. It only reads `model`; every change goes through `perform`.
 // A file dropped on the stage follows the suite's drop rule (file-flow FL-2, `suiteFileDrop`): a .flare opens
@@ -101,8 +101,8 @@ struct FlareStage: View {
     /// and rate are data, in primary text as the zoom pill is: a short "1:1" in the bar's secondary text measured
     /// under 4.5:1 on the pill fill.
     @ViewBuilder static func statusPills(_ pills: StatusPills) -> some View {
-        Text(pills.aspect).foregroundStyle(SuiteColor.textPrimary).accessibilityIdentifier("flare.status.aspect")
-        Text(pills.fps).foregroundStyle(SuiteColor.textPrimary).accessibilityIdentifier("flare.status.fps")
+        readoutPill(pills.aspect, identifier: "flare.status.aspect")
+        readoutPill(pills.fps, identifier: "flare.status.fps")
         if let actual = pills.actualFPS {
             Text(actual)
                 .accessibilityIdentifier("flare.status.actualFPS")
@@ -118,6 +118,17 @@ struct FlareStage: View {
         }
         if let help = pills.pathHelp { Text(help).accessibilityIdentifier("flare.status.pathHelp") }
         if let note = pills.placeNote { Text(note).accessibilityIdentifier("flare.status.place") }
+    }
+
+    /// A data pill journeys and VoiceOver read: its own element with `text` as label and value, since XCUITest drops
+    /// a plain Text's label on macOS (#1452, #4687), as FlareTimeline's readouts are.
+    private static func readoutPill(_ text: String, identifier: String) -> some View {
+        Text(text)
+            .foregroundStyle(SuiteColor.textPrimary)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(text)
+            .accessibilityValue(text)
+            .accessibilityIdentifier(identifier)
     }
 
     /// The scene's size for the status bar in whole points ("550 × 400 pt"); a non-finite side reads 0.
