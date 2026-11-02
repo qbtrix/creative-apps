@@ -9,7 +9,7 @@
 // `suite.controls` holds no duplicate. The row is only the controls, so it
 // fits the narrowest content column (#2101): the status pills (IT-9) live in
 // the stage's ViewerStatusBar, the readouts beside it in FlareTimeline, and
-// the PlaybackDriver in FlareCanvas. It only reads `model`.
+// the playback driver in FlareCanvas. It only reads `model`.
 import FlareModel
 import SuiteUI
 import SwiftUI
