@@ -1,8 +1,16 @@
 // FlareGuides.swift: the selected scene's ruler guides (docs/blueprints/flare.md, 3.4 and J14): add, move, remove and
-// Clear Guides. A guide drag is one coalesced "Move Guide" step, however many moves it sends.
+// Clear Guides, and the readout a guide's mark gives ("y 300"). A guide drag is one coalesced "Move Guide" step, however many moves it sends.
 import FlareCore
 
 extension FlareWorkspace {
+    /// Guide `index` of the selected scene as its mark reads it: "y 300" for a horizontal guide at 300, "x 120" for
+    /// a vertical one; nil when there is no such guide.
+    public func guideReadout(at index: Int) -> String? {
+        guard guides.indices.contains(index) else { return nil }
+        let guide = guides[index]
+        return "\(guide.axis == .horizontal ? "y" : "x") \(Self.whole(guide.position))"
+    }
+
     /// The selected scene's guides, in the order they were added.
     public var guides: [Guide] { selectedScene?.guides ?? [] }
 

@@ -26,5 +26,19 @@
     "find": "zoomLoupe(abs(scale - fit) < 0.0001 ? .fit : .scale(scale))",
     "replace": "zoomLoupe(.scale(scale))",
     "tests": "LibraryActionTests"
+  },
+  {
+    "label": "loupeStepEnd: Zoom In past the last loupe stop zooms back out to it",
+    "file": "Sources/LibraryModel/LibraryActions.swift",
+    "find": "return (step > 0 ? target > current : target < current) ? target : nil",
+    "replace": "return target",
+    "tests": "LibraryLoupeZoomTests.swift"
+  },
+  {
+    "label": "loupeTable: the loupe steps the suite's stops instead of its own",
+    "file": "Sources/LibraryModel/LibraryActions.swift",
+    "find": "public static let loupeZoomSteps = ZoomSteps(stops: [0.125, 0.25, 0.5, 1, 2, 4, 8])",
+    "replace": "public static let loupeZoomSteps = ZoomSteps.suite",
+    "tests": "LibraryLoupeZoomTests.swift"
   }
 ]
