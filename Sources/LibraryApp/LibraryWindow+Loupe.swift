@@ -109,6 +109,11 @@ extension LibraryWindow {
             fitMeasured: { fit in if areas.loupe.fitScale != fit { areas.loupe.fitScale = fit } })
     }
 
+    #if DEBUG
+    /// Loupe renders started, for the render budget tests (a straighten step starts none).
+    static var loupeRenders = 0
+    #endif
+
     /// Called when `model.focusedItemID` or `model.mode` changes (the loupe's
     /// photo, or the loupe opening on the photo the grid had focused): the held
     /// thumbnail as a preview, then the full render and the neighbours.
@@ -130,6 +135,9 @@ extension LibraryWindow {
     /// replace the queue's pending decodes ahead; nil keeps them.
     func loupeAreaRender(_ quality: RenderQuality, prefetching neighbours: [PhotoItem]? = nil) {
         guard let request = model.loupeRequest(longSide: loupeLongSide, quality: quality) else { return }
+        #if DEBUG
+        Self.loupeRenders += 1
+        #endif
         let state = areas.loupe
         loupeAreaListen(state)
         let service = model.services.loupe
