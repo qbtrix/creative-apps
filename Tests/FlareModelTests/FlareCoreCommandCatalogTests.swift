@@ -89,7 +89,9 @@ import Testing
     /// makes and changes them headless, each as one undo step (#6200).
     @Test func maskAndMatteCommandsRunHeadlessAsOneUndoStepEach() throws {
         var workspace = opened()
-        _ = try catalog.run("layer.duplicate", params: try #require(catalog.spec("layer.duplicate")).example, on: &workspace)
+        for id in ["layer.add", "layer.duplicate"] {
+            _ = try catalog.run(id, params: try #require(catalog.spec(id)).example, on: &workspace)
+        }
         for id in ["mask.add", "mask.set", "mask.set-matte"] {
             let spec = try #require(catalog.spec(id))
             #expect(catalog.availability(id, on: workspace) == .available, "\(id)")
