@@ -66,6 +66,7 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
             return []
         }
         photo.press(character: "z", .command)
+        transform(photo, backend: backend, pid: pid)
 
         for _ in 0..<3 { photo.press(character: "=", .command) }
         photo.health("\(backend) pan", pid: pid, series: nil) {
@@ -77,6 +78,32 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
             Journey.repeatFor(seconds: 3) { step in photo.press(character: step.isMultiple(of: 2) ? "-" : "=", .command) }
         }
         text(photo, backend: backend, pid: pid)
+    }
+
+    /// transform (#6206): the whole 8K photo pasted as a layer, Edit > Free Transform, and its
+    /// bottom-right handle dragged in and back. The sample must show the drag as a compositor
+    /// transform (no per-step resample); Escape drops the draft.
+    @MainActor private func transform(_ photo: Journey, backend: String, pid: pid_t) {
+        for key in ["a", "c", "v", "d"] { photo.press(character: key, .command) }
+        guard photo.app.staticTexts["Pasted Layer"].waitForExistence(timeout: 30) else {
+            return XCTFail("\(backend): the 8K paste made no Pasted Layer")
+        }
+        photo.element("suite.tools").buttons["Select"].click()
+        let edit = photo.app.menuBars.firstMatch.menuBarItems["Edit"]
+        edit.click()
+        edit.menus.firstMatch.children(matching: .menuItem)["Free Transform"].click()
+        let box = photo.element("photo.canvas.transform-box")
+        guard box.waitForExistence(timeout: 10) else { return XCTFail("\(backend): Free Transform put no box on the canvas") }
+        let corner = box.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1))
+        photo.health("\(backend) transform drag", pid: pid, series: "canvas-drag") {
+            for offset in [CGVector(dx: -300, dy: -170), CGVector(dx: -40, dy: -20)] {
+                corner.click(forDuration: 0.05, thenDragTo: corner.withOffset(offset),
+                             withVelocity: XCUIGestureVelocity(400), thenHoldForDuration: 0.05)
+            }
+            return []
+        }
+        photo.press(.escape)
+        photo.press(character: "z", .command)
     }
 
     /// text-layers (#5951): a Type tool box on the 8K photo takes key repeats, then Return adds the layer
