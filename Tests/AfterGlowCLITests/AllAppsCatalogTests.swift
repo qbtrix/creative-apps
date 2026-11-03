@@ -78,7 +78,7 @@ struct AllAppsCatalogTests {
             "machine.remove-transition: exampleRuns", "machine.rename: exampleRuns",
             "machine.set-initial: exampleRuns", "machine.update-input: exampleRuns",
             "machine.update-state: exampleRuns", "machine.update-transition: exampleRuns", "mask.move: exampleRuns",
-            "mask.remove: exampleRuns", "scene.remove: exampleRuns", "scene.rename: exampleRuns",
+            "mask.remove: exampleRuns", "mask.set: exampleRuns", "mask.set-matte: exampleRuns", "scene.remove: exampleRuns", "scene.rename: exampleRuns",
             "scene.reorder: exampleRuns", "scene.set-canvas: exampleRuns", "scene.timing: exampleRuns",
             "swatch.remove: exampleRuns", "swatch.rename: exampleRuns", "swatch.set-color: exampleRuns",
             "symbol.convert: exampleRuns", "symbol.remove: exampleRuns", "symbol.rename: exampleRuns",
