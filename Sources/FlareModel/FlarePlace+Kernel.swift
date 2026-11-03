@@ -2,7 +2,8 @@
 // commands in `PlaceCommands` bring an SVG into the edited scene the way the other apps place pictures. Flare draws
 // no pixels, so it takes SVG only and `rasterSize` refuses. A place reads the SVG with FlareCore's `SVGImport`: each
 // top-level group becomes a layer named after it, every shape mapped by one fit matrix (the kernel's
-// `PlaceRules.fitted` box), all added in one apply group, so one undo step. Flare keeps no picture after, so
+// `PlaceRules.fitted` box), all added by one `PlaceLayers` command, so one undo step and one document check (2,000
+// `AddLayer`s each scanned every layer, qbtrix/creative-core#828). Flare keeps no picture after, so
 // `placedSelection` is nil and the picture edits refuse. `placeSpecs` are the kernel's five place specs as Flare's
 // catalog registers them: the format refusal in Flare's words, the picture edits unavailable. Linux-safe.
 #if canImport(FoundationEssentials)
@@ -92,9 +93,7 @@ extension FlareWorkspace: PlacedImageTarget {
         let below = ownerLayers.firstIndex { $0.id == selectedLayerID }
         layerError = nil
         applyGroup(name, selection: .layer(placed.first?.id)) { engine in
-            for (k, layer) in placed.enumerated() {
-                try engine.perform(AddLayer(owner: owner, layer: layer, index: below.map { $0 + 1 + k }))
-            }
+            try engine.perform(PlaceLayers(owner: owner, layers: placed, index: below.map { $0 + 1 }))
         }
         if let layerError { throw CatalogError.failed(id: "place.image", message: layerError.message) }
         placeReport = Self.placeSentence(asset.name, layers: placed.count, skipped: imported.report.skipped)
@@ -171,6 +170,60 @@ extension FlareWorkspace: PlacedImageTarget {
         case .solid: fill
         case .linear(let stops, let start, let end): .linear(stops: stops, start: m.apply(start), end: m.apply(end))
         case .radial(let stops, let center, let radius): .radial(stops: stops, center: m.apply(center), radius: radius * k)
+        }
+    }
+}
+
+/// Inserts `layers` into `owner`'s list at `index` (nil appends) as one command; undo puts back the list it replaced.
+/// One command, so the engine checks the document once, not once per layer.
+struct PlaceLayers: Command {
+    static let id = "flare.place.layers"
+    var label: String { "Add Layers" }
+    let owner: LayerOwner
+    let layers: [Layer]
+    let index: Int?
+    /// The owner's layers before `execute`, for `undo`; nil until it ran.
+    private var replaced: [Layer]?
+    private enum CodingKeys: String, CodingKey { case owner, layers, index }
+
+    init(owner: LayerOwner, layers: [Layer], index: Int?) {
+        self.owner = owner; self.layers = layers; self.index = index
+    }
+
+    mutating func execute(_ document: inout Document) throws {
+        let old = try Self.list(owner, in: document)
+        var ids = Set(old.map(\.id))
+        for layer in layers where !ids.insert(layer.id).inserted { throw CommandError.duplicateID(layer.id) }
+        var next = old
+        next.insert(contentsOf: layers, at: min(max(index ?? old.count, 0), old.count))
+        try Self.set(next, owner, in: &document)
+        replaced = old
+    }
+
+    func undo(_ document: inout Document) throws {
+        guard let replaced else { throw CommandError.notExecuted }
+        try Self.set(replaced, owner, in: &document)
+    }
+
+    static func list(_ owner: LayerOwner, in document: Document) throws -> [Layer] {
+        switch owner {
+        case .scene(let id):
+            guard let scene = document.scenes.first(where: { $0.id == id }) else { throw ModelError.sceneNotFound(id) }
+            return scene.layers
+        case .symbol(let id):
+            guard let symbol = document.symbols.first(where: { $0.id == id }) else { throw ModelError.symbolNotFound(id) }
+            return symbol.layers
+        }
+    }
+
+    static func set(_ layers: [Layer], _ owner: LayerOwner, in document: inout Document) throws {
+        switch owner {
+        case .scene(let id):
+            guard let i = document.scenes.firstIndex(where: { $0.id == id }) else { throw ModelError.sceneNotFound(id) }
+            document.scenes[i].layers = layers
+        case .symbol(let id):
+            guard let i = document.symbols.firstIndex(where: { $0.id == id }) else { throw ModelError.symbolNotFound(id) }
+            document.symbols[i].layers = layers
         }
     }
 }
