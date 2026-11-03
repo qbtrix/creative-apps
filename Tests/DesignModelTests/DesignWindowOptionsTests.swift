@@ -1,5 +1,5 @@
 // DesignWindowOptionsTests.swift: the window's launch arguments (-DesignServices,
-// -DesignFixture, -DesignWindowSize), opening a named fixture as an unsaved file,
+// -DesignFixture, -DesignOpenFile, -DesignWindowSize; a launch file wins over a fixture), opening a named fixture as an unsaved file,
 // the status line's selection count, page size and tool tooltip, and the control id list. Runs on Linux and macOS.
 import Foundation
 import Testing
@@ -19,6 +19,16 @@ import Testing
         #expect(DesignWindowOptions(arguments: ["app", "-DesignFixture", "cards"]).fixture == "cards")
         #expect(DesignWindowOptions(arguments: ["app"]).fixture == nil)
         #expect(DesignWindowOptions(arguments: ["app", "-DesignFixture"]).fixture == nil)
+    }
+
+    /// files-history P4 (#6199): a launch file wins over a fixture, so `-DesignFixture crowd -DesignOpenFile
+    /// <crowd.design>` opens the saved file, named after it, instead of loading the unsaved fixture over it.
+    @Test func aLaunchFileWinsOverTheFixture() {
+        let both = DesignWindowOptions(arguments: ["app", "-DesignFixture", "crowd", "-DesignOpenFile", "/tmp/crowd.design"])
+        #expect(both.openFile == "/tmp/crowd.design")
+        #expect(both.fixture == nil)
+        #expect(DesignWindowOptions(arguments: ["app", "-DesignOpenFile", "/tmp/a.design"]).openFile == "/tmp/a.design")
+        #expect(DesignWindowOptions(arguments: ["app", "-DesignFixture", "cards"]).openFile == nil)
     }
 
     /// design-export DE-6: the journeys' export folder and the file the fakes fail to write.

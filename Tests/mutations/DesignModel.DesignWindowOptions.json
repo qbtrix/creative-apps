@@ -10,5 +10,7 @@
   {"label": "size skips empty parts", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "omittingEmptySubsequences: false", "replace": "omittingEmptySubsequences: true", "tests": "DesignWindowOptionsTests.swift"},
   {"label": "size chip drops the Page label", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "selectedPage.map { \"Page \\($0.sizeText)\" }", "replace": "selectedPage.map { $0.sizeText }", "tests": "DesignWindowOptionsTests.swift"},
   {"label": "export folder reads the fail flag", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "exportFolder = value(after: \"-DesignExportTo\")", "replace": "exportFolder = value(after: \"-DesignExportFail\")", "tests": "DesignWindowOptionsTests.swift"},
-  {"label": "export fail is never read", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "exportFail = value(after: \"-DesignExportFail\")", "replace": "exportFail = nil", "tests": "DesignWindowOptionsTests.swift"}
+  {"label": "export fail is never read", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "exportFail = value(after: \"-DesignExportFail\")", "replace": "exportFail = nil", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "fixture loads over the launch file", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "fixture = openFile == nil ? value(after: \"-DesignFixture\") : nil", "replace": "fixture = value(after: \"-DesignFixture\")", "tests": "DesignWindowOptionsTests.swift"},
+  {"label": "launch file is never read", "file": "Sources/DesignModel/DesignWindowOptions.swift", "find": "openFile = value(after: \"-DesignOpenFile\")", "replace": "openFile = nil", "tests": "DesignWindowOptionsTests.swift"}
 ]
