@@ -8,6 +8,8 @@
 // SampleTarget and color.pick the Eyedropper's click (eyedropper DY-6); shape.draw and tool.shape are ShapeCommands on its
 // ShapeTarget (shape-tools DS-6); select.pick, select.enter-group and select.exit-group are GroupPick's on its
 // GroupPickTarget (area-selection AR-14); the nine stroke.* are StrokeCommands on its StrokeTarget (stroke-style DK-6);
+// edit.cut, edit.copy and edit.paste move
+// Design layer data as a JSON string `{"data": ...}` between files, today's copySelection, cutSelection and paste;
 // edit.copy-as and edit.paste-as-image are CopyAsCommands on DesignPasteboardAdapter's CopyAsTarget (clipboard-interop CB-6);
 // the five place.* are PlaceCommands on its PlacedImageTarget (placed-images PD-5); the keyframe.* and time.* ids are
 // DesignKeyCommands' (one-document OD-8).
@@ -154,9 +156,42 @@ extension DesignWorkspace {
         },
         plain("edit.select-all", "Select All", "Selects every visible, unlocked layer at the selection's level.", .view,
               { reason($0.addPageHelp) }, { $0.selectAll() }),
+        clip("edit.cut", "Cut", "Copies the selected layers, then deletes them as one step.", .edit,
+             { reason($0.copyHelp() ?? $0.help(.delete)) }) { try $0.cutSelection() },
+        clip("edit.copy", "Copy", "Returns the selected layers as Design layer data.", .query, { reason($0.copyHelp()) }) { try $0.copySelection() },
+        .typed("edit.paste", title: "Paste", summary: "Pastes layer data from edit.copy or edit.cut, from this file or another, and selects the copies.",
+               kind: .edit, params: DataParams.self, schema: dataSchema, example: pasteExample,
+               availability: { reason($0.addPageHelp ?? ($0.editingTextID == nil ? nil : $0.pasteHelp(nil))) }
+        ) { w, p in
+            try w.paste(Data(p.data.utf8))
+            return JSONValue.object([:])
+        },
         command("edit.duplicate", "Duplicate", "Duplicates the selected layers.", .duplicate),
         command("edit.delete", "Delete", "Deletes the selected layers.", .delete),
     ]
+
+    /// edit.cut's and edit.copy's result and edit.paste's params: the layer data as text (LiveClipboard's payload).
+    struct DataParams: Codable, Sendable { var data: String }
+    static let dataSchema = ParamSchema.object(["data": .string("Design layer data, as edit.copy returns it.")], required: ["data"])
+
+    /// Cut or Copy: the layer data as `{"data": text}`.
+    static func clip(
+        _ id: String, _ title: String, _ summary: String, _ kind: CommandKind,
+        _ availability: @escaping @Sendable (DesignWorkspace) -> Availability,
+        _ grab: @escaping @Sendable (inout DesignWorkspace) throws -> Data
+    ) -> CommandSpec<DesignWorkspace> {
+        .typed(id, title: title, summary: summary, kind: kind, params: NoParams.self, schema: ParamSchema.none, result: dataSchema,
+               example: .object([:]), availability: availability) { w, _ in
+            JSONValue.object(["data": .string(String(decoding: try grab(&w), as: UTF8.self))])
+        }
+    }
+
+    /// One rectangle as edit.copy writes it, so the example pastes on any open file.
+    static let pasteExample: JSONValue = {
+        var w = DesignFixtures.cards
+        w.selectItem("node-2")
+        return .object(["data": .string((try? w.copySelection()).map { String(decoding: $0, as: UTF8.self) } ?? "")])
+    }()
 
     static let objectSpecs: [CommandSpec<DesignWorkspace>] = [
         command("object.group", "Group", "Groups the selected layers.", .group),

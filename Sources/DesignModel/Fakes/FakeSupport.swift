@@ -1,20 +1,38 @@
 // Fakes/FakeSupport.swift: tree helpers the fixture fakes share (the select and
 // arrange fakes now, the tier-2 fakes later). Internal, never part of the API.
-// They walk the whole tree, so a fake acts on layers inside frames and groups
+// They walk the whole tree once per call, however many ids, so a fake acts on layers inside frames and groups
 // exactly as the journeys select them. fakeHelp and fakeChange keep the help
 // law: a help is nil exactly when the write succeeds or only reports
 // `.unchanged`. Linux-safe.
 
 /// The nodes of `page` named in `ids`, in the order of `ids`; unknown ids are skipped.
 func fakeFind(_ ids: [String], _ page: DesignPage) -> [DesignNode] {
-    ids.compactMap { page.nodes.node($0) }
+    let found = fakeWalk(ids, page.nodes)
+    return ids.compactMap { found[$0]?.node }
 }
 
 /// The id of the parent all of `ids` share (nil: the top level), or `.notSameParent`.
 func fakeSharedParent(_ ids: [String], _ page: DesignPage) throws(DesignRefusal) -> String? {
-    let parents = Set(ids.map { page.nodes.ancestors(of: $0)?.last ?? "" })
+    let found = fakeWalk(ids, page.nodes)
+    let parents = Set(ids.map { found[$0].map { $0.parent ?? "" } ?? "" })
     guard parents.count == 1, let parent = parents.first else { throw .notSameParent }
     return parent.isEmpty ? nil : parent
+}
+
+/// Each of `ids` in the tree with its parent's id, in one walk however many there are (one walk per
+/// id made Group of 400 frames on 20,000 layers take 38 s, #6198).
+private func fakeWalk(_ ids: [String], _ nodes: [DesignNode]) -> [String: (node: DesignNode, parent: String?)] {
+    let wanted = Set(ids)
+    var out: [String: (node: DesignNode, parent: String?)] = [:]
+    func walk(_ nodes: [DesignNode], _ parent: String?) {
+        for node in nodes {
+            if wanted.contains(node.id), out[node.id] == nil { out[node.id] = (node, parent) }
+            if out.count == wanted.count { return }
+            walk(node.children, node.id)
+        }
+    }
+    walk(nodes, nil)
+    return out
 }
 
 /// Runs `body` on the children of `parentID` (the top level when nil) in a copy of the tree.

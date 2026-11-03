@@ -3,9 +3,9 @@
 // share a parent in a new group whose frame is the union of theirs, named
 // "Group N" with the lowest N no layer on the page uses, placed where the
 // topmost member was. Ungroup puts each selected group's children back in its
-// place, in order. An adapter over SuiteKernel's LayerTree (DesignNode+Kernel):
-// the kernel groups and ungroups; this file checks the shared parent, names the
-// group and gives it the members' union as its frame.
+// place, in order. Group edits the shared parent's child list in one pass, so it
+// costs one walk however many layers; Ungroup is an adapter over SuiteKernel's
+// LayerTree (DesignNode+Kernel).
 //
 // Invariants:
 // - Nothing moves: every leaf keeps its frame through Group and Ungroup.
@@ -30,16 +30,19 @@ public struct LiveGrouping: LayerGrouping {
     /// One "Group" step: the new group selected, at the topmost member's place, its frame the union.
     public func group(_ ids: [String], on page: DesignPage, mint: inout DesignIDMint) throws(DesignRefusal) -> DesignEdit {
         guard let box = fakeUnion(fakeFind(Array(Set(ids)), page).map(\.frame)) else { throw .nothingSelected }
-        let present = ids.filter { page.nodes.node($0) != nil }
-        _ = try fakeSharedParent(present, page)
-        let made = DesignNode(id: mint.nextNodeID(), name: "Group \(freeGroupNumber(page.nodes))", kind: .group, frame: box)
-        var tree = page.nodes.layerTree
-        do throws(TreeRefusal) {
-            _ = try tree.group(present, name: made.name, payload: DesignNodePayload(node: made), mint: { made.id })
-        } catch {
-            throw .notSameParent
+        let present = fakeFind(ids, page).map(\.id)
+        let parent = try fakeSharedParent(present, page)
+        var made = DesignNode(id: mint.nextNodeID(), name: "Group \(freeGroupNumber(page.nodes))", kind: .group, frame: box)
+        // One sibling list, edited once: the kernel's group walks the tree per id (38 s on 20,000, #6198).
+        let picked = Set(present)
+        let nodes = fakeSiblings(parent, page.nodes) { kids in
+            guard let front = kids.lastIndex(where: { picked.contains($0.id) }) else { return }
+            let at = kids[..<front].filter { !picked.contains($0.id) }.count
+            made.children = kids.filter { picked.contains($0.id) }
+            kids.removeAll { picked.contains($0.id) }
+            kids.insert(made, at: at)
         }
-        return DesignEdit(name: "Group", nodes: tree.designNodes, selection: [made.id])
+        return DesignEdit(name: "Group", nodes: nodes, selection: [made.id])
     }
 
     public func ungroupHelp(_ ids: [String], on page: DesignPage) -> String? {
