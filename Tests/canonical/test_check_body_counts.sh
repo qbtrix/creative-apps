@@ -4,7 +4,8 @@
 # a stored `bodyRuns` counter or a `+=` on one is caught in Sources and Tests, a
 # BodyCounted view passes, a `bodyRuns` read is fine inside BodyCountSuites and
 # caught outside it, a test reading a Sources static Int counter is caught,
-# comments never count, and the baseline allows existing hits but only shrinks.
+# comments never count, a bodyTally use outside `#if DEBUG` is caught (inside it, or
+# in a nested block under it, passes; the `#else` side is outside), and the baseline allows existing hits but only shrinks.
 # Run: bash Tests/canonical/test_check_body_counts.sh   (exit 0 = all pass)
 # bash 3.2 compatible, needs python3.
 set -uo pipefail
@@ -42,6 +43,25 @@ add Tests/AppSnapshotTests/RendererTests.swift $'extension BodyCountSuites {\n  
 expect "a test reading a Sources static Int counter is caught" \
   "Tests/AppSnapshotTests/RendererTests.swift::Renderer.inFlight,Tests/AppSnapshotTests/RendererTests.swift::Renderer.lifts" "$(hits)"
 
+tally() {  # tally <body>: a view under Sources using bodyTally
+  tree; add Sources/LibraryApp/View.swift "$1"; out=$(run); rc=$?; echo "$rc|$(sed 's/: .*//' <<<"$out")"
+}
+expect "bodyTally.ran outside #if DEBUG fails" "1|Sources/LibraryApp/View.swift:3" \
+  "$(tally $'struct V {\n    func f() {\n        bodyTally.ran(V.self)\n    }\n}')"
+expect "an @Environment(bodyTally) declaration outside #if DEBUG fails" "1|Sources/LibraryApp/View.swift:2" \
+  "$(tally $'struct V {\n    @Environment(\\.bodyTally) var bodyTally\n}')"
+expect "bodyTally under #if DEBUG passes (nested #if too)" "0|check-body-counts" \
+  "$(tally $'struct V {\n    #if DEBUG\n    @Environment(\\.bodyTally) var bodyTally\n    #endif\n    func f() {\n        #if DEBUG\n        #if os(macOS)\n        bodyTally.ran(V.self)\n        #endif\n        #endif\n    }\n}')"
+expect "bodyTally in the #else of #if DEBUG fails" "1|Sources/LibraryApp/View.swift:5" \
+  "$(tally $'struct V {\n    func f() {\n        #if DEBUG\n        #else\n        bodyTally.ran(V.self)\n        #endif\n    }\n}')"
+expect "bodyTally after an #endif fails" "1|Sources/LibraryApp/View.swift:5" \
+  "$(tally $'struct V {\n    func f() {\n        #if DEBUG\n        #endif\n        bodyTally.ran(V.self)\n    }\n}')"
+
+# the Renderer tree from above is gone; rebuild it for the baseline cases
+tree
+add Sources/PhotoApp/Renderer.swift $'final class Renderer {\n    static var pictures = 0, inFlight = 0\n    static var lifts: Int = 0\n    static var name = "x"\n    var made = 0\n}'
+add Tests/AppSnapshotTests/RendererTests.swift $'extension BodyCountSuites {\n    @Suite struct RendererTests {\n        @Test func a() { #expect(Renderer.inFlight == 0 && Renderer.lifts < 3 && Renderer.name == "x") }\n    }\n}'
+hits >/dev/null
 out=$(run); rc=$?
 expect "listed hits pass" "0|check-body-counts: clean (2 grandfathered in Tests/body-counts-baseline.txt)" "$rc|$out"
 

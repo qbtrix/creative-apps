@@ -143,7 +143,9 @@ extension LibraryWindow {
     /// replace the queue's pending decodes ahead; nil keeps them.
     func loupeAreaRender(_ quality: RenderQuality, prefetching neighbours: [PhotoItem]? = nil) {
         guard let request = model.loupeRequest(longSide: loupeLongSide, quality: quality) else { return }
+        #if DEBUG
         bodyTally.ran(LibraryLoupeRenders.self)
+        #endif
         let state = areas.loupe
         loupeAreaListen(state)
         let service = model.services.loupe
