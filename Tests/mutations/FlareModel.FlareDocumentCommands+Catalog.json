@@ -28,17 +28,24 @@
     "tests": "FlareCoreCommandCatalogTests"
   },
   {
-    "label": "notDrawnOnStage is ignored: mask and matte commands read available though the stage can't draw them",
-    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
-    "find": "        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }\n",
-    "replace": "",
-    "tests": "FlareCoreCommandCatalogTests"
-  },
-  {
     "label": "exampleTargetsJudged: a refusal about the example's layer-1 makes the id unavailable (#5841)",
     "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
     "find": "        default: return .available\n",
     "replace": "        default: return copy.layerError.map { .unavailable($0.message) } ?? .available\n",
     "tests": "FlareCoreCommandCatalogTests|FlareLayersFilesGateTests"
+  },
+  {
+    "label": "mask and matte ids refused again: the dry run reads them unavailable with a document open (#6200)",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "    static func dryRun<C: FlareCore.Command>(_ example: C, on workspace: FlareWorkspace) -> Availability {\n",
+    "replace": "    static func dryRun<C: FlareCore.Command>(_ example: C, on workspace: FlareWorkspace) -> Availability {\n        if C.id.hasPrefix(\"mask.\"), workspace.document != nil { return .unavailable(\"\") }\n",
+    "tests": "FlareCoreCommandCatalogTests"
+  },
+  {
+    "label": "a mask command reads available but its run changes nothing (#6200)",
+    "file": "Sources/FlareModel/FlareDocumentCommands+Catalog.swift",
+    "find": "        apply(command)\n",
+    "replace": "        if !id.hasPrefix(\"mask.\") { apply(command) }\n",
+    "tests": "FlareCoreCommandCatalogTests"
   }
 ]

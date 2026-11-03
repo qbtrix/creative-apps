@@ -3,8 +3,7 @@
 // envelope carries as "params"), its schema is SchemaProbe's unless `coreSchemaOverrides` has one, it is available
 // unless its example's dry run hits a refusal no params could avoid (`dryRun`), and it runs through the workspace's CommandEngine as one undo step.
 // Catalog ids allow no capitals, so a FlareCore id keeps its words in kebab case: layer.setFlags is layer.set-flags.
-// The stage and PNG frames don't draw masks or mattes yet while SVG and Lottie write them, so the commands that make
-// or change one (`notDrawnOnStage`) are unavailable with `masksNotDrawn` rather than export a different picture.
+// Mask and matte commands run like any other: every export format draws them, and the stage says "Masks not shown".
 import FlareCore
 import SuiteKernel
 
@@ -23,19 +22,11 @@ extension FlareWorkspace {
         if let error = layerError { throw .failed(id: id, message: error.message) }
     }
 
-    /// FlareCore ids that make or change a mask or matte, which the stage and PNG frames can't draw yet.
-    public static let notDrawnOnStage: Set<String> = ["mask.add", "mask.set", "mask.setMatte"]
-    /// Why `notDrawnOnStage` commands are unavailable.
-    public static let masksNotDrawn = "Flare's stage and PNG frames don't draw masks or mattes yet, so this would "
-        + "export a different picture from the one on the stage. Removing or reordering a mask still works."
-
     /// The dry run: `example` on a copy of `workspace`. Only a refusal that holds whatever the params name makes the
     /// id unavailable: no document open, or a command FlareCore hasn't built. A refusal about the example's own
     /// targets (its layer-1 missing or locked, an index past the end) says nothing about the caller's params, so the
-    /// id stays available and the run refuses with the engine's message instead (#5841). A `notDrawnOnStage` id is
-    /// unavailable with `masksNotDrawn` whenever a document is open.
+    /// id stays available and the run refuses with the engine's message instead (#5841).
     static func dryRun<C: FlareCore.Command>(_ example: C, on workspace: FlareWorkspace) -> Availability {
-        if notDrawnOnStage.contains(C.id), workspace.document != nil { return .unavailable(masksNotDrawn) }
         var copy = workspace
         copy.apply(example)
         switch copy.layerError {

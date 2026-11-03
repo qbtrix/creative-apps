@@ -51,18 +51,9 @@ import Testing
         // FlareCore has not built shape keyframes yet (TrackCommands.notBuilt), so the dry run says that, not a
         // generic refusal a caller can't tell from a bad param (#5283).
         let notBuilt: Set = ["shape-key.set", "shape-key.remove"]
-        let coreIDs = Dictionary(uniqueKeysWithValues: CommandRegistry.builtIn.ids.map { (FlareWorkspace.catalogID($0), $0) })
         for spec in FlareWorkspace.coreCommands {
             guard !notBuilt.contains(spec.id) else {
                 #expect(catalog.availability(spec.id, on: workspace) == .unavailable("That isn\u{2019}t built in Flare yet."))
-                continue
-            }
-            if let coreID = coreIDs[spec.id], FlareWorkspace.notDrawnOnStage.contains(coreID) {
-                // Refused through the catalog; applied on the engine so the later mask examples have a mask to use.
-                #expect(catalog.availability(spec.id, on: workspace) == .unavailable(FlareWorkspace.masksNotDrawn))
-                let envelope = JSONValue.object(["id": .string(coreID), "params": spec.example])
-                workspace.apply(try CommandRegistry.builtIn.decode(envelope.json()))
-                #expect(workspace.layerError == nil, "\(spec.id)")
                 continue
             }
             #expect(catalog.availability(spec.id, on: workspace) == .available, "\(spec.id)")
@@ -94,20 +85,23 @@ import Testing
         #expect(workspace.document == before)
     }
 
-    /// The stage and PNG frames don't draw masks or mattes yet, so the catalog refuses to make them and says why;
-    /// removing and reordering masks a file already has still works.
-    @Test func maskAndMatteCommandsAreRefusedUntilTheStageDrawsThem() throws {
+    /// PNG frames, SVG and Lottie all draw masks and mattes now (the stage says "Masks not shown"), so the catalog
+    /// makes and changes them headless, each as one undo step (#6200).
+    @Test func maskAndMatteCommandsRunHeadlessAsOneUndoStepEach() throws {
         var workspace = opened()
+        for id in ["layer.add", "layer.duplicate"] {
+            _ = try catalog.run(id, params: try #require(catalog.spec(id)).example, on: &workspace)
+        }
         for id in ["mask.add", "mask.set", "mask.set-matte"] {
             let spec = try #require(catalog.spec(id))
-            #expect(catalog.availability(id, on: workspace) == .unavailable(FlareWorkspace.masksNotDrawn), "\(id)")
-            let before = workspace.document
-            #expect(throws: CatalogError.unavailable(id: id, why: FlareWorkspace.masksNotDrawn)) {
-                try catalog.run(id, params: spec.example, on: &workspace)
-            }
-            #expect(workspace.document == before)
+            #expect(catalog.availability(id, on: workspace) == .available, "\(id)")
+            let outcome = try catalog.run(id, params: spec.example, on: &workspace)
+            #expect(outcome.undoStep == spec.title, "\(id)")
         }
-        #expect(!FlareWorkspace.notDrawnOnStage.contains("mask.remove") && !FlareWorkspace.notDrawnOnStage.contains("mask.move"))
+        let layer = try #require(workspace.document?.scenes.first?.layers.first { $0.id == "layer-1" })
+        #expect(layer.masks.map(\.mode) == [.subtract] && layer.matte?.sourceLayerID == "layer-1-copy")
+        workspace.undo()
+        #expect(workspace.document?.scenes.first?.layers.first { $0.id == "layer-1" }?.matte == nil)
     }
 
     @Test func withNoDocumentEveryCommandSaysWhy() {
