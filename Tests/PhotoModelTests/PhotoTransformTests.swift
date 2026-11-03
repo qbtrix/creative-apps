@@ -345,4 +345,15 @@ import Testing
         #expect(try layerPixels(workspace).width == 40, "redo lays the transform again in one step")
         #expect(workspace.transformDraft == nil)
     }
+
+    @Test func aCommittedTransformsJobReportNamesOneStep() throws {
+        var workspace = try logoOnPhoto()
+        let step = { (id: String, params: [String: JSONValue]) in CommandEnvelope(id: id, params: .object(params)) }
+        let report = PhotoWorkspace.catalog.runBatch([
+            step("layer.move-by", ["dx": .number(4), "dy": .number(2)]), step("transform.begin", [:]),
+            step("transform.scale", ["sx": .number(2), "sy": .number(2), "anchor": .string("topLeft")]), step("transform.commit", [:]),
+        ], on: &workspace, atomic: true)
+        #expect(report.stoppedAt == nil)
+        #expect(report.steps.compactMap(\.undoStep) == ["Move Layer", "Free Transform"], "the Scale folded into Free Transform names no step")
+    }
 }
