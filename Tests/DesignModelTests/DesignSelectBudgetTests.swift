@@ -3,15 +3,20 @@
 // docs/blueprints/design/features/select-several.md, S-8), on `crowd` (2,000
 // layers on one page). Each row presses once, untimed, then times 200 drag steps
 // of the Move or Rectangle tool through DesignBudget and fails when the p95 is
-// over the Linux debug gate (10 × the device target): QD-S1, a move step of a
+// over the gate (`DesignBudget.gate`: 10 × the device target in a debug build,
+// the device target itself in a release one; the two bulk select rows keep the
+// debug gate): QD-S1, a move step of a
 // frame with 50 children (rewind, translate); QD-S2, a rectangle draw step;
 // QD-S3, a resize step of one layer and of 20 through the selection's box;
-// QD-S4, a marquee step in Frame 40, whose lookup walks the frames before it.
+// QD-S4, a marquee step in Frame 40, whose lookup walks the frames before it;
+// and an Option-drag step of that 50-child frame, which moves its one copy.
 // Each is ≤ 1 ms / ≤ 10 ms, median and p95. Two bulk rows (#5838) run edit.select
 // with 1,500 ids (≤ 25 ms / ≤ 250 ms) and edit.duplicate of those 1,500 layers
 // (≤ 50 ms / ≤ 500 ms), each of which once walked the tree per layer and took
-// seconds. One row times the inspector's lock and hide reads for one layer, which run
-// on every drag step (≤ 0.4 ms / ≤ 4 ms, half the 8 ms step). Each also checks the timed steps did their work, so
+// seconds; and Select All then Duplicate or Group on 20,000 layers (crowd ten times,
+// ≤ 100 ms / ≤ 1 s), which took 20 s in a debug build until both lost their
+// per-layer walks. One row times the inspector's lock and hide reads for one layer,
+// which run on every drag step (≤ 0.4 ms / ≤ 4 ms, half the 8 ms step). Each also checks the timed steps did their work, so
 // a body that short-circuits can't pass. All the tests are timed, so the suite
 // is on the perf list (Tests/perf-suites.txt): the merge gate skips it and
 // perf-nightly runs it.
@@ -40,13 +45,13 @@ import Testing
     /// step to the first end (the press that picks the route). The last timed step goes to `ends[1]`.
     private static func timeSteps(
         _ name: String, on workspace: inout DesignWorkspace, from start: DesignPoint, ends: [DesignPoint],
-        sourceLocation: SourceLocation = #_sourceLocation
+        modifiers: DesignModifiers = [], sourceLocation: SourceLocation = #_sourceLocation
     ) -> (report: DesignBudget.Report, steps: Int) {
-        workspace.drag(from: start, to: ends[0])
-        let gate = DesignBudget.linuxDebugGate(device: .milliseconds(1))
+        workspace.drag(from: start, to: ends[0], modifiers: modifiers)
+        let gate = DesignBudget.gate(device: .milliseconds(1))
         var step = 0
         let report = DesignBudget.expect(name, runs: 200, gate: gate, sourceLocation: sourceLocation) {
-            workspace.drag(from: start, to: ends[step % 2])
+            workspace.drag(from: start, to: ends[step % 2], modifiers: modifiers)
             step += 1
         }
         #expect(report.median <= gate, "\(name): \(report), median over the gate \(gate)",
@@ -76,6 +81,22 @@ import Testing
         }
         workspace.endDrag()
         #expect(workspace.undoActionName == "Undo Move")
+    }
+
+    /// An Option-drag of a frame with 50 children: the press copies it once, each step moves the copy (#6198).
+    @Test func optionDragStep() throws {
+        var workspace = try Self.crowdWithFiftyInFrameOne()
+        workspace.selectItem("node-1")
+        let (_, steps) = Self.timeSteps(
+            "option-drag step on a frame with 50 children", on: &workspace, from: pt(30, 30),
+            ends: [pt(70, 30), pt(33, 37)], modifiers: .option)
+        #expect(steps == 200, "the timed option-drags ran \(steps) steps, not 200")
+        let page = try #require(workspace.selectedPage)
+        #expect(page.nodes.count == 41, "the drag made \(page.nodes.count - 40) copies, not one")
+        #expect(page.nodes.node("node-1")?.frame == rc(10, 10, 160, 150), "the original moved")
+        #expect(workspace.selectedNode?.children.count == 50)
+        workspace.endDrag()
+        #expect(workspace.undoActionName == "Undo Duplicate")
     }
 
     @Test func drawStep() {
@@ -187,6 +208,43 @@ import Testing
         #expect(workspace.selectedNodeIDs.count == 1500)
         #expect(Set(workspace.selectedNodeIDs).isDisjoint(with: Self.bulkIDs))
         #expect(workspace.undoActionName == "Undo Duplicate")
+    }
+
+    /// `crowd` ten times over: 400 frames of 49 rectangles and a text, 20,000 layers on one page.
+    private static let crowdTen: DesignWorkspace = {
+        let frames = DesignFixtures.crowd.pages[0].nodes
+        var number = 0
+        func renumbered(_ node: DesignNode) -> DesignNode {
+            number += 1
+            var copy = DesignNode(id: "node-\(number)", copying: node)
+            copy.children = node.children.map(renumbered)
+            return copy
+        }
+        let nodes = (0..<10).flatMap { _ in frames.map(renumbered) }
+        var workspace = DesignWorkspace()
+        workspace.load([DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: nodes)])
+        return workspace
+    }()
+
+    /// Select All, then Duplicate or Group, on 20,000 layers: once a per-layer tree walk each (#6198).
+    @Test(arguments: ["edit.duplicate", "object.group"])
+    func selectAllThenOnTwentyThousand(_ command: String) throws {
+        let crowd = Self.crowdTen
+        var workspace = crowd
+        let gate = DesignBudget.gate(device: .milliseconds(100))
+        var runs = 0
+        let report = DesignBudget.expect("select all + \(command) on 20,000 layers", runs: 20, gate: gate) {
+            workspace = crowd
+            workspace.selectAll()
+            do {
+                _ = try DesignWorkspace.catalog.run(command, params: .object([:]), on: &workspace)
+                runs += 1
+            } catch { Issue.record("\(command) refused: \(error)") }
+        }
+        #expect(report.median <= gate, "select all + \(command) on 20,000 layers: \(report), median over the gate \(gate)")
+        #expect(runs == 20, "the timed runs refused")
+        let top = try #require(workspace.selectedPage?.nodes)
+        #expect(command == "edit.duplicate" ? top.count == 800 : top.count == 1 && top.first?.children.count == 400)
     }
 
     /// The inspector re-reads the selection's lock and the layer row toggles on every drag step
