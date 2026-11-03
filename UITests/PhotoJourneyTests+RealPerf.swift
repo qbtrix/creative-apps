@@ -47,6 +47,8 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
         print("realperf photo \(backend): status line reads \(drew.isEmpty ? "(unreadable)" : drew)")
         XCTAssert(drew.isEmpty || drew.hasPrefix(status), "-suite.rendering \(backend) drew on \(drew), not \(status)")
         guard let pid = photo.pid(of: "Photo") else { return XCTFail("no running Photo from .build/realperf (scripts/ui-test perf makes it)") }
+        // First, while the image's adjustments are at identity: a slider step ⌘Z hasn't caught yet would stop the lift.
+        transform(photo, backend: backend, pid: pid)
 
         for (label, title) in [("levels", "Black"), ("hue-sat", "Hue")] {
             let slider = photo.app.sliders[title]
@@ -66,7 +68,6 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
             return []
         }
         photo.press(character: "z", .command)
-        transform(photo, backend: backend, pid: pid)
 
         for _ in 0..<3 { photo.press(character: "=", .command) }
         photo.health("\(backend) pan", pid: pid, series: nil) {
@@ -106,7 +107,6 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
             return []
         }
         photo.press(.escape)
-        photo.press(character: "z", .command)
     }
 
     /// text-layers (#5951): a Type tool box on the 8K photo takes key repeats, then Return adds the layer
