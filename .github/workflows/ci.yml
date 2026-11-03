@@ -88,6 +88,10 @@ on:
         description: 'Scope to one app: flare, design, photo, library, halo, suite or suiteui (empty: the full run). With build_only: a comma list of flare, design, photo, library, halo. With mac_only: a comma list of any of them'
         type: string
         default: ''
+      slow_profile:
+        description: With linux_only, also the Slow tests job (every shared-pass test timed one at a time against Tests/slow-baseline.txt)
+        type: boolean
+        default: false
   schedule:
     - cron: '17 4 * * *'  # daily; schedule runs on the default branch (dev)
 
@@ -132,6 +136,31 @@ jobs:
       - run: swift --version
       - run: scripts/ci
       - run: bash Tests/fast_lane/test_fast_lane.sh
+
+  # The shared parallel pass's guard (#5321). In scripts/ci's parallel pass a
+  # test's `passed after` is its place in the queue, not its cost, so this job
+  # runs every test but the perf and heavy lists one at a time and fails on one
+  # over 10 s alone that Tests/slow-baseline.txt doesn't list (scripts/test-scope
+  # slow): a few such tests starved the time-limited suites on the 3-4 thread
+  # runners. Daily on dev, and on a Linux-only dispatch with slow_profile. Not in
+  # promote's or dev-red's needs: it times tests, the Linux job gates them.
+  slow-tests:
+    name: Slow tests
+    if: ${{ github.event_name == 'schedule' || (inputs.linux_only && inputs.slow_profile) }}
+    runs-on: ubuntu-latest
+    container: swift:6.3.3-noble
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - run: apt-get update -q && apt-get install -y -q python3
+      - run: swift build --build-tests --force-resolved-versions
+      - name: Every shared-pass test, one at a time
+        shell: bash
+        run: |
+          skip=$(printf '%s\n' "$(python3 scripts/test-scope perf)" "$(python3 scripts/test-scope heavy)" | grep . | paste -sd'|' -)
+          swift test --skip-build --no-parallel ${skip:+--skip "$skip"} --xunit-output slow.xml \
+            || echo "::warning title=Slow tests::a test failed run one at a time; the Linux job gates tests, this job only times them"
+      - run: python3 scripts/test-scope slow "$(ls slow-swift-testing.xml 2>/dev/null || echo slow.xml)"
 
   # The fast lane's compile check for a PR that changes code (BUILD_RE in
   # scripts/fast-lane.sh: Swift under Sources/, Tests/ and UITests/,

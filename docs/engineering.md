@@ -275,6 +275,13 @@ every step.
   Gate: none, by design. A local gate on a different toolchain than CI can set
   `CI_LOCAL_SKIP='<swift-testing --skip regex>'` to skip tests that only differ
   there (rendering tint); CI never sets it and stays canonical.
+- **Slow tests leave the shared pass.** A correctness test that costs about
+  5 s or more alone goes in `Tests/heavy-suites.txt`, so it runs after the
+  shared parallel pass instead of starving its time-limited suites (#5321).
+  CI's `Slow tests` job (daily on dev, or a Linux-only dispatch with
+  `slow_profile`) runs the shared pass one at a time and fails on a test over
+  10 s that `Tests/slow-baseline.txt` doesn't list; the error names the
+  heavy-list line to add. Gate: `Slow tests`, report only (not in promote).
 
 ## Reading cost
 

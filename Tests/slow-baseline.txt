@@ -1,0 +1,19 @@
+# Tests/slow-baseline.txt: shared-pass tests that cost over 5 s alone on CI's Linux
+# runner, grandfathered. `scripts/test-scope slow` (CI's `Slow tests` job, a
+# --no-parallel run of every test but the perf and heavy lists) fails on any test
+# over 10 s that this file doesn't list, so a new slow test goes in
+# Tests/heavy-suites.txt (or gets a smaller fixture) in its own PR instead of
+# starving the time-limited suites in the shared parallel pass (#5321). The 5 s
+# listing line under the 10 s failing one absorbs runner noise (the same code ran
+# 2x apart on one day). The job notes lines whose test got fast or is gone: drop
+# them. Never add a line for a new test. Line: <Target>.<Suite path>/<test>.
+# Seeded from CI run 40317915718 (2026-10-26), the first Slow tests run.
+AfterGlowCLITests.MCPProtocolTests/fuzzedRequestsNeverCrash
+FlareModelTests.turningLoopOffOnAnyTickNeverJumpsThePlayhead
+HaloModelTests.HaloFilesBudgetTests/hugeFitsTheLimit
+HaloModelTests.HaloShapeCommandIDTests/theStarJobPassesAndShowsTheStarNotAnEllipse
+HaloModelTests.HaloTextAdapterTests/theSpanIsOneLineInTheSystemFamilyAndTheLayersColour
+LibraryModelTests.LargeCatalogBudgetTests/fixtureBuildsTenThousandDeterministically
+PhotoModelTests.PhotoImagingTests/aFixtureOpensWithItsValuesAndSavesByteForByte
+PhotoModelTests.PhotoLiveToneTests/anAdjustmentLayerTakesTheLiveRouteAndIsTheReference
+SuiteKernelTests.CommandCatalogTests/fuzzedParamsNeverCrash
