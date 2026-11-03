@@ -11,7 +11,9 @@
 // 24 fps are exactly 2 s. Each frame's sRGB pixels are drawn into the colour
 // space those tags name (the one a reader decodes into), so a frame reads
 // back as the colours it was given rather than 709-tagged sRGB values, which
-// read about 12/255 bright in the mid-tones. The alpha codecs keep each
+// read about 12/255 bright in the mid-tones. `bt709Space()` and
+// `taggedBuffer` are that step on its own, public so Halo's HaloMovieWriter
+// tags its frames the same way until it is retired. The alpha codecs keep each
 // frame's alpha; H.264 and HEVC draw the frame over opaque black, Halo's
 // rule. `cancel()` cancels the writer and deletes the partial file.
 //
@@ -68,7 +70,7 @@ public final class MovieWriter: FrameSink, @unchecked Sendable {
         guard !FileManager.default.fileExists(atPath: url.path) else {
             throw .notAvailable("A file named \(url.lastPathComponent) already exists.")
         }
-        guard let space = CVImageBufferCreateColorSpaceFromAttachments(Self.tags as CFDictionary)?.takeRetainedValue() else {
+        guard let space = Self.bt709Space() else {
             throw .notAvailable("The movie's BT.709 colour space couldn't be made.")
         }
         let output = Self.outputSettings(settings)
@@ -214,28 +216,42 @@ public final class MovieWriter: FrameSink, @unchecked Sendable {
         kCVImageBufferYCbCrMatrixKey as String: kCVImageBufferYCbCrMatrix_ITU_R_709_2 as String,
     ]
 
-    /// `frame` as a BGRA buffer tagged BT.709 like the track: cleared (alpha
-    /// codecs) or opaque black, then the frame's sRGB pixels drawn over it in
-    /// the colour space the tags name.
+    /// The colour space the BT.709 tags name, the one a reader decodes into.
+    /// Make it once per movie and pass it to `taggedBuffer`: making it per
+    /// frame costs about two thirds of 1080p throughput.
+    public static func bt709Space() -> CGColorSpace? {
+        CVImageBufferCreateColorSpaceFromAttachments(tags as CFDictionary)?.takeRetainedValue()
+    }
+
+    /// `frame` as a BGRA buffer tagged BT.709 like the track.
     private func pixelBuffer(_ frame: MediaFrame) throws(SuiteError) -> CVReadOnlyPixelBuffer {
         guard let image = Self.image(frame) else {
             throw .notAvailable("The frame's pixels couldn't be read.")
         }
+        return try Self.taggedBuffer(
+            image, width: frame.width, height: frame.height, space: space, keepAlpha: settings.codec.keepsAlpha)
+    }
+
+    /// A `width` by `height` BGRA buffer tagged BT.709: cleared (`keepAlpha`)
+    /// or opaque black, then `image` drawn over it in `space` (from
+    /// `bt709Space()`), so the tags describe the pixels.
+    public static func taggedBuffer(
+        _ image: CGImage, width: Int, height: Int, space: CGColorSpace, keepAlpha: Bool
+    ) throws(SuiteError) -> CVReadOnlyPixelBuffer {
         let attributes: [String: Any] = [
             kCVPixelBufferCGBitmapContextCompatibilityKey as String: true,
             kCVPixelBufferIOSurfacePropertiesKey as String: [String: Any](),
         ]
         var created: CVPixelBuffer?
         let status = CVPixelBufferCreate(
-            kCFAllocatorDefault, frame.width, frame.height, kCVPixelFormatType_32BGRA,
-            attributes as CFDictionary, &created)
+            kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, attributes as CFDictionary, &created)
         guard status == kCVReturnSuccess, let buffer = created else {
-            throw .notAvailable("No memory for a \(frame.width) by \(frame.height) movie frame.")
+            throw .notAvailable("No memory for a \(width) by \(height) movie frame.")
         }
-        guard Self.draw(image, into: buffer, space: space, keepAlpha: settings.codec.keepsAlpha) else {
+        guard draw(image, into: buffer, space: space, keepAlpha: keepAlpha) else {
             throw .notAvailable("The frame couldn't be drawn.")
         }
-        CVBufferSetAttachments(buffer, Self.tags as CFDictionary, .shouldPropagate)
+        CVBufferSetAttachments(buffer, tags as CFDictionary, .shouldPropagate)
         // The buffer is never touched again: the read-only wrapper owns it.
         return CVReadOnlyPixelBuffer(unsafeBuffer: buffer)
     }

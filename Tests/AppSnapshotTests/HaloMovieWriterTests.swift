@@ -1,18 +1,23 @@
 // HaloMovieWriterTests.swift: the movie sink (render-out RO-7, #1505, HF-8).
 // `keyed` (1920 × 1080, 24 fps, 48 frames) rendered at full size through
 // HaloMovieWriter: the movie loads as exactly 2 s, an asset reader counts 48
-// video samples, and frame 0 decoded matches LiveFrameRendering's frame 0
+// video samples, and frame 0 read back colour-managed (FootageReader, through
+// the BT.709 tags, as a player shows it) matches LiveFrameRendering's frame 0
 // (HaloFrameImage's sRGB bytes composited over black here) within 4/255 per
 // channel on at least 99% of pixels. A render cancelled after 3 frames leaves
-// no file. Uses only the macOS 26 reader API (outputProvider, start, next).
-// Writes no snapshot PNGs. macOS only.
+// no file. Keyed's floor stretched over the frame in a mid-tone (120, 135,
+// 128), the colour #4640 caught MovieWriter brightening, written at 1280 x 720
+// comes back within 6/255 mean error of its sRGB source, the tolerance
+// ShellMediaFootageTests holds MovieWriter to. Uses only the macOS 26 reader
+// API (outputProvider, start, next). Writes no snapshot PNGs. macOS only.
 import AVFoundation
 import CoreGraphics
 import CoreMedia
-import CoreVideo
 import Foundation
 import HaloModel
 import SuiteKernel
+import SuiteModel
+import SuiteShell
 import Testing
 
 @testable import HaloApp
@@ -46,10 +51,9 @@ import Testing
         let duration = try await asset.load(.duration)
         #expect(CMTimeCompare(duration, CMTime(value: 48, timescale: 24)) == 0)
 
-        let (count, first) = try await readFrames(asset)
-        #expect(count == 48)
-        let decoded = try #require(first)
+        #expect(try await sampleCount(asset) == 48)
         let expected = try oracle(composition, width: plan.width, height: plan.height)
+        let decoded = try await FootageReader().frame(ofMovieAt: url.path, seconds: 0, longestSide: nil).rgba
         #expect(decoded.count == expected.count)
         let pixels = min(decoded.count, expected.count) / 4
         var close = 0
@@ -76,6 +80,33 @@ import Testing
         }
         try writer.finish(cancelled: true)
         #expect(!FileManager.default.fileExists(atPath: url.path))
+    }
+
+    /// A player decodes the movie through its BT.709 tags; the frame must come
+    /// back as the sRGB colours it was given, not about 12/255 bright.
+    @Test func movieReadsBackAsItsSourceColours() async throws {
+        var composition = try keyed()
+        var floor = try #require(composition.layers.last)
+        floor.rect = HaloLayerRect(x: 0, y: 0, width: 1920, height: 1080)
+        floor.color = HaloLayerColor(red: 120 / 255, green: 135 / 255, blue: 128 / 255)
+        composition.layers = [floor]
+        let rendered = try LiveFrameRendering().render(
+            LiveFrameDrawing().drawList(composition, at: 0), width: 1280, height: 720, text: nil)
+        let image = try #require(HaloFrameImage.cgImage(rendered))
+        let bytes = try #require(image.dataProvider?.data)
+        let source = try MediaFrame(width: 1280, height: 720, rgba: [UInt8](bytes as Data))
+        let dir = try folder()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let url = dir.appendingPathComponent("colour.mp4")
+        var writer = HaloMovieWriter(url: url)
+        try writer.begin(HaloRenderPlan(width: 1280, height: 720, framesPerSecond: 24, frames: Array(0..<12),
+                                        fileNames: [url.lastPathComponent]))
+        for _ in 0..<12 { try writer.write(rendered, named: url.lastPathComponent) }
+        try writer.finish(cancelled: false)
+        let frame = try await FootageReader().frame(ofMovieAt: url.path, seconds: 0.25, longestSide: nil)
+        let error = ShellMediaFootageTests.meanError(frame, source)
+        print("HaloMovieWriterTests.colour: frame reads back \(error)/255 off its source")
+        #expect(error <= 6, "frame reads back \(error)/255 off its source")
     }
 
     /// FR-8b: keyed at 29.97 for 30 frames, half size, is 30 x 1001 / 30000 s on a 30000 track, not 1 s.
@@ -114,50 +145,17 @@ import Testing
         return out
     }
 
-    /// The number of video samples in `asset`, and the first one decoded as
-    /// R, G, B, A bytes with no row padding.
-    private func readFrames(_ asset: AVURLAsset) async throws -> (Int, [UInt8]?) {
-        let tracks = try await asset.loadTracks(withMediaType: .video)
-        let track = try #require(tracks.first)
+    /// The number of video samples in `asset`.
+    private func sampleCount(_ asset: AVURLAsset) async throws -> Int {
+        let track = try #require(try await asset.loadTracks(withMediaType: .video).first)
         let reader = try AVAssetReader(asset: asset)
-        let output = AVAssetReaderTrackOutput(
-            track: track, outputSettings: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA])
-        let provider = reader.outputProvider(for: output)
+        let provider = reader.outputProvider(for: AVAssetReaderTrackOutput(track: track, outputSettings: nil))
         try reader.start()
         var count = 0
-        var first: [UInt8]?
         while let sample = try await provider.next() {
-            let decoded: [UInt8]? = sample.withUnsafeSampleBuffer { buffer in
-                count += CMSampleBufferGetNumSamples(buffer)
-                guard first == nil, let image = CMSampleBufferGetImageBuffer(buffer) else { return nil }
-                return Self.rgba(image)
-            }
-            if first == nil, let decoded { first = decoded }
+            count += sample.withUnsafeSampleBuffer { CMSampleBufferGetNumSamples($0) }
         }
         #expect(reader.status == .completed)
-        return (count, first)
-    }
-
-    /// A BGRA image buffer's pixels as tightly packed R, G, B, A bytes.
-    private static func rgba(_ image: CVPixelBuffer) -> [UInt8]? {
-        CVPixelBufferLockBaseAddress(image, .readOnly)
-        defer { CVPixelBufferUnlockBaseAddress(image, .readOnly) }
-        guard CVPixelBufferGetPixelFormatType(image) == kCVPixelFormatType_32BGRA,
-              let base = CVPixelBufferGetBaseAddress(image)
-        else { return nil }
-        let width = CVPixelBufferGetWidth(image), height = CVPixelBufferGetHeight(image)
-        let rowBytes = CVPixelBufferGetBytesPerRow(image)
-        let bytes = base.assumingMemoryBound(to: UInt8.self)
-        var out = [UInt8](repeating: 0, count: width * height * 4)
-        for y in 0..<height {
-            for x in 0..<width {
-                let s = y * rowBytes + x * 4, d = (y * width + x) * 4
-                out[d] = bytes[s + 2]
-                out[d + 1] = bytes[s + 1]
-                out[d + 2] = bytes[s]
-                out[d + 3] = bytes[s + 3]
-            }
-        }
-        return out
+        return count
     }
 }
