@@ -9,7 +9,9 @@
 // re-runs per sample) and mouse-up draws the moved frame once.
 // `liftedDragTiming` gates a sample's p95 at or under 8 ms (16 ms hard; render
 // contract rule 6); a wall-clock test, it runs where Tests/perf-suites.txt
-// lists it and is disabled until it does. `liftMatchesTheOffsetList`
+// lists it and is disabled until it does. `liftedDragInTheWindow` feeds the
+// same samples to the whole HaloWindow on huge and gates (DEBUG) that no
+// window or inspector body re-runs per sample. `liftMatchesTheOffsetList`
 // checks the lift moved by a delta draws the pixels the offset list draws.
 // Nested in BodyCountSuites, as every suite that reads a body counter is.
 // macOS only.
@@ -76,6 +78,33 @@ extension BodyCountSuites {
             #expect(draws() > before, "mouse-up didn't draw the frame")
             #endif
             return step
+        }
+
+        /// The same lifted samples in the whole window on huge: nothing outside
+        /// the viewer re-runs, and a sample's layout stays out of the window.
+        @Test(.timeLimit(.minutes(6))) func liftedDragInTheWindow() async throws {
+            let project = try Self.project("huge")
+            let live = HaloLiveEdit()
+            let w = RenderBudgetWindow(HaloWindow(model: project, live: live), size: CGSize(width: 1700, height: 1000))
+            defer { w.close() }
+            try await w.settle(2000)
+            var begun = live.current() ?? project
+            begun.beginViewerDrag(at: Self.press)
+            try #require(begun.viewerDrag != nil, "the press hit no layer")
+            live.lift = HaloViewerGestures.lift(begun, at: Self.press)
+            live.project = begun
+            try await w.settle(1000)
+            let outside = { HaloWindowPlaybackTests.windowBodies().map { $0 + BodyTally.runs(of: HaloPropertyRowView.self) } }
+            let step = try await w.measure("halo lifted viewer drag in the window on huge, 60 samples", bodies: outside) {
+                try await w.ticks(60) { i in
+                    var shown = begun
+                    shown.moveViewerDrag(to: HaloPoint(x: Self.press.x + 3 * Double(i), y: Self.press.y + Double(i)))
+                    live.project = shown
+                }
+            }
+            #if DEBUG
+            #expect(step.bodies == 0, "a lifted sample re-ran the window or the inspector: \(step)")
+            #endif
         }
 
         @Test func liftMatchesTheOffsetList() async throws {
