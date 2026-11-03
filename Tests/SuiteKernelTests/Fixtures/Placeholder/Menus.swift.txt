@@ -18,6 +18,9 @@ struct FixtureCommands: Commands {
         CommandMenu("Fixture") {
             Button("Empty Argument", action: {})
             Button("Live Argument", action: { model?.run() })
+            MenuCommand(item: menu.clear) {}
+            MenuCommand("Off", help: "Later.", isEnabled: false) { model?.run() }
+            MenuCommand(item: menu.live) { model?.run() }
         }
     }
 }

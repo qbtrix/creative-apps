@@ -56,7 +56,8 @@ import Testing
     static let scale = 1
     #endif
 
-    /// The export rows' gate in ms: both run at full size, so a release build gets the packet's release row.
+    /// The export rows' gate in ms, on the p95 of 20 runs: both run at full size, so a release build gets the
+    /// packet's release row.
     static func exportBudget(debug: Double, release: Double) -> Double {
         #if DEBUG
         debug
@@ -115,24 +116,24 @@ struct LargeCatalogModelBudgetTests {
                                     sidecar: true)
         let existing = Set(exporter.plan(Array(photos.prefix(50)), options: options, existingNames: []).items.map(\.fileName))
         var plan = ExportPlan(items: [], options: options)
-        let cost = Budget.measure("large export-plan-1000", runs: 5) {
+        let cost = Budget.measure("large export-plan-1000", runs: 20) {
             plan = exporter.plan(photos, options: options, existingNames: existing)
         }
         #expect(Set(plan.items.map(\.fileName)).count == 1_000)
         #expect(plan.items.allSatisfy { max($0.size.width, $0.size.height) <= 2048 })
-        #expect(cost.median <= Base.exportBudget(debug: 50, release: 5), "the plan took \(cost.median) ms (median)")
+        #expect(cost.p95 <= Base.exportBudget(debug: 50, release: 5), "the plan took \(cost.p95) ms (p95)")
     }
 
     /// QB-L9 model half, at full size: opening the sheet on 10,000 selected photos.
     @Test func beginExportWithinBudget() throws {
         var catalog = try Base.catalog(10_000, "begin")
         catalog.select(Set(catalog.order))
-        let cost = Budget.measure("large export-begin-10000", runs: 5) {
+        let cost = Budget.measure("large export-begin-10000", runs: 20) {
             catalog.closeExport()
             _ = catalog.beginExport(folder: "/out")
         }
         #expect(catalog.exportRun == .editing(ExportOptions(folder: "/out")))
-        #expect(cost.median <= Base.exportBudget(debug: 10, release: 1), "beginExport took \(cost.median) ms (median)")
+        #expect(cost.p95 <= Base.exportBudget(debug: 10, release: 1), "beginExport took \(cost.p95) ms (p95)")
     }
 }
 

@@ -129,6 +129,16 @@ public final class HomeModel {
         rebuild(now: now)
     }
 
+    /// File > Open Recent > Clear Menu: empties every app's recents (RecentWork clears one app at a time).
+    public func clearRecents(now: Date) async {
+        do {
+            for app in SuiteApp.apps { try await services.recents.clear(app: app) }
+            message = nil
+        } catch { message = error }
+        selection = nil; lastRemoved = nil
+        await reload(now: now)
+    }
+
     /// Edit > Undo after Remove from Recents: re-notes the card with its date and thumbnail.
     public func undoRemove(now: Date) async {
         guard let item = lastRemoved else { return }

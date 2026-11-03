@@ -126,6 +126,15 @@ actor GateSending: HandOffSending {
         #expect(after.item == before.item && after.item.thumbnail != nil)
     }
 
+    /// File > Open Recent > Clear Menu empties every app's recents, in the store and on the home (#6203).
+    @Test func clearRecentsEmptiesEveryApp() async throws {
+        let (m, s) = try await model()
+        m.select(logoID)
+        await m.clearRecents(now: now)
+        let stored = try await s.recents.list().items
+        #expect(m.state.cards.isEmpty && stored.isEmpty && m.selection == nil)
+    }
+
     /// #1866: the search line names its unit, singular or plural, and counts the filtered cards.
     @Test func matchingNamesItsUnit() async throws {
         #expect(HomeModel.matching(query: "logo", count: 1) == "1 item matching \u{201C}logo\u{201D}")

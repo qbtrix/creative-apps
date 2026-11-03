@@ -16,8 +16,8 @@
   {
     "label": "liveReasonPasses: any .disabled( counts as constant, so a live reason fails",
     "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
-    "find": "if modifiers.contains(\".disabled(true)\") { kinds.insert(.constantDisabled) }",
-    "replace": "if modifiers.contains(\".disabled(\") { kinds.insert(.constantDisabled) }",
+    "find": "if modifiers.contains(\".disabled(true)\") || compact.contains(\"isEnabled:false\") { kinds.insert(.constantDisabled) }",
+    "replace": "if modifiers.contains(\".disabled(\") || compact.contains(\"isEnabled:false\") { kinds.insert(.constantDisabled) }",
     "tests": "PlaceholderMenuTests"
   },
   {
@@ -32,6 +32,20 @@
     "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
     "find": "guard let owner = site.owner else { return true }",
     "replace": "guard let owner = site.owner, owner.isEmpty else { return true }",
+    "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "eachKindIsFound: a MenuCommand item is never scanned (#6203)",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "static let itemCalls = [\"Button(\", \"MenuCommand(\"]",
+    "replace": "static let itemCalls = [\"Button(\"]",
+    "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "eachKindIsFound: isEnabled: false is not a constant disable (#6203)",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "if modifiers.contains(\".disabled(true)\") || compact.contains(\"isEnabled:false\") {",
+    "replace": "if modifiers.contains(\".disabled(true)\") {",
     "tests": "PlaceholderMenuTests"
   }
 ]
