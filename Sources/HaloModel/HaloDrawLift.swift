@@ -7,7 +7,9 @@
 // only when every part blends normally over the one under it (source-over is
 // associative, so grouping changes nothing), so a lifted layer or a layer
 // over it with any other blend mode gets no lift and the drag keeps drawing
-// the offset list per step (HaloDrawList.offsetting). Linux-safe.
+// the offset list per step (HaloDrawList.offsetting). The split reuses the
+// list the viewer drew at rest when it is for the same frame, so the drag's
+// first step draws nothing either. Linux-safe.
 
 /// The frame split around one layer: drawn bottom first, `below`, then
 /// `lifted` moved by the drag's delta, then `above`.
@@ -38,8 +40,18 @@ extension HaloProject {
     /// The live viewer drag's lift: the frame at the playhead without the
     /// drag's offset, split around the dragged layer; nil with no drag or
     /// when the layer can't be lifted (`HaloDrawList.lift`).
-    public var viewerLift: HaloDrawLift? {
+    public var viewerLift: HaloDrawLift? { viewerLift(drawn: nil) }
+
+    /// `viewerLift`, splitting `drawn` (the list the viewer already drew for
+    /// this project at rest) instead of drawing the frame again, which takes
+    /// tens of ms on 2,000 layers; a `drawn` for another frame or size is
+    /// stale and ignored.
+    public func viewerLift(drawn: HaloDrawList?) -> HaloDrawLift? {
         guard let drag = viewerDrag, let comp = selectedComposition else { return nil }
-        return services.drawing.drawList(comp, at: comp.playheadFrame).lift(drag.layerID)
+        let frame = comp.playheadFrame
+        if let drawn, drawn.frame == frame, drawn.width == comp.width, drawn.height == comp.height {
+            return drawn.lift(drag.layerID)
+        }
+        return services.drawing.drawList(comp, at: frame).lift(drag.layerID)
     }
 }

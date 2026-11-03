@@ -60,3 +60,25 @@ private func list(_ items: [HaloDrawItem]) -> HaloDrawList {
     let resting = try #require(model.viewerDrawList?.offsetting(id, by: HaloPoint(x: -100, y: -20)))
     #expect(lift.below.items + lift.lifted.items + lift.above.items == resting.items)
 }
+
+@Test func viewerLiftSplitsTheListAlreadyDrawnForItsFrame() throws {
+    var model = commandProject("keyed", .live)
+    let drawn = try #require(model.viewerDrawList)
+    model.beginViewerDrag(at: HaloPoint(x: 960, y: 980))
+    let id = try #require(model.viewerDrag?.layerID, "the press hit no layer")
+    // The canvas's list for this frame is split as it is, not drawn again:
+    // a marked item in it shows up in the lift.
+    var marked = drawn
+    let i = try #require(marked.items.firstIndex { $0.layerID != id })
+    marked.items[i].opacity = 0.25
+    let lift = try #require(model.viewerLift(drawn: marked))
+    #expect(lift.below.items + lift.lifted.items + lift.above.items == marked.items)
+    // A list for another frame or size is stale: the lift draws its own.
+    for stale in [
+        HaloDrawList(width: marked.width, height: marked.height, frame: marked.frame + 1, items: marked.items),
+        HaloDrawList(width: marked.width + 1, height: marked.height, frame: marked.frame, items: marked.items),
+    ] {
+        #expect(model.viewerLift(drawn: stale) == model.viewerLift)
+    }
+    #expect(model.viewerLift(drawn: nil) == model.viewerLift)
+}

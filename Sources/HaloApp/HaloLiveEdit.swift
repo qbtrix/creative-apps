@@ -31,6 +31,9 @@ import SwiftUI
     /// (HaloDrawLift), which moves by `project`'s drag delta; nil with no
     /// lifted drag. HaloViewerGestures sets it at the drag's first move.
     var lift: HaloDrawLift?
+    /// The list HaloLiveLayers last drew with no drag live, for the next
+    /// drag's lift to split instead of drawing the frame again.
+    @ObservationIgnored var drawn: HaloDrawList?
     /// The window's project now; HaloWindow sets it once it appears.
     @ObservationIgnored var current: @MainActor () -> HaloProject? = { nil }
     /// The window's project ticked to the frame playing now, or scrubbed to

@@ -11,7 +11,8 @@
 // window's HaloLiveEdit as the window's project with that move applied
 // (`moveViewerDrag` on a copy, HaloLiveEdit.show), at most once per display
 // refresh (HaloViewerPace, #4276; the latest move wins). Its first move also
-// lifts the dragged layer (`viewerLift` into HaloLiveEdit.lift), so a sample
+// lifts the dragged layer (`viewerLift` into HaloLiveEdit.lift, splitting the
+// list the canvas drew at rest), so a sample
 // only moves the lifted layer and redraws none (render contract rule 3); a
 // layer that can't be lifted redraws the drawn layers per sample;
 // the release sends the last `moveViewerDrag` and `endViewerDrag`, and the
@@ -106,7 +107,7 @@ struct HaloViewerGestures: View {
                     begun.beginViewerDrag(at: start)
                     // A press over empty space starts no drag; there is nothing to preview.
                     guard begun.viewerDrag != nil else { return self.start = nil }
-                    live.lift = Self.lift(begun, at: start)
+                    live.lift = Self.lift(begun, at: start, drawn: live.drawn)
                 }
                 let first = pace.isFresh
                 pace.move(to: now, probe: probe) { point in
@@ -133,11 +134,12 @@ struct HaloViewerGestures: View {
     }
 
     /// The lift of a drag pressed at `start` on `project`; nil when the
-    /// press hits nothing or the layer can't be lifted.
-    nonisolated static func lift(_ project: HaloProject, at start: HaloPoint) -> HaloDrawLift? {
+    /// press hits nothing or the layer can't be lifted. It splits `drawn`,
+    /// the canvas's list at rest, when that is for the same frame.
+    nonisolated static func lift(_ project: HaloProject, at start: HaloPoint, drawn: HaloDrawList? = nil) -> HaloDrawLift? {
         var begun = project
         if begun.viewerDrag == nil { begun.beginViewerDrag(at: start) }
-        return begun.viewerLift
+        return begun.viewerLift(drawn: drawn)
     }
 
     /// The modifiers held now: Shift squares a shape, Option grows it from the centre.

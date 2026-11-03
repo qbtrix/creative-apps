@@ -81,6 +81,8 @@ struct HaloLiveLayers: View, BodyCounted {
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)
                 .padding(SuiteSize.canvasInset)
         } else if case let shown = live?.shown(model) ?? model, let list = shown.viewerDrawList {
+            // At rest, kept for the next drag's lift (HaloLiveEdit.drawn).
+            let _ = live.map { if $0.project == nil { $0.drawn = list } }
             HaloDrawnLayers(list: list, selectedLayerID: Self.outlinedLayer(shown))
                 .aspectRatio(artboard, contentMode: .fit)
                 .frame(maxWidth: artboard.width, maxHeight: artboard.height)
