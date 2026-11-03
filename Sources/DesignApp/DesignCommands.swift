@@ -191,8 +191,8 @@ struct DesignFileMenu: View {
     }
 }
 
-/// File > New's sheet on the key window: Design's presets; Create runs New File (and its unsaved guard),
-/// then gives the new page the setup's size and background inside that step (`shapeNewFile`).
+/// File > New's sheet on the key window: Design's presets; Create runs New File at the setup, which asks the
+/// unsaved guard first and carries the setup through it.
 @MainActor enum DesignNewDocumentSheet {
     static func begin(on window: NSWindow, perform: @escaping DesignPerform) {
         var panel: NSWindow?
@@ -200,24 +200,13 @@ struct DesignFileMenu: View {
                                      setup: DesignWorkspace.newDocumentSetup, limits: DesignWorkspace.newDocumentLimits,
                                      onDone: { setup, _ in
                                          if let panel { window.endSheet(panel) }
-                                         Task { await create(setup, on: window, perform: perform) }
+                                         // On the next turn, once the document window is key again for the guard's sheet.
+                                         Task { @MainActor in perform(.newFileAt(setup)) }
                                      },
                                      onCancel: { if let panel { window.endSheet(panel) } })
         let made = NSWindow(contentViewController: NSHostingController(rootView: sheet))
         panel = made
         window.beginSheet(made)
-    }
-
-    /// New File, then, once its unsaved guard (an alert on `window`) has gone, the setup on the file it made;
-    /// a guard the person cancelled leaves their file, which `shapeNewFile` refuses to reshape.
-    /// The window is the live front's (`DesignShell.front`), which reads its file and adopts the shaped one.
-    private static func create(_ setup: DocumentSetup, on window: NSWindow, perform: @escaping DesignPerform) async {
-        guard let id = DesignShell.front.window else { return }
-        perform(.newFile)
-        try? await Task.sleep(for: .milliseconds(200))
-        while window.attachedSheet != nil { try? await Task.sleep(for: .milliseconds(100)) }
-        guard DesignShell.front.window == id, let next = DesignShell.front.document()?.shapingNewFile(setup) else { return }
-        DesignShell.front.apply(next)
     }
 }
 

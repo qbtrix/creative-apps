@@ -3,7 +3,8 @@
 // name is the open file's ("Untitled" before its first save, nil with nothing open); the dirty state is the
 // workspace's DocumentSession; and Save runs File > Save (`DesignIntent.save` through the window's perform),
 // landing only when the workspace then reads clean, so a cancelled Save panel or a failed write keeps the
-// window. macOS only.
+// window. File > New's Create (DesignWindow.newFile) carries the sheet's size through the guard: a Save answered
+// first still makes the picked size, and Cancel makes nothing. macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -28,6 +29,18 @@ import Testing
             if let url = self.saveTo { self.model.didSave(to: url) }
         }
     }
+
+    /// The New sheet's Phone preset.
+    static let phone = DocumentSetup(width: 393, height: 852)
+
+    /// What the window's New File does with the sheet's setup.
+    func make(_ setup: DocumentSetup?) {
+        guard let setup else { return model.newFile() }
+        try? model.newFile(setup)
+    }
+
+    /// The first page's size.
+    var frameSize: [Double] { model.pages.first.map { [$0.frameWidth, $0.frameHeight] } ?? [] }
 
     /// The `cards` fixture, opened unsaved, with one rectangle drawn on it when `edited`.
     static func cards(edited: Bool) throws -> DesignBox {
@@ -84,6 +97,31 @@ import Testing
         #expect(box.saves == 1)
         #expect(!landed, "a Save that wrote nothing let the window close")
         #expect(box.model.isDirty)
+    }
+
+    @Test func newSheetSizeSurvivesTheGuardsSave() async throws {
+        let box = try DesignBox.cards(edited: true)
+        var hooks = box.hooks
+        hooks.ask = { _, _, _ in .save }
+        await DesignWindow.newFile(DesignBox.phone, hooks: hooks, in: nil, make: box.make)?.value
+        #expect(box.saves == 1, "the guard's Save ran File > Save \(box.saves) times")
+        #expect(box.frameSize == [393, 852], "the new file is \(box.frameSize), not the Phone size picked")
+    }
+
+    @Test func newSheetCancelMakesNothing() async throws {
+        let box = try DesignBox.cards(edited: true)
+        let before = box.model
+        var hooks = box.hooks
+        hooks.ask = { _, _, _ in .cancel }
+        await DesignWindow.newFile(DesignBox.phone, hooks: hooks, in: nil, make: box.make)?.value
+        #expect(box.model == before, "Cancel replaced the edited file")
+    }
+
+    @Test func newSheetOnCleanFileMakesItAtOnce() throws {
+        let box = try DesignBox.cards(edited: false)
+        let task = DesignWindow.newFile(DesignBox.phone, hooks: box.hooks, in: nil, make: box.make)
+        #expect(task == nil, "a clean file waited on the guard")
+        #expect(box.frameSize == [393, 852])
     }
 
     @Test func guardAsksOnlyWhenDirty() async throws {

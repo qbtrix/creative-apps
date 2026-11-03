@@ -13,6 +13,8 @@ import SwiftUI
 
 enum DesignIntent {
     case newFile, open, save, saveAs, export
+    /// File > New's Create: New File at the sheet's setup, after the unsaved guard.
+    case newFileAt(DocumentSetup)
     /// A finished export's options, which the next Export sheet opens with (`rememberExport`).
     case rememberExport(DesignExportOptions)
     case undo, redo

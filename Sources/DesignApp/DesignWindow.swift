@@ -40,7 +40,7 @@
 //
 // Unsaved changes: SuiteUI's `.unsavedChangesGuard` sits on the root with Design's hooks
 // (`unsavedHooks`, buttons `design.close.*`): a close of an edited window, and File > New File
-// over one, asks Save, Don't Save or Cancel first. Save runs File > Save and lands only when
+// over one, asks Save, Don't Save or Cancel first (after the New sheet's Create, carrying its size). Save runs File > Save and lands only when
 // the workspace then reads clean, so a cancelled Save panel keeps the document.
 //
 // Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace,
@@ -185,6 +185,7 @@ struct DesignWindow: View, BodyCounted {
         }
         switch intent {
         case .newFile: newFile()
+        case .newFileAt(let setup): newFile(setup)
         case .open: chooseFile()
         case .save: save()
         case .saveAs: saveAs()
@@ -405,12 +406,29 @@ struct DesignWindow: View, BodyCounted {
             })
     }
 
-    /// File > New File, after the unsaved guard's sheet on the key window lets it go on.
-    private func newFile() {
-        let hooks = Self.unsavedHooks(model: { model }, perform: perform)
-        guard hooks.isDirty() else { return model.newFile() }
-        Task { @MainActor in
-            if await UnsavedGuard.proceed(hooks, in: NSApp.keyWindow) { model.newFile() }
+    /// File > New File over the window's file, at the New sheet's `setup` (nil: the plain Desktop file). `make`
+    /// runs at once on a clean file, else once the unsaved guard on `window` lets it go on (Don't Save, or a Save
+    /// that landed); the task is that wait. The setup rides through the guard, so a Save answered first still
+    /// makes the size the person picked.
+    // view-static: main-actor
+    @discardableResult
+    static func newFile(_ setup: DocumentSetup?, hooks: UnsavedHooks, in window: NSWindow?,
+                        make: @escaping @MainActor (DocumentSetup?) -> Void) -> Task<Void, Never>? {
+        guard hooks.isDirty() else {
+            make(setup)
+            return nil
+        }
+        return Task { @MainActor in
+            if await UnsavedGuard.proceed(hooks, in: window) { make(setup) }
+        }
+    }
+
+    /// File > New File on this window, asking on the key window first when the file is edited.
+    private func newFile(_ setup: DocumentSetup? = nil) {
+        Self.newFile(setup, hooks: Self.unsavedHooks(model: { model }, perform: perform), in: NSApp.keyWindow) { setup in
+            // The sheet refuses a setup past the limits, so this throws only for one it never sends.
+            guard let setup else { return model.newFile() }
+            try? model.newFile(setup)
         }
     }
 
