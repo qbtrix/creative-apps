@@ -98,3 +98,17 @@ import Testing
     // A zoom of 0 clamps to 0.1, so the point stays finite.
     #expect(n.documentPoint(PlanePoint(x: 21, y: 11), artboardOrigin: origin, zoom: 0) == PlanePoint(x: 10, y: 10))
 }
+
+@Test func zoomButtonsSayWhyAtTheEndsOfTheRange() {
+    // At a limit the step changes nothing, so the button is disabled with a reason.
+    #expect(ZoomMath.zoomedOut(from: ZoomMath.range.lowerBound) == ZoomMath.range.lowerBound)
+    #expect(ZoomMath.zoomOutHelp(at: ZoomMath.range.lowerBound) == "Already at the smallest zoom.")
+    #expect(ZoomMath.zoomOutHelp(at: 0.05) != nil)
+    #expect(ZoomMath.zoomInHelp(at: ZoomMath.range.upperBound) == "Already at the largest zoom.")
+    #expect(ZoomMath.zoomInHelp(at: 50) != nil)
+    // Anywhere inside the range both buttons act.
+    for zoom in [0.25, 1, 4] {
+        #expect(ZoomMath.zoomOutHelp(at: zoom) == nil)
+        #expect(ZoomMath.zoomInHelp(at: zoom) == nil)
+    }
+}

@@ -7,7 +7,8 @@
 // 120-sample drag) and OD-18's: a canvas drag leaves the inspector rows it can't
 // change (Opacity, Corners, Stroke, Fill) alone, so they run only at the press
 // and the release (`inspectorRuns`), never per sample; `timing` (Tests/perf-suites.txt, report-only) judges the
-// step times. Before each drag the window settles until its body count stops
+// step times, and an Option-drag of Rectangle 1 on `crowd` (copy-group #6198), hosted as
+// DesignArrangeDragTests does because a test's events can't hold Option, must end as one copy. Before each drag the window settles until its body count stops
 // moving (BodyCountSuites' `settle(untilStable:)`), so the bodies counted are
 // the drag's alone, not the open's late layouts on a slow runner (#1974). Nested in BodyCountSuites, as every suite that reads a body
 // counter is. macOS only.
@@ -38,6 +39,23 @@ extension BodyCountSuites {
             // Target: a drag sample fits one 120 Hz frame.
             expectP95(move.step, atMost: 6, target: 8.3)  // dev: 4.1 ms
             expectP95(marquee.step, atMost: 4, target: 8.3)  // dev: 2.7 ms
+            let option = try await Self.optionDrag()
+            // Real time: p95 within one 120 Hz frame, 8 ms. Release: 6.6-7.75 ms at load 12, its press copies once.
+            expectP95(option, atMost: 8, target: 8.3)
+        }
+
+        /// A 120-sample Option-drag of Rectangle 1 on `crowd`: the press copies it, the samples move the copy.
+        static func optionDrag() async throws -> RenderStep {
+            var crowd = DesignFixtures.crowd
+            crowd.selectItem("node-2")
+            let host = OptionDragHost(model: crowd)
+            let w = RenderBudgetWindow(host)
+            defer { w.close() }
+            let step = try await BodyCountSuites.DesignWindowDragTests.dragSamples(.move, in: w)
+            let after = try #require(host.recorder.workspace, "the Option-drag never reached the editor")
+            #expect(after.undoActionName == "Undo Duplicate", "the Option-drag left \(after.undoActionName)")
+            #expect(after.selectedNode?.name == "Rectangle 1" && after.selectedNodeID != "node-2")
+            return step
         }
 
         /// A measured canvas drag and the body runs of the inspector rows a canvas drag can't change.

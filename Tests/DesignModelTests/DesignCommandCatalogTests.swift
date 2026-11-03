@@ -98,8 +98,9 @@ struct DesignCatalogDoc: HeadlessDocument {
         case "file.export", "view.zoom-in", "view.zoom-out", "view.fit": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
         case "view.zoom-to-selection": .some(w.zoomToSelectionHelp)
         // Copy As and Paste as Image (clipboard-interop CB-6): Copy's reason; Paste's, with no file first.
-        case "edit.copy-as": .some(w.copyHelp())
-        case "edit.paste-as-image": .some(w.addPageHelp ?? (w.editingTextID == nil ? nil : w.pasteHelp(nil)))
+        case "edit.copy-as", "edit.copy": .some(w.copyHelp())
+        case "edit.cut": .some(w.copyHelp() ?? w.help(.delete))
+        case "edit.paste-as-image", "edit.paste": .some(w.addPageHelp ?? (w.editingTextID == nil ? nil : w.pasteHelp(nil)))
         // The key commands (one-document OD-8): reads need an open file, edits Rename Page's reason, key edits a key too.
         case "time.sample", "time.playhead": .some(w.isOpen ? nil : DesignToolbarItem.noFile)
         case "keyframe.set": .some(noPage)
@@ -200,6 +201,24 @@ struct DesignCatalogDoc: HeadlessDocument {
         #expect(try opened.fileData() == w.fileData())
     }
 
+    /// edit.cut in one file and edit.paste in another move a group with its children headlessly (#6198).
+    @Test func cutAndPasteMoveAGroupBetweenFiles() throws {
+        var source = DesignFixtures.cards
+        source.selectItem("node-6")
+        let cut = try DesignWorkspace.catalog.run("edit.cut", params: .object([:]), on: &source)
+        guard case .object(let result) = cut.result, let data = result["data"] else { Issue.record("edit.cut returned no data"); return }
+        #expect(cut.undoStep == "Cut" && source.selectedPage?.nodes.node("node-6") == nil)
+        var target = DesignFixtures.empty
+        let paste = try DesignWorkspace.catalog.run("edit.paste", params: .object(["data": data]), on: &target)
+        let pair = target.selectedNodeIDs.last.flatMap { target.selectedPage?.nodes.node($0) }
+        #expect(paste.undoStep == "Paste" && pair?.name == "Pair" && pair?.children.map(\.name) == ["E1", "E2"])
+        var copied = DesignFixtures.cards
+        copied.selectItem("node-6")
+        let before = try copied.fileData()
+        _ = try DesignWorkspace.catalog.run("edit.copy", params: .object([:]), on: &copied)
+        #expect(try copied.fileData() == before, "edit.copy changed the file")
+    }
+
     @Test func idsKeepTheLedger() throws {
         let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("../command-ids/design.txt")
         let ledger = try String(contentsOf: url, encoding: .utf8)
@@ -220,6 +239,7 @@ struct DesignCatalogDoc: HeadlessDocument {
         "file.save | Save | on", "file.save-as | Save As… | on", "file.export | Export… | on",
         "edit.undo | Undo | Nothing to undo.", "edit.redo | Redo | Nothing to redo.",
         "edit.select | Select | on", "edit.select-all | Select All | on",
+        "edit.cut | Cut | on", "edit.copy | Copy | on", "edit.paste | Paste | on",
         "edit.duplicate | Duplicate | on", "edit.delete | Delete | on",
         "edit.copy-as | Copy As | on", "edit.paste-as-image | Paste as Image | on",
         "object.group | Group | on", "object.ungroup | Ungroup | A isn't a group.",

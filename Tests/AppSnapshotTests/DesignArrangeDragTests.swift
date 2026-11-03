@@ -5,7 +5,8 @@
 // (`NSEvent.modifierFlags`, the device state), which an event a test sends can't set, so the editor
 // is hosted with the window's live-drag routing and Option held for it. The drag is design-window
 // D0-8b's `dragSamples` (DesignWindowDragTests): its `move` presses at (20, 20) and goes by
-// (160, 90), so A starts selected around that point. DesignEditor.bodyRuns is a debug body
+// (160, 90), so A starts selected around that point. RenderBudgetDesignTests/timing hosts the same
+// editor on `crowd` to time an Option-drag at real size. DesignEditor.bodyRuns is a debug body
 // counter, so the suite nests in BodyCountSuites. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -57,12 +58,12 @@ extension BodyCountSuites {
 }
 
 /// The last workspace the host's editor was handed, for the test to read after the drag.
-@MainActor private final class OptionDragRecorder {
+@MainActor final class OptionDragRecorder {
     var workspace: DesignWorkspace?
 }
 
 /// DesignEditor with the window's live drag box and drag routing, Option held for every canvas drag.
-private struct OptionDragHost: View {
+struct OptionDragHost: View {
     @State private var model: DesignWorkspace
     @State private var zoom = 1.0
     let live = DesignLiveDrag()

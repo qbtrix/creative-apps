@@ -91,7 +91,8 @@ final class DesignArrangeJourneyTests: XCTestCase {
         // 2. The pasted Pair sits 10, 10 down and right, on top: a press at E1's copy picks it. Both Pairs
         //    opened in Layers show E1 and E2 twice, so the copy brought its two children.
         click(design, x: 960, y: 460)
-        for pair in layerRows(design, "Pair") { design.expandDesignLayer(pair.identifier) }
+        // The ids first: a row element is bound by index, so opening the pasted Pair (frontmost) shifts the next one.
+        for id in layerRows(design, "Pair").map(\.identifier) { design.expandDesignLayer(id) }
         XCTAssert(Self.waitUntil { self.rows(design, "E1") == 2 && self.rows(design, "E2") == 2 },
                   "the two Pairs show \(rows(design, "E1")) E1 and \(rows(design, "E2")) E2 rows, not 2 each")
         design.shot("arrange-paste")
