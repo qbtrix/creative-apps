@@ -34,6 +34,17 @@ import Testing
         #expect(PhotoToolbarItem.saveState(of: workspace) == nil)
     }
 
+    @Test func zoomStopsAtTheRangeEndsAndSaysWhy() throws {
+        let workspace = try whiteImage(8, 8)
+        #expect(PhotoToolbarItem.zoomOut.unavailableHelp(in: workspace, zoom: 0.1) == "Already at the smallest zoom.")
+        #expect(PhotoToolbarItem.zoomIn.unavailableHelp(in: workspace, zoom: 32) == "Already at the largest zoom.")
+        #expect(PhotoToolbarItem.zoomOut.unavailableHelp(in: workspace, zoom: 0.1004) == nil)
+        #expect(PhotoToolbarItem.zoomIn.unavailableHelp(in: workspace, zoom: 0.1) == nil)
+        #expect(PhotoToolbarItem.zoomOut.unavailableHelp(in: workspace, zoom: 32) == nil)
+        #expect(PhotoToolbarItem.fit.unavailableHelp(in: workspace, zoom: 32) == nil)
+        #expect(PhotoToolbarItem.zoomIn.unavailableHelp(in: PhotoWorkspace(), zoom: 32) == "Open or create an image first.")
+    }
+
     @Test func aStrokeIsEditedAndUndoNamesIt() throws {
         var workspace = try stroked()
         #expect(PhotoToolbarItem.undo.unavailableHelp(in: workspace) == nil)

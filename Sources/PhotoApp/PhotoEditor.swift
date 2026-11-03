@@ -90,7 +90,7 @@ struct PhotoEditor: View, BodyCounted {
         case .zoomIn: .zoomIn
         }
         return ToolbarAction(
-            item.title(in: model), systemImage: item.systemImage, unavailableHelp: item.unavailableHelp(in: model),
+            item.title(in: model), systemImage: item.systemImage, unavailableHelp: item.unavailableHelp(in: model, zoom: zoom),
             identifier: item.identifier
         ) { perform(intent) }
     }

@@ -104,3 +104,14 @@ private let closed = "Create or open a file first."
     let order = DesignToolbarItem.allCases
     #expect(order.firstIndex(of: .history) == (order.firstIndex(of: .redo) ?? 0) + 1)
 }
+
+@Test func toolbarZoomStopsAtTheRangeEndsAndSaysWhy() {
+    let workspace = openDesign()
+    #expect(DesignToolbarItem.zoomOut.unavailableHelp(in: workspace, zoom: 0.1) == "Already at the smallest zoom.")
+    #expect(DesignToolbarItem.zoomIn.unavailableHelp(in: workspace, zoom: 32) == "Already at the largest zoom.")
+    #expect(DesignToolbarItem.zoomOut.unavailableHelp(in: workspace, zoom: 0.1004) == nil)
+    #expect(DesignToolbarItem.zoomIn.unavailableHelp(in: workspace, zoom: 0.1) == nil)
+    #expect(DesignToolbarItem.zoomOut.unavailableHelp(in: workspace, zoom: 32) == nil)
+    #expect(DesignToolbarItem.fit.unavailableHelp(in: workspace, zoom: 0.1) == nil)
+    #expect(DesignToolbarItem.zoomOut.unavailableHelp(in: DesignWorkspace(), zoom: 0.1) == closed)
+}

@@ -108,3 +108,16 @@ import Testing
     #expect(ZoomSteps.percentText(0) == "–")
     #expect(ZoomSteps.percentText(1e9) == "1000000%")
 }
+
+@Test func zoomInAndOutSayWhyAtTheRangeEnds() {
+    let steps = ZoomSteps.suite
+    #expect(steps.zoomOutHelp(at: 0.1) == "Already at the smallest zoom.")
+    #expect(steps.zoomOutHelp(at: 0.05) == "Already at the smallest zoom.")
+    #expect(steps.zoomInHelp(at: 32) == "Already at the largest zoom.")
+    #expect(steps.zoomInHelp(at: 50) == "Already at the largest zoom.")
+    // A fit just above 10% can still step down to it, and the ends can step the other way.
+    #expect(steps.zoomOutHelp(at: 0.1004) == nil)
+    #expect(steps.zoomOutHelp(at: 32) == nil)
+    #expect(steps.zoomInHelp(at: 0.1) == nil)
+    #expect(steps.zoomInHelp(at: 31.9) == nil)
+}

@@ -151,7 +151,7 @@ private struct GalleryEditorWindowPage: View {
             ) { step(back: false) },
             ToolbarAction(
                 "Zoom Out", systemImage: "minus.magnifyingglass",
-                unavailableHelp: zoom > ZoomMath.range.lowerBound ? nil : "Already at the smallest zoom.",
+                unavailableHelp: ZoomMath.steps.zoomOutHelp(at: zoom),
                 identifier: "suite.gallery.bar.zoom-out"
             ) { chosenZoom = ZoomMath.zoomedOut(from: zoom) },
             ToolbarAction(
@@ -159,7 +159,7 @@ private struct GalleryEditorWindowPage: View {
             ) { chosenZoom = nil },
             ToolbarAction(
                 "Zoom In", systemImage: "plus.magnifyingglass",
-                unavailableHelp: zoom < ZoomMath.range.upperBound ? nil : "Already at the largest zoom.",
+                unavailableHelp: ZoomMath.steps.zoomInHelp(at: zoom),
                 identifier: "suite.gallery.bar.zoom-in"
             ) { chosenZoom = ZoomMath.zoomedIn(from: zoom) },
         ]

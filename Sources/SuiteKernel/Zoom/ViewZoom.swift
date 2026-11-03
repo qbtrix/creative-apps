@@ -5,7 +5,8 @@
 // - `ZoomSteps`: the 10% to 3200% clamp (a zoom that isn't a number is 100%), Zoom In and Zoom Out
 //   over a stop table (the suite's by default; an app may pass its own table, never its own
 //   stepping), the snap that lands a pinch near 100% on 100%, the fit scale, the anchor that keeps
-//   the document point under the pointer still, and the percent text every zoom pill shows.
+//   the document point under the pointer still, the percent text every zoom pill shows, and the
+//   tooltip Zoom In and Zoom Out show at the range's ends.
 // - `ZoomLevel`: fit, 100% or a scale. Fit follows the viewport as it resizes until the user picks
 //   another level, so a window that settles keeps its picture fitted.
 // - `ZoomKey`: what ⌘= / ⌘+ / ⌘- / ⌘0 / ⌘1 ask for, and the level each one moves to.
@@ -47,6 +48,16 @@ public struct ZoomSteps: Hashable, Sendable {
     public func zoomedOut(from zoom: Double) -> Double {
         guard zoom.isFinite, zoom > 0 else { return 1 }
         return clamped(stops.last { $0 < zoom / 1.001 } ?? stops[0])
+    }
+
+    /// Why Zoom In can't run at `zoom`, as its tooltip: at the top of `range`. Nil while it can.
+    public func zoomInHelp(at zoom: Double) -> String? {
+        zoomedIn(from: zoom) > clamped(zoom) ? nil : "Already at the largest zoom."
+    }
+
+    /// Why Zoom Out can't run at `zoom`, as its tooltip: at the bottom of `range`. Nil while it can.
+    public func zoomOutHelp(at zoom: Double) -> String? {
+        zoomedOut(from: zoom) < clamped(zoom) ? nil : "Already at the smallest zoom."
     }
 
     /// `zoom` clamped, and 100% when it is within `snapShare` of it.

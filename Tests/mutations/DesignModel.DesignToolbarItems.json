@@ -2,8 +2,8 @@
   {
     "label": "Save is enabled with no file open",
     "file": "Sources/DesignModel/DesignToolbarItems.swift",
-    "find": "        case .save, .zoomOut, .fit, .zoomIn:\n            return workspace.isOpen ? nil : Self.noFile",
-    "replace": "        case .save:\n            return nil\n        case .zoomOut, .fit, .zoomIn:\n            return workspace.isOpen ? nil : Self.noFile",
+    "find": "        case .save, .fit:\n            return workspace.isOpen ? nil : Self.noFile",
+    "replace": "        case .save:\n            return nil\n        case .fit:\n            return workspace.isOpen ? nil : Self.noFile",
     "tests": "DesignToolbarItemsTests"
   },
   {
@@ -53,6 +53,20 @@
     "file": "Sources/DesignModel/DesignToolbarItems.swift",
     "find": "case .history: \"design.bar.history\"",
     "replace": "case .history: \"design.bar.panel\"",
+    "tests": "DesignToolbarItemsTests"
+  },
+  {
+    "label": "Zoom Out stays on at the smallest zoom",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "return workspace.isOpen ? ZoomSteps.suite.zoomOutHelp(at: zoom) : Self.noFile",
+    "replace": "return workspace.isOpen ? nil : Self.noFile",
+    "tests": "DesignToolbarItemsTests"
+  },
+  {
+    "label": "Zoom In reads the Zoom Out limit",
+    "file": "Sources/DesignModel/DesignToolbarItems.swift",
+    "find": "return workspace.isOpen ? ZoomSteps.suite.zoomInHelp(at: zoom) : Self.noFile",
+    "replace": "return workspace.isOpen ? ZoomSteps.suite.zoomOutHelp(at: zoom) : Self.noFile",
     "tests": "DesignToolbarItemsTests"
   }
 ]

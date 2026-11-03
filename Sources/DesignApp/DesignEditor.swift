@@ -114,7 +114,7 @@ struct DesignEditor: View, BodyCounted {
     private func action(_ item: DesignToolbarItem) -> ToolbarAction {
         guard let intent = item.intent else { return DesignHistoryArea.toolbarAction(model, history) }
         return ToolbarAction(
-            item.title(in: model), systemImage: item.systemImage, unavailableHelp: item.unavailableHelp(in: model),
+            item.title(in: model), systemImage: item.systemImage, unavailableHelp: item.unavailableHelp(in: model, zoom: zoom),
             identifier: item.identifier
         ) { perform(intent) }
     }

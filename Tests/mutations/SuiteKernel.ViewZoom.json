@@ -40,5 +40,19 @@
     "find": "self = scale == 1 ? .actual : .scale(scale)",
     "replace": "self = .scale(scale)",
     "tests": "ViewZoomTests.swift"
+  },
+  {
+    "label": "zoomOutHelp: Zoom Out says it is at the end before it is",
+    "file": "Sources/SuiteKernel/Zoom/ViewZoom.swift",
+    "find": "zoomedOut(from: zoom) < clamped(zoom) ? nil : \"Already at the smallest zoom.\"",
+    "replace": "zoomedOut(from: zoom) <= clamped(zoom) ? nil : \"Already at the smallest zoom.\"",
+    "tests": "ViewZoomTests.swift"
+  },
+  {
+    "label": "zoomInHelp: Zoom In never says it is at the end",
+    "file": "Sources/SuiteKernel/Zoom/ViewZoom.swift",
+    "find": "zoomedIn(from: zoom) > clamped(zoom) ? nil : \"Already at the largest zoom.\"",
+    "replace": "zoomedIn(from: zoom) >= clamped(zoom) ? nil : \"Already at the largest zoom.\"",
+    "tests": "ViewZoomTests.swift"
   }
 ]

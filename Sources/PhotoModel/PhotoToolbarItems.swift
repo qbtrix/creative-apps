@@ -7,8 +7,11 @@
 // `photo.bar.undo` / `photo.bar.redo`: their titles name the edit, so the
 // identifier is what the journeys and the app audit find. The save state
 // reads `saveStatus(autosaved:saveFailed:)`, but says "Saved" only for a file
-// that has a name: a new image that was never saved shows nothing.
+// that has a name: a new image that was never saved shows nothing. Zoom Out and
+// Zoom In also say why at the ends of the suite's 10% to 3200% range, from the
+// zoom the window passes.
 // Linux-safe: no UI imports.
+import struct SuiteKernel.ZoomSteps
 
 /// One command in Photo's window toolbar, in toolbar order.
 public enum PhotoToolbarItem: String, CaseIterable, Sendable {
@@ -56,13 +59,16 @@ public enum PhotoToolbarItem: String, CaseIterable, Sendable {
         }
     }
 
-    /// Why the item can't run now, as its tooltip; nil when it can.
-    public func unavailableHelp(in workspace: PhotoWorkspace) -> String? {
+    /// Why the item can't run now, as its tooltip; nil when it can. `zoom` is the canvas's,
+    /// so Zoom Out and Zoom In say so at the ends of the range.
+    public func unavailableHelp(in workspace: PhotoWorkspace, zoom: Double = 1) -> String? {
         if self == .open { return nil }
         guard workspace.canvas != nil else { return Self.noImage }
         switch self {
         case .undo: return workspace.canUndo ? nil : "Nothing to undo."
         case .redo: return workspace.canRedo ? nil : "Nothing to redo."
+        case .zoomOut: return ZoomSteps.suite.zoomOutHelp(at: zoom)
+        case .zoomIn: return ZoomSteps.suite.zoomInHelp(at: zoom)
         default: return nil
         }
     }

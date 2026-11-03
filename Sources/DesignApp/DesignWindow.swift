@@ -363,10 +363,7 @@ struct DesignWindow: View, BodyCounted {
     /// The fit EditorDetail hands Command-0: clear of the floating palette, which shows every tool
     /// while a page is open.
     private var paletteFit: @Sendable (CGSize, CGSize) -> Double {
-        let toolCount = DesignTool.allCases.count
-        return { viewport, artboard in
-            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
-        }
+        EditorDetailLayout.paletteFit(toolCount: DesignTool.allCases.count)
     }
 
     /// Zooms to fit the selection clear of the palette and keeps its rect for the canvas to

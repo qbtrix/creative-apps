@@ -349,11 +349,8 @@ struct PhotoWindow: View {
     private func fit() {
         guard let canvas = model.canvas, viewport.width > 0, viewport.height > 0 else { return }
         fitPending = false
-        let toolCount = PhotoTool.allCases.count
         // The fit EditorDetail hands Command-0, so a fitted image clears the floating palette.
-        let paletteFit: @Sendable (CGSize, CGSize) -> Double = { viewport, artboard in
-            EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
-        }
+        let paletteFit = EditorDetailLayout.paletteFit(toolCount: PhotoTool.allCases.count)
         setZoom(ZoomMath.fit(document: CGSize(width: canvas.width, height: canvas.height), in: viewport, using: paletteFit))
         fittedZoom = zoom
     }

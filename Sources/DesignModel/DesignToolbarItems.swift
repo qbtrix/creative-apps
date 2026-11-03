@@ -6,8 +6,10 @@
 // why. Undo and Redo keep `design.bar.undo` / `design.bar.redo`: their titles
 // name the edit, so the identifier is what the journeys and the app audit find.
 // History (design/autosave-history DA-3) shows the window's History panel, which
-// has steps to list only once a file is open.
+// has steps to list only once a file is open. Zoom Out and Zoom In also say why
+// at the ends of the suite's 10% to 3200% range, from the zoom the window passes.
 // Linux-safe: no UI imports.
+import struct SuiteKernel.ZoomSteps
 
 /// One command in Design's window toolbar, in toolbar order.
 public enum DesignToolbarItem: String, CaseIterable, Sendable {
@@ -58,13 +60,18 @@ public enum DesignToolbarItem: String, CaseIterable, Sendable {
         }
     }
 
-    /// Why the item can't run now, as its tooltip; nil when it can.
-    public func unavailableHelp(in workspace: DesignWorkspace) -> String? {
+    /// Why the item can't run now, as its tooltip; nil when it can. `zoom` is the canvas's,
+    /// so Zoom Out and Zoom In say so at the ends of the range.
+    public func unavailableHelp(in workspace: DesignWorkspace, zoom: Double = 1) -> String? {
         switch self {
         case .newFile, .open:
             return nil
-        case .save, .zoomOut, .fit, .zoomIn:
+        case .save, .fit:
             return workspace.isOpen ? nil : Self.noFile
+        case .zoomOut:
+            return workspace.isOpen ? ZoomSteps.suite.zoomOutHelp(at: zoom) : Self.noFile
+        case .zoomIn:
+            return workspace.isOpen ? ZoomSteps.suite.zoomInHelp(at: zoom) : Self.noFile
         case .history:
             return workspace.isOpen ? nil : Self.noFile
         case .undo:
