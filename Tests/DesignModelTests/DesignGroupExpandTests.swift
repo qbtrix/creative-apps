@@ -1,6 +1,8 @@
 // DesignGroupExpandTests.swift: after Group the new group's own Layers row is
 // expanded, so its members stay in the visible rows (copy-group D0-3a, #2471),
-// on DesignFixtures' `cards` through `.live`. Runs on Linux and macOS.
+// and a canvas click on a group's child opens the rows around it so the child's
+// row shows (J9, #6198), on DesignFixtures' `cards` through `.live`. Runs on
+// Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -36,5 +38,29 @@ import Testing
         try workspace.run(.ungroup)
         #expect(workspace.selectedNodeIDs == ["node-7", "node-8"])
         #expect(!workspace.isExpanded("node-7") && !workspace.isExpanded("node-8"))
+    }
+
+    /// J9 (#6198): picking E1 on the canvas, with every row collapsed, opens Desktop and Pair so E1's
+    /// row shows one level under Pair's. A plain click picks Pair (the outermost group, AR-14); a
+    /// ⌘-press picks E1 at once, and a double-click enters Pair and picks E1.
+    @Test(arguments: [true, false]) func pickingAGroupsChildOnTheCanvasRevealsItsRow(deep: Bool) throws {
+        var workspace = DesignFixtures.cards
+        workspace.useServices(.live)
+        #expect(!workspace.layerRows.map(\.id).contains("node-7"))
+        let point = DesignPoint(x: 950, y: 450)
+        func press(_ modifiers: DesignModifiers) {
+            workspace.drag(from: point, to: point, modifiers: modifiers)
+            workspace.endDrag()
+        }
+        if deep { press(.deep) } else {
+            press([])
+            #expect(workspace.selectedNodeIDs == ["node-6"])
+            press(.enter)
+        }
+        #expect(workspace.selectedNodeIDs == ["node-7"])
+        let rows = workspace.layerRows
+        let pair = try #require(rows.first { $0.id == "node-6" })
+        let e1 = try #require(rows.first { $0.id == "node-7" })
+        #expect(e1.depth == pair.depth + 1)
     }
 }

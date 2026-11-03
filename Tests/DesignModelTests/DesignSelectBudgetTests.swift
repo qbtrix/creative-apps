@@ -3,7 +3,9 @@
 // docs/blueprints/design/features/select-several.md, S-8), on `crowd` (2,000
 // layers on one page). Each row presses once, untimed, then times 200 drag steps
 // of the Move or Rectangle tool through DesignBudget and fails when the p95 is
-// over the Linux debug gate (10 × the device target): QD-S1, a move step of a
+// over the gate (`DesignBudget.gate`: 10 × the device target in a debug build,
+// the device target itself in a release one; the two bulk select rows keep the
+// debug gate): QD-S1, a move step of a
 // frame with 50 children (rewind, translate); QD-S2, a rectangle draw step;
 // QD-S3, a resize step of one layer and of 20 through the selection's box;
 // QD-S4, a marquee step in Frame 40, whose lookup walks the frames before it;
@@ -46,7 +48,7 @@ import Testing
         modifiers: DesignModifiers = [], sourceLocation: SourceLocation = #_sourceLocation
     ) -> (report: DesignBudget.Report, steps: Int) {
         workspace.drag(from: start, to: ends[0], modifiers: modifiers)
-        let gate = DesignBudget.linuxDebugGate(device: .milliseconds(1))
+        let gate = DesignBudget.gate(device: .milliseconds(1))
         var step = 0
         let report = DesignBudget.expect(name, runs: 200, gate: gate, sourceLocation: sourceLocation) {
             workspace.drag(from: start, to: ends[step % 2], modifiers: modifiers)
@@ -229,9 +231,9 @@ import Testing
     func selectAllThenOnTwentyThousand(_ command: String) throws {
         let crowd = Self.crowdTen
         var workspace = crowd
-        let gate = DesignBudget.linuxDebugGate(device: .milliseconds(100))
+        let gate = DesignBudget.gate(device: .milliseconds(100))
         var runs = 0
-        let report = DesignBudget.expect("select all + \(command) on 20,000 layers", runs: 3, gate: gate) {
+        let report = DesignBudget.expect("select all + \(command) on 20,000 layers", runs: 20, gate: gate) {
             workspace = crowd
             workspace.selectAll()
             do {
@@ -240,7 +242,7 @@ import Testing
             } catch { Issue.record("\(command) refused: \(error)") }
         }
         #expect(report.median <= gate, "select all + \(command) on 20,000 layers: \(report), median over the gate \(gate)")
-        #expect(runs == 3, "the timed runs refused")
+        #expect(runs == 20, "the timed runs refused")
         let top = try #require(workspace.selectedPage?.nodes)
         #expect(command == "edit.duplicate" ? top.count == 800 : top.count == 1 && top.first?.children.count == 400)
     }
