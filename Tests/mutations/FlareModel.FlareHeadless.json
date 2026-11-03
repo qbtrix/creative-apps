@@ -42,6 +42,13 @@
     "tests": "FlareHeadlessTests"
   },
   {
+    "label": "file.drop stays window-only, so the CLI can't place a dropped SVG",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "windowOnly = spec.kind == .file && id != \"file.drop\"",
+    "replace": "windowOnly = spec.kind == .file",
+    "tests": "FlareDropCLITests"
+  },
+  {
     "label": "exportOptionsFailingTheSchemaAreMalformed: the schema check skipped",
     "file": "Sources/FlareModel/FlareHeadless.swift",
     "find": "guard issues.isEmpty else { throw CatalogError.malformedParams(id: \"export\", issues) }",

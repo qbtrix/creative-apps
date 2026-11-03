@@ -218,10 +218,17 @@ extension LibraryCatalog {
 
     /// Clamped to `CropSettings.angleRange`; NaN and infinity change nothing.
     public mutating func setCropAngle(_ degrees: Double) {
-        guard degrees.isFinite, let draft = cropDraft, let size = loupeItem?.pixelSize else { return }
+        if let draft = cropDraft(angle: degrees) { cropDraft = draft }
+    }
+
+    /// The draft `setCropAngle(degrees)` would leave, without changing the
+    /// catalog, so the loupe can show a Straighten step before the catalog
+    /// takes it (#6222); nil when not cropping or `degrees` isn't finite.
+    public func cropDraft(angle degrees: Double) -> CropSettings? {
+        guard degrees.isFinite, let draft = cropDraft, let size = loupeItem?.pixelSize else { return nil }
         let range = CropSettings.angleRange
         let angle = min(max(degrees, range.lowerBound), range.upperBound)
-        cropDraft = (try? services.crop.straightened(draft, angle: angle, photo: size)) ?? draft
+        return (try? services.crop.straightened(draft, angle: angle, photo: size)) ?? draft
     }
 
     /// Adds a `levelAngle` result to the draft's angle; nil changes nothing.
@@ -264,21 +271,28 @@ extension LibraryCatalog {
     }
 
     /// The draft's frame in the straightened photo's pixels; nil when not cropping.
-    public var cropFrame: PixelRect? {
-        guard let draft = cropDraft, let photo = loupeItem else { return nil }
-        return try? services.crop.frame(draft, photo: photo.pixelSize)
+    public var cropFrame: PixelRect? { cropDraft.flatMap(cropFrame(of:)) }
+
+    /// `draft`'s frame in the loupe photo's straightened pixels.
+    public func cropFrame(of draft: CropSettings) -> PixelRect? {
+        loupeItem.flatMap { try? services.crop.frame(draft, photo: $0.pixelSize) }
     }
 
     /// The straightened photo's size (the frame of the whole rect); nil when not cropping.
-    public var cropCanvas: PixelSize? {
-        guard let draft = cropDraft, let photo = loupeItem else { return nil }
-        let whole = CropSettings(angle: draft.angle, rect: .full, aspect: .original)
-        return (try? services.crop.frame(whole, photo: photo.pixelSize)).map { PixelSize(width: $0.width, height: $0.height) }
+    public var cropCanvas: PixelSize? { cropDraft.flatMap(cropCanvas(of:)) }
+
+    /// The loupe photo straightened by `draft`'s angle: the frame of the whole rect.
+    public func cropCanvas(of draft: CropSettings) -> PixelSize? {
+        cropFrame(of: CropSettings(angle: draft.angle, rect: .full, aspect: .original))
+            .map { PixelSize(width: $0.width, height: $0.height) }
     }
 
     /// `library.crop.frame`'s value: "4000 × 4000 at 1000, 0".
-    public var cropFrameValue: String? {
-        cropFrame.map { "\($0.width) × \($0.height) at \($0.x), \($0.y)" }
+    public var cropFrameValue: String? { cropDraft.flatMap(cropFrameValue(of:)) }
+
+    /// `draft`'s `library.crop.frame` value.
+    public func cropFrameValue(of draft: CropSettings) -> String? {
+        cropFrame(of: draft).map { "\($0.width) × \($0.height) at \($0.x), \($0.y)" }
     }
 
     /// What the loupe renders while cropping: the photo's tone on the whole

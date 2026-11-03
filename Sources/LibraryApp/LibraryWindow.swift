@@ -107,7 +107,7 @@ struct LibraryWindow: View, BodyCounted {
                     .onKeyPress(phases: .down) { press in route(press) }
                 if model.showsStatusBar {
                     // Keeps its height; the content above shrinks to fit.
-                    LibraryStatusBar(model: model, fitScale: areas.loupe.fitScale)
+                    LibraryStatusBar(model: model, loupe: areas.loupe)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -124,6 +124,7 @@ struct LibraryWindow: View, BodyCounted {
                        perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
+        .environment(\.libraryCropLive, areas.crop)
         // The Develop tab's LOOKS and BLACK & WHITE run their commands through this (AJ-11).
         .environment(\.libraryAdjust, adjustControls)
         .libraryControlsProbe()

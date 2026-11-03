@@ -6,7 +6,9 @@
 // (`library.crop.straighten`) 120 times at 120 Hz through its adjustable
 // action. The loupe turns its unturned picture with a compositor transform,
 // so `bodies` gates that the steps start no loupe render
-// (`LibraryLoupeRenders` in BodyTally) and caps the window bodies. `timing` gates
+// (`LibraryLoupeRenders` in BodyTally) and caps the window bodies: a step
+// is shown through `\.libraryCropLive` and reaches the catalog once the
+// steps settle, so the window body doesn't rerun per step (#6222). `timing` gates
 // the step p95 on one frame; it is a wall-clock test, so it stays disabled
 // until Tests/perf-suites.txt lists it. Nested in BodyCountSuites, as every
 // suite that reads a body counter is. macOS only.
@@ -25,8 +27,8 @@ extension BodyCountSuites {
             let (step, renders) = try await Self.run()
             // A straighten step is a compositor turn of the picture already drawn. Target: 0.
             #expect(renders == 0, "120 straighten steps started \(renders) loupe renders: \(step)")
-            // Each step changes the draft, which the overlay and the CROP section read. Target: 120.
-            expectBodies(step, atMost: Self.budget, target: 120)
+            // A step reruns only the loupe, its overlay and the CROP section, never the window. Target: 0.
+            expectBodies(step, atMost: Self.budget, target: 0)
         }
 
         @Test(.disabled("a wall-clock gate: waits on its Tests/perf-suites.txt line"), .timeLimit(.minutes(4)))
@@ -37,7 +39,7 @@ extension BodyCountSuites {
         }
 
         /// What this branch measured (Tests/render-budgets.md); it only ratchets down.
-        static let budget = 120
+        static let budget = 2
 
         static func run() async throws -> (step: RenderStep, renders: Int) {
             let w = RenderBudgetWindow(

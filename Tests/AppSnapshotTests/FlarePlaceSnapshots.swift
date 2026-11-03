@@ -1,5 +1,5 @@
 // FlarePlaceSnapshots.swift (svg-place PF-4; svg-place.md, Screens and states): Flare's window after a place, run
-// as the menu and the drop run it (`FlareWorkspace.place(_:)`). `placed` (two-groups.svg centred; waits on PF-5)
+// as the menu and the drop run it (`FlareWorkspace.place(_:)`). `placed` (two-groups.svg centred as layers red and blue)
 // writes flare-place-svg-*.png; `report` (a blur the import skips) writes flare-place-report-*.png. macOS only.
 import Foundation
 import FlareModel
@@ -28,7 +28,7 @@ import Testing
         return model
     }
 
-    @Test(.disabled("waits on PF-5")) func placed() throws {
+    @Test func placed() throws {
         var model = animation()
         model.place([(name: "two-groups.svg", data: Self.twoGroups)])
         #expect(model.placeStatus == "Placed two-groups.svg: 2 layers.")
@@ -40,7 +40,8 @@ import Testing
     @Test func report() throws {
         var model = animation()
         model.place([(name: "soft.svg", data: Self.blurred)])
-        #expect(model.placeStatus?.isEmpty == false, "the place left nothing in the status line")
+        let status = model.placeStatus ?? ""
+        #expect(status.hasPrefix("Placed soft.svg: 1 layer.") && status.contains("Skipped filter"), "status: \(status)")
         try shoot("report", model)
     }
 

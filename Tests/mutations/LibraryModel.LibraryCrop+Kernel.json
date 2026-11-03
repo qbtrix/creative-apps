@@ -12,5 +12,19 @@
     "find": "if orientation != .up { try c.encode(orientation, forKey: .orientation) }",
     "replace": "try c.encode(orientation, forKey: .orientation)",
     "tests": "LibraryOrientationTests"
+  },
+  {
+    "label": ".liveAngleCommits",
+    "file": "Sources/LibraryModel/LibraryCrop+Kernel.swift",
+    "find": "        if let draft = cropDraft(angle: degrees) { cropDraft = draft }\n",
+    "replace": "        _ = cropDraft(angle: degrees)\n",
+    "tests": "LibraryCropLiveAngleTests"
+  },
+  {
+    "label": ".liveAngleLeavesCatalog",
+    "file": "Sources/LibraryModel/LibraryCrop+Kernel.swift",
+    "find": "        guard degrees.isFinite, let draft = cropDraft, let size = loupeItem?.pixelSize else { return nil }\n",
+    "replace": "        guard let draft = cropDraft, let size = loupeItem?.pixelSize else { return nil }\n",
+    "tests": "LibraryCropLiveAngleTests"
   }
 ]

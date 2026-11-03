@@ -137,7 +137,7 @@ private let logo = """
         let png = Data([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
         FlarePasteboardAdapter(rasterizer: Echo()).paste(.image(png: png, pixelWidth: 1, pixelHeight: 1), into: &workspace)
         #expect(layerNames(workspace) == before)
-        #expect(workspace.layerError?.message == PlaceRules.formatHelp(for: [.svg]))
+        #expect(workspace.layerError?.message == FlareWorkspace.placeFormatHelp)
     }
 
     /// Copy As in the catalog: SVG is the playhead's frame, own is Edit > Copy's bytes, PNG refuses without a window.

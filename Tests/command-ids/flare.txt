@@ -96,6 +96,11 @@ path.finish
 path.handle-move
 path.pen-add
 path.read
+place.focus
+place.image
+place.read
+place.replace
+place.reset-size
 recovery.discard
 recovery.restore
 scene.add

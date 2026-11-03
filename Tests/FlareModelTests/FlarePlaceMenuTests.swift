@@ -1,5 +1,6 @@
 // FlarePlaceMenuTests.swift (svg-place PF-3): File > Place… and the drop on Flare's workspace: off until an animation
-// is open; a refusal adds nothing and says why in the status line, in Flare's words. The SVG report waits on PF-5.
+// is open; an SVG adds its layers in one Place Image step and the status line reads the report; a refusal adds
+// nothing and says why in the status line, in Flare's words.
 import Foundation
 import FlareCore
 @testable import FlareModel
@@ -64,10 +65,11 @@ import Testing
         #expect(FlareWorkspace.placeRefusal(.unavailable(id: "place.image", why: "Unlock it.")) == "Unlock it.")
     }
 
-    @Test(.disabled("waits on PF-5")) func svgPlaceReportsInStatus() {
+    @Test func svgPlaceReportsInStatus() {
         var w = blank()
         w.place([(name: "two-groups.svg", data: twoGroups)])
         #expect(w.placeStatus == "Placed two-groups.svg: 2 layers.")
         #expect(w.undoName == "Place Image")
+        #expect(w.layers.map(\.name) == ["blue", "red"])
     }
 }
