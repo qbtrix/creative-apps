@@ -109,6 +109,9 @@ struct DesignGesture: Sendable, Equatable {
     var history = DesignHistory()
     /// The snap engine the press built (nil: no snapping), its build count, and the last step's guides.
     var snap: DesignSnapIndex?, snapBuilds = 0, guides = DesignSnapGuides.empty
+    /// An Option-drag's copies and the mint after them, made at its first step: every step rewinds to the
+    /// same page, so the copies come out the same, and a step only moves them.
+    var copies: DesignEdit?, copiesMint: DesignIDMint?
 }
 
 extension DesignWorkspace {
@@ -288,8 +291,12 @@ extension DesignWorkspace {
                 let snapped = snapResize(delta, box: bounds, handle: handle, modifiers: modifiers, current)
                 apply(try transforming.resize(ids, handle: handle, by: snapped, modifiers: modifiers, on: page))
             case .optionCopy(let ids, let start):
-                var mint = start
-                let copied = try services.duplicating.duplicate(ids, offset: DesignPoint(x: 0, y: 0), on: page, mint: &mint)
+                if current.copies == nil {
+                    var mint = start
+                    current.copies = try services.duplicating.duplicate(ids, offset: DesignPoint(x: 0, y: 0), on: page, mint: &mint)
+                    current.copiesMint = mint
+                }
+                guard let copied = current.copies, let mint = current.copiesMint else { return }
                 var copies = page
                 copies.nodes = copied.nodes
                 let nodes: [DesignNode]

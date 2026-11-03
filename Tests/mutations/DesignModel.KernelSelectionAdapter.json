@@ -30,8 +30,8 @@
   {
     "label": "selectAllIgnoresCanAdd: Select All takes locked and hidden layers",
     "file": "Sources/DesignModel/DesignActions.swift",
-    "find": "next.selectAll(level.map(\\.id), canAdd: canAddToSelection)",
-    "replace": "next.selectAll(level.map(\\.id))",
+    "find": "level.filter { !$0.isLocked && !$0.isHidden }.map(\\.id)",
+    "replace": "level.map(\\.id)",
     "tests": "DesignKernelSelectionAdapterTests|DesignActionsTests"
   },
   {
