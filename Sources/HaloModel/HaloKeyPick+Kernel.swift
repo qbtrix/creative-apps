@@ -42,9 +42,14 @@ extension HaloProject {
         return Set(Self.keys(of: layer).filter(picked.contains).map(\.frame))
     }
 
-    /// Nil when Select All Keys can act; otherwise why not.
+    /// Nil when Select All Keys can act; otherwise why not. Stops at the
+    /// first animated track: the menus ask on every window body, and listing
+    /// huge's keys to count them cost ~300 ms in debug.
     public var selectAllKeysHelp: String? {
-        compositionKeys.isEmpty ? "There are no keys to select." : nil
+        let animated = (selectedComposition?.layers ?? []).contains { layer in
+            HaloProperty.keyable.contains { (layer.tracks[$0.rawValue]?.count ?? 0) >= 2 }
+        }
+        return animated ? nil : "There are no keys to select."
     }
 
     /// Every key of the selected composition's animated tracks: layers top
