@@ -1,7 +1,7 @@
 // AfterGlowJourneyTests+Menus.swift (no-placeholders NP-2, MJ-NP): every launcher menu, opened by a click, holds
 // no Check for Updates…, Add from Clipboard or Assets (their stubs are out of the beta's scenes), and Edit keeps
 // the system's Cut, Copy and Paste. Items are found by title only (#4647); the menu shot is a screen shot.
-// testViewAndClearAct (#6203): View's Hide Sidebar and Hide Inspector hide their columns and flip to Show,
+// testViewAndClearAct (#6203): View's sidebar and inspector toggles hide their columns and bring them back,
 // and File > Open Recent > Clear Menu empties the recents, so its item turns off.
 import XCTest
 
@@ -34,38 +34,53 @@ final class AfterGlowMenusJourneyTests: XCTestCase {
         }
     }
 
-    /// #6203: the View and Open Recent items the audit found dead each act on a click.
+    /// #6203: the View and Open Recent items the audit found dead each act on a click. The View toggles are
+    /// found by suffix and proved by their column: AX can read the system's sidebar item as Show while it draws Hide.
     @MainActor func testViewAndClearAct() {
         let home = SuiteHarness(self).launch(fixture: "weekOfWork", arguments: [], skipOnboarding: true)
         XCTAssert(home.element("suite.sidebar").waitForExistence(timeout: 30), "the home window has no sidebar")
         let bar = home.app.menuBars.firstMatch
-        for (hide, show, column) in [("Hide Sidebar", "Show Sidebar", "suite.sidebar"),
-                                     ("Hide Inspector", "Show Inspector", "suite.inspector")] {
-            let view = bar.menuBarItems["View"]
-            view.click()
-            XCTAssert(view.menuItems[hide].waitForExistence(timeout: 5), "View has no \(hide)")
-            XCTAssert(view.menuItems[hide].isEnabled, "View > \(hide) is off")
-            view.menuItems[hide].click()
-            XCTAssert(home.element(column).waitForNonExistence(timeout: 5), "View > \(hide) left \(column) shown")
-            view.click()
-            XCTAssert(view.menuItems[show].waitForExistence(timeout: 5), "View doesn't offer \(show) after \(hide)")
-            view.menuItems[show].click()
-            XCTAssert(home.element(column).waitForExistence(timeout: 5), "View > \(show) didn't bring \(column) back")
+        for (name, column) in [("Sidebar", "suite.sidebar"), ("Inspector", "suite.inspector")] {
+            let shown = { home.element(column).exists && home.element(column).isHittable }
+            XCTAssert(Self.wait(for: shown), "\(column) isn't shown at launch")
+            let toggle = Self.open(bar.menuBarItems["View"], to: name)
+            XCTAssert(toggle.exists && toggle.isEnabled, "View has no working \(name) toggle")
+            toggle.click()
+            XCTAssert(Self.wait(for: { !shown() }), "View > Hide \(name) left \(column) shown")
+            home.shot("launcher-view-hidden-\(name.lowercased())", screen: true)
+            Self.open(bar.menuBarItems["View"], to: name).click()
+            XCTAssert(Self.wait(for: shown), "View > Show \(name) didn't bring \(column) back")
         }
         let file = bar.menuBarItems["File"]
-        file.click()
-        let recent = file.menuItems["Open Recent"]
-        XCTAssert(recent.waitForExistence(timeout: 5), "File has no Open Recent")
+        let recent = Self.open(file, to: "Open Recent")
+        XCTAssert(recent.exists, "File has no Open Recent")
         recent.hover()
         let clear = recent.menuItems["Clear Menu"]
         XCTAssert(clear.waitForExistence(timeout: 5) && clear.isEnabled, "Clear Menu is off with recents shown")
         clear.click()
-        file.click()
-        recent.hover()
+        Self.open(file, to: "Open Recent").hover()
         XCTAssert(recent.menuItems["Clear Menu"].waitForExistence(timeout: 5), "Open Recent lost Clear Menu")
         XCTAssertFalse(recent.menuItems["Clear Menu"].isEnabled, "Clear Menu stayed on after clearing")
         home.shot("launcher-menu-cleared", screen: true)
         home.press(.escape)
         home.press(.escape)
+    }
+
+    /// Clicks `menu` open (again if the first click lands while another menu closes) and returns its item ending in `suffix`.
+    @MainActor static func open(_ menu: XCUIElement, to suffix: String) -> XCUIElement {
+        let item = AfterGlowJourneyTests.item(endingWith: suffix, in: menu)
+        menu.click()
+        if !item.waitForExistence(timeout: 3) { menu.click() }
+        _ = item.waitForExistence(timeout: 5)
+        return item
+    }
+
+    /// Polls `condition` for up to five seconds.
+    @MainActor static func wait(for condition: () -> Bool) -> Bool {
+        for _ in 0..<25 {
+            if condition() { return true }
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        return condition()
     }
 }
