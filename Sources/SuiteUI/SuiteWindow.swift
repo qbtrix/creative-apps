@@ -272,14 +272,17 @@ extension SuiteWindow {
                     maxWidth: .infinity, minHeight: SuiteSize.contentMinimum.height, maxHeight: .infinity)
                 .tint(SuiteColor.accent)
                 .inspector(isPresented: $showsInspector) {
-                    inspector
-                        .padding(SuiteSpacing.m)
-                        .frame(maxHeight: .infinity, alignment: .top)
-                        .accessibilityElement(children: .contain)
-                        .accessibilityIdentifier("suite.inspector")
-                        .tint(SuiteColor.accent)
-                        .inspectorColumnWidth(
-                            min: inspectorColumn.min, ideal: inspectorColumn.ideal, max: inspectorColumn.max)
+                    // Its own hosting view re-reads its minimum and maximum size on every update; this
+                    // frame answers both from the column widths, so a row's layout change (one Rotation
+                    // scrub step) doesn't measure the whole scrolling inspector again (#6229).
+                    InspectorFrame(minWidth: inspectorColumn.min, idealWidth: inspectorColumn.ideal) {
+                        inspector.padding(SuiteSpacing.m)
+                    }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("suite.inspector")
+                    .tint(SuiteColor.accent)
+                    .inspectorColumnWidth(
+                        min: inspectorColumn.min, ideal: inspectorColumn.ideal, max: inspectorColumn.max)
                 }
         }
         .navigationTitle(title)
@@ -345,5 +348,20 @@ extension SuiteWindow {
     /// What `action` takes in the toolbar, as `actionButton` draws it (icon only).
     private func toolbarItem(_ action: ToolbarAction) -> SwitcherToolbarItem {
         SwitcherToolbarItem(action.title, showsTitle: false)
+    }
+}
+
+/// The inspector's root frame: at least `minWidth` wide, `idealWidth` when nothing is proposed, any height,
+/// content top-aligned. Unlike a `.frame`, it answers every size query without measuring its content.
+struct InspectorFrame: Layout {
+    let minWidth: CGFloat
+    let idealWidth: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        CGSize(width: max(minWidth, proposal.width ?? idealWidth), height: proposal.height ?? 0)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        for subview in subviews { subview.place(at: bounds.origin, proposal: ProposedViewSize(bounds.size)) }
     }
 }

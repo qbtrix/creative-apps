@@ -105,6 +105,27 @@ extension BodyCountSuites {
             expectBodies(step, atMost: 3, target: 1)
         }
 
+        /// The inspector's Rotation row stepped 120 times at 120 Hz (VoiceOver's increments, each its own gesture):
+        /// the steps ride the compositor like a handle drag, with no CPU resample, and the end of the steps
+        /// draws the exact frame once (#6229).
+        @Test(.timeLimit(.minutes(2))) func rotationScrubResamplesOnlyAtTheEnd() async throws {
+            let draft = try Self.draft()
+            let w = RenderBudgetWindow(PhotoWindow(model: draft.model).allowsWindowActivationEvents())
+            defer { w.close() }
+            let edited = try await RenderBudgetPhotoTransformTests.settle(w)
+            try await Self.idle(w)
+            let before = Self.resamples()
+            let found = try await w.adjust("suite.transform.rotation", steps: Self.samples)
+            let during = Self.resamples() - before
+            #expect(found, "the Rotation row isn't adjustable")
+            #expect(during == 0, "the scrub resampled the layer on the CPU \(during) times during its steps")
+            _ = try #require(await BodyCountSuites.RenderBudgetPhotoTransformTests.landed(edited) {
+                ($0.transformSelection?.degrees).map { $0 != draft.before.degrees } ?? true
+            })
+            try await Self.idle(w)
+            #expect(Self.resamples() - before == 1, "the scrub's end resampled \(Self.resamples() - before - during) times, not once")
+        }
+
         /// Whether the window's canvas shows a live layer, waiting up to 10 s for the lift's one render (the picture
         /// under it) to land; prints how long the pointer waited.
         static func lifted<V: View>(_ w: RenderBudgetWindow<V>) async throws -> Bool {
