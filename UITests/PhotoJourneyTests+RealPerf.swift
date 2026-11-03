@@ -94,8 +94,11 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
         edit.menus.firstMatch.children(matching: .menuItem)["Free Transform"].click()
         let box = photo.element("photo.canvas.transform-box")
         guard box.waitForExistence(timeout: 10) else { return XCTFail("\(backend): Free Transform put no box on the canvas") }
+        // The 8K paste and the draft's first picture settle first, so the sample holds only the drag.
+        _ = XCTWaiter.wait(for: [XCTestExpectation(description: "settle")], timeout: 15)
         let corner = box.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1))
-        photo.health("\(backend) transform drag", pid: pid, series: "canvas-drag") {
+        // The handles feed no probe series (only the viewport's own drag does), so the round trip is report-only.
+        photo.health("\(backend) transform drag", pid: pid, series: nil) {
             for offset in [CGVector(dx: -300, dy: -170), CGVector(dx: -40, dy: -20)] {
                 corner.click(forDuration: 0.05, thenDragTo: corner.withOffset(offset),
                              withVelocity: XCUIGestureVelocity(400), thenHoldForDuration: 0.05)
