@@ -110,10 +110,10 @@ import Testing
         }
         #expect(workspace.historySteps.count == steps + 1)
         try workspace.commitTransform()
-        #expect(workspace.historySteps.count == steps + 2)
+        #expect(workspace.historySteps.count == steps + 1, "the commit folds the draft's steps into one")
         let flipped = TransformRules.flipped(try #require(workspace.transformSelection), .horizontal)
         try workspace.setTransform(flipped, name: "Flip Horizontal", drag: nil)
-        #expect(workspace.historySteps.count == steps + 3)
+        #expect(workspace.historySteps.count == steps + 2)
     }
 
     /// A mouse drag on the canvas while Free Transform is up (#5197): one on
@@ -152,7 +152,7 @@ import Testing
         let steps = workspace.historySteps.count
         try workspace.commitTransform()
         #expect(workspace.transformDraft == nil)
-        #expect(workspace.historySteps.count == steps + 1)
+        #expect(workspace.historySteps.count == steps, "the commit replaces the draft's step")
         #expect(workspace.historySteps.last == "Free Transform")
         let layer = try #require(workspace.selectedLayer), pixels = try layerPixels(workspace)
         let placed = Rect(minX: Double(layer.offsetX), minY: Double(layer.offsetY),
@@ -242,11 +242,11 @@ import Testing
         _ = try PhotoWorkspace.catalog.run("transform.rotate", params: .object(["degrees": .number(15)]), on: &workspace)
         _ = try PhotoWorkspace.catalog.run("transform.commit", params: .object([:]), on: &workspace)
         #expect(workspace.transformDraft == nil)
-        #expect(workspace.historySteps.suffix(2) == ["Rotate", "Free Transform"])
+        #expect(workspace.historySteps.count == steps + 1 && workspace.historySteps.last == "Free Transform", "Rotate folds into the commit")
         _ = try PhotoWorkspace.catalog.run("transform.begin", params: .object([:]), on: &workspace)
         _ = try PhotoWorkspace.catalog.run("transform.cancel", params: .object([:]), on: &workspace)
         #expect(workspace.transformDraft == nil)
-        #expect(workspace.historySteps.count == steps + 2)
+        #expect(workspace.historySteps.count == steps + 1)
     }
 
     /// RJ-P17: the job's own script on its .ora (a 400 x 200 logo over a
@@ -297,6 +297,34 @@ import Testing
         try workspace.setTransform(TransformRules.flipped(committed, .horizontal), name: "Flip Horizontal", drag: nil)
         #expect(workspace.historySteps.last == "Flip Horizontal")
         #expect(near(try #require(workspace.transformSelection).box, bounds), "the flip keeps its left edge")
-        #expect(workspace.historySteps.count == steps + 4)
+        #expect(workspace.historySteps.count == steps + 2, "one Free Transform and one flip")
+    }
+
+    /// #6201: the audit's job (move the layer, Free Transform, scale 2x,
+    /// commit, then undo): the commit folds the draft's Scale into one "Free
+    /// Transform" step, so the first undo puts the moved layer back with no
+    /// box up and the second takes the Move back.
+    @Test func oneFreeTransformIsOneUndoStep() throws {
+        var workspace = try logoOnPhoto()
+        let run = { (id: String, params: JSONValue) in _ = try PhotoWorkspace.catalog.run(id, params: params, on: &workspace) }
+        let start = try #require(workspace.selectedLayer), base = workspace.historySteps
+        try run("layer.move-by", .object(["dx": .number(4), "dy": .number(2)]))
+        let moved = try #require(workspace.selectedLayer), movedPixels = try layerPixels(workspace)
+        try run("transform.begin", .object([:]))
+        try run("transform.scale", .object(["sx": .number(2), "sy": .number(2), "anchor": .string("topLeft")]))
+        try run("transform.commit", .object([:]))
+        #expect(workspace.historySteps == base + ["Move Layer", "Free Transform"])
+        #expect(try layerPixels(workspace).width == 40)
+        workspace.undo()
+        #expect(workspace.transformDraft == nil, "undoing the commit leaves no box up")
+        #expect(workspace.selectedLayer?.offsetX == moved.offsetX && workspace.selectedLayer?.offsetY == moved.offsetY)
+        #expect(try layerPixels(workspace) == movedPixels, "one undo takes the whole transform back")
+        workspace.undo()
+        #expect(workspace.selectedLayer?.offsetX == start.offsetX && workspace.selectedLayer?.offsetY == start.offsetY,
+                "the second undo takes the Move back")
+        workspace.redo()
+        workspace.redo()
+        #expect(try layerPixels(workspace).width == 40, "redo lays the transform again in one step")
+        #expect(workspace.transformDraft == nil)
     }
 }
