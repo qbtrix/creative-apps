@@ -5,12 +5,13 @@
 // view of one lane per track (TimelineLaneRow: the lane and its input). The
 // names stack is lazy; the lanes stack, laid out at every lane's height inside
 // the sideways scroll, builds only the rows the vertical scroll shows
-// (`lanesShown`), with clear space for the rest, so a long track list costs the
-// rows in view. A host that scrolls the strip in its own vertical scroll sets
-// `timelineRowsShown`, and both stacks then build only those rows (#1262).
-// Each stack sits behind one `.equatable()` (TimelineNameRows,
-// TimelineLaneRows) over the tracks and the mapping (and the rows shown), and
-// a row compares only its track and mapping; the playhead and
+// (`lanesShown`; a screen of rows before it first reports), with clear space
+// for the rest, so a long track list costs the rows in view. A host that
+// scrolls the strip in its own vertical scroll sets `timelineRowsShown`, and
+// both stacks then build only those rows (#1262). Each stack sits behind one
+// `.equatable()` (TimelineNameRows, TimelineLaneRows) over the tracks and the
+// mapping (and the rows shown), and a row compares only its track and
+// mapping; the playhead and
 // the closures a press needs sit in one unobserved TimelineLaneContext the body
 // rewrites. So a frame change runs the playhead layer and never re-evaluates a
 // ForEach or a lane, even when layout runs ahead of SwiftUI's flush under load
@@ -346,16 +347,14 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     }
 
     /// The lanes the stack builds: the rows a host that scrolls the strip itself shows (`timelineRowsShown`),
-    /// else the rows the vertical scroll shows (`visibleRows`), or every row before it reports and in a snapshot.
-    /// The lanes' horizontal scroll view is laid out at every lane's height, so inside it the lazy stack alone
-    /// built every lane (500 tracks cost a host ~90 ms a body); the names column, a direct child of the vertical
-    /// scroll, is lazy on its own.
+    /// else the rows the vertical scroll shows (`visibleRows`), a screen of rows from the top before it reports,
+    /// and every row in a snapshot. The lanes' horizontal scroll view is laid out at every lane's height, so
+    /// inside it the lazy stack alone built every lane (500 tracks cost a host ~90 ms a body); the names column,
+    /// a direct child of the vertical scroll, is lazy on its own.
     private var lanesShown: Range<Int> {
-        let all = 0..<tracks.count
-        guard !snapshot else { return all }
-        if let rowsShown { return rowsShown.clamped(to: all) }
-        guard let visibleRows else { return all }
-        return visibleRows.clamped(to: all)
+        guard !snapshot else { return 0..<tracks.count }
+        if let rowsShown { return rowsShown.clamped(to: 0..<tracks.count) }
+        return TimelineStripLayout.lanesShown(reported: visibleRows, count: tracks.count)
     }
 
     private func lanes(width: CGFloat) -> some View {
@@ -554,6 +553,18 @@ struct TimelineStripLayout: Equatable, Sendable {
         let first = min(Int((y / SuiteSize.timelineLane).rounded(.down)), trackCount)
         let end = min(Int(((y + viewport) / SuiteSize.timelineLane).rounded(.up)), trackCount)
         return first..<max(first, end)
+    }
+
+    /// The most lanes built before the vertical scroll first reports: 2,048 pt, taller than a screen. A strip that
+    /// appears with every track at once (a 2,000-path SVG placed into an empty scene) built all its lanes in that
+    /// first layout: ~700 ms of the place in a debug build.
+    static let lanesBeforeReport = 64
+
+    /// The lane rows the stack builds from the vertical scroll's last report (`lanesShown(visibleY:)`), clamped to
+    /// the tracks, or the first `lanesBeforeReport` rows before one.
+    static func lanesShown(reported: Range<Int>?, count: Int) -> Range<Int> {
+        let all = 0..<count
+        return (reported ?? 0..<lanesBeforeReport).clamped(to: all)
     }
 
     /// The lane rows a lanes' visible y range shows, with half a row of margin each side so a viewport edge that

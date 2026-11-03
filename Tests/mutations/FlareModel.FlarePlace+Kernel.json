@@ -14,10 +14,10 @@
     "tests": "FlarePlaceTests"
   },
   {
-    "label": "oneUndoStep: each layer gets its own apply group, so a place is several undo steps",
+    "label": "oneUndoStep: each layer is its own apply group, so a place is several undo steps",
     "file": "Sources/FlareModel/FlarePlace+Kernel.swift",
-    "find": "        applyGroup(name, selection: .layer(placed.first?.id)) { engine in\n            for (k, layer) in placed.enumerated() {",
-    "replace": "        for (k, layer) in placed.enumerated() {\n            applyGroup(name, selection: .layer(placed.first?.id)) { engine in",
+    "find": "        applyGroup(name, selection: .layer(placed.first?.id)) { engine in\n            try engine.perform(PlaceLayers(owner: owner, layers: placed, index: below.map { $0 + 1 }))\n        }",
+    "replace": "        for layer in placed {\n            applyGroup(name, selection: .layer(placed.first?.id)) { engine in\n                try engine.perform(PlaceLayers(owner: owner, layers: [layer], index: below.map { $0 + 1 }))\n            }\n        }",
     "tests": "FlarePlaceTests"
   },
   {
@@ -32,6 +32,20 @@
     "file": "Sources/FlareModel/FlarePlace+Kernel.swift",
     "find": "        return \"Placed \\(file): \\(count).\\(skips)\"",
     "replace": "        return \"Placed \\(file): \\(count).\"",
+    "tests": "FlarePlaceTests"
+  },
+  {
+    "label": "manyPathsUndoAndRedoExactly: undo of a place leaves the placed layers in",
+    "file": "Sources/FlareModel/FlarePlace+Kernel.swift",
+    "find": "        guard let replaced else { throw CommandError.notExecuted }\n        try Self.set(replaced, owner, in: &document)",
+    "replace": "        guard replaced != nil else { throw CommandError.notExecuted }",
+    "tests": "FlarePlaceTests"
+  },
+  {
+    "label": "landsAboveTheSelectedLayerInOrder: a place ignores the selected layer and lands on top",
+    "file": "Sources/FlareModel/FlarePlace+Kernel.swift",
+    "find": "        next.insert(contentsOf: layers, at: min(max(index ?? old.count, 0), old.count))",
+    "replace": "        next.insert(contentsOf: layers, at: old.count)",
     "tests": "FlarePlaceTests"
   }
 ]

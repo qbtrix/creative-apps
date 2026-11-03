@@ -11,17 +11,15 @@ extension LiveHits {
     public func marquee(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?,
                         rect: Rect) -> [StageAddress] {
         guard let list = Self.renderList(document, sceneID, frame, symbolID) else { return [] }
-        var picked: [StageAddress] = []
-        for address in list.marquee(rect).compactMap(Self.address) where !picked.contains(address) {
-            picked.append(address)
-        }
-        return picked
+        var seen = Set<StageAddress>()
+        return list.marquee(rect).compactMap(Self.address).filter { seen.insert($0).inserted }
     }
 
     /// The scene-space box of `items`, stroke included; nil when none of them has a box.
     public func bounds(_ document: Document, sceneID: String, frame: Int, editing symbolID: String?,
                        of items: [StageAddress]) -> Rect? {
         guard !items.isEmpty, let list = Self.renderList(document, sceneID, frame, symbolID) else { return nil }
+        let items = Set(items)
         let wanted = list.items.map(\.address).filter { core in Self.address(core).map(items.contains) ?? false }
         return list.worldBounds(of: wanted)
     }
