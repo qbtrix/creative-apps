@@ -36,7 +36,9 @@
 // scroll vertically, by wheel and trackpad with no scroller (as Halo's
 // inspector), so the canvas keeps its room. The strip builds only the rows
 // that scroll shows (`timelineRowsShown`, HaloTimelineLayout.rowsShown), so
-// huge's 2,000 rows stay out of the accessibility tree (#1262). Under `-SuitePerfProbe` a
+// huge's 2,000 rows stay out of the accessibility tree (#1262), and reads
+// key frames only for those rows and the readouts' (a commit on huge read
+// all 2,000 rows' keys). Under `-SuitePerfProbe` a
 // ruler scrub records a `playhead-scrub` sample and each lane scroll offset a
 // `lanes-scroll` frame (HaloProbe).
 import HaloModel
@@ -67,8 +69,11 @@ struct HaloTimelineView: View {
         minimumHeight: Double(SuiteSize.timelineSlotMinimum))
 
     var body: some View {
-        let rows = model.timelineRows
         let layout = Self.layout
+        // Key frames only for the rows drawn and the readouts; snapshots draw every row.
+        let shown = rowsInView ?? layout.rowsShown(visibleY: nil, rows: model.selectedComposition?.layers.count ?? 0)
+        let rows = snapshot
+            ? model.timelineRows : model.timelineRows { shown.contains($0) || $0 < HaloTimelineRow.readoutLimit }
         Group {
             // ImageRenderer can't draw a ScrollView or measure a container,
             // so snapshots show the whole strip at its uncapped height.
@@ -96,7 +101,7 @@ struct HaloTimelineView: View {
                     } action: { _, shown in
                         rowsInView = shown
                     }
-                    .environment(\.timelineRowsShown, rowsInView ?? layout.rowsShown(visibleY: nil, rows: rows.count))
+                    .environment(\.timelineRowsShown, shown)
             }
         }
         .focusable()

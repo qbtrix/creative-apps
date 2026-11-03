@@ -12,5 +12,8 @@ extension HaloTimelineRow {
 
     /// The lanes that publish a readout: the first 100.
     // ponytail: a fixed prefix; move the readout into the strip's rows if a journey reads lane 101+.
-    public static func readoutRows(_ rows: [HaloTimelineRow]) -> ArraySlice<HaloTimelineRow> { rows.prefix(100) }
+    public static func readoutRows(_ rows: [HaloTimelineRow]) -> ArraySlice<HaloTimelineRow> { rows.prefix(readoutLimit) }
+
+    /// How many lanes publish a readout.
+    public static let readoutLimit = 100
 }

@@ -3,15 +3,19 @@
 // property keyed), render contract rules 3 and 6. HaloLiveLayers is hosted
 // with a HaloLiveEdit and fed the drag's samples the way HaloViewerGestures
 // writes them (`lift` once, then the project with the moved drag), one per
-// 1/120 s, each a timed layout and display; no synthetic events, which a
-// hosted window doesn't get on every Mac. `liftedDrag` gates the draws: the
+// 1/120 s, each a timed layout and display. `liftedDrag` gates the draws: the
 // samples draw no layer (HaloCanvasDraws stays put while HaloLiftOffset
 // re-runs per sample) and mouse-up draws the moved frame once.
 // `liftedDragTiming` gates a sample's p95 at or under 8 ms (16 ms hard; render
 // contract rule 6); a wall-clock test, it runs where Tests/perf-suites.txt
 // lists it and is disabled until it does. `liftedDragInTheWindow` feeds the
 // same samples to the whole HaloWindow on huge and gates (DEBUG) that no
-// window or inspector body re-runs per sample. `liftMatchesTheOffsetList`
+// window or inspector body re-runs per sample. `pressDragReleaseInTheWindow`
+// sends a real press, 60 moves and a release to huge's viewer through hosted
+// events and gates (DEBUG) that no move re-runs the window and the release
+// commits one undo step; `pressDragReleaseTiming` gates each part's p95 (the
+// press and release at 16 ms, a move at 8), disabled until perf-suites lists
+// it. `liftMatchesTheOffsetList`
 // checks the lift moved by a delta draws the pixels the offset list draws.
 // Nested in BodyCountSuites, as every suite that reads a body counter is.
 // macOS only.
@@ -105,6 +109,51 @@ extension BodyCountSuites {
             #if DEBUG
             #expect(step.bodies == 0, "a lifted sample re-ran the window or the inspector: \(step)")
             #endif
+        }
+
+        /// A press, drag and release on huge's viewer in the whole window,
+        /// through hosted events, each timed on its own: the press (the lift
+        /// and the first live frame), the drag's moves, and the release (the
+        /// one commit, one undo step).
+        @Test(.timeLimit(.minutes(6))) func pressDragReleaseInTheWindow() async throws {
+            _ = try await Self.pressDragRelease()
+        }
+
+        @Test(.disabled("timing: runs once Tests/perf-suites.txt lists it"), .timeLimit(.minutes(6)))
+        func pressDragReleaseTiming() async throws {
+            let (press, drag, release) = try await Self.pressDragRelease()
+            expectP95(press, atMost: 16, target: 8.3)
+            expectP95(drag, atMost: 8, target: 8.3)
+            expectP95(release, atMost: 16, target: 8.3)
+        }
+
+        static func pressDragRelease() async throws -> (RenderStep, RenderStep, RenderStep) {
+            let project = try Self.project("huge")
+            let w = RenderBudgetWindow(
+                HaloWindow(model: project).environment(\.haloViewerTakesActivationClicks, true),
+                size: CGSize(width: 1700, height: 1000))
+            defer { w.close() }
+            try await w.settle(2000)
+            let canvas = try #require(await w.element("halo.viewer.canvas"), "no halo.viewer.canvas")
+            let start = CGPoint(x: canvas.midX, y: canvas.midY)
+            #if DEBUG
+            let undo = HaloWindow.shownProject?.history.undo.count ?? 0
+            #endif
+            let press = try await w.measure("halo press on huge", bodies: HaloWindowPlaybackTests.windowBodies) {
+                w.timed { w.send(.leftMouseDown, at: start) }
+                w.timed { w.send(.leftMouseDragged, at: CGPoint(x: start.x + 1, y: start.y)) }
+            }
+            let drag = try await w.measure("halo drag on huge, 60 moves", bodies: HaloWindowPlaybackTests.windowBodies) {
+                try await w.ticks(60) { i in w.send(.leftMouseDragged, at: CGPoint(x: start.x + 1 + Double(i), y: start.y)) }
+            }
+            let release = try await w.measure("halo release on huge", bodies: HaloWindowPlaybackTests.windowBodies) {
+                w.timed { w.send(.leftMouseUp, at: CGPoint(x: start.x + 61, y: start.y)) }
+            }
+            #if DEBUG
+            #expect(drag.bodies == 0, "a drag move re-ran the window: \(drag)")
+            #expect(HaloWindow.shownProject?.history.undo.count == undo + 1, "the release didn't commit one step")
+            #endif
+            return (press, drag, release)
         }
 
         @Test func liftMatchesTheOffsetList() async throws {
