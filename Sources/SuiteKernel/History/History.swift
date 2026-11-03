@@ -1,6 +1,7 @@
 // History.swift: the one undo history every app keeps: named steps, a run
 // under one key folded into one step, ids that never repeat, dirty read
-// exactly as saved-vs-current, a limit that rolls old steps into the base.
+// exactly as saved-vs-current, a limit that rolls old steps into the base,
+// and `dropRedo` for steps an app takes back for good.
 // Each step records who made it (`StepOrigin`): `record` reads the ambient
 // `StepOrigin.current`, `.user` unless a live call set `.agent`, so no record
 // site names an origin. An agent step made while a request span is open
@@ -157,6 +158,13 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
     /// Ends the open run, so the next `record` with the same key adds a step.
     public mutating func endRun() {
         openKey = nil
+    }
+
+    /// Forgets the undone steps, so Redo has nothing to make again: for steps
+    /// an app took back for good (a cancelled draft's). Ends the open run.
+    public mutating func dropRedo() {
+        openKey = nil
+        undone.removeAll()
     }
 
     /// Reverts the last step through `apply`, which returns the redo payload;
