@@ -90,16 +90,19 @@ public struct CommandCatalog<Target>: Sendable {
     public func describeAll() -> [CommandDescription] { ids.compactMap(describe) }
     /// Runs `id` with `params` on `target`: checks the id, validates the params, checks availability, then runs on a
     /// copy and commits it only on success, so every refusal leaves `target` unchanged. An edit's outcome names the
-    /// undo step the target's history now reads; any other kind's is nil.
+    /// undo step the target's history now reads; any other kind's is nil, and so is an edit's that recorded
+    /// nothing (its history's `stepID` didn't move), so it never names the step before it.
     public func run(_ id: String, params: JSONValue, on target: inout Target) throws(CatalogError) -> CommandOutcome {
         guard let spec = spec(id) else { throw .unknownCommand(id) }
         let issues = spec.params.validate(params)
         guard issues.isEmpty else { throw .malformedParams(id: id, issues) }
         if let why = spec.availability(target).why { throw .unavailable(id: id, why: why) }
+        let was = history(target).stepID
         var copy = target
         let result = try Self.perform(spec, params, on: &copy)
         target = copy
-        return CommandOutcome(result: result, undoStep: spec.undoable ? history(target).undoName : nil)
+        let now = history(target), recorded = was == nil || now.stepID != was
+        return CommandOutcome(result: result, undoStep: spec.undoable && recorded ? now.undoName : nil)
     }
     /// Runs `id` as `run(_:params:on:)` does, with every step it records made by `origin`: the one place a live
     /// call marks its steps as an agent's.

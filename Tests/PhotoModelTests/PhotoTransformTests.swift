@@ -267,6 +267,16 @@ import Testing
         #expect(workspace.historySteps.count == steps + 1)
     }
 
+    /// #6206: Return on a draft nothing changed records no step, so the call names none, not the step before it.
+    @Test func committingAnUnchangedDraftNamesNoStep() throws {
+        var workspace = try logoOnPhoto()
+        let steps = workspace.historySteps
+        _ = try PhotoWorkspace.catalog.run("transform.begin", params: .object([:]), on: &workspace)
+        let outcome = try PhotoWorkspace.catalog.run("transform.commit", params: .object([:]), on: &workspace)
+        #expect(outcome.undoStep == nil, "an unchanged commit named \(outcome.undoStep ?? "")")
+        #expect(workspace.historySteps == steps && workspace.transformDraft == nil)
+    }
+
     /// RJ-P17: the job's own script on its .ora (a 400 x 200 logo over a
     /// photo): the logo lands on the turned 200 x 100 box's bounds, the flip
     /// keeps its left edge, and the export matches the expected PNG.
