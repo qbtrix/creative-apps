@@ -2,7 +2,7 @@
 // EK-undo). Named steps, a run under one key folded into one step, the run
 // ending on undo, redo and `endRun`, step ids that never repeat, dirty read
 // exactly as saved-vs-current, the limit rolling old steps into the base, and
-// `jump(to:)`. KJ1, the history walk, is the last test. EK-8 built the body
+// `jump(to:)`, `dropRedo`. KJ1, the history walk, is the last test. EK-8 built the body
 // and turned these on.
 import Testing
 import SuiteKernel
@@ -24,6 +24,17 @@ private func menuState(_ history: some HistoryReading) -> (Bool, Bool, String?, 
 }
 
 @Suite struct HistoryTests {
+    @Test func dropRedoForgetsOnlyTheUndoneSteps() {
+        var history = History<String>(), applied = Applied()
+        history.record("Move", "move-back")
+        history.record("Fill", "fill-back")
+        _ = history.undo { applied.flip($0) }
+        let id = history.currentStepID
+        history.dropRedo()
+        #expect(history.steps == ["Move"] && !history.canRedo && history.canUndo)
+        #expect(history.currentStepID == id, "the document stays where it is")
+    }
+
     @Test func recordsNamedSteps() {
         var history = History<String>()
         #expect(!history.canUndo && !history.canRedo && !history.isDirty)
