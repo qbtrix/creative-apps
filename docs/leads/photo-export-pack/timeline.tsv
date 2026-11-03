@@ -635,3 +635,4 @@ utc	stage	event	ref	note
 2026-11-03T12:40Z	check-in	quiet: dev green (no new dev-red); captain merged #6245 (suiteui) #6246 (flare); #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-03T13:13Z	check-in	quiet: dev green (no new dev-red); captain re-audit on #6206 (transform, captain's, skipped); #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-03T13:46Z	check-in	quiet: dev green (no new dev-red); new gap #6249 (autosave, p2, not export/text); #5353 open clean a92b4651; no new findings; 52 photo findings
+2026-11-03T14:18Z	check-in	dev-red #6251 opened 13:52Z (macos, HaloMovieWriterTests, range #6237 suiteui; lane flake re-run pending) not ours; #5353 open clean a92b4651; no new findings; 52 photo findings
