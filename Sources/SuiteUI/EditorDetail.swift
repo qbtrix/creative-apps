@@ -121,12 +121,12 @@ public struct EditorDetailLayout: Equatable, Sendable {
     }
 
     /// The zoom at which `artboard` (document pixels) sits centred with
-    /// `clearance` on either side and `xxl` above and below, never below the
-    /// smallest zoom stop. Non-positive artboard sides count as one pixel; a
-    /// viewport with no room, or one that isn't finite, gives the smallest stop.
+    /// `clearance` on either side and `xxl` above and below, never below
+    /// ZoomMath's smallest zoom (10%). Non-positive artboard sides count as one pixel; a
+    /// viewport with no room, or one that isn't finite, gives that smallest zoom.
     /// Hosts call this instead of ViewerZoom.fitScale.
     public func fitScale(artboard: CGSize) -> Double {
-        let smallest = ViewerZoom.stops.first ?? 0.05
+        let smallest = ZoomMath.range.lowerBound
         let width = artboard.width.isFinite && artboard.width > 0 ? artboard.width : 1
         let height = artboard.height.isFinite && artboard.height > 0 ? artboard.height : 1
         let horizontal = (viewport.width - 2 * clearance) / width
