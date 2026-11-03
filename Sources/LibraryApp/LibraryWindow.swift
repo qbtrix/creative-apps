@@ -107,7 +107,7 @@ struct LibraryWindow: View, BodyCounted {
                     .onKeyPress(phases: .down) { press in route(press) }
                 if model.showsStatusBar {
                     // Keeps its height; the content above shrinks to fit.
-                    LibraryLoupeStatusBar(model: model, loupe: areas.loupe)
+                    LibraryStatusBar(model: model, loupe: areas.loupe)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
