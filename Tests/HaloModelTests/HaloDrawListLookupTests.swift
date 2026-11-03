@@ -51,4 +51,15 @@ struct HaloDrawListLookupTests {
             }
         }
     }
+
+    @Test func aHeldFollowerKeepsItsParentsPlace() throws {
+        var comp = try #require(HaloFixtures.project("parented")?.compositions.first)
+        let rig = try #require(comp.layers.first { $0.kind == .null })
+        let i = try #require(comp.layers.firstIndex { $0.kind != .null })
+        comp.layers[i].parentID = rig.id
+        var alone = comp.layers[i]
+        alone.parentID = nil
+        let live = LiveLayerPlacing()
+        #expect(live.worldMatrix(of: comp.layers[i], in: comp, at: 40) != live.worldMatrix(of: alone, in: comp, at: 40))
+    }
 }
