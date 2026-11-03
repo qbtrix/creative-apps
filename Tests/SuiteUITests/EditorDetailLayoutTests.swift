@@ -3,7 +3,7 @@
 // SuiteWindow (about 1024 x 737 inside the menu bar) with the editor's 304 pt
 // inspector shown and hidden, and the window minimum, for wide, tall, tiny and
 // huge artboards: the palette clear of the rulers, a fitted artboard's handles
-// clear of the palette, the 5% clamp, and no zero, NaN or infinite zoom for
+// clear of the palette, the clamp to ZoomMath's 10% floor, and no zero, NaN or infinite zoom for
 // degenerate sizes. Also Command-0's choice between the host's fit and
 // ZoomMath's. No SwiftUI rendering. macOS only.
 import CoreGraphics
@@ -33,7 +33,8 @@ private let artboards = [
     CGSize(width: 20000, height: 20000),
 ]
 private let toolCounts = [1, 6, 10]
-private let smallestZoom = 0.05
+/// ZoomMath's floor: the fit never hands a host a zoom it would clamp away.
+private let smallestZoom = ZoomMath.range.lowerBound
 
 /// The fit before the clamp, as the packet's pseudocode writes it.
 private func unclamped(_ layout: EditorDetailLayout, _ artboard: CGSize) -> Double {
@@ -138,4 +139,11 @@ private func unclamped(_ layout: EditorDetailLayout, _ artboard: CGSize) -> Doub
     #expect(ZoomMath.fit(document: document, in: room, using: host) == layout.fitScale(artboard: document))
     // Without one, Command-0 is unchanged.
     #expect(ZoomMath.fit(document: document, in: room, using: nil) == ZoomMath.fit(document: document, in: room))
+}
+
+@Test func paletteFitOfAHugeDocumentIsInsideZoomMathsRange() {
+    let fit = ZoomMath.fit(
+        document: CGSize(width: 20000, height: 20000), in: CGSize(width: 800, height: 600),
+        using: EditorDetailLayout.paletteFit(toolCount: 6))
+    #expect(fit == ZoomMath.range.lowerBound)
 }
