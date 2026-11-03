@@ -4,7 +4,7 @@
 # windows in the same process, so a process-wide static counter read by a test
 # comes out wrong on CI (dev-red #5938, #5952, #5962, #5969).
 #
-# Three hits, each a `path::Type.member` line:
+# Four hits, each a `path::Type.member` line:
 #   - a stored body counter anywhere in Sources/ or Tests/: `static var bodyRuns = 0`
 #     or `bodyRuns += 1`. A view counts through SuiteUI's BodyTally instead: it
 #     conforms to BodyCounted (which gives it `bodyRuns`) and runs
@@ -15,6 +15,10 @@
 #   - a test that reads a stored static Int counter declared in Sources/
 #     (`static var lifts = 0` on CanvasRenderer, read as `CanvasRenderer.lifts`):
 #     count on the object under test instead.
+#   - a `bodyTally.ran(` call or an `@Environment(\.bodyTally)` declaration in Sources/
+#     outside an `#if DEBUG` block (the `#else` of one is outside too). The views declare
+#     the property only under DEBUG, so a bare use compiles in Debug and breaks the
+#     Release build in scripts/bundle-apps. Never grandfathered: any hit fails.
 # Tests/body-counts-baseline.txt lists today's hits (grandfathered):
 #   scripts/check-body-counts                    fail on a hit the baseline doesn't list,
 #                                                and on a listed one that is gone (prune it)
@@ -32,6 +36,8 @@ LEX = re.compile(r'"""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|//[^\n]*|/\*[\s\S]*?\*/')
 TYPE = re.compile(r"^(\s*)(?:[\w@()]+\s+)*(?:struct|class|enum|actor|extension)\s+([A-Za-z_]\w*)")
 STORED_BODY = re.compile(r"\bstatic\s+var\s+bodyRuns\s*(?::\s*Int\s*)?=|\bbodyRuns\s*\+=")
 COUNTER = re.compile(r"\bstatic\s+var\s+((?:[A-Za-z_]\w*\s*(?::\s*Int\s*)?=\s*\d+\s*,?\s*)+)$")
+TALLY = re.compile(r"\bbodyTally\.ran\(|@Environment\(\\\.bodyTally\)")
+DIRECTIVE = re.compile(r"^\s*#(if|elseif|else|endif)\b(.*)")
 READ = re.compile(r"\b([A-Z]\w*)(?:<[^<>()]*>)?\.([a-z]\w*)\b")
 BASELINE = "Tests/body-counts-baseline.txt"
 HEADER = """# Tests/body-counts-baseline.txt: process-wide counts a test still reads, grandfathered
@@ -68,11 +74,35 @@ def swift(root, top):
             for f in sorted((root / top).rglob("*.swift"))}
 
 
+def untallied(code):
+    """Line numbers where bodyTally is used outside an `#if DEBUG` branch."""
+    stack, out = [], []  # stack: is this branch under DEBUG (inherited by nested blocks)
+    for n, line in enumerate(code.splitlines(), 1):
+        d = DIRECTIVE.match(line)
+        if d:
+            kind, cond = d.groups()
+            if kind == "endif":
+                stack and stack.pop()
+                continue
+            if kind == "if":
+                stack.append(False)
+            if kind == "else":
+                cond = ""
+            parent = stack[-2] if len(stack) > 1 else False
+            stack[-1:] = [parent or bool(re.search(r"(?<![!\w])DEBUG\b", cond))] if stack else [False]
+            continue
+        if TALLY.search(line) and not (stack and stack[-1]):
+            out.append(n)
+    return out
+
+
 def scan(root):
     sources, tests = swift(root, "Sources"), swift(root, "Tests")
-    hits, counters = set(), set()
+    hits, counters, bare = set(), set(), set()
     for rel, code in {**sources, **tests}.items():
         lines = code.splitlines()
+        if rel.startswith("Sources/"):
+            bare.update(f"{rel}:{n}" for n in untallied(code))
         for i, line in enumerate(lines):
             if STORED_BODY.search(line):
                 hits.add(f"{rel}::{owner(lines, i)}.bodyRuns")
@@ -86,7 +116,7 @@ def scan(root):
             kind, member = m.group(1), m.group(2)
             if (kind, member) in counters or (member == "bodyRuns" and not scoped):
                 hits.add(f"{rel}::{kind}.{member}")
-    return hits
+    return hits, bare
 
 
 def main():
@@ -100,7 +130,7 @@ def main():
     listed = set()
     if path.exists():
         listed = {l.strip() for l in path.read_text().splitlines() if l.strip() and not l.startswith("#")}
-    hits = scan(root)
+    hits, bare = scan(root)
     if a.update_baseline:
         new = hits - listed
         if new and not a.allow_increase:
@@ -112,6 +142,9 @@ def main():
         print(f"check-body-counts: wrote {len(hits)} lines to {BASELINE}")
         return 0
     bad = 0
+    for h in sorted(bare):
+        print(f"{h}: bodyTally used outside #if DEBUG; it only exists in Debug builds, so Release fails (wrap it)")
+        bad = 1
     for h in sorted(hits - listed):
         print(f"{h}: a process-wide count in a test; count the window under test through BodyTally (lesson 345)")
         bad = 1
