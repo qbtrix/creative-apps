@@ -63,7 +63,7 @@ final class PhotoJourneyTests: XCTestCase {
     @MainActor func testLaunchShowsWindowShell() {
         let photo = Journey("Photo", self, arguments: photoArguments())
         XCTAssert(photo.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
-        photo.app.typeKey("n", modifierFlags: .command)
+        photo.newImage()
         XCTAssert(photo.element("suite.tools").waitForExistence(timeout: 10), "New Image showed no tool palette (suite.tools)")
         photo.expectEditorWindow()
         let eyedropper = photo.element("suite.tools").buttons["Eyedropper"]
@@ -102,7 +102,7 @@ final class PhotoJourneyTests: XCTestCase {
 
     @MainActor func testNewImageAndEveryTool() {
         let photo = Journey("Photo", self, arguments: photoArguments())
-        photo.app.typeKey("n", modifierFlags: .command)
+        photo.newImage()
         photo.shot("new-image")
         photo.clickEachTool()
     }
@@ -161,7 +161,7 @@ final class PhotoJourneyTests: XCTestCase {
 
     @MainActor func testEveryMenuOpens() {
         let photo = Journey("Photo", self, arguments: photoArguments())
-        photo.app.typeKey("n", modifierFlags: .command)
+        photo.newImage()
         photo.openEachMenu()
     }
 
