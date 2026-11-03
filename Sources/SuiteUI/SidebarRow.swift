@@ -12,7 +12,8 @@
 // (SidebarRenameField, SidebarRenameMessage; LL-6, #3462). LayerTreeList's
 // rows draw a refusal the same way. The Void form still renames.
 // Return on the focused row and the "Rename" accessibility action open the
-// same field as the double-click, and only on a row with `onRename` (LL-7). Each toggle icon lays out both of its symbols and draws one,
+// same field as the double-click, and only on a row with `onRename` (LL-7). A row without
+// `onRename` has no double-click gesture on its name, so a click there selects (#2496). Each toggle icon lays out both of its symbols and draws one,
 // so it is as wide in every state and the toggles form a column (#53). The
 // icon is hidden from accessibility, so each toggle carries its own
 // identifier, `suite.sidebar.<item id>.<toggle id>` (the app audit, #262).
@@ -275,6 +276,10 @@ public struct SidebarRow: View {
                     SidebarRenameMessage(message, identifier: "suite.sidebar.\(item.id).renameMessage")
                 }
             }
+        } else if onRename == nil {
+            // No rename gesture: on the label it swallows the List's click, so a click on the name wouldn't select (#2496).
+            Label { Text(item.title) } icon: { SidebarRowIcon(item: item) }
+                .modifier(SidebarRowDimming(color: SidebarRowLook(item).title))
         } else {
             Label { Text(item.title) } icon: { SidebarRowIcon(item: item) }
                 .modifier(SidebarRowDimming(color: SidebarRowLook(item).title))

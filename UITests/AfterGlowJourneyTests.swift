@@ -27,11 +27,13 @@ final class AfterGlowJourneyTests: XCTestCase {
     /// Why a step that needs Design's documents on disk is skipped.
     static let waitsOnFixtures = "waits on #836 (A-DE-0)"
     /// The app-defined items of each menu but the app menu (LauncherCommands,
-    /// HomeMenu, SuiteCommands); Help defines none.
+    /// HomeMenu, SuiteCommands); Help defines none. Each is matched as a title
+    /// suffix: the system's sidebar and inspector items flip Show/Hide with
+    /// their column, and AX can lag the drawn title (#6203).
     static let menuItems: [String: [String]] = [
         "File": ["New", "Open…", "Open Recent"],
         "Edit": ["Undo Remove from Recents", "Remove from Recents", "Cut", "Copy", "Paste", "Select All"],
-        "View": ["Show Sidebar", "Show Inspector", "Larger Thumbnails", "Smaller Thumbnails"],
+        "View": ["Sidebar", "Inspector", "Larger Thumbnails", "Smaller Thumbnails"],
         "Window": ["Switch To", "AI Access…"],
     ]
 
@@ -154,8 +156,13 @@ final class AfterGlowJourneyTests: XCTestCase {
         guard menu.waitForExistence(timeout: 5) else { return items }
         menu.click()
         _ = menu.menuItems.firstMatch.waitForExistence(timeout: 3)
-        let missing = items.filter { !menu.menuItems[$0].exists }
+        let missing = items.filter { !Self.item(endingWith: $0, in: menu).exists }
         home.press(.escape)
         return missing
+    }
+
+    /// The first item of `menu` whose title ends with `suffix`.
+    static func item(endingWith suffix: String, in menu: XCUIElement) -> XCUIElement {
+        menu.menuItems.matching(NSPredicate(format: "title ENDSWITH %@", suffix)).firstMatch
     }
 }
