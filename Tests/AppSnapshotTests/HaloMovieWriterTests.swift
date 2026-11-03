@@ -1,11 +1,18 @@
 // HaloMovieWriterTests.swift: the movie sink (render-out RO-7, #1505, HF-8).
-// `keyed` (1920 × 1080, 24 fps, 48 frames) rendered at full size through
+// `keyed` (1920 × 1080, 24 fps, 48 frames) planned at full size, rendered at
+// half size (960 × 540, the size HF-7's PNG test uses) through
 // HaloMovieWriter: the movie loads as exactly 2 s, an asset reader counts 48
 // video samples, and frame 0 decoded matches LiveFrameRendering's frame 0
 // (HaloFrameImage's sRGB bytes composited over black here) within 4/255 per
 // channel on at least 99% of pixels. A render cancelled after 3 frames leaves
 // no file. Uses only the macOS 26 reader API (outputProvider, start, next).
 // Writes no snapshot PNGs. macOS only.
+//
+// Every frame is CPU-rastered by LiveFrameRendering in a debug build, about
+// 4 s at 1080p and 1 s at 960 × 540 on an idle Mac, single-threaded. The
+// heavy pass runs this suite beside the other heavy suites on a 3-core CI
+// runner, so the suite's work is kept near a minute idle to stay well inside
+// its 10-minute limit there (#6157); nothing here waits on the encoder.
 import AVFoundation
 import CoreGraphics
 import CoreMedia
@@ -33,8 +40,10 @@ import Testing
     @Test func keyedRendersAsATwoSecondMovieMatchingFrameZero() async throws {
         let composition = try keyed()
         let rendering = LiveCompositionRendering()
-        let plan = try rendering.plan(composition, settings: HaloRenderSettings(format: .movie))
-        #expect(plan.width == 1920 && plan.height == 1080 && plan.framesPerSecond == 24 && plan.frames.count == 48)
+        let full = try rendering.plan(composition, settings: HaloRenderSettings(format: .movie))
+        #expect(full.width == 1920 && full.height == 1080 && full.framesPerSecond == 24 && full.frames.count == 48)
+        let plan = try rendering.plan(composition, settings: HaloRenderSettings(format: .movie, halfSize: true))
+        #expect(plan.width == 960 && plan.height == 540 && plan.frames.count == 48)
         let dir = try folder()
         defer { try? FileManager.default.removeItem(at: dir) }
         let url = dir.appendingPathComponent(try #require(plan.fileNames.first))
@@ -63,7 +72,8 @@ import Testing
 
     @Test func cancelAfterThreeFramesLeavesNoFile() throws {
         let composition = try keyed()
-        let plan = try LiveCompositionRendering().plan(composition, settings: HaloRenderSettings(format: .movie))
+        let plan = try LiveCompositionRendering().plan(
+            composition, settings: HaloRenderSettings(format: .movie, halfSize: true))
         let dir = try folder()
         defer { try? FileManager.default.removeItem(at: dir) }
         let url = dir.appendingPathComponent(try #require(plan.fileNames.first))
