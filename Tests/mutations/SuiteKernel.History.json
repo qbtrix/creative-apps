@@ -72,8 +72,8 @@
   {
     "label": "a step forgets its origin, so every step reads as the user's",
     "file": "Sources/SuiteKernel/History/History.swift",
-    "find": "idAfter: after, origin: origin))",
-    "replace": "idAfter: after))",
+    "find": "idAfter: after, origin: origin, serial: after))",
+    "replace": "idAfter: after, serial: after))",
     "tests": "SuiteKernelTests.HistoryOriginTests/stepsAreTheUsersUnlessALiveCallSetsTheOrigin"
   }
 ]
