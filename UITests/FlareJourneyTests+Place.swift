@@ -1,15 +1,11 @@
-// FlareJourneyTests+Place.swift (svg-place PF-4 written, PF-7 turns it on; docs/blueprints/flare/features/svg-place.md,
+// FlareJourneyTests+Place.swift (svg-place PF-7; docs/blueprints/flare/features/svg-place.md,
 // Journey steps): New; File > Place… (Shift-Command-P) picks two-groups.svg in the open panel by its path (Shift-
 // Command-G): layers `red` and `blue` and "Placed two-groups.svg: 2 layers."; key blue's x; undo the keys, then both
 // layers in one step. Step 5's PNG is covered by FlarePlaceMenuTests (the panel offers SVG only). Shots "place-".
 import XCTest
 
 final class FlarePlaceJourneyTests: XCTestCase {
-    /// True until PF-7 turns the journey on.
-    static let waitsOnPF7 = true
-
     @MainActor func testPlaceSVGArt() throws {
-        if Self.waitsOnPF7 { throw XCTSkip("waits on PF-7") }
         let folder = FileManager.default.temporaryDirectory.appending(path: "flare-place-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }

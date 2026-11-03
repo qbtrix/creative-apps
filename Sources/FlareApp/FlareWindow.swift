@@ -91,7 +91,7 @@ struct FlareWindow: View, BodyCounted {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
                 help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey,
-                onFit: { fitted = $0 }, onDismissNote: { model.dismissImportNote() })
+                onFit: { fitted = $0 }, onDismissNote: { model.dismissImportNote() }, onPlace: { place(paths: $0) })
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
@@ -174,6 +174,8 @@ struct FlareCanvas: View {
     var onFit: @MainActor (Double) -> Void = { _ in }
     /// The import note's Dismiss (FlareImportNoteAdapter.swift): the window's `model.dismissImportNote()`.
     var onDismissNote: @MainActor () -> Void = {}
+    /// The SVGs dropped on the stage (FlarePlace.swift): the window's `place(paths:)`.
+    var onPlace: @MainActor ([String]) -> Void = { _ in }
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
     /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
     @State private var driver: SuitePlaybackDriver?
@@ -184,7 +186,8 @@ struct FlareCanvas: View {
                 FlareImportNoteAdapter(rows: model.importNoteRows, onDismiss: onDismissNote)
                 FlareStage(
                     model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit)
+                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit,
+                    onPlace: onPlace)
                 FlareTimeline(model: model, perform: perform)
             }
             .overlay { FlareRecording(model: model) }

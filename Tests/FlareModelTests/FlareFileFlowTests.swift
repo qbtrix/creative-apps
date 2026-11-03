@@ -1,8 +1,9 @@
 // FlareFileFlowTests.swift: MFL, Flare's file-flow Model walk (file-flow
 // FL-1 written, FL-3 turns it on). Flare as a FileFlowTarget and a
 // SuiteDocumentHost: it names itself "flare", opens a dropped .flare, hands
-// a .halo to Halo, refuses an SVG (the host with "Flare can't import SVG
-// yet.") until SVG import (E11), accepts open and new hand-offs, reads its
+// a .halo to Halo, places a dropped SVG as layers (svg-place, the same
+// place as File > Place…), points a placed-SVG hand-off at the window
+// (`svgRefusal`), accepts open and new hand-offs, reads its
 // recents from the suite's list and keeps no list of its own (#5126), registers the
 // shared file-flow ids, and runs RJ-F42 (Tests/RealJobs/flare/open-recent)
 // on the catalog. Runs on Linux and macOS.
@@ -71,10 +72,10 @@ private func clearThroughFileFlow<T: FileFlowTarget>(_ target: inout T) throws {
                       places: target.placesExtensions, readers: { target.readers(ofExtension: $0) })
     }
 
-    @Test func flareNamesItselfAndPlacesNothingYet() {
+    @Test func flareNamesItselfAndPlacesSVG() {
         let workspace = FlareWorkspace(services: .fake())
         #expect(workspace.appID == "flare")
-        #expect(workspace.placesExtensions.isEmpty)
+        #expect(workspace.placesExtensions == ["svg"])
         #expect(!workspace.hasDocument && opened().hasDocument)
     }
 
@@ -87,22 +88,36 @@ private func clearThroughFileFlow<T: FileFlowTarget>(_ target: inout T) throws {
         #expect(workspace.takeFileRequests().isEmpty)
     }
 
-    @Test func anSVGIsRefusedUntilSVGImport() async throws {
+    @Test func aDroppedSVGPlacesItsLayers() async throws {
+        var workspace = opened()
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("flare-drop-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let file = folder.appendingPathComponent("two-groups.svg")
+        try Data(("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"240\" height=\"80\">"
+            + "<g id=\"red\"><rect width=\"100\" height=\"80\" fill=\"#E53935\"/></g>"
+            + "<g id=\"blue\"><rect x=\"140\" width=\"100\" height=\"80\" fill=\"#1E88E5\"/></g></svg>").utf8).write(to: file)
+        let layersBefore = workspace.layers.count
+        let actions = plan(workspace, file.path)
+        #expect(actions == [.place(path: file.path)])
+        try workspace.perform(actions)
+        #expect(workspace.layers.count == layersBefore + 2)
+        #expect(workspace.placeStatus == "Placed two-groups.svg: 2 layers.")
+        #expect(workspace.undoActionName == "Undo Place Image")
+        #expect(workspace.takeFileRequests().isEmpty, "a placed SVG was opened or handed off")
+        let place = handOff(.place, path: file.path, type: .svg)
+        #expect(await workspace.refusal(for: place) == .notAvailable(FlareWorkspace.svgRefusal))
+        #expect(FlareWorkspace.svgRefusal == "Drop the SVG on a Flare window, or choose File > Place….")
+    }
+
+    @Test func aMissingDroppedSVGSaysSo() throws {
         var workspace = opened()
         let before = workspace.document
-        let actions = plan(workspace, "/w/logo.svg")
-        guard case .refuse(let path, _)? = actions.first, actions.count == 1 else {
-            Issue.record("an SVG wasn't refused: \(actions)")
-            return
+        #expect(throws: CatalogError.failed(id: "file.drop", message: "Can't read logo.svg.")) {
+            try workspace.perform([.place(path: "/nowhere/logo.svg")])
         }
-        #expect(path == "/w/logo.svg")
-        try workspace.perform(actions)
         #expect(workspace.document == before)
-        #expect(workspace.undoActionName == nil)
-        #expect(workspace.takeFileRequests().isEmpty, "a refused SVG was opened or handed off")
-        let place = handOff(.place, path: "/w/logo.svg", type: .svg)
-        #expect(await workspace.refusal(for: place) == .notAvailable(FlareWorkspace.svgRefusal))
-        #expect(FlareWorkspace.svgRefusal == "Flare can't import SVG yet.")
+        #expect(workspace.placeStatus == "Can't read logo.svg.")
     }
 
     @Test func openInOffersHaloForAFlare() throws {

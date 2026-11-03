@@ -9,16 +9,21 @@
 // (`library.crop.apply`, also Return), and Cancel (`library.crop.cancel`,
 // also Escape on the canvas); and Reset Crop (`library.crop.reset`), back to
 // the whole photo at 0°. Values in, closures out: every change goes through
-// `LibraryMenu.Crop`'s closures; it never writes LibraryCatalog.
+// `LibraryMenu.Crop`'s closures; it never writes LibraryCatalog. It shows a
+// Straighten step the catalog hasn't taken yet (`\.libraryCropLive`).
 import LibraryModel
 import SuiteKernel
 import SuiteUI
 import SwiftUI
 
 struct CropInspector: View {
-    let crop: LibraryMenu.Crop
+    let controls: LibraryMenu.Crop
+    @Environment(\.libraryCropLive) private var live
+
+    init(crop: LibraryMenu.Crop) { controls = crop }
 
     var body: some View {
+        let crop = live.shown(controls)
         let auto = action("Auto", "auto", systemImage: "level", crop.level, help: crop.levelHelp)
         let cancel = action("Cancel", "cancel", systemImage: "xmark", crop.cancel)
         let reset = action("Reset Crop", "reset", systemImage: "arrow.counterclockwise", crop.reset, help: crop.resetHelp)

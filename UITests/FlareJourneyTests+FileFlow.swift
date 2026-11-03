@@ -2,7 +2,8 @@
 // FL-6 written, FL-7 turned on live). Flare launches on the suite's `weekOfWork` store with Logo.flare open:
 // 1. File > Open Recent ▸ lists the week's .flare files and no other app's.
 // 2. Title.flare dropped on the stage opens in a new window.
-// 3. logo.svg dropped on the stage: the mark reads "Flare can't import SVG yet." and nothing opens.
+// 3. logo.svg dropped on the stage: its group becomes a layer, the status reads "Placed logo.svg: 1 layer." and
+//    nothing opens.
 // 4. File > Open In ▸ Halo: Halo starts with the scene (flare-in-halo, SJ17's path).
 // The files are dragged from a small floating window the test runner shows, as a person drags from a folder
 // window (`dragFile`, Journey+FileDrag.swift). Every file lives in this test's own temp folder. One shot per
@@ -69,16 +70,17 @@ final class FlareFileFlowJourneyTests: XCTestCase {
         XCTAssertEqual(flare.app.windows.count, windows + 1, "Title.flare didn't open in a window of its own")
         flare.shot("file-flow-2-dropped-flare")
 
-        // 3. logo.svg: the mark says Flare can't import it yet, and nothing opens.
+        // 3. logo.svg: its group is placed as a layer (svg-place), and nothing opens.
         let svg = folder.appending(path: "logo.svg")
-        try Data("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"/>".utf8).write(to: svg)
+        try Data(("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"80\" height=\"80\">"
+            + "<g id=\"logo\"><rect width=\"80\" height=\"80\" fill=\"#E53935\"/></g></svg>").utf8).write(to: svg)
         let front = flare.element("flare.stagePane")
         dragFile(svg, onto: front)
-        let mark = flare.app.descendants(matching: .any)[Self.dropMark]
-        let refused = NSPredicate(format: "label == %@", "Flare can't import SVG yet.")
-        XCTAssertEqual(XCTWaiter.wait(for: [expectation(for: refused, evaluatedWith: mark)], timeout: 5), .completed,
-                       "dropping logo.svg didn't say Flare can't import SVG yet")
-        flare.shot("file-flow-3-svg-refused")
+        let note = flare.element("flare.status.place")
+        let placed = NSPredicate(format: "label == %@ OR value == %@", "Placed logo.svg: 1 layer.", "Placed logo.svg: 1 layer.")
+        XCTAssertEqual(XCTWaiter.wait(for: [expectation(for: placed, evaluatedWith: note)], timeout: 5), .completed,
+                       "dropping logo.svg didn't place its group")
+        flare.shot("file-flow-3-svg-placed")
         XCTAssertEqual(flare.app.windows.count, windows + 1, "dropping logo.svg opened a window")
 
         // 4. File > Open In ▸ Halo: Halo starts with the scene.

@@ -58,7 +58,7 @@ public struct FlarePasteboardAdapter: Sendable {
         if let refusal = coder.pasteRefusal(for: offered, in: .flare) { return refusal.message }
         switch coder.bestItem(from: offered, for: .flare) {
         case .appLayers(_, let data)?: return workspace.editHelp(.paste, pasteboard: data)
-        default: return Self.placeCatalog.availability("place.image", on: workspace).why
+        default: return FlareWorkspace.catalog.availability("place.image", on: workspace).why
         }
     }
 
@@ -104,7 +104,7 @@ public struct FlarePasteboardAdapter: Sendable {
         let command = PlaceIntent.place(name: name, data: data, at: nil).command
         workspace.layerError = nil
         do throws(CatalogError) {
-            _ = try Self.placeCatalog.run(command.id, params: command.params, on: &workspace)
+            _ = try FlareWorkspace.catalog.run(command.id, params: command.params, on: &workspace)
         } catch {
             switch error {
             case .unavailable(_, let why): workspace.refuse(.refused(why))
@@ -114,9 +114,6 @@ public struct FlarePasteboardAdapter: Sendable {
         }
     }
 
-    /// The catalog `place.image` runs through until svg-place PF-6 registers the place specs in Flare's own.
-    static let placeCatalog = (try? CommandCatalog<FlareWorkspace>(app: "flare", PlaceCommands.specs(FlareWorkspace.self),
-                                                                    history: FlareCoreHistory.init)) ?? .empty(app: "flare")
 }
 
 /// Copy As and Paste as Image on the workspace, for the catalog and the CLI: no window, so no rasterizer, and PNG
@@ -124,7 +121,7 @@ public struct FlarePasteboardAdapter: Sendable {
 extension FlareWorkspace: CopyAsTarget {
     public var copyAsHelp: String? { editHelp(.copy) }
 
-    public var pasteAsImageHelp: String? { FlarePasteboardAdapter.placeCatalog.availability("place.image", on: self).why }
+    public var pasteAsImageHelp: String? { FlareWorkspace.catalog.availability("place.image", on: self).why }
 
     public func copyAs(_ format: CopyAsFormat) throws -> CopiedBytes {
         var workspace = self

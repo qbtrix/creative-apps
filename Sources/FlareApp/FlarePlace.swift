@@ -1,5 +1,5 @@
 // FlarePlace.swift (svg-place PF-3): File > Place… (Shift-Command-P) opens PlacePanel limited to the place formats
-// (SVG); it and the window's drop place centred through the workspace (FlarePlace+Menu.swift), shown in the status line.
+// (SVG); it, the window's drop and an SVG dropped on the stage place centred through the workspace (FlarePlace+Menu.swift), shown in the status line.
 import FlareModel
 import SuiteUI
 import SwiftUI
@@ -15,5 +15,10 @@ extension FlareWindow {
         guard !files.isEmpty else { return false }
         model.place(files)
         return true
+    }
+
+    /// The SVGs dropped on the stage, read and placed like the menu's.
+    func place(paths: [String]) {
+        model.place(paths: paths)
     }
 }
