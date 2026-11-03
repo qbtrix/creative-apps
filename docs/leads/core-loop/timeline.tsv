@@ -356,3 +356,4 @@ utc	stage	event	ref	note
 2026-11-02T23:47Z	3	check-in	quiet	full 41495412760 done, 0 Halo cases; no halo run
 2026-11-03T01:50Z	3	check-in	quiet	fulls 41549215836, 41550450960 failed before cases; no halo run
 2026-11-03T03:52Z	3	check-in	quiet	no new journeys run
+2026-11-03T05:54Z	3	check-in	quiet	full 41583847863 journeys running; no halo run
