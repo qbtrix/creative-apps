@@ -201,6 +201,24 @@ import Testing
         #expect(try layerPixels(workspace) == before)
     }
 
+    @Test func cancelAfterAScaleTakesItsStepsBack() throws {
+        var workspace = try logoOnPhoto()
+        let steps = workspace.historySteps, index = workspace.historyIndex
+        _ = try PhotoWorkspace.catalog.run("transform.begin", params: .object([:]), on: &workspace)
+        let box = try #require(workspace.transformSelection)
+        try workspace.setTransform(TransformRules.scaled(box, sx: 2, sy: 2, about: .topLeft), name: "Scale", drag: nil)
+        try workspace.setTransform(TransformRules.rotated(try #require(workspace.transformSelection), by: 15), name: "Rotate", drag: nil)
+        workspace.undo()
+        _ = try PhotoWorkspace.catalog.run("transform.cancel", params: .object([:]), on: &workspace)
+        #expect(workspace.historySteps == steps, "Escape leaves no Scale or Rotate step, done or undone (#6201)")
+        #expect(workspace.historyIndex == index && !workspace.canRedo)
+        workspace.undo()
+        #expect(workspace.transformDraft == nil, "the next undo never reopens the transform")
+        #expect(throws: (any Error).self) {
+            _ = try PhotoWorkspace.catalog.run("transform.commit", params: .object([:]), on: &workspace)
+        }
+    }
+
     @Test func aLockedLayerRefusesWithItsHelp() throws {
         var services = PhotoServices.fake
         services.transform = LockedTransform()

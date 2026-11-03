@@ -16,7 +16,8 @@
 // draft's layer swapped for that result (`draftPlaced`), and commit lays the
 // same pixels as one "Free Transform" step that the draft's own steps fold
 // into (`foldDraftSteps`), so Return shows nothing new and one undo takes the
-// whole transform back with no box left up. A drag
+// whole transform back with no box left up; Escape takes the draft's steps
+// back for good, so history reads as before it began. A drag
 // whose layer lifts (PhotoTransformLift+Kernel.swift) draws no frames: the
 // compositor moves the box's pixels over the rest (`boxCut`). Any other drag's
 // frames (`transformPreview(live:)`) draw the rest, then the box's pixels
@@ -192,10 +193,17 @@ extension PhotoWorkspace {
         touch(.all)
     }
 
-    /// Escape: drops the draft, no step. The draft's own steps stay, so Undo
-    /// can walk back into them.
+    /// Escape: drops the draft and takes its own steps (Scale, Rotate, a drag)
+    /// back for good, undone ones too, so history reads as before Free
+    /// Transform began and the next Undo never reopens it. No step.
     public mutating func cancelTransform() {
-        guard transformDraft != nil else { return }
+        guard let draft = transformDraft else { return }
+        _ = foldDraftSteps(of: draft)
+        // A draft step recorded cleared the redo steps, so one next up means every redo step is the draft's.
+        if case .draft(let next?)? = history.kernel.redoSteps.last?.payload,
+            next.layerID == draft.layerID, next.box == draft.box {
+            history.kernel.dropRedo()
+        }
         transformDraft = nil
         touch(.all)
     }
