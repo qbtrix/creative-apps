@@ -54,15 +54,19 @@ enum LoupePicture: Sendable {
     }
 }
 
-/// Observable for `fitScale` alone, so the zoom pill and the menu's zoom
-/// items follow a new fit (a resize, a new photo) the moment it is measured.
+/// Observable for `fitScale` alone, so the zoom pill follows a new fit (a
+/// resize, a new photo) the moment it is measured.
 @Observable final class LoupeAreaState {
     /// Runs the renders one at a time; a newer one replaces an older waiting one.
     @ObservationIgnored let queue = RenderQueue()
     /// Runs GPU frames' histograms apart from `queue`, so a frame never waits on one.
     @ObservationIgnored let histograms = RenderQueue()
-    /// The fit scale the loupe view last measured; Zoom In and Out step from it.
+    /// The fit scale the loupe view last measured; the status bar's zoom pill reads it.
     var fitScale = 1.0
+    /// `fitScale`, unobserved: the menu's Zoom items step from it without the
+    /// window body tracking the fit, which each Straighten step changes (#6222).
+    /// The items take a new fit on the window's next update.
+    @ObservationIgnored var menuFit = 1.0
     /// Finished renders, handed to the catalog on the main actor.
     @ObservationIgnored let results: AsyncStream<LoupeRenderResult>
     @ObservationIgnored let deliver: AsyncStream<LoupeRenderResult>.Continuation
@@ -89,12 +93,17 @@ enum LoupePicture: Sendable {
 
 extension LibraryWindow {
     var viewMenu: LibraryMenu.Viewing {
-        let fit = areas.loupe.fitScale
+        let fit = areas.loupe.menuFit
         return LibraryMenu.Viewing(
             grid: act(.showGrid),
             loupe: act(.showLoupe),
-            zoomIn: act(.zoomIn(fitScale: fit)),
-            zoomOut: act(.zoomOut(fitScale: fit)),
+            // Each zoom runs from the fit measured last, not the one this body saw.
+            zoomIn: enabled(model.help(.zoomIn(fitScale: fit)) == nil) {
+                try? model.run(.zoomIn(fitScale: areas.loupe.menuFit))
+            },
+            zoomOut: enabled(model.help(.zoomOut(fitScale: fit)) == nil) {
+                try? model.run(.zoomOut(fitScale: areas.loupe.menuFit))
+            },
             zoomToFit: act(.zoomToFit),
             actualSize: act(.actualSize),
             setSort: enabled(model.help(.setSort(model.sort)) == nil) { (sort: LibrarySort) in
@@ -105,9 +114,12 @@ extension LibraryWindow {
             last: act(.showLast),
             zoomInTitle: model.zoomInTitle, zoomOutTitle: model.zoomOutTitle,
             zoomTo: enabled(model.help(.zoomTo(1, fitScale: fit)) == nil) { (scale: Double) in
-                try? model.run(.zoomTo(scale, fitScale: areas.loupe.fitScale))
+                try? model.run(.zoomTo(scale, fitScale: areas.loupe.menuFit))
             },
-            fitMeasured: { fit in if areas.loupe.fitScale != fit { areas.loupe.fitScale = fit } })
+            fitMeasured: { fit in
+                areas.loupe.menuFit = fit
+                if areas.loupe.fitScale != fit { areas.loupe.fitScale = fit }
+            })
     }
 
     /// Called when `model.focusedItemID` or `model.mode` changes (the loupe's

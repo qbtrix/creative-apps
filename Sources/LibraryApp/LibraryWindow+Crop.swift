@@ -9,8 +9,14 @@
 // `.full`. A straighten, Auto or a reset inside the draft renders nothing:
 // the loupe's picture is the unturned photo, which the loupe turns itself.
 // Auto measures that picture off the main actor and sets the draft to the
-// leveler's turn. Every state change is a
-// LibraryCatalog method. The window merges this half with the develop half.
+// leveler's turn. A Straighten step (#6222) changes only `CropAreaState`'s
+// live draft, which the loupe and the CROP section read through
+// `\.libraryCropLive`, so a step reruns those views, not the window; the
+// catalog takes the angle once the steps pause for `CropAreaState.settle`, and
+// every other crop action takes it first (`cropAreaFlush`). A live draft whose
+// base is no longer the catalog's draft is shown nowhere and dropped. Every
+// state change is a LibraryCatalog method. The window merges this half with
+// the develop half.
 // Orientation (orientation-crop OC-9): Rotate Left, Rotate Right and Flip
 // Horizontal and Vertical run the catalog's image.rotate-* and image.flip on
 // the selection, then redraw the loupe and those thumbnails; the CROP
@@ -20,8 +26,32 @@ import LibraryModel
 import SuiteKernel
 import SwiftUI
 
-/// The crop area keeps no window state; the catalog holds the draft.
-final class CropAreaState {}
+/// The Straighten steps the catalog hasn't taken yet (#6222); the catalog holds the draft.
+@Observable final class CropAreaState {
+    /// A shown step: `draft` and its frame, canvas and frame value, made from the catalog's `base`.
+    struct Live {
+        let base: CropSettings, draft: CropSettings
+        let frame: PixelRect?, canvas: PixelSize?, frameValue: String?
+    }
+
+    /// How long the steps pause before the catalog takes the angle.
+    static let settle = Duration.milliseconds(250)
+    private(set) var live: Live?
+    /// The pending commit; a newer step replaces it.
+    @ObservationIgnored var commit: Task<Void, Never>?
+
+    func show(_ step: Live?) { live = step }
+
+    /// `crop` with the live step's draft, frame, canvas and frame value while it
+    /// was made from `crop`'s draft; `crop` unchanged otherwise.
+    func shown(_ crop: LibraryMenu.Crop) -> LibraryMenu.Crop {
+        guard let live, crop.draft == live.base else { return crop }
+        var shown = crop
+        shown.draft = live.draft
+        (shown.frame, shown.canvas, shown.frameValue) = (live.frame, live.canvas, live.frameValue)
+        return shown
+    }
+}
 
 extension LibraryMenu {
     /// What the crop frame overlay and the CROP section read and call.
@@ -47,6 +77,8 @@ extension EnvironmentValues {
     /// The window's `cropControls`, read by the loupe and the Develop tab
     /// (CR-6); empty, with every closure nil, outside a window.
     @Entry var libraryCrop = LibraryMenu.Crop()
+    /// The window's Straighten steps not yet in the catalog; `shown` on `libraryCrop` gives what to draw.
+    @Entry var libraryCropLive = CropAreaState()
 }
 
 extension LibraryWindow {
@@ -54,16 +86,19 @@ extension LibraryWindow {
         let cropping = model.cropDraft != nil
         return LibraryMenu.Photo(
             toggleCrop: enabled(model.cropHelp == nil) {
+                cropAreaFlush()
                 model.toggleCrop()
                 cropAreaRender()
             },
             cropTitle: model.cropTitle,
             // Return routes here: nil outside crop mode, so the key goes on to the grid or the loupe.
             applyCrop: enabled(cropping) {
+                cropAreaFlush()
                 model.applyCrop()
                 cropAreaRender()
             },
             resetCrop: enabled(model.resetCropHelp == nil) {
+                cropAreaFlush()
                 model.resetCrop()
                 cropAreaRender(preview: true)
             },
@@ -80,6 +115,7 @@ extension LibraryWindow {
 
     /// Runs image command `id`, then the loupe's picture and the turned photos' thumbnails again.
     private func cropAreaOrient(_ id: String, _ params: JSONValue) {
+        cropAreaFlush()
         let ids = model.developTargets
         _ = try? LibraryCatalog.catalog.run(id, params: params, on: &model)
         cropAreaRender()
@@ -95,6 +131,7 @@ extension LibraryWindow {
         let params: JSONValue = pick.command == CropAspectChoices.aspectCommand
             ? .object(["aspect": .string(pick.aspect.rawValue), "orientation": .string(pick.orientation.rawValue)])
             : .object([:])
+        cropAreaFlush()
         _ = try? LibraryCatalog.catalog.run(pick.command, params: params, on: &model)
     }
 
@@ -104,6 +141,7 @@ extension LibraryWindow {
         let cropping = model.cropDraft != nil
         let artboard: PixelSize? = model.loupeItem.map { model.croppedSize($0) }
         let setAspect: (@MainActor (CropAspect) -> Void)? = enabled(cropping) { (aspect: CropAspect) in
+            cropAreaFlush()
             model.setCropAspect(aspect)
         }
         let pick: (@MainActor (CropPick) -> Void)? = enabled(cropping) { (picked: CropPick) in
@@ -112,25 +150,29 @@ extension LibraryWindow {
         var drag: (@MainActor (CropHandle, Double, Double) -> Void)?
         if cropping {
             drag = { (handle: CropHandle, dx: Double, dy: Double) in
+                cropAreaFlush()
                 model.dragCrop(handle, dx: dx, dy: dy)
             }
         }
         // The loupe turns its picture itself, so an angle needs no render.
         let setAngle: (@MainActor (Double) -> Void)? = enabled(cropping) { (degrees: Double) in
-            model.setCropAngle(degrees)
+            cropAreaStep(degrees)
         }
         let level: LibraryMenu.Action? = enabled(cropping && model.levelHelp == nil) { () in
             cropAreaLevel()
         }
         let apply: LibraryMenu.Action? = enabled(cropping) { () in
+            cropAreaFlush()
             model.applyCrop()
             cropAreaRender()
         }
         let cancel: LibraryMenu.Action? = enabled(cropping) { () in
+            cropAreaFlush()
             model.cancelCrop()
             cropAreaRender()
         }
         let reset: LibraryMenu.Action? = enabled(cropping) { () in
+            cropAreaFlush()
             model.resetCrop()
         }
         return LibraryMenu.Crop(
@@ -140,6 +182,32 @@ extension LibraryWindow {
             resetHelp: model.resetCropHelp, levelHelp: model.levelHelp,
             setAspect: setAspect, pick: pick, drag: drag, setAngle: setAngle,
             level: level, apply: apply, cancel: cancel, reset: reset)
+    }
+
+    /// A Straighten step: the draft at `degrees` shows at once through
+    /// `areas.crop`, and the catalog takes it once the steps pause.
+    private func cropAreaStep(_ degrees: Double) {
+        guard let base = model.cropDraft, let draft = model.cropDraft(angle: degrees) else { return }
+        let state = areas.crop
+        state.show(CropAreaState.Live(
+            base: base, draft: draft, frame: model.cropFrame(of: draft), canvas: model.cropCanvas(of: draft),
+            frameValue: model.cropFrameValue(of: draft)))
+        state.commit?.cancel()
+        state.commit = Task {
+            try? await Task.sleep(for: CropAreaState.settle)
+            if !Task.isCancelled { cropAreaFlush() }
+        }
+    }
+
+    /// The live Straighten step into the catalog, while the catalog's draft is
+    /// still the one it was made from; dropped otherwise.
+    func cropAreaFlush() {
+        let state = areas.crop
+        state.commit?.cancel()
+        state.commit = nil
+        guard let live = state.live else { return }
+        state.show(nil)
+        if model.cropDraft == live.base { model.setCropAngle(live.draft.angle) }
     }
 
     /// The loupe's picture again for the catalog's current settings (the
@@ -154,6 +222,7 @@ extension LibraryWindow {
     /// Auto: the leveler's turn for the loupe's current picture, measured off
     /// the main actor, added to the draft (nil, no horizon, changes nothing).
     private func cropAreaLevel() {
+        cropAreaFlush()
         guard let leveler = model.leveler, let image = model.loupeRender?.image,
               let turned = model.cropDraft?.angle else { return }
         Task {
