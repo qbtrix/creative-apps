@@ -2,8 +2,9 @@
 // (file-flow FL-1 stubs, FL-3 bodies). FlareWorkspace is the
 // SuiteDocumentHost the shell hands every hand-off to, and the FileFlowTarget
 // the shared Open Recent, Clear Menu, Open In and drop commands run on.
-// It accepts open and new hand-offs, refuses an SVG place with "Flare can't
-// import SVG yet." until SVG import (E11), offers the readers the suite's
+// It accepts open and new hand-offs, places a dropped SVG as layers through
+// the same `place` as File > Place… (svg-place), points a placed-SVG
+// hand-off from another app at the window (`svgRefusal`), offers the readers the suite's
 // routing names for Open In, leaves what only the window can do as
 // `FlareFileRequest`s. Open Recent and Clear Menu read the suite's list as
 // the window last gave it (`updateFileFlow`); Flare keeps no list of its
@@ -28,6 +29,8 @@ public struct FlareFileFlowState: Sendable {
     public internal(set) var recents: [RecentFileEntry] = []
     /// The window's requests (oldest first), and who reads each type.
     var requests: [FlareFileRequest] = [], registry = SuiteTypeRegistry.standard
+    /// The dropped files' bytes by path, once a host without a disk hands them over (`receiveDropped`).
+    var dropped: [String: Data]?
     public init() {}
 }
 
@@ -48,14 +51,14 @@ extension FlareWorkspace: SuiteDocumentHost {
 }
 
 extension FlareWorkspace: FileFlowTarget {
-    /// What a placed SVG reads until SVG import (E11) lands.
-    public static let svgRefusal = "Flare can't import SVG yet."
+    /// Why another app's SVG place hand-off is refused: the place reads the file in a Flare window.
+    public static let svgRefusal = "Drop the SVG on a Flare window, or choose File > Place…."
 
     public var appID: String { SuiteApp.flare.rawValue }
     public var recentFiles: [RecentFileEntry] { fileFlow.recents }
     public var hasDocument: Bool { document != nil }
-    /// Nothing is placed into an open animation until SVG import (E11).
-    public var placesExtensions: Set<String> { [] }
+    /// A dropped SVG is placed into the open animation as layers (svg-place).
+    public var placesExtensions: Set<String> { ["svg"] }
 
     /// The other apps that read a .flare, from the suite's routing.
     public var openInApps: [String] {
@@ -102,15 +105,51 @@ extension FlareWorkspace: FileFlowTarget {
         fileFlow.requests.append(.handOff(path: path, app: app))
     }
 
-    /// Opens and hand-offs become requests for the window; a refusal changes nothing (the drop's result says why).
+    /// Opens and hand-offs become requests for the window, the SVGs are placed (`place(paths:)`), and a refusal
+    /// changes nothing (the drop's result says why). A place that can't run throws its status line's words.
     public mutating func perform(_ actions: [DropAction]) throws {
+        var places: [String] = []
         for action in actions {
             switch action {
             case .open(let path): fileFlow.requests.append(.open(path: path))
             case .handOff(let path, let app): fileFlow.requests.append(.handOff(path: path, app: app))
-            case .place, .refuse: continue
+            case .place(let path): places.append(path)
+            case .refuse: continue
             }
         }
+        if !places.isEmpty, !place(paths: places) {
+            throw CatalogError.failed(id: "file.drop", message: placeStatus ?? "The drop placed nothing.")
+        }
+    }
+
+    /// Places the files at `paths` as File > Place… does; one that can't be read stops the place and says so.
+    /// After `receiveDropped` the bytes come from what the host handed over, never the disk. False on a refusal.
+    @discardableResult public mutating func place(paths: [String]) -> Bool {
+        var files: [(name: String, data: Data)] = []
+        for path in paths {
+            let name = path.split(separator: "/").last.map(String.init) ?? path
+            let data = fileFlow.dropped.map { $0[path] } ?? (try? Data(contentsOf: URL(fileURLWithPath: path)))
+            guard let data else {
+                placeStatus = "Can't read \(name)."
+                return false
+            }
+            files.append((name, data))
+        }
+        return place(files)
+    }
+
+    /// Hands the next drops their files' bytes by path; from then on a drop never reads the disk.
+    public mutating func receiveDropped(_ files: [String: Data]) {
+        fileFlow.dropped = (fileFlow.dropped ?? [:]).merging(files) { $1 }
+    }
+
+    /// A drop's actions split: the files to place, and the rest, in order.
+    public static func placeDrops(_ actions: [DropAction]) -> (places: [String], rest: [DropAction]) {
+        var places: [String] = [], rest: [DropAction] = []
+        for action in actions {
+            if case .place(let path) = action { places.append(path) } else { rest.append(action) }
+        }
+        return (places, rest)
     }
 
     /// What the file-flow commands left for the window, oldest first; empties the list.

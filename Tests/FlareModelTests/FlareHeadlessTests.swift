@@ -50,7 +50,8 @@ import Testing
         #expect(FlareHeadless.catalog.ids == FlareWorkspace.catalog.ids)
         let doc = try Self.keyed()
         for spec in FlareWorkspace.commands {
-            let expected = spec.kind == .file ? .unavailable(FlareHeadless.fileCommandHelp) : spec.availability(doc.workspace)
+            let windowOnly = spec.kind == .file && spec.id != "file.drop"
+            let expected = windowOnly ? .unavailable(FlareHeadless.fileCommandHelp) : spec.availability(doc.workspace)
             #expect(FlareHeadless.catalog.availability(spec.id, on: doc) == expected, "\(spec.id)")
         }
     }

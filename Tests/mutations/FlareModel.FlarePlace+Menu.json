@@ -1,12 +1,5 @@
 [
   {
-    "label": "pngRefusesInFlaresWords: a PNG's refusal names every format the kernel knows, not Flare's SVG",
-    "file": "Sources/FlareModel/FlarePlace+Menu.swift",
-    "find": "case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: [.svg]): placeFormatHelp",
-    "replace": "case .unavailable(_, let why) where why == PlaceRules.formatHelp(for: [.svg]): why",
-    "tests": "FlarePlaceMenuTests"
-  },
-  {
     "label": "noAnimationRefusesWithItsReason: a refusal shows the command's id and wording, not the reason alone",
     "file": "Sources/FlareModel/FlarePlace+Menu.swift",
     "find": "case .unavailable(_, let why): why",
@@ -23,7 +16,7 @@
   {
     "label": "noAnimationTurnsPlaceOff: File > Place… stays on with no animation open",
     "file": "Sources/FlareModel/FlarePlace+Menu.swift",
-    "find": "Self.placeCatalog.availability(\"place.image\", on: self).why",
+    "find": "Self.catalog.availability(\"place.image\", on: self).why",
     "replace": "nil as String?",
     "tests": "FlarePlaceMenuTests"
   },
