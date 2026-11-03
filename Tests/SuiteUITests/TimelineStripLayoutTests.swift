@@ -74,6 +74,14 @@ import Testing
         #expect(layout.lanesWidth(contentWidth: 40_000, offered: -1, snapshot: true) == 0)
     }
 
+    /// A strip that appears with 2,000 tracks builds a screen of lanes, not all of them, until its scroll reports.
+    @Test func beforeTheScrollReportsOnlyAScreenOfLanesIsBuilt() {
+        #expect(TimelineStripLayout.lanesShown(reported: nil, count: 2_000) == 0..<TimelineStripLayout.lanesBeforeReport)
+        #expect(TimelineStripLayout.lanesShown(reported: nil, count: 5) == 0..<5)
+        #expect(TimelineStripLayout.lanesShown(reported: 10..<20, count: 2_000) == 10..<20)
+        #expect(TimelineStripLayout.lanesShown(reported: 10..<20, count: 12) == 10..<12, "tracks can shrink after a report")
+    }
+
     /// The lanes sit in a sideways scroll laid out at every lane's height, so their lazy stack built every row;
     /// the strip slices them to the rows the vertical scroll shows, half a row of margin each side, and the
     /// range is not clamped (the strip clamps to tracks that may have grown since the report).

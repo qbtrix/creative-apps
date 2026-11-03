@@ -151,6 +151,31 @@ private let blurred = """
         #expect(!w.canUndo)
     }
 
+    @Test func landsAboveTheSelectedLayerInOrder() throws {
+        var w = blank()
+        try place(logo, on: &w)
+        w.selectedLayerID = layers(w).first?.id
+        try place(logo, as: "again.svg", on: &w)
+        #expect(layers(w).map(\.name) == ["red", "red", "blue", "blue"])
+        #expect(w.selectedLayerID == layers(w)[1].id)
+    }
+
+    @Test func manyPathsUndoAndRedoExactly() throws {
+        var w = blank()
+        let before = w.document
+        let paths = (0..<2_000).map { "<path fill=\"#1E88E5\" d=\"M\($0 % 50 * 8) \($0 / 50 * 5) h6 v4 h-6 Z\"/>" }
+        try place("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"400\" height=\"200\">\(paths.joined())</svg>",
+                  as: "many.svg", on: &w)
+        let placed = w.document
+        #expect(layers(w).count == 2_000)
+        #expect(Set(layers(w).map(\.id)).count == 2_000)
+        #expect(w.placeReport == "Placed many.svg: 2000 layers.")
+        w.undo()
+        #expect(w.document == before)
+        w.redo()
+        #expect(w.document == placed)
+    }
+
     @Test func reportNamesASkippedFilter() throws {
         var w = blank()
         try place(blurred, as: "soft.svg", on: &w)
