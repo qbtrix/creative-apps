@@ -1,0 +1,5 @@
+[
+{"label": "a draw list places each layer by id again", "file": "Sources/HaloModel/Live/HaloDrawRules.swift", "find": "placing.worldMatrix(of: layer, in: c", "replace": "placing.worldMatrix(of: layer.id, in: c", "tests": "HaloDrawListLookupTests"},
+{"label": "a draw list samples opacity by id again", "file": "Sources/HaloModel/Live/HaloDrawRules.swift", "find": "placing.value(.opacity, of: layer,", "replace": "placing.value(.opacity, of: layer.id,", "tests": "HaloDrawListLookupTests"},
+{"label": "a held parented layer drops its parent's place", "file": "Sources/HaloModel/Live/HaloKeyRules.swift", "find": "guard layer.parentID != nil else { return localMatrix(of: layer, in: c, at: f) }", "replace": "return localMatrix(of: layer, in: c, at: f)", "tests": "HaloDrawListLookupTests"}
+]

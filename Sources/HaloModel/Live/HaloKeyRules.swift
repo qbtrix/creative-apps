@@ -38,10 +38,14 @@ enum HaloKeyRules {
     /// answer for a root, without building the tree: a frame's draw list
     /// asks for every layer, so a tree per layer cost layers squared (#5844).
     static func worldMatrix(of id: String, in c: HaloComposition, at f: Int) -> HaloMatrix? {
-        guard let layer = layer(id, in: c) else { return nil }
+        layer(id, in: c).flatMap { worldMatrix(of: $0, in: c, at: f) }
+    }
+
+    /// `layer`'s world matrix, for a caller that already holds it: no id scan.
+    static func worldMatrix(of layer: HaloLayer, in c: HaloComposition, at f: Int) -> HaloMatrix? {
         // ponytail: a followed layer still builds the tree per call; build one per draw list if parented comps grow.
         guard layer.parentID != nil else { return localMatrix(of: layer, in: c, at: f) }
-        return c.layerTree.worldPlacement(of: id) { localMatrix(of: $0.payload, in: c, at: f) }
+        return c.layerTree.worldPlacement(of: layer.id) { localMatrix(of: $0.payload, in: c, at: f) }
     }
 
     /// Whether `id` follows `ancestorID` through its chain of parents: the

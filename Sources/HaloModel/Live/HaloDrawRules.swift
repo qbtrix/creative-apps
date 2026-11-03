@@ -2,6 +2,8 @@
 // LiveFrameDrawing and FakeFrameDrawing so the two can't drift apart, plus
 // the draw list's summary and world boxes the viewer reads. Each item's
 // style has its keyable numbers sampled at the frame (layer-styles HY-6).
+// Each layer is placed through the layer it is, never by id: an id lookup
+// scans every layer, so one per layer made huge's list quadratic (#5950).
 // Linux-safe.
 import FlareCore
 import SuiteImaging
@@ -13,8 +15,8 @@ enum HaloDrawRules {
         let items = c.layers.reversed().filter { $0.kind != .null && $0.isVisible(at: frame) }.map { layer in
             HaloDrawItem(
                 layerID: layer.id, kind: layer.kind, bounds: layer.bounds(in: c),
-                matrix: placing.worldMatrix(of: layer.id, in: c, at: frame) ?? .identity,
-                opacity: placing.value(.opacity, of: layer.id, in: c, at: frame) ?? layer.opacity,
+                matrix: placing.worldMatrix(of: layer, in: c, at: frame) ?? .identity,
+                opacity: placing.value(.opacity, of: layer, in: c, at: frame) ?? layer.opacity,
                 color: layer.color, blendMode: layer.blendMode, text: layer.text, gradient: layer.gradient,
                 shape: layer.shape, stroke: HaloOutlines.stroke(of: layer, in: c, at: frame),
                 placedAsset: layer.kind == .solid ? layer.placedAsset : nil, placedImage: layer.placedImage(in: c),
@@ -29,7 +31,7 @@ enum HaloDrawRules {
         guard layer.style != nil else { return nil }
         var sampled = layer
         for p in layer.styleProperties {
-            if let v = placing.value(p, of: layer.id, in: c, at: frame) { sampled.setStyleValue(v, p) }
+            if let v = placing.value(p, of: layer, in: c, at: frame) { sampled.setStyleValue(v, p) }
         }
         return sampled.style
     }
