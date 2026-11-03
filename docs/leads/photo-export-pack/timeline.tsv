@@ -643,3 +643,4 @@ utc	stage	event	ref	note
 2026-11-03T16:58Z	check-in	dev-red #6256 opened 16:55Z (macos, range #6209 #6248 #6252 design/suiteui/halo; lane flake re-run pending) not ours; #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-03T17:33Z	check-in	dev-red #6256 still open: rerun red, no test named (captain: macOS runner capacity, not code; range design/suiteui/halo) not ours; #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-03T18:06Z	check-in	dev-red #6256 still open (runner capacity, not ours); captain merged #6255 (ci); #5353 open clean a92b4651; no new findings; 51 photo findings (one closed)
+2026-11-03T18:38Z	check-in	dev-red #6256 still open (runner capacity, not ours); no merges; #5353 open clean a92b4651; no new findings; 51 photo findings
