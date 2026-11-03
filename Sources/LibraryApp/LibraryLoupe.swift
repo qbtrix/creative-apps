@@ -8,7 +8,8 @@
 // with no animation), or a placeholder until one arrives: the photo's frame
 // in a card tone with its name and size. A GPU frame (suite-imaging IM-11)
 // is drawn by the window's `\.libraryLoupeGPU` into a canvas host: the base
-// through the frame's develop steps, written on the GPU. Its help says
+// through the frame's develop steps, written on the GPU; the CPU route's
+// picture is rebuilt only when the shown render changes. Its help says
 // why the file can't be read or the render failed. The name, "12 of 60" position and cull summary sit in a glass
 // readout. Left and Right step through the sort; Escape, G or the glass
 // Grid button at the top leading corner (`library.loupe.grid`) go back to
@@ -22,7 +23,8 @@
 // overlay; a canvas drag moves the handle under its press (or the whole
 // frame), Escape cancels and the arrows nudge the frame 1 px (Shift 10);
 // otherwise the artboard is the photo at its stored crop (`crop.artboard`).
-// The crop controls come from the window through `\.libraryCrop`. The photo
+// The crop controls come from the window through `\.libraryCrop`, with a
+// Straighten step the catalog hasn't taken yet from `\.libraryCropLive`. The photo
 // carries Photo's Rotate Left and Rotate Right as accessibility actions
 // (orientation-crop OC-9). Values in, closures out; LibraryCatalog holds the state.
 import LibraryModel
@@ -39,10 +41,14 @@ struct LibraryLoupe: View {
     @State private var viewport: CGSize = .zero
     /// The crop handle the drag under way holds; nil between drags.
     @State private var grabbed: CropHandle?
-    @Environment(\.libraryCrop) private var crop
+    @Environment(\.libraryCrop) private var controls
+    @Environment(\.libraryCropLive) private var live
+    /// The crop controls with the live Straighten step, if any.
+    private var crop: LibraryMenu.Crop { live.shown(controls) }
     @Environment(\.libraryLoupeGPU) private var gpu
 
     var body: some View {
+        let crop = self.crop
         let size = (crop.draft == nil ? nil : crop.canvas) ?? crop.artboard ?? model.loupePhotoSize
             ?? PixelSize(width: 1, height: 1)
         let document = CGSize(width: size.width, height: size.height)
@@ -105,7 +111,7 @@ struct LibraryLoupe: View {
                     gpu.draw(render.image, program: program, token: model.loupeShownToken, photoID: model.loupeItem?.id, into: $0)
                 }
             } else if let render = model.loupeRender {
-                Image(display: render.image).resizable()
+                LoupeCPUPicture(image: render.image, token: model.loupeShownToken, quality: render.quality).equatable()
             } else {
                 ZStack {
                     // A card tone, not the surround, so the photo's frame shows before its pixels do.
@@ -165,4 +171,17 @@ struct LibraryLoupe: View {
         }
         return .handled
     }
+}
+
+/// The CPU route's picture, rebuilt only when the shown render changes, so a
+/// Straighten step or a zoom copies no pixels (#6222). One token's render is
+/// one request's pixels; only its `.preview` can give way to its `.full`.
+private struct LoupeCPUPicture: View, Equatable {
+    let image: DisplayImage
+    let token: Int
+    let quality: RenderQuality
+
+    nonisolated static func == (a: Self, b: Self) -> Bool { a.token == b.token && a.quality == b.quality && a.image.size == b.image.size }
+
+    var body: some View { Image(display: image).resizable() }
 }

@@ -4,7 +4,8 @@
 // FlareCore's exporters, or as PNG frames drawn by FlareRaster (masks, mattes and symbol animation included) through
 // the `pngEncoder` the host hands in. Lottie and PNG can't hold text, so a scene with text refuses them unless
 // `dropText` asks to export the rest: never a silent drop. Options failing `exportSchema` are malformed params,
-// so the CLI exits 65 with the issues. Linux-safe: no UI imports.
+// so the CLI exits 65 with the issues. Of the window's file commands only `file.drop` runs here, placing the SVGs
+// the host handed over (`receiveDropped`). Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -21,7 +22,7 @@ public struct FlareHeadless: HeadlessDocument {
     public static let fileCommandHelp = "The CLI opens, saves and exports the file."
     /// Why PNG frames refuse when no encoder was handed in.
     public static let pngHelp = "PNG frames need a PNG encoder; this host has none, so export svg or lottie here."
-    /// Every `FlareWorkspace.catalog` command, run on the wrapped workspace; file commands are unavailable.
+    /// Every `FlareWorkspace.catalog` command, run on the wrapped workspace; file commands but `file.drop` are unavailable.
     public static let catalog: CommandCatalog<FlareHeadless> =
         (try? CommandCatalog(app: app, FlareWorkspace.commands.map(lifted), history: { FlareCoreHistory($0.workspace) }))
         ?? .empty(app: app)
@@ -127,9 +128,10 @@ public struct FlareHeadless: HeadlessDocument {
     }
 
     /// `spec` over the wrapped workspace: the same id, words, schema and availability, run through FlareWorkspace's
-    /// catalog. File commands are unavailable: the CLI's open, save and export do their work.
+    /// catalog. File commands are unavailable, the CLI's open, save and export doing their work, but `file.drop`,
+    /// which places the SVGs the host handed over (`receiveDropped`).
     static func lifted(_ spec: CommandSpec<FlareWorkspace>) -> CommandSpec<FlareHeadless> {
-        let id = spec.id, windowOnly = spec.kind == .file
+        let id = spec.id, windowOnly = spec.kind == .file && id != "file.drop"
         return .typed(id, title: spec.title, summary: spec.summary, kind: spec.kind, params: JSONValue.self,
                       schema: spec.params, result: spec.result, example: spec.example,
                       availability: { windowOnly ? .unavailable(fileCommandHelp) : spec.availability($0.workspace) }) { h, json in
@@ -164,4 +166,9 @@ public struct FlareHeadless: HeadlessDocument {
         "scale": .optional(.number("PNG frames' scale of the scene's size.")),
         "transparent": .optional(.boolean),
     ], required: [])
+}
+
+extension FlareHeadless: HeadlessDropReceiver {
+    /// Hands `file.drop` the dropped files' bytes by path.
+    public mutating func receiveDropped(_ files: [String: Data]) { workspace.receiveDropped(files) }
 }

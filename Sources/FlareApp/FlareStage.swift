@@ -18,6 +18,7 @@
 // through the app's document host, another app's file goes to that app, and the mark at the bottom says which
 // before the drop. A Lottie .json, which no suite type names, is planned as Flare's own open (`opens`), so the
 // mark says "Open in Flare", and opens through FlareShell.openQueue (`FlareWorkspace.lottieDrops`, lottie-open LO-4).
+// An SVG is placed into the open animation as layers (`placeDrops`, then the window's `onPlace`, svg-place).
 import AppKit
 import FlareCore
 import FlareModel
@@ -40,6 +41,8 @@ struct FlareStage: View {
     var guideDrag: FlareGuideDrag? = nil
     /// The fit's zoom, reported as the viewport changes, so Zoom In from the fit steps from it.
     var onFit: @MainActor (Double) -> Void = { _ in }
+    /// The SVG paths a drop on the stage places; the window runs them through the same place as File > Place….
+    var onPlace: @MainActor ([String]) -> Void = { _ in }
     @State private var liveGuide: FlareGuideDrag?
     /// The gesture under way's first point, in scene points; nil between drags.
     @State private var dragStart: CGPoint?
@@ -76,7 +79,9 @@ struct FlareStage: View {
             .accessibilityIdentifier(Self.identifier)
             .suiteFileDrop(.flare, bridge: FlareShell.bridge, hasDocument: model.hasDocument,
                            places: model.placesExtensions, opens: Self.opens, documentName: model.fileName) { actions in
-                let (lottie, rest) = FlareWorkspace.lottieDrops(actions)
+                let (lottie, other) = FlareWorkspace.lottieDrops(actions)
+                let (places, rest) = FlareWorkspace.placeDrops(other)
+                if !places.isEmpty { onPlace(places) }
                 Task { @MainActor in
                     for path in lottie { FlareShell.openQueue.open(URL(fileURLWithPath: path)) }
                     if !rest.isEmpty { await FlareShell.bridge.perform(rest, host: FlareShell.host) }

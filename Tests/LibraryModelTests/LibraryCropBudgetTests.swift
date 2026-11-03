@@ -6,7 +6,8 @@
 // recording a step. The 2048 px render at 1:1 and 5° through `LiveDevelop`
 // is report-only in debug (decision D8) and within 120 ms in release; the
 // audit's real-size turn (2400 × 2000 at 10° of 6000 × 4000) is within
-// 375 ms, release only. Each prints a `LIBRARY-BUDGET crop …` line.
+// 375 ms, release only. Both renders gate their p95 over 20 runs, not the
+// median, as the drag and angle rows do. Each prints a `LIBRARY-BUDGET crop …` line.
 // Runs on Linux and macOS.
 @testable import LibraryModel
 import CoreRaster
@@ -45,7 +46,7 @@ struct LibraryCropBudgetTests {
         let frame = try #require(catalog.cropFrame)
         #expect(abs(frame.width - frame.height) <= 1)
         #expect(catalog.history.undo.isEmpty)
-        #expect(cost.median <= 2 * scale)
+        #expect(cost.p95 <= 2 * scale)
     }
 
     @Test func angleWithinBudget() throws {
@@ -58,7 +59,7 @@ struct LibraryCropBudgetTests {
         let draft = try #require(catalog.cropDraft)
         #expect(CropSettings.angleRange.contains(draft.angle) && draft.angle != 0)
         #expect(catalog.history.undo.isEmpty)
-        #expect(cost.median <= 2 * scale)
+        #expect(cost.p95 <= 2 * scale)
     }
 
     @Test func croppedRenderReport() throws {
@@ -67,12 +68,12 @@ struct LibraryCropBudgetTests {
         let square = try cropLiveGeometry().initial(aspect: .square, angle: 5, photo: size)
         let settings = DevelopSettings.neutral.setting(crop: square)
         let live = LiveDevelop()
-        let cost = Budget.measure("crop render-2048-square-5", runs: judgesRenders ? 10 : 2) {
+        let cost = Budget.measure("crop render-2048-square-5", runs: judgesRenders ? 20 : 2) {
             _ = try? live.render(buffer, settings: settings)
         }
         let out = try live.render(buffer, settings: settings)
         #expect(abs(out.width - out.height) <= 1 && out.width < 1365)
-        #expect(!judgesRenders || cost.median <= 120)
+        #expect(!judgesRenders || cost.p95 <= 120)
     }
 
     /// #5954 at real size: a 2400 × 2000 frame at 10° out of a 6000 × 4000
@@ -83,12 +84,12 @@ struct LibraryCropBudgetTests {
         let buffer = try developGradient(width: 6000, height: 4000)
         let settings = DevelopSettings.neutral.setting(crop: try cropLiveFrame600x400At10())
         let live = LiveDevelop()
-        let cost = Budget.measure("crop render-6000-2400x2000-10", runs: 5) {
+        let cost = Budget.measure("crop render-6000-2400x2000-10", runs: 20) {
             _ = try? live.render(buffer, settings: settings)
         }
         let out = try live.render(buffer, settings: settings)
         #expect(abs(out.width - 2400) <= 1 && abs(out.height - 2000) <= 1)
-        #expect(cost.median <= 375)
+        #expect(cost.p95 <= 375)
     }
 
     /// The audit's frame: 2400 × 2000 at (600, 400) of the 10° straightened 6000 × 4000.
