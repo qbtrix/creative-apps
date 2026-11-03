@@ -2,7 +2,8 @@
 // no Check for Updates…, Add from Clipboard or Assets (their stubs are out of the beta's scenes), and Edit keeps
 // the system's Cut, Copy and Paste. Items are found by title only (#4647); the menu shot is a screen shot.
 // testViewAndClearAct (#6203): View's sidebar and inspector toggles hide their columns and bring them back,
-// and File > Open Recent > Clear Menu empties the recents, so its item turns off.
+// and File > Open Recent > Clear Menu empties the recents, so its item turns off. testAssetsEditHasNoRemove:
+// the Assets page's Edit menu has no Remove Asset or Remove from Recents.
 import XCTest
 
 final class AfterGlowMenusJourneyTests: XCTestCase {
@@ -63,6 +64,24 @@ final class AfterGlowMenusJourneyTests: XCTestCase {
         XCTAssertFalse(recent.menuItems["Clear Menu"].isEnabled, "Clear Menu stayed on after clearing")
         home.shot("launcher-menu-cleared", screen: true)
         home.press(.escape)
+        home.press(.escape)
+    }
+
+    /// #6203: on the Assets page Edit holds no dead Remove Asset or Remove from Recents; the page has nothing to remove.
+    @MainActor func testAssetsEditHasNoRemove() {
+        let home = SuiteHarness(self).launch(fixture: "weekOfWork", arguments: [], skipOnboarding: true)
+        let assets = home.element("suite.sidebar").staticTexts["Assets"]
+        XCTAssert(assets.waitForExistence(timeout: 30), "the sidebar has no Assets row")
+        assets.click()
+        let page = home.app.staticTexts.matching(NSPredicate(format: "value CONTAINS 'Shared assets' OR label CONTAINS 'Shared assets'"))
+        XCTAssert(page.firstMatch.waitForExistence(timeout: 5), "the Assets row showed no Assets page")
+        let edit = home.app.menuBars.firstMatch.menuBarItems["Edit"]
+        let copy = Self.open(edit, to: "Copy")
+        XCTAssert(copy.exists, "Edit didn't open on the Assets page")
+        for title in ["Remove Asset", "Remove from Recents"] {
+            XCTAssertFalse(edit.menuItems[title].exists, "Edit on the Assets page still shows \(title)")
+        }
+        home.shot("launcher-assets-edit", screen: true)
         home.press(.escape)
     }
 
