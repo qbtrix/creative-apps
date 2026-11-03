@@ -1,6 +1,6 @@
 // ExportScanTests.swift: LM-0c3 (docs/blueprints/flare.md, 7.1): one test per warning, `bounce` 0–12 step 2 gives 7
 // PNGs, a cancelled export returns no files, the run on the kernel's ExportRun (FX-4), `showcase`, never a silent
-// drop, and QB-L8 on the fake.
+// drop, and QB-L8 on the real writers with a copy-only PNG encode.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -165,7 +165,8 @@ private func workspace(_ document: Document) -> FlareWorkspace {
 
 // QB-L8: SVG frame < 1 s, Lottie of 300 frames < 10 s, 48 PNG frames at 1080p < 10 s, timed on the real writers
 // (LiveExportAdapter over LiveStage, FlareRaster drawing the showcase's mask, symbol and gradients). The encoder
-// here only copies the pixels; the CLI's CoreRaster PNG encode is timed by its own drive. Run it on a release
+// here only copies the pixels (FlareModel can't reach CoreRaster); the same row with the CLI's real PNG encode is
+// AfterGlowCLITests.FlareExportBudgetTests. Run it on a release
 // build (perf-suites, not the gate): `swift test -c release --filter svgFrameLottieAndPNGSequenceStayInsideQBL8`.
 @Test func svgFrameLottieAndPNGSequenceStayInsideQBL8() async throws {
     let live = LiveExportAdapter(stage: LiveStage()), clock = ContinuousClock()
