@@ -42,8 +42,7 @@ private let homeFile = "Sources/AfterGlowApp/LauncherCommands+Home.swift"
 
 /// Each HomeMenu item LauncherCommandsHome renders, and the 6.2 shortcut that must follow it.
 private let homeFields: [(String, String?)] = [
-    ("open", ".keyboardShortcut(\"o\")"), ("clearMenu", nil), ("undo", nil), ("delete", nil), ("showSidebar", nil),
-    ("showInspector", ".keyboardShortcut(\"i\", modifiers: [.option, .command])"),
+    ("open", ".keyboardShortcut(\"o\")"), ("clearMenu", nil), ("undo", nil),
     ("larger", ".keyboardShortcut(\"+\")"), ("smaller", ".keyboardShortcut(\"-\")"),
 ]
 
@@ -119,11 +118,12 @@ private func occurrences(of needle: String, in text: String) -> Int {
         // No Button of its own: each item is SuiteUI's MenuCommand, disabled with its reason as help.
         #expect(buttons(text).isEmpty && text.contains("help: item.reason ?? \"\", isEnabled: item.isEnabled"))
         let menu = HomeMenu.make(recents: RecentsList(), selection: nil, thumbnailStep: 1, page: .home, hasWindow: true)
-        let titles = menu.new.map(\.item.title) + [menu.open, menu.clearMenu, menu.delete, menu.showSidebar,
-                                                  menu.showInspector, menu.larger, menu.smaller].map(\.title)
+        let titles = menu.new.map(\.item.title) + [menu.open, menu.clearMenu, menu.larger, menu.smaller].map(\.title)
         #expect(titles == ["New Animation", "New Design", "New Image", "Import Photos…", "New Composition", "Open…",
-                           "Clear Menu", "Remove from Recents", "Show Sidebar", "Show Inspector",
-                           "Larger Thumbnails", "Smaller Thumbnails"])
+                           "Clear Menu", "Larger Thumbnails", "Smaller Thumbnails"])
+        #expect(menu.delete?.title == "Remove from Recents")
+        // Delete shows only where it can act: `if let delete = menu.delete`, never a dead Remove Asset (#6203).
+        #expect(text.contains("if let delete = menu.delete") && text.contains("MenuCommand(item: delete)"))
     }
 
     /// #1873: Edit > Delete is built for the page the window shows, never a literal Home page.
@@ -134,7 +134,7 @@ private func occurrences(of needle: String, in text: String) -> Int {
         let window = try source("Sources/AfterGlowApp/HomeWindow.swift")
         #expect(window.contains(".focusedSceneValue(\\.homePage, showsAssets ? .assets : .home)"))
         let delete = HomeMenu.make(recents: RecentsList(), selection: "a", thumbnailStep: 1, page: .assets, hasWindow: true).delete
-        #expect(delete.title == "Remove Asset" && !delete.isEnabled && delete.reason != nil)
+        #expect(delete == nil)
     }
 
     @Test func noItemEnabledWithoutAReason() throws {
@@ -163,5 +163,9 @@ private func occurrences(of needle: String, in text: String) -> Int {
             #expect(occurrences(of: stub, in: app) == 0, "\(stub) is back in a scene")
         }
         #expect(app.contains("@NSApplicationDelegateAdaptor(LauncherDelegate.self)"))
+        // View > Show Sidebar and Show Inspector are the system's, which toggle SuiteWindow's columns (#6203).
+        for group in ["SidebarCommands()", "InspectorCommands()"] {
+            #expect(occurrences(of: group, in: app) == 1, "\(group)")
+        }
     }
 }

@@ -54,5 +54,19 @@
     "find": "case let e as LibraryError: e.message",
     "replace": "case let e as LibraryError: \"\\(e)\"",
     "tests": "LibraryHeadlessTests"
+  },
+  {
+    "label": "exportOptionsFailingTheSchemaAreMalformed: the schema check skipped",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "guard issues.isEmpty else { throw CatalogError.malformedParams(id: \"export\", issues) }",
+    "replace": "_ = issues",
+    "tests": "LibraryHeadlessTests"
+  },
+  {
+    "label": "exportOptionsFailingTheSchemaAreMalformed: longSide takes 0",
+    "file": "Sources/LibraryModel/LibraryHeadless.swift",
+    "find": "its own when absent.\", minimum: 1))",
+    "replace": "its own when absent.\"))",
+    "tests": "LibraryHeadlessTests"
   }
 ]
