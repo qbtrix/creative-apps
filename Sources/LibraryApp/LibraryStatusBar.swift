@@ -10,7 +10,9 @@
 // The identifier and help come last on each trailing view, so they name the
 // pill once ViewerStatusBar makes the capsule one element (#3197).
 // A row without a zoom (the grid) draws no zoom pill; at Fit the loupe's
-// measured fit scale is the one zoom pill.
+// measured fit scale is the one zoom pill. In the window it sits in
+// LibraryLoupeStatusBar, which reads that fit itself, so a new fit (each
+// Straighten step changes it) reruns the bar, not the window (#6222).
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -50,4 +52,12 @@ struct LibraryStatusBar: View {
         case .error: .error
         }
     }
+}
+
+/// The status bar at the loupe's measured fit, read here so a new fit reruns this bar, not the window.
+struct LibraryLoupeStatusBar: View {
+    let model: LibraryCatalog
+    let loupe: LoupeAreaState
+
+    var body: some View { LibraryStatusBar(model: model, fitScale: loupe.fitScale) }
 }
