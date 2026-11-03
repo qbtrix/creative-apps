@@ -123,19 +123,27 @@ public struct CommandCatalog<Target>: Sendable {
         try run(step.id, params: step.params, on: &target)
     }
     /// Runs `steps` in order, stopping at the first refusal; `atomic` puts the target back when one stops it.
-    /// The report lists every step tried, the refused one last.
+    /// The report lists every step tried, the refused one last. A step whose undo step a later one folded away
+    /// (a draft's Scale inside its commit's one step) names none, so the report lists the steps history holds.
     public func runBatch(_ steps: [CommandEnvelope], on target: inout Target, atomic: Bool) -> BatchReport {
         let start = target
         var report = BatchReport(steps: [], stoppedAt: nil, rolledBack: false)
+        var serials: [Int?] = []
         for (index, step) in steps.enumerated() {
             do {
                 let outcome = try run(step, on: &target)
                 report.steps.append(.init(id: step.id, ok: true, undoStep: outcome.undoStep, error: nil))
+                serials.append(outcome.undoStep == nil ? nil : history(target).undoSerial)
             } catch {
                 report.steps.append(.init(id: step.id, ok: false, undoStep: nil, error: error.description))
                 report.stoppedAt = index
                 if atomic { target = start; report.rolledBack = true }
                 break
+            }
+        }
+        if !report.rolledBack, let held = history(target).stepSerials {
+            for (index, serial) in serials.enumerated() where serial.map({ !held.contains($0) }) ?? false {
+                report.steps[index].undoStep = nil
             }
         }
         return report

@@ -54,5 +54,19 @@
     "find": "        let done = try outcome.get()\n        target = copy",
     "replace": "        let done = try outcome.get()",
     "tests": "SuiteKernelTests.HistoryCommandsTests/aRunUnderAnAgentOriginMarksItsSteps"
+  },
+  {
+    "label": "foldedStepsStay: a batch report keeps the name of a step a later one folded away",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "                report.steps[index].undoStep = nil\n",
+    "replace": "",
+    "tests": "BatchFoldedStepTests"
+  },
+  {
+    "label": "serialFollowsIdAfter: a coalesced run reads as a new step, so its earlier entries lose their name",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "    public var undoSerial: Int? { done.last?.serial }",
+    "replace": "    public var undoSerial: Int? { done.last?.idAfter }",
+    "tests": "BatchFoldedStepTests"
   }
 ]
