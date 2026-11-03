@@ -14,7 +14,9 @@
 // both, so a selection never erases the paint outside it. The canvas shows the
 // draft live: a still frame draws `transformPreview`, the workspace with the
 // draft's layer swapped for that result (`draftPlaced`), and commit lays the
-// same pixels as one "Free Transform" step, so Return shows nothing new. A drag
+// same pixels as one "Free Transform" step that the draft's own steps fold
+// into (`foldDraftSteps`), so Return shows nothing new and one undo takes the
+// whole transform back with no box left up. A drag
 // whose layer lifts (PhotoTransformLift+Kernel.swift) draws no frames: the
 // compositor moves the box's pixels over the rest (`boxCut`). Any other drag's
 // frames (`transformPreview(live:)`) draw the rest, then the box's pixels
@@ -171,7 +173,7 @@ extension PhotoWorkspace {
     }
 
     /// Return: resamples the box's pixels once into their new bounds as one "Free Transform" step
-    /// (`draftPlaced`); the rest of the layer stays. The identity records nothing. No draft: nothing.
+    /// (`draftPlaced`) that replaces the draft's own steps; the rest of the layer stays. The identity records nothing. No draft: nothing.
     /// A resample that fails keeps the draft and throws.
     public mutating func commitTransform() throws {
         guard let draft = transformDraft else { return }
@@ -179,7 +181,10 @@ extension PhotoWorkspace {
             transformDraft = nil
             return touch(.all)
         }
-        record(.group([.stack(stackState), .draft(draft)]), named: "Free Transform")
+        // One committed transform is one step: its Scale and Rotate steps fold in, and its undo
+        // leaves no box up (an identity draft is just Free Transform begun).
+        let began = foldDraftSteps(of: draft)
+        record(.group([.stack(stackState), .draft(began?.transform == .identity ? nil : began)]), named: "Free Transform")
         pixels[draft.layerID] = placed.pixels
         layers[at].offsetX = placed.x
         layers[at].offsetY = placed.y
