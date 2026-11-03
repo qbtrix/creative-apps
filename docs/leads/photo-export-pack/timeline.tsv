@@ -621,3 +621,4 @@ utc	stage	event	ref	note
 2026-11-03T05:09Z	check-in	quiet: dev-red #6220 still open (not ours); no merges; #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-03T05:41Z	check-in	quiet: dev-red #6220 open, lane flake-rerun at 0afca33 on GestureContractTests photo (not ours); no merges; #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-03T06:12Z	check-in	quiet: dev-red #6220 open, flake rerun at 0afca33 no verdict yet (not ours); no merges; #5353 open clean a92b4651; no new findings; 52 photo findings
+2026-11-03T06:44Z	check-in	dev green: #6220 closed 06:25Z (flake rerun passed at 0afca33, main promoted; flake finding #6127 is line:suite, skip); no merges; #5353 open clean a92b4651; no new findings; 52 photo findings
