@@ -640,3 +640,4 @@ utc	stage	event	ref	note
 2026-11-03T15:23Z	check-in	dev-red #6251 still open (Halo movie writer, no lane verdict yet, not ours); no merges; #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-03T15:54Z	check-in	dev green: #6251 closed 15:34Z as flake (finding #6254, halo); captain merged #6209 #6248 #6252, #6253 (#6206 proof); #5353 open clean a92b4651; no new findings; 52 photo findings
 2026-11-03T16:26Z	check-in	quiet: dev green (no new dev-red); no new merges; #5353 open clean a92b4651; no new findings; 52 photo findings
+2026-11-03T16:58Z	check-in	dev-red #6256 opened 16:55Z (macos, range #6209 #6248 #6252 design/suiteui/halo; lane flake re-run pending) not ours; #5353 open clean a92b4651; no new findings; 52 photo findings
