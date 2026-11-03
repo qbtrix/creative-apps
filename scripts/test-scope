@@ -10,6 +10,7 @@
 #   scripts/test-scope perf [APP]          the perf and timing tests, all or APP's
 #   scripts/test-scope perf-report LOG     a perf run's swift test log as a markdown report
 #   scripts/test-scope heavy [FILTER]      the CPU-heavy correctness tests, all or those FILTER takes
+#   scripts/test-scope limited [FILTER]    the suites under a .timeLimit trait, all or those FILTER takes
 #   scripts/test-scope shard K/N           shard K of N of the `swift test list` ids on stdin
 #   scripts/test-scope timing              the tests that assert a wall-clock bound and aren't in the perf list
 #   scripts/test-scope ids TARGET FILE     each @Test in FILE as a perf-list id, Target.Suite/test (nested suites
@@ -272,6 +273,37 @@ def heavy_regex(within=None):
     return "|".join(out)
 
 
+TIME_LIMIT = re.compile(r"\.timeLimit\(")
+
+
+def limited_units(root=None):
+    """Target.Suite (Target.freeTest for a free test) for every test in a Tests/<Target>/ file whose code,
+    comments and strings aside, applies a .timeLimit trait. Swift Testing starts a test's limit when it
+    queues the test, not when the body gets a pool thread, so scripts/ci runs these in a pass of their
+    own, ahead of the shared one, where the queue is seconds long and a limit means a hang. The snapshot
+    target is left out: its pass already runs one test at a time."""
+    units = set()
+    for target in sorted(os.listdir(root or TESTS_DIR)):
+        if target == SNAP:
+            continue
+        for dirpath, _, names in os.walk(os.path.join(root or TESTS_DIR, target)):
+            for name in names:
+                if not name.endswith(".swift"):
+                    continue
+                path = os.path.join(dirpath, name)
+                with open(path, errors="replace") as f:
+                    if not any(TIME_LIMIT.search(swift_code(l)) for l in f):
+                        continue
+                for suites, test, _, _ in swift_tests(path):
+                    units.add(f"{target}.{suites[0] if suites else test}")
+    return sorted(units)
+
+
+def limited_regex(within=None):
+    ids = [u for u in limited_units() if within is None or re.search(within, u + "/")]
+    return "^(%s)(/|\\()" % "|".join(i.replace(".", r"\.") for i in ids) if ids else ""
+
+
 def shard(ids, k, n):
     """The two lines shard prints for shard k of n of these `swift test list` ids."""
     if not 1 <= k <= n:
@@ -496,6 +528,8 @@ def main(argv):
         print(perf_regex(args[0] if args else None))
     elif cmd == "heavy" and len(args) <= 1:
         print(heavy_regex(args[0] if args else None))
+    elif cmd == "limited" and len(args) <= 1:
+        print(limited_regex(args[0] if args else None))
     elif cmd == "shard" and len(args) == 1 and re.fullmatch(r"\d+/\d+", args[0]):
         print(shard(sys.stdin.read().splitlines(), *map(int, args[0].split("/"))))
     elif cmd == "perf-report" and len(args) == 1:
@@ -507,7 +541,7 @@ def main(argv):
         for suites, name, _, _ in swift_tests(args[1]):
             print("/".join([args[0] + "." + (suites[0] if suites else name)] + suites[1:] + ([name] if suites else [])))
     else:
-        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | shard K/N | perf-report LOG | timing | ids TARGET FILE")
+        sys.exit("usage: scripts/test-scope app APP[,APP...] | changed [--linux] | build-apps | scopes | perf [APP] | heavy [FILTER] | limited [FILTER] | shard K/N | perf-report LOG | timing | ids TARGET FILE")
 
 
 if __name__ == "__main__":
