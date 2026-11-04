@@ -4,8 +4,10 @@
 // its Search and cancel buttons, which the app audit's identifier check and the
 // journeys need (#2215). A zero-size AppKit view behind the content finds the
 // window's search fields once it is in a window (and again on the next turn of
-// the run loop, after the toolbar is built) and names the field `<identifier>`,
-// its buttons `<identifier>.search` and `<identifier>.cancel`. On each window
+// the run loop, after the toolbar is built) and names the field and its cell
+// `<identifier>` (accessibility reads the cell), its buttons `<identifier>.search`
+// and `<identifier>.cancel`, and a collapsed item's Search button
+// `<identifier>.collapsed`. On each window
 // update it names a toolbar search item's field again, which AppKit rebuilds
 // when the item collapses or the page changes.
 import AppKit
@@ -68,12 +70,21 @@ private struct SearchFieldNamer: NSViewRepresentable {
 
         private static func name(_ field: NSSearchField, _ name: String) {
             let cell = field.cell as? NSSearchFieldCell
-            // The field can keep its name while AppKit swaps its button cells (a sheet over the window), so both count.
-            guard field.accessibilityIdentifier() != name
-                || cell?.searchButtonCell?.accessibilityIdentifier() != name + ".search" else { return }
-            field.setAccessibilityIdentifier(name)
-            cell?.searchButtonCell?.setAccessibilityIdentifier(name + ".search")
-            cell?.cancelButtonCell?.setAccessibilityIdentifier(name + ".cancel")
+            // Accessibility reads the cell, not the field (under a sheet the bare field shows), and AppKit can swap
+            // the button cells while the field keeps its name, so each is checked on its own.
+            set(field, name)
+            if let cell { set(cell, name) }
+            if let search = cell?.searchButtonCell { set(search, name + ".search") }
+            if let cancel = cell?.cancelButtonCell { set(cancel, name + ".cancel") }
+            // A collapsed toolbar search item shows a Search button beside the field, in the item's viewer.
+            for case let button as NSAccessibilityProtocol in (field.accessibilityParent() as? NSAccessibilityProtocol)?
+                .accessibilityChildren() ?? [] where button.accessibilityRole() == .button {
+                set(button, name + ".collapsed")
+            }
+        }
+
+        private static func set(_ element: NSAccessibilityProtocol, _ name: String) {
+            if element.accessibilityIdentifier() != name { element.setAccessibilityIdentifier(name) }
         }
 
         private static func searchFields(in view: NSView) -> [NSSearchField] {
