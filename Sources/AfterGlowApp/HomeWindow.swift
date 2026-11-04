@@ -105,6 +105,7 @@ struct HomeContent: View {
     }
 
     /// The Open… panel: one or more files; empty when cancelled.
+    // view-static: main-actor
     static func chooseFiles() -> [String] {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
