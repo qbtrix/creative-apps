@@ -665,3 +665,4 @@ utc	stage	event	ref	note
 2026-11-04T04:47Z	check-in	dev green (no dev-red open); no merges since #6242; #5353 open clean a92b4651; no new findings; 49 photo findings
 2026-11-04T05:18Z	check-in	dev green (no dev-red open); captain's #6264 (flare) merged 05:18Z; #5353 open a92b4651 (mergeable recomputing); no new findings; 49 photo findings
 2026-11-04T05:50Z	check-in	dev green (no dev-red open); captain's #6253 (photo mac finish) merged 05:37Z; #5353 open clean a92b4651; no new findings; 49 photo findings
+2026-11-04T06:22Z	check-in	dev green (no dev-red open); no merges since #6253; #5353 open clean a92b4651; no new findings; 49 photo findings; captain's Quality-Reaudit on #6206 (fail, transform perf; not export)
