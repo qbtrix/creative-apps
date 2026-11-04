@@ -106,42 +106,6 @@ public final class HomeModel {
         await send(HandOff(id: makeID(), from: .launcher, to: item.ref.app, verb: .open, documents: [item.ref], createdAt: now))
     }
 
-    /// Open In ▸: the other apps that read the selected card's type, its own app left out (Open goes there).
-    public var openInTargets: [SuiteApp] {
-        guard let item = selection.flatMap({ item($0) }) else { return [] }
-        return services.routing.openInTargets(for: item.ref.type, from: item.ref.app)
-    }
-
-    /// Why Open In can't act on the selection (missing file, no other reader, sending pending); nil: it acts.
-    public var openInReason: String? {
-        guard let id = selection, let item = item(id) else { return HomeMenu.noSelection }
-        if missingFiles.contains(id) { return SuiteError.fileMissing(name: item.ref.displayName).message }
-        if let refusal = services.routing.openInRefusal(for: item.ref.type, from: item.ref.app) { return refusal.message }
-        return services.pending["sending"]
-    }
-
-    /// Open In ▸ <app>: hands the selected card to `app` instead of the app that last used it.
-    public func openSelection(in app: SuiteApp, now: Date) async {
-        guard let id = selection, let item = item(id) else { return }
-        if missingFiles.contains(id) { message = .fileMissing(name: item.ref.displayName); return }
-        await send(HandOff(id: makeID(), from: .launcher, to: app, verb: .open, documents: [item.ref], createdAt: now))
-    }
-
-    /// File > Open… and the toolbar's Open…: hands each chosen file to the app its type opens in;
-    /// a file no app reads says so in place and is skipped.
-    public func open(paths: [String], now: Date, registry: SuiteTypeRegistry = .standard) async {
-        for path in paths {
-            let name = path.split(separator: "/").last.map(String.init) ?? path
-            let app: SuiteApp
-            do { app = try services.routing.route(fileName: name) } catch { message = error; continue }
-            let ext = name.split(separator: ".").last.map { $0.lowercased() } ?? ""
-            guard let type = registry.type(forExtension: ext) else { message = .unsupportedFile(name: name); continue }
-            let ref = SuiteDocumentRef(path: path, fileID: SuiteDocumentRef.fileID(forPath: path), app: app,
-                                       type: type.id, displayName: name)
-            await send(HandOff(id: makeID(), from: .launcher, to: app, verb: .open, documents: [ref], createdAt: now))
-        }
-    }
-
     /// Locate… on a missing card: re-point it to the file the person chose.
     public func locate(_ fileID: String, newPath: String, now: Date) async {
         guard let item = item(fileID) else { return }

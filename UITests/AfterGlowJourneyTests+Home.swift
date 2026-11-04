@@ -77,19 +77,21 @@ extension AfterGlowJourneyTests {
         XCTAssert(Self.waitForCards(missing, Self.weekOfWork), "after Undo RECENT reads \(Self.cardNames(missing))")
         missing.shot("home-sj1-undo")
 
-        // 6. On `empty`: Open… is the one prominent button, live since #1763, and the sentence invites it.
+        // 6. On `empty`: Open… is the one prominent button, disabled, and the sentence says why.
         let empty = suite.launch(fixture: "empty", arguments: ["-SuitePerfProbe", "YES"])
         XCTAssert(empty.app.windows.firstMatch.waitForExistence(timeout: 30), "AfterGlow opened no window on empty")
         let open = empty.element("afterglow.home.empty.open")
         XCTAssert(open.waitForExistence(timeout: 10), "the empty home has no Open…")
-        XCTAssert(open.isEnabled, "Open… is disabled though routing and sending are live (#1763)")
+        XCTAssertFalse(open.isEnabled, "Open… is enabled though it can't route a file yet")
         let primaries = empty.controls()?.controls.filter { $0.role == "primary" } ?? []
         XCTAssertEqual(primaries.map(\.id), ["afterglow.home.empty.open"], "Open… isn't the one prominent button")
-        XCTAssertNil(primaries.first?.reason ?? nil, "Open… still carries a reason though it acts")
-        let invite = "No recent work yet. Start something new above, or open a file."
+        XCTAssertEqual(primaries.first?.reason, Self.openWaits, "Open…'s tooltip isn't HomeMenu.openWaits")
+        let first = "No recent work yet. Start something new above."
         let text = empty.app.staticTexts
-            .matching(NSPredicate(format: "label == %@ OR value == %@", invite, invite)).firstMatch
-        XCTAssert(text.waitForExistence(timeout: 5), "the empty home doesn't say \(invite)")
+            .matching(NSPredicate(format: "label BEGINSWITH %@ OR value BEGINSWITH %@", first, first)).firstMatch
+        XCTAssert(text.waitForExistence(timeout: 5), "the empty home doesn't say \(first)")
+        let lines = Self.text(of: text).split(separator: "\n").map(String.init)
+        XCTAssertEqual(lines, [first, Self.openWaits], "the empty sentence's second line isn't Open…'s reason")
         empty.shot("home-sj1-empty")
 
         // 5, the rest: a file on disk isn't Missing beside the missing Cards.design.
@@ -102,9 +104,13 @@ extension AfterGlowJourneyTests {
         element.label.isEmpty ? (element.value as? String) ?? "" : element.label
     }
 
-    /// The Design filter chip by its own identifier (#2041). A search by label also found the
-    /// switcher's Design item in the toolbar, whose click left the cards unfiltered (#2215).
+    /// The chip row's Design button: titled Design, not a New tile, right of the sidebar's Design row.
     @MainActor static func designChip(_ home: Journey) -> XCUIElement {
-        home.element("afterglow.home.filter.design")
+        let sidebar = home.element("suite.sidebar").frame
+        let titled = home.app.windows.firstMatch.buttons
+            .matching(NSPredicate(format: "label == 'Design' AND NOT (identifier BEGINSWITH 'afterglow.home.new.')"))
+        let chip = titled.allElementsBoundByIndex.first { $0.frame.minX >= sidebar.maxX }
+        // Past the last match: an element that doesn't exist, so the caller's check fails.
+        return chip ?? titled.element(boundBy: titled.count)
     }
 }

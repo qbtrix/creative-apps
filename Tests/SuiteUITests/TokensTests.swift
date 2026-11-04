@@ -37,11 +37,11 @@ import Testing
 /// #933: the detail column measured its content frame's minimum plus the
 /// inspector's minimum plus an 8 pt divider (648 pt for 440). SuiteWindow's
 /// content frame sits that much under the content sizes, so the column comes
-/// out at contentMinimum and the columns fit the window minimum. At the
-/// minimum itself the split view was 8 pt wider still (#2042), so 16 pt.
+/// out at contentMinimum and the columns fit the window minimum.
 @Test func contentFrameLeavesTheDetailColumnRoomForTheInspector() {
     let allowance = SuiteSize.detailInspectorAllowance
-    #expect(allowance == SuiteSize.inspectorWidth.min + 16)
+    #expect(allowance == SuiteSize.inspectorWidth.min + 8)
+    #expect(SuiteSize.contentMinimum.width + allowance == 648, "the column width #933 measured with the full minimum")
     let frameMinimum = SuiteSize.contentMinimum.width - allowance
     #expect(frameMinimum > 0 && SuiteSize.contentIdealWidth - allowance > frameMinimum)
     let columns = SuiteSize.sidebarWidth.ideal + (frameMinimum + allowance) + SuiteSize.inspectorWidth.ideal
