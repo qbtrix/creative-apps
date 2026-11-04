@@ -103,10 +103,8 @@ public struct HomeMenu: Equatable, Sendable {
     }
 
     /// Why Open… (menu, toolbar and empty state) can't act: `openWaits` while
-    /// routing or sending is pending, and until recents-open-in gives Open… a
-    /// file to route (#1763) while the routing slot is still a fake.
+    /// the services list routing or sending as pending; nil once both are live (#1763).
     public static func openReason(pending: [String: String]) -> String? {
-        let waits = pending["routing"] != nil || pending["sending"] != nil || SuiteServices.notConnected("routing") != nil
-        return waits ? openWaits : nil
+        pending["routing"] != nil || pending["sending"] != nil ? openWaits : nil
     }
 }
