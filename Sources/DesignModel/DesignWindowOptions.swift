@@ -1,6 +1,8 @@
 // DesignWindowOptions.swift: what Design's window reads from its launch
 // arguments, parsed once: `-DesignServices fake` (else the live services),
-// `-DesignFixture <name>` (a DesignFixtures name opened as an unsaved file) and
+// `-DesignFixture <name>` (a DesignFixtures name opened as an unsaved file; nil
+// when `-DesignOpenFile <path>` names a file, which wins so a relaunch on a saved
+// fixture opens the file, not the fixture over it), `-DesignOpenFile` itself, and
 // `-DesignWindowSize WxH` (both above zero, else nil; the app floors it at the
 // suite's minimum window size), and the export's `-DesignExportTo <folder>` and
 // `-DesignExportFail <file>` (nil when absent). The size parse matches SuiteUI's
@@ -22,8 +24,10 @@ import Foundation
 public struct DesignWindowOptions: Sendable, Equatable {
     /// `-DesignServices fake`, else `.live`.
     public var services: DesignServices
-    /// `-DesignFixture <name>`; nil when absent.
+    /// `-DesignFixture <name>`; nil when absent or when `openFile` names a file.
     public var fixture: String?
+    /// `-DesignOpenFile <path>`: the file the first window opens; nil when absent.
+    public var openFile: String?
     /// `-DesignWindowSize 880x560`; nil when absent or malformed. The app floors it at SuiteSize.windowMinimum.
     public var windowWidth: Double?
     public var windowHeight: Double?
@@ -38,7 +42,8 @@ public struct DesignWindowOptions: Sendable, Equatable {
             return arguments[index + 1]
         }
         services = value(after: "-DesignServices") == "fake" ? .fake : .live
-        fixture = value(after: "-DesignFixture")
+        openFile = value(after: "-DesignOpenFile")
+        fixture = openFile == nil ? value(after: "-DesignFixture") : nil
         let size = value(after: "-DesignWindowSize").flatMap(Self.size)
         windowWidth = size?.width
         windowHeight = size?.height
