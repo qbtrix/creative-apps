@@ -59,14 +59,6 @@ func photoArguments(
 }
 
 extension Journey {
-    /// File > New: Command-N opens the shared New sheet (#4901), and Create makes an image at its default size.
-    func newImage() {
-        app.typeKey("n", modifierFlags: .command)
-        let create = element("suite.newdoc.create")
-        XCTAssert(create.waitForExistence(timeout: 10), "File > New opened no New sheet (suite.newdoc)")
-        create.click()
-    }
-
     /// The window titled `name` (an opened file's name). The title bar follows the name with the
     /// save state as its subtitle ("Saved", "Edited"), so the window's accessibility title is no
     /// longer the bare name and `windows[name]` misses it (#1910); this matches the name anywhere in it.
