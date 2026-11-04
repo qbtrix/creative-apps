@@ -193,9 +193,10 @@ The UI test runner is sandboxed, so `scripts/realperf-watch` (started by
 `scripts/ui-test perf` beside xcodebuild) runs `sample` and `ps` for it and
 writes the 8K photo (7680 x 4320) Photo opens. Pan and zoom have no
 `suite.perf` series, so their round trips (which include XCUITest's own
-overhead) are recorded, not gated; neither are Design's and Flare's canvas
-drags, which publish no `canvas-drag` samples on dev, so those gate on the
-other three checks. Pinch isn't driven: XCUITest on macOS can't make a
+overhead) are recorded, not gated. Canvas drags in every app gate on their
+`canvas-drag` samples, which `.suiteProbes()` turns on by installing the
+viewport's canvas probe; the line also names the five slowest steps
+(`step:ms`), so a p95 reads as a few spikes or as every step. Pinch isn't driven: XCUITest on macOS can't make a
 magnify gesture, so ⌘= / ⌘− stand in. Photo runs with Metal on and off
 (`-suite.rendering gpu|cpu`); Design and Flare have no switch. The journeys
 move the mouse, so they run only in perf-nightly.sh at 04:30, never in a
