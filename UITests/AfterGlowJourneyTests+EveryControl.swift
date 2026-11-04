@@ -96,9 +96,11 @@ final class AfterGlowControlJourneys: XCTestCase {
                 continue
             }
             let before = Self.state(of: control, home)
+            let wasSelected = control.isSelected
             control.click()
             Thread.sleep(forTimeInterval: 0.5)
-            let changed = before != Self.state(of: control, home)
+            // A chip already on (All at launch) picks what is showing: staying selected is its act.
+            let changed = before != Self.state(of: control, home) || (wasSelected && control.isSelected)
             home.shot("control-\(home.slug(id))")
             XCTAssert(changed, "\(id) is enabled but clicking it changed nothing")
             bringBack(home)
