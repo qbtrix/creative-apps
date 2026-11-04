@@ -128,12 +128,12 @@ struct PhotoWindow: View {
         // Every facet but the options: an option step re-runs only the views that show options.
         let _ = session.workspace(reading: .document, .tool, .adjust, .history, .status, .canvas, .file)
         PhotoEditor(
-            model: model, tiles: renderer.tiles, renderMilliseconds: renderer.milliseconds,
-            renderBackend: renderer.backend, note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
+            model: model, tiles: renderer.tiles, note: renderer.failure ?? note, zoom: zoom, onViewport: viewportChanged, onZoom: setZoom, perform: perform,
             straighten: straightenDraft)
             .environment(session)
             .environment(\.photoDragLine, dragLine)
             .environment(\.photoLiveTransform, liveTransform)
+            .environment(\.photoRenderReadout, renderer)
             .focusedSceneValue(\.photoMenu, PhotoMenu(model: model, isPresenting: isPresenting, perform: perform))
             .onChange(of: model.revision) { renderer.show(model) }
             .onAppear { if let rendering { renderer.follow(rendering) { renderer.show(model) } } }
