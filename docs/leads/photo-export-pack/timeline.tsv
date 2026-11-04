@@ -685,3 +685,4 @@ utc	stage	event	ref	note
 2026-11-04T15:28Z	check-in	dev-red #6275 opened 14:59Z: macOS AfterGlowHomeLayoutTests homeAtEachWidth, culprit captain's #6263 (suite), lane opened revert #6277; not ours, left alone; #5353 still a92b4651; no new findings; 49 photo findings
 2026-11-04T16:00Z	check-in	dev-red #6275 still open, revert #6277 open clean (not ours); #5353 still a92b4651 unmerged; no new findings; 49 photo findings
 2026-11-04T16:31Z	check-in	lane revert #6277 merged 16:27Z; dev-red #6275 still open pending next dev run (not ours); #5353 still a92b4651 unmerged; no new findings; 49 photo findings
+2026-11-04T17:03Z	check-in	dev-red #6275 still open: post-revert run 41868641294 at 2aa2b63 red on macos, lane flake re-run 17:02Z (not ours); #5353 still a92b4651 unmerged; no new findings; 49 photo findings
