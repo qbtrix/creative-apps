@@ -4,16 +4,16 @@
 // those pixels through the draft's matrix (`liftPlacement`); no pixel work runs until the release draws the
 // exact frame, the resample Return lays. A layer lifts only when the compositor's plain overs draw it as the
 // canvas would (`liftKey`): a visible, unmasked, unstyled pixel layer at normal blend and opacity in 0...1, whose
-// visible layers above are all at normal blend and opacity in 0...1 (an adjustment layer among them per pixel:
-// no blur, no sharpen), and a box no wider or taller than 16384 px with its margin (the GPU's texture limit).
+// visible layers above are all at normal blend and opacity in 0...1 (an adjustment layer among them unmasked),
+// and a box no wider or taller than 16384 px with its margin (the GPU's texture limit).
 // Anything else draws through the matrix region by region (`transformPreview(live:)`). The pixel layers above
 // render once, canvas-sized, as the cover the compositor lays over the lift (`liftedCover`). The adjustment
 // layers above, then the image's adjustments, tone the lifted pixels; the picture under the lift keeps both, and
 // the cover the ones over its layers. Each toned on its own matches the canvas wherever the lift and the cover
 // are opaque or clear (their soft edges blend toned colours until the release draws the exact frame). A blur or
-// sharpen on the image reads `readMargin` pixels around each pixel, so the lifted pixels carry that margin, clear,
-// on every side and blur alone: the lift's edge softens over the blurred picture under it, close to the canvas
-// and exact again at the release. The picture under the lift keeps the layer's pixels outside the box
+// sharpen on the image or an adjustment layer above reads `readMargin` pixels around each pixel, so the lifted
+// pixels carry those margins, summed, clear on every side, and blur alone: the lift's edge softens over the
+// blurred picture under it, close to the canvas and exact again at the release. The picture under the lift keeps the layer's pixels outside the box
 // (`boxCut`), as commit does, and lacks the layers above. The pixels are the same for every drag of one draft
 // (`liftSprite`), so the canvas makes them once per Free Transform; each drag renders only the picture under
 // them (`liftedBase`). Linux-safe.
@@ -73,7 +73,8 @@ extension PhotoWorkspace {
             var m = try? services.transform.matrix(draft, origin: (layers[at].offsetX, layers[at].offsetY))
         else { return nil }
         // Lifted pixel (0, 0) is layer pixel (part.x - margin, part.y - margin).
-        let (x, y) = (Double(part.x - adjustments.readMargin), Double(part.y - adjustments.readMargin))
+        let margin = liftMargin(above: at)
+        let (x, y) = (Double(part.x - margin), Double(part.y - margin))
         (m.tx, m.ty) = (m.tx + m.a * x + m.c * y, m.ty + m.b * x + m.d * y)
         return m
     }
@@ -124,7 +125,7 @@ extension PhotoWorkspace {
         guard let (at, part) = liftPart, let tiles = pixels[layers[at].id] else { return nil }
         let whole = PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)
         let tones = layers[..<at].reversed().filter { $0.isVisible && $0.opacity > 0 && $0.kind.isAdjustment }
-        let margin = adjustments.readMargin
+        let margin = liftMargin(above: at)
         var bytes: [UInt8]
         if adjustments.isIdentity && tones.isEmpty {
             bytes = try part == whole ? tiles.rgba8() : TiledPixels(tiles.flattened(part)).rgba8()
@@ -162,23 +163,33 @@ extension PhotoWorkspace {
     /// The draft layer's index and the part of its pixels in the draft's box (layer pixels), when it lifts.
     private var liftPart: (Int, PixelRect)? {
         guard let draft = transformDraft, let at = index(of: draft.layerID),
-            layers[..<at].allSatisfy({ !$0.isVisible || Self.covers($0) })
+            layers[..<at].allSatisfy({ !$0.isVisible || covers($0) })
         else { return nil }
         let layer = layers[at]
         guard layer.kind == .pixels, layer.isVisible, layer.blendMode == .normal, layer.style == .none,
             (0...1).contains(layer.opacity), shownMask(of: layer) == nil, let tiles = pixels[layer.id],
             let part = draft.box.offsetBy(-layer.offsetX, -layer.offsetY)
                 .intersection(PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)),
-            part.width + 2 * adjustments.readMargin <= Self.liftLimit, part.height + 2 * adjustments.readMargin <= Self.liftLimit
+            part.width + 2 * liftMargin(above: at) <= Self.liftLimit, part.height + 2 * liftMargin(above: at) <= Self.liftLimit
         else { return nil }
         return (at, part)
     }
 
     /// Whether a visible layer above the lift composites over it as a plain over, so it can ride as the cover, or
-    /// is an adjustment layer per pixel, so it tones the lift.
-    private static func covers(_ layer: PhotoLayer) -> Bool {
-        if case .adjustment(let settings) = layer.kind, settings.readMargin > 0 { return false }
+    /// is an unmasked adjustment layer, so it tones the lift (a mask holds the tone to its own part of the canvas,
+    /// which the lift moves under).
+    private func covers(_ layer: PhotoLayer) -> Bool {
+        if layer.kind.isAdjustment, shownMask(of: layer) != nil { return false }
         return layer.blendMode == .normal && (0...1).contains(layer.opacity)
+    }
+
+    /// The clear margin the lifted pixels carry on every side: the image's read margin plus each visible
+    /// adjustment layer's above the layer at `at`, as the blurs widen it one after another.
+    private func liftMargin(above at: Int) -> Int {
+        layers[..<at].reduce(adjustments.readMargin) { margin, layer in
+            guard layer.isVisible, layer.opacity > 0, case .adjustment(let settings) = layer.kind else { return margin }
+            return margin + settings.readMargin
+        }
     }
 }
 

@@ -2,7 +2,7 @@
   {
     "label": "liftsUnderABlendedCover: a layer under a visible multiply layer lifts, so the drag draws the cover as a plain over",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "layers[..<at].allSatisfy({ !$0.isVisible || Self.covers($0) })",
+    "find": "layers[..<at].allSatisfy({ !$0.isVisible || covers($0) })",
     "replace": "layers[..<at].allSatisfy({ _ in true })",
     "tests": "PhotoTransformLiftTests/aBlendedLayerOrOneUnderABlendedLayerStaysDown"
   },
@@ -44,7 +44,7 @@
   {
     "label": "coverRefused: a layer under a visible plain layer stays down, so its drag resamples on the CPU every sample (#6259)",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "layers[..<at].allSatisfy({ !$0.isVisible || Self.covers($0) })",
+    "find": "layers[..<at].allSatisfy({ !$0.isVisible || covers($0) })",
     "replace": "layers[..<at].allSatisfy({ !$0.isVisible })",
     "tests": "PhotoTransformLiftTests/aLayerUnderAVisibleLayerLiftsUnderItsCover"
   },
@@ -65,7 +65,7 @@
   {
     "label": "marginUnplaced: a blurred lift ignores its margin, so it sits margin pixels off the layer mid-drag",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "let (x, y) = (Double(part.x - adjustments.readMargin), Double(part.y - adjustments.readMargin))",
+    "find": "let (x, y) = (Double(part.x - margin), Double(part.y - margin))",
     "replace": "let (x, y) = (Double(part.x), Double(part.y))",
     "tests": "PhotoTransformLiftTests/aBlurredImageLiftsWithItsMarginBlurred"
   },
@@ -82,5 +82,19 @@
     "find": "for above in 0...at where !base.layers[above].kind.isAdjustment { base.layers[above].isVisible = false }",
     "replace": "for above in 0...at { base.layers[above].isVisible = false }",
     "tests": "PhotoTransformLiftTests/anAdjustmentLayerAboveTonesTheLift"
+  },
+  {
+    "label": "maskedToneLifts: a masked adjustment layer above tones the whole lift, though its mask holds it to one part of the canvas",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "if layer.kind.isAdjustment, shownMask(of: layer) != nil { return false }",
+    "replace": "if layer.kind.isAdjustment, false { return false }",
+    "tests": "PhotoTransformLiftTests/anAdjustmentLayerAboveTonesTheLift"
+  },
+  {
+    "label": "marginSkipsBlurLayers: the lift carries only the image's margin, so a Blur layer above clips the soft edge",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "return margin + settings.readMargin",
+    "replace": "return margin + 0 * settings.readMargin",
+    "tests": "PhotoTransformLiftTests/aBlurLayerAboveLiftsWithTheSummedMargin"
   }
 ]
