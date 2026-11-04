@@ -19,7 +19,7 @@ final class DesignHistoryJourneyTests: XCTestCase {
     /// View > Show History shows the panel with a row per step; View > Hide History hides it.
     @MainActor func testShowHistoryFromViewMenu() {
         let design = Journey("Design", self)
-        design.app.typeKey("n", modifierFlags: .command)
+        design.newDocument()
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 30), "New File showed no canvas")
         for index in 0..<3 {
             let x = 0.15 + Double(index) * 0.2
