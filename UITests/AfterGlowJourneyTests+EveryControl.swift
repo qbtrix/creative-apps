@@ -97,11 +97,15 @@ final class AfterGlowControlJourneys: XCTestCase {
             }
             let before = Self.state(of: control, home)
             let wasSelected = control.isSelected
+            let windows = home.app.windows.count
             control.click()
             Thread.sleep(forTimeInterval: 0.5)
             // A chip already on (All at launch) picks what is showing: staying selected is its act.
             let changed = before != Self.state(of: control, home) || (wasSelected && control.isSelected)
-            home.shot("control-\(home.slug(id))")
+            // A click that opened a panel (Open…) or brought an app forward leaves the home inactive and
+            // dimmed: that shot is kept as proof but isn't audited, which would judge the inactive window.
+            let away = home.app.state != .runningForeground || home.app.windows.count > windows
+            home.shot("control-\(home.slug(id))", screen: away)
             XCTAssert(changed, "\(id) is enabled but clicking it changed nothing")
             bringBack(home)
             home.press(.escape)
