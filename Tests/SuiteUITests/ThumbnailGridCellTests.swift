@@ -9,6 +9,13 @@ import SuiteUI
 import SwiftUI
 import Testing
 
+/// A cell waits (and pulses) only while it has no image and nothing is wrong with the file.
+@Test func onlyACellWithoutAnImageIsLoading() {
+    #expect(ThumbnailItem(id: 1, caption: "a.heic").isLoading)
+    #expect(!ThumbnailItem(id: 1, image: Image(systemName: "photo"), caption: "a.heic").isLoading)
+    #expect(!ThumbnailItem(id: 1, caption: "a.heic", isUnreadable: true).isLoading)
+}
+
 @Test func badgesAreNotDimmedUnlessAsked() {
     #expect(!ThumbnailBadges().dimmed)
     #expect(ThumbnailBadges(dimmed: true).dimmed)

@@ -97,12 +97,14 @@ import Testing
     /// A clean import's notice is success green with the checkmark; a
     /// nothing-new notice is secondary text with the info symbol (#1378).
     @Test func noticeUsesItsStateColor() {
-        let clean = LibraryImportNoticeRow(notice: ImportNotice(folder: "Shoot", added: 26), onClose: nil)
-        #expect(clean.symbol == "checkmark.circle")
-        #expect(clean.tint == SuiteColor.stateSuccess)
-        let nothingNew = LibraryImportNoticeRow(notice: ImportNotice(folder: "Shoot", alreadyKnown: 26), onClose: nil)
-        #expect(nothingNew.symbol == "info.circle")
-        #expect(nothingNew.tint == SuiteColor.textSecondary)
+        let clean = LibraryBrowser.noticeKind(ImportNotice(folder: "Shoot", added: 26))
+        #expect(clean == .success && clean.symbol == "checkmark.circle")
+        #expect(clean.color == SuiteColor.stateSuccess)
+        let nothingNew = LibraryBrowser.noticeKind(ImportNotice(folder: "Shoot", alreadyKnown: 26))
+        #expect(nothingNew == .info && nothingNew.symbol == "info.circle")
+        #expect(nothingNew.color == SuiteColor.textSecondary)
+        let failed = ImportNotice(folder: "Shoot", added: 3, failures: [FileFailure(path: "/a.jpg", reason: "unreadable")])
+        #expect(LibraryBrowser.noticeKind(failed) == .warning)
     }
 
     /// With the window's import actions, the denied empty state offers an
@@ -121,9 +123,8 @@ import Testing
     @Test func noticeListsFailuresByName() {
         let notice = ImportNotice(
             folder: "Shoot", added: 26, failures: [FileFailure(path: "/tmp/Shoot/broken.jpg", reason: "not an image file")])
-        let row = LibraryImportNoticeRow(notice: notice, onClose: nil)
-        #expect(row.failureLines == ["broken.jpg: not an image file"])
-        #expect(LibraryImportNoticeRow.identifier == "library.import.notice")
+        #expect(LibraryBrowser.failureLines(notice) == ["broken.jpg: not an image file"])
+        #expect(LibraryBrowser.importNoticeID == "library.import.notice")
     }
 
     /// The window's File actions: Import Folder…, the notice's Show and its close enabled.

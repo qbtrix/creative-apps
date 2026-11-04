@@ -124,7 +124,7 @@ import Testing
         #expect(HomeGrid.noticeActions(.fileMissing(name: "Cards.design"), hasSelection: false).isEmpty)
     }
 
-    /// #1871: the notice is InlineNotice #780's placeholder in Library's shape, not a tinted slab.
+    /// #1871: the notice is SuiteUI's InlineNotice, bare in the recents' column (no band), not a tinted slab.
     @Test func noticeIsNoTintedBand() throws {
         var root = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
         while root.path != "/", !FileManager.default.fileExists(atPath: root.appendingPathComponent("Package.swift").path) {
@@ -132,7 +132,8 @@ import Testing
         }
         let grid = try String(contentsOf: root.appendingPathComponent("Sources/AfterGlowApp/HomeGrid.swift"), encoding: .utf8)
         #expect(!grid.contains("Tint, in:"))
-        #expect(grid.contains("Label(text, systemImage: systemImage).font(SuiteFont.caption)"))
+        #expect(grid.components(separatedBy: "InlineNotice(").count == 3, "both home notices are InlineNotice")
+        #expect(grid.components(separatedBy: "band: false").count == 3, "both home notices draw bare, with no band")
     }
 
     @Test func previewPillOnlyOnTheFakesAndAFixtureSeedsTheLiveStore() async throws {

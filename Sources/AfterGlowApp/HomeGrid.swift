@@ -1,7 +1,7 @@
 // HomeGrid.swift: the recents (blueprint suite.md 6.1): RECENT with the
 // "Preview data" label on the fakes (a plain placeholder until SuiteUI has a
 // standalone StatusPill, #1790), the app chips, a message in place
-// (InlineNotice #780's placeholder: the missing file, or the removed one with
+// (SuiteUI's InlineNotice: the missing file, or the removed one with
 // Undo), then the grid, the empty sentence with
 // Open… prominent (while it waits, the sentence says why instead of inviting
 // it, #1754), or the no-match sentence. "Missing" sits in a missing
@@ -160,7 +160,7 @@ struct HomeGrid: View, BodyCounted {
     }
 
     private func notice(_ message: SuiteError) -> some View {
-        noticeRow(message.message, systemImage: "exclamationmark.triangle", color: SuiteColor.stateWarning) {
+        InlineNotice(message.message, kind: .warning, identifier: Self.noticeID, band: false) {
             if !Self.noticeActions(message, hasSelection: model.selection != nil).isEmpty {
                 if let ref = selectedRef {
                     Button("Locate…") { HomeInspector.locate(ref, model: model) }
@@ -174,22 +174,12 @@ struct HomeGrid: View, BodyCounted {
 
     /// After Remove from Recents (#1865): says which file went, with Undo beside it.
     private func removedNotice(_ text: String) -> some View {
-        noticeRow(text, systemImage: "trash", color: SuiteColor.textSecondary) {
+        InlineNotice(text, kind: .info, systemImage: "trash", identifier: Self.noticeID, band: false) {
             Button("Undo") { Task { await model.undoRemove(now: Date()) } }
                 .suiteControl(id: "afterglow.home.undo-remove", enabled: true, reason: nil)
         }
     }
 
-    /// InlineNotice #780's placeholder, as Library's notice row draws it (#1871):
-    /// a caption-sized label in the state color and its buttons, no tinted fill.
-    private func noticeRow<Actions: View>(_ text: String, systemImage: String, color: Color,
-                                          @ViewBuilder actions: () -> Actions) -> some View {
-        HStack(spacing: SuiteSpacing.s) {
-            Label(text, systemImage: systemImage).font(SuiteFont.caption).foregroundStyle(color).lineLimit(2)
-            Spacer(minLength: SuiteSpacing.s)
-            actions()
-        }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("afterglow.home.notice")
-    }
+    /// Both notices are SuiteUI's InlineNotice, bare inside the recents' padded column.
+    static let noticeID = "afterglow.home.notice"
 }
