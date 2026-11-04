@@ -5,7 +5,8 @@
 // from DesignCanvas at 50%: Desktop's fill is white near its bottom and where the rectangle was,
 // the ellipse still shows, and the rectangle is painted at its moved place. The parts once laid
 // out one above the other, a third of the page each, so only a band of Desktop and no rectangle
-// showed (captain, 11-01). macOS only.
+// showed (captain, 11-01). An Option-drag lifts its copy the same way, the rectangle still painted
+// where it was (copy-group #6198). macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -17,7 +18,8 @@ import Testing
 
 @MainActor
 @Suite struct DesignMoveLiftPaintTests {
-    @Test func aMoveDragPaintsTheWholePage() throws {
+    /// `option`: an Option-drag, which lifts a copy and leaves the rectangle painted where it was.
+    @Test(arguments: [false, true]) func aMoveDragPaintsTheWholePage(option: Bool) throws {
         var model = DesignWorkspace()
         model.newFile()
         drawOnCanvas(&model, .ellipse, from: (600, 760), to: (900, 960))
@@ -25,8 +27,9 @@ import Testing
         try #require(model.selectedNode?.kind == .rectangle)
         model.selectTool(.move)
         let press = DesignPoint(x: 354, y: 305)
-        model.drag(from: press, to: press, modifiers: .noSnap)
-        model.drag(from: press, to: DesignPoint(x: 454, y: 405), modifiers: .noSnap)
+        let modifiers: DesignModifiers = option ? [.noSnap, .option] : .noSnap
+        model.drag(from: press, to: press, modifiers: modifiers)
+        model.drag(from: press, to: DesignPoint(x: 454, y: 405), modifiers: modifiers)
         try #require(model.moveLift != nil, "the drag is a lifted move")
         let page = try #require(model.selectedPage)
 
@@ -50,10 +53,10 @@ import Testing
             }
         }
         let white = 1.0, shape = 217.0 / 255
-        try shootCanvas(model, "design-canvas-move-lift", zoom: zoom)
+        if !option { try shootCanvas(model, "design-canvas-move-lift", zoom: zoom) }
         #expect(near(100, 900, white), "Desktop's fill near its bottom: \(String(describing: color(100, 900)))")
         #expect(near(1300, 600, white), "Desktop's fill in its middle: \(String(describing: color(1300, 600)))")
-        #expect(near(250, 250, white), "Desktop's fill where the rectangle was: \(String(describing: color(250, 250)))")
+        #expect(near(250, 250, option ? shape : white), "where the rectangle was: \(String(describing: color(250, 250)))")
         #expect(near(750, 860, shape), "the ellipse: \(String(describing: color(750, 860)))")
         #expect(near(454, 405, shape), "the moved rectangle's centre: \(String(describing: color(454, 405)))")
     }

@@ -1,6 +1,7 @@
 // DesignMoveLiftTests.swift: `moveLift`, what the canvas draws a live move from: the page at
 // the press, the moved run's first and last painted node, and the offset so far; nil when no
-// move has moved or the moved layers aren't one run in paint order. Runs on Linux and macOS.
+// move has moved or the moved layers aren't one run in paint order. An Option-drag lifts its copies from
+// the page with the copies made in place. Runs on Linux and macOS.
 import DesignModel
 import Testing
 
@@ -52,4 +53,24 @@ private func threeInAFrame() throws -> DesignWorkspace {
     let lift = try #require(workspace.moveLift)
     #expect((lift.firstID, lift.lastID) == ("node-1", "node-4"))
     #expect(lift.offset == pt(10, 0))
+}
+
+@Test func anOptionDragLiftsItsCopyFromThePageWithTheCopyInIt() throws {
+    var workspace = try threeInAFrame()
+    workspace.selectItem("node-2")
+    let option: DesignModifiers = [.option, .noSnap]
+    workspace.drag(from: pt(150, 150), to: pt(150, 150), modifiers: option)
+    workspace.drag(from: pt(150, 150), to: pt(170, 155), modifiers: option)
+    let copy = try #require(workspace.selectedNodeID)
+    #expect(copy != "node-2")
+    let lift = try #require(workspace.moveLift, "an Option-drag repaints the whole page every step")
+    #expect((lift.firstID, lift.lastID) == (copy, copy))
+    #expect(lift.offset == pt(20, 5))
+    // The copy sits where it was made, over the original, which stays put.
+    let shown = try #require(lift.page.nodes.first?.children)
+    #expect(shown.first { $0.id == copy }?.frame == rc(100, 100, 100, 100))
+    #expect(shown.first { $0.id == "node-2" }?.frame == rc(100, 100, 100, 100))
+    #expect(workspace.frame(copy) == rc(120, 105, 100, 100))
+    workspace.endDrag()
+    #expect(workspace.moveLift == nil)
 }
