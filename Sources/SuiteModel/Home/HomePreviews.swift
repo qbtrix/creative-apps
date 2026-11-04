@@ -1,6 +1,6 @@
 // HomePreviews.swift: the home's Recent card previews (shared-thumbnails ST-3).
-// Each document asks `preview(for:)` once for the window's life; a nil answer
-// shows the app's mark. Generic over the picture so it runs on Linux. Linux-safe.
+// Each document asks `preview(for:)` once for the window's life; until its
+// answer, and after a nil one, the card shows the app's mark. Generic over the picture so it runs on Linux. Linux-safe.
 import Observation
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -54,11 +54,11 @@ public final class HomePreviews<Picture> {
         return answered.contains(ref.fileID) ? .mark : .waiting
     }
 
-    /// The preview, else `fallback` (the recents' own thumbnail), else the mark once answered; nil while waiting.
+    /// The preview, else `fallback` (the recents' own thumbnail), else the app's mark, also while the
+    /// answer is still out, so a loading card already names its app (#1764).
     public func picture(for ref: SuiteDocumentRef, fallback: Picture?) -> Picture? {
         if let picture = pictures[ref.fileID] { return picture }
         if let fallback { return fallback }
-        guard answered.contains(ref.fileID) else { return nil }
         if let cached = marks[ref.app] { return cached }
         let drawn = mark(ref.app)
         marks[ref.app] = drawn
