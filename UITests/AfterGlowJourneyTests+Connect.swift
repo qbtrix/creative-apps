@@ -41,10 +41,8 @@ extension AfterGlowHelpJourneyTests {
         let link = home.appendingPathComponent(".local/bin/afterglow")
         sheet.descendants(matching: .any)["suite.help.connect.install"].click()
         XCTAssertFalse(FileManager.default.fileExists(atPath: link.path), "the link was written before Install")
-        // The alerts cover the sheet, which they dim: screen shots, as proof, not audited (help-connect audits the sheet).
-        launcher.shot("help-install-alert", screen: true)
-        launcher.click("Install", in: .sheet)
-        launcher.shot("help-install", screen: true)
+        launcher.shot("help-install-alert")
+        launcher.click("Install", in: .sheet, step: "help-install")
         // OK on the result: the alert that says it's installed comes after the write.
         launcher.click("OK", in: .sheet)
         let target = try? FileManager.default.destinationOfSymbolicLink(atPath: link.path)
