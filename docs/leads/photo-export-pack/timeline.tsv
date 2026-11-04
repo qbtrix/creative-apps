@@ -687,3 +687,4 @@ utc	stage	event	ref	note
 2026-11-04T16:31Z	check-in	lane revert #6277 merged 16:27Z; dev-red #6275 still open pending next dev run (not ours); #5353 still a92b4651 unmerged; no new findings; 49 photo findings
 2026-11-04T17:03Z	check-in	dev-red #6275 still open: post-revert run 41868641294 at 2aa2b63 red on macos, lane flake re-run 17:02Z (not ours); #5353 still a92b4651 unmerged; no new findings; 49 photo findings
 2026-11-04T17:35Z	check-in	dev-red #6275 real: re-run at 2aa2b63 failed macOS again, no test named (build or crash), range main..2aa2b63 is only #6263 + its revert #6277, lane hands culprit to a human; no Photo PR in range, not ours; #5353 still a92b4651; no new findings; 49 photo findings
+2026-11-04T18:07Z	check-in	quiet: dev-red #6275 still open, culprit left to a human (not ours); #5353 still a92b4651; no merges, no new findings; 49 photo findings
