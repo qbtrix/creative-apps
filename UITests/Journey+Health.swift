@@ -129,6 +129,11 @@ extension Journey {
             let p95 = Self.p95(steps)
             parts.insert(String(format: "steps %d p95 %@ ms (budget %.0f ms, %@)", steps.count,
                                 p95.map { String(format: "%.0f", $0) } ?? "n/a", Health.stepBudget, series), at: 0)
+            // The five slowest steps as step:ms, in step order, so a p95 reads as spikes or as every step.
+            let slowest = steps.enumerated().sorted { $0.element > $1.element }.prefix(5).sorted { $0.offset < $1.offset }
+            if !slowest.isEmpty {
+                parts.insert("slowest " + slowest.map { String(format: "%d:%.0f", $0.offset, $0.element) }.joined(separator: " "), at: 1)
+            }
             if let p95 { XCTAssertLessThanOrEqual(p95, Health.stepBudget, "\(label): step p95 \(Int(p95)) ms over \(Int(Health.stepBudget)) ms") }
         } else {
             let p95 = Self.p95(roundTrips.map { $0 * 1000 })
