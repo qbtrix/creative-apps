@@ -53,6 +53,12 @@ import Testing
         #expect(field.accessibilityIdentifier() == "afterglow.home.search")
         #expect(cell.searchButtonCell?.accessibilityIdentifier() == "afterglow.home.search.search")
         #expect(cell.cancelButtonCell?.accessibilityIdentifier() == "afterglow.home.search.cancel")
+        // A toolbar item's field AppKit rebuilt (collapsed, another page) is named on the next window update.
+        let item = try #require(window.toolbar?.items.lazy.compactMap { $0 as? NSSearchToolbarItem }.first)
+        let rebuilt = NSSearchField()
+        item.searchField = rebuilt
+        window.update()
+        #expect(item.searchField.accessibilityIdentifier() == "afterglow.home.search")
     }
 }
 #endif

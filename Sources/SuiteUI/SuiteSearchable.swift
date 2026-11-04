@@ -5,7 +5,9 @@
 // journeys need (#2215). A zero-size AppKit view behind the content finds the
 // window's search fields once it is in a window (and again on the next turn of
 // the run loop, after the toolbar is built) and names the field `<identifier>`,
-// its buttons `<identifier>.search` and `<identifier>.cancel`.
+// its buttons `<identifier>.search` and `<identifier>.cancel`. On each window
+// update it names a toolbar search item's field again, which AppKit rebuilds
+// when the item collapses or the page changes.
 import AppKit
 import SwiftUI
 
@@ -36,7 +38,21 @@ private struct SearchFieldNamer: NSViewRepresentable {
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
+            NotificationCenter.default.removeObserver(self, name: NSWindow.didUpdateNotification, object: nil)
+            if let window {
+                NotificationCenter.default.addObserver(self, selector: #selector(windowDidUpdate),
+                                                       name: NSWindow.didUpdateNotification, object: window)
+            }
             nameSoon()
+        }
+
+        /// A toolbar search item rebuilds its field when it collapses or the page changes; only the
+        /// toolbar's items are read here, so this per-update pass stays cheap.
+        @objc private func windowDidUpdate() {
+            guard let name = identifier?.rawValue else { return }
+            for item in window?.toolbar?.items ?? [] {
+                if let field = (item as? NSSearchToolbarItem)?.searchField { Self.name(field, name) }
+            }
         }
 
         /// Names the fields now and once more after this turn, when a new toolbar has its items.
@@ -47,12 +63,15 @@ private struct SearchFieldNamer: NSViewRepresentable {
 
         private func name() {
             guard let name = identifier?.rawValue, let root = window?.contentView?.superview else { return }
-            for field in Self.searchFields(in: root) where field.accessibilityIdentifier() != name {
-                field.setAccessibilityIdentifier(name)
-                let cell = field.cell as? NSSearchFieldCell
-                cell?.searchButtonCell?.setAccessibilityIdentifier(name + ".search")
-                cell?.cancelButtonCell?.setAccessibilityIdentifier(name + ".cancel")
-            }
+            for field in Self.searchFields(in: root) { Self.name(field, name) }
+        }
+
+        private static func name(_ field: NSSearchField, _ name: String) {
+            guard field.accessibilityIdentifier() != name else { return }
+            field.setAccessibilityIdentifier(name)
+            let cell = field.cell as? NSSearchFieldCell
+            cell?.searchButtonCell?.setAccessibilityIdentifier(name + ".search")
+            cell?.cancelButtonCell?.setAccessibilityIdentifier(name + ".cancel")
         }
 
         private static func searchFields(in view: NSView) -> [NSSearchField] {
