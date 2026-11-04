@@ -1,4 +1,5 @@
 [
   {"label": "CLI export skips the dotLottie check", "file": "Sources/AfterGlowCLICore/CLI.swift", "find": "if files.count == 1, let why = misnamed(out, format: format) { throw Refusal.usage(why) }", "replace": "", "tests": "FlareLottieOpenCLITests"},
-  {"label": "misnamed never names .lottie", "file": "Sources/AfterGlowCLICore/CLI.swift", "find": "target.lowercased().hasSuffix(\".lottie\")", "replace": "target.lowercased().hasSuffix(\".dotlottie\")", "tests": "FlareLottieOpenCLITests"}
+  {"label": "misnamed never names .lottie", "file": "Sources/AfterGlowCLICore/CLI.swift", "find": "target.lowercased().hasSuffix(\".lottie\")", "replace": "target.lowercased().hasSuffix(\".dotlottie\")", "tests": "FlareLottieOpenCLITests"},
+  {"label": "a refused open is failed, not data", "file": "Sources/AfterGlowCLICore/CLI.swift", "find": "            throw Refusal.data(message)\n", "replace": "            throw Refusal(code: Exit.failed, kind: \"failed\", message: message)\n", "tests": "CLIArgsTests"}
 ]

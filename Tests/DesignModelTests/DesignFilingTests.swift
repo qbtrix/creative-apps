@@ -2,7 +2,8 @@
 // through `services.filing`. Every fixture encodes to the bytes DesignFile wrote
 // before the move (`empty`'s file pinned as a literal, the others by length and
 // an FNV-1a hash taken from those bytes) and decodes back to the same document
-// (QD-V1); the four bad files of J16 give their reasons word for word; and a
+// (QD-V1); the four bad files of J16 give their reasons word for word, on
+// FakeFiling too, which reads a real file through LiveFiling; and a
 // refused open leaves the workspace's pages as they were. Runs on Linux and
 // macOS.
 @testable import DesignModel
@@ -82,13 +83,21 @@ import Foundation
         #expect(DesignWorkspace().services.filing is LiveFiling)
     }
 
-    @Test func badFilesGiveTheirReasons() {
+    /// Both filings: FakeFiling reads a file in the real format through LiveFiling, so J16 also runs on fakes (#6199).
+    @Test(arguments: ["live", "fake"])
+    func badFilesGiveTheirReasons(_ services: String) {
+        let filing: any DocumentFiling = services == "fake" ? FakeFiling() : LiveFiling()
         for bad in Self.badFiles {
             let thrown: DesignFileError?
-            do { _ = try LiveFiling().decode(bad.data); thrown = nil } catch { thrown = error }
-            #expect(thrown == bad.error, "\(bad.name)")
-            #expect(thrown?.reason == bad.reason, "\(bad.name)")
+            do { _ = try filing.decode(bad.data); thrown = nil } catch { thrown = error }
+            #expect(thrown == bad.error, "\(services) \(bad.name)")
+            #expect(thrown?.reason == bad.reason, "\(services) \(bad.name)")
         }
+    }
+
+    @Test func fakeFilingOpensARealFile() throws {
+        let document = DesignDocument(pages: try Self.fixture("cards").pages)
+        #expect(try FakeFiling().decode(LiveFiling().encode(document)) == document)
     }
 
     @Test func aRefusedOpenKeepsThePages() throws {

@@ -5,7 +5,7 @@
 // view itself, the status line's `design.status.save`, drawn by SuiteUI's
 // EditorSaveStatus (an accent dot while edited). A failed save shows its reason
 // in the window's alert and leaves the state at "Edited". The window's edited
-// dot waits on a SuiteUI window modifier (#2861), not a copy in this target.
+// dot is SuiteUI's `.suiteDocumentEdited(model.isDirty)` on DesignEditor's window.
 import DesignModel
 import SuiteUI
 import SwiftUI

@@ -18,7 +18,8 @@
 // text being typed. New File clears that URL, so Save then asks for a name; Undo
 // and Redo of New File swap it back with the document they restore, so Save
 // always writes the file that document belongs to (#436). Two launch arguments let the UI journeys skip the panels:
-// `-DesignOpenFile <file path>` opens that file once, in the first window, and
+// `-DesignOpenFile <file path>` opens that file once, in the first window (a
+// `-DesignFixture` beside it is ignored, so the file is never loaded over), and
 // `-DesignSaveTo <file path>` makes Save and Save As write exactly that path.
 // DesignWindowOptions reads three more: `-DesignServices fake` (every window),
 // `-DesignFixture <name>` (a fixture opened unsaved in the first window; an
@@ -434,7 +435,7 @@ struct DesignWindow: View, BodyCounted {
         } else if launch?.startsNewFile == true {
             perform(.newFile)
         } else {
-            openLaunchFile()
+            openLaunchFile(options)
             applyLaunchOptions(options)
         }
     }
@@ -461,8 +462,9 @@ struct DesignWindow: View, BodyCounted {
         }
     }
 
-    private func openLaunchFile() {
-        guard !Self.launchFileOpened, let path = UserDefaults.standard.string(forKey: "DesignOpenFile") else { return }
+    /// `-DesignOpenFile`, once; it wins over `-DesignFixture` (DesignWindowOptions drops the fixture).
+    private func openLaunchFile(_ options: DesignWindowOptions) {
+        guard !Self.launchFileOpened, let path = options.openFile else { return }
         Self.launchFileOpened = true
         open(URL(fileURLWithPath: path))
     }

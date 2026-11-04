@@ -6,15 +6,13 @@
 // Each open ends in one system alert (DesignFileProblem) titled
 // "<file> can't be opened." whose message is the reason word for word from
 // DesignFileError, so no empty text field trips the contrast audit (#3052); after OK the window stays empty (the New File empty
-// state, no canvas). Live services only: FakeFiling has no version check, so
-// a fake-mode run skips. One shot per file with its alert up,
-// `design-bad-files-<n>`, and one after OK, `design-bad-files-<n>-ok`.
+// state, no canvas). It runs on live services and again on fakes, where
+// FakeFiling reads a real-format file through LiveFiling and gives the same
+// reasons. One shot per file with its alert up,
+// `design-bad-files-<n>` (`design-bad-files-fake-<n>` on fakes), and one after OK, `-ok`.
 import XCTest
 
 final class DesignBadFilesJourneyTests: XCTestCase {
-    /// The services this journey runs on; `-DesignServices fake` would open on FakeFiling.
-    private static let services = "live"
-
     /// A rectangle layer with `id`, in the file format's own keys (DesignFilingTests' node).
     private static func node(_ id: String) -> String {
         #"{"children":[],"cornerRadius":0,"fill":{"blue":217,"green":217,"red":217},"frame":{"height":80,"width":100,"x":100,"y":100},"id":""#
@@ -35,13 +33,15 @@ final class DesignBadFilesJourneyTests: XCTestCase {
 
     /// J16: four bad files, four alerts in words, the window left empty.
     @MainActor func testOpenBadFiles() throws {
-        try walkBadFiles(services: Self.services)
+        try walkBadFiles(services: "live")
+    }
+
+    /// J16 on `-DesignServices fake`: FakeFiling refuses the same four files in the same words.
+    @MainActor func testOpenBadFilesOnFakes() throws {
+        try walkBadFiles(services: "fake")
     }
 
     @MainActor private func walkBadFiles(services: String) throws {
-        if services == "fake" {
-            throw XCTSkip("J16 runs on live services only: FakeFiling has no version check")
-        }
         let folder = FileManager.default.temporaryDirectory.appending(path: "design-bad-files-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
@@ -50,7 +50,7 @@ final class DesignBadFilesJourneyTests: XCTestCase {
             try item.data.write(to: URL(fileURLWithPath: path))
             let design = Journey("Design", self, arguments: ["-DesignServices", services, "-DesignOpenFile", path])
             XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened for \(item.file)")
-            let step = "bad-files-\(index + 1)"
+            let step = "bad-files-\(services == "fake" ? "fake-" : "")\(index + 1)"
 
             let sheet = design.app.sheets.firstMatch
             let alert = sheet.waitForExistence(timeout: 30) ? sheet : design.app.dialogs.firstMatch
