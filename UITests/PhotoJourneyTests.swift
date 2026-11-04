@@ -241,7 +241,7 @@ final class PhotoJourneyTests: XCTestCase {
         // The sheet keeps JPEG; the lowest quality writes a smaller file.
         photo.click("Export", in: .window)
         XCTAssert(quality.waitForExistence(timeout: 5), "the Export sheet forgot JPEG")
-        quality.adjust(toNormalizedSliderPosition: 0)
+        photo.scrub(quality, by: -0.45) // past the left end: the lowest quality
         photo.shot("export-quality")
         photo.click("Export", in: .sheet)
         XCTAssert(Self.waitForFile(jpg), "the low-quality export wrote no journey.jpg")
