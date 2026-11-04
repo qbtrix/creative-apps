@@ -26,7 +26,8 @@ final class AfterGlowControlJourneys: XCTestCase {
     /// The menu items `.suiteEditor` gives every editor and the launcher has too, by menu: a title or an id.
     static let editorMenus: [(menu: String, item: String)] = [
         ("Window", "Switch To"), ("Window", "AI Access…"),
-        ("Help", "suite.help.report-problem"), ("Help", "suite.help.beta-notes"),
+        // Help's items by title: SwiftUI drops a Commands item's identifier, as XJ-RP finds them.
+        ("Help", "Report a Problem…"), ("Help", "Beta Notes"),
     ]
 
     @MainActor func testEveryControlActsOrSaysWhy() {
@@ -96,10 +97,17 @@ final class AfterGlowControlJourneys: XCTestCase {
                 continue
             }
             let before = Self.state(of: control, home)
+            let wasSelected = control.isSelected
+            let windows = home.app.windows.count
             control.click()
             Thread.sleep(forTimeInterval: 0.5)
-            let changed = before != Self.state(of: control, home)
-            home.shot("control-\(home.slug(id))")
+            // A chip already on (All at launch) picks what is showing: staying selected is its act.
+            let changed = before != Self.state(of: control, home) || (wasSelected && control.isSelected)
+            // A click that opened a panel (Open…'s sheet) or brought an app forward leaves the home covered
+            // or inactive: that shot is kept as proof but isn't audited, which would judge the covered window.
+            let away = home.app.state != .runningForeground || home.app.windows.count > windows
+                || home.app.sheets.firstMatch.exists || home.app.dialogs.firstMatch.exists
+            home.shot("control-\(home.slug(id))", screen: away)
             XCTAssert(changed, "\(id) is enabled but clicking it changed nothing")
             bringBack(home)
             home.press(.escape)

@@ -64,10 +64,11 @@ import Testing
         let pending = makeLive().services.pending
         var expected = SuiteServices.slotFeatures.mapValues(SuiteIdentity.notConnected)
         let live = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences", "onboarding",
-                    "pasteboard", "text", "media", "thumbnails"]
+                    "pasteboard", "text", "media", "thumbnails", "routing"]
         for member in live { expected[member] = nil }
         #expect(pending == expected)
-        #expect(pending.count == 5)
+        #expect(pending.count == 4)
+        #expect(pending["routing"] == nil)
         #expect(pending["text"] == nil)
         #expect(pending["media"] == nil)
         #expect(pending["thumbnails"] == nil)
@@ -89,7 +90,7 @@ import Testing
                                     "onboarding", "thumbnails", "home", "media", "text"]
         #expect(Set(SuiteServices.slotFeatures.keys) == members)
         let live: Set<String> = ["recents", "creating", "home", "switching", "sending", "receiving", "preferences",
-                                  "onboarding", "pasteboard", "text", "media", "thumbnails"]
+                                  "onboarding", "pasteboard", "text", "media", "thumbnails", "routing"]
         #expect(Set(pending.keys).union(live) == members)
     }
 

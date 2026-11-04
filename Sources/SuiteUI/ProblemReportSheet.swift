@@ -51,6 +51,9 @@ public struct ProblemReportSheet: View, BodyCounted {
                     .frame(maxWidth: .infinity, alignment: .leading).padding(SuiteSpacing.s)
             }
             .frame(height: SuiteSize.contentMinimum.height / 2)
+            // No scroller: a legacy scroller's page area is an unnamed button with no identifier to the app
+            // audit (as LayerTreeList); the report still scrolls by wheel, trackpad and keyboard.
+            .scrollIndicators(.never)
             .background(SuiteColor.card, in: RoundedRectangle(cornerRadius: SuiteRadius.control))
             .accessibilityIdentifier(Self.identifier("report"))
             HStack(spacing: SuiteSpacing.s) {
