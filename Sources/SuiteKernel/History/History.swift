@@ -33,6 +33,9 @@ public protocol HistoryReading: Sendable {
     var undoSerial: Int? { get }
     /// The serials of every step the history holds (undone ones included), nil when the reader doesn't track them.
     var stepSerials: Set<Int>? { get }
+    /// The id of the state the document is at, new after every record, fold, undo or redo; nil when the reader
+    /// doesn't track it.
+    var stepID: Int? { get }
 }
 
 extension HistoryReading {
@@ -41,6 +44,8 @@ extension HistoryReading {
     /// A history that doesn't track serials names none, so a batch report keeps every step's name.
     public var undoSerial: Int? { nil }
     public var stepSerials: Set<Int>? { nil }
+    /// A history without step ids names an edit's step whether or not it recorded one.
+    public var stepID: Int? { nil }
 }
 
 /// Who made a history step: the person at the app, or an agent over a live call, inside a named request or not.
@@ -139,6 +144,7 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
     public var undoSerial: Int? { done.last?.serial }
     /// The serials of every step held, undone ones included.
     public var stepSerials: Set<Int>? { Set(done.map(\.serial) + undone.map(\.serial)) }
+    public var stepID: Int? { currentStepID }
 
     /// Hands out the next id; the counter never rewinds.
     private mutating func nextID() -> Int {

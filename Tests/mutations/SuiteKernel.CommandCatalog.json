@@ -2,8 +2,8 @@
   {
     "label": "unavailableChangesNothing: availability is checked on the copy after the run",
     "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
-    "find": "        if let why = spec.availability(target).why { throw .unavailable(id: id, why: why) }\n        var copy = target\n        let result = try Self.perform(spec, params, on: &copy)\n",
-    "replace": "        var copy = target\n        let result = try Self.perform(spec, params, on: &copy)\n        if let why = spec.availability(copy).why { throw .unavailable(id: id, why: why) }\n",
+    "find": "        if let why = spec.availability(target).why { throw .unavailable(id: id, why: why) }\n        let was = history(target).stepID\n        var copy = target\n        let result = try Self.perform(spec, params, on: &copy)\n",
+    "replace": "        let was = history(target).stepID\n        var copy = target\n        let result = try Self.perform(spec, params, on: &copy)\n        if let why = spec.availability(copy).why { throw .unavailable(id: id, why: why) }\n",
     "tests": "CommandCatalogTests"
   },
   {
@@ -23,8 +23,8 @@
   {
     "label": "undoStepOnlyForEdits: a query or view run reports the history's last step",
     "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
-    "find": "undoStep: spec.undoable ? history(target).undoName : nil)",
-    "replace": "undoStep: history(target).undoName)",
+    "find": "undoStep: spec.undoable && recorded ? now.undoName : nil)",
+    "replace": "undoStep: now.undoName)",
     "tests": "CommandCatalogTests"
   },
   {
@@ -67,6 +67,20 @@
     "file": "Sources/SuiteKernel/History/History.swift",
     "find": "    public var undoSerial: Int? { done.last?.serial }",
     "replace": "    public var undoSerial: Int? { done.last?.idAfter }",
+    "tests": "BatchFoldedStepTests"
+  },
+  {
+    "label": "recordedNothingNamesPrevious: an edit that recorded nothing names the step before it",
+    "file": "Sources/SuiteKernel/Commands/CommandCatalog.swift",
+    "find": "recorded = was == nil || now.stepID != was",
+    "replace": "recorded = true || now.stepID != was",
+    "tests": "BatchFoldedStepTests"
+  },
+  {
+    "label": "historyHidesStepID: the kernel history reads no step id, so a no-op edit names the step before it",
+    "file": "Sources/SuiteKernel/History/History.swift",
+    "find": "    public var stepID: Int? { currentStepID }",
+    "replace": "    public var stepID: Int? { nil }",
     "tests": "BatchFoldedStepTests"
   }
 ]

@@ -9,7 +9,8 @@
 // steps the Rotation row 120 times, as VoiceOver adjusts it. The draft is a
 // preview, so the window's editor body (a debug-only counter) runs at most 3
 // times either way; `slowCornerDragInOneBody` pauses the drag past the live
-// copy's quiet time, pointer down, and the body runs once (#4795). The window needs `allowsWindowActivationEvents`: a test
+// copy's quiet time, pointer down, and the body runs once (#4795): the render
+// time the release's picture publishes reaches the status line alone, not the window. The window needs `allowsWindowActivationEvents`: a test
 // process only sends activation clicks, and the handles are a SwiftUI gesture.
 // Each test checks the draft moved: the drag grew its box, the scrub turned it
 // (`setTransform`, PT-5). A scrub's steps run on the window's live copy, which

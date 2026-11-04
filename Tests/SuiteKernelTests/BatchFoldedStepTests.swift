@@ -1,6 +1,7 @@
 // BatchFoldedStepTests.swift: a batch report names only the undo steps the history still holds. A draft
 // step a later commit folds into its own one step (Photo's Scale inside Free Transform) loses its
-// `undoStep`, while steps a run coalesces or an undo moves to Redo keep theirs.
+// `undoStep`, while steps a run coalesces or an undo moves to Redo keep theirs. An edit that records
+// nothing (an unchanged draft's commit) names no step, not the one before it.
 import Foundation
 import Testing
 import SuiteKernel
@@ -16,6 +17,7 @@ struct FoldDoc: Sendable {
     static let catalog = (try? CommandCatalog<FoldDoc>(app: "fold", [
         edit("value.move") { $0.history.record("Move", $0.value); $0.value += 1 },
         edit("value.nudge") { $0.history.record("Nudge", $0.value, key: "nudge"); $0.value += 1 },
+        edit("value.same") { _ in },
         edit("draft.scale") { $0.history.record("Scale", $0.value); $0.value *= 2 },
         edit("draft.commit") { doc in
             var value = doc.value
@@ -48,5 +50,13 @@ struct FoldDoc: Sendable {
                                               on: &doc, atomic: false)
         #expect(doc.history.steps == ["Nudge", "Move"] && doc.history.index == 1)
         #expect(report.steps.map(\.undoStep) == ["Nudge", "Nudge", "Move", nil])
+    }
+
+    @Test func anEditThatRecordsNothingNamesNoStep() throws {
+        var doc = FoldDoc()
+        _ = try FoldDoc.catalog.run("value.move", params: .object([:]), on: &doc)
+        #expect(try FoldDoc.catalog.run("value.same", params: .object([:]), on: &doc).undoStep == nil)
+        let report = FoldDoc.catalog.runBatch(["value.move", "value.same"].map(FoldDoc.step), on: &doc, atomic: true)
+        #expect(report.steps.map(\.undoStep) == ["Move", nil])
     }
 }

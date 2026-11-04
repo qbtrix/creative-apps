@@ -8,7 +8,9 @@
 // tooltip and accessibility hint say it is built-in sample data. The window
 // clears the message 4 s after it appears (PhotoWindow's `clearStatus` task);
 // with no message only the pills show. In a window it reads the PhotoSession's
-// `status` facet; without one (the snapshots) the workspace it was given.
+// `status` facet and the render time and backend off the window's CanvasRenderer
+// (`photoRenderReadout`), so a readout re-runs only this line, never the window;
+// without them (the snapshots) the values it was given.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -21,6 +23,7 @@ struct PhotoStatusLine: View {
     /// The backend that drew the picture: CoreRender's CPU backend ("cpu") or the GPU's name; nil leaves it out.
     var renderBackend: String?
     @Environment(PhotoSession.self) private var session: PhotoSession?
+    @Environment(\.photoRenderReadout) private var readout
 
     init(model: PhotoWorkspace, zoom: Double, note: String? = nil, renderMilliseconds: Double? = nil,
          renderBackend: String? = nil) {
@@ -47,6 +50,8 @@ struct PhotoStatusLine: View {
 
     var body: some View {
         let model = self.model
+        let renderMilliseconds = readout?.milliseconds ?? renderMilliseconds
+        let renderBackend = readout?.backend ?? renderBackend
         HStack(spacing: 0) {
             if let message = model.statusMessage {
                 Label(message, systemImage: "exclamationmark.circle")
@@ -72,4 +77,9 @@ struct PhotoStatusLine: View {
         }
         .background(SuiteColor.panel)
     }
+}
+
+extension EnvironmentValues {
+    /// The window's renderer, whose render time and backend the status line shows; nil outside a PhotoWindow.
+    @Entry var photoRenderReadout: CanvasRenderer?
 }
