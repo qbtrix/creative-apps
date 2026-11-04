@@ -53,7 +53,8 @@ struct HomeWindow: View {
             let bridge = self.bridge
             Task { await bridge.handOff(actions) }
         })
-        .searchable(text: Binding(get: { model.query }, set: { model.search($0, now: Date()) }))
+        .suiteSearchable(text: Binding(get: { model.query }, set: { model.search($0, now: Date()) }),
+                         identifier: "afterglow.home.search")
         .task { await model.reload(now: Date()); await model.observe(now: { Date() }) }
         .task(id: model.state.cards.compactMap(\.item.thumbnail)) {  // load each thumbnail once
             for path in model.state.cards.compactMap(\.item.thumbnail) where images[path] == nil {

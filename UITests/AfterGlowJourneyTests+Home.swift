@@ -104,13 +104,9 @@ extension AfterGlowJourneyTests {
         element.label.isEmpty ? (element.value as? String) ?? "" : element.label
     }
 
-    /// The chip row's Design button: titled Design, not a New tile, right of the sidebar's Design row.
+    /// The Design filter chip by its own identifier (#2041). A search by label also found the
+    /// switcher's Design item in the toolbar, whose click left the cards unfiltered (#2215).
     @MainActor static func designChip(_ home: Journey) -> XCUIElement {
-        let sidebar = home.element("suite.sidebar").frame
-        let titled = home.app.windows.firstMatch.buttons
-            .matching(NSPredicate(format: "label == 'Design' AND NOT (identifier BEGINSWITH 'afterglow.home.new.')"))
-        let chip = titled.allElementsBoundByIndex.first { $0.frame.minX >= sidebar.maxX }
-        // Past the last match: an element that doesn't exist, so the caller's check fails.
-        return chip ?? titled.element(boundBy: titled.count)
+        home.element("afterglow.home.filter.design")
     }
 }
