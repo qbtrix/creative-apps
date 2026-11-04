@@ -1,8 +1,9 @@
 // HomeInspector.swift: the home's inspector (blueprint suite.md 6.1, HM-2b).
 // No selection: the one sentence. A selected card: InspectorHeader (name; app,
-// last used, path), then Open, Open In ▸ (disabled until recents-open-in
-// routes a file), Show in Finder, Locate… on a missing card and Remove from
-// Recents, each an InspectorAction listed as afterglow.home.inspector.<name>.
+// last used, path), then Open, one Open in <App> per other app that reads the
+// file (afterglow.home.inspector.openIn.<app>; a single disabled Open In saying
+// why when there is none), Show in Finder, Locate… on a missing card and Remove
+// from Recents, each an InspectorAction listed as afterglow.home.inspector.<name>.
 // Open waits on `sending` as the New tiles do.
 import AppKit
 import SuiteModel
@@ -42,15 +43,12 @@ struct HomeInspector: View {
     private func actions(_ card: RecentCard) -> [ToolbarAction] {
         let ref = card.item.ref
         let missing = card.isMissing ? SuiteError.fileMissing(name: ref.displayName).message : nil
-        let openIn = services.pending["routing"] ?? SuiteServices.notConnected("routing")
-            ?? SuiteIdentity.notConnected("recents-open-in")
         var list = [
             ToolbarAction("Open", systemImage: "arrow.up.forward.app", unavailableHelp: missing ?? services.pending["sending"],
                           identifier: "afterglow.home.inspector.open") {
                 Task { await model.openSelection(now: Date()) }
             },
-            ToolbarAction("Open In", systemImage: "square.and.arrow.up.on.square", unavailableHelp: openIn,
-                          identifier: "afterglow.home.inspector.openIn"),
+        ] + openIn + [
             ToolbarAction("Show in Finder", systemImage: "folder", unavailableHelp: missing,
                           identifier: "afterglow.home.inspector.showInFinder") {
                 NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: ref.path)])
@@ -66,6 +64,20 @@ struct HomeInspector: View {
             Task { await model.removeSelection(now: Date()) }
         })
         return list
+    }
+
+    /// One Open in <App> per other reader of the card's type; with none, one disabled Open In saying why.
+    private var openIn: [ToolbarAction] {
+        if let reason = model.openInReason {
+            return [ToolbarAction("Open In", systemImage: "square.and.arrow.up.on.square", unavailableHelp: reason,
+                                  identifier: "afterglow.home.inspector.openIn")]
+        }
+        return model.openInTargets.map { app in
+            ToolbarAction("Open in \(app.displayName)", systemImage: "square.and.arrow.up.on.square",
+                          identifier: "afterglow.home.inspector.openIn.\(app.rawValue)") {
+                Task { await model.openSelection(in: app, now: Date()) }
+            }
+        }
     }
 
     /// Locate…: the person picks where the file went; the card re-points to
