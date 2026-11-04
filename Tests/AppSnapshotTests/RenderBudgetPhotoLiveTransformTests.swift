@@ -123,7 +123,7 @@ extension BodyCountSuites {
             try await w.settle(200)
             let during = Self.resamples() - before
             let lifted = try await Self.lifted(w)
-            let covered = Self.canvas(in: w.host)?.liftCover != nil
+            let covered = Self.canvas(in: w.host)?.layer.map(Self.hasCover) == true
             send(.endDrag)
             #expect(during == 0, "\(blocker): the drag resampled the layer on the CPU \(during) times before the release")
             #expect(lifted, "\(blocker): the drag never lifted the layer")
@@ -168,6 +168,11 @@ extension BodyCountSuites {
         }
 
         /// The window's canvas host view.
+        /// Whether a layer named for the live cover sits anywhere under `layer`.
+        static func hasCover(_ layer: CALayer) -> Bool {
+            layer.name?.hasSuffix(".live-cover") == true || (layer.sublayers ?? []).contains(where: hasCover)
+        }
+
         static func canvas(in view: NSView) -> CanvasHostView? {
             if let host = view as? CanvasHostView { return host }
             for child in view.subviews { if let found = canvas(in: child) { return found } }
@@ -467,7 +472,7 @@ enum LiftBlocker: String, CaseIterable, CustomStringConvertible, Sendable {
     /// A white `width` x `height` image with the blocker in place and Free Transform begun on its one pixel layer.
     func draft(width: Int, height: Int) throws -> PhotoWorkspace {
         var model = PhotoWorkspace()
-        try model.newImage(DocumentSetup(width: width, height: height))
+        try model.newImage(DocumentSetup(width: Double(width), height: Double(height)))
         let background = try #require(model.layers.first?.id)
         switch self {
         case .levels:
