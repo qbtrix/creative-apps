@@ -9,10 +9,21 @@
 // index from `app.menus` can vanish between the count and the read while a
 // menu closes, which failed a run with "No matches found" (run 38814195169).
 // An inspector row gives its identifier to its label text as well as its
-// menu button, so `inspectorMenu` matches the button by type.
+// menu button, so `inspectorMenu` matches the button by type. `newDocument`
+// is File > New through the shared New sheet that Design and Photo open.
 import XCTest
 
 extension Journey {
+    /// File > New: once a window is up, Command-N opens the shared New sheet (Photo #4901, Design's
+    /// DesignNewDocumentSheet), and Create makes a document at the sheet's default size.
+    func newDocument() {
+        XCTAssert(app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
+        app.typeKey("n", modifierFlags: .command)
+        let create = element("suite.newdoc.create")
+        XCTAssert(create.waitForExistence(timeout: 10), "File > New opened no New sheet (suite.newdoc)")
+        create.click()
+    }
+
     /// Whether any of the app's menus is on screen.
     func aMenuIsUp() -> Bool {
         !shownMenus().isEmpty
