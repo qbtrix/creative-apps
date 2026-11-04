@@ -179,8 +179,17 @@ struct FlareCanvas: View {
     /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
     /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
     @State private var driver: SuitePlaybackDriver?
+    @Environment(\.flareRefreshLink) private var makeLink
+
+    #if DEBUG
+    /// The frame the last canvas body showed and whether it was playing, for RenderBudgetFlarePlaybackTests.
+    static var shown: (frame: Int, playing: Bool)?
+    #endif
 
     var body: some View {
+        #if DEBUG
+        let _ = Self.shown = (model.currentFrame, model.isPlaying)
+        #endif
         if model.document != nil {
             VStack(spacing: 0) {
                 FlareImportNoteAdapter(rows: model.importNoteRows, onDismiss: onDismissNote)
@@ -214,7 +223,7 @@ struct FlareCanvas: View {
     private func follow(playing: Bool) {
         driver?.stop()
         guard playing else { return }
-        let running = Self.playbackDriver(tick)
+        let running = Self.playbackDriver(tick, makeLink: makeLink)
         driver = running
         running.start()
     }
@@ -222,12 +231,21 @@ struct FlareCanvas: View {
     /// The suite's display-link driver, its ticks advancing a PlaybackTicker of its own through `tick`, which
     /// returns false to stop the link (paused, or the end of a play that doesn't loop).
     // view-static: main-actor
-    static func playbackDriver(_ tick: @escaping @MainActor (Double, inout PlaybackTicker) -> Bool) -> SuitePlaybackDriver {
+    static func playbackDriver(
+        _ tick: @escaping @MainActor (Double, inout PlaybackTicker) -> Bool,
+        makeLink: @escaping SuitePlaybackDriver.LinkMaker = SuiteScreenLink.make
+    ) -> SuitePlaybackDriver {
         let state = TickerState()
-        return SuitePlaybackDriver(onTick: { target in tick(target, &state.ticker) })
+        return SuitePlaybackDriver(onTick: { target in tick(target, &state.ticker) }, makeLink: makeLink)
     }
 
     @MainActor private final class TickerState {
         var ticker = PlaybackTicker()
     }
+}
+
+extension EnvironmentValues {
+    /// The link Flare's playback runs on: the main screen's display link. A test hosting the window swaps in a
+    /// link it fires by hand; no unit test starts a real one.
+    @Entry var flareRefreshLink: SuitePlaybackDriver.LinkMaker = SuiteScreenLink.make
 }
