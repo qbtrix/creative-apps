@@ -77,21 +77,19 @@ extension AfterGlowJourneyTests {
         XCTAssert(Self.waitForCards(missing, Self.weekOfWork), "after Undo RECENT reads \(Self.cardNames(missing))")
         missing.shot("home-sj1-undo")
 
-        // 6. On `empty`: Open… is the one prominent button, disabled, and the sentence says why.
+        // 6. On `empty`: Open… is the one prominent button, live since #1763, and the sentence invites it.
         let empty = suite.launch(fixture: "empty", arguments: ["-SuitePerfProbe", "YES"])
         XCTAssert(empty.app.windows.firstMatch.waitForExistence(timeout: 30), "AfterGlow opened no window on empty")
         let open = empty.element("afterglow.home.empty.open")
         XCTAssert(open.waitForExistence(timeout: 10), "the empty home has no Open…")
-        XCTAssertFalse(open.isEnabled, "Open… is enabled though it can't route a file yet")
+        XCTAssert(open.isEnabled, "Open… is disabled though routing and sending are live (#1763)")
         let primaries = empty.controls()?.controls.filter { $0.role == "primary" } ?? []
         XCTAssertEqual(primaries.map(\.id), ["afterglow.home.empty.open"], "Open… isn't the one prominent button")
-        XCTAssertEqual(primaries.first?.reason, Self.openWaits, "Open…'s tooltip isn't HomeMenu.openWaits")
-        let first = "No recent work yet. Start something new above."
+        XCTAssertNil(primaries.first?.reason ?? nil, "Open… still carries a reason though it acts")
+        let sentence = "No recent work yet. Start something new above, or open a file."
         let text = empty.app.staticTexts
-            .matching(NSPredicate(format: "label BEGINSWITH %@ OR value BEGINSWITH %@", first, first)).firstMatch
-        XCTAssert(text.waitForExistence(timeout: 5), "the empty home doesn't say \(first)")
-        let lines = Self.text(of: text).split(separator: "\n").map(String.init)
-        XCTAssertEqual(lines, [first, Self.openWaits], "the empty sentence's second line isn't Open…'s reason")
+            .matching(NSPredicate(format: "label == %@ OR value == %@", sentence, sentence)).firstMatch
+        XCTAssert(text.waitForExistence(timeout: 5), "the empty home doesn't say \(sentence)")
         empty.shot("home-sj1-empty")
 
         // 5, the rest: a file on disk isn't Missing beside the missing Cards.design.

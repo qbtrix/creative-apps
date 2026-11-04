@@ -6,7 +6,7 @@
 // The bundle compiles only SuiteModel's Values (project.yml), so HomeMenu's,
 // HomeBuilder's and SuiteFixtures' strings are literals here: the
 // `weekOfWork` recents newest first, the menu titles of LauncherCommands and
-// HomeMenu, `HomeMenu.openWaits`. A card is found by its
+// HomeMenu. A card is found by its
 // `afterglow.home.card.<fileID>` identifier, whose file id is a path ending in
 // the file's name. ThumbnailGrid is lazy, so `cardNames` scrolls the grid to
 // read every card, then scrolls it back.
@@ -22,8 +22,6 @@ final class AfterGlowJourneyTests: XCTestCase {
         "Logo.design", "Cards.design", "Bounce.flare", "Intro.halo",
         "beach.ora", "Title.flare", "Sunset.png", "Logo animated.flare",
     ]
-    /// HomeMenu.openWaits: why Open… can't act yet.
-    static let openWaits = "Opening files from AfterGlow isn't available yet."
     /// Why a step that needs Design's documents on disk is skipped.
     static let waitsOnFixtures = "waits on #836 (A-DE-0)"
     /// The app-defined items of each menu but the app menu (LauncherCommands,
@@ -83,6 +81,8 @@ final class AfterGlowJourneyTests: XCTestCase {
             _ = home.app.wait(for: .runningForeground, timeout: 10)
         }
         home.shot("home-sj0-controls")
+        // The sweep leaves its last filter chip on: back to All before reading the cards.
+        home.element("afterglow.home.filter.all").click()
 
         // 1, the rest: Design's documents are on disk, so their cards aren't Missing.
         guard Self.hasFixture("Cards.design"), Self.hasFixture("Logo.design") else {
