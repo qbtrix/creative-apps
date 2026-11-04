@@ -366,3 +366,4 @@ utc	stage	event	ref	note
 2026-11-03T19:49Z	3	check-in	quiet	halo 41679212665 and full 41681640724 still waiting
 2026-11-03T21:22Z	3	check-in	quiet	halo 41679212665 job running; full 41681640724 waiting
 2026-11-03T22:56Z	3	check-in	result	halo 41679212665: 89 cases, PlayHittable pass, H-J12 known :618, TextLayer :139 (#5896); nothing filed
+2026-11-04T00:59Z	3	check-in	quiet	full 41681640724 cancelled 0 Halo; full 41739288339 running
