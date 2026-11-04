@@ -5,10 +5,11 @@
 // cards' captions and tooltips (#1758), the search line (#1765) and the
 // missing notice's Locate… (#1759) are checked on HomeGrid's mapping; "removed"
 // is SJ1 step 5's Remove of the missing Cards.design with its Undo notice (#1870,
-// #1865); the empty state's sentence says why Open… waits (#1754). macOS only.
+// #1865); the empty state's sentence says why Open… waits (#1754); each filter
+// chip has its own identifier (#2041). macOS only.
 import AppKit
 import SuiteModel
-import SuiteUI
+@testable import SuiteUI
 import SwiftUI
 import Testing
 
@@ -138,6 +139,18 @@ import Testing
         let grid = try String(contentsOf: root.appendingPathComponent("Sources/AfterGlowApp/HomeGrid.swift"), encoding: .utf8)
         #expect(!grid.contains("Tint, in:"))
         #expect(grid.contains("Label(text, systemImage: systemImage).font(SuiteFont.caption)"))
+    }
+
+    /// Each filter chip carries its own identifier, "All" included (#2041: the audit found 'All' with none).
+    @Test func everyFilterChipIsIdentified() async throws {
+        let services = SuiteServices.fake(recents: week)
+        let store = SuiteControlStore()
+        let view = HomeContent(model: await model(services), services: services, images: [:])
+            .frame(width: 800, height: 640).environment(\.suiteControlStore, store)
+        _ = try #require(render(view, scheme: .light))
+        let ids = Set(store.inventory.document().controls.map(\.id))
+        let chips = ["all"] + SuiteApp.apps.map(\.rawValue)
+        #expect(Set(chips.map { "afterglow.home.filter.\($0)" }).isSubset(of: ids))
     }
 
     @Test func previewPillOnlyOnTheFakesAndAFixtureSeedsTheLiveStore() async throws {
