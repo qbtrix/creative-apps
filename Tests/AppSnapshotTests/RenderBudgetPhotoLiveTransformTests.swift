@@ -128,8 +128,12 @@ extension BodyCountSuites {
             #expect(during == 0, "\(blocker): the drag resampled the layer on the CPU \(during) times before the release")
             #expect(lifted, "\(blocker): the drag never lifted the layer")
             #expect(covered == (blocker == .layerAbove), "\(blocker): a cover shows exactly when a layer is above")
+            // The renderer can still read settled before the release's resample is queued (a blurred one, at load).
+            let deadline = ContinuousClock.now + .seconds(60)
+            while Self.resamples() == before, ContinuousClock.now < deadline { try await w.settle(50) }
             try await Self.idle(w)
-            #expect(Self.resamples() - before == 1, "\(blocker): the release resampled \(Self.resamples() - before - during) times, not once")
+            let released = Self.resamples() - before
+            #expect(released == 1, "\(blocker): the release resampled \(released) times, not once")
         }
 
         /// The inspector's Rotation row stepped 120 times at 120 Hz (VoiceOver's increments, each its own gesture):
