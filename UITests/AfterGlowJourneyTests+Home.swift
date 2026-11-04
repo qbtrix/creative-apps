@@ -86,10 +86,10 @@ extension AfterGlowJourneyTests {
         let primaries = empty.controls()?.controls.filter { $0.role == "primary" } ?? []
         XCTAssertEqual(primaries.map(\.id), ["afterglow.home.empty.open"], "Open… isn't the one prominent button")
         XCTAssertNil(primaries.first?.reason ?? nil, "Open… still carries a reason though it acts")
-        let sentence = "No recent work yet. Start something new above, or open a file."
+        let invite = "No recent work yet. Start something new above, or open a file."
         let text = empty.app.staticTexts
-            .matching(NSPredicate(format: "label == %@ OR value == %@", sentence, sentence)).firstMatch
-        XCTAssert(text.waitForExistence(timeout: 5), "the empty home doesn't say \(sentence)")
+            .matching(NSPredicate(format: "label == %@ OR value == %@", invite, invite)).firstMatch
+        XCTAssert(text.waitForExistence(timeout: 5), "the empty home doesn't say \(invite)")
         empty.shot("home-sj1-empty")
 
         // 5, the rest: a file on disk isn't Missing beside the missing Cards.design.
