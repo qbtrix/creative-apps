@@ -1,3 +1,15 @@
 # Placeholder menu items PlaceholderMenuTests allows (no-placeholders NP-1), one `<file>: <trimmed line>`
 # each. An unlisted hit fails, and so does a line naming no hit: this file only shrinks.
 # captain decision: AfterGlow > Settings… stays (no placeholder Button; the system item opens Settings).
+# Design's Page > Rename Page… has no name field yet (the Layers panel renames a page); off with a notBuilt reason
+# until #3148 wires it. Design's line, not the launcher's, so this pass lists it instead of hiding it.
+Sources/DesignApp/DesignCommands.swift: model.addPageHelp ?? DesignRefusal.notBuilt("Renaming a page from the menu").help
+Sources/DesignApp/DesignCommands.swift: menu.item("page.rename", title: "Rename Page…", systemImage: "pencil") {}
+Sources/DesignModel/DesignMenuState.swift: return .unavailable(w.addPageHelp ?? DesignRefusal.notBuilt("Renaming a page from the menu").help)
+# Design's Object > Arrange and Align: the off stand-in drawn only while every step of the submenu is off (#2465),
+# so its empty action never runs and its help is the live reason of the first step.
+Sources/DesignApp/DesignObjectMenu.swift: menu.item(DesignMenuState.objectID(DesignArrangeStep.bringToFront.title), title: "Arrange", systemImage: "square.3.layers.3d") {}
+Sources/DesignApp/DesignObjectMenu.swift: menu.item(DesignMenuState.objectID(DesignAlignEdge.left.title), title: "Align", systemImage: "align.horizontal.center") {}
+# Halo's Layer style items: a dry run that throws the catalog's notBuilt reads as "Not built yet"; no style
+# body throws it today, so the branch is a fallback that never fires.
+Sources/HaloModel/HaloStyleMenu.swift: if case .notBuilt(_, let feature) = error { return "Not built yet (\(feature))." }

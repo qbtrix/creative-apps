@@ -69,6 +69,7 @@ import Testing
         #expect(pending == expected)
         #expect(pending.count == 4)
         #expect(pending["routing"] == nil)
+        #expect(HomeMenu.openReason(pending: pending) == nil, "File > Open… acts in a real process (#6203)")
         #expect(pending["text"] == nil)
         #expect(pending["media"] == nil)
         #expect(pending["thumbnails"] == nil)
