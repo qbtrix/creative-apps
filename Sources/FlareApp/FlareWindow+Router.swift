@@ -3,12 +3,16 @@
 // FlareIntent to `perform`, and shows `help(for:)` as its reason while that
 // is non-nil. Each switches on the intent's area and hands it to that area's
 // file (FlareWindow+File.swift … FlareWindow+Assist.swift), so a later task
-// fills its own area without touching this file or another area's.
+// fills its own area without touching this file or another area's. A running
+// play lands its frame before any intent acts and plays on after it.
 import FlareModel
 
 extension FlareWindow {
-    /// Acts on `intent` through its area's `perform<Area>`.
+    /// Acts on `intent` through its area's `perform<Area>`, at the frame on screen: a running play lands its frame
+    /// first and plays on afterwards from wherever the intent left the playhead (FlarePlayer.swift).
     func perform(_ intent: FlareIntent) {
+        landPlayback()
+        defer { followPlayback() }
         switch intent {
         case .file(let intent): performFile(intent)
         case .edit(let intent): performEdit(intent)
