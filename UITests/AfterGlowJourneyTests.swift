@@ -120,14 +120,15 @@ final class AfterGlowJourneyTests: XCTestCase {
 
     /// Every card's file name in grid order (rows top to bottom, left to
     /// right), scrolling the lazy grid down to read them all and back after.
+    /// Each pass reads one snapshot of the window, so a card the grid drops
+    /// mid-read (a Remove shrinking the list) can't fail an index lookup.
     @MainActor static func cardNames(_ home: Journey) -> [String] {
-        let cards = home.app.descendants(matching: .any).matching(cardPredicate)
         let grid = home.app.windows.firstMatch.scrollViews.containing(cardPredicate).firstMatch
         var names: [String] = []
         var scrolled: CGFloat = 0
         for pass in 0..<6 {
             let before = names.count
-            let visible = cards.allElementsBoundByIndex.sorted {
+            let visible = visibleCards(home).sorted {
                 ($0.frame.minY, $0.frame.minX) < ($1.frame.minY, $1.frame.minX)
             }
             for card in visible {
@@ -140,6 +141,15 @@ final class AfterGlowJourneyTests: XCTestCase {
         }
         if scrolled != 0, grid.exists { grid.scroll(byDeltaX: 0, deltaY: -scrolled) }
         return names
+    }
+
+    /// The cards in one snapshot of the home window; none when it can't be read.
+    @MainActor private static func visibleCards(_ home: Journey) -> [any XCUIElementSnapshot] {
+        guard let root = try? home.app.windows.firstMatch.snapshot() else { return [] }
+        func cards(_ node: any XCUIElementSnapshot) -> [any XCUIElementSnapshot] {
+            (node.identifier.hasPrefix("afterglow.home.card.") ? [node] : []) + node.children.flatMap(cards)
+        }
+        return cards(root)
     }
 
     /// Whether the cards read `expected`, in order, within about five seconds.
