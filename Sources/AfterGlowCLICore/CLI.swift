@@ -102,11 +102,14 @@ public enum CLI {
         }
     }
 
-    /// Opens `file` as `app`'s document: missing is io (74), bytes the app can't read are data (65).
+    /// Opens `file` as `app`'s document: missing is io (74), bytes the app can't read are data (65), also when the
+    /// app refuses them with a catalog `failed` carrying its own words (Design's "It has no pages.").
     static func open(_ file: String, as app: HeadlessApp, io: any CLIIO) throws -> HeadlessSession {
         let data: Data
         do { data = try io.read(file) } catch let error as CLIIOError { throw error } catch { throw Refusal.io("could not read \(file): \(error)") }
-        do { return try app.session(open: data, name: file) } catch let error as CatalogError { throw error } catch {
+        do { return try app.session(open: data, name: file) } catch CatalogError.failed(_, let message) {
+            throw Refusal.data(message)
+        } catch let error as CatalogError { throw error } catch {
             throw Refusal.data("\(file) is not a \(app.name) document: \(words(error))")
         }
     }

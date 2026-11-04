@@ -28,6 +28,7 @@
   ],
   "journeys": [
     "DesignBadFilesJourneyTests.testOpenBadFiles",
+    "DesignBadFilesJourneyTests.testOpenBadFilesOnFakes",
     "DesignFilesJourneyTests.testUndoInTextFieldsAndDirtyState",
     "DesignFilesJourneyTests.testCloseWithUnsavedChanges",
     "DesignPerfFilesJourneyTests.testOpenLargeFile"

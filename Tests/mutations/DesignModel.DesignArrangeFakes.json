@@ -54,5 +54,12 @@
     "find": "if document.time == DesignDocumentTime() {",
     "replace": "if document.time != DesignDocumentTime() {",
     "tests": "DesignFileTimeTests"
+  },
+  {
+    "label": "the fake codec refuses a real file (badFilesGiveTheirReasons)",
+    "file": "Sources/DesignModel/Fakes/DesignArrangeFakes.swift",
+    "find": "            return try LiveFiling().decode(data)\n",
+    "replace": "            throw .unreadable\n",
+    "tests": "DesignFilingTests"
   }
 ]

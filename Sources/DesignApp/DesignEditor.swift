@@ -20,7 +20,9 @@
 // selection count and tool carry their DesignControlID and list themselves in
 // `suite.controls` (.suiteControl), which DesignWindow's `.suiteProbes()`
 // publishes. The note keeps to one line, cut in the middle, and shows its
-// whole text as help. In debug builds `bodyRuns` counts its body's runs, so
+// whole text as help. The window's edited dot follows `model.isDirty`
+// (`.suiteDocumentEdited`), and a file landing in the window marks
+// `progress-shown` on `design.open` in `suite.perf` (P4). In debug builds `bodyRuns` counts its body's runs, so
 // DesignWindowDragTests can prove a canvas drag leaves the editor still.
 import DesignModel
 import SuiteUI
@@ -37,6 +39,8 @@ struct DesignEditor: View, BodyCounted {
     /// The window's History panel, which the History button toggles.
     @Environment(\.designHistory) private var history
     @Environment(\.suiteReduceMotion) private var reduceMotion
+    /// The window's frame probe: an opened file marks `progress-shown` on `design.open` (files-history P4, QB-L9).
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     /// The commands beside the title, then the trailing ones, in toolbar order.
     private static let documentItems: [DesignToolbarItem] = [.newFile, .open, .save]
@@ -96,6 +100,12 @@ struct DesignEditor: View, BodyCounted {
             } else {
                 EmptyStateView("No Selection", systemImage: "square.dashed", message: "Create a file to start designing.")
             }
+        }
+        // The close button's edited dot, from the same save state the subtitle reads (files-history FH-4).
+        .suiteDocumentEdited(model.isDirty)
+        // ponytail: a Save As to a new name marks again; P4 reads the first mark only.
+        .onChange(of: documentName, initial: true) {
+            if documentName != nil { recorder?.mark("progress-shown", series: "design.open") }
         }
     }
 
