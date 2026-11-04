@@ -620,3 +620,4 @@ utc	stage	event	ref	note
 2026-11-04T01:18Z	check	#3482 quiet; no open Flare file-flow findings (Photo #5833 open, line:photo, not ours); gaps #4764, #1829 open
 2026-11-04T01:49Z	check	#3482 quiet; no open Flare file-flow findings (Photo #5833 open, line:photo, not ours); gaps #4764, #1829 open
 2026-11-04T02:21Z	check	#3482 quiet; no open Flare file-flow findings (Photo #5833 open, line:photo, not ours); gaps #4764, #1829 open
+2026-11-04T02:52Z	check	#3482 quiet; no open Flare file-flow findings (Photo #5833 open, line:photo, not ours); gaps #4764, #1829 open (#1829 +1 CI still-failing note, timeline key overlap)
