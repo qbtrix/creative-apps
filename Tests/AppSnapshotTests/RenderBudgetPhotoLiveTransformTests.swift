@@ -6,12 +6,12 @@
 // intents) does the same through the live copy. While the pointer is down Photo resamples the layer on the CPU
 // 0 times (PhotoRenderCount.resamples, debug only), the layer rides the canvas's live layer and the window's
 // editor body runs at most once with the pointer down; the release draws the exact frame, one resample, drops the live layer, and
-// the draft has turned or moved. A draft under Levels off identity or a visible layer lifts the same way, the layer
-// riding as the live layer's cover (#6259). Nested in BodyCountSuites: it reads process-wide
+// the draft has turned or moved. A draft under Levels off identity, a visible layer, an Invert adjustment layer or
+// a blur lifts the same way, a layer above riding as the live layer's cover (#6259). Nested in BodyCountSuites: it reads process-wide
 // counters. `RenderBudgetPhotoLiveTransformTimingTests` (a perf suite, Tests/perf-suites.txt, nested in
 // BodyCountSuites too so no other window's renders count) times the same
 // drag, the handles' corner drag and the inspector's Rotation scrub on a 24 MP layer (6000 x 4000, one opaque
-// layer, and the corner drag again under Levels and under a layer): each sample's main-thread step, the event and the layout and display it forces, has a p95 of at most
+// layer, and the corner drag again under each LiftBlocker): each sample's main-thread step, the event and the layout and display it forces, has a p95 of at most
 // 4 ms (the corner drag and the scrub 8 ms, one frame) on a release build with testing and DEBUG on (Tests/render-budgets.md). `PixelMover` runs both measurements over every drag that moves a layer's
 // existing pixels (each PhotoTool but the paint, area, crop, pick, type and path tools, plus Free Transform's
 // body drag), so a Select drag pressed on a layer (the Move it folds in) meets the same budget and a new pixel-moving tool fails until it uses the
@@ -128,8 +128,12 @@ extension BodyCountSuites {
             #expect(during == 0, "\(blocker): the drag resampled the layer on the CPU \(during) times before the release")
             #expect(lifted, "\(blocker): the drag never lifted the layer")
             #expect(covered == (blocker == .layerAbove), "\(blocker): a cover shows exactly when a layer is above")
+            // The renderer can still read settled before the release's resample is queued (a blurred one, at load).
+            let deadline = ContinuousClock.now + .seconds(60)
+            while Self.resamples() == before, ContinuousClock.now < deadline { try await w.settle(50) }
             try await Self.idle(w)
-            #expect(Self.resamples() - before == 1, "\(blocker): the release resampled \(Self.resamples() - before - during) times, not once")
+            let released = Self.resamples() - before
+            #expect(released == 1, "\(blocker): the release resampled \(released) times, not once")
         }
 
         /// The inspector's Rotation row stepped 120 times at 120 Hz (VoiceOver's increments, each its own gesture):
@@ -462,10 +466,10 @@ extension BodyCountSuites.RenderBudgetPhotoLiveTransformTests {
 }
 #endif
 
-/// What kept a Free Transform drag off the compositor until #6259: Levels off identity, or a visible layer above
-/// the draft's.
+/// What kept a Free Transform drag off the compositor until #6259: Levels off identity, a visible layer above
+/// the draft's, an adjustment layer above it, or a blur on the image.
 enum LiftBlocker: String, CaseIterable, CustomStringConvertible, Sendable {
-    case levels, layerAbove
+    case levels, layerAbove, adjustmentLayer, blur
 
     var description: String { rawValue }
 
@@ -481,6 +485,12 @@ enum LiftBlocker: String, CaseIterable, CustomStringConvertible, Sendable {
         case .layerAbove:
             model.addLayer()
             model.selectLayer(background)
+        case .adjustmentLayer:
+            model.addAdjustmentLayer(.invert)
+            model.selectLayer(background)
+        case .blur:
+            model.adjust(.blurSigma(2))
+            model.adjust(.setEnabled(.blur, true))
         }
         model.selectTool(.select)
         try model.beginTransform()
