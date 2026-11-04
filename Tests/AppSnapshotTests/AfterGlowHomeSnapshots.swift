@@ -93,8 +93,13 @@ import Testing
         let none = SuiteServices.fake()
         let empty = await model(none)
         #expect(empty.state.emptyMessage == "No recent work yet. Start something new above, or open a file.")
+        // #1763: with routing and sending live, Open… acts and the sentence invites it.
+        #expect(HomeContent.open(none, identifier: "x").isEnabled)
+        #expect(HomeGrid.emptyMessage(empty, open: HomeContent.open(none, identifier: "x")).contains("open a file"))
         // #1754: while Open… waits, the sentence drops "or open a file" and says why, in Open…'s own words.
-        let open = HomeContent.open(none, identifier: "x")
+        var waiting = none
+        waiting.pending["routing"] = SuiteIdentity.notConnected("recents-open-in")
+        let open = HomeContent.open(waiting, identifier: "x")
         #expect(open.isEnabled == false)
         let shown = HomeGrid.emptyMessage(empty, open: open)
         #expect(!shown.contains("open a file"), "\(shown)")

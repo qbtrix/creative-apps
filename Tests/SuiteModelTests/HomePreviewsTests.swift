@@ -46,10 +46,11 @@ actor CountingThumbnails: ThumbnailPublishing {
         #expect(previews.requests == refs.count)
     }
 
-    @Test func aCardWaitsUntilItsAnswerIsIn() async {
+    @Test func aWaitingCardShowsItsAppMark() async {
         let previews = previews()
         #expect(previews.kind(for: refs[0]) == .waiting)
-        #expect(previews.picture(for: refs[0], fallback: nil) == nil)
+        // #1764: a card still waiting shows its own app's mark, never a generic photo glyph.
+        #expect(previews.picture(for: refs[0], fallback: nil) == "mark:photo")
         await previews.load([refs[0]], from: CountingThumbnails(seeded: []))
         // Answered with nil: the recents' own thumbnail still wins over the mark.
         #expect(previews.picture(for: refs[0], fallback: "own") == "own")

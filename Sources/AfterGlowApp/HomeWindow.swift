@@ -1,7 +1,7 @@
 // HomeWindow.swift: the launcher's home window (blueprint suite.md 6.1,
 // HM-2a): SuiteWindow (which applies `.suiteProbes()` once) over a HomeModel
 // on LauncherServices.shared, reloaded then observed in a `.task`, with
-// search, Open… (disabled, saying why, until a chosen file can be routed)
+// search, Open… (a file panel whose files go to the apps that read them)
 // and the model published as the `homeModel` focused value for the menus,
 // with the page it shows as `homePage`, so Edit > Delete is titled for it.
 // HM-2b: the New row (HomeNewRow) and the inspector (HomeInspector).
@@ -42,7 +42,7 @@ struct HomeWindow: View {
         SuiteWindow(
             title: "AfterGlow", sections: HomeSidebarRows.sections,
             selection: HomeSidebarRows.selection(showsAssets: showsAssets, filter: model.filter),
-            onSelect: select, actions: [HomeContent.open(services, identifier: "afterglow.home.open")]
+            onSelect: select, actions: [HomeContent.open(services, identifier: "afterglow.home.open", model: model)]
         ) {
             if showsAssets { AssetsPage() } else { HomeContent(model: model, services: services, images: images) }
         } inspector: {
@@ -81,7 +81,7 @@ struct HomeContent: View {
         VStack(alignment: .leading, spacing: SuiteSpacing.l) {
             HomeNewRow(model: model)
             HomeGrid(model: model, images: images, isPreview: Self.showsPreview(services),
-                     open: Self.open(services, identifier: "afterglow.home.empty.open"))
+                     open: Self.open(services, identifier: "afterglow.home.empty.open", model: model))
                 .homeLayoutAnchor("recents")
             HomeRunningStrip(model: model)
                 .homeLayoutAnchor("running")
@@ -92,9 +92,24 @@ struct HomeContent: View {
     /// The "Preview data" pill shows only on the fakes, never on a live store.
     static func showsPreview(_ services: SuiteServices) -> Bool { services.isPreview }
 
-    /// Open…: disabled with HomeMenu's reason, as File > Open…, until a chosen file can be routed.
-    static func open(_ services: SuiteServices, identifier: String) -> ToolbarAction {
+    /// Open…: disabled with HomeMenu's reason, as File > Open…, while routing or sending is pending;
+    /// else it asks for files and the model hands each to the app that reads it.
+    static func open(_ services: SuiteServices, identifier: String, model: HomeModel? = nil) -> ToolbarAction {
         ToolbarAction("Open…", systemImage: "folder", unavailableHelp: HomeMenu.openReason(pending: services.pending),
-                      identifier: identifier)
+                      identifier: identifier) {
+            guard let model else { return }
+            let paths = chooseFiles()
+            if !paths.isEmpty { Task { await model.open(paths: paths, now: Date()) } }
+        }
+    }
+
+    /// The Open… panel: one or more files; empty when cancelled.
+    static func chooseFiles() -> [String] {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = true
+        guard panel.runModal() == .OK else { return [] }
+        return panel.urls.map { $0.path(percentEncoded: false) }
     }
 }
