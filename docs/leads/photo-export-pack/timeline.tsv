@@ -684,3 +684,4 @@ utc	stage	event	ref	note
 2026-11-04T14:56Z	check-in	dev green (no dev-red open); no merges since 14:21Z; #5353 still a92b4651 after its failed Linux check; no new findings; 49 photo findings
 2026-11-04T15:28Z	check-in	dev-red #6275 opened 14:59Z: macOS AfterGlowHomeLayoutTests homeAtEachWidth, culprit captain's #6263 (suite), lane opened revert #6277; not ours, left alone; #5353 still a92b4651; no new findings; 49 photo findings
 2026-11-04T16:00Z	check-in	dev-red #6275 still open, revert #6277 open clean (not ours); #5353 still a92b4651 unmerged; no new findings; 49 photo findings
+2026-11-04T16:31Z	check-in	lane revert #6277 merged 16:27Z; dev-red #6275 still open pending next dev run (not ours); #5353 still a92b4651 unmerged; no new findings; 49 photo findings
