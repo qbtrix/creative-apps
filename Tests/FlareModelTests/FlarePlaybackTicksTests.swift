@@ -1,9 +1,11 @@
 // FlarePlaybackTicksTests.swift: LA-2's platform-neutral core (docs/blueprints/flare.md, 7.5). A fake tick source
 // (a list of display-link target timestamps) drives FlareWorkspace.tick the way PlaybackDriver does on macOS. The
 // acceptance test: it stops when paused and uses the link's target timestamp, not wall time. Also QB-L4's CI gate:
-// 5 s at the document rate drops at most 2 frames.
+// 5 s at the document rate drops at most 2 frames. The app's player ticks a copy: `showing(frame:playing:)` draws the
+// window's workspace at the copy's frame and `landPlayback(from:)` takes the copy's playhead back, no undo step.
 import FlareCore
 @testable import FlareModel
+import SuiteKernel
 import Testing
 
 /// A 48-frame scene at 24 fps.
@@ -128,4 +130,29 @@ func fiveSecondsAtTheDocumentRateDropNoFrames(hz: Double) {
     #expect(PlaybackBudget.droppedFrames(in: [47, 1], timelineFrames: 48) == 1)
     #expect(PlaybackBudget.droppedFrames(in: [5], timelineFrames: 48) == 0)
     #expect(PlaybackBudget.droppedFrames(in: [0, 3], timelineFrames: 0) == 0)
+}
+
+@Test func showingMovesOnlyThePlayhead() {
+    let w = workspace()
+    let shown = w.showing(frame: 12, playing: true)
+    #expect(shown.currentFrame == 12 && shown.isPlaying && w.currentFrame == 0 && !w.isPlaying)
+    #expect(w.showing(frame: 99, playing: false).currentFrame == 47, "clamped to the timeline")
+    var back = shown
+    (back.currentFrame, back.isPlaying) = (w.currentFrame, w.isPlaying)
+    #expect(back == w, "nothing but the playhead and the play flag changed")
+}
+
+@Test func landingTakesTheClocksPlayheadWithNoUndoStepOrUnsavedChange() {
+    var w = workspace(), ticker = PlaybackTicker()
+    w.play()
+    var clock = w
+    _ = run(&clock, &ticker, targets(hz: 60, count: 31))
+    #expect(clock.currentFrame == 12)
+    let (dirty, undo) = (w.isDirty, w.canUndo)
+    w.landPlayback(from: clock)
+    #expect(w.currentFrame == 12 && w.isPlaying && w.playClock == clock.playClock)
+    #expect(w.isDirty == dirty && w.canUndo == undo)
+    clock.pause()
+    w.landPlayback(from: clock)
+    #expect(!w.isPlaying && w.currentFrame == 12)
 }

@@ -10,6 +10,7 @@
 import AppKit
 import FlareCore
 import FlareModel
+import SuiteKernel
 @testable import SuiteUI
 import SwiftUI
 import Testing
