@@ -94,9 +94,9 @@ final class DesignShellJourneyTests: XCTestCase {
         expectSwitcher(design)
     }
 
-    /// ⌘N: the page, and the palette's eight tools in order at the canvas's leading edge.
+    /// File > New through its sheet: the page, and the palette's eight tools in order at the canvas's leading edge.
     @MainActor private func openFile(_ design: Journey, shot: String) {
-        design.app.typeKey("n", modifierFlags: .command)
+        design.newDocument()
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "New File showed no page")
         let tools = design.element("suite.tools").buttons
         XCTAssert(tools.firstMatch.waitForExistence(timeout: 5), "no floating palette (suite.tools)")
