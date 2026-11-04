@@ -133,14 +133,11 @@ public struct SuiteHelpCommands: Commands {
     /// Opens, or brings forward, the Beta Notes window.
     func showBetaNotes() {
         if notes == nil {
-            let hosting = NSHostingController(rootView: BetaNotesView(notes: BetaNotes.current) { [weak self] in
+            let window = NSWindow(contentViewController: NSHostingController(rootView: BetaNotesView(notes: BetaNotes.current) { [weak self] in
                 self?.notes?.close()
-            })
-            let window = NSWindow(contentViewController: hosting)
+            }))
             window.title = "Beta Notes"
             window.isReleasedWhenClosed = false
-            // Sized before centring: the hosting view grows the window later, from the origin, past a small screen.
-            window.setContentSize(hosting.view.fittingSize)
             window.center()
             notes = window
         }
