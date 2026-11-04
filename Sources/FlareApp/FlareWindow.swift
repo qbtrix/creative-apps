@@ -107,13 +107,22 @@ struct FlareWindow: View, BodyCounted {
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
         .modifier(FlareDocumentSheet(
             sheet: $presented, setup: model.documentSetup, limits: model.documentLimits, perform: perform,
-            apply: { model.applyDocumentSetup($0, anchor: $1); return model.layerError == nil }))
+            apply: {
+                landPlayback()
+                model.applyDocumentSetup($0, anchor: $1)
+                followPlayback()
+                return model.layerError == nil
+            }))
         .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
         .onChange(of: Self.bridge.recents(for: .flare), initial: true) { model.updateFileFlow(recents: $1) }
-        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: playbackShown) }, write: { model.takeLive($0) })
+        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: playbackShown) }, write: {
+            landPlayback()
+            model.takeLive($0)
+            followPlayback()
+        })
         .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .onChange(of: model.isPlaying, initial: true) { syncPlayback() }
         .onDisappear { player.stop() }
