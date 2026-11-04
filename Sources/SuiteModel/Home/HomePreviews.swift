@@ -1,6 +1,9 @@
 // HomePreviews.swift: the home's Recent card previews (shared-thumbnails ST-3).
-// Each document asks `preview(for:)` once for the window's life; a nil answer
-// shows the app's mark. Generic over the picture so it runs on Linux. Linux-safe.
+// Each document asks `preview(for:)` once per recents entry: once for the
+// window's life, and again when its entry gets newer (saved again while the
+// home is open, #5211; the apps publish the preview before they note the
+// save). A nil answer shows the app's mark, and keeps a preview shown
+// before. Generic over the picture so it runs on Linux. Linux-safe.
 import Observation
 #if canImport(FoundationEssentials)
 import FoundationEssentials
@@ -24,7 +27,8 @@ public final class HomePreviews<Picture> {
     public private(set) var answered: Set<String> = []
     /// How many times `preview(for:)` was asked.
     @ObservationIgnored public private(set) var requests = 0
-    @ObservationIgnored private var asked: Set<String> = []
+    /// Each fileID asked, with the `lastUsed` of the entry it was asked for.
+    @ObservationIgnored private var asked: [String: Date] = [:]
     @ObservationIgnored private var marks: [SuiteApp: Picture] = [:]
     @ObservationIgnored private let decode: @MainActor (Data) -> Picture?
     @ObservationIgnored private let mark: @MainActor (SuiteApp) -> Picture?
@@ -34,12 +38,19 @@ public final class HomePreviews<Picture> {
         self.decode = decode; self.mark = mark
     }
 
-    /// Asks for each document not asked before, then publishes every answer at once: one change, not one per card.
+    /// `load(_:from:)` for documents with no recents entry: each is asked once.
     public func load(_ refs: [SuiteDocumentRef], from thumbnails: any ThumbnailPublishing) async {
+        await load(refs.map { RecentItem(ref: $0, lastUsed: .distantPast) }, from: thumbnails)
+    }
+
+    /// Asks for each entry not asked before or newer than when it was asked, then publishes every answer
+    /// at once: one change, not one per card.
+    public func load(_ items: [RecentItem], from thumbnails: any ThumbnailPublishing) async {
         var found: [String: Picture] = [:]
         var done: [String] = []
-        for ref in refs where !asked.contains(ref.fileID) {
-            asked.insert(ref.fileID)
+        for item in items where asked[item.ref.fileID].map({ $0 < item.lastUsed }) ?? true {
+            let ref = item.ref
+            asked[ref.fileID] = item.lastUsed
             requests += 1
             if let data = await thumbnails.preview(for: ref), let picture = decode(data) { found[ref.fileID] = picture }
             done.append(ref.fileID)

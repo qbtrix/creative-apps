@@ -1,5 +1,6 @@
 // HomePreviewsTests.swift: the home's Recent card previews on FakeThumbnails
 // (shared-thumbnails ST-3). Pictures are strings here; the app passes images.
+// A recents entry that gets newer (a save) is asked again (#5211).
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -44,6 +45,25 @@ actor CountingThumbnails: ThumbnailPublishing {
         await previews.load(Array(refs.reversed()), from: thumbnails)
         #expect(await thumbnails.asked == refs.map(\.fileID))
         #expect(previews.requests == refs.count)
+    }
+
+    /// #5211: a document saved again while the home is open (its recents entry is newer) is asked again,
+    /// and its card shows the second preview; an unchanged entry is still asked once.
+    @Test func aDocumentSavedAgainShowsItsNewPreview() async throws {
+        let thumbnails = CountingThumbnails(seeded: [])
+        let previews = previews()
+        let first = RecentItem(ref: refs[0], lastUsed: Date(timeIntervalSince1970: 100))
+        _ = try await thumbnails.publish(png: Data([1]), for: refs[0])
+        await previews.load([first], from: thumbnails)
+        #expect(previews.picture(for: refs[0], fallback: nil) == "png:1")
+        _ = try await thumbnails.publish(png: Data([1, 2, 3]), for: refs[0])
+        await previews.load([first], from: thumbnails)
+        #expect(previews.picture(for: refs[0], fallback: nil) == "png:1")
+        let saved = RecentItem(ref: refs[0], lastUsed: Date(timeIntervalSince1970: 200))
+        await previews.load([saved], from: thumbnails)
+        await previews.load([saved], from: thumbnails)
+        #expect(previews.picture(for: refs[0], fallback: nil) == "png:3")
+        #expect(await thumbnails.asked == [refs[0].fileID, refs[0].fileID])
     }
 
     @Test func aCardWaitsUntilItsAnswerIsIn() async {
