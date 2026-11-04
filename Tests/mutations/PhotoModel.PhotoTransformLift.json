@@ -16,15 +16,15 @@
   {
     "label": "placementIgnoresBoxOrigin: the lifted pixels sit at the layer's corner, not the box's",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "(m.tx, m.ty) = (m.tx + m.a * Double(part.x) + m.c * Double(part.y), m.ty + m.b * Double(part.x) + m.d * Double(part.y))",
+    "find": "(m.tx, m.ty) = (m.tx + m.a * x + m.c * y, m.ty + m.b * x + m.d * y)",
     "replace": "(m.tx, m.ty) = (m.tx, m.ty)",
     "tests": "PhotoTransformLiftTests/aSelectionLiftsItsPartAtItsPlace"
   },
   {
     "label": "baseKeepsLayer: the picture under the lift still has the layer, so the drag shows it twice",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "for above in 0...at { base.layers[above].isVisible = false }",
-    "replace": "for above in 0..<at { base.layers[above].isVisible = false }",
+    "find": "for above in 0...at where !base.layers[above].kind.isAdjustment { base.layers[above].isVisible = false }",
+    "replace": "for above in 0..<at where !base.layers[above].kind.isAdjustment { base.layers[above].isVisible = false }",
     "tests": "PhotoTransformLiftTests/theLiftIsTheLayersPixelsOverTheWorkspaceWithoutIt"
   },
   {
@@ -51,22 +51,36 @@
   {
     "label": "baseKeepsCover: the picture under the lift keeps the layers above, so the cover shows twice mid-drag",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "for above in 0...at { base.layers[above].isVisible = false }",
+    "find": "for above in 0...at where !base.layers[above].kind.isAdjustment { base.layers[above].isVisible = false }",
     "replace": "base.layers[at].isVisible = false",
     "tests": "PhotoTransformLiftTests/aLayerUnderAVisibleLayerLiftsUnderItsCover"
   },
   {
     "label": "spriteUntoned: the lifted pixels skip the image's adjustments, so the layer flashes untoned mid-drag",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "bytes = try TiledPixels(adjustments.applied(to: tiles.flattened(part))).rgba8()",
-    "replace": "bytes = try TiledPixels(tiles.flattened(part)).rgba8()",
-    "tests": "PhotoTransformLiftTests/perPixelAdjustmentsLiftTonedAndABlurStaysDown"
+    "find": "bytes = try TiledPixels(adjustments.applied(to: sprite)).rgba8()",
+    "replace": "bytes = try TiledPixels(sprite).rgba8()",
+    "tests": "PhotoTransformLiftTests/perPixelAdjustmentsLiftToned"
   },
   {
-    "label": "liftsUnderBlur: a blurred image lifts, so the lift's edge skips the blur's neighbours",
+    "label": "marginUnplaced: a blurred lift ignores its margin, so it sits margin pixels off the layer mid-drag",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "adjustments.readMargin == 0, let at",
-    "replace": "true, let at",
-    "tests": "PhotoTransformLiftTests/perPixelAdjustmentsLiftTonedAndABlurStaysDown"
+    "find": "let (x, y) = (Double(part.x - adjustments.readMargin), Double(part.y - adjustments.readMargin))",
+    "replace": "let (x, y) = (Double(part.x), Double(part.y))",
+    "tests": "PhotoTransformLiftTests/aBlurredImageLiftsWithItsMarginBlurred"
+  },
+  {
+    "label": "toneLayersSkipped: the adjustment layers above skip the lifted pixels, so the layer flashes untoned mid-drag",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "let tones = layers[..<at].reversed().filter { $0.isVisible && $0.opacity > 0 && $0.kind.isAdjustment }",
+    "replace": "let tones = [PhotoLayer]()",
+    "tests": "PhotoTransformLiftTests/anAdjustmentLayerAboveTonesTheLift"
+  },
+  {
+    "label": "baseDropsTone: the picture under the lift hides the adjustment layers above, so it shows untoned mid-drag",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "for above in 0...at where !base.layers[above].kind.isAdjustment { base.layers[above].isVisible = false }",
+    "replace": "for above in 0...at { base.layers[above].isVisible = false }",
+    "tests": "PhotoTransformLiftTests/anAdjustmentLayerAboveTonesTheLift"
   }
 ]
