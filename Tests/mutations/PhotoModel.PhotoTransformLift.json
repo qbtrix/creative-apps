@@ -1,17 +1,17 @@
 [
   {
-    "label": "liftsUnderACover: a layer under a visible layer lifts, so the drag draws it over what should cover it",
+    "label": "liftsUnderABlendedCover: a layer under a visible multiply layer lifts, so the drag draws the cover as a plain over",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "layers[..<at].allSatisfy({ !$0.isVisible })",
+    "find": "layers[..<at].allSatisfy({ !$0.isVisible || Self.covers($0) })",
     "replace": "layers[..<at].allSatisfy({ _ in true })",
-    "tests": "PhotoTransformLiftTests/aLayerUnderAVisibleLayerDoesNotLiftAndLiftsOnceItIsHidden"
+    "tests": "PhotoTransformLiftTests/aBlendedLayerOrOneUnderABlendedLayerStaysDown"
   },
   {
     "label": "liftsBlended: a multiply layer lifts and the compositor draws it as a plain over",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
     "find": "layer.blendMode == .normal,",
     "replace": "layer.blendMode == layer.blendMode,",
-    "tests": "PhotoTransformLiftTests/aBlendModeOrAdjustmentKeepsTheLayerDown"
+    "tests": "PhotoTransformLiftTests/aBlendedLayerOrOneUnderABlendedLayerStaysDown"
   },
   {
     "label": "placementIgnoresBoxOrigin: the lifted pixels sit at the layer's corner, not the box's",
@@ -23,8 +23,8 @@
   {
     "label": "baseKeepsLayer: the picture under the lift still has the layer, so the drag shows it twice",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "base.layers[at].isVisible = false",
-    "replace": "base.layers[at].isVisible = true",
+    "find": "for above in 0...at { base.layers[above].isVisible = false }",
+    "replace": "for above in 0..<at { base.layers[above].isVisible = false }",
     "tests": "PhotoTransformLiftTests/theLiftIsTheLayersPixelsOverTheWorkspaceWithoutIt"
   },
   {
@@ -40,5 +40,33 @@
     "find": "part == PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)",
     "replace": "part == part",
     "tests": "PhotoTransformLiftTests/theBaseUnderASelectionsLiftKeepsTheRestOfTheLayer"
+  },
+  {
+    "label": "coverRefused: a layer under a visible plain layer stays down, so its drag resamples on the CPU every sample (#6259)",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "layers[..<at].allSatisfy({ !$0.isVisible || Self.covers($0) })",
+    "replace": "layers[..<at].allSatisfy({ !$0.isVisible })",
+    "tests": "PhotoTransformLiftTests/aLayerUnderAVisibleLayerLiftsUnderItsCover"
+  },
+  {
+    "label": "baseKeepsCover: the picture under the lift keeps the layers above, so the cover shows twice mid-drag",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "for above in 0...at { base.layers[above].isVisible = false }",
+    "replace": "base.layers[at].isVisible = false",
+    "tests": "PhotoTransformLiftTests/aLayerUnderAVisibleLayerLiftsUnderItsCover"
+  },
+  {
+    "label": "spriteUntoned: the lifted pixels skip the image's adjustments, so the layer flashes untoned mid-drag",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "bytes = try TiledPixels(adjustments.applied(to: tiles.flattened(part))).rgba8()",
+    "replace": "bytes = try TiledPixels(tiles.flattened(part)).rgba8()",
+    "tests": "PhotoTransformLiftTests/perPixelAdjustmentsLiftTonedAndABlurStaysDown"
+  },
+  {
+    "label": "liftsUnderBlur: a blurred image lifts, so the lift's edge skips the blur's neighbours",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "adjustments.readMargin == 0, let at",
+    "replace": "true, let at",
+    "tests": "PhotoTransformLiftTests/perPixelAdjustmentsLiftTonedAndABlurStaysDown"
   }
 ]

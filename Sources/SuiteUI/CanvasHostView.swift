@@ -63,6 +63,9 @@ public final class CanvasHostView: NSView {
     var pictureHidden = false
     /// A dropped live layer the Metal path keeps until the drawable with the exact picture is on screen.
     var droppedLift: CALayer?
+    /// The live layer's cover (CanvasLiveLayer.cover) over it in `liftSpace`, and a dropped one kept as `droppedLift` is.
+    var liftCover: CALayer?
+    var droppedCover: CALayer?
 
     override public init(frame: NSRect) {
         super.init(frame: frame)
