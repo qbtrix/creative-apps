@@ -9,7 +9,7 @@ Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Add from Clipboard")
 Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Select All") {}.keyboardShortcut("a")
 Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Assets") {}.keyboardShortcut("a", modifiers: [.option, .command])
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: entry.item) {
-Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.open) {
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.open) { openWindow(id: "home") }.keyboardShortcut("o")
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: entry.item) {
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.clearMenu) { if let model { Task { await model.clearRecents(now: Date()) } } }
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.undo) { if let model { Task { await model.undoRemove(now: Date()) } } }

@@ -7,8 +7,7 @@
 // assets page); View: the thumbnail sizes, before the sidebar group. Show
 // Sidebar and Show Inspector ⌥⌘I are the system's SidebarCommands and
 // InspectorCommands (AfterGlowApp.swift), which toggle SuiteWindow's columns.
-// Open… asks for files and the model routes each; with no window, New and
-// Open… open it.
+// With no window, New and Open… open it.
 import SuiteModel
 import SuiteUI
 import SwiftUI
@@ -36,11 +35,7 @@ struct LauncherCommandsHome: Commands {
                     }
                 }
             }
-            MenuCommand(item: menu.open) {
-                guard let model else { return openWindow(id: "home") }
-                let paths = HomeContent.chooseFiles()
-                if !paths.isEmpty { Task { await model.open(paths: paths, now: Date()) } }
-            }.keyboardShortcut("o")
+            MenuCommand(item: menu.open) { openWindow(id: "home") }.keyboardShortcut("o")
             Menu("Open Recent") {
                 ForEach(menu.recents, id: \.fileID) { entry in
                     MenuCommand(item: entry.item) {
