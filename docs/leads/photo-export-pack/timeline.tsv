@@ -673,3 +673,4 @@ utc	stage	event	ref	note
 2026-11-04T09:03Z	check-in	dev green (no dev-red open); no merges since 08:28Z; #5353 open clean a92b4651; no new findings; 49 photo findings
 2026-11-04T09:35Z	check-in	dev green (no dev-red open); no merges since 09:00Z; captain posted Quality-Proof #6267 on #6206 (Free Transform, not export); #5353 open clean a92b4651; no new findings; 49 photo findings
 2026-11-04T10:06Z	check-in	dev green (no dev-red open); captain's #6270 (design) and #6267 (photo Free Transform) merged; lane started a Linux check on #5353 a92b4651 at 09:40Z, not merged yet; no new findings; 49 photo findings
+2026-11-04T10:39Z	check-in	dev green (no dev-red open); no merges since 10:04Z; lane's Linux check on #5353 a92b4651 (run 40235953008) failed in scripts/ci, captain's PR, left alone; PX-9 still blocked; no new findings; 49 photo findings
