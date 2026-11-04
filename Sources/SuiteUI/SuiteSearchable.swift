@@ -67,9 +67,11 @@ private struct SearchFieldNamer: NSViewRepresentable {
         }
 
         private static func name(_ field: NSSearchField, _ name: String) {
-            guard field.accessibilityIdentifier() != name else { return }
-            field.setAccessibilityIdentifier(name)
             let cell = field.cell as? NSSearchFieldCell
+            // The field can keep its name while AppKit swaps its button cells (a sheet over the window), so both count.
+            guard field.accessibilityIdentifier() != name
+                || cell?.searchButtonCell?.accessibilityIdentifier() != name + ".search" else { return }
+            field.setAccessibilityIdentifier(name)
             cell?.searchButtonCell?.setAccessibilityIdentifier(name + ".search")
             cell?.cancelButtonCell?.setAccessibilityIdentifier(name + ".cancel")
         }
