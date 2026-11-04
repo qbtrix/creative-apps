@@ -277,8 +277,8 @@ extension PhotoWorkspace {
     /// with the next still one). A masked layer, the identity and a layer without pixels take the still frame.
     /// A layer that lifts (`liftKey`) never comes here mid-drag: the compositor moves its pixels.
     /// ponytail: a drag frame resamples the layer in 256 px chunks on the CPU (bilinear, the chunks across the cores); a
-    /// Metal `.affine` kernel is the upgrade for the layers that still can't lift (a mask, a style or a blend on the
-    /// layer, a blended or masked adjustment layer above it).
+    /// Metal `.affine` kernel is the upgrade for the layers that still can't lift (a blend on the
+    /// layer or on a layer above it).
     func transformPreview(live: Bool) -> PhotoWorkspace {
         guard live, let draft = transformDraft, draft.transform != .identity, let at = index(of: draft.layerID),
             pixels[draft.layerID] != nil, shownMask(of: layers[at]) == nil

@@ -84,11 +84,18 @@
     "tests": "PhotoTransformLiftTests/anAdjustmentLayerAboveTonesTheLift"
   },
   {
-    "label": "maskedToneLifts: a masked adjustment layer above tones the whole lift, though its mask holds it to one part of the canvas",
+    "label": "maskedToneStaysDown: a masked adjustment layer above keeps the layer down, though the canvas tones through no adjustment mask",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "if layer.kind.isAdjustment, shownMask(of: layer) != nil { return false }",
-    "replace": "if layer.kind.isAdjustment, false { return false }",
+    "find": "layer.blendMode == .normal && (0...1).contains(layer.opacity)",
+    "replace": "(!layer.kind.isAdjustment || shownMask(of: layer) == nil) && layer.blendMode == .normal && (0...1).contains(layer.opacity)",
     "tests": "PhotoTransformLiftTests/anAdjustmentLayerAboveTonesTheLift"
+  },
+  {
+    "label": "styleStaysDown: a styled layer keeps off the compositor and resamples each drag step, though the canvas draws no style",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "(0...1).contains(layer.opacity), shownMask(of: layer) == nil,",
+    "replace": "(0...1).contains(layer.opacity), layer.style == .none, shownMask(of: layer) == nil,",
+    "tests": "PhotoTransformLiftTests/aStyledLayerLiftsItsPlainPixels"
   },
   {
     "label": "marginSkipsBlurLayers: the lift carries only the image's margin, so a Blur layer above clips the soft edge",

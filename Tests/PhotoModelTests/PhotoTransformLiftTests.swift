@@ -6,6 +6,7 @@
 // (the one commit resamples through) puts that layer pixel. Runs on Linux and macOS.
 import CoreRaster
 import Foundation
+import SuiteImaging
 import SuiteKernel
 import Testing
 
@@ -90,7 +91,7 @@ import Testing
     }
 
     /// An adjustment layer above lifts (#6259): it tones the lifted pixels and stays in the picture under the lift,
-    /// with no cover; a masked one keeps the layer down, since its mask stays put while the lift moves.
+    /// with no cover; a masked one lifts toned the same, as the canvas tones through no adjustment layer's mask.
     @Test func anAdjustmentLayerAboveTonesTheLift() throws {
         var workspace = try PhotoLiveTransformTests.transforming()
         workspace.cancelTransform()
@@ -117,7 +118,18 @@ import Testing
         let at2 = try #require(masked.index(of: invert))
         masked.layers[at2].hasMask = true
         masked.masks[invert] = try TiledPixels(width: 300, height: 200)
-        #expect(masked.liftKey == nil, "a masked Invert layer tones only its mask's part, which moves under the lift")
+        _ = try #require(masked.liftKey, "a masked Invert layer lifts: the canvas tones through no adjustment mask")
+        #expect(try masked.lifted()?.rgba8 == lift.rgba8, "toned as the canvas draws it")
+    }
+
+    /// A styled layer lifts with its plain pixels: the canvas draws no layer style.
+    @Test func aStyledLayerLiftsItsPlainPixels() throws {
+        var styled = try Self.turned()
+        let id = try #require(styled.transformDraft?.layerID)
+        let at = try #require(styled.index(of: id))
+        styled.layers[at].style = LayerStyle(effects: [StyleRules.defaults(.dropShadow)], fillOpacity: 1)
+        _ = try #require(styled.liftKey, "a drop-shadowed layer lifts")
+        #expect(try styled.lifted()?.rgba8 == Self.turned().lifted()?.rgba8, "with the same pixels the canvas draws")
     }
 
     /// A blurring adjustment layer above lifts (#6259) with its margin added to the image's, and blurs the sprite.

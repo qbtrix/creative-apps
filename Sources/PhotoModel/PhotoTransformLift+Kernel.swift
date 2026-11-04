@@ -3,9 +3,8 @@
 // the workspace without that layer, rendered once as the picture under it. Each drag sample then only places
 // those pixels through the draft's matrix (`liftPlacement`); no pixel work runs until the release draws the
 // exact frame, the resample Return lays. A layer lifts only when the compositor's plain overs draw it as the
-// canvas would (`liftKey`): a visible, unmasked, unstyled pixel layer at normal blend and opacity in 0...1, whose
-// visible layers above are all at normal blend and opacity in 0...1 (an adjustment layer among them unmasked),
-// and a box no wider or taller than 16384 px with its margin (the GPU's texture limit).
+// canvas would (`liftKey`): a visible, unmasked pixel layer at normal blend and opacity in 0...1, whose visible
+// layers above are all at normal blend and opacity in 0...1, and a box no wider or taller than 16384 px with its margin (the GPU's texture limit).
 // Anything else draws through the matrix region by region (`transformPreview(live:)`). The pixel layers above
 // render once, canvas-sized, as the cover the compositor lays over the lift (`liftedCover`). The adjustment
 // layers above, then the image's adjustments, tone the lifted pixels; the picture under the lift keeps both, and
@@ -16,7 +15,8 @@
 // blurred picture under it, close to the canvas and exact again at the release. The picture under the lift keeps the layer's pixels outside the box
 // (`boxCut`), as commit does, and lacks the layers above. The pixels are the same for every drag of one draft
 // (`liftSprite`), so the canvas makes them once per Free Transform; each drag renders only the picture under
-// them (`liftedBase`). Linux-safe.
+// them (`liftedBase`). The canvas draws no layer style and tones through no adjustment layer's mask, so neither
+// keeps a layer down: the lift draws what the canvas does. Linux-safe.
 import CoreRaster
 
 /// The draft's layer lifted off the canvas for a drag.
@@ -166,7 +166,7 @@ extension PhotoWorkspace {
             layers[..<at].allSatisfy({ !$0.isVisible || covers($0) })
         else { return nil }
         let layer = layers[at]
-        guard layer.kind == .pixels, layer.isVisible, layer.blendMode == .normal, layer.style == .none,
+        guard layer.kind == .pixels, layer.isVisible, layer.blendMode == .normal,
             (0...1).contains(layer.opacity), shownMask(of: layer) == nil, let tiles = pixels[layer.id],
             let part = draft.box.offsetBy(-layer.offsetX, -layer.offsetY)
                 .intersection(PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)),
@@ -175,12 +175,10 @@ extension PhotoWorkspace {
         return (at, part)
     }
 
-    /// Whether a visible layer above the lift composites over it as a plain over, so it can ride as the cover, or
-    /// is an unmasked adjustment layer, so it tones the lift (a mask holds the tone to its own part of the canvas,
-    /// which the lift moves under).
+    /// Whether a visible layer above the lift composites over it as a plain over, so it can ride as the cover or,
+    /// as an adjustment layer, tone the lift.
     private func covers(_ layer: PhotoLayer) -> Bool {
-        if layer.kind.isAdjustment, shownMask(of: layer) != nil { return false }
-        return layer.blendMode == .normal && (0...1).contains(layer.opacity)
+        layer.blendMode == .normal && (0...1).contains(layer.opacity)
     }
 
     /// The clear margin the lifted pixels carry on every side: the image's read margin plus each visible
