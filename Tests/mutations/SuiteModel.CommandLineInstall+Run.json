@@ -1,0 +1,6 @@
+[
+{"label": "confirm ignored, the plan always writes (.withoutConfirmNothingIsWritten)", "file": "Sources/SuiteModel/Packaging/CommandLineInstall+Run.swift", "find": "guard let write = linkToMake(plan, confirmed: confirm) else", "replace": "guard let write = linkToMake(plan, confirmed: true) else", "tests": "CommandLineInstallRunTests"},
+{"label": "a failed write reported as linked (.aFailedWriteIsARefusal)", "file": "Sources/SuiteModel/Packaging/CommandLineInstall+Run.swift", "find": "return result(.refuse(reason: \"Couldn't make the link at \\(write.at): \\(error)\"))", "replace": "_ = error", "tests": "CommandLineInstallRunTests"},
+{"label": "already linked reported as not in place (.ourOwnLinkIsAlreadyLinked)", "file": "Sources/SuiteModel/Packaging/CommandLineInstall+Run.swift", "find": "case .alreadyLinked(let at): InstallResult(plan: \"alreadyLinked\", at: at, to: nil, reason: nil, linked: true)", "replace": "case .alreadyLinked(let at): InstallResult(plan: \"alreadyLinked\", at: at, to: nil, reason: nil, linked: false)", "tests": "CommandLineInstallRunTests"},
+{"label": "a plain file reads as nothing there (.aPlainFileIsItsOwnTarget)", "file": "Sources/SuiteModel/Packaging/CommandLineInstall+Run.swift", "find": "fileExists(atPath: path) ? path : nil", "replace": "fileExists(atPath: path) ? nil : nil", "tests": "CommandLineInstallRunTests"}
+]

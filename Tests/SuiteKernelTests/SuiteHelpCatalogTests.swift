@@ -100,4 +100,11 @@ struct EchoHelp: HelpProviding {
         #expect(catalog.availability("help.welcome", on: SuiteHelpDocument(app: "launcher", provider: EchoHelp())) == .available)
         #expect(catalog.availability("help.welcome", on: SuiteHelpDocument(app: "photo", provider: EchoHelp())).why != nil)
     }
+
+    @Test func planAnswerLeavesOutNilFields() {
+        #expect(SuiteHelpCatalog.planAnswer(plan: "link", at: "/h/a", to: "/b", reason: nil, linked: true)
+            == .object(["plan": .string("link"), "at": .string("/h/a"), "to": .string("/b"), "linked": .bool(true)]))
+        #expect(SuiteHelpCatalog.planAnswer(plan: "refuse", at: nil, to: nil, reason: "no", linked: false)
+            == .object(["plan": .string("refuse"), "reason": .string("no"), "linked": .bool(false)]))
+    }
 }

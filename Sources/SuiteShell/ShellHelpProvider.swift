@@ -35,5 +35,15 @@ public struct ShellHelpProvider: HelpProviding {
         return .object(["command": .string(panel.command), "json": .string(panel.configJSON)])
     }
 
+    /// The `~/.local/bin/afterglow` plan for the running bundle, the link made with `confirm`; null outside one. The
+    /// home is `-SuiteHomeDir`'s in a journey. CommandLineInstall.run decides it, as for the CLI (cli-bundle CB-z).
+    public func installCLI(confirm: Bool) -> JSONValue {
+        guard let bundle else { return .null }
+        let home = CommandLineInstall.home(arguments: ProcessInfo.processInfo.arguments, fallback: NSHomeDirectory())
+        let result = CommandLineInstall.run(home: home, bundle: bundle, confirm: confirm, existing: CommandLineInstall.linkTarget)
+        return SuiteHelpCatalog.planAnswer(plan: result.plan, at: result.at, to: result.to, reason: result.reason,
+                                           linked: result.linked)
+    }
+
     public func betaNotes() -> JSONValue { SuiteHelpCatalog.notesAnswer(BetaNotes.current) }
 }
