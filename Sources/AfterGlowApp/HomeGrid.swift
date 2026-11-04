@@ -1,6 +1,7 @@
 // HomeGrid.swift: the recents (blueprint suite.md 6.1): RECENT with the
 // "Preview data" label on the fakes (a plain placeholder until SuiteUI has a
-// standalone StatusPill, #1790), the app chips, a message in place
+// standalone StatusPill, #1790), the app chips (each its own identifier,
+// afterglow.home.filter.<id>), a message in place
 // (InlineNotice #780's placeholder: the missing file, or the removed one with
 // Undo), then the grid, the empty sentence with
 // Open… prominent (while it waits, the sentence says why instead of inviting
@@ -38,8 +39,14 @@ struct HomeGrid: View, BodyCounted {
         #endif
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             header
-            ChipRow(chips) { model.filter(SuiteApp(rawValue: $0), now: Date()) }
-                .suiteControl(id: "afterglow.home.filter", enabled: true, reason: nil, identifies: false)
+            // One ChipRow per chip, so each chip's button carries its own identifier (#2041).
+            HStack(spacing: SuiteSpacing.xs) {
+                ForEach(chips) { chip in
+                    ChipRow([chip]) { model.filter(SuiteApp(rawValue: $0), now: Date()) }
+                        .fixedSize()
+                        .suiteControl(id: "afterglow.home.filter.\(chip.id)", enabled: true, reason: nil)
+                }
+            }
             if let message = model.message {
                 notice(message)
             } else if let removed = model.removedNotice {
