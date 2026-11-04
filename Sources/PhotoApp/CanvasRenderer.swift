@@ -19,7 +19,8 @@
 // draws through its matrix, and the plain `show` that follows (the window
 // taking the copy back) redraws the whole picture exactly, even at the same
 // revision. A drag sample of a draft that lifts (PhotoTransformLift) draws nothing: the first renders the
-// picture once without the draft's layer and lifts the layer's pixels onto the view's live layer (SuiteUI's CanvasLiveLayer), every
+// picture once without the draft's layer and the layers above it, lifts the layer's pixels onto the view's live layer
+// (SuiteUI's CanvasLiveLayer) with the layers above as its fixed cover, every
 // later one only places them (`moveLift`), and the next plain picture drops the lift as it lands. Wherever a
 // picture comes back as tiles (no presenter texture to write), a layer with nothing under it hides the picture
 // instead of drawing an empty one. The lifted
@@ -88,6 +89,8 @@ final class CanvasRenderer {
         let of: PhotoTransformLift.Sprite
         let surface: IOSurface
         let width: Int, height: Int
+        /// The visible layers above, canvas-sized, laid over the lift; nil with none.
+        let cover: IOSurface?
     }
     /// Called with each picture's revision as its tiles reach the view (the brush ink test times this).
     @ObservationIgnored var onPicture: ((Int) -> Void)?
@@ -332,8 +335,8 @@ final class CanvasRenderer {
                 if let update { prepared = await Self.prepared(update) }
                 if let up = lift, up.key == key, !up.shown {
                     if let update { tiles.apply(update, prepared: prepared) }
-                    tiles.lift(made.surface, width: made.width, height: made.height,
-                               opacity: made.of.opacity, placement: up.placement, hidingPicture: alone)
+                    tiles.lift(made.surface, width: made.width, height: made.height, opacity: made.of.opacity,
+                               cover: made.cover, placement: up.placement, hidingPicture: alone)
                     lift?.shown = true
                     if let update, backend != update.backend { backend = update.backend }
                     #if DEBUG
@@ -377,10 +380,16 @@ final class CanvasRenderer {
 
     /// `workspace`'s live-layer pixels as an IOSurface, made off the main thread; nil when nothing lifts.
     nonisolated static func sprite(of workspace: PhotoWorkspace) async throws -> Sprite? {
-        guard let of = workspace.liftSprite, let pixels = try workspace.liftedPixels(),
+        guard let of = workspace.liftSprite, let canvas = workspace.canvas, let pixels = try workspace.liftedPixels(),
             let surface = CanvasTile.surface(premultipliedRGBA: pixels.rgba8, width: pixels.width, height: pixels.height)
         else { return nil }
-        return Sprite(of: of, surface: surface, width: pixels.width, height: pixels.height)
+        var cover: IOSurface?
+        if let bytes = try workspace.liftedCover() {
+            guard let made = CanvasTile.surface(premultipliedRGBA: bytes, width: canvas.width, height: canvas.height)
+            else { return nil }
+            cover = made
+        }
+        return Sprite(of: of, surface: surface, width: pixels.width, height: pixels.height, cover: cover)
     }
 
     /// `update`'s tile images and surfaces, made off the main thread (a nonisolated async function runs on
