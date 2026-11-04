@@ -50,14 +50,14 @@ import Testing
     }
 
     /// #6203: with the window open, no item on either page waits on a feature ("isn't available yet"),
-    /// except Open…, which waits on file routing (#1763, openWaitsForRouting).
+    /// Open… included now that routing is live (#1763).
     @Test func noItemWaitsOnAFeature() throws {
         let recents = try crowd()
         let id = try #require(recents.items.first?.ref.fileID)
         for page in [HomePage.home, .assets] {
             for (selection, step) in [(nil, 1), (id, 0), (id, 3)] {
                 let m = menu(recents, selection: selection, step: step, page: page)
-                let all = m.new.map(\.item) + [m.clearMenu, m.undo, m.larger, m.smaller]
+                let all = m.new.map(\.item) + [m.open, m.clearMenu, m.undo, m.larger, m.smaller]
                     + [m.delete].compactMap { $0 } + m.recents.map(\.item)
                 for item in all { #expect(item.reason?.hasSuffix("isn't available yet.") != true, "\(item.title)") }
             }
@@ -118,19 +118,25 @@ import Testing
         }
     }
 
-    @Test func openWaitsForRouting() {
-        #expect(menu().open == HomeMenu.Item("Open…", reason: HomeMenu.openWaits))
+    /// #1763: Open… waits only while routing or sending is pending, and acts once both are live.
+    @Test func openWaitsOnlyWhileRoutingOrSendingIsPending() {
+        #expect(menu().open == HomeMenu.Item("Open…"))
         #expect(menu(window: false).open == HomeMenu.Item("Open…"))
+        let open = HomeMenu.make(recents: RecentsList(), selection: nil, thumbnailStep: 1, page: .home,
+                                 hasWindow: true, pending: [:]).open
+        #expect(open.isEnabled)
     }
 
     /// #1754: Open…'s reason names opening a file, never "Opening recent work".
     @Test func openReasonNamesOpeningAFile() {
         let live = ["routing": SuiteIdentity.notConnected("recents-open-in"),
                     "sending": SuiteIdentity.notConnected("switching")]
-        for pending in [[:], live, ["sending": SuiteIdentity.notConnected("switching")]] {
+        for pending in [live, ["sending": SuiteIdentity.notConnected("switching")],
+                        ["routing": SuiteIdentity.notConnected("recents-open-in")]] {
             #expect(HomeMenu.openReason(pending: pending) == "Opening files from AfterGlow isn't available yet.")
             #expect(HomeMenu.openReason(pending: pending) != SuiteIdentity.notConnected("recents-open-in"))
         }
+        #expect(HomeMenu.openReason(pending: [:]) == nil)
         let open = HomeMenu.make(recents: RecentsList(), selection: nil, thumbnailStep: 1, page: .home,
                                  hasWindow: true, pending: live).open
         #expect(open.reason == HomeMenu.openWaits)

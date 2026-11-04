@@ -194,8 +194,12 @@ struct Journey {
         }
     }
 
+    /// The element with this identifier. XCUITest refuses a subscript key over 128 characters (an
+    /// AfterGlow card's id holds its file's path), so a longer one goes through an identifier predicate.
     func element(_ identifier: String) -> XCUIElement {
-        app.descendants(matching: .any)[identifier].firstMatch
+        let all = app.descendants(matching: .any)
+        guard identifier.count > 128 else { return all[identifier].firstMatch }
+        return all.matching(NSPredicate(format: "identifier == %@", identifier)).firstMatch
     }
 
     /// "New Composition…" becomes "new-composition".

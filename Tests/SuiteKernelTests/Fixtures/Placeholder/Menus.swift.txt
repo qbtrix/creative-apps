@@ -21,6 +21,7 @@ struct FixtureCommands: Commands {
             MenuCommand(item: menu.clear) {}
             MenuCommand("Off", help: "Later.", isEnabled: false) { model?.run() }
             MenuCommand(item: menu.live) { model?.run() }
+            FixtureMenu(menu: menu)
         }
     }
 }
@@ -29,3 +30,12 @@ struct FixtureView: View {
     var body: some View { Button("View Button") {}.alert("Done", isPresented: .constant(false)) { Button("OK") {} } }
 }
 struct FixtureScene: Scene { var body: some Scene { WindowGroup { FixtureView() }.commands { FixtureCommands() } } }
+struct FixtureMenu: View {
+    let menu: FixtureMenuState
+    var body: some View {
+        menu.item("fixture.rename", title: "Rename…") {}
+        menu.item("fixture.live") { menu.perform(.live) }
+        MenuCommand(menu.cut) {}.givingWay(to: .cut)
+    }
+}
+struct FixtureMenuState { var renameHelp: String { FixtureRefusal.notBuilt("Renaming").help } }
