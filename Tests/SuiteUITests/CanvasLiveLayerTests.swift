@@ -1,6 +1,7 @@
 // CanvasLiveLayerTests.swift: the canvas host's live layer (CanvasHostView+LiveLayer.swift). Its corners land
 // where its placement puts them in document pixels (y down), through the host's zoom and turn, on the tile
-// path; a move changes only the transform; a drop removes the layer. macOS only.
+// path; a move changes only the transform; a drop removes the layer; a cover sits still over it and drops with it.
+// macOS only.
 import AppKit
 import Testing
 
@@ -63,5 +64,29 @@ import Testing
         #expect(!host.hasLiveLayer && layer.superlayer == nil)
         host.moveLiveLayer(.identity)  // nothing lifted: nothing happens
         #expect(!host.hasLiveLayer)
+    }
+
+    /// A cover (the layers above what the drag moves) shows over the live layer at the document's own place and
+    /// size, stays put while the layer moves, and goes with it on the drop.
+    @Test func aCoverSitsOverTheLiveLayerStillAndDropsWithIt() throws {
+        let host = CanvasHostView(frame: CGRect(x: 0, y: 0, width: 400, height: 200))
+        host.isEmbedded = true
+        host.show(Content())
+        host.layoutSubtreeIfNeeded()
+        host.showLiveLayer(CanvasLiveLayer(contents: NSNull(), size: CGSize(width: 40, height: 20), cover: NSNull()), at: .identity)
+        let (lifted, cover) = (try #require(host.lifted), try #require(host.liftCover))
+        #expect(cover.superlayer === lifted.superlayer, "the cover shares the live layer's document space")
+        let order = try #require(host.liftSpace.sublayers)
+        #expect(try #require(order.firstIndex(of: cover)) > (try #require(order.firstIndex(of: lifted))), "the cover is over the live layer")
+        let corner = cover.convert(CGPoint(x: 0, y: 100), to: try #require(host.layer))
+        let want = try Self.picture(.zero, of: host)
+        #expect(abs(corner.x - want.x) < 1e-6 && abs(corner.y - want.y) < 1e-6, "the cover's top-left is the document's: \(corner) not \(want)")
+        let still = cover.affineTransform()
+        host.moveLiveLayer(CGAffineTransform(translationX: 50, y: 25))
+        #expect(cover.affineTransform() == still && host.liftCover === cover, "a move moved the cover")
+        host.dropLiveLayer()
+        #expect(host.liftCover == nil && cover.superlayer == nil, "the cover outlived the drop")
+        host.showLiveLayer(CanvasLiveLayer(contents: NSNull(), size: CGSize(width: 40, height: 20)), at: .identity)
+        #expect(host.liftCover == nil, "a live layer with no cover shows none")
     }
 }

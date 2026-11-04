@@ -1,8 +1,9 @@
 // CanvasHostView+LiveLayer.swift: the canvas's live layer, the one way any canvas drag moves pixels while
 // it lasts (render contract rule 3). On drag start the app renders its picture once without what the drag
 // moves and hands that layer's pixels to the host (`showLiveLayer`, a CanvasLiveLayer: an IOSurface or
-// CGImage, its size, its opacity). They show in one CALayer above the picture (tiles or Metal) and under the
-// overlay. Each sample only sets that layer's affine transform in a transaction with actions off
+// CGImage, its size, its opacity, and an optional document-sized cover of what lies above it). They show in
+// one CALayer above the picture (tiles or Metal) and under the overlay, the cover in one more over them that
+// never moves. Each sample only sets that layer's affine transform in a transaction with actions off
 // (`moveLiveLayer`), so the compositor moves pixels it already has and no pixel work runs per sample, as a
 // browser moves a layer with a CSS transform. On commit or cancel the app draws the exact picture and drops
 // the layer (`dropLiveLayer`) in the turn it arrives; on the Metal path it stays until that picture's
@@ -16,14 +17,16 @@ import AppKit
 import QuartzCore
 
 /// Pixels a drag moves on the compositor: `contents` (an IOSurface or CGImage, premultiplied) of `size`
-/// pixels, drawn at `opacity`.
+/// pixels, drawn at `opacity`, and an optional `cover`: document-sized premultiplied contents that stay put over
+/// them (what lies above the moved pixels).
 public struct CanvasLiveLayer {
     public let contents: Any
     public let size: CGSize
     public let opacity: Float
+    public let cover: Any?
 
-    public init(contents: Any, size: CGSize, opacity: Float = 1) {
-        (self.contents, self.size, self.opacity) = (contents, size, opacity)
+    public init(contents: Any, size: CGSize, opacity: Float = 1, cover: Any? = nil) {
+        (self.contents, self.size, self.opacity, self.cover) = (contents, size, opacity, cover)
     }
 }
 
@@ -52,6 +55,27 @@ extension CanvasHostView {
         if layer.superlayer == nil { liftSpace.addSublayer(layer) }
         lifted = layer
         layer.setAffineTransform(Self.liveTransform(transform, size: live.size, document: documentSize))
+        showCover(live.cover)
+    }
+
+    /// Shows `contents` over the live layer at the document's place and size, or removes the cover for nil.
+    private func showCover(_ contents: Any?) {
+        guard let contents else {
+            liftCover?.removeFromSuperlayer()
+            liftCover = nil
+            return
+        }
+        let cover = liftCover ?? CALayer()
+        cover.anchorPoint = .zero
+        cover.position = .zero
+        cover.bounds = CGRect(origin: .zero, size: documentSize)
+        cover.contents = contents
+        cover.magnificationFilter = tileFilter ?? .linear
+        cover.minificationFilter = .trilinear
+        cover.name = RenderingControlID.canvas + ".live-cover"
+        if cover.superlayer == nil { liftSpace.addSublayer(cover) }
+        liftCover = cover
+        cover.setAffineTransform(Self.liveTransform(.identity, size: documentSize, document: documentSize))
     }
 
     /// Moves the live layer to `transform`, with no animation; nothing with none up.
@@ -70,7 +94,7 @@ extension CanvasHostView {
         guard let lifted else { return }
         self.lifted = nil
         removeDroppedLift()
-        droppedLift = lifted
+        (droppedLift, droppedCover, liftCover) = (lifted, liftCover, nil)
         guard metalLayer != nil, pictureChanged else { return removeDroppedLift() }
         Task { @MainActor [weak self] in
             try? await Task.sleep(for: .milliseconds(250))
@@ -89,6 +113,8 @@ extension CanvasHostView {
         CATransaction.setDisableActions(true)
         gone.removeFromSuperlayer()
         gone.contents = nil
+        droppedCover?.removeFromSuperlayer()
+        droppedCover = nil
         if pictureHidden {
             container.isHidden = metalLayer != nil
             metalLayer?.isHidden = false

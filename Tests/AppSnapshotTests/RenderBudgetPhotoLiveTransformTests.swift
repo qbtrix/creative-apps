@@ -6,11 +6,12 @@
 // intents) does the same through the live copy. While the pointer is down Photo resamples the layer on the CPU
 // 0 times (PhotoRenderCount.resamples, debug only), the layer rides the canvas's live layer and the window's
 // editor body runs at most once with the pointer down; the release draws the exact frame, one resample, drops the live layer, and
-// the draft has turned or moved. Nested in BodyCountSuites: it reads process-wide
+// the draft has turned or moved. A draft under Levels off identity or a visible layer lifts the same way, the layer
+// riding as the live layer's cover (#6259). Nested in BodyCountSuites: it reads process-wide
 // counters. `RenderBudgetPhotoLiveTransformTimingTests` (a perf suite, Tests/perf-suites.txt, nested in
 // BodyCountSuites too so no other window's renders count) times the same
 // drag, the handles' corner drag and the inspector's Rotation scrub on a 24 MP layer (6000 x 4000, one opaque
-// layer): each sample's main-thread step, the event and the layout and display it forces, has a p95 of at most
+// layer, and the corner drag again under Levels and under a layer): each sample's main-thread step, the event and the layout and display it forces, has a p95 of at most
 // 4 ms (the corner drag and the scrub 8 ms, one frame) on a release build with testing and DEBUG on (Tests/render-budgets.md). `PixelMover` runs both measurements over every drag that moves a layer's
 // existing pixels (each PhotoTool but the paint, area, crop, pick, type and path tools, plus Free Transform's
 // body drag), so a Select drag pressed on a layer (the Move it folds in) meets the same budget and a new pixel-moving tool fails until it uses the
@@ -103,6 +104,32 @@ extension BodyCountSuites {
             #endif
             // The release adopts the copy (one body) and its exact picture's time reaches the status line.
             expectBodies(step, atMost: 3, target: 1)
+        }
+
+        /// The canvas body drag on a draft that used to resample every sample (#6259): Levels off identity, or a
+        /// visible layer above. It lifts like the plain draft, the layer above riding as the cover.
+        @Test(.timeLimit(.minutes(2)), arguments: LiftBlocker.allCases)
+        func aBodyDragUnderLevelsOrALayerLifts(_ blocker: LiftBlocker) async throws {
+            let model = try blocker.draft(width: 400, height: 300)
+            let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
+            defer { w.close() }
+            let edited = try await RenderBudgetPhotoTransformTests.settle(w)
+            try await Self.idle(w)
+            let send = try #require(edited.send)
+            let before = Self.resamples()
+            try await w.ticks(Self.samples) { i in
+                send(.drag(CGPoint(x: 200 + Double(i - 1) * 2, y: 150), CGPoint(x: 200 + Double(i) * 2, y: 150)))
+            }
+            try await w.settle(200)
+            let during = Self.resamples() - before
+            let lifted = try await Self.lifted(w)
+            let covered = Self.canvas(in: w.host)?.liftCover != nil
+            send(.endDrag)
+            #expect(during == 0, "\(blocker): the drag resampled the layer on the CPU \(during) times before the release")
+            #expect(lifted, "\(blocker): the drag never lifted the layer")
+            #expect(covered == (blocker == .layerAbove), "\(blocker): a cover shows exactly when a layer is above")
+            try await Self.idle(w)
+            #expect(Self.resamples() - before == 1, "\(blocker): the release resampled \(Self.resamples() - before - during) times, not once")
         }
 
         /// The inspector's Rotation row stepped 120 times at 120 Hz (VoiceOver's increments, each its own gesture):
@@ -265,6 +292,29 @@ extension BodyCountSuites {
             try await RenderBudgetPhotoLiveTransformTests.idle(w)
         }
 
+        /// The corner drag on 24 MP under Levels off identity, or under a visible layer (#6259): it lifts, no
+        /// sample resamples on the CPU, and each step stays within a frame.
+        @Test(.timeLimit(.minutes(4)), arguments: LiftBlocker.allCases)
+        func cornerDragUnderLevelsOrALayerIsUnder8MillisecondsOn24Megapixels(_ blocker: LiftBlocker) async throws {
+            let w = RenderBudgetWindow(PhotoWindow(model: try blocker.draft(width: 6000, height: 4000)).allowsWindowActivationEvents())
+            defer { w.close() }
+            _ = try await RenderBudgetPhotoTransformTests.settle(w)
+            try await RenderBudgetPhotoLiveTransformTests.idle(w)
+            let corner = try #require(await w.element("suite.handles.bottomRight"), "no bottom-right handle on the draft")
+            let before = RenderBudgetPhotoLiveTransformTests.resamples()
+            let step = try await w.measure("photo transform corner drag, \(blocker), 24 MP", bodies: { nil }) {
+                try await w.drag(from: CGPoint(x: corner.midX, y: corner.midY), by: CGVector(dx: -120, dy: 80))
+            }
+            #expect(step.steps >= 120, "\(step)")
+            #if DEBUG
+            // The release's exact frame is the one resample; none before it.
+            try await RenderBudgetPhotoLiveTransformTests.idle(w)
+            #expect(RenderBudgetPhotoLiveTransformTests.resamples() - before <= 1, "\(blocker): the drag resampled on the CPU")
+            #endif
+            expectP95(step, atMost: 8, target: 4)
+            try await RenderBudgetPhotoLiveTransformTests.idle(w)
+        }
+
         /// A 6000 x 4000 white image (24 MP, one opaque layer) with the Move tool and Free Transform begun.
         static func draft24MP() throws -> PhotoWorkspace {
             var model = PhotoWorkspace()
@@ -406,3 +456,30 @@ extension BodyCountSuites.RenderBudgetPhotoLiveTransformTests {
     }
 }
 #endif
+
+/// What kept a Free Transform drag off the compositor until #6259: Levels off identity, or a visible layer above
+/// the draft's.
+enum LiftBlocker: String, CaseIterable, CustomStringConvertible, Sendable {
+    case levels, layerAbove
+
+    var description: String { rawValue }
+
+    /// A white `width` x `height` image with the blocker in place and Free Transform begun on its one pixel layer.
+    func draft(width: Int, height: Int) throws -> PhotoWorkspace {
+        var model = PhotoWorkspace()
+        try model.newImage(DocumentSetup(width: width, height: height))
+        let background = try #require(model.layers.first?.id)
+        switch self {
+        case .levels:
+            model.adjust(.setEnabled(.levels, true))
+            model.adjust(.gamma(1.4))
+        case .layerAbove:
+            model.addLayer()
+            model.selectLayer(background)
+        }
+        model.selectTool(.select)
+        try model.beginTransform()
+        #expect(model.transformDraft?.layerID == background, "\(self): the draft isn't on the image's layer")
+        return model
+    }
+}

@@ -100,9 +100,10 @@ import SwiftUI
 
     /// Free Transform's lifted layer (PhotoTransformLift) above the picture in the attached view (its live layer), at `placement`.
     /// `hidingPicture`: the layer is all the picture has, so the picture hides while it is lifted.
-    func lift(_ surface: IOSurface, width: Int, height: Int, opacity: Double, placement: AffineMatrix, hidingPicture: Bool = false) {
-        view?.showLiveLayer(CanvasLiveLayer(contents: surface, size: CGSize(width: width, height: height), opacity: Float(opacity)),
-                            at: Self.affine(placement), hidingPicture: hidingPicture)
+    func lift(_ surface: IOSurface, width: Int, height: Int, opacity: Double, cover: IOSurface? = nil, placement: AffineMatrix,
+              hidingPicture: Bool = false) {
+        view?.showLiveLayer(CanvasLiveLayer(contents: surface, size: CGSize(width: width, height: height), opacity: Float(opacity),
+                                            cover: cover), at: Self.affine(placement), hidingPicture: hidingPicture)
     }
 
     /// The view the tiles show in; nil before `attach`.
