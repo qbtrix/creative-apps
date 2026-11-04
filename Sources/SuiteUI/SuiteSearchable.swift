@@ -7,9 +7,10 @@
 // the run loop, after the toolbar is built) and names the field and its cell
 // `<identifier>` (accessibility reads the cell), its buttons `<identifier>.search`
 // and `<identifier>.cancel`, and a collapsed item's Search button
-// `<identifier>.collapsed`. On each window
-// update it names a toolbar search item's field again, which AppKit rebuilds
-// when the item collapses or the page changes.
+// `<identifier>.collapsed`. On each window update it names a toolbar search
+// item's field again, which AppKit rebuilds when the item collapses or the page
+// changes, and the toolbar's "more toolbar items" pop-up, if a titlebar
+// accessory pushed items into it, `<identifier minus its last part>.toolbar.more`.
 import AppKit
 import SwiftUI
 
@@ -53,7 +54,10 @@ private struct SearchFieldNamer: NSViewRepresentable {
         @objc private func windowDidUpdate() {
             guard let name = identifier?.rawValue else { return }
             for item in window?.toolbar?.items ?? [] {
-                if let field = (item as? NSSearchToolbarItem)?.searchField { Self.name(field, name) }
+                if let field = (item as? NSSearchToolbarItem)?.searchField {
+                    Self.name(field, name)
+                    Self.nameOverflow(near: field, name)
+                }
             }
         }
 
@@ -76,11 +80,31 @@ private struct SearchFieldNamer: NSViewRepresentable {
             if let cell { set(cell, name) }
             if let search = cell?.searchButtonCell { set(search, name + ".search") }
             if let cancel = cell?.cancelButtonCell { set(cancel, name + ".cancel") }
-            // A collapsed toolbar search item shows a Search button beside the field, in the item's viewer.
-            for case let button as NSAccessibilityProtocol in (field.accessibilityParent() as? NSAccessibilityProtocol)?
-                .accessibilityChildren() ?? [] where button.accessibilityRole() == .button {
+            // A collapsed toolbar search item shows a Search button beside the field, read through its cell.
+            for case let button as NSButton in field.superview?.subviews ?? [] {
                 set(button, name + ".collapsed")
+                if let cell = button.cell { set(cell, name + ".collapsed") }
             }
+        }
+
+        /// A titlebar accessory can squeeze the toolbar until AppKit folds items into its "more toolbar items"
+        /// pop-up, which nothing else names (#6204). It sits in the same toolbar view as the search item.
+        private static func nameOverflow(near field: NSSearchField, _ name: String) {
+            var toolbar = field.superview
+            while let view = toolbar, String(describing: type(of: view)) != "NSToolbarView" { toolbar = view.superview }
+            guard let toolbar else { return }
+            let more = String(name.split(separator: ".").dropLast().joined(separator: ".")) + ".toolbar.more"
+            func walk(_ view: NSView) {
+                let type = String(describing: Swift.type(of: view))
+                // Only an unnamed one: a toolbar menu the app named keeps its own identifier.
+                if view.accessibilityIdentifier().isEmpty || view.accessibilityIdentifier() == more,
+                   view is NSPopUpButton || type.contains("Clipped") || type.contains("Overflow") {
+                    set(view, more)
+                    if let cell = (view as? NSControl)?.cell { set(cell, more) }
+                }
+                view.subviews.forEach(walk)
+            }
+            walk(toolbar)
         }
 
         private static func set(_ element: NSAccessibilityProtocol, _ name: String) {

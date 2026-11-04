@@ -1,9 +1,11 @@
 // AfterGlowToolbarIdentifierTests.swift: the real HomeWindow in a titled
 // window, its accessibility tree read in process the way the app audit's
 // identifier check reads it from the journeys (#6204). With the AI Access
-// chip in the title bar (testAIAccessApproval) and under a sheet
-// (testConnectAssistant), every control in the window's toolbar keeps an
-// identifier. macOS only.
+// chip in the title bar (testAIAccessApproval), which collapses the search
+// item into a Search button at 880, and under a sheet (testConnectAssistant),
+// where accessibility reads the search field's cell, every control keeps an
+// identifier. The window's minimum width keeps AppKit's "more toolbar items"
+// pop-up from showing here; the journeys' audit covers it. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteModel
@@ -15,8 +17,9 @@ import Testing
 @testable import SuiteShell
 
 @MainActor @Suite struct AfterGlowToolbarIdentifierTests {
-    @Test(.timeLimit(.minutes(3))) func chipLeavesNoUnnamedControl() async throws {
-        let window = Self.window()
+    @Test(.timeLimit(.minutes(3)), arguments: [1000.0, 880.0])
+    func chipLeavesNoUnnamedControl(width: Double) async throws {
+        let window = Self.window(width: width)
         defer { window.close() }
         try await Task.sleep(for: .milliseconds(800))
         let center = AIAccessCenter()
@@ -45,11 +48,11 @@ import Testing
     }
 
     /// The home window at the journeys' 1000 by 640, titled so the hosting controller bridges its toolbar.
-    static func window() -> NSWindow {
+    static func window(width: Double = 1000) -> NSWindow {
         let window = NSWindow(contentViewController: NSHostingController(rootView: HomeWindow(services: .fake(), support: "/fixture")))
         window.styleMask = [.titled, .resizable, .closable, .miniaturizable]
         window.isReleasedWhenClosed = false
-        window.setFrame(CGRect(x: -20_000, y: -20_000, width: 1000, height: 640), display: false)
+        window.setFrame(CGRect(x: -20_000, y: -20_000, width: width, height: 640), display: false)
         window.orderFrontRegardless()
         return window
     }
@@ -80,11 +83,6 @@ import Testing
             for child in node.accessibilityChildren() ?? [] { walk(child, depth: depth + 1) }
         }
         walk(window, depth: 0)
-        func fields(_ view: NSView) -> [NSSearchField] { (view as? NSSearchField).map { [$0] } ?? view.subviews.flatMap(fields) }
-        for field in fields(window.contentView?.superview ?? NSView()) {
-            print("FIELD \(field) id=\(field.accessibilityIdentifier()) frame=\(field.accessibilityFrame()) kids=\((field.accessibilityChildren() ?? []).map { "\(type(of: $0)) \(($0 as? NSAccessibilityProtocol)?.accessibilityIdentifier() ?? "?")" })")
-        }
-        print("ITEMS \(window.toolbar?.items.map { "\(type(of: $0)) \($0.itemIdentifier.rawValue) \(type(of: $0.view as Any))" } ?? [])")
         return found
     }
 }
