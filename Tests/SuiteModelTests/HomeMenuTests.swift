@@ -50,7 +50,7 @@ import Testing
     }
 
     /// #6203: with the window open, no item on either page waits on a feature ("isn't available yet"),
-    /// except Open…, which waits on file routing (#1763, openWaitsForRouting).
+    /// Open… included now that routing is live (#1763).
     @Test func noItemWaitsOnAFeature() throws {
         let recents = try crowd()
         let id = try #require(recents.items.first?.ref.fileID)
