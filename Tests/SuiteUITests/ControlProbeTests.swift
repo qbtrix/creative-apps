@@ -1,7 +1,7 @@
-// ControlProbeTests.swift: `.suiteProbes()` hands scrub fields, chips and
-// curve editors the window's probes under -SuitePerfProbe and none without
-// it, and those probes record samples and marks into the recorder
-// `suite.perf` publishes (SP1, SP6, SP7, SJ20; inspector-controls IC-14b).
+// ControlProbeTests.swift: `.suiteProbes()` hands scrub fields, chips,
+// curve editors and the canvas viewport the window's probes under
+// -SuitePerfProbe and none without it, and those probes record samples and
+// marks into the recorder `suite.perf` publishes (SP1, SP6, SP7, SJ20; inspector-controls IC-14b).
 // macOS only.
 import AppKit
 import Foundation
@@ -17,8 +17,9 @@ import Testing
         recorder.curveProbe.record(CurveProbe.sample(eventTime: 5, shownAt: 6))
         recorder.chipProbe.record(ProbeMark(name: "fade-start", series: ChipProbe.fadeSeries, time: 7))
         recorder.curveProbe.mark(ProbeMark(name: "preview-stopped", series: CurveProbe.previewSeries, time: 8))
+        recorder.canvasProbe.record(CanvasProbe.sample(eventTime: 9, shownAt: 10))
         let series: [String] = recorder.probe.samples.map(\.series)
-        let expected: [String] = [ScrubProbe.barSeries, ChipProbe.pressSeries, CurveProbe.dragSeries]
+        let expected: [String] = [ScrubProbe.barSeries, ChipProbe.pressSeries, CurveProbe.dragSeries, CanvasProbe.dragSeries]
         #expect(series == expected)
         let marks: [String] = recorder.probe.marks.map(\.name)
         let expectedMarks: [String] = ["fade-start", "preview-stopped"]
@@ -27,9 +28,9 @@ import Testing
 
     @MainActor @Test func theHostSetsControlProbesOnlyUnderTheFlag() {
         let flagged = Self.probes(arguments: [SuiteFrameProbe.launchFlag])
-        #expect(flagged.scrub && flagged.chip && flagged.curve)
+        #expect(flagged.scrub && flagged.chip && flagged.curve && flagged.canvas)
         let plain = Self.probes(arguments: [])
-        #expect(!plain.scrub && !plain.chip && !plain.curve)
+        #expect(!plain.scrub && !plain.chip && !plain.curve && !plain.canvas)
     }
 
     /// Which control probes a view inside `.suiteProbes(arguments:)` reads once hosted.
@@ -51,6 +52,7 @@ import Testing
     var scrub = false
     var chip = false
     var curve = false
+    var canvas = false
 }
 
 private struct ControlProbeReader: View {
@@ -58,12 +60,14 @@ private struct ControlProbeReader: View {
     @Environment(\.scrubProbe) private var scrub
     @Environment(\.chipProbe) private var chip
     @Environment(\.curveProbe) private var curve
+    @Environment(\.canvasProbe) private var canvas
 
     var body: some View {
         Text(verbatim: "Controls").onAppear {
             seen.scrub = scrub != nil
             seen.chip = chip != nil
             seen.curve = curve != nil
+            seen.canvas = canvas != nil
         }
     }
 }
