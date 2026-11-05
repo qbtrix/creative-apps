@@ -57,7 +57,7 @@ import Testing
         ]
         for (name, edited) in edits {
             var held = DesignHeldIDs()
-            held.scan([DesignPage(id: "p", name: "Page", nodes: tree)])
+            held.scan([DesignPage(id: "p", name: "Page", frameWidth: 10, frameHeight: 10, nodes: tree)])
             held.swap(tree, for: edited)
             #expect(held.ids == allIDs(edited).union(["p"]), "\(name)")
         }
