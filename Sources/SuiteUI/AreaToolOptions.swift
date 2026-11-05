@@ -95,6 +95,7 @@ public struct AreaToolOptions: View {
     private func bar(_ title: String, _ control: AreaControl, value: Double, range: ClosedRange<Double>, unit: String) -> some View {
         InspectorSliderRow(title, value: scrubbing[control] ?? value, in: range, step: 1, unit: unit, decimals: 0) {
             scrubbing[control] = $0
+            onChange(control, options)
         } onEnd: {
             guard let end = scrubbing.removeValue(forKey: control) else { return }
             send(control) { if control == .feather { $0.feather = end } else { $0.tolerance = end } }
