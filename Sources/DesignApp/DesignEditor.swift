@@ -6,7 +6,7 @@
 // the sidebar's Layers and AI tabs (DesignSidebarTabs), the canvas in
 // EditorDetail with the floating tool palette over its leading edge while a
 // file is open, the timeline slot (DesignTimeline) sliding in under it once the
-// document has keys, and the status line under that (zoom, "Page 1440 × 1024 pt", the last
+// document has keys, and the status line under that (zoom while a file is open, "Page 1440 × 1024 pt", the last
 // message, "2 Layers" with a selection, the save state's slot
 // (DesignSaveStatus), the active tool), and Properties (DesignInspector) in the
 // inspector. Values in, intents out: it reads the workspace and sends every
@@ -75,7 +75,7 @@ struct DesignEditor: View, BodyCounted {
                     DesignTimeline(model: model, perform: perform).transition(.move(edge: .bottom))
                 }
             } status: {
-                ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.statusSizeText) {
+                ViewerStatusBar(zoom: model.isOpen ? zoom : nil, size: model.statusSizeText) {
                     if let note {
                         Text(note)
                             .lineLimit(1)
