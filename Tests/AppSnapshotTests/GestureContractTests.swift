@@ -20,6 +20,7 @@
 import AppKit
 import DesignModel
 import HaloModel
+import LibraryModel
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -30,6 +31,7 @@ import Testing
 @testable import FlareApp
 @testable import FlareModel
 @testable import HaloApp
+@testable import LibraryApp
 @testable import PhotoApp
 
 /// Every app with a canvas.
@@ -42,7 +44,6 @@ extension BodyCountSuites {
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
         static let exclusions: [String: (reason: String, issue: Int)] = [
             "design.move": ("2 root bodies with the pointer down", 6021),
-            "library.*": ("no canvas tool enum, so no adapter", 6022),
         ]
 
         /// Pixel renders a drag that changes nothing costs on Photo's window (eyedropper 101, pen 85 on
@@ -56,6 +57,7 @@ extension BodyCountSuites {
             .design: DesignTool.allCases.map { ($0.rawValue, $0.gesture) },
             .flare: FlareTool.allCases.map { ($0.rawValue, $0.gesture) },
             .halo: HaloTool.allCases.map { ($0.rawValue, $0.gesture) },
+            .library: LibraryTool.allCases.map { ($0.rawValue, $0.gesture) },
         ]
 
         /// The most root bodies a class may run while the pointer is down.
@@ -176,6 +178,43 @@ extension BodyCountSuites {
                     let was = project.viewerDrawList?.worldBox(of: floor) else { return "no Floor in the draw list" }
                 if got.x == was.x && got.y == was.y { return "Floor didn't move" }
                 return abs(got.x - want.x) < 0.5 && abs(got.y - want.y) < 0.5 ? nil : "Floor at \(got.x),\(got.y), want \(want.x),\(want.y)"
+            })
+        }
+
+        @Test(.timeLimit(.minutes(5)), arguments: LibraryTool.allCases) func library(_ tool: LibraryTool) async throws {
+            let w = RenderBudgetWindow(
+                LibraryWindow(arguments: ["Library", "-LibraryFixture", "shoot"]).allowsWindowActivationEvents(), keyCapable: true)
+            defer { w.close() }
+            w.window.makeKey()
+            _ = w.window.makeFirstResponder(w.host)
+            try await w.settle(800)
+            try await w.settle(untilStable: { LibraryWindow.bodyRuns }, turns: 8)
+            let first = try #require(w.identifiers().first { $0.hasPrefix(LibraryGrid.cellIdentifierPrefix) })
+            #expect(w.perform("Open", on: first), "no Open action on \(first)")
+            let photo = try #require(await w.element("library.loupe.photo"), "Open showed no loupe photo")
+            try await w.ticks(1) { _ in w.click(at: CGPoint(x: photo.midX, y: photo.midY)) }
+            try await w.settle(200)
+            var target: CGPoint?
+            if tool == .crop {
+                RenderBudgetBrushKeysTests.press("r", in: w.window)
+                let full = try #require(await w.element("library.crop.frame"), "R showed no crop frame")
+                // Pull the bottom-right corner in, so the frame has room to move right and down.
+                try await w.drag(from: CGPoint(x: full.maxX, y: full.minY), by: CGVector(dx: -full.width / 3, dy: full.height / 3), samples: 20)
+                try await w.settle(untilStable: { LibraryWindow.bodyRuns }, turns: 8)
+                let frame = try #require(w.elementNow("library.crop.frame"))
+                target = CGPoint(x: frame.midX, y: frame.midY)
+            }
+            // "4000 × 2667 at 0, 0": the frame's size and origin in photo pixels.
+            let origin = { () -> (frame: [Double], window: CGRect)? in
+                guard let label = w.label("library.crop.frame"), let box = w.elementNow("library.crop.frame") else { return nil }
+                let numbers = label.split { !$0.isNumber && $0 != "." && $0 != "-" }.compactMap { Double($0) }
+                return numbers.count == 4 ? (numbers, box) : nil
+            }
+            let before = origin()
+            try await Self.run(.library, tool.rawValue, tool.gesture, w, at: target, bodies: { LibraryWindow.bodyRuns }, effect: {
+                guard let before, let after = origin() else { return "no crop frame after the release" }
+                let zoom = before.window.width / before.frame[0]
+                return Self.near(CGVector(dx: after.frame[2] - before.frame[2], dy: after.frame[3] - before.frame[3]), Self.delta(zoom), "the crop frame")
             })
         }
 

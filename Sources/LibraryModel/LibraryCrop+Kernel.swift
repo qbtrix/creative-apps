@@ -212,8 +212,21 @@ extension LibraryCatalog {
 
     /// Handle drags and arrow nudges, in photo pixels. Records nothing.
     public mutating func dragCrop(_ handle: CropHandle, dx: Double, dy: Double) {
-        guard dx.isFinite, dy.isFinite, let draft = cropDraft, let size = loupeItem?.pixelSize else { return }
-        cropDraft = (try? services.crop.dragged(draft, handle: handle, dx: dx, dy: dy, photo: size)) ?? draft
+        if let draft = cropDraft, let dragged = cropDraft(draft, dragging: handle, dx: dx, dy: dy) { cropDraft = dragged }
+    }
+
+    /// `draft` after a `dragCrop(handle, dx, dy)` step, without changing the
+    /// catalog, so the loupe can show a drag step before the catalog takes it
+    /// (#6022); nil when not cropping or a step isn't finite.
+    public func cropDraft(_ draft: CropSettings, dragging handle: CropHandle, dx: Double, dy: Double) -> CropSettings? {
+        guard dx.isFinite, dy.isFinite, cropDraft != nil, let size = loupeItem?.pixelSize else { return nil }
+        return (try? services.crop.dragged(draft, handle: handle, dx: dx, dy: dy, photo: size)) ?? draft
+    }
+
+    /// A draft `cropDraft(angle:)` or `cropDraft(_:dragging:dx:dy:)` made, as
+    /// the catalog's; nothing when not cropping. Records nothing.
+    public mutating func takeCropDraft(_ draft: CropSettings) {
+        if cropDraft != nil { cropDraft = draft }
     }
 
     /// Clamped to `CropSettings.angleRange`; NaN and infinity change nothing.
