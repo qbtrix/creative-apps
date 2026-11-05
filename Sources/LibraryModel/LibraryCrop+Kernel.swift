@@ -221,7 +221,7 @@ extension LibraryCatalog {
     /// delta isn't finite.
     public func cropDraft(dragging handle: CropHandle, dx: Double, dy: Double, from draft: CropSettings) -> CropSettings? {
         guard dx.isFinite, dy.isFinite, cropDraft != nil, let size = loupeItem?.pixelSize else { return nil }
-        return (try? services.crop.dragged(draft, handle: handle, dx: dx, dy: dy, photo: size)) ?? draft
+        return (try? services.crop.dragged(cropDraft ?? draft, handle: handle, dx: dx, dy: dy, photo: size)) ?? draft
     }
 
     /// A shown draft (`cropDraft(dragging:…)`, `cropDraft(angle:)`) into the catalog; nothing outside crop mode. Records nothing.
