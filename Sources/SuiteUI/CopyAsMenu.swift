@@ -3,7 +3,8 @@
 // built from CopyAsCommands' specs through MenuCommand+Catalog. Each item
 // takes its enabled state and help from the spec's availability on the
 // target, so one that can't act is off and says why in the coder's or the
-// document's sentence (no dead controls). The menu only reads its target; it
+// document's sentence (no dead controls); the submenu, off while nothing can
+// be copied, says why in its own name ("Copy As: ..."). The menu only reads its target; it
 // calls `copy` and `pasteAsImage`, which the app routes through its pasteboard
 // adapter. Placed inside an app's Edit menu.
 import SuiteKernel
@@ -63,13 +64,19 @@ public struct CopyAsMenu<Target: CopyAsTarget>: View {
                      command: MenuCommand(spec, on: target, systemImage: "photo.on.rectangle", perform: pasteAsImage))
     }
 
+    /// The submenu's help: what it does, or "Copy As: <why>" while the target can't copy.
+    public var submenuHelp: String {
+        let why = Self.specs.first(where: { $0.id == "edit.copy-as" })?.availability(target).why
+        return why.map { "Copy As: \($0)" } ?? "Copy the selection as PNG, SVG or \(ownTitle)."
+    }
+
     public var body: some View {
         let items = copyItems
         Menu("Copy As") {
             ForEach(items) { $0.command }
         }
         .disabled(!items.contains(where: \.command.isEnabled))
-        .help(items.first(where: { !$0.command.isEnabled })?.command.help ?? "Copy the selection as PNG, SVG or \(ownTitle).")
+        .help(submenuHelp)
         if let paste = pasteItem { paste.command }
     }
 }

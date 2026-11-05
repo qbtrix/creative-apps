@@ -39,6 +39,11 @@ import Testing
         }
     }
 
+    @Test func theOffSubmenuSaysWhyInItsOwnName() {
+        #expect(menu(GalleryClipDocument(selected: false)).submenuHelp == "Copy As: \(GalleryClipDocument.noSelection)")
+        #expect(menu(GalleryClipDocument()).submenuHelp == "Copy the selection as PNG, SVG or Gallery Layers.")
+    }
+
     @Test func textOnTheFakePasteboardTurnsPasteAsImageOffWithTheCodersSentence() throws {
         let why = try #require(SuitePasteboardCoding().pasteRefusal(for: text, in: GalleryClipDocument.app))
         let paste = try #require(menu(GalleryClipDocument(offered: text)).pasteItem)

@@ -69,8 +69,11 @@ struct GalleryMenuCommandPage: View, BodyCounted {
     #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
     #endif
-    @State private var doc = GalleryClipDocument()
+    @State private var doc: GalleryClipDocument
     @State private var log: [String] = []
+
+    /// `doc` starts the page in a state, as SuiteCopyAsSnapshots does after Copy Text.
+    init(doc: GalleryClipDocument = GalleryClipDocument()) { _doc = State(initialValue: doc) }
 
     var body: some View {
         #if DEBUG
