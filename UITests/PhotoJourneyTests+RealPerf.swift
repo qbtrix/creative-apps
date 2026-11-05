@@ -14,9 +14,10 @@
 // windows, its status message, and the frames of a Photo crash report
 // written meanwhile. Then it drives, about 3 s each: the Levels Black slider,
 // the Hue slider, the Move tool across the canvas, a scroll-wheel pan at
-// 300%, and ⌘= / ⌘− zoom steps. Pinch isn't driven: XCUITest on macOS can't
-// make a magnify gesture, so the zoom keys stand in. Every gesture goes
-// through Journey.health (Journey+Health.swift). Only `scripts/ui-test perf`
+// 300%, ⌘= / ⌘− zoom steps, then text-layers' two: key repeats into a Type
+// tool box and, once Return adds the layer, a drag of its Size field. Pinch
+// isn't driven: XCUITest on macOS can't make a magnify gesture, so the zoom
+// keys stand in. Every gesture goes through Journey.health (Journey+Health.swift). Only `scripts/ui-test perf`
 // runs these (nightly, from perf-nightly.sh); Tests/render-budgets.md records
 // what they measured.
 import AppKit
@@ -46,6 +47,8 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
         print("realperf photo \(backend): status line reads \(drew.isEmpty ? "(unreadable)" : drew)")
         XCTAssert(drew.isEmpty || drew.hasPrefix(status), "-suite.rendering \(backend) drew on \(drew), not \(status)")
         guard let pid = photo.pid(of: "Photo") else { return XCTFail("no running Photo from .build/realperf (scripts/ui-test perf makes it)") }
+        // First, while the image's adjustments are at identity: a slider step ⌘Z hasn't caught yet would stop the lift.
+        transform(photo, backend: backend, pid: pid)
 
         for (label, title) in [("levels", "Black"), ("hue-sat", "Hue")] {
             let slider = photo.app.sliders[title]
@@ -74,6 +77,60 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
         }
         photo.health("\(backend) zoom", pid: pid, series: nil) {
             Journey.repeatFor(seconds: 3) { step in photo.press(character: step.isMultiple(of: 2) ? "-" : "=", .command) }
+        }
+        text(photo, backend: backend, pid: pid)
+    }
+
+    /// transform (#6206): the whole 8K photo pasted as a layer, Edit > Free Transform, and its
+    /// bottom-right handle dragged in and back. The sample must show the drag as a compositor
+    /// transform (no per-step resample); Escape drops the draft.
+    @MainActor private func transform(_ photo: Journey, backend: String, pid: pid_t) {
+        for key in ["a", "c", "v", "d"] { photo.press(character: key, .command) }
+        guard photo.app.staticTexts["Pasted Layer"].waitForExistence(timeout: 30) else {
+            return XCTFail("\(backend): the 8K paste made no Pasted Layer")
+        }
+        photo.element("suite.tools").buttons["Select"].click()
+        let edit = photo.app.menuBars.firstMatch.menuBarItems["Edit"]
+        edit.click()
+        edit.menus.firstMatch.children(matching: .menuItem)["Free Transform"].click()
+        let box = photo.element("photo.canvas.transform-box")
+        guard box.waitForExistence(timeout: 10) else { return XCTFail("\(backend): Free Transform put no box on the canvas") }
+        // The 8K paste and the draft's first picture settle first, so the sample holds only the drag.
+        _ = XCTWaiter.wait(for: [XCTestExpectation(description: "settle")], timeout: 15)
+        let corner = box.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1))
+        // The handles feed no probe series (only the viewport's own drag does), so the round trip is report-only.
+        photo.health("\(backend) transform drag", pid: pid, series: nil) {
+            for offset in [CGVector(dx: -300, dy: -170), CGVector(dx: -40, dy: -20)] {
+                corner.click(forDuration: 0.05, thenDragTo: corner.withOffset(offset),
+                             withVelocity: XCUIGestureVelocity(400), thenHoldForDuration: 0.05)
+            }
+            return []
+        }
+        photo.press(.escape)
+    }
+
+    /// text-layers (#5951): a Type tool box on the 8K photo takes key repeats, then Return adds the layer
+    /// and its Text section's Size is dragged both ways. Typing has no probe series, so its round trips
+    /// are report-only; the sample, hang and idle checks still hold it. Size reports `exact-field`.
+    @MainActor private func text(_ photo: Journey, backend: String, pid: pid_t) {
+        photo.element("suite.tools").buttons["Type"].click()
+        photo.element("suite.viewport").coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.3)).click()
+        let box = photo.element("photo.text.box")
+        guard box.waitForExistence(timeout: 10) else { return XCTFail("\(backend): the Type tool click opened no box (photo.text.box)") }
+        photo.health("\(backend) type", pid: pid, series: nil) {
+            Journey.repeatFor(seconds: 3) { step in photo.app.typeText(step.isMultiple(of: 5) ? " " : "a") }
+        }
+        photo.press(.return)
+        let size = photo.element("suite.inspector").descendants(matching: .any)["photo.text.size"].firstMatch
+        guard size.waitForExistence(timeout: 10) else { return XCTFail("\(backend): Return added no text layer (no photo.text.size)") }
+        photo.reveal(size)
+        let from = size.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        photo.health("\(backend) text size", pid: pid, series: "exact-field") {
+            for dx: CGFloat in [300, -300] {
+                from.click(forDuration: 0.05, thenDragTo: from.withOffset(CGVector(dx: dx, dy: 0)),
+                           withVelocity: XCUIGestureVelocity(400), thenHoldForDuration: 0.05)
+            }
+            return []
         }
     }
 

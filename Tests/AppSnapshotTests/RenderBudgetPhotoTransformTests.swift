@@ -9,15 +9,16 @@
 // steps the Rotation row 120 times, as VoiceOver adjusts it. The draft is a
 // preview, so the window's editor body (a debug-only counter) runs at most 3
 // times either way; `slowCornerDragInOneBody` pauses the drag past the live
-// copy's quiet time, pointer down, and the body runs once (#4795). The window needs `allowsWindowActivationEvents`: a test
+// copy's quiet time, pointer down, and the body runs once (#4795): the render
+// time the release's picture publishes reaches the status line alone, not the window. The window needs `allowsWindowActivationEvents`: a test
 // process only sends activation clicks, and the handles are a SwiftUI gesture.
 // Each test checks the draft moved: the drag grew its box, the scrub turned it
 // (`setTransform`, PT-5). A scrub's steps run on the window's live copy, which
 // it takes back only once they go quiet (LiveTransformCopy+Kernel.swift), so
 // each test reads the workspace after waiting, up to 2 s, for that edit to land
-// (`landed`). The step p95 (budget 16 ms) is printed, never asserted, until the
-// supervisor lists these in Tests/perf-suites.txt. Nested in BodyCountSuites,
-// as every suite that reads a body counter is. macOS only.
+// (`landed`). The step times are gated on 24 MP in the perf suite
+// RenderBudgetPhotoLiveTransformTimingTests (Tests/perf-suites.txt), not here.
+// Nested in BodyCountSuites, as every suite that reads a body counter is. macOS only.
 #if canImport(AppKit)
 import AppKit
 import PhotoModel
@@ -43,7 +44,6 @@ extension BodyCountSuites {
                 // Window points have y up: out from the bottom-right corner is right and down.
                 try await w.drag(from: start, by: CGVector(dx: 120, dy: -80), samples: Self.samples)
             }
-            print("RENDER-BUDGET photo transform corner drag p95 \(String(format: "%.2f", step.p95)) ms (budget 16, print-only)")
             #expect(step.steps >= Self.samples, "\(step)")
             let after = try #require(await Self.landed(edited) {
                 ($0.transformSelection?.box).map { $0 != draft.before.box } ?? true
@@ -94,7 +94,6 @@ extension BodyCountSuites {
             let step = try await w.measure("photo transform rotation scrub, 120 steps", bodies: Self.bodies) {
                 found = try await w.adjust("suite.transform.rotation", steps: Self.samples)
             }
-            print("RENDER-BUDGET photo transform rotation scrub p95 \(String(format: "%.2f", step.p95)) ms (budget 16, print-only)")
             #expect(found, "the Rotation row isn't adjustable")
             #expect(step.steps >= Self.samples, "\(step)")
             let after = try #require(await Self.landed(edited) {

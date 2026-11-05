@@ -186,7 +186,7 @@ public struct FakeStyling: StyleEditing {
     }
 }
 
-/// Keeps documents in memory as JSON; refuses bytes that don't decode. A still document is its pages array, as it
+/// Keeps documents in memory as JSON; bytes in another form decode as a real file (LiveFiling) or are refused. A still document is its pages array, as it
 /// always was; one with a set rate or length also writes that time beside the pages, so it reopens with it.
 public struct FakeFiling: DocumentFiling {
     private struct Timed: Codable { var pages: [DesignPage]; var time: DesignDocumentTime }
@@ -198,9 +198,13 @@ public struct FakeFiling: DocumentFiling {
             return try JSONEncoder().encode(Timed(pages: document.pages, time: document.time))
         } catch { throw .unreadable }
     }
+    /// The fake's own JSON first; any other bytes go through LiveFiling, so a real file opens on fakes and a bad one
+    /// is refused with the real reason (J16 on fakes).
     public func decode(_ data: Data) throws(DesignFileError) -> DesignDocument {
         let timed = try? JSONDecoder().decode(Timed.self, from: data)
-        guard let pages = timed?.pages ?? (try? JSONDecoder().decode([DesignPage].self, from: data)) else { throw .unreadable }
+        guard let pages = timed?.pages ?? (try? JSONDecoder().decode([DesignPage].self, from: data)) else {
+            return try LiveFiling().decode(data)
+        }
         guard !pages.isEmpty else { throw .noPages }
         return DesignDocument(pages: pages, time: timed?.time ?? DesignDocumentTime())
     }

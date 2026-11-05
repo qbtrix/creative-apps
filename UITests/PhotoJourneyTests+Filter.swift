@@ -31,7 +31,7 @@ final class PhotoFilterJourneyTests: XCTestCase {
         choose(["Filter", "Blur", "Gaussian Blur…"], photo)
         let radius = photo.element("suite.filter.slider.radius")
         XCTAssert(radius.waitForExistence(timeout: 5), "Gaussian Blur… opened no sheet with a Radius slider")
-        radius.adjust(toNormalizedSliderPosition: 8.0 / 250)
+        photo.enter("8", in: radius)
         let value = photo.element("suite.filter.value.radius")
         XCTAssert(waitUntil { Self.number(value.label).map { abs($0 - 8) <= 1.5 } ?? false },
                   "Radius reads \(value.label), not about 8 px")

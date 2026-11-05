@@ -1,0 +1,219 @@
+{
+  "version": 1,
+  "app": "flare",
+  "why": "RJ-F06 (flare/svg-place): places logo.svg (a red #E53935 square group and a blue #1E88E5 ring group whose inner square is a hole, 200 x 100) into a blank 480 x 270 scene and saves the .flare file: two new layers layer-1 and layer-2 named after the groups, drawn at natural size centred (140, 85 to 340, 185), and the blue ring keeps both contours.",
+  "inputs": [
+    "input/*.flare"
+  ],
+  "steps": [
+    {
+      "id": "place.image",
+      "params": {
+        "name": "logo.svg",
+        "base64": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjAwIDEwMCI+PGcgaWQ9InJlZCI+PHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iODAiIGhlaWdodD0iODAiIGZpbGw9IiNFNTM5MzUiLz48L2c+PGcgaWQ9ImJsdWUiPjxwYXRoIGZpbGw9IiMxRTg4RTUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTExMCAxMCBIMTkwIFY5MCBIMTEwIFogTTEzMCAzMCBWNzAgSDE3MCBWMzAgWiIvPjwvZz48L3N2Zz4="
+      }
+    }
+  ],
+  "atomic": true,
+  "output": {
+    "dir": "out",
+    "name": "{stem}-placed",
+    "format": "flare"
+  },
+  "expect": {
+    "out/blank-placed.flare": {
+      "json": {
+        "document": {
+          "scenes": [
+            {
+              "background": {
+                "a": 1,
+                "b": 1,
+                "g": 1,
+                "r": 1
+              },
+              "durationFrames": 24,
+              "fps": 24,
+              "guides": [],
+              "height": 270,
+              "id": "scene-1",
+              "labels": {},
+              "layers": [
+                {
+                  "id": "layer-1",
+                  "instances": [],
+                  "isLocked": false,
+                  "isVisible": true,
+                  "name": "red",
+                  "shapes": [
+                    {
+                      "closed": true,
+                      "fill": {
+                        "a": 1,
+                        "b": 0.20784313725490197,
+                        "g": 0.2235294117647059,
+                        "r": 0.8980392156862745
+                      },
+                      "path": {
+                        "elements": [
+                          {
+                            "move": {
+                              "to": {
+                                "x": 150,
+                                "y": 95
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 230,
+                                "y": 95
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 230,
+                                "y": 175
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 150,
+                                "y": 175
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 150,
+                                "y": 95
+                              }
+                            }
+                          },
+                          {
+                            "close": {}
+                          }
+                        ]
+                      },
+                      "points": []
+                    }
+                  ],
+                  "tracks": {}
+                },
+                {
+                  "id": "layer-2",
+                  "instances": [],
+                  "isLocked": false,
+                  "isVisible": true,
+                  "name": "blue",
+                  "shapes": [
+                    {
+                      "closed": true,
+                      "fill": {
+                        "a": 1,
+                        "b": 0.8980392156862745,
+                        "g": 0.5333333333333333,
+                        "r": 0.11764705882352941
+                      },
+                      "path": {
+                        "elements": [
+                          {
+                            "move": {
+                              "to": {
+                                "x": 250,
+                                "y": 95
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 330,
+                                "y": 95
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 330,
+                                "y": 175
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 250,
+                                "y": 175
+                              }
+                            }
+                          },
+                          {
+                            "close": {}
+                          },
+                          {
+                            "move": {
+                              "to": {
+                                "x": 270,
+                                "y": 115
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 270,
+                                "y": 155
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 310,
+                                "y": 155
+                              }
+                            }
+                          },
+                          {
+                            "line": {
+                              "to": {
+                                "x": 310,
+                                "y": 115
+                              }
+                            }
+                          },
+                          {
+                            "close": {}
+                          }
+                        ]
+                      },
+                      "points": []
+                    }
+                  ],
+                  "tracks": {}
+                }
+              ],
+              "name": "Scene 1",
+              "width": 480
+            }
+          ],
+          "symbols": []
+        },
+        "format": "flare",
+        "version": 1
+      }
+    }
+  },
+  "platforms": [
+    "linux",
+    "macos"
+  ]
+}

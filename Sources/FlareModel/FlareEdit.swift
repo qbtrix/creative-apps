@@ -33,8 +33,9 @@ extension FlareWorkspace {
         let locked = targets.first(where: \.isLocked).map { Self.unlockMessage($0.name) }
         let shapes = services.shapes.unavailableHelp(for: .select)
         switch action {
-        case .selectAll: return everything().isEmpty ? "There is nothing to select."
-            : everything() == selection ? "Everything is already selected." : nil
+        case .selectAll:
+            let all = everything()
+            return all.isEmpty ? "There is nothing to select." : all == selection ? "Everything is already selected." : nil
         case .deselect: return selection.isEmpty && selectedLayerID == nil ? "Nothing is selected." : nil
         case .paste:
             guard let pasteboard, !pasteboard.isEmpty else { return FakeShapes.nothingToPaste }

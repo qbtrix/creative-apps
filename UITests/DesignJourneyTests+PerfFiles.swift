@@ -13,7 +13,9 @@
 // poll that found the canvas instead. `suite.perf`'s frame intervals, when
 // Design publishes them, add their p95 against QB-L12's 2 refreshes. The
 // numbers go to .build/ui-screens/perf-design-files.json and attach as
-// "perf-design-files"; the test asserts only that the saved file reopened.
+// "perf-design-files"; the test asserts that the saved file reopened, named
+// after it (the launch file wins over `-DesignFixture`), and that the window
+// recorded the progress mark (DesignEditor marks it as the file lands).
 // Every flag carries a value (`-SuitePerfProbe YES`, as AfterGlow's journeys
 // pass it): the launch arguments become UserDefaults' argument domain in
 // "-key value" pairs, so a bare `-SuitePerfProbe` followed by `-DesignSaveTo
@@ -68,6 +70,8 @@ final class DesignPerfFilesJourneyTests: XCTestCase {
         reopened.shot("perf-files-reopened")
 
         let document = reopened.element("suite.perf").waitForExistence(timeout: 5) ? reopened.perf() : nil
+        XCTAssertNotNil(document?.marks.first { $0.name == "progress-shown" },
+                        "Design recorded no progress-shown mark for the opened file (FH-7)")
         report(document: document, launched: launched, shownMs: shownMs, polls: polls, longest: longest, stalls: stalls)
     }
 

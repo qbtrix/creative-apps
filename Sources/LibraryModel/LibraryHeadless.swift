@@ -4,8 +4,9 @@
 // it imports every image the catalog doesn't list yet. Commands are `LibraryCatalog.catalog`'s, lifted; saving writes
 // the zip back; export writes the catalog file ("json") or the picks as sRGB-tagged PNGs at a long side through
 // CoreRaster's codecs, at Deflate's fastest level and a few picks at once across the cores; any export failure is a
-// plain sentence naming the photo. The catalog (about 1.7 KB inline) lives in a copy-on-write box, so copying the
-// document is a pointer copy and fits a small thread stack (#5032). Linux-safe: no UI imports.
+// plain sentence naming the photo. Options failing the format's `exportSchemas` are malformed params, so the CLI
+// exits 65 with the issues and writes nothing. The catalog (about 1.7 KB inline) lives in a copy-on-write box, so
+// copying the document is a pointer copy and fits a small thread stack (#5032). Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -111,6 +112,10 @@ public struct LibraryHeadless: HeadlessDocument {
     /// "json": the catalog file, or the shown photos with `contents` "shown". "png": each pick, developed, at
     /// `longSide` (its own size when absent).
     public func export(_ format: String, options: JSONValue) throws -> [ExportedFile] {
+        if options != .null, let schema = Self.exportSchemas[format] {
+            let issues = schema.validate(options)
+            guard issues.isEmpty else { throw CatalogError.malformedParams(id: "export", issues) }
+        }
         switch format {
         case "json":
             let data = try Self.wantsShown(options) ? shownFile() : catalogFile()
@@ -249,6 +254,14 @@ public struct LibraryHeadless: HeadlessDocument {
     }
 
     struct ExportSize: Decodable { var longSide: Int? }
+
+    /// Each format's options (`ExportSize`, `ShownRequest`), all optional; any other key or a wrong type fails it.
+    static let exportSchemas: [String: ParamSchema] = [
+        "png": .object(["longSide": .optional(.integer("Each pick's long side in pixels; its own when absent.", minimum: 1))],
+                       required: []),
+        "json": .object(["contents": .optional(.string("The catalog file, or the shown photos.", oneOf: ["catalog", "shown"]))],
+                        required: []),
+    ]
 
     /// The catalog on the heap; `library`'s `_modify` copies it before writing a shared one.
     final class CatalogBox: @unchecked Sendable {

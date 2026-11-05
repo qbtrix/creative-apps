@@ -1,6 +1,8 @@
 // History.swift: the one undo history every app keeps: named steps, a run
 // under one key folded into one step, ids that never repeat, dirty read
-// exactly as saved-vs-current, a limit that rolls old steps into the base.
+// exactly as saved-vs-current, a limit that rolls old steps into the base,
+// and `dropRedo` for steps an app takes back for good. Each step keeps the
+// serial it was recorded with, so a batch report can tell a step folded away.
 // Each step records who made it (`StepOrigin`): `record` reads the ambient
 // `StepOrigin.current`, `.user` unless a live call set `.agent`, so no record
 // site names an origin. An agent step made while a request span is open
@@ -27,11 +29,23 @@ public protocol HistoryReading: Sendable {
     var isDirty: Bool { get }
     /// Who made each step, in `History.steps` order (undone ones included); empty when the reader doesn't track it.
     var stepOrigins: [StepOrigin] { get }
+    /// The serial of the step undo would revert, nil when there is none or the reader doesn't track serials.
+    var undoSerial: Int? { get }
+    /// The serials of every step the history holds (undone ones included), nil when the reader doesn't track them.
+    var stepSerials: Set<Int>? { get }
+    /// The id of the state the document is at, new after every record, fold, undo or redo; nil when the reader
+    /// doesn't track it.
+    var stepID: Int? { get }
 }
 
 extension HistoryReading {
     /// A history that doesn't track origins (an engine's own undo) lists none.
     public var stepOrigins: [StepOrigin] { [] }
+    /// A history that doesn't track serials names none, so a batch report keeps every step's name.
+    public var undoSerial: Int? { nil }
+    public var stepSerials: Set<Int>? { nil }
+    /// A history without step ids names an edit's step whether or not it recorded one.
+    public var stepID: Int? { nil }
 }
 
 /// Who made a history step: the person at the app, or an agent over a live call, inside a named request or not.
@@ -80,6 +94,8 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
         public internal(set) var idAfter: Int
         /// Who made the step; `.user` unless a live call recorded it.
         public internal(set) var origin: StepOrigin = .user
+        /// The id the step was recorded with: unlike `idAfter`, a run folding into it keeps it.
+        public internal(set) var serial: Int = 0
     }
 
     /// The most steps kept; older ones roll into the base and can't be undone.
@@ -124,6 +140,11 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
     public var index: Int { done.count }
     /// Who made each of `steps`, oldest first, undone ones included.
     public var stepOrigins: [StepOrigin] { done.map(\.origin) + undone.reversed().map(\.origin) }
+    /// The serial of the step undo would revert, nil when there is none.
+    public var undoSerial: Int? { done.last?.serial }
+    /// The serials of every step held, undone ones included.
+    public var stepSerials: Set<Int>? { Set(done.map(\.serial) + undone.map(\.serial)) }
+    public var stepID: Int? { currentStepID }
 
     /// Hands out the next id; the counter never rewinds.
     private mutating func nextID() -> Int {
@@ -147,7 +168,7 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
         }
         let before = currentStepID
         let after = nextID()
-        done.append(Step(name: name, payload: undo, idBefore: before, idAfter: after, origin: origin))
+        done.append(Step(name: name, payload: undo, idBefore: before, idAfter: after, origin: origin, serial: after))
         undone.removeAll()
         while done.count > limit { done.removeFirst() }
         openKey = key
@@ -157,6 +178,13 @@ public struct History<Payload: Sendable>: Sendable, HistoryReading {
     /// Ends the open run, so the next `record` with the same key adds a step.
     public mutating func endRun() {
         openKey = nil
+    }
+
+    /// Forgets the undone steps, so Redo has nothing to make again: for steps
+    /// an app took back for good (a cancelled draft's). Ends the open run.
+    public mutating func dropRedo() {
+        openKey = nil
+        undone.removeAll()
     }
 
     /// Reverts the last step through `apply`, which returns the redo payload;

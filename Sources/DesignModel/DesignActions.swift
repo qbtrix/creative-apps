@@ -129,8 +129,11 @@ extension DesignWorkspace {
         guard let page = selectedPage else { return }
         let parent = selectedNodeID.flatMap { page.nodes.ancestors(of: $0)?.last }
         let level = parent.flatMap { page.nodes.node($0)?.children } ?? page.nodes
+        // `canAddToSelection` per layer, in one check: every candidate shares `parent`, so the lock and
+        // hide cascades above them are that parent's (a walk of the tree per layer took 87 s on 20,000, #6198).
+        let blocked = parent.map { isLockedInTree($0) || isHiddenInTree($0) } ?? false
         var next = selection
-        next.selectAll(level.map(\.id), canAdd: canAddToSelection)
+        next.selectAll(blocked ? [] : level.filter { !$0.isLocked && !$0.isHidden }.map(\.id))
         guard !next.ordered.isEmpty else { return }
         commitTextEdit()
         adopt(next)

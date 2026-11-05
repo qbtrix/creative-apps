@@ -171,13 +171,18 @@ extension DesignColor {
 extension DesignModifiers {
     /// The modifier keys held right now and View > Snap to Layers, for the drag the pointer is making; ⌘ also
     /// picks the deepest layer (`.deep`) and the second press of a double-click enters the picked group (`.enter`).
-    static var current: DesignModifiers {
-        var modifiers = make(flags: NSEvent.modifierFlags, defaults: .standard)
-        if KeyModifiers(flags: NSEvent.modifierFlags).contains(.command) { modifiers.insert(.deep) }
+    @MainActor static var current: DesignModifiers {
+        let flags = NSEvent.modifierFlags.union(held)
+        var modifiers = make(flags: flags, defaults: .standard)
+        if KeyModifiers(flags: flags).contains(.command) { modifiers.insert(.deep) }
         // clickCount is only read on a mouse-down: AppKit raises on a non-mouse event.
         if let event = NSApp.currentEvent, event.type == .leftMouseDown, event.clickCount >= 2 { modifiers.insert(.enter) }
         return modifiers
     }
+
+    /// Keys a test holds on top of the device's: a test's events can't set `NSEvent.modifierFlags`, so the
+    /// window's Option-drag timing (RenderBudgetDesignTests) holds Option here. Always empty in the app.
+    @MainActor static var held: NSEvent.ModifierFlags = []
 
     /// Shift and Option as held; `.noSnap` when ⌘ is held or Snap to Layers is off in `defaults` (snapping SN-8).
     /// The flags are read through SuiteUI's `KeyModifiers(flags:)` (AC-tools).

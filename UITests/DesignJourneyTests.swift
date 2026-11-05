@@ -34,13 +34,13 @@ final class DesignJourneyTests: XCTestCase {
     @MainActor func testLaunchShowsWindowShell() {
         let design = Journey("Design", self)
         // The floating palette, one of the editor window's regions, shows only while a file is open.
-        design.app.typeKey("n", modifierFlags: .command)
+        design.newDocument()
         design.expectEditorWindow()
     }
 
     @MainActor func testNewFileAndEveryTool() {
         let design = Journey("Design", self)
-        design.app.typeKey("n", modifierFlags: .command)
+        design.newDocument()
         design.shot("new-file")
         design.clickEachTool()
     }
@@ -111,7 +111,7 @@ final class DesignJourneyTests: XCTestCase {
 
     @MainActor func testAlignALayer() {
         let design = Journey("Design", self)
-        design.app.typeKey("n", modifierFlags: .command)
+        design.newDocument()
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "New File showed no canvas")
         design.element("suite.tools").buttons["Rectangle"].click()
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.15, dy: 0.3), to: CGVector(dx: 0.3, dy: 0.45), step: "align-drew")

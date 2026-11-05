@@ -1,6 +1,7 @@
 // ZoomMath.swift: SuiteKernel's zoom model (ViewZoom.swift, the one copy) in CoreGraphics types,
 // for CanvasViewport and the editor windows: the 10% to 3200% clamp, Zoom In and Zoom Out over the
-// suite's stops, the fit inside the viewport's margin, and `anchoredOrigin`, the artboard origin
+// suite's stops (and Zoom In and Zoom Out's help at the range's ends), the fit inside the
+// viewport's margin, and `anchoredOrigin`, the artboard origin
 // that keeps the document point under the pointer there. A zoom that isn't a number is 100%, and a
 // viewport with no room fits at the smallest zoom, never a division by zero. CanvasHostView's pinch
 // and CanvasLayout's anchored scroll both go through `anchoredOrigin`.
@@ -26,6 +27,17 @@ public enum ZoomMath {
 
     /// The next stop below `zoom`, within `range`.
     public static func zoomedOut(from zoom: Double) -> Double { steps.zoomedOut(from: zoom) }
+
+    /// Zoom Out's `unavailableHelp` at `zoom`: why it can't step, at or below the smallest zoom; nil
+    /// when it can. A Zoom Out left enabled there is a dead control.
+    public static func zoomOutHelp(at zoom: Double) -> String? {
+        zoom > range.lowerBound ? nil : "Already at the smallest zoom."
+    }
+
+    /// Zoom In's `unavailableHelp` at `zoom`: why it can't step, at or above the largest zoom; nil when it can.
+    public static func zoomInHelp(at zoom: Double) -> String? {
+        zoom < range.upperBound ? nil : "Already at the largest zoom."
+    }
 
     /// The zoom that fits `document` inside `viewport` with `margin` on every side, never above 100%,
     /// within `range`.

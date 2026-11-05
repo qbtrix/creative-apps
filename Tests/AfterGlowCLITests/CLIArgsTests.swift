@@ -98,6 +98,7 @@ struct CLIArgsTests {
         (["fake", "rect.add", "--in", "a.fake", "--out", "b.fake", "--json", "{x:1"], 65, "data", "--json"),
         (["fake", "rect.add", "--in", "a.fake", "--out", "b.fake", "--json", #"{"x":1}"#], 65, "data", "rect.add"),
         (["fake", "open", "bad.fake"], 65, "data", "bad.fake"),
+        (["design", "open", "v99.design"], 65, "data", "It was made by a newer version of Design (file version 99"),
         (["fake", "rect.move", "--in", "a.fake", "--out", "b.fake", "--json", move], 69, "unavailable", "Select a rectangle first."),
         (["fake", "rect.select", "--in", "a.fake", "--out", "b.fake", "--json", #"{"id":99}"#], 70, "failed", "There is no rect 99."),
         (["fake", "rect.add", "--in", "a.fake", "--out", "a.fake", "--json", rect], 73, "exists", "a.fake"),
@@ -108,7 +109,8 @@ struct CLIArgsTests {
 
     @Test(arguments: table.filter { !fromCatalog($0.3) })
     func exitCodeTable(arguments: [String], code: Int32, kind: String, naming: String) {
-        let run = Self.afterglow(arguments, files: ["a.fake": Self.fixture, "bad.fake": Data("not a canvas".utf8)])
+        let run = Self.afterglow(arguments, files: ["a.fake": Self.fixture, "bad.fake": Data("not a canvas".utf8),
+                                                    "v99.design": Data(#"{"pages":[],"version":99}"#.utf8)])
         Self.expectFailure(run, code, kind, naming: naming)
     }
 
@@ -137,6 +139,18 @@ struct CLIArgsTests {
         #expect(Self.afterglow(["photo", "list-commands"]).code != 64)
     }
 
+    /// #5948: export options failing the schema are 65 with the schema `issues`, not a bare 70.
+    @Test
+    func exportOptionsFailingTheSchemaAre65WithIssues() {
+        let run = Self.afterglow(["fake", "export", "a.fake", "--format", "jpeg", "--out", "a.jpg", "--json", #"{"quality":10}"#])
+        Self.expectFailure(run, 65, "data", naming: "/quality")
+        guard case .object(let error)? = run.reply?["error"], case .array(let issues)? = error["issues"] else {
+            Issue.record("no issues in \(run.io.stdout)"); return
+        }
+        #expect(issues == [.object(["path": .string("/quality"), "message": .string("expected at most 1")])])
+        #expect(run.io.files["a.jpg"] == nil)
+    }
+
     @Test
     func unavailableIs69() {
         let run = Self.afterglow(["fake", "rect.move", "--in", "a.fake", "--out", "b.fake", "--json", Self.move])
@@ -160,7 +174,8 @@ struct CLIArgsTests {
     /// Every run, ok or not, prints exactly one JSON object with sorted keys; stderr has a line only when it failed.
     @Test(arguments: forms.map(\.0) + table.map(\.0))
     func oneJSONObjectPerRun(arguments: [String]) throws {
-        let run = Self.afterglow(arguments, files: ["a.fake": Self.fixture, "bad.fake": Data("not a canvas".utf8)])
+        let run = Self.afterglow(arguments, files: ["a.fake": Self.fixture, "bad.fake": Data("not a canvas".utf8),
+                                                    "v99.design": Data(#"{"pages":[],"version":99}"#.utf8)])
         let line = try #require(run.io.stdout.count == 1 ? run.io.stdout.first : nil, "stdout: \(run.io.stdout)")
         guard let ok = run.ok else { Issue.record("no ok in \(line)"); return }
         #expect(ok == (run.code == 0))

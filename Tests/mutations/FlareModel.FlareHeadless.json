@@ -2,8 +2,8 @@
   {
     "label": "framesOffByOne: an SVG export writes the frame after each one asked for",
     "file": "Sources/FlareModel/FlareHeadless.swift",
-    "find": "SVGExporter.export(scene: scene, frame: Double(frame), symbols: clean.symbols)",
-    "replace": "SVGExporter.export(scene: scene, frame: Double(frame + 1), symbols: clean.symbols)",
+    "find": "SVGExporter.export(scene: scene, frame: Double(frame), symbols: document.symbols)",
+    "replace": "SVGExporter.export(scene: scene, frame: Double(frame + 1), symbols: document.symbols)",
     "tests": "FlareHeadlessTests|RealJobsTests"
   },
   {
@@ -23,8 +23,43 @@
   {
     "label": "lastFrameRefused: the scene's last frame is outside the export's range",
     "file": "Sources/FlareModel/FlareHeadless.swift",
-    "find": "guard (0..<scene.durationFrames).contains(frame)",
-    "replace": "guard (0..<scene.durationFrames - 1).contains(frame)",
+    "find": "!(0..<scene.durationFrames).contains($0)",
+    "replace": "!(0..<scene.durationFrames - 1).contains($0)",
+    "tests": "FlareHeadlessTests"
+  },
+  {
+    "label": "a Lottie export with text drops it silently instead of refusing",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "if texts > 0, o.dropText != true {",
+    "replace": "if texts < 0, o.dropText != true {",
+    "tests": "FlareHeadlessTests"
+  },
+  {
+    "label": "an SVG export strips text",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "guard let scene = document.scenes.first(where: { $0.id == id }) else {",
+    "replace": "guard let scene = ExportScan.withoutText(document).scenes.first(where: { $0.id == id }) else {",
+    "tests": "FlareHeadlessTests"
+  },
+  {
+    "label": "file.drop stays window-only, so the CLI can't place a dropped SVG",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "windowOnly = spec.kind == .file && id != \"file.drop\"",
+    "replace": "windowOnly = spec.kind == .file",
+    "tests": "FlareDropCLITests"
+  },
+  {
+    "label": "exportOptionsFailingTheSchemaAreMalformed: the schema check skipped",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "guard issues.isEmpty else { throw CatalogError.malformedParams(id: \"export\", issues) }",
+    "replace": "_ = issues",
+    "tests": "FlareHeadlessTests"
+  },
+  {
+    "label": "exportOptionsFailingTheSchemaAreMalformed: frames take any whole number",
+    "file": "Sources/FlareModel/FlareHeadless.swift",
+    "find": "\"frames\": .optional(.array(of: .integer(minimum: 0))),",
+    "replace": "\"frames\": .optional(.array(of: .integer())),",
     "tests": "FlareHeadlessTests"
   }
 ]

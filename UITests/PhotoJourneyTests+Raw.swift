@@ -6,7 +6,7 @@
 //    (NEF)." and the window stays empty. Shot `photo-open-raw-refused`.
 // 2. Photo opens `tiny-bayer.dng`: the title is "tiny-bayer", the canvas 48 x 64 (Orientation 6 applied),
 //    one layer "Background". Shot `photo-open-raw`.
-// 3. Exposure dragged to -1 in the tone rows (its slider runs -5...5, so 0.4 of the way).
+// 3. Exposure dragged left about 1 EV in the tone rows (a short scrub of its bar).
 // 4. Export as PNG (-PhotoExportTo): the file is 48 x 64, not the embedded preview's 24 x 32, and its two
 //    highlight patches are more than 20 levels apart (an 8-bit decode leaves both at white).
 import CoreGraphics
@@ -49,7 +49,7 @@ final class PhotoRawJourneyTests: XCTestCase {
 
         let exposure = photo.app.sliders["Exposure"] // 3.
         XCTAssert(exposure.waitForExistence(timeout: 10), "no Exposure slider in the tone rows")
-        exposure.adjust(toNormalizedSliderPosition: 0.4)
+        photo.scrub(exposure, by: -0.05)
         XCTAssert(photo.app.buttons["Undo Exposure"].waitForExistence(timeout: 5), "the drag made no Exposure step")
 
         photo.click("Export", in: .window) // 4.

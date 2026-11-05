@@ -7,9 +7,10 @@
 # wall-clock bound is in the perf list or the shrink-only timing baseline
 # (scripts/test-scope timing, with its own fixture cases), the perf
 # and heavy regexes take exactly the listed tests (a suite, one test of a
-# suite, a free test) and nothing beside them, and perf-report
-# flags only a bound missed by more than its multiple. No swift; needs
-# python3. bash 3.2 compatible.
+# suite, a free test) and nothing beside them, the limited regex takes the
+# suites whose file applies a .timeLimit trait (snapshot suites aside), and
+# perf-report flags only a bound missed by more than its multiple. No swift;
+# needs python3. bash 3.2 compatible.
 #
 # Run: bash Tests/test_scope/test_test_scope.sh   (exit 0 = all pass)
 set -uo pipefail
@@ -299,6 +300,25 @@ check "heavy within a changed filter keeps that target's" '^(PhotoModelTests\.Ph
 check "heavy within a filter that takes none is empty, never a match-all regex" "" \
   "$(HEAVY_SUITES="$tmp/heavy.txt" python3 "$ts" heavy '^(SuiteModelTests)\.')"
 check "an empty heavy list gives no regex" "" "$(HEAVY_SUITES="$tmp/empty.txt" python3 "$ts" heavy)"
+
+# The limited regex: every suite (or free test) in a Tests/<Target>/ file whose code applies
+# .timeLimit(, all or those a filter takes; a comment doesn't count, nor does the snapshot target.
+mkdir -p "$tmp/Tests/FooModelTests/Sub" "$tmp/Tests/AppSnapshotTests" "$tmp/Tests/BarModelTests"
+printf '%s\n' 'import Testing' '@Suite(.timeLimit(.minutes(1))) struct ATests {' '    @MainActor @Test func t() async {}' '}' \
+  'struct Beside {' '    @Test func u() {}' '}' >"$tmp/Tests/FooModelTests/A.swift"
+printf '%s\n' 'import Testing' '@Test(.timeLimit(.minutes(2))) func freeLimited() {}' >"$tmp/Tests/FooModelTests/Sub/Free.swift"
+printf '%s\n' 'import Testing' '// the .timeLimit( here is only a comment' 'struct CTests { @Test func v() {} }' >"$tmp/Tests/FooModelTests/C.swift"
+printf '%s\n' 'import Testing' '@Suite(.timeLimit(.minutes(1))) struct SnapTests { @Test func w() {} }' >"$tmp/Tests/AppSnapshotTests/S.swift"
+printf '%s\n' 'import Testing' 'struct BTests { @Test func x() {} }' >"$tmp/Tests/BarModelTests/B.swift"
+limited=$(TESTS_DIR="$tmp/Tests" python3 "$ts" limited)
+check "limited takes the suites and free tests of a file with a time limit, not a comment or a snapshot suite" \
+  '^(FooModelTests\.ATests|FooModelTests\.Beside|FooModelTests\.freeLimited)(/|\()' "$limited"
+check "limited within a filter keeps that filter's" '^(FooModelTests\.ATests)(/|\()' \
+  "$(TESTS_DIR="$tmp/Tests" python3 "$ts" limited '^(FooModelTests\.ATests|BarModelTests\.BTests)(/|\()')"
+check "limited within a filter that takes none is empty, never a match-all regex" "" \
+  "$(TESTS_DIR="$tmp/Tests" python3 "$ts" limited '^(BarModelTests)\.')"
+check "the repo's limited regex holds the onboarding contract suite that timed out queued" yes \
+  "$(python3 "$ts" limited | grep -q 'SuiteModelTests\\\.OnboardingStubTests' && echo yes || echo no)"
 
 # shard K/N: the sorted distinct top-level suites (a nested suite stays with its
 # parent; free tests on their own) go round-robin; every shard agrees, nothing

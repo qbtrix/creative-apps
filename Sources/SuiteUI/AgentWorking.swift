@@ -53,7 +53,9 @@ public struct AgentWorkWatch<Content: View>: View {
 public struct AgentWorkingMark: View, Equatable, BodyCounted {
     let work: AgentWork
     let id: String
+    #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
+    #endif
 
     public init(_ work: AgentWork, id: String) { (self.work, self.id) = (work, id) }
 

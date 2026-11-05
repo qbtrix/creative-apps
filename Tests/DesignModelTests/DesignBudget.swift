@@ -2,7 +2,8 @@
 // (docs/blueprints/design.md section 7.1). It runs a body N times, reports the
 // median and p95 of the runs, and records a test issue when the p95 is over the
 // gate: the Linux debug gate, 10 × the device target unless a row says
-// otherwise. design-seams' DesignBudgetTests and each wave-1 feature's
+// otherwise, or the device target itself in an optimized build (`gate(device:)`).
+// Every report prints, so a release run shows the numbers it gated. design-seams' DesignBudgetTests and each wave-1 feature's
 // Design<Area>BudgetTests call `DesignBudget.expect`. Runs on Linux and macOS.
 import Testing
 
@@ -38,6 +39,15 @@ enum DesignBudget {
     /// The Linux debug gate for a device target: 10 × the target (section 7.1).
     static func linuxDebugGate(device: Duration) -> Duration { device * 10 }
 
+    /// The gate for this build: the Linux debug gate in a debug build, the device target in a release one.
+    static func gate(device: Duration) -> Duration {
+        #if DEBUG
+        linuxDebugGate(device: device)
+        #else
+        device
+        #endif
+    }
+
     /// Times `body` `runs` times (at least once) on the continuous clock.
     static func measure(runs: Int, _ body: () throws -> Void) rethrows -> Report {
         let clock = ContinuousClock()
@@ -56,6 +66,7 @@ enum DesignBudget {
         sourceLocation: SourceLocation = #_sourceLocation, _ body: () throws -> Void
     ) rethrows -> Report {
         let report = try measure(runs: runs, body)
+        print("budget: \(name): \(report), gate \(gate)")
         if !report.fits(gate) {
             Issue.record("\(name): \(report), over the gate \(gate)", sourceLocation: sourceLocation)
         }

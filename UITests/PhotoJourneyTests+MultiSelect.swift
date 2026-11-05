@@ -63,7 +63,7 @@ final class PhotoMultiLayerJourneyTests: XCTestCase {
         let opacity = photo.element("suite.inspector").sliders.matching(
             NSPredicate(format: "identifier == %@ OR label == %@", "photo.layer.opacity", "Opacity")).firstMatch
         XCTAssert(opacity.waitForExistence(timeout: 5), "no Opacity slider in the inspector (photo.layer.opacity)")
-        opacity.adjust(toNormalizedSliderPosition: 0.5)
+        photo.enter("50", in: opacity)
         expect("Undo Layer Opacity", photo, "the Opacity slider made no Layer Opacity step")
         XCTAssert(
             waitUntil { self.reads("50%", rows[0]) && self.reads("50%", rows[2]) },

@@ -65,7 +65,7 @@ struct LibraryWindow: View, BodyCounted {
     nonisolated static let dropTarget = "Library"
 
     #if DEBUG
-    @Environment(\.bodyTally) private var bodyTally
+    @Environment(\.bodyTally) var bodyTally
     #endif
 
     var body: some View {
@@ -107,7 +107,7 @@ struct LibraryWindow: View, BodyCounted {
                     .onKeyPress(phases: .down) { press in route(press) }
                 if model.showsStatusBar {
                     // Keeps its height; the content above shrinks to fit.
-                    LibraryStatusBar(model: model, fitScale: areas.loupe.fitScale)
+                    LibraryStatusBar(model: model, loupe: areas.loupe)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -124,12 +124,13 @@ struct LibraryWindow: View, BodyCounted {
                        perform: { try? model.perform($0) })
         // The crop frame and the CROP section read these (crop CR-6).
         .environment(\.libraryCrop, cropControls)
+        .environment(\.libraryCropLive, areas.crop)
         // The Develop tab's LOOKS and BLACK & WHITE run their commands through this (AJ-11).
         .environment(\.libraryAdjust, adjustControls)
         .libraryControlsProbe()
         .background { ProbeElement("library.collections", label: model.collectionsFileValue) }
-        // The export area (LibraryWindow+Export.swift) moves `exportState` off `.idle`.
-        .sheet(isPresented: Binding(get: { model.exportState != .idle }, set: { _ in })) { exportSheet }
+        // The export area (LibraryWindow+Export.swift) moves `exportRun` off `.idle`.
+        .sheet(isPresented: Binding(get: { model.exportRun != .idle }, set: { _ in })) { exportSheet }
         .modifier(backupArea)  // File > Restore Catalog Backup… (LibraryWindow+Backup.swift)
         .modifier(trashArea)  // Photo > Delete Rejected Photos… and its confirm (LibraryWindow+Trash.swift)
         .modifier(filesArea)  // Remove from Catalog… and Locate… (LibraryWindow+Files.swift)

@@ -101,6 +101,34 @@ actor GateSending: HandOffSending {
                                               documents: [logo], createdAt: now)])
     }
 
+    /// #1763: Open In ▸ lists the other readers of the card's type and hands the file to the one picked.
+    @Test func openInHandsTheCardToAnotherReader() async throws {
+        let (m, s) = try await model(makeID: { "open-in" })
+        #expect(m.openInReason == HomeMenu.noSelection)
+        let sunset = try #require(m.state.cards.first { $0.item.ref.displayName == "Sunset.png" }).item.ref
+        m.select(sunset.fileID)
+        #expect(m.openInTargets == [.library])
+        #expect(m.openInReason == nil)
+        await m.openSelection(in: .library, now: now)
+        #expect(try await sent(s) == [HandOff(id: "open-in", from: .launcher, to: .library, verb: .open,
+                                              documents: [sunset], createdAt: now)])
+        // A type only its own app reads has no target, and says why.
+        m.select(logoID)
+        #expect(m.openInTargets.isEmpty)
+        #expect(m.openInReason != nil)
+    }
+
+    /// #1763: Open… routes each chosen file to the app its type opens in; an unknown type says so.
+    @Test func openPathsRoutesEachFileAndRefusesUnknownTypes() async throws {
+        let (m, s) = try await model(makeID: { "open-file" })
+        await m.open(paths: ["/tmp/In/Poster.design", "/tmp/In/notes.xyz"], now: now)
+        let sent = try await sent(s)
+        #expect(sent.map(\.to) == [.design])
+        #expect(sent.first?.documents.first?.path == "/tmp/In/Poster.design")
+        #expect(sent.first?.documents.first?.displayName == "Poster.design")
+        #expect(m.message == .unsupportedFile(name: "notes.xyz"))
+    }
+
     @Test func twoOpensSendTwoIDs() async throws {
         let (m, s) = try await model()
         m.select(logoID)
@@ -124,6 +152,15 @@ actor GateSending: HandOffSending {
         #expect(m.state.cards.count == 8)
         let after = try #require(m.state.cards.first { $0.item.ref.fileID == logoID })
         #expect(after.item == before.item && after.item.thumbnail != nil)
+    }
+
+    /// File > Open Recent > Clear Menu empties every app's recents, in the store and on the home (#6203).
+    @Test func clearRecentsEmptiesEveryApp() async throws {
+        let (m, s) = try await model()
+        m.select(logoID)
+        await m.clearRecents(now: now)
+        let stored = try await s.recents.list().items
+        #expect(m.state.cards.isEmpty && stored.isEmpty && m.selection == nil)
     }
 
     /// #1866: the search line names its unit, singular or plural, and counts the filtered cards.

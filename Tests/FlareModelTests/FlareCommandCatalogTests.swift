@@ -80,16 +80,18 @@ struct FlareCommandCatalogTests {
     /// The path.* examples (pen-paths FP-6) need a Pen draft or a shape picked with Direct Select, which the fixture has
     /// not: FlarePathCommandTests runs them in Flare and SuiteKernelTests' PathCommandsTests runs each rule.
     /// `import.report` needs a document opened from a Lottie: FlareLottieNoteTests runs it.
+    /// The place.* examples are the kernel's: place.image's empty SVG draws nothing, and the four picture edits are
+    /// refused because a placed SVG becomes layers (svg-place PF-6): FlarePlaceTests runs each.
     static func exempt(_ problem: String) -> Bool {
         let id = String(problem.prefix { $0 != ":" })
         // The beta.2 commands never run (FlareMenuVisibilityTests).
         if FlareWorkspace.menuHidden.contains(id) { return problem.contains("exampleRuns") }
-        if id.hasPrefix("path.") { return problem.contains("exampleRuns") }
+        if id.hasPrefix("path.") || id.hasPrefix("place.") { return problem.contains("exampleRuns") }
         if ["file.clear-recent", "file.open-in", "file.open-recent", "import.report"].contains(id) { return problem.contains("exampleRuns") }
         if ["recovery.restore", "recovery.discard", "timeline.delete-keys"].contains(id) { return problem.contains("exampleRuns") }
-        // Copy As's shared example asks for PNG, which needs the window's rasterizer: FlarePasteboardAdapterTests runs
-        // its SVG and own-layers forms and the PNG refusal.
-        if id == "edit.copy-as" { return problem.contains("exampleRuns") && problem.contains("rasterizer") }
+        // Copy As's shared example asks for PNG, which the fixture has no PNG encoder for: FlarePasteboardAdapterTests
+        // runs its SVG and own-layers forms and the PNG refusal.
+        if id == "edit.copy-as" { return problem.contains("exampleRuns") && problem.contains(FlareHeadless.pngHelp) }
         return ["timeline.insert-frames", "timeline.remove-frames"].contains(id)
             && ["stepNamedTitle", "editRecordsOneStep", "undoRestoresBytes"].contains { problem.contains($0) }
     }

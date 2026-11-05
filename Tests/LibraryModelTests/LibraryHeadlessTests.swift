@@ -50,6 +50,26 @@ import Testing
         #expect(throws: CatalogError.self) { try doc.export("tiff", options: .object([:])) }
     }
 
+    /// Quality gate #5948, docs/cli.md: export options failing the format's schema are 65 with every issue, and
+    /// nothing is written, picks or not.
+    @Test(arguments: [
+        ("png", JSONValue.object(["longSide": .string("x")]), "/longSide", "expected integer"),
+        ("png", .object(["longSide": .number(0)]), "/longSide", "expected at least 1"),
+        ("png", .object(["bogus": .number(1)]), "/bogus", "unexpected key"),
+        ("png", .object(["contents": .string("shown")]), "/contents", "unexpected key"),
+        ("json", .object(["bogus": .number(1)]), "/bogus", "unexpected key"),
+        ("json", .object(["longSide": .string("x")]), "/longSide", "unexpected key"),
+        ("json", .object(["contents": .string("all")]), "/contents", "expected one of catalog, shown"),
+        ("json", .array([]), "", "expected object"),
+    ])
+    func exportOptionsFailingTheSchemaAreMalformed(format: String, options: JSONValue, path: String,
+                                                   message: String) throws {
+        let doc = try LibraryHeadless.open(Self.input("import-rate-export"), name: "shoot.library")
+        #expect(throws: CatalogError.malformedParams(id: "export", [SchemaIssue(path: path, message: message)])) {
+            try doc.export(format, options: options)
+        }
+    }
+
     /// Quality gate #5953: a failed export says what went wrong in plain words, never an enum dump.
     @Test func failedExportSaysWhyInPlainWords() throws {
         var doc = try LibraryHeadless.open(Self.input("import-rate-export"), name: "shoot.library")

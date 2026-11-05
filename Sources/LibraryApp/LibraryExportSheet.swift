@@ -1,5 +1,6 @@
 // LibraryExportSheet.swift: File > Export… (export EX-6): editing, the progress
-// row, the summary. Values in, closures out; a nil action disables its control.
+// row, the summary, or a failed run's error, read from the kernel's ExportRun
+// and the catalog's `exportFinished`. Values in, closures out; a nil action disables its control.
 // Each control but the dismiss-only Cancel and Done, and the name alert's Save
 // (#4208), is its catalog command's MenuCommand on the window's catalog
 // (command-state CS-6), so it is off with the command's reason too. The
@@ -18,7 +19,7 @@ struct LibraryExportSheet: View {
         var savePreset: (@MainActor (String) -> Void)?
     }
 
-    let state: ExportState, count: Int, preview: String?, writable: Set<ExportFormat>, exportHelp: String?
+    let run: ExportRun<ExportOptions>, summary: ExportSummary?, count: Int, preview: String?, writable: Set<ExportFormat>, exportHelp: String?
     let presets: [ExportPreset], actions: Actions, progressDelay: Duration
     /// The window's catalog, which the controls' specs read; nil (a snapshot) leaves the actions alone to decide.
     var catalog: LibraryCatalog?
@@ -27,12 +28,12 @@ struct LibraryExportSheet: View {
     @State private var savingPreset = false
     @State private var presetName = ""
 
-    init(state: ExportState, count: Int, preview: String?, writable: Set<ExportFormat>, exportHelp: String?,
-         presets: [ExportPreset], actions: Actions = Actions(), progressDelay: Duration = .milliseconds(100),
+    init(run: ExportRun<ExportOptions>, summary: ExportSummary?, count: Int, preview: String?, writable: Set<ExportFormat>,
+         exportHelp: String?, presets: [ExportPreset], actions: Actions = Actions(), progressDelay: Duration = .milliseconds(100),
          catalog: LibraryCatalog? = nil) {
-        (self.state, self.count, self.preview, self.writable, self.catalog) = (state, count, preview, writable, catalog)
-        (self.exportHelp, self.presets, self.actions, self.progressDelay) = (exportHelp, presets, actions, progressDelay)
-        let options = Self.options(state)
+        (self.run, self.summary, self.count, self.preview, self.writable) = (run, summary, count, preview, writable)
+        (self.exportHelp, self.presets, self.actions, self.progressDelay, self.catalog) = (exportHelp, presets, actions, progressDelay, catalog)
+        let options = run.editingOptions
         _longEdgeText = State(initialValue: options?.longEdge.map(String.init) ?? "")
         _qualityText = State(initialValue: options.map { String($0.quality) } ?? "")
     }
@@ -40,15 +41,16 @@ struct LibraryExportSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             Text(Self.title(count)).font(SuiteFont.headline)
-            switch state {
+            switch run {
             case .idle: EmptyView()
             case .editing(let options): editing(options)
-            case .running(let done, let total): running(done: done, total: total)
-            case .finished(let summary): finished(summary)
+            case .running(_, let done, let total): running(done: done, total: total)
+            case .finished: if let summary { finished(summary) }
+            case .failed(_, let message): failed(message)
             }
         }
         .padding(SuiteSpacing.l).frame(width: SuiteSize.contentIdealWidth)
-        .onChange(of: Self.options(state)) { (_: ExportOptions?, options: ExportOptions?) -> Void in sync(options) }
+        .onChange(of: run.editingOptions) { (_: ExportOptions?, options: ExportOptions?) -> Void in sync(options) }
     }
 
     @ViewBuilder private func editing(_ options: ExportOptions) -> some View {
@@ -169,6 +171,16 @@ struct LibraryExportSheet: View {
         }
     }
 
+    /// A run that failed as a whole (#5948): its error, and Done to leave; nothing was finished.
+    @ViewBuilder private func failed(_ message: String) -> some View {
+        InspectorNote(message, kind: .error, identifier: "library.export.error")
+        HStack {
+            Spacer()
+            Button("Done") { actions.close?() }.keyboardShortcut(.defaultAction)
+                .accessibilityIdentifier("library.export.done")
+        }
+    }
+
     nonisolated static let sizes = [1024, 2048, 4096, 0]
 
     /// The Metadata row's chips: the kernel's policies under their own titles.
@@ -207,11 +219,6 @@ struct LibraryExportSheet: View {
         Int(text.trimmingCharacters(in: .whitespaces)).flatMap { range.contains($0) ? $0 : nil }
     }
 
-    nonisolated static func options(_ state: ExportState) -> ExportOptions? {
-        if case .editing(let options) = state { return options }
-        return nil
-    }
-
     private func fieldsHelp(_ options: ExportOptions) -> String? {
         let range = ExportOptions.longEdgeRange
         if !(options.longEdge == nil && longEdgeText.isEmpty), Self.number(longEdgeText, in: range) == nil {
@@ -231,7 +238,7 @@ struct LibraryExportSheet: View {
     }
 
     private func change(_ edit: (inout ExportOptions) -> Void) {
-        guard var options = Self.options(state) else { return }
+        guard var options = run.editingOptions else { return }
         edit(&options)
         actions.setOptions?(options)
     }

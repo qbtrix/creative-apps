@@ -24,15 +24,14 @@ import Testing
         #expect(none.delete == HomeMenu.Item("Remove from Recents", reason: "Select a recent item first."))
         let id = try #require(recents.items.first?.ref.fileID)
         #expect(menu(recents, selection: id).delete == HomeMenu.Item("Remove from Recents"))
-        #expect(menu(recents, selection: "gone").delete.reason == "Select a recent item first.")
+        #expect(menu(recents, selection: "gone").delete?.reason == "Select a recent item first.")
     }
 
     @Test func deleteRoutesByPage() throws {
         let recents = try crowd()
         let id = try #require(recents.items.first?.ref.fileID)
-        let assets = menu(recents, selection: id, page: .assets).delete
-        #expect(assets.title == "Remove Asset")
-        #expect(assets.reason == SuiteIdentity.notConnected("shared-assets"))
+        // #6203: the assets page has nothing to remove yet, so Edit shows no Delete there rather than a dead one.
+        #expect(menu(recents, selection: id, page: .assets).delete == nil)
     }
 
     @Test func openRecentListsTheTwentyNewest() throws {
@@ -44,10 +43,25 @@ import Testing
         #expect(menu().recents.isEmpty)
     }
 
-    @Test func clearMenuSaysWhyItWaits() throws {
-        // RecentWork clears one app at a time and HomeModel has no clear yet.
-        let clear = try menu(crowd()).clearMenu
-        #expect(clear == HomeMenu.Item("Clear Menu", reason: SuiteIdentity.notConnected("recents-open-in")))
+    /// #6203: Clear Menu acts while there are recents, and says why not when there are none.
+    @Test func clearMenuActsOnRecents() throws {
+        #expect(try menu(crowd()).clearMenu == HomeMenu.Item("Clear Menu"))
+        #expect(menu().clearMenu == HomeMenu.Item("Clear Menu", reason: HomeMenu.noRecents))
+    }
+
+    /// #6203: with the window open, no item on either page waits on a feature ("isn't available yet"),
+    /// except Open…, which waits on file routing (#1763, openWaitsForRouting).
+    @Test func noItemWaitsOnAFeature() throws {
+        let recents = try crowd()
+        let id = try #require(recents.items.first?.ref.fileID)
+        for page in [HomePage.home, .assets] {
+            for (selection, step) in [(nil, 1), (id, 0), (id, 3)] {
+                let m = menu(recents, selection: selection, step: step, page: page)
+                let all = m.new.map(\.item) + [m.clearMenu, m.undo, m.larger, m.smaller]
+                    + [m.delete].compactMap { $0 } + m.recents.map(\.item)
+                for item in all { #expect(item.reason?.hasSuffix("isn't available yet.") != true, "\(item.title)") }
+            }
+        }
     }
 
     @Test func thumbnailSizesStopAtTheirEnds() {
@@ -104,19 +118,25 @@ import Testing
         }
     }
 
-    @Test func openWaitsForRouting() {
-        #expect(menu().open == HomeMenu.Item("Open…", reason: HomeMenu.openWaits))
+    /// #1763: Open… waits only while routing or sending is pending, and acts once both are live.
+    @Test func openWaitsOnlyWhileRoutingOrSendingIsPending() {
+        #expect(menu().open == HomeMenu.Item("Open…"))
         #expect(menu(window: false).open == HomeMenu.Item("Open…"))
+        let open = HomeMenu.make(recents: RecentsList(), selection: nil, thumbnailStep: 1, page: .home,
+                                 hasWindow: true, pending: [:]).open
+        #expect(open.isEnabled)
     }
 
     /// #1754: Open…'s reason names opening a file, never "Opening recent work".
     @Test func openReasonNamesOpeningAFile() {
         let live = ["routing": SuiteIdentity.notConnected("recents-open-in"),
                     "sending": SuiteIdentity.notConnected("switching")]
-        for pending in [[:], live, ["sending": SuiteIdentity.notConnected("switching")]] {
+        for pending in [live, ["sending": SuiteIdentity.notConnected("switching")],
+                        ["routing": SuiteIdentity.notConnected("recents-open-in")]] {
             #expect(HomeMenu.openReason(pending: pending) == "Opening files from AfterGlow isn't available yet.")
             #expect(HomeMenu.openReason(pending: pending) != SuiteIdentity.notConnected("recents-open-in"))
         }
+        #expect(HomeMenu.openReason(pending: [:]) == nil)
         let open = HomeMenu.make(recents: RecentsList(), selection: nil, thumbnailStep: 1, page: .home,
                                  hasWindow: true, pending: live).open
         #expect(open.reason == HomeMenu.openWaits)
@@ -128,16 +148,16 @@ import Testing
         let m = menu(recents, selection: id, window: false, canUndo: true)
         #expect(m.new.allSatisfy { $0.item.isEnabled })
         #expect(m.open.isEnabled)
-        let rest = [m.clearMenu, m.undo, m.delete, m.showSidebar, m.showInspector, m.larger, m.smaller]
+        let rest = [m.clearMenu, m.undo, m.larger, m.smaller] + [m.delete].compactMap { $0 }
             + m.recents.map(\.item)
-        #expect(rest.count == 27)
+        #expect(rest.count == 25)
         for item in rest { #expect(item.reason == "Open the AfterGlow window first.", "\(item.title)") }
     }
 
     @Test func everyDisabledItemSaysWhy() throws {
         let m = try menu(crowd(), step: 3)
-        let all = m.new.map(\.item) + [m.open, m.clearMenu, m.undo, m.delete, m.showSidebar, m.showInspector,
-                                       m.larger, m.smaller] + m.recents.map(\.item)
+        let all = m.new.map(\.item) + [m.open, m.clearMenu, m.undo, m.larger, m.smaller]
+            + [m.delete].compactMap { $0 } + m.recents.map(\.item)
         for item in all where !item.isEnabled { #expect(item.reason?.isEmpty == false, "\(item.title)") }
         #expect(!all.contains { $0.reason?.contains("Not connected yet") == true })
     }

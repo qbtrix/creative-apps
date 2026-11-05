@@ -9,13 +9,11 @@ Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Add from Clipboard")
 Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Select All") {}.keyboardShortcut("a")
 Sources/AfterGlowApp/LauncherCommands+Assets.swift: Button("Assets") {}.keyboardShortcut("a", modifiers: [.option, .command])
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: entry.item) {
-Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.open) { openWindow(id: "home") }.keyboardShortcut("o")
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.open) {
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: entry.item) {
-Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.clearMenu) {}
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.clearMenu) { if let model { Task { await model.clearRecents(now: Date()) } } }
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.undo) { if let model { Task { await model.undoRemove(now: Date()) } } }
-Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.delete) { if let model { Task { await model.removeSelection(now: Date()) } } }
-Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.showSidebar) {}
-Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.showInspector) {}.keyboardShortcut("i", modifiers: [.option, .command])
+Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: delete) { if let model { Task { await model.removeSelection(now: Date()) } } }
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.larger) { model?.larger() }.keyboardShortcut("+")
 Sources/AfterGlowApp/LauncherCommands+Home.swift: MenuCommand(item: menu.smaller) { model?.smaller() }.keyboardShortcut("-")
 Sources/AfterGlowApp/LauncherCommands+Update.swift: Button("Check for Updates…") {}.disabled(true).help(SuiteIdentity.notConnected("updater"))

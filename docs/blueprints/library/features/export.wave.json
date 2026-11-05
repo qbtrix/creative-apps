@@ -41,7 +41,6 @@
     "Tests/mutations/LibraryModel.ExportPresets.json",
     "Sources/LibraryApp/Platform/ExportPresetStore.swift",
     "Tests/LibraryModelTests/LibraryExportBatchTests.swift",
-    "Tests/LibraryModelTests/LibraryExportBudgetTests.swift",
     "UITests/LibraryJourneyTests+ExportBatch.swift",
     "UITests/LibraryJourneyTests+PerfExport.swift",
     "Tests/LibraryModelTests/LibraryExportSidecarTests.swift",
@@ -206,7 +205,6 @@
       ],
       "owned": [
         "Tests/LibraryModelTests/LibraryExportBatchTests.swift",
-        "Tests/LibraryModelTests/LibraryExportBudgetTests.swift",
         "UITests/LibraryJourneyTests+ExportBatch.swift",
         "UITests/LibraryJourneyTests+PerfExport.swift",
         "Sources/LibraryModel/LibraryExport.swift",

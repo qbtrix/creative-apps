@@ -1,10 +1,13 @@
-// RenderBudgetFlarePlaceTests.swift (svg-place PF-4, quality row "place: a 2,000-path SVG on a live stage"): one
-// place of a 2,000-path SVG, sent through FlareWindow's debug-only `placeProbe` as the menu and drop send it, runs
-// the window's body at most 3 times (target 1). The time is printed, not gated (perf-suites only). Until PF-5 the
-// place refuses and this covers the refusal's status line. In BodyCountSuites: a global counter. macOS only.
+// RenderBudgetFlarePlaceTests.swift (svg-place quality row "place: a 2,000-path SVG on a live stage"): one place
+// of a 2,000-path SVG, sent through FlareWindow's debug-only `placeProbe` as the menu and drop send it, on a new
+// document with the stage live. `bodies` gates the window body at most 3 runs (target 1) and the status line's
+// report; `timing` gates the place step at 200 ms (svg-place.md's budget) and is disabled until
+// Tests/perf-suites.txt lists it, so a loaded CI Mac can't redden the merge gate.
+// In BodyCountSuites: a global counter. macOS only.
 #if canImport(AppKit)
 import AppKit
 import FlareModel
+import Foundation
 import SwiftUI
 import Testing
 
@@ -23,29 +26,35 @@ extension BodyCountSuites {
         }()
 
         @Test(.timeLimit(.minutes(2))) func placeInThreeBodies() async throws {
+            guard let (step, status) = try await Self.run() else { return }
+            #expect(status?.hasPrefix("Placed many-paths.svg: ") == true, "the place didn't report: \(String(describing: status))")
+            expectBodies(step, atMost: 3, target: 1)
+        }
+
+        @Test(.timeLimit(.minutes(2)), .disabled("waits on its Tests/perf-suites.txt line"))
+        func timing() async throws {
+            guard let (step, _) = try await Self.run() else { return }
+            expectP95(step, atMost: 200, target: 100)
+        }
+
+        /// The place step and the status line after it; nil in a release build, which has no place probe.
+        static func run() async throws -> (RenderStep, String?)? {
             var open = FlareWorkspace(services: .built)
             open.newDocument()
             let w = RenderBudgetWindow(FlareWindow(model: open))
             defer { w.close() }
             try await w.settle(500)
-            let bodies = { () -> Int? in
-                #if DEBUG
-                return FlareWindow.bodyRuns
-                #else
-                return nil
-                #endif
-            }
             #if DEBUG
             let place = try #require(FlareWindow.placeProbe, "the window published no place probe")
             let file = (name: "many-paths.svg", data: Self.manyPaths)
-            let step = try await w.measure("flare place 2,000-path SVG", bodies: bodies) {
+            let step = try await w.measure("flare place 2,000-path SVG", bodies: { FlareWindow.bodyRuns }) {
                 w.timed { place([file]) }
                 try await w.settle(500)
             }
-            print("RENDER-BUDGET flare place 2000-path SVG step \(String(format: "%.2f", step.p95)) ms (print-only)")
-            let status = FlareWindow.shownModel?.placeStatus
-            #expect(status?.isEmpty == false, "the place left nothing in the status line")
-            expectBodies(step, atMost: 3, target: 1)
+            print("RENDER-BUDGET flare place 2000-path SVG step \(String(format: "%.2f", step.p95)) ms")
+            return (step, FlareWindow.shownModel?.placeStatus)
+            #else
+            return nil
             #endif
         }
     }

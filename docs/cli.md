@@ -422,6 +422,18 @@ reads `frame` from its options the same way, for example
 `afterglow design export ui.design --format svg --out out --json '{"frame":60}'`;
 PNG export stays in the window for now.
 
+Flare exports `svg` (one file per frame, text included), `lottie` (one file)
+and `png` (one file per frame, masks, mattes and playing symbols drawn;
+`scale` and `transparent` options). `frames` picks the frames, for example
+`afterglow flare export show.flare --format png --out out --json '{"frames":[0,12],"scale":0.5}'`.
+Lottie and PNG can't hold text yet, so a scene with text fails with a message
+that names the layers, unless `{"dropText": true}` asks for the rest.
+
+Library exports `png` (one file per pick; `longSide`, a whole number of
+pixels, at least 1, never enlarging) and `json` (the catalog file, or with
+`{"contents": "shown"}` the photos the grid shows). Any other key or a wrong
+type is 65 with the issues, and nothing is written.
+
 ### Handles
 
 `<app>.open` and `<app>.new` hold the document in the server and return

@@ -17,7 +17,8 @@
 // tab and which setup sheet is up (FlareSetupSheet, in FlareDocumentSheet.swift),
 // plus the export task and the file it last wrote (FlareWindow+Export.swift);
 // the export sheet is FlareExportSheetAdapter's, shown while the Model's run
-// isn't idle.
+// isn't idle. Playback runs on `player` (FlarePlayer.swift), a copy of the
+// model only FlareCanvas reads at its frame, so a refresh never runs this body.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
 // `help` for every section 3.4 item, the Undo and Redo step names, Loop and
 // the selection's Edit reasons, and File > Place…'s reason and action; the
@@ -44,6 +45,8 @@ struct FlareWindow: View, BodyCounted {
     @State var exportTask: Task<Void, Never>? = nil
     /// The first file the last export wrote, for Reveal in Finder.
     @State var exportedFile: URL? = nil
+    /// Plays a copy of `model` off the window's body (FlarePlayer.swift).
+    @State var player = FlarePlayer()
     /// The process's flags; a hosted-window test passes its own, so `-FlareExportTo` reaches the export and no
     /// folder panel opens.
     var launch = FlareLaunch(arguments: ProcessInfo.processInfo.arguments)
@@ -90,8 +93,8 @@ struct FlareWindow: View, BodyCounted {
         } content: {
             FlareCanvas(
                 model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                help: { help(for: $0) }, tick: { model.tick(target: $0, ticker: &$1) }, onKey: toolKey,
-                onFit: { fitted = $0 }, onDismissNote: { model.dismissImportNote() })
+                help: { help(for: $0) }, player: player, onKey: toolKey,
+                onFit: { fitted = $0 }, onDismissNote: { model.dismissImportNote() }, onPlace: { place(paths: $0) })
         } inspector: {
             FlareInspector(
                 model: model, tab: inspectorTab, perform: perform,
@@ -104,14 +107,26 @@ struct FlareWindow: View, BodyCounted {
         .modifier(FlareFilePanels(model: model, launch: launch, perform: perform))
         .modifier(FlareDocumentSheet(
             sheet: $presented, setup: model.documentSetup, limits: model.documentLimits, perform: perform,
-            apply: { model.applyDocumentSetup($0, anchor: $1); return model.layerError == nil }))
+            apply: {
+                landPlayback()
+                model.applyDocumentSetup($0, anchor: $1)
+                followPlayback()
+                return model.layerError == nil
+            }))
         .modifier(FlareExportSheetAdapter(model: model, perform: perform))
         .modifier(FlareOpenStatus(model: model))
         .suiteOpenQueue(FlareShell.openQueue, isEmpty: model.takesOpenedFile, open: { open($0) })
         .modifier(FlareAutosaveAdapter(model: model, restore: { try model.restoreRecovery($0) }))
         .onChange(of: Self.bridge.recents(for: .flare), initial: true) { model.updateFileFlow(recents: $1) }
-        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: model) }, write: { model.takeLive($0) })
+        .suiteLiveWindow(FlareLive.front, read: { FlareHeadless(workspace: playbackShown) }, write: {
+            landPlayback()
+            model.takeLive($0)
+            followPlayback()
+        })
         .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
+        .onChange(of: model.isPlaying, initial: true) { syncPlayback() }
+        .onDisappear { player.stop() }
+        .modifier(RefreshLinkHandoff(player: player))
         .focusedSceneValue(
             \.flareMenu,
             FlareMenu(
@@ -128,7 +143,13 @@ struct FlareWindow: View, BodyCounted {
     /// sample (the easing journey's route); every other item goes through
     /// `perform`, the file area's samples included.
     private func menuPerform(_ intent: FlareIntent) {
-        if intent == .file(.openSample(name: "keyed")) { model.newSampleAnimation() } else { perform(intent) }
+        if intent == .file(.openSample(name: "keyed")) {
+            landPlayback()
+            model.newSampleAnimation()
+            followPlayback()
+        } else {
+            perform(intent)
+        }
     }
 
     /// Why a menu item can't act now: nil for Keyed Ball, else `help(for:)`.
@@ -168,28 +189,39 @@ struct FlareCanvas: View {
     var showsGuides = true
     var perform: @MainActor (FlareIntent) -> Void = { _ in }
     var help: @MainActor (FlareIntent) -> String? = { _ in nil }
-    var tick: @MainActor (Double, inout PlaybackTicker) -> Bool = { _, _ in false }
+    /// The window's player: while it plays, the stage and the timeline draw `model` at its frame.
+    var player: FlarePlayer? = nil
     /// The stage's keys it doesn't take itself (Return, Escape): the window's `toolKey`.
     var onKey: @MainActor (KeyPress) -> KeyPress.Result = { _ in .ignored }
     var onFit: @MainActor (Double) -> Void = { _ in }
     /// The import note's Dismiss (FlareImportNoteAdapter.swift): the window's `model.dismissImportNote()`.
     var onDismissNote: @MainActor () -> Void = {}
-    /// Ticks the model while playing: started when `model.isPlaying` turns true, stopped when it turns false or
-    /// the canvas leaves the screen. Its `measuredFPS` feeds the stage's status pills.
-    @State private var driver: SuitePlaybackDriver?
+    /// The SVGs dropped on the stage (FlarePlace.swift): the window's `place(paths:)`.
+    var onPlace: @MainActor ([String]) -> Void = { _ in }
+    #if DEBUG
+    /// The frame the last canvas body showed and whether it was playing, for RenderBudgetFlarePlaybackTests.
+    // view-static: main-actor
+    static var shown: (frame: Int, playing: Bool)?
+    #endif
 
     var body: some View {
+        // Only this body reads the player's frame, so a refresh runs the canvas, never the window.
+        let atFrame = player.flatMap { player in
+            player.frame.map { model.showing(frame: $0, playing: player.isPlaying) }
+        } ?? model
+        #if DEBUG
+        let _ = Self.shown = (atFrame.currentFrame, atFrame.isPlaying)
+        #endif
         if model.document != nil {
             VStack(spacing: 0) {
                 FlareImportNoteAdapter(rows: model.importNoteRows, onDismiss: onDismissNote)
                 FlareStage(
-                    model: model, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
-                    help: help, onKey: onKey, measuredFPS: driver?.measuredFPS, onFit: onFit)
-                FlareTimeline(model: model, perform: perform)
+                    model: atFrame, zoom: zoom, showsRulers: showsRulers, showsGuides: showsGuides, perform: perform,
+                    help: help, onKey: onKey, measuredFPS: player?.measuredFPS, onFit: onFit,
+                    onPlace: onPlace)
+                FlareTimeline(model: atFrame, perform: perform)
             }
-            .overlay { FlareRecording(model: model) }
-            .onChange(of: model.isPlaying, initial: true) { _, playing in follow(playing: playing) }
-            .onDisappear { driver?.stop() }
+            .overlay { FlareRecording(model: atFrame) }
         } else {
             EmptyStateView(
                 "No Animation Open", systemImage: "square.stack.3d.forward.dottedline",
@@ -204,27 +236,5 @@ struct FlareCanvas: View {
                     return !files.isEmpty
                 })
         }
-    }
-
-    /// Runs the display link while playing and stops it otherwise; each play gets a fresh driver, so its
-    /// ticker counts no paused time.
-    private func follow(playing: Bool) {
-        driver?.stop()
-        guard playing else { return }
-        let running = Self.playbackDriver(tick)
-        driver = running
-        running.start()
-    }
-
-    /// The suite's display-link driver, its ticks advancing a PlaybackTicker of its own through `tick`, which
-    /// returns false to stop the link (paused, or the end of a play that doesn't loop).
-    // view-static: main-actor
-    static func playbackDriver(_ tick: @escaping @MainActor (Double, inout PlaybackTicker) -> Bool) -> SuitePlaybackDriver {
-        let state = TickerState()
-        return SuitePlaybackDriver(onTick: { target in tick(target, &state.ticker) })
-    }
-
-    @MainActor private final class TickerState {
-        var ticker = PlaybackTicker()
     }
 }

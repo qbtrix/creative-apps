@@ -1,5 +1,6 @@
 // FlareHeadlessTests.swift (adopt-command-catalog AC-f3): FlareHeadless opens, saves, makes, summarizes, lifts
-// FlareWorkspace's catalog and exports SVG frames and Lottie on Linux, refusing PNG; Tests/RealJobs/flare's jobs run
+// FlareWorkspace's catalog and exports SVG frames (text included) and Lottie (refusing text unless told to drop it)
+// on Linux, refusing PNG; Tests/RealJobs/flare's jobs run
 // here through `FlareJob` (json compared equal; a sha256's digest is the CLI's RealJobsTests' to check).
 import FlareCore
 import Foundation
@@ -49,7 +50,8 @@ import Testing
         #expect(FlareHeadless.catalog.ids == FlareWorkspace.catalog.ids)
         let doc = try Self.keyed()
         for spec in FlareWorkspace.commands {
-            let expected = spec.kind == .file ? .unavailable(FlareHeadless.fileCommandHelp) : spec.availability(doc.workspace)
+            let windowOnly = spec.kind == .file && spec.id != "file.drop"
+            let expected = windowOnly ? .unavailable(FlareHeadless.fileCommandHelp) : spec.availability(doc.workspace)
             #expect(FlareHeadless.catalog.availability(spec.id, on: doc) == expected, "\(spec.id)")
         }
     }
@@ -68,6 +70,30 @@ import Testing
         #expect(throws: CatalogError.self) { try doc.export("svg", options: .object(["frames": .array([.number(12)])])) }
     }
 
+    /// A 96 pt "Title Card" reaches the SVG; Lottie refuses it by name unless `dropText` asks for the rest.
+    @Test func svgKeepsTextAndLottieRefusesItUnlessToldToDrop() throws {
+        var doc = try Self.keyed()
+        let card = TextShape(string: "Title Card", fontFamily: "System", fontSize: 96, position: FlareCore.Point(x: 10, y: 90))
+        _ = try FlareHeadless.catalog.run(FlareWorkspace.catalogID(AddLayer.id), params: JSONValue(encoding: AddLayer(
+            owner: .scene("scene-1"), layer: Layer(id: "title", name: "Title", texts: [card]))), on: &doc)
+        let svg = try doc.export("svg", options: .object([:]))
+        #expect(String(decoding: try #require(svg.first).data, as: UTF8.self).contains("Title Card"))
+        #expect(throws: CatalogError.failed(id: "export", message: FlareHeadless.textHelp("lottie", 1))) {
+            try doc.export("lottie", options: .object([:]))
+        }
+        let dropped = try doc.export("lottie", options: .object(["dropText": .bool(true)]))
+        #expect(dropped.count == 1 && !String(decoding: dropped[0].data, as: UTF8.self).contains("Title Card"))
+    }
+
+    /// With an encoder, PNG frames draw headless at the asked scale, one file per frame, each a different picture.
+    @Test func pngDrawsEachAskedFrameThroughTheEncoder() throws {
+        var doc = try Self.keyed()
+        doc.pngEncoder = { frame in Data("\(frame.width)x\(frame.height)".utf8) + Data(frame.rgba) }
+        let files = try doc.export("png", options: .object(["frames": .array([.number(0), .number(11)]), "scale": .number(0.5)]))
+        #expect(files.map(\.suggestedName) == ["scene-1-0.png", "scene-1-11.png"] && files.allSatisfy { $0.format == "png" })
+        #expect(files.allSatisfy { $0.data.starts(with: Data("100x50".utf8)) } && files[0].data != files[1].data)
+    }
+
     @Test func exportWritesLottieForTheAskedSceneAndRefusesPNG() throws {
         var doc = try Self.keyed()
         let second = FlareScene(id: "scene-2", name: "Two", durationFrames: 6)
@@ -77,7 +103,23 @@ import Testing
         #expect(throws: CatalogError.self) { try doc.export("lottie", options: .object(["scene": .string("scene-9")])) }
         #expect(throws: CatalogError.self) { try doc.export("png", options: .object([:])) }
         #expect(throws: CatalogError.self) { try doc.export("gif", options: .object([:])) }
-        #expect(FlareHeadless.openExtensions == ["flare", "json"] && FlareHeadless.exportFormats == ["svg", "lottie"])
+        #expect(FlareHeadless.openExtensions == ["flare", "json"] && FlareHeadless.exportFormats == ["svg", "lottie", "png"])
+    }
+
+    /// docs/cli.md: export options failing the schema are 65 with every issue, and nothing is written.
+    @Test(arguments: [
+        (JSONValue.object(["quality": .number(10)]), "/quality", "unexpected key"),
+        (.object(["quality": .string("x")]), "/quality", "unexpected key"),
+        (.object(["bogus": .number(1)]), "/bogus", "unexpected key"),
+        (.object(["scene": .number(1)]), "/scene", "expected string"),
+        (.object(["frames": .array([.number(-1)])]), "/frames/0", "expected at least 0"),
+        (.array([]), "", "expected object"),
+    ])
+    func exportOptionsFailingTheSchemaAreMalformed(options: JSONValue, path: String, message: String) throws {
+        let doc = try Self.keyed()
+        #expect(throws: CatalogError.malformedParams(id: "export", [SchemaIssue(path: path, message: message)])) {
+            try doc.export("svg", options: options)
+        }
     }
 
     @Test(arguments: ["export-svg-frames", "gradient-edit", "key-and-save"])

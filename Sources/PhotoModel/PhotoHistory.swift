@@ -132,6 +132,20 @@ extension PhotoWorkspace {
         history.runKey = nil
     }
 
+    /// Takes back the steps Free Transform's `draft` made (Scale, Rotate, a
+    /// drag) so its commit can stand as their one step: undoes each newest
+    /// step that put back a draft on the same layer and box, or none, and
+    /// returns the draft they began from (nil when the first step began it).
+    mutating func foldDraftSteps(of draft: TransformDraft) -> TransformDraft? {
+        var began: TransformDraft? = draft
+        while let now = began, case .draft(let before)? = history.kernel.undoSteps.last?.payload,
+            before.map({ $0.layerID == now.layerID && $0.box == now.box }) ?? true {
+            moveHistory { _ = $0.undo($1) }
+            began = before
+        }
+        return began
+    }
+
     /// Runs `move` (an undo, a redo or a jump) on the kernel with `apply` as
     /// its closure. The kernel is taken out while it runs, since `apply`
     /// changes the workspace; that also spares a copy of the steps. The

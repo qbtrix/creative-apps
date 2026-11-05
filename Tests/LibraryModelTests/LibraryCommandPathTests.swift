@@ -172,7 +172,7 @@ import Testing
         }
         var f = Self.state("export failed")
         #expect(try Self.catalog.run("export.retry", params: .object([:]), on: &f).result == .object(["photos": .number(1)]))
-        #expect(f.exportState == .running(done: 0, total: 1))
+        #expect(f.exportRun == .running(ExportOptions(folder: "/tmp/Exports"), done: 0, total: 1))
         var r = Self.state("every slider")
         _ = try Self.catalog.run("photo.reset-tint", params: .object([:]), on: &r)
         #expect(r.items.first { $0.id == "IMG_0001" }?.develop.value(.tint) == 0)

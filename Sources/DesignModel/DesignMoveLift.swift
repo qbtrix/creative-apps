@@ -4,7 +4,8 @@
 // the moved layers' run in paint order (DesignPage.painted's: depth first, hidden subtrees
 // skipped), and how far the drag has moved them. The canvas draws the nodes before the run, the
 // run, and the nodes after it, each from that unchanged page, and moves only the run's view.
-// Nil unless a Move drag (one layer or several) has moved, and nil when the moved layers are
+// An Option-drag lifts its copies the same way, from the press's page with the copies made in
+// place. Nil unless a Move or Option drag (one layer or several) has moved, and nil when the moved layers are
 // not one unbroken run in paint order, which a single offset view can't draw in place.
 // Linux-safe: no UI imports.
 
@@ -19,14 +20,21 @@ public struct DesignMoveLift: Sendable, Equatable {
 
 extension DesignWorkspace {
     public var moveLift: DesignMoveLift? {
-        guard let gesture, gesture.moved else { return nil }
+        guard let gesture, gesture.moved,
+              var page = gesture.before.pages.first(where: { $0.id == selectedPageID })
+        else { return nil }
         let roots: [String]
         switch gesture.route {
         case .move(let id): roots = [id]
         case .moveSeveral(let ids): roots = ids
+        case .optionCopy:
+            // The copies, made in place at the first step, are the run; the originals stay in the page.
+            guard let copies = gesture.copies else { return nil }
+            page.nodes = copies.nodes
+            roots = copies.selection
         default: return nil
         }
-        guard let page = gesture.before.pages.first(where: { $0.id == selectedPageID }), let root = roots.first,
+        guard let root = roots.first,
               let was = page.nodes.node(root)?.frame, let now = selectedPage?.nodes.node(root)?.frame,
               let run = Self.run(of: Set(roots), in: page.nodes)
         else { return nil }

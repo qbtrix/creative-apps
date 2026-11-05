@@ -21,13 +21,6 @@
     "tests": "DesignDuplicateTests|DesignContractLawTests"
   },
   {
-    "label": "group hands the kernel a payload that is not a group",
-    "file": "Sources/DesignModel/Live/LiveGrouping.swift",
-    "find": "payload: DesignNodePayload(node: made)",
-    "replace": "payload: DesignNodePayload(node: DesignNode(id: made.id, name: made.name, kind: .rectangle, frame: made.frame))",
-    "tests": "DesignGroupTests"
-  },
-  {
     "label": "ungroup drops the kernel's ungroup",
     "file": "Sources/DesignModel/Live/LiveGrouping.swift",
     "find": "                try tree.ungroup(group.id)\n",

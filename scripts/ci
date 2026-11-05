@@ -3,7 +3,11 @@
 # app-state rule, the design lint, the C4 ownership and descriptions checks, the duplicate-code
 # check, the canonical-first check, the SuiteUI-first view check, the body-counts check, the render contract, the app-marks check, the CI scripts' fixture tests, the test quarantine check, the
 # real-jobs check, the mutation anchors, swift build of every target with its tests, and swift
-# test, then prints PASS or FAIL and exits with the real status. swift build takes its dependencies only
+# test, then prints PASS or FAIL and exits with the real status. The suites under a
+# .timeLimit trait (scripts/test-scope limited) run first in a pass of their own: Swift
+# Testing starts a test's clock when it queues the test, so in the shared parallel pass
+# (165-240 s on CI's 3 cores) a trivial one-minute test timed out from its place in the
+# queue (run 41648346672). swift build takes its dependencies only
 # from the committed Package.resolved (--force-resolved-versions): a
 # Package.swift whose creative-core revision doesn't match it fails here
 # instead of re-resolving (scripts/bump-core moves both). A swift test that
@@ -575,6 +579,23 @@ run_heavy() {
 }
 skip_heavy="$perf${perf:+${heavy:+|}}$heavy"
 
+# The suites under a .timeLimit trait run first, in a pass of their own. Swift
+# Testing's withTimeLimit starts the timer as a sibling task of the body when
+# the test is queued, so in the shared pass a one-minute hang guard counts the
+# wait for a pool thread: 1726 tests posted "started" in one second and a
+# trivial OnboardingStubTests test timed out at 157 s (run 41648346672). On
+# their own the queue ahead of them is seconds long, and a limit means a hang.
+limited=$(python3 scripts/test-scope limited) || fail "test-scope limited"
+
+# run_limited [FILTER]: the time-limited suites, all or those FILTER takes;
+# nothing when none. The perf, quarantined and heavy skips still apply.
+run_limited() {
+  local tests
+  tests=$(python3 scripts/test-scope limited ${1:+"$1"}) || fail "test-scope limited"
+  [[ -z "$tests" ]] || run_tests "the time-limited suites, in a pass of their own" --filter "$tests" ${skip_heavy:+--skip "$skip_heavy"}
+}
+skip_shared="$skip_heavy${skip_heavy:+${limited:+|}}$limited"
+
 # run_all: every test but the perf ones.
 run_all() {
   if [[ "$(uname)" == Darwin ]]; then
@@ -584,22 +605,26 @@ run_all() {
     # memory; ci.yml samples memory to confirm it. So it runs on its own, one
     # test at a time (--no-parallel serializes Swift Testing), and the rest stay
     # parallel. Each run prints its wall time.
-    run_tests "all but AppSnapshotTests and the heavy tests" --skip "^AppSnapshotTests\.${perf:+|$perf}${heavy:+|$heavy}"
+    run_limited
+    run_tests "all but AppSnapshotTests, the heavy and the time-limited tests" --skip "^AppSnapshotTests\.${skip_shared:+|$skip_shared}"
     run_heavy
     run_tests "AppSnapshotTests, one at a time" --filter '^AppSnapshotTests\.' ${skip_heavy:+--skip "$skip_heavy"} --no-parallel
   else
-    run_tests "all but the heavy tests" ${skip_heavy:+--skip "$skip_heavy"}
+    run_limited
+    run_tests "all but the heavy and the time-limited tests" ${skip_shared:+--skip "$skip_shared"}
     run_heavy
   fi
 }
 
-# run_scope LABEL TESTS SNAPS: the parallel pass of TESTS without the perf and
-# heavy tests, the heavy tests of TESTS and SNAPS in a pass of their own, then
-# the rest of SNAPS one at a time; nothing for an empty regex (a --changed
-# scope and a shard).
+# run_scope LABEL TESTS SNAPS: the time-limited suites of TESTS first, the
+# parallel pass of TESTS without the perf, heavy and time-limited tests, the
+# heavy tests of TESTS and SNAPS in a pass of their own, then the rest of
+# SNAPS one at a time; nothing for an empty regex (a --changed scope and a
+# shard).
 run_scope() {
   local both
-  [[ -z "$2" ]] || run_tests "$1" --filter "$2" ${skip_heavy:+--skip "$skip_heavy"}
+  [[ -z "$2" ]] || run_limited "$2"
+  [[ -z "$2" ]] || run_tests "$1" --filter "$2" ${skip_shared:+--skip "$skip_shared"}
   both="$2${2:+${3:+|}}$3"
   [[ -z "$both" ]] || run_heavy "$both"
   [[ -z "$3" ]] || run_tests "$1, snapshots one at a time" --filter "$3" ${skip_heavy:+--skip "$skip_heavy"} --no-parallel
