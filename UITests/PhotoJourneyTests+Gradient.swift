@@ -1,7 +1,7 @@
 // PhotoJourneyTests+Gradient.swift: PJ-G1, a sky gradient in a selection
 // (gradient-fill PG-6; docs/blueprints/photo/features/gradient-fill.md,
 // Journey steps; RJ-P19). On sky.png (the 800 x 600 test photo) a marquee
-// over the top half, then G picks the Gradient tool: Tool Options shows
+// over the top half, then G, Shift-G picks the Gradient tool: Tool Options shows
 // SuiteUI's stop bar (`suite.gradient.bar`) and no angle row
 // (`suite.gradient.angle`). The first stop goes deep blue and the last pale
 // blue through the editor's hex field (`suite.gradient.color`); a drag from
@@ -44,7 +44,9 @@ final class PhotoGradientJourneyTests: XCTestCase {
         let selection = photo.app.staticTexts.matching(
             NSPredicate(format: "label CONTAINS 'Selection ' OR value CONTAINS 'Selection '")).firstMatch
         XCTAssert(selection.waitForExistence(timeout: 5), "the marquee left no Selection on the info line")
+        // G picks the group's first tool, the Paint Bucket; Shift-G cycles on to the Gradient.
         photo.press(character: "g")
+        photo.press(character: "g", .shift)
         let tool = photo.element("suite.tools").buttons["Gradient"]
         XCTAssert(tool.waitForExistence(timeout: 5) && tool.isEnabled, "no enabled Gradient on the palette")
         XCTAssert(tool.isSelected, "G didn't pick the Gradient tool")
