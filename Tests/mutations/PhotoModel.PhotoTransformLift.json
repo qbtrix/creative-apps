@@ -93,8 +93,8 @@
   {
     "label": "styleStaysDown: a styled layer keeps off the compositor and resamples each drag step, though the canvas draws no style",
     "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
-    "find": "(0...1).contains(layer.opacity), shownMask(of: layer) == nil,",
-    "replace": "(0...1).contains(layer.opacity), layer.style == .none, shownMask(of: layer) == nil,",
+    "find": "(0...1).contains(layer.opacity), let tiles = pixels[layer.id],",
+    "replace": "(0...1).contains(layer.opacity), layer.style == .none, let tiles = pixels[layer.id],",
     "tests": "PhotoTransformLiftTests/aStyledLayerLiftsItsPlainPixels"
   },
   {
@@ -103,5 +103,19 @@
     "find": "return margin + settings.readMargin",
     "replace": "return margin + 0 * settings.readMargin",
     "tests": "PhotoTransformLiftTests/aBlurLayerAboveLiftsWithTheSummedMargin"
+  },
+  {
+    "label": "maskedStaysDown: a masked layer keeps off the compositor and resamples each drag step (#6259)",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "(0...1).contains(layer.opacity), let tiles = pixels[layer.id],",
+    "replace": "(0...1).contains(layer.opacity), shownMask(of: layer) == nil, let tiles = pixels[layer.id],",
+    "tests": "PhotoTransformLiftTests/aMaskedLayerLiftsMasked"
+  },
+  {
+    "label": "spriteUnmasked: a masked layer lifts without its mask, so the hidden part shows mid-drag",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "if let mask = shownMask(of: layers[at]) { tiles = try masked(tiles, by: mask) }",
+    "replace": "_ = tiles",
+    "tests": "PhotoTransformLiftTests/aMaskedLayerLiftsMasked"
   }
 ]

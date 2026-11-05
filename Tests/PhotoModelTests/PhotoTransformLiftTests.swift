@@ -132,6 +132,46 @@ import Testing
         #expect(try styled.lifted()?.rgba8 == Self.turned().lifted()?.rgba8, "with the same pixels the canvas draws")
     }
 
+    /// `turned()` with a mask on the Logo that hides its left half.
+    static func maskedTurned() throws -> PhotoWorkspace {
+        var masked = try turned()
+        let id = try #require(masked.transformDraft?.layerID)
+        let at = try #require(masked.index(of: id))
+        var mask = try PixelBuffer(width: 60, height: 40, fill: RGBA(r: 1, g: 1, b: 1, a: 1))
+        for y in 0..<40 { for x in 0..<30 { try mask.setPixel(x: x, y: y, RGBA(r: 0, g: 0, b: 0, a: 1)) } }
+        masked.layers[at].hasMask = true
+        masked.masks[id] = TiledPixels(mask)
+        return masked
+    }
+
+    /// A masked layer lifts with its mask in the sprite (#6259): the mask moves with the pixels, as commit moves it.
+    @Test func aMaskedLayerLiftsMasked() throws {
+        let masked = try Self.maskedTurned()
+        _ = try #require(masked.liftKey, "a masked layer lifts")
+        let lift = try #require(try masked.lifted())
+        #expect(Array(lift.rgba8.prefix(4)) == [0, 0, 0, 0], "the mask hides the Logo's left half in the sprite")
+        #expect(Array(lift.rgba8[(59 * 4)..<(60 * 4)]) == [255, 0, 0, 255], "its right half lifts red")
+        #expect(try masked.liftSprite != Self.turned().liftSprite, "a masked sprite is another sprite")
+    }
+
+    /// Return takes a layer's mask through the draft with its pixels, as a flip or a turn does: the mask still
+    /// hides the Logo's left half where the turned Logo lands, and stays the layer's size.
+    @Test func commitTakesTheMaskAlong() throws {
+        var masked = try Self.maskedTurned()
+        let id = try #require(masked.transformDraft?.layerID)
+        let m = try #require(try Self.turned().liftPlacement, "Logo pixel to canvas pixel")
+        try masked.commitTransform()
+        let pixels = try #require(masked.pixels[id]), mask = try #require(masked.masks[id])
+        #expect((mask.width, mask.height) == (pixels.width, pixels.height), "the mask is the placed layer's size")
+        let picture = try masked.composite()
+        func shown(_ x: Double, _ y: Double) throws -> RGBA {
+            try picture.pixel(x: Int((m.a * x + m.c * y + m.tx).rounded(.down)), y: Int((m.b * x + m.d * y + m.ty).rounded(.down)))
+        }
+        let right = try shown(45, 20), left = try shown(15, 20)
+        #expect(right.a > 0.9 && right.g < 0.1, "the Logo's right half shows red: \(right)")
+        #expect(left.a < 0.1 || left.g > 0.9, "its left half stays hidden: \(left)")
+    }
+
     /// A blurring adjustment layer above lifts (#6259) with its margin added to the image's, and blurs the sprite.
     @Test func aBlurLayerAboveLiftsWithTheSummedMargin() throws {
         var workspace = try Self.turned()

@@ -182,10 +182,12 @@ extension PhotoWorkspace {
             transformDraft = nil
             return touch(.all)
         }
+        let mask = try draftPlacedMask(at)
         // One committed transform is one step: its Scale and Rotate steps fold in, and its undo
         // leaves no box up (an identity draft is just Free Transform begun).
         let began = foldDraftSteps(of: draft)
         record(.group([.stack(stackState), .draft(began?.transform == .identity ? nil : began)]), named: "Free Transform")
+        masks[draft.layerID] = mask
         pixels[draft.layerID] = placed.pixels
         layers[at].offsetX = placed.x
         layers[at].offsetY = placed.y
@@ -219,13 +221,25 @@ extension PhotoWorkspace {
         return try boxChanged(at, in: draft.box) { try services.transform.applied(draft, to: $0) }.map { (at, $0) }
     }
 
+    /// The mask of the layer at `at` taken through the draft as `draftPlaced()` takes its pixels, so it stays
+    /// the placed layer's size and hides what it hid (a flip or a turn moves it the same way); black, opaque,
+    /// where the placed layer grew past it. Nil for a layer without a mask or without a draft.
+    func draftPlacedMask(_ at: Int) throws -> TiledPixels? {
+        guard let draft = transformDraft, let mask = masks[layers[at].id],
+            let placed = try boxChanged(at, in: draft.box, tiles: mask, { try services.transform.applied(draft, to: $0) })
+        else { return masks[layers[at].id] }
+        let black = try TiledPixels(PixelBuffer(width: placed.pixels.width, height: placed.pixels.height, fill: RGBA(r: 0, g: 0, b: 0, a: 1)))
+        return try laid(placed, onto: black, at: PixelRect(x: placed.x, y: placed.y, width: placed.pixels.width, height: placed.pixels.height))
+    }
+
     /// The layer at `at` with only its pixels in `box` (canvas pixels) run through `change` and laid back over
     /// the rest, which stays put, on a layer grown to hold both. A box over the whole layer changes the whole
-    /// layer. Nil for a layer without pixels.
-    func boxChanged(_ at: Int, in box: PixelRect, _ change: (PlacedPixels) throws -> PlacedPixels) throws -> PlacedPixels? {
+    /// layer. `tiles` stands in for the layer's pixels (its mask, the layer's size). Nil for a layer without pixels.
+    func boxChanged(_ at: Int, in box: PixelRect, tiles: TiledPixels? = nil,
+                    _ change: (PlacedPixels) throws -> PlacedPixels) throws -> PlacedPixels? {
         let layer = layers[at]
-        guard let tiles = pixels[layer.id] else { return nil }
-        guard let (part, rest) = try boxCut(of: layer, in: box) else {
+        guard let tiles = tiles ?? pixels[layer.id] else { return nil }
+        guard let (part, rest) = try boxCut(of: layer, in: box, tiles: tiles) else {
             return try change(PlacedPixels(pixels: tiles, x: layer.offsetX, y: layer.offsetY))
         }
         let changed = try change(PlacedPixels(pixels: TiledPixels(tiles.flattened(part)),
@@ -241,9 +255,9 @@ extension PhotoWorkspace {
     }
 
     /// The part of `layer`'s pixels in `box` (canvas pixels in, layer pixels out) and the layer with that part
-    /// cleared; nil when the box holds the whole layer, misses it, or the layer has no pixels.
-    func boxCut(of layer: PhotoLayer, in box: PixelRect) throws -> (part: PixelRect, rest: TiledPixels)? {
-        guard let tiles = pixels[layer.id] else { return nil }
+    /// cleared (`tiles` in place of its pixels); nil when the box holds the whole layer, misses it, or the layer has no pixels.
+    func boxCut(of layer: PhotoLayer, in box: PixelRect, tiles: TiledPixels? = nil) throws -> (part: PixelRect, rest: TiledPixels)? {
+        guard let tiles = tiles ?? pixels[layer.id] else { return nil }
         let whole = PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)
         guard let part = box.offsetBy(-layer.offsetX, -layer.offsetY).intersection(whole), part != whole else { return nil }
         var rest = tiles
@@ -266,6 +280,7 @@ extension PhotoWorkspace {
     var transformPreview: PhotoWorkspace {
         guard let (at, placed) = (try? draftPlaced()) ?? nil else { return self }
         var shown = self
+        shown.masks[layers[at].id] = (try? draftPlacedMask(at)) ?? masks[layers[at].id]
         shown.pixels[layers[at].id] = placed.pixels
         shown.layers[at].offsetX = placed.x
         shown.layers[at].offsetY = placed.y

@@ -3,7 +3,7 @@
 // the workspace without that layer, rendered once as the picture under it. Each drag sample then only places
 // those pixels through the draft's matrix (`liftPlacement`); no pixel work runs until the release draws the
 // exact frame, the resample Return lays. A layer lifts only when the compositor's plain overs draw it as the
-// canvas would (`liftKey`): a visible, unmasked pixel layer at normal blend and opacity in 0...1, whose visible
+// canvas would (`liftKey`): a visible pixel layer at normal blend and opacity in 0...1, whose visible
 // layers above are all at normal blend and opacity in 0...1, and a box no wider or taller than 16384 px with its margin (the GPU's texture limit).
 // Anything else draws through the matrix region by region (`transformPreview(live:)`). The pixel layers above
 // render once, canvas-sized, as the cover the compositor lays over the lift (`liftedCover`). The adjustment
@@ -16,7 +16,8 @@
 // (`boxCut`), as commit does, and lacks the layers above. The pixels are the same for every drag of one draft
 // (`liftSprite`), so the canvas makes them once per Free Transform; each drag renders only the picture under
 // them (`liftedBase`). The canvas draws no layer style and tones through no adjustment layer's mask, so neither
-// keeps a layer down: the lift draws what the canvas does. Linux-safe.
+// keeps a layer down: the lift draws what the canvas does. A layer's shown mask multiplies the lifted pixels, so it
+// moves with them, as Return takes the mask through the draft (`draftPlacedMask`). Linux-safe.
 import CoreRaster
 
 /// The draft's layer lifted off the canvas for a drag.
@@ -35,6 +36,8 @@ public struct PhotoTransformLift: Sendable {
         public let key: Key
         public let opacity: Double
         let source: TiledPixels
+        /// The layer's shown mask, which the lifted pixels carry.
+        let mask: TiledPixels?
         /// What tones the pixels, and the visible layers above with their pixels (the cover's makings).
         let adjustments: AdjustmentSettings
         let above: [PhotoLayer]
@@ -90,7 +93,8 @@ extension PhotoWorkspace {
     public var liftSprite: PhotoTransformLift.Sprite? {
         guard let key = liftKey, let (at, _) = liftPart, let tiles = pixels[key.layerID] else { return nil }
         let above = layers[..<at].filter(\.isVisible)
-        return PhotoTransformLift.Sprite(key: key, opacity: layers[at].opacity, source: tiles, adjustments: adjustments,
+        return PhotoTransformLift.Sprite(key: key, opacity: layers[at].opacity, source: tiles, mask: shownMask(of: layers[at]),
+                                         adjustments: adjustments,
                                          above: above, abovePixels: above.map { pixels[$0.id] })
     }
 
@@ -122,7 +126,8 @@ extension PhotoWorkspace {
     /// adjustment layers above and then the image's adjustments, as premultiplied sRGB bytes, and the layer's
     /// opacity; nil when nothing lifts. Reads the layer's pixels once: a drag reuses them while `liftSprite` holds.
     public func liftedPixels() throws -> (width: Int, height: Int, rgba8: [UInt8], opacity: Double)? {
-        guard let (at, part) = liftPart, let tiles = pixels[layers[at].id] else { return nil }
+        guard let (at, part) = liftPart, var tiles = pixels[layers[at].id] else { return nil }
+        if let mask = shownMask(of: layers[at]) { tiles = try masked(tiles, by: mask) }
         let whole = PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)
         let tones = layers[..<at].reversed().filter { $0.isVisible && $0.opacity > 0 && $0.kind.isAdjustment }
         let margin = liftMargin(above: at)
@@ -167,12 +172,23 @@ extension PhotoWorkspace {
         else { return nil }
         let layer = layers[at]
         guard layer.kind == .pixels, layer.isVisible, layer.blendMode == .normal,
-            (0...1).contains(layer.opacity), shownMask(of: layer) == nil, let tiles = pixels[layer.id],
+            (0...1).contains(layer.opacity), let tiles = pixels[layer.id],
             let part = draft.box.offsetBy(-layer.offsetX, -layer.offsetY)
                 .intersection(PixelRect(x: 0, y: 0, width: tiles.width, height: tiles.height)),
             part.width + 2 * liftMargin(above: at) <= Self.liftLimit, part.height + 2 * liftMargin(above: at) <= Self.liftLimit
         else { return nil }
         return (at, part)
+    }
+
+    /// `tiles` with each tile multiplied by `mask` there (the layer's mask, its size), the tiles across the cores.
+    private func masked(_ tiles: TiledPixels, by mask: TiledPixels) throws -> TiledPixels {
+        let masking = services.masking
+        var out = tiles
+        out.tiles = try PhotoLayerComposite.inParallel(tiles.tiles.count) { i in
+            let r = tiles.tileRect(i)
+            return try masking.masked(tiles.tiles[i], at: (r.x, r.y), by: mask)
+        }
+        return out
     }
 
     /// Whether a visible layer above the lift composites over it as a plain over, so it can ride as the cover or,
