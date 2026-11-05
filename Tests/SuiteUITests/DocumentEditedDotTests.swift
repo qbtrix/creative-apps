@@ -48,9 +48,9 @@ private struct Edited: View {
         window.contentView = NSHostingView(rootView: Edited(dirty: dirty))
         window.orderFrontRegardless()
         #expect(await settles { label(in: window) == "edited" }, "an edited window's element read \(label(in: window) ?? "nothing")")
-        let element = try #require(element(in: window))
-        #expect((element as? NSObject)?.value(forKey: "accessibilityValue") as? String == "edited")
-        #expect((element.accessibilityRole?() ?? nil) == .group, "the element is a control or text the app audit would judge")
+        let found = try #require(element(in: window))
+        #expect((found as? NSObject)?.value(forKey: "accessibilityValue") as? String == "edited")
+        #expect((found.accessibilityRole?() ?? nil) == .group, "the element is a control or text the app audit would judge")
         dirty.edited = false
         #expect(await settles { label(in: window) == "saved" }, "a saved window's element read \(label(in: window) ?? "nothing")")
         // The window's flag, not the model's: set the window alone and the element follows it.
