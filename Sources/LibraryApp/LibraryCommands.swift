@@ -264,7 +264,7 @@ struct LibraryCommands: Commands {
             shortcut: KeyboardShortcut("v", modifiers: [.command, .shift]))
         MenuCommand("photo.reset-develop", on: catalog, title: "Reset Develop", action: photo.resetDevelop, reason: develop)
         Divider()
-        MenuCommand("photo.crop", on: catalog, title: photo.cropTitle, systemImage: "crop",
+        MenuCommand("photo.crop", on: catalog, title: photo.cropTitle, systemImage: LibraryTool.crop.systemImage,
             action: photo.toggleCrop, reason: crop, key: "R")
         MenuCommand("photo.reset-crop", on: catalog, title: "Reset Crop", action: photo.resetCrop, reason: crop)
         Divider()

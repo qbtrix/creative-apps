@@ -23,8 +23,22 @@
   {
     "label": ".liveAngleLeavesCatalog",
     "file": "Sources/LibraryModel/LibraryCrop+Kernel.swift",
-    "find": "        guard degrees.isFinite, let draft = cropDraft, let size = loupeItem?.pixelSize else { return nil }\n",
-    "replace": "        guard let draft = cropDraft, let size = loupeItem?.pixelSize else { return nil }\n",
+    "find": "        guard degrees.isFinite, let draft = base ?? cropDraft, cropDraft != nil, let size = loupeItem?.pixelSize else { return nil }\n",
+    "replace": "        guard let draft = base ?? cropDraft, cropDraft != nil, let size = loupeItem?.pixelSize else { return nil }\n",
     "tests": "LibraryCropLiveAngleTests"
+  },
+  {
+    "label": ".liveDragFromShown",
+    "file": "Sources/LibraryModel/LibraryCrop+Kernel.swift",
+    "find": "        guard dx.isFinite, dy.isFinite, let draft = base ?? cropDraft, cropDraft != nil,\n",
+    "replace": "        guard dx.isFinite, dy.isFinite, let draft = cropDraft, cropDraft != nil,\n",
+    "tests": "LibraryCropLiveDragTests"
+  },
+  {
+    "label": ".setDraftOnlyWhileCropping",
+    "file": "Sources/LibraryModel/LibraryCrop+Kernel.swift",
+    "find": "        if cropDraft != nil { cropDraft = draft }\n",
+    "replace": "        cropDraft = draft\n",
+    "tests": "LibraryCropLiveDragTests"
   }
 ]
