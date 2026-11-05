@@ -380,3 +380,4 @@ utc	stage	event	ref	note
 2026-11-04T23:38Z	3	check-in	quiet	full 41911541755 cancelled 0 Halo; full 41925978957 running; no halo run
 2026-11-05T01:41Z	3	check-in	quiet	full 41925978957 cancelled after Design/Flare 0 Halo; full 41941517618 in wait; no halo run
 2026-11-05T03:44Z	3	check-in	quiet	full 41941517618 running; no halo run
+2026-11-05T05:47Z	3	check-in	quiet	full 41941517618 failed after Design/Flare/Photo 0 Halo; no halo run
