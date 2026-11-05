@@ -247,5 +247,5 @@ private func gradientCards() -> DesignWorkspace {
     model.deselect()
     #expect(model.quietPress(at: sample(0), modifiers: []) == nil, "pressing A selects it, which shows")
     model.selectItem("node-2")
-    #expect(model.quietPress(at: pt(5, 5), modifiers: []) == nil, "pressing the empty page deselects")
+    #expect(model.quietPress(at: pt(350, 170), modifiers: []) == nil, "pressing B with A selected selects B")
 }
