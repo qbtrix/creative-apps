@@ -11,9 +11,10 @@
 // Auto measures that picture off the main actor and sets the draft to the
 // leveler's turn. A Straighten step (#6222) changes only `CropAreaState`'s
 // live draft, which the loupe and the CROP section read through
-// `\.libraryCropLive`, so a step reruns those views, not the window; the
-// catalog takes the angle once the steps pause for `CropAreaState.settle`, and
-// every other crop action takes it first (`cropAreaFlush`). A live draft whose
+// `\.libraryCropLive`, so a step reruns those views, not the window; a
+// handle drag or arrow nudge step does the same. The catalog takes the live
+// draft once the steps pause for `CropAreaState.settle`, and every other crop
+// action takes it first (`cropAreaFlush`). A live draft whose
 // base is no longer the catalog's draft is shown nowhere and dropped. Every
 // state change is a LibraryCatalog method. The window merges this half with
 // the develop half.
@@ -26,7 +27,7 @@ import LibraryModel
 import SuiteKernel
 import SwiftUI
 
-/// The Straighten steps the catalog hasn't taken yet (#6222); the catalog holds the draft.
+/// The Straighten and handle drag steps the catalog hasn't taken yet (#6222); the catalog holds the draft.
 @Observable final class CropAreaState {
     /// A shown step: `draft` and its frame, canvas and frame value, made from the catalog's `base`.
     struct Live {
@@ -150,8 +151,7 @@ extension LibraryWindow {
         var drag: (@MainActor (CropHandle, Double, Double) -> Void)?
         if cropping {
             drag = { (handle: CropHandle, dx: Double, dy: Double) in
-                cropAreaFlush()
-                model.dragCrop(handle, dx: dx, dy: dy)
+                cropAreaDrag(handle, dx, dy)
             }
         }
         // The loupe turns its picture itself, so an angle needs no render.
@@ -187,7 +187,25 @@ extension LibraryWindow {
     /// A Straighten step: the draft at `degrees` shows at once through
     /// `areas.crop`, and the catalog takes it once the steps pause.
     private func cropAreaStep(_ degrees: Double) {
+        // A pending handle drag goes in first, so the turn starts from it.
+        if let live = areas.crop.live, live.draft != model.cropDraft(angle: live.draft.angle) { cropAreaFlush() }
         guard let base = model.cropDraft, let draft = model.cropDraft(angle: degrees) else { return }
+        cropAreaShow(base: base, draft: draft)
+    }
+
+    /// A handle drag or arrow nudge step, from the draft on screen: shown at
+    /// once through `areas.crop`, so a step reruns the loupe and the CROP
+    /// section, not the window; the catalog takes it once the steps pause.
+    private func cropAreaDrag(_ handle: CropHandle, _ dx: Double, _ dy: Double) {
+        guard let base = model.cropDraft else { return }
+        let live = areas.crop.live
+        let shown = live?.base == base ? live?.draft ?? base : base
+        guard let draft = model.cropDraft(dragging: handle, dx: dx, dy: dy, from: shown) else { return }
+        cropAreaShow(base: base, draft: draft)
+    }
+
+    /// `draft`, made from the catalog's `base`, shown now and taken by the catalog after `CropAreaState.settle`.
+    private func cropAreaShow(base: CropSettings, draft: CropSettings) {
         let state = areas.crop
         state.show(CropAreaState.Live(
             base: base, draft: draft, frame: model.cropFrame(of: draft), canvas: model.cropCanvas(of: draft),
@@ -199,7 +217,7 @@ extension LibraryWindow {
         }
     }
 
-    /// The live Straighten step into the catalog, while the catalog's draft is
+    /// The live Straighten or drag step into the catalog, while the catalog's draft is
     /// still the one it was made from; dropped otherwise.
     func cropAreaFlush() {
         let state = areas.crop
@@ -207,7 +225,7 @@ extension LibraryWindow {
         state.commit = nil
         guard let live = state.live else { return }
         state.show(nil)
-        if model.cropDraft == live.base { model.setCropAngle(live.draft.angle) }
+        if model.cropDraft == live.base { model.setCropDraft(live.draft) }
     }
 
     /// The loupe's picture again for the catalog's current settings (the

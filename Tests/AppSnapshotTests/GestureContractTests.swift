@@ -30,6 +30,7 @@ import Testing
 @testable import FlareApp
 @testable import FlareModel
 @testable import HaloApp
+@testable import LibraryApp
 @testable import PhotoApp
 
 /// Every app with a canvas.
@@ -42,7 +43,6 @@ extension BodyCountSuites {
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
         static let exclusions: [String: (reason: String, issue: Int)] = [
             "design.move": ("2 root bodies with the pointer down", 6021),
-            "library.*": ("no canvas tool enum, so no adapter", 6022),
         ]
 
         /// Pixel renders a drag that changes nothing costs on Photo's window (eyedropper 101, pen 85 on
@@ -56,6 +56,7 @@ extension BodyCountSuites {
             .design: DesignTool.allCases.map { ($0.rawValue, $0.gesture) },
             .flare: FlareTool.allCases.map { ($0.rawValue, $0.gesture) },
             .halo: HaloTool.allCases.map { ($0.rawValue, $0.gesture) },
+            .library: LibraryTool.allCases.map { ($0.rawValue, $0.gesture) },
         ]
 
         /// The most root bodies a class may run while the pointer is down.
@@ -177,6 +178,59 @@ extension BodyCountSuites {
                 if got.x == was.x && got.y == was.y { return "Floor didn't move" }
                 return abs(got.x - want.x) < 0.5 && abs(got.y - want.y) < 0.5 ? nil : "Floor at \(got.x),\(got.y), want \(want.x),\(want.y)"
             })
+        }
+
+        /// The shoot fixture's first grid photo in the loupe; `.crop` presses R (a frame on the whole photo, which
+        /// gives its size), then drags the frame's bottom-right corner to the photo's middle, so the frame has room
+        /// to move right and down.
+        @Test(.timeLimit(.minutes(5)), arguments: LibraryTool.allCases) func library(_ tool: LibraryTool) async throws {
+            let w = RenderBudgetWindow(
+                LibraryWindow(arguments: ["Library", "-LibraryFixture", "shoot"]).allowsWindowActivationEvents(),
+                keyCapable: true)
+            defer { w.close() }
+            w.window.makeKey()
+            _ = w.window.makeFirstResponder(w.host)
+            try await w.settle(800)
+            let bodies = { () -> Int? in LibraryWindow.bodyRuns }
+            try await w.settle(untilStable: bodies, turns: 8)
+            let first = try #require(w.identifiers().first { $0.hasPrefix(LibraryGrid.cellIdentifierPrefix) })
+            #expect(w.perform("Open", on: first), "no Open action on \(first)")
+            let photo = try #require(await w.element("library.loupe.photo"), "Open showed no loupe photo")
+            try await w.settle(untilStable: bodies, turns: 8)
+            var target: CGPoint?, before: [Double] = [], zoom = 1.0
+            if tool == .crop {
+                try await w.ticks(1) { _ in w.click(at: CGPoint(x: photo.midX, y: photo.midY)) }
+                try await w.settle(200)
+                RenderBudgetBrushKeysTests.press("r", in: w.window)
+                try await w.settle(untilStable: bodies, turns: 8)
+                let whole = Self.frame(w.label("library.crop.frame"))
+                try #require(whole.count == 4, "R showed no crop frame")
+                let size = CGSize(width: whole[0], height: whole[1])
+                let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
+                zoom = board.width / size.width
+                let corner = w.point(CGPoint(x: size.width, y: size.height), on: size, in: board)
+                let middle = w.point(CGPoint(x: size.width / 2, y: size.height / 2), on: size, in: board)
+                w.send(.leftMouseDown, at: corner)
+                try await w.ticks(10) { i in
+                    w.send(.leftMouseDragged, at: CGPoint(x: corner.x + (middle.x - corner.x) * Double(i) / 10, y: corner.y + (middle.y - corner.y) * Double(i) / 10))
+                }
+                w.send(.leftMouseUp, at: middle)
+                try await w.settle(untilStable: bodies, turns: 8)
+                before = Self.frame(w.label("library.crop.frame"))
+                try #require(before.count == 4 && before[0] < size.width, "the corner drag left the frame at \(before)")
+                target = w.point(CGPoint(x: before[2] + before[0] / 2, y: before[3] + before[1] / 2), on: size, in: board)
+            }
+            try await Self.run(.library, tool.rawValue, tool.gesture, w, at: target, bodies: bodies,
+                pixels: { BodyTally.runs(of: LibraryLoupeRenders.self) }, effect: {
+                let after = Self.frame(w.label("library.crop.frame"))
+                guard after.count == 4 else { return "no crop frame after the release" }
+                return Self.near(CGVector(dx: after[2] - before[2], dy: after[3] - before[3]), Self.delta(zoom), "the crop frame")
+            })
+        }
+
+        /// A crop frame's label ("4000 × 4000 at 1000, 0") as [width, height, x, y]; empty when there is none.
+        static func frame(_ label: String?) -> [Double] {
+            (label ?? "").split { !"0123456789.-".contains($0) }.compactMap { Double($0) }
         }
 
         /// One press, `samples` drag samples and a release from the canvas's middle; checks `gesture`'s contract on

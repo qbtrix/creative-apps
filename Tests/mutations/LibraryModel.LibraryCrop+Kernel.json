@@ -26,5 +26,19 @@
     "find": "        guard degrees.isFinite, let draft = cropDraft, let size = loupeItem?.pixelSize else { return nil }\n",
     "replace": "        guard let draft = cropDraft, let size = loupeItem?.pixelSize else { return nil }\n",
     "tests": "LibraryCropLiveAngleTests"
+  },
+  {
+    "label": ".liveDragFromShown",
+    "file": "Sources/LibraryModel/LibraryCrop+Kernel.swift",
+    "find": "        return (try? services.crop.dragged(draft, handle: handle, dx: dx, dy: dy, photo: size)) ?? draft\n",
+    "replace": "        return (try? services.crop.dragged(cropDraft ?? draft, handle: handle, dx: dx, dy: dy, photo: size)) ?? draft\n",
+    "tests": "LibraryCropLiveDragTests"
+  },
+  {
+    "label": ".setDraftOnlyWhileCropping",
+    "file": "Sources/LibraryModel/LibraryCrop+Kernel.swift",
+    "find": "        if cropDraft != nil { cropDraft = draft }\n",
+    "replace": "        cropDraft = draft\n",
+    "tests": "LibraryCropLiveDragTests"
   }
 ]
