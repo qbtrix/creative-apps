@@ -20,8 +20,8 @@
 // (a debug-only `bodyRuns` counter the caller reads; each window puts its own
 // BodyTally in its environment and reports to the running test's, so the
 // counter reads this test's windows, never a parallel suite's), the root hosting view's
-// layout passes and time, and the per-step p50 / p95 (FrameProbe's nearest
-// rank). `expectBodies` gates a body count; `expectP95` judges time and
+// layout passes and time, the per-step p50 / p95 (FrameProbe's nearest
+// rank) and the slowest step. `expectBodies` gates a body count; `expectP95` judges time and
 // belongs only in tests Tests/perf-suites.txt lists.
 //
 // What a test process can't drive: it is never the active app, so every press
@@ -55,11 +55,13 @@ struct RenderStep: CustomStringConvertible {
     /// Per-step main-thread milliseconds: sendEvent plus the layout and display it forced.
     let p50: Double
     let p95: Double
+    /// The slowest single step, the press included; a one-off hitch the p95 hides.
+    let slowest: Double
 
     var description: String {
         "RENDER-BUDGET \(name): steps \(steps) | window bodies \(bodies.map(String.init) ?? "n/a") | layout passes "
             + "\(layouts) (\(String(format: "%.1f", layoutMilliseconds)) ms) | step p50 \(String(format: "%.2f", p50)) ms "
-            + "p95 \(String(format: "%.2f", p95)) ms"
+            + "p95 \(String(format: "%.2f", p95)) ms slowest \(String(format: "%.2f", slowest)) ms"
     }
 }
 
@@ -132,7 +134,8 @@ private final class KeyCapableWindow: NSWindow {
         let step = RenderStep(
             name: name, steps: times.count, bodies: bodies().map { $0 - (before ?? 0) },
             layouts: host.layouts - layouts, layoutMilliseconds: host.layoutTime - layoutTime,
-            p50: SuiteFrameProbe.nearestRank(times, 0.5) ?? 0, p95: SuiteFrameProbe.nearestRank(times, 0.95) ?? 0)
+            p50: SuiteFrameProbe.nearestRank(times, 0.5) ?? 0, p95: SuiteFrameProbe.nearestRank(times, 0.95) ?? 0,
+            slowest: times.last ?? 0)
         print(step)
         return step
     }
