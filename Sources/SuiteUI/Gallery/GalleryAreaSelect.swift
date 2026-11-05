@@ -1,6 +1,7 @@
 // GalleryAreaSelect.swift (area-selection AR-7): the gallery's `area-select` page, AreaToolOptions over AreaAnts on a
 // local AreaSelectTarget fake: a drag runs the tool's `select.<shape>` in the shown mode, Feather `select.feather`, and
-// each command logs a line. `GalleryAreaSelectSheet` is the snapshot: the bar in each mode and the ants on a lasso.
+// each command logs a line. The artboard sits on the canvas surround. `GalleryAreaSelectSheet` is the snapshot: the bar
+// in each mode and the ants on a lasso.
 import AppKit
 import Observation
 import SuiteKernel
@@ -99,6 +100,7 @@ struct GalleryAreaSelectPage: View, BodyCounted {
                     })
                 .accessibilityElement().accessibilityLabel("Area canvas")
                 .accessibilityValue("\(board.outline.count) shapes").accessibilityIdentifier("suite.gallery.area-canvas")
+                .galleryAreaSurround()
             Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
                 .accessibilityValue(log.joined(separator: "\n")).accessibilityIdentifier("suite.gallery.log")
         }
@@ -130,8 +132,16 @@ struct GalleryAreaSelectSheet: View {
                     AreaAnts(outline: [GalleryAreaSelect.lasso], draft: GalleryAreaSelect.lasso.map { Point(x: $0.x + 120, y: $0.y + 60) }, zoom: 1)
                 }
                 .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+                .galleryAreaSurround()
         }
         .padding(SuiteSpacing.xxl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+private extension View {
+    /// The artboard on the canvas surround, so its edge shows in Light as in Dark.
+    func galleryAreaSurround() -> some View {
+        padding(SuiteSpacing.l).background(SuiteColor.canvasSurround, in: .rect(cornerRadius: SuiteRadius.medium))
     }
 }

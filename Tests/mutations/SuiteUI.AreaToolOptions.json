@@ -1,0 +1,4 @@
+[
+{"label":"the bar sends every drag sample to the host again","file":"Sources/SuiteUI/AreaToolOptions.swift","find":"            scrubbing[control] = $0\n","replace":"            scrubbing[control] = $0\n            onChange(control, options)\n","tests":"RenderBudgetAreaSelectTests"},
+{"label":"the gesture's end sends the old value, not the dragged one","file":"Sources/SuiteUI/AreaToolOptions.swift","find":"$0.feather = end }","replace":"$0.feather = value }","tests":"RenderBudgetAreaSelectTests"}
+]

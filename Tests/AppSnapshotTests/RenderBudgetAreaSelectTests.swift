@@ -23,6 +23,29 @@ extension BodyCountSuites {
             expectBodies(wand, atMost: 3, target: 1)
         }
 
+        /// A 120-sample drag on the Feather bar is one change for the host: one `select.feather` (one History step)
+        /// at release, and the page's body runs at most 3 times, because the bar holds the value it is dragging.
+        @Test(.timeLimit(.minutes(2))) func featherDragIsOneChange() async throws {
+            let w = RenderBudgetWindow(AreaBudgetHost())
+            defer { w.close() }
+            try await w.settle(600)
+            let bodies = { () -> Int? in
+                #if DEBUG
+                return GalleryAreaSelectPage.bodyRuns
+                #else
+                return nil
+                #endif
+            }
+            let bar = try #require(await w.element(AreaControl.feather.identifier), "no Feather bar")
+            let drag = try await w.measure("area-select feather drag, 120 samples", bodies: bodies) {
+                try await w.drag(from: CGPoint(x: bar.minX + bar.width * 0.4, y: bar.midY), by: CGVector(dx: bar.width * 0.3, dy: 0))
+            }
+            let lines = (w.value("suite.gallery.log") ?? "").split(separator: "\n").filter { $0.hasPrefix("select.feather") }
+            #expect(lines.count == 1, "a Feather drag ran select.feather \(lines.count) times, not once")
+            #expect(!(w.value(AreaControl.feather.identifier) ?? "0").hasPrefix("0"), "the drag left Feather at 0")
+            expectBodies(drag, atMost: 3, target: 1)
+        }
+
         @Test(.disabled("report-only: enable once Tests/perf-suites.txt lists it"), .timeLimit(.minutes(2)))
         func timing() async throws {
             let (lasso, _) = try await Self.run()

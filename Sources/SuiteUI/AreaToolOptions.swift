@@ -1,7 +1,9 @@
 // AreaToolOptions.swift (area-selection AR-7): the area tools' options bar: shape and mode chips, Feather (0...250 px)
 // and, for the wand, Tolerance (0...255), Contiguous and All Layers. Each control names the `AreaSelectCommands`
 // command it feeds (`AreaControl.command`). While Shift or Option is held the mode chip shows the keys' mode, as a drag
-// uses it. The view keeps only the held keys; the host owns the options and gets each change with its control.
+// uses it. Feather and Tolerance are whole-number bars; the bar holds the value being dragged and sends it once, when
+// the drag, key step or typed value ends, so the host makes one change (one undo step) and reruns no body per sample.
+// The view keeps only the held keys and that value; the host owns the options and gets each change with its control.
 // Identifiers: `suite.area.tool-<shape>`, `suite.area.mode-<mode>` and `suite.area.<control>`.
 import SuiteKernel
 import SwiftUI
@@ -50,6 +52,8 @@ public struct AreaToolOptions: View {
     let options: AreaOptions, onChange: @MainActor (AreaControl, AreaOptions) -> Void
     /// The modifier keys held now. Presentation state only.
     @State private var held = EditModifiers()
+    /// The Feather or Tolerance value a gesture is moving, sent to the host when it ends. Presentation state only.
+    @State private var scrubbing: [AreaControl: Double] = [:]
 
     public init(options: AreaOptions, onChange: @escaping @MainActor (AreaControl, AreaOptions) -> Void) {
         (self.options, self.onChange) = (options, onChange)
@@ -77,20 +81,25 @@ public struct AreaToolOptions: View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             ChoiceChips(options: Self.tools, selected: options.tool) { tool in send(.tool) { $0.tool = tool } }
             ChoiceChips(options: Self.modes, selected: Self.shownMode(options.mode, held: held)) { mode in send(.mode) { $0.mode = mode } }
-            StudioScrubRow(label: "Feather", value: options.feather, range: AreaControl.feathers, step: 1, unit: "px") { radius in
-                send(.feather) { $0.feather = radius }
-            }
-            .accessibilityIdentifier(AreaControl.feather.identifier)
+            bar("Feather", .feather, value: options.feather, range: AreaControl.feathers, unit: "px")
             if shown.contains(.tolerance) {
-                StudioScrubRow(label: "Tolerance", value: options.tolerance, range: AreaControl.tolerances, step: 1) { tolerance in
-                    send(.tolerance) { $0.tolerance = tolerance }
-                }
-                .accessibilityIdentifier(AreaControl.tolerance.identifier)
+                bar("Tolerance", .tolerance, value: options.tolerance, range: AreaControl.tolerances, unit: "")
                 check("Contiguous", .contiguous, on: options.contiguous)
                 check("All Layers", .allLayers, on: options.allLayers)
             }
         }
         .onModifierKeysChanged(mask: [.shift, .option]) { _, keys in held = Self.modifiers(keys) }
+    }
+
+    /// A whole-number bar that shows the value being dragged and sends it to the host once, as the gesture ends.
+    private func bar(_ title: String, _ control: AreaControl, value: Double, range: ClosedRange<Double>, unit: String) -> some View {
+        InspectorSliderRow(title, value: scrubbing[control] ?? value, in: range, step: 1, unit: unit, decimals: 0) {
+            scrubbing[control] = $0
+        } onEnd: {
+            guard let end = scrubbing.removeValue(forKey: control) else { return }
+            send(control) { if control == .feather { $0.feather = end } else { $0.tolerance = end } }
+        }
+        .accessibilityIdentifier(control.identifier)
     }
 
     private func check(_ title: String, _ control: AreaControl, on: Bool) -> some View {
