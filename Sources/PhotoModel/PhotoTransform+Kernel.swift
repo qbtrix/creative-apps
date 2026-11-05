@@ -128,9 +128,11 @@ extension PhotoWorkspace: TransformTarget {
     /// A layer's painted bounds and the pixels and window they were read from.
     /// A caller that reads the box on every change (the canvas's Select move,
     /// the Transform rows) keeps one, so the box is read once per layer pixels,
-    /// not per show: the pixels compare by storage first, so an unchanged
-    /// layer costs one compare. Holding one holds the layer's tiles, so a
-    /// caller drops it once its tool is put down.
+    /// not per show: the pixels compare by tile storage only, so an unchanged
+    /// layer costs one compare and a rewritten one reads again, however equal
+    /// (an equal-pixel compare of an 8K layer per body hung Flip Canvas).
+    /// Holding one holds the layer's tiles, so a caller drops it once its tool
+    /// is put down.
     public struct PaintedBox: Sendable {
         let layerID: PhotoLayer.ID
         let source: TiledPixels
@@ -144,7 +146,7 @@ extension PhotoWorkspace: TransformTarget {
     /// part is clear.
     func paintedBounds(of id: PhotoLayer.ID, in window: PixelRect?, reusing known: inout PaintedBox?) -> PixelRect? {
         guard let tiles = pixels[id] else { return nil }
-        if known?.layerID != id || known?.window != window || known?.source != tiles {
+        if known?.layerID != id || known?.window != window || known?.source.sharesTiles(with: tiles) != true {
             PhotoRenderCount.paintedBox()
             known = PaintedBox(layerID: id, source: tiles, window: window, painted: try? tiles.paintedBounds(in: window))
         }
