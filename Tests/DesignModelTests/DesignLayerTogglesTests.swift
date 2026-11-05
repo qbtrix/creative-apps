@@ -81,3 +81,16 @@ func aToggleReservesEverySymbolItCanShow(flag: DesignLayerFlag) throws {
         }
     }
 }
+
+/// The Layers tree hands a row whether a group around it is hidden or locked (#6281); the row's toggles
+/// from those match the ones the workspace works out by walking the page.
+@Test func aRowsTogglesFromItsGroupsMatchTheTreeWalk() throws {
+    var workspace = try sample()
+    try workspace.setNodeHidden("node-2", true)
+    try workspace.setNodeLocked("node-2", true)
+    let group = try #require(workspace.treeNode("node-2"))
+    let child = try #require(workspace.treeNode("node-3"))
+    #expect(group.layerToggles(hiddenAbove: false, lockedAbove: false) == workspace.layerToggles("node-2"))
+    #expect(child.layerToggles(hiddenAbove: true, lockedAbove: true) == workspace.layerToggles("node-3"))
+    #expect(child.layerToggles(hiddenAbove: true, lockedAbove: true).map(\.offSymbol) == ["eye.slash", "lock"])
+}

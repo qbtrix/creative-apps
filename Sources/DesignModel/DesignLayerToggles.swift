@@ -112,18 +112,7 @@ extension DesignWorkspace {
     /// The eye and lock toggles for node `id`'s row, in that order; empty for an unknown id.
     public func layerToggles(_ id: String) -> [DesignLayerToggle] {
         guard let node = findNode(id) else { return [] }
-        let hiddenByGroup = !node.isHidden && isHiddenInTree(id)
-        let lockedByGroup = !node.isLocked && isLockedInTree(id)
-        return [
-            DesignLayerToggle(
-                flag: .hidden,
-                title: node.isHidden ? "Show Layer" : hiddenByGroup ? "Hide Layer (its group is hidden)" : "Hide Layer",
-                onSymbol: "eye.slash", offSymbol: hiddenByGroup ? "eye.slash" : "eye", isOn: node.isHidden),
-            DesignLayerToggle(
-                flag: .locked,
-                title: node.isLocked ? "Unlock Layer" : lockedByGroup ? "Lock Layer (its group is locked)" : "Lock Layer",
-                onSymbol: "lock.fill", offSymbol: lockedByGroup ? "lock" : "lock.open", isOn: node.isLocked),
-        ]
+        return node.layerToggles(hiddenAbove: isHiddenInTree(id), lockedAbove: isLockedInTree(id))
     }
 
     /// Flips node `id`'s own `flag`, as a click on its row toggle does: one undo step.
@@ -135,3 +124,22 @@ extension DesignWorkspace {
         }
     }
 }
+
+extension DesignNode {
+    /// This layer's row toggles when a group around it is hidden (`hiddenAbove`) or locked (`lockedAbove`).
+    /// The Layers tree hands those down as it walks, so a row reads no tree: on `crowd` each row's run walked
+    /// all 2,000 layers four times (#6281).
+    public func layerToggles(hiddenAbove: Bool, lockedAbove: Bool) -> [DesignLayerToggle] {
+        let hiddenByGroup = !isHidden && hiddenAbove
+        let lockedByGroup = !isLocked && lockedAbove
+        return [
+            DesignLayerToggle(
+                flag: .hidden,
+                title: isHidden ? "Show Layer" : hiddenByGroup ? "Hide Layer (its group is hidden)" : "Hide Layer",
+                onSymbol: "eye.slash", offSymbol: hiddenByGroup ? "eye.slash" : "eye", isOn: isHidden),
+            DesignLayerToggle(
+                flag: .locked,
+                title: isLocked ? "Unlock Layer" : lockedByGroup ? "Lock Layer (its group is locked)" : "Lock Layer",
+                onSymbol: "lock.fill", offSymbol: lockedByGroup ? "lock" : "lock.open", isOn: isLocked),
+        ]
+    }
