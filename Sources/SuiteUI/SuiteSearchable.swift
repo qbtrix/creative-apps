@@ -11,6 +11,10 @@
 // item's field again, which AppKit rebuilds when the item collapses or the page
 // changes, and the toolbar's "more toolbar items" pop-up, if a titlebar
 // accessory pushed items into it, `<identifier minus its last part>.toolbar.more`.
+// While a sheet is up it also does that every quarter second: AppKit can swap
+// the field's button cells under a sheet with no event, so no window update,
+// after it (the Help menu's sheets, #6204), and accessibility reads whichever
+// cell is current.
 import AppKit
 import SwiftUI
 
@@ -41,12 +45,31 @@ private struct SearchFieldNamer: NSViewRepresentable {
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
-            NotificationCenter.default.removeObserver(self, name: NSWindow.didUpdateNotification, object: nil)
+            NotificationCenter.default.removeObserver(self)
+            sheetTimer?.invalidate()
+            sheetTimer = nil
             if let window {
-                NotificationCenter.default.addObserver(self, selector: #selector(windowDidUpdate),
-                                                       name: NSWindow.didUpdateNotification, object: window)
+                let center = NotificationCenter.default
+                center.addObserver(self, selector: #selector(windowDidUpdate), name: NSWindow.didUpdateNotification, object: window)
+                center.addObserver(self, selector: #selector(sheetDidChange), name: NSWindow.willBeginSheetNotification, object: window)
+                center.addObserver(self, selector: #selector(sheetDidChange), name: NSWindow.didEndSheetNotification, object: window)
             }
             nameSoon()
+        }
+
+        private var sheetTimer: Timer?
+
+        /// Renames on a timer while a sheet is attached, since nothing else runs then (#6204); stops when it ends.
+        @objc private func sheetDidChange(_ note: Notification) {
+            sheetTimer?.invalidate()
+            sheetTimer = nil
+            guard note.name == NSWindow.willBeginSheetNotification else { return windowDidUpdate() }
+            let timer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated { self?.windowDidUpdate() }
+            }
+            timer.tolerance = 0.1
+            RunLoop.main.add(timer, forMode: .common)
+            sheetTimer = timer
         }
 
         /// A toolbar search item rebuilds its field when it collapses or the page changes; only the
