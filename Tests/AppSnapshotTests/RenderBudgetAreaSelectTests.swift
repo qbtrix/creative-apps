@@ -6,7 +6,8 @@
 // sample would count 120 and fail. AreaBudgetHost only hosts the page and opts in to activation clicks (the test
 // process is never the active app). `timing` judges the packet's p95 ≤ 8 ms and is report-only: it stays disabled until
 // Tests/perf-suites.txt lists it (only the supervisor edits that list). Nested in BodyCountSuites: it reads a body
-// counter. macOS only.
+// counter. `featherScrubIsOneCommand`: a 60-sample Feather scrub runs `select.feather` once, at mouse-up, so it is one
+// History step, not one per sample. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SwiftUI
@@ -28,6 +29,17 @@ extension BodyCountSuites {
             let (lasso, _) = try await Self.run()
             // Target: a sample fits the packet's 8 ms (one 120 Hz frame).
             expectP95(lasso, atMost: 8, target: 8)
+        }
+
+        @Test(.timeLimit(.minutes(2))) func featherScrubIsOneCommand() async throws {
+            let w = RenderBudgetWindow(AreaBudgetHost())
+            defer { w.close() }
+            try await w.settle(600)
+            let row = try #require(await w.element("suite.area.feather"), "no suite.area.feather row")
+            try await w.drag(from: CGPoint(x: row.minX + row.width * 0.5, y: row.midY), by: CGVector(dx: row.width * 0.3, dy: 0), samples: 60)
+            try await w.settle(200)
+            let runs = (w.value("suite.gallery.log") ?? "").split(separator: "\n").filter { $0.hasPrefix("select.feather") }
+            #expect(runs.count == 1, "a Feather scrub ran select.feather \(runs.count) times, not once at mouse-up")
         }
 
         /// Chooses the Lasso, drags a 120-sample circle on the canvas, then chooses the Wand and clicks inside it;

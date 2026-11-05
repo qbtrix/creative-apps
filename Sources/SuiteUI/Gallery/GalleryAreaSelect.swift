@@ -1,6 +1,8 @@
 // GalleryAreaSelect.swift (area-selection AR-7): the gallery's `area-select` page, AreaToolOptions over AreaAnts on a
-// local AreaSelectTarget fake: a drag runs the tool's `select.<shape>` in the shown mode, Feather `select.feather`, and
-// each command logs a line. `GalleryAreaSelectSheet` is the snapshot: the bar in each mode and the ants on a lasso.
+// local AreaSelectTarget fake: a drag draws the tool's shape (`AreaTool.drawn`) and runs its `select.<shape>` in the
+// shown mode at mouse-up, a Feather drag or typed value runs `select.feather` once when it ends, and each command logs a
+// line. The artboard sits on the canvas surround, as in an app. `GalleryAreaSelectSheet` is the snapshot: the bar in
+// each mode and the ants on a lasso.
 import AppKit
 import Observation
 import SuiteKernel
@@ -30,7 +32,8 @@ struct GalleryAreaBoard: AreaSelectTarget {
     /// Runs the tool's command over `points` in `mode`; the log line.
     mutating func select(_ points: [Point], _ options: AreaOptions, mode: AreaCombine) -> String {
         guard let first = points.first else { return "nothing drawn" }
-        let (xs, ys, reach) = (points.map(\.x), points.map(\.y), options.tool == .wand ? options.tolerance / 2 : 0)
+        let corners = options.tool == .rect || options.tool == .ellipse ? [first, points.last ?? first] : points
+        let (xs, ys, reach) = (corners.map(\.x), corners.map(\.y), options.tool == .wand ? options.tolerance / 2 : 0)
         let (low, high) = (Point(x: (xs.min() ?? 0) - reach, y: (ys.min() ?? 0) - reach), Point(x: (xs.max() ?? 0) + reach, y: (ys.max() ?? 0) + reach))
         var params: [String: JSONValue] = ["mode": .string(mode.rawValue)]
         switch options.tool {
@@ -42,8 +45,7 @@ struct GalleryAreaBoard: AreaSelectTarget {
             params.merge(["x": .number(first.x), "y": .number(first.y), "tolerance": .number(options.tolerance),
                           "contiguous": .bool(options.contiguous), "allLayers": .bool(options.allLayers)]) { $1 }
         }
-        let drawn = options.tool == .lasso || options.tool == .polygon ? points
-            : [low, Point(x: high.x, y: low.y), high, Point(x: low.x, y: high.y)]
+        let drawn = options.tool == .wand ? [low, Point(x: high.x, y: low.y), high, Point(x: low.x, y: high.y)] : options.tool.drawn(points)
         let line = run(options.tool.command, .object(params))
         if !line.contains("refused") { outline = mode == .replace ? [drawn] : outline + [drawn] }
         return "\(options.tool.command) \(mode.rawValue)" + line
@@ -83,11 +85,13 @@ struct GalleryAreaSelectPage: View, BodyCounted {
             Text("Area select").font(SuiteFont.sectionCaps).foregroundStyle(SuiteColor.secondaryText).accessibilityAddTraits(.isHeader)
             AreaToolOptions(options: options) { control, next in
                 options = next
-                log.append(control == .feather ? "select.feather" + board.run("select.feather", .object(["radius": .number(next.feather)]))
-                    : "\(control.command(next.tool)) \(control.rawValue)")
+                if control != .feather && control != .tolerance { log.append("\(control.command(next.tool)) \(control.rawValue)") }
+            } onEnd: { control in
+                log.append(control == .feather ? "select.feather" + board.run("select.feather", .object(["radius": .number(options.feather)]))
+                    : "\(control.command(options.tool)) \(control.rawValue)")
             }
             SuiteColor.artboard.frame(width: SuiteSize.contentMinimum.width, height: SuiteSize.contentMinimum.height)
-                .overlay(alignment: .topLeading) { GalleryAreaAntsLayer(outline: board.outline, draft: draft) }
+                .overlay(alignment: .topLeading) { GalleryAreaAntsLayer(outline: board.outline, tool: options.tool, draft: draft) }
                 .clipShape(.rect(cornerRadius: SuiteRadius.medium))
                 .contentShape(.rect)
                 .gesture(DragGesture(minimumDistance: 0)
@@ -99,6 +103,7 @@ struct GalleryAreaSelectPage: View, BodyCounted {
                     })
                 .accessibilityElement().accessibilityLabel("Area canvas")
                 .accessibilityValue("\(board.outline.count) shapes").accessibilityIdentifier("suite.gallery.area-canvas")
+                .padding(SuiteSpacing.l).background(SuiteColor.canvasSurround, in: .rect(cornerRadius: SuiteRadius.medium))
             Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
                 .accessibilityValue(log.joined(separator: "\n")).accessibilityIdentifier("suite.gallery.log")
         }
@@ -109,10 +114,10 @@ struct GalleryAreaSelectPage: View, BodyCounted {
 
 /// The only view that reads the draft: the ants over the outline and the drag in progress.
 private struct GalleryAreaAntsLayer: View {
-    let outline: [[Point]]
+    let outline: [[Point]], tool: AreaTool
     let draft: GalleryAreaDraft
 
-    var body: some View { AreaAnts(outline: outline, draft: draft.points, zoom: 1) }
+    var body: some View { AreaAnts(outline: outline, draft: tool.drawn(draft.points), zoom: 1) }
 }
 
 /// The snapshot: the bar in each mode (the wand's last, with its rows) and the ants on a lasso with a polygon drawn.
@@ -130,6 +135,7 @@ struct GalleryAreaSelectSheet: View {
                     AreaAnts(outline: [GalleryAreaSelect.lasso], draft: GalleryAreaSelect.lasso.map { Point(x: $0.x + 120, y: $0.y + 60) }, zoom: 1)
                 }
                 .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+                .padding(SuiteSpacing.l).background(SuiteColor.canvasSurround, in: .rect(cornerRadius: SuiteRadius.medium))
         }
         .padding(SuiteSpacing.xxl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

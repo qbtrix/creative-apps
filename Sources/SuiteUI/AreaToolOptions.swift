@@ -1,7 +1,9 @@
 // AreaToolOptions.swift (area-selection AR-7): the area tools' options bar: shape and mode chips, Feather (0...250 px)
 // and, for the wand, Tolerance (0...255), Contiguous and All Layers. Each control names the `AreaSelectCommands`
 // command it feeds (`AreaControl.command`). While Shift or Option is held the mode chip shows the keys' mode, as a drag
-// uses it. The view keeps only the held keys; the host owns the options and gets each change with its control.
+// uses it. The view keeps only the held keys; the host owns the options and gets each change with its control, and a
+// Feather or Tolerance scrub ends once in `onEnd`, where a host that runs a command runs it (one undo step per drag).
+// `AreaTool.drawn` is the outline a drag draws with each tool, for the ants while it is in progress.
 // Identifiers: `suite.area.tool-<shape>`, `suite.area.mode-<mode>` and `suite.area.<control>`.
 import SuiteKernel
 import SwiftUI
@@ -12,6 +14,20 @@ public enum AreaTool: String, CaseIterable, Hashable, Sendable {
     /// The command a drag or click with the tool runs.
     public var command: String { "select.\(rawValue)" }
     public var title: String { self == .rect ? "Rectangle" : rawValue.capitalized }
+
+    /// The outline a drag over `points` draws with the tool: the rectangle or the inscribed ellipse from the first point
+    /// to the last, the points themselves for the lasso and polygon, nothing for the wand (a click).
+    public nonisolated func drawn(_ points: [Point]) -> [Point] {
+        guard self == .rect || self == .ellipse else { return self == .wand ? [] : points }
+        guard let a = points.first, let b = points.last, points.count > 1 else { return points }
+        if self == .rect { return [a, Point(x: b.x, y: a.y), b, Point(x: a.x, y: b.y)] }
+        let (cx, cy, rx, ry) = ((a.x + b.x) / 2, (a.y + b.y) / 2, abs(b.x - a.x) / 2, abs(b.y - a.y) / 2)
+        // ponytail: 48 fixed segments; derive the count from the radius if a huge ellipse looks faceted.
+        return (0..<48).map { i in
+            let t = 2 * Double.pi * Double(i) / 48
+            return Point(x: cx + rx * cos(t), y: cy + ry * sin(t))
+        }
+    }
 }
 
 /// What the area tools are set to.
@@ -47,12 +63,14 @@ public enum AreaControl: String, CaseIterable, Hashable, Sendable {
 }
 
 public struct AreaToolOptions: View {
-    let options: AreaOptions, onChange: @MainActor (AreaControl, AreaOptions) -> Void
+    let options: AreaOptions, onChange: @MainActor (AreaControl, AreaOptions) -> Void, onEnd: @MainActor (AreaControl) -> Void
     /// The modifier keys held now. Presentation state only.
     @State private var held = EditModifiers()
 
-    public init(options: AreaOptions, onChange: @escaping @MainActor (AreaControl, AreaOptions) -> Void) {
-        (self.options, self.onChange) = (options, onChange)
+    /// `onEnd` fires once when a Feather or Tolerance drag, key or typed value ends.
+    public init(options: AreaOptions, onChange: @escaping @MainActor (AreaControl, AreaOptions) -> Void,
+                onEnd: @escaping @MainActor (AreaControl) -> Void = { _ in }) {
+        (self.options, self.onChange, self.onEnd) = (options, onChange, onEnd)
     }
 
     nonisolated static let tools = AreaTool.allCases.map {
@@ -79,12 +97,12 @@ public struct AreaToolOptions: View {
             ChoiceChips(options: Self.modes, selected: Self.shownMode(options.mode, held: held)) { mode in send(.mode) { $0.mode = mode } }
             StudioScrubRow(label: "Feather", value: options.feather, range: AreaControl.feathers, step: 1, unit: "px") { radius in
                 send(.feather) { $0.feather = radius }
-            }
+            } onEnd: { onEnd(.feather) }
             .accessibilityIdentifier(AreaControl.feather.identifier)
             if shown.contains(.tolerance) {
                 StudioScrubRow(label: "Tolerance", value: options.tolerance, range: AreaControl.tolerances, step: 1) { tolerance in
                     send(.tolerance) { $0.tolerance = tolerance }
-                }
+                } onEnd: { onEnd(.tolerance) }
                 .accessibilityIdentifier(AreaControl.tolerance.identifier)
                 check("Contiguous", .contiguous, on: options.contiguous)
                 check("All Layers", .allLayers, on: options.allLayers)

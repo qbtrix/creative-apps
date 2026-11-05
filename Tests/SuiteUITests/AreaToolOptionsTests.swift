@@ -1,6 +1,7 @@
 // AreaToolOptionsTests.swift (area-selection AR-7): every area control names an `AreaSelectCommands` command; the mode
 // chip shows the held keys' mode; the ants trace their outline, step 4 times a second and stand still under Reduce
-// Motion. macOS only (SuiteUI).
+// Motion; a drag in progress draws the tool's shape (a rectangle or an ellipse from the press to the pointer, the
+// lasso's points, nothing for the wand). macOS only (SuiteUI).
 import SuiteKernel
 @testable import SuiteUI
 import SwiftUI
@@ -62,5 +63,20 @@ private struct AreaFake: AreaSelectTarget {
         #expect(Set(phases).count == 4, "the ants don't step 4 times a second: \(phases)")
         #expect(AreaAnts.phase(at: 1, reduceMotion: false) == phases[0], "a second isn't one full march")
         #expect(AreaAnts.phase(at: .infinity, reduceMotion: false) == 0)
+    }
+
+    @Test func theDraftDrawsTheToolsShape() {
+        let drag = [Point(x: 10, y: 20), Point(x: 40, y: 5), Point(x: 30, y: 60)]
+        #expect(AreaTool.rect.drawn(drag) == [Point(x: 10, y: 20), Point(x: 30, y: 20), Point(x: 30, y: 60), Point(x: 10, y: 60)],
+                "a rectangle drag doesn't draw the press-to-pointer rectangle")
+        let ellipse = AreaTool.ellipse.drawn(drag)
+        #expect(ellipse.count >= 16, "the ellipse is \(ellipse.count) points")
+        for p in ellipse {
+            let (dx, dy) = ((p.x - 20) / 10, (p.y - 40) / 20)
+            #expect(abs(dx * dx + dy * dy - 1) < 1e-9, "\(p) is off the ellipse inscribed in the drag")
+        }
+        #expect(AreaTool.lasso.drawn(drag) == drag && AreaTool.polygon.drawn(drag) == drag)
+        #expect(AreaTool.wand.drawn(drag).isEmpty, "the wand drew a band")
+        #expect(AreaTool.rect.drawn([drag[0]]) == [drag[0]] && AreaTool.ellipse.drawn([]).isEmpty)
     }
 }
