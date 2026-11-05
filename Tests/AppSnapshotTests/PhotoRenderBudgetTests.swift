@@ -23,7 +23,7 @@ import CoreRender
 import CoreRenderMetal
 import Foundation
 import Metal
-import PhotoModel
+@testable import PhotoModel
 import SwiftUI
 import Testing
 
@@ -139,7 +139,9 @@ import Testing
 extension BodyCountSuites {
     @MainActor @Suite struct PhotoFlipCanvasBudgetTests {
         /// Image > Flip Canvas Horizontal on an 8K two-layer image: one undo step, at most 2 window bodies.
-        @Test(.timeLimit(.minutes(2))) func flipCanvasInOneBody() async throws {
+        /// The limit only catches a hang: the debug build's 8K CPU tile renders around the flip take 60 to
+        /// 130 s on a loaded Mac.
+        @Test(.timeLimit(.minutes(5))) func flipCanvasInOneBody() async throws {
             let w = RenderBudgetWindow(AnyView(PhotoWindow(model: try Self.document())
                 .environment(\.photoRendering, RenderBudgetPhotoLiveTransformTests.rendering(.gpu))))
             defer { w.close() }
@@ -155,15 +157,15 @@ extension BodyCountSuites {
             expectBodies(step, atMost: 2, target: 1)
         }
 
-        /// 7680 x 4320: the white Background and a full-canvas fill above it.
+        /// 7680 x 4320: the white Background and a full-canvas fill above it. The fill is set as tiles, not
+        /// through Fill Selection, whose per-pixel debug loop took most of the 2 minute limit under load.
         static func document() throws -> PhotoWorkspace {
             var workspace = PhotoWorkspace(services: PhotoRenderBudgetTests.services)
             try workspace.newCanvas(width: 7680, height: 4320)
             workspace.addLayer()
-            workspace.setToolOption(.color(red: 30, green: 120, blue: 210))
-            workspace.selectAll()
-            workspace.fillSelection()
-            workspace.deselect()
+            let fill = try #require(workspace.selectedLayerID)
+            workspace.pixels[fill] = try TiledPixels(
+                width: 7680, height: 4320, fill: RGBA(r: 30 / 255, g: 120 / 255, b: 210 / 255, a: 1))
             return workspace
         }
     }
