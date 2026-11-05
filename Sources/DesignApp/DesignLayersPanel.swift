@@ -261,33 +261,24 @@ private struct DesignPageLabel: View {
 }
 
 /// The rows of `nodes`, frontmost first, each with its children under a disclosure the workspace expands.
-/// `hiddenAbove` and `lockedAbove` say whether a group around `nodes` is hidden or locked; the tree hands
-/// them down, so no row walks the page for its toggles (#6281).
 private struct DesignLayerTree: View {
     let nodes: [DesignNode]
     let model: DesignWorkspace
     let perform: DesignPerform
     let drag: DesignLayerDrag
-    var hiddenAbove = false
-    var lockedAbove = false
 
     var body: some View {
         ForEach(nodes.frontToBack) { node in
             if node.children.isEmpty {
-                DesignLayerRow(node: node, hiddenAbove: hiddenAbove, lockedAbove: lockedAbove, perform: perform, drag: drag)
-                    .tag(node.id)
+                DesignLayerRow(node: node, model: model, perform: perform, drag: drag).tag(node.id)
             } else {
                 DisclosureGroup(
                     isExpanded: Binding(
                         get: { model.isExpanded(node.id) }, set: { perform(.setExpanded(node.id, $0)) })
                 ) {
-                    DesignLayerTree(
-                        nodes: node.children, model: model, perform: perform, drag: drag,
-                        hiddenAbove: hiddenAbove || node.isHidden, lockedAbove: lockedAbove || node.isLocked)
+                    DesignLayerTree(nodes: node.children, model: model, perform: perform, drag: drag)
                 } label: {
-                    DesignLayerRow(
-                        node: node, hiddenAbove: hiddenAbove, lockedAbove: lockedAbove, perform: perform, drag: drag,
-                        isDisclosureLabel: true)
+                    DesignLayerRow(node: node, model: model, perform: perform, drag: drag, isDisclosureLabel: true)
                         .tag(node.id)
                 }
                 .tag(node.id)
@@ -300,9 +291,7 @@ private struct DesignLayerTree: View {
 /// the eye and lock toggles; it drags to reorder and draws the insertion line when it is the target.
 private struct DesignLayerRow: View {
     let node: DesignNode
-    /// A group around the layer is hidden or locked.
-    let hiddenAbove: Bool
-    let lockedAbove: Bool
+    let model: DesignWorkspace
     let perform: DesignPerform
     let drag: DesignLayerDrag
     /// A group's row: its disclosure flattens the label into one checkbox, so the row combines.
@@ -310,7 +299,7 @@ private struct DesignLayerRow: View {
 
     var body: some View {
         let id = node.id
-        let toggles = node.layerToggles(hiddenAbove: hiddenAbove, lockedAbove: lockedAbove)
+        let toggles = model.layerToggles(id)
         let line = drag.line?.rowID == id ? drag.line?.position : nil
         SidebarRow(
             SidebarItem(
@@ -327,7 +316,7 @@ private struct DesignLayerRow: View {
         )
         .lineLimit(1)
         .truncationMode(.middle)
-        .foregroundStyle(node.isHidden || hiddenAbove ? SuiteColor.textSecondary : Color.primary)
+        .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.textSecondary : Color.primary)
         .simultaneousGesture(TapGesture().modifiers(.shift).onEnded { perform(.toggleSelect(id)) })
         .background { if line == .into { RoundedRectangle(cornerRadius: SuiteRadius.row).fill(SuiteColor.dragFill) } }
         .overlay(alignment: line == .above ? .top : .bottom) {
