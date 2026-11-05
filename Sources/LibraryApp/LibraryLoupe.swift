@@ -20,11 +20,12 @@
 // artboard is the straightened photo (`crop.canvas`): the unturned render
 // turned by the draft's angle with `.rotationEffect` (a compositor transform,
 // so a straighten step never waits for a render), under the crop frame
-// overlay; a canvas drag moves the handle under its press (or the whole
-// frame), Escape cancels and the arrows nudge the frame 1 px (Shift 10);
+// overlay; a canvas drag (LibraryTool's Crop) moves the handle under its
+// press (or the whole frame), Escape cancels and the arrows nudge the frame
+// 1 px (Shift 10); outside it a drag (View) only gives the canvas the keys;
 // otherwise the artboard is the photo at its stored crop (`crop.artboard`).
-// The crop controls come from the window through `\.libraryCrop`, with a
-// Straighten step the catalog hasn't taken yet from `\.libraryCropLive`. The photo
+// The crop controls come from the window through `\.libraryCrop`, with the
+// steps and drags the catalog hasn't taken yet from `\.libraryCropLive`. The photo
 // carries Photo's Rotate Left and Rotate Right as accessibility actions
 // (orientation-crop OC-9). Values in, closures out; LibraryCatalog holds the state.
 import LibraryModel
@@ -57,8 +58,10 @@ struct LibraryLoupe: View {
         CanvasViewport(
             documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false, holdsRulerBand: false,
             onSize: { viewport = $0 }, onZoom: menu.view.zoomTo,
-            // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
-            onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key
+            // The View tool's drag only gives the canvas focus, so its keys reach it.
+            onDrag: { from, to in
+                if LibraryTool.current(cropping: crop.drag != nil) == .crop { cropDrag(from: from, to: to, zoom: zoom) }
+            }, onDragEnd: { grabbed = nil }, onKey: key
         ) {
             if let draft = crop.draft, let canvas = crop.canvas, let photo = model.loupePhotoSize {
                 // The unturned picture turned by the draft's angle on the GPU, centred

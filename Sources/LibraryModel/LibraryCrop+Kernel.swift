@@ -210,10 +210,24 @@ extension LibraryCatalog {
         cropDraft = (try? services.crop.initial(aspect: aspect, angle: draft.angle, photo: size)) ?? draft
     }
 
+    /// Takes a draft the loupe showed before the catalog did (a live
+    /// Straighten step or drag, made by `cropDraft(angle:from:)` or
+    /// `cropDraft(_:dragging:dx:dy:)`); changes nothing when not cropping.
+    public mutating func setCropDraft(_ draft: CropSettings) {
+        if cropDraft != nil { cropDraft = draft }
+    }
+
     /// Handle drags and arrow nudges, in photo pixels. Records nothing.
     public mutating func dragCrop(_ handle: CropHandle, dx: Double, dy: Double) {
-        guard dx.isFinite, dy.isFinite, let draft = cropDraft, let size = loupeItem?.pixelSize else { return }
-        cropDraft = (try? services.crop.dragged(draft, handle: handle, dx: dx, dy: dy, photo: size)) ?? draft
+        if let draft = cropDraft, let dragged = cropDraft(draft, dragging: handle, dx: dx, dy: dy) { cropDraft = dragged }
+    }
+
+    /// `draft` with `handle` dragged by `dx`, `dy` photo pixels, without
+    /// changing the catalog, so the loupe can show a drag's samples before the
+    /// catalog takes them; nil when not cropping or a step isn't finite.
+    public func cropDraft(_ draft: CropSettings, dragging handle: CropHandle, dx: Double, dy: Double) -> CropSettings? {
+        guard dx.isFinite, dy.isFinite, cropDraft != nil, let size = loupeItem?.pixelSize else { return nil }
+        return (try? services.crop.dragged(draft, handle: handle, dx: dx, dy: dy, photo: size)) ?? draft
     }
 
     /// Clamped to `CropSettings.angleRange`; NaN and infinity change nothing.
@@ -224,8 +238,9 @@ extension LibraryCatalog {
     /// The draft `setCropAngle(degrees)` would leave, without changing the
     /// catalog, so the loupe can show a Straighten step before the catalog
     /// takes it (#6222); nil when not cropping or `degrees` isn't finite.
-    public func cropDraft(angle degrees: Double) -> CropSettings? {
-        guard degrees.isFinite, let draft = cropDraft, let size = loupeItem?.pixelSize else { return nil }
+    /// `from` turns a draft not yet in the catalog (a live drag's) instead of the catalog's.
+    public func cropDraft(angle degrees: Double, from shown: CropSettings? = nil) -> CropSettings? {
+        guard degrees.isFinite, let draft = shown ?? cropDraft, cropDraft != nil, let size = loupeItem?.pixelSize else { return nil }
         let range = CropSettings.angleRange
         let angle = min(max(degrees, range.lowerBound), range.upperBound)
         return (try? services.crop.straightened(draft, angle: angle, photo: size)) ?? draft
