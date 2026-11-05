@@ -1,7 +1,7 @@
 // PhotoStatusLine.swift: the Photo window's status line. The workspace's
 // `statusMessage` (a refusal such as "Pick a pixel layer to paint on.") shows
 // at the leading edge as an error (a refusal: nothing changed), stateError with
-// the exclamation circle, in caption text (a sentence, not a pill), left of the pills: zoom, image size, the window's
+// the exclamation circle, in caption text (a sentence, not a pill), left of the pills: zoom (none with no image open, so no lone "–" pill), image size, the window's
 // note, the active tool, the render time (with the backend that drew it,
 // "CPU" or "GPU (Metal)", once a window renders through View > Rendering) and, on the fakes (`-PhotoFixture`),
 // a "Preview data" warning pill (warning tint, color and triangle) whose
@@ -61,7 +61,7 @@ struct PhotoStatusLine: View {
                     .padding(.leading, SuiteSpacing.s)
                     .accessibilityIdentifier("photo.status.message")
             }
-            ViewerStatusBar(zoom: model.canvas == nil ? 0 : zoom, size: model.viewerSizeText) {
+            ViewerStatusBar(zoom: model.canvas == nil ? nil : zoom, size: model.viewerSizeText) {
                 if let note { Text(note) }
                 if model.canvas != nil { Text(model.tool.title) }
                 if let renderMilliseconds {
