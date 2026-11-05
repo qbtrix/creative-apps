@@ -210,6 +210,17 @@ extension DesignWorkspace {
         record("Delete \(node.kind.defaultName)", before: before)
     }
 
+    /// This workspace after a press at `start`, when the press only began its gesture and shows nothing
+    /// (Option on a selected layer, a drawing tool); nil when it shows something (a selection, a toggle).
+    /// The window leaves a quiet press to the live copy, so it doesn't run and lay out at the press (#6281).
+    public func quietPress(at start: DesignPoint, modifiers: DesignModifiers) -> DesignWorkspace? {
+        var pressed = self
+        pressed.drag(from: start, to: start, modifiers: modifiers)
+        var shown = pressed
+        shown.gesture = nil
+        return shown == self ? pressed : nil
+    }
+
     /// One pointer move of the active tool's gesture, from the gesture's start to `end`.
     public mutating func drag(from start: DesignPoint, to end: DesignPoint, modifiers: DesignModifiers = []) {
         guard isOpen, end.isFinite, gesture != nil || start.isFinite else { return }

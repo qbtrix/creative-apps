@@ -4,7 +4,8 @@
 // minted id must avoid both kinds (#303).
 //
 // DesignWorkspace keeps it current: an add inserts the new id, a delete drops
-// its subtree's ids, and undo, redo and a gesture's rewind put back the
+// its subtree's ids, an edit that changes ids swaps only the child lists it
+// copied (`swap`), and undo, redo and a gesture's rewind put back the
 // snapshot's index along with its pages. Only opening a file scans the tree.
 // Linux-safe.
 
@@ -38,6 +39,31 @@ struct DesignHeldIDs: Sendable {
             ids.remove(node.id)
             remove(node.children)
         }
+    }
+
+    /// Trades `old`'s ids for `new`'s. An edit copies only the path down to what it changed, so a
+    /// child list sharing storage with the old one is skipped: an Option-drag sample on `crowd`
+    /// walks one frame's 50 layers, not all 2,000 (#6281). Removals go first, so a layer moved
+    /// to another parent is held again.
+    mutating func swap(_ old: [DesignNode], for new: [DesignNode]) {
+        var added: [DesignNode] = []
+        drop(old, keeping: new, added: &added)
+        for node in added { collect(node) }
+    }
+
+    private mutating func drop(_ old: [DesignNode], keeping new: [DesignNode], added: inout [DesignNode]) {
+        if old.withUnsafeBufferPointer({ $0.baseAddress }) == new.withUnsafeBufferPointer({ $0.baseAddress }) { return }
+        let kept = Dictionary(new.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        for node in old {
+            if let match = kept[node.id] { drop(node.children, keeping: match.children, added: &added) } else { remove([node]) }
+        }
+        let had = Set(old.map(\.id))
+        added += new.filter { !had.contains($0.id) }
+    }
+
+    private mutating func collect(_ node: DesignNode) {
+        ids.insert(node.id)
+        for child in node.children { collect(child) }
     }
 
     /// Drops a page and every node on it.

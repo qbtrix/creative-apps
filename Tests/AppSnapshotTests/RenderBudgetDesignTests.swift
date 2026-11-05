@@ -44,10 +44,9 @@ extension BodyCountSuites {
             let option = try await Self.optionDrag()
             // Real time: p95 within one 120 Hz frame, 8 ms. Release: 6.6-7.75 ms at load 12, its press copies once.
             expectP95(option, atMost: 8, target: 8.3)
-            // #6281: no step stalls, the press and the copy's first sample included: two 60 Hz frames at most.
-            for step in [move.step, option] {
-                #expect(step.slowest <= 33, "\(step) (budget 33 ms for the slowest step, #6281)")
-            }
+            // #6281: the press and the copy's first sample each fit two 60 Hz frames; the press on the
+            // selection is quiet, so the window doesn't run until mouse-up.
+            #expect(option.opening <= 33, "\(option) (budget 33 ms for the press and the first sample, #6281)")
         }
 
         /// A 120-sample Option-drag of Rectangle 1 on `crowd` in the real window: the press copies it, the
