@@ -32,6 +32,12 @@ private struct AreaFake: AreaSelectTarget {
         #expect(Set(AreaControl.allCases.map(\.identifier)).count == AreaControl.allCases.count)
     }
 
+    @Test func numbersShowTheirFieldsPrecision() {
+        // docs/design.md: one decimal for pixels; Tolerance is a whole level (it read "32.00").
+        #expect(AreaControl.feather.decimals == 1)
+        #expect(AreaControl.tolerance.decimals == 0)
+    }
+
     @Test func theModeChipFollowsHeldKeys() {
         #expect(AreaToolOptions.shownMode(.subtract, held: []) == .subtract)
         #expect(AreaToolOptions.shownMode(.replace, held: .shift) == .add)
