@@ -143,3 +143,4 @@ extension DesignNode {
                 onSymbol: "lock.fill", offSymbol: lockedByGroup ? "lock" : "lock.open", isOn: isLocked),
         ]
     }
+}
