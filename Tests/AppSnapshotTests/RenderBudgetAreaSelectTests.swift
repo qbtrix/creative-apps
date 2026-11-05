@@ -3,7 +3,8 @@
 // (`suite.gallery.area-canvas`) runs `select.lasso` once at mouse-up; with the Wand chosen, one click runs
 // `select.wand`. Each runs the page's body (GalleryAreaSelectPage.bodyRuns) at most 3 times (the packet's "≤ 3 window
 // bodies"): the lasso in progress lives in GalleryAreaDraft, read only by the ants layer, so a page that reran on each
-// sample would count 120 and fail. AreaBudgetHost only hosts the page and opts in to activation clicks (the test
+// sample would count 120 and fail. A 60-sample Feather scrub runs `select.feather` once, at mouse-up (one History
+// step, not one per sample). AreaBudgetHost only hosts the page and opts in to activation clicks (the test
 // process is never the active app). `timing` judges the packet's p95 ≤ 8 ms and is report-only: it stays disabled until
 // Tests/perf-suites.txt lists it (only the supervisor edits that list). Nested in BodyCountSuites: it reads a body
 // counter. macOS only.
@@ -21,6 +22,20 @@ extension BodyCountSuites {
             // One select at mouse-up: one log line and one outline. Target: 1.
             expectBodies(lasso, atMost: 3, target: 1)
             expectBodies(wand, atMost: 3, target: 1)
+        }
+
+        /// A 60-sample Feather scrub runs `select.feather` once, at mouse-up: one History step, not one per sample.
+        @Test(.timeLimit(.minutes(2))) func featherScrubIsOneSelect() async throws {
+            let w = RenderBudgetWindow(AreaBudgetHost())
+            defer { w.close() }
+            try await w.settle(600)
+            let row = try #require(await w.element(AreaControl.feather.identifier), "no Feather row")
+            let start = CGPoint(x: row.minX + row.width * 0.3, y: row.midY)
+            try await w.drag(from: start, by: CGVector(dx: row.width * 0.4, dy: 0), samples: 60)
+            try await w.settle()
+            let feathers = (w.value("suite.gallery.log") ?? "").split(separator: "\n").filter { $0.hasPrefix("select.feather") }
+            #expect(feathers.count == 1, "a Feather scrub ran select.feather \(feathers.count) times, not once at mouse-up")
+            #expect(feathers.first?.contains("refused") == false, "select.feather was refused: \(feathers)")
         }
 
         @Test(.disabled("report-only: enable once Tests/perf-suites.txt lists it"), .timeLimit(.minutes(2)))
