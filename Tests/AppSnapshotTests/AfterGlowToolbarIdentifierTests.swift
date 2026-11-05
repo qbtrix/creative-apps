@@ -3,8 +3,8 @@
 // identifier check reads it from the journeys (#6204). With the AI Access
 // chip in the title bar (testAIAccessApproval), which collapses the search
 // item into a Search button at 880, and under a sheet (testConnectAssistant),
-// where accessibility reads the search field's cell and AppKit can swap its
-// button cells as the window gives up key, every control keeps an identifier. The window's minimum width keeps AppKit's "more toolbar items"
+// where accessibility reads the search field's cell, every control keeps an
+// identifier. The window's minimum width keeps AppKit's "more toolbar items"
 // pop-up from showing here; the journeys' audit covers it. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -45,24 +45,6 @@ import Testing
         let unnamed = Self.unnamedControls(in: window)
         window.endSheet(sheet)
         #expect(unnamed.isEmpty, "controls with no identifier under a sheet: \(unnamed)")
-    }
-
-    /// AppKit can swap the field's button cells as the window gives up key to a sheet, with no window update after
-    /// it (Help > Connect…, testConnectAssistant): beginning the sheet names the new cells all the same.
-    @Test(.timeLimit(.minutes(3))) func sheetNamesSwappedButtonCells() async throws {
-        let window = Self.window()
-        defer { window.close() }
-        try await Task.sleep(for: .milliseconds(800))
-        let item = try #require(window.toolbar?.items.lazy.compactMap { $0 as? NSSearchToolbarItem }.first)
-        let cell = try #require(item.searchField.cell as? NSSearchFieldCell)
-        cell.searchButtonCell = NSButtonCell()
-        cell.cancelButtonCell = NSButtonCell()
-        SuiteHelpPresenter.shared.showConnect(bundle: "/fixture/AfterGlow.app", in: window)
-        defer { SuiteHelpPresenter.shared.closeConnect() }
-        try await Task.sleep(for: .milliseconds(1500))
-        #expect(window.attachedSheet != nil, "no Connect sheet")
-        #expect(cell.searchButtonCell?.accessibilityIdentifier() == "afterglow.home.search.search")
-        #expect(cell.cancelButtonCell?.accessibilityIdentifier() == "afterglow.home.search.cancel")
     }
 
     /// The home window at the journeys' 1000 by 640, titled so the hosting controller bridges its toolbar.

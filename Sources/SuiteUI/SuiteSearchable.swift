@@ -9,8 +9,7 @@
 // and `<identifier>.cancel`, and a collapsed item's Search button
 // `<identifier>.collapsed`. On each window update it names a toolbar search
 // item's field again, which AppKit rebuilds when the item collapses or the page
-// changes, and again when a sheet begins or ends or the window changes key (the
-// button cells can be swapped with no window update after), and the toolbar's "more toolbar items" pop-up, if a titlebar
+// changes, and the toolbar's "more toolbar items" pop-up, if a titlebar
 // accessory pushed items into it, `<identifier minus its last part>.toolbar.more`.
 import AppKit
 import SwiftUI
@@ -42,28 +41,12 @@ private struct SearchFieldNamer: NSViewRepresentable {
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
-            NotificationCenter.default.removeObserver(self)
+            NotificationCenter.default.removeObserver(self, name: NSWindow.didUpdateNotification, object: nil)
             if let window {
                 NotificationCenter.default.addObserver(self, selector: #selector(windowDidUpdate),
                                                        name: NSWindow.didUpdateNotification, object: window)
-                for change in Self.keyChanges {
-                    NotificationCenter.default.addObserver(self, selector: #selector(keyDidChange), name: change, object: window)
-                }
             }
             nameSoon()
-        }
-
-        /// A sheet taking key can swap the field's button cells with no window update after it (#6204).
-        private static let keyChanges: [Notification.Name] = [
-            NSWindow.willBeginSheetNotification, NSWindow.didEndSheetNotification,
-            NSWindow.didResignKeyNotification, NSWindow.didBecomeKeyNotification,
-        ]
-
-        /// Names the toolbar's field now, after this turn and once the sheet has settled.
-        @objc private func keyDidChange() {
-            windowDidUpdate()
-            DispatchQueue.main.async { [weak self] in self?.windowDidUpdate() }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in self?.windowDidUpdate() }
         }
 
         /// A toolbar search item rebuilds its field when it collapses or the page changes; only the
