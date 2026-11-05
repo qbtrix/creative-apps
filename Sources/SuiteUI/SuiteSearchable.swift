@@ -11,10 +11,10 @@
 // item's field again, which AppKit rebuilds when the item collapses or the page
 // changes, and the toolbar's "more toolbar items" pop-up, if a titlebar
 // accessory pushed items into it, `<identifier minus its last part>.toolbar.more`.
-// While a sheet is up it also does that every quarter second: AppKit can swap
-// the field's button cells under a sheet with no event, so no window update,
-// after it (the Help menu's sheets, #6204), and accessibility reads whichever
-// cell is current.
+// While a sheet is attached it names every search field in the window every
+// quarter second: AppKit can swap the field's button cells under a sheet with
+// no event, so no window update, after it (the Help menu's sheets, #6204), and
+// accessibility reads whichever cell is current.
 import AppKit
 import SwiftUI
 
@@ -59,17 +59,25 @@ private struct SearchFieldNamer: NSViewRepresentable {
 
         private var sheetTimer: Timer?
 
-        /// Renames on a timer while a sheet is attached, since nothing else runs then (#6204); stops when it ends.
+        /// Renames every search field in the window on a timer while a sheet is attached, since nothing else runs
+        /// then (#6204). The timer itself stops once no sheet is attached, so one sheet's end under another doesn't.
         @objc private func sheetDidChange(_ note: Notification) {
-            sheetTimer?.invalidate()
-            sheetTimer = nil
-            guard note.name == NSWindow.willBeginSheetNotification else { return windowDidUpdate() }
+            windowDidUpdate()
+            guard sheetTimer == nil else { return }
             let timer = Timer(timeInterval: 0.25, repeats: true) { [weak self] _ in
-                MainActor.assumeIsolated { self?.windowDidUpdate() }
+                MainActor.assumeIsolated { self?.sheetTick() }
             }
             timer.tolerance = 0.1
             RunLoop.main.add(timer, forMode: .common)
             sheetTimer = timer
+        }
+
+        private func sheetTick() {
+            name()
+            windowDidUpdate()
+            guard window?.attachedSheet == nil else { return }
+            sheetTimer?.invalidate()
+            sheetTimer = nil
         }
 
         /// A toolbar search item rebuilds its field when it collapses or the page changes; only the

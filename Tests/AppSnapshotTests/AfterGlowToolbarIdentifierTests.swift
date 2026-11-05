@@ -19,7 +19,7 @@ import Testing
 @testable import AfterGlowApp
 @testable import SuiteShell
 
-@MainActor @Suite struct AfterGlowToolbarIdentifierTests {
+@MainActor @Suite(.serialized) struct AfterGlowToolbarIdentifierTests {
     @Test(.timeLimit(.minutes(3)), arguments: [1000.0, 880.0])
     func chipLeavesNoUnnamedControl(width: Double) async throws {
         let window = Self.window(width: width)
@@ -66,9 +66,32 @@ import Testing
         // update names the new one; under the Help sheets the journeys' audit read that cell unnamed.
         let cell = try #require(Self.searchCell(in: window), "no toolbar search field")
         cell.searchButtonCell = NSButtonCell()
+        // A search field AppKit builds in the title bar outside the toolbar item (the one the item keeps), with no
+        // event after it, is named too.
+        let stray = NSSearchField(frame: CGRect(x: 0, y: 0, width: 120, height: 22))
+        window.contentView?.superview?.addSubview(stray)
         try await Task.sleep(for: .milliseconds(1500))
         let unnamed = Self.unnamedControls(in: window)
         #expect(unnamed.isEmpty, "controls with no identifier under the Connect sheet: \(unnamed)")
+        #expect((stray.cell as? NSSearchFieldCell)?.searchButtonCell?.accessibilityIdentifier() == "afterglow.home.search.search",
+                "a title bar search field outside the toolbar item stayed unnamed under the sheet")
+    }
+
+    /// A second sheet's end while the Connect sheet is still up doesn't stop the renaming.
+    @Test(.timeLimit(.minutes(3))) func anEndedSheetKeepsRenamingUnderTheNext() async throws {
+        let window = Self.window()
+        defer { window.close() }
+        try await Task.sleep(for: .milliseconds(800))
+        let presenter = SuiteHelpPresenter.shared
+        presenter.showConnect(bundle: "/Applications/AfterGlow.app", in: window)
+        defer { presenter.closeConnect() }
+        try await Task.sleep(for: .milliseconds(800))
+        NotificationCenter.default.post(name: NSWindow.didEndSheetNotification, object: window)
+        let cell = try #require(Self.searchCell(in: window), "no toolbar search field")
+        cell.searchButtonCell = NSButtonCell()
+        try await Task.sleep(for: .milliseconds(1500))
+        #expect(cell.searchButtonCell?.accessibilityIdentifier() == "afterglow.home.search.search",
+                "the renaming stopped while the Connect sheet was still up")
     }
 
     /// The toolbar search item's field cell.
