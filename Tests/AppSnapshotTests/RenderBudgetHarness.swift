@@ -21,7 +21,8 @@
 // BodyTally in its environment and reports to the running test's, so the
 // counter reads this test's windows, never a parallel suite's), the root hosting view's
 // layout passes and time, the per-step p50 / p95 (FrameProbe's nearest
-// rank), the slowest step and the opening (the slower of the press and the first sample). `expectBodies` gates a body count; `expectP95` judges time and
+// rank), the slowest step and the opening (the slower of the press and the
+// first sample). `expectBodies` gates a body count; `expectP95` judges time and
 // belongs only in tests Tests/perf-suites.txt lists.
 //
 // What a test process can't drive: it is never the active app, so every press
@@ -139,7 +140,7 @@ private final class KeyCapableWindow: NSWindow {
             layouts: host.layouts - layouts, layoutMilliseconds: host.layoutTime - layoutTime,
             p50: SuiteFrameProbe.nearestRank(times, 0.5) ?? 0, p95: SuiteFrameProbe.nearestRank(times, 0.95) ?? 0,
             slowest: times.last ?? 0, opening: stepTimes.prefix(2).max() ?? 0)
-        print(step); print("STEPS-RAW \(name): first \(stepTimes.prefix(4).map { Int($0) }) last \(stepTimes.suffix(3).map { Int($0) })")
+        print(step)
         return step
     }
 
@@ -150,11 +151,8 @@ private final class KeyCapableWindow: NSWindow {
         let clock = ContinuousClock()
         let began = clock.now
         action()
-        let a = clock.now
         host.layoutSubtreeIfNeeded()
-        let l = clock.now
         window.displayIfNeeded()
-        if stepTimes.count < 2 { print("STEP-SPLIT action \(a - began) layout \(l - a) display \(clock.now - l)") }
         stepTimes.append(Double((clock.now - began) / .microseconds(1)) / 1000)
     }
 
