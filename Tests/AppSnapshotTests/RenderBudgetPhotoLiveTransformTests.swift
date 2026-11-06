@@ -19,6 +19,7 @@
 #if canImport(AppKit)
 import AppKit
 import PhotoModel
+import SuiteImaging
 import SuiteKernel
 import SuiteUI
 import SwiftUI
@@ -106,8 +107,8 @@ extension BodyCountSuites {
             expectBodies(step, atMost: 3, target: 1)
         }
 
-        /// The canvas body drag on a draft that used to resample every sample (#6259): Levels off identity, or a
-        /// visible layer above. It lifts like the plain draft, the layer above riding as the cover.
+        /// The canvas body drag on a draft that used to resample every sample (#6259): Levels off identity, a
+        /// visible layer above, or a layer style (which the canvas doesn't draw). It lifts like the plain draft, the layer above riding as the cover.
         @Test(.timeLimit(.minutes(2)), arguments: LiftBlocker.allCases)
         func aBodyDragUnderLevelsOrALayerLifts(_ blocker: LiftBlocker) async throws {
             let model = try blocker.draft(width: 400, height: 300)
@@ -469,7 +470,7 @@ extension BodyCountSuites.RenderBudgetPhotoLiveTransformTests {
 /// What kept a Free Transform drag off the compositor until #6259: Levels off identity, a visible layer above
 /// the draft's, an adjustment layer above it, or a blur on the image.
 enum LiftBlocker: String, CaseIterable, CustomStringConvertible, Sendable {
-    case levels, layerAbove, adjustmentLayer, blur
+    case levels, layerAbove, adjustmentLayer, blur, style
 
     var description: String { rawValue }
 
@@ -491,6 +492,9 @@ enum LiftBlocker: String, CaseIterable, CustomStringConvertible, Sendable {
         case .blur:
             model.adjust(.blurSigma(2))
             model.adjust(.setEnabled(.blur, true))
+        case .style:
+            model.selectLayer(background)
+            try model.setStyle(LayerStyle(effects: [StyleRules.defaults(.dropShadow)], fillOpacity: 1), name: "Style", drag: nil)
         }
         model.selectTool(.select)
         try model.beginTransform()
