@@ -4,8 +4,8 @@
 // Rectangle 1 of Frame 1 along the empty band under the first row of frames
 // (page points through `suite.canvas.artboard`, as DesignPerfCanvasJourneyTests
 // maps them), the same drag with Option held (a copy follows the pointer,
-// the copy-group lift), the Opacity bar of Frame 36's Text, a scroll-wheel pan at
-// zoom, and ⌘= / ⌘− zoom steps. Design has no View > Rendering switch, so it
+// the copy-group lift, held to the 16 ms hard line), the Opacity bar of
+// Frame 36's Text, a scroll-wheel pan at zoom, and ⌘= / ⌘− zoom steps. Design has no View > Rendering switch, so it
 // runs once. Every gesture goes through Journey.health (Journey+Health.swift):
 // step p95, main-thread surface allocation, the accessibility answer and idle
 // CPU. Run by `scripts/ui-test perf` only, as Photo's real-perf journeys are.
@@ -29,7 +29,9 @@ final class DesignRealPerfJourneyTests: XCTestCase {
         }
         design.press(character: "z", .command)
 
-        design.health("option-move", pid: pid, series: "canvas-drag") {
+        // The copy-group drag (#6198) holds the render contract's 16 ms hard line, not the 33 ms 8K
+        // budget: its steady steps land on the next 120 Hz refresh (about 8 ms).
+        design.health("option-move", pid: pid, series: "canvas-drag", budget: Health.realTimeBudget) {
             let scale = NSScreen.main?.backingScaleFactor ?? 1, span = artboard.frame.width * 1360 / page.width
             XCUIElement.perform(withKeyModifiers: .option) {
                 at(20, 20).click(forDuration: 0.05, thenDragTo: at(1380, 185),
