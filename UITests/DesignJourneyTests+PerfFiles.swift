@@ -4,18 +4,19 @@
 // layers) with `-DesignSaveTo <tmp>`, ⌘S writes the file with no panel; the
 // app quits and relaunches with `-DesignOpenFile <tmp>` until the window is
 // named after the file and shows its canvas.
-// Report-only (QB-L9, QB-L12; docs/review-rubric.md, How gates are set): from
-// the relaunch the test polls the window and times each poll's round trip,
-// which needs the app's main thread to answer, so the longest is a coarse sign
-// of a main-thread stall. The progress mark is FrameProbe's "progress-shown"
-// in `suite.perf` (`perf()`), timed from the relaunch on the shared uptime
-// clock; when the window records none, the report says so and gives the first
-// poll that found the canvas instead. `suite.perf`'s frame intervals, when
-// Design publishes them, add their p95 against QB-L12's 2 refreshes. The
-// numbers go to .build/ui-screens/perf-design-files.json and attach as
-// "perf-design-files"; the test asserts that the saved file reopened, named
-// after it (the launch file wins over `-DesignFixture`), and that the window
-// recorded the progress mark (DesignEditor marks it as the file lands).
+// QB-L9 is gated from the command (docs/review-rubric.md): the window marks
+// `open-command` when its open begins and `progress-shown` when its
+// "Opening <name>…" note shows, both on `design.open` in `suite.perf`, and
+// the gap between them must be at most the rubric's 200 ms CI placeholder
+// (100 ms is the target the report states). The rest is report-only (QB-L12;
+// How gates are set): from the relaunch the test polls the window and times
+// each poll's round trip, which needs the app's main thread to answer, so the
+// longest is a coarse sign of a main-thread stall; the report also gives the
+// progress and `open-landed` marks from the relaunch and, when Design
+// publishes them, `suite.perf`'s frame intervals against QB-L12's 2
+// refreshes. The numbers go to .build/ui-screens/perf-design-files.json and
+// attach as "perf-design-files"; the test asserts that the saved file
+// reopened, named after it (the launch file wins over `-DesignFixture`).
 // Every flag carries a value (`-SuitePerfProbe YES`, as AfterGlow's journeys
 // pass it): the launch arguments become UserDefaults' argument domain in
 // "-key value" pairs, so a bare `-SuitePerfProbe` followed by `-DesignSaveTo
@@ -29,8 +30,10 @@ final class DesignPerfFilesJourneyTests: XCTestCase {
     /// A poll round trip over this many milliseconds counts as a stall (QB-L12: 2 refreshes at 60 Hz).
     static let stallMilliseconds = 2 * 1000.0 / 60
     static let fileName = "crowd.design"
+    /// QB-L9's CI placeholder: the open's progress shows within this many milliseconds of the command.
+    static let progressGateMilliseconds = 200.0
 
-    /// P4: save `crowd`, relaunch on the saved file; report the progress mark and the longest stall.
+    /// P4: save `crowd`, relaunch on the saved file; gate the progress from the command, report the rest.
     @MainActor func testOpenLargeFile() throws {
         let folder = FileManager.default.temporaryDirectory.appending(path: "design-perf-files-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -70,8 +73,16 @@ final class DesignPerfFilesJourneyTests: XCTestCase {
         reopened.shot("perf-files-reopened")
 
         let document = reopened.element("suite.perf").waitForExistence(timeout: 5) ? reopened.perf() : nil
-        XCTAssertNotNil(document?.marks.first { $0.name == "progress-shown" },
-                        "Design recorded no progress-shown mark for the opened file (FH-7)")
+        let command = document?.marks.first { $0.name == "open-command" }
+        let progress = document?.marks.first { $0.name == "progress-shown" }
+        XCTAssertNotNil(progress, "Design recorded no progress-shown mark for the opened file (FH-7)")
+        if let command, let progress {
+            let ms = (progress.time - command.time) * 1000
+            XCTAssertLessThanOrEqual(ms, Self.progressGateMilliseconds,
+                                     "\"Opening…\" showed \(Int(ms)) ms after the open began (QB-L9: target 100 ms)")
+        } else {
+            XCTFail("Design recorded no open-command mark, so QB-L9 can't be timed from the command")
+        }
         report(document: document, launched: launched, shownMs: shownMs, polls: polls, longest: longest, stalls: stalls)
     }
 
@@ -108,12 +119,16 @@ final class DesignPerfFilesJourneyTests: XCTestCase {
                 + "report-only (accessibility query round trips from the relaunch)",
         ]
         let canvas = shownMs.map { "canvas-shown-ms=\(ms($0))" } ?? "canvas never shown"
-        if let mark = document?.marks.first(where: { $0.name == "progress-shown" }) {
-            numbers["QB-L9 P4 progress"] = "progress-shown-ms=\(ms((mark.time - launched) * 1000)) series=\(mark.series) "
-                + "\(canvas) report-only (gate 100 ms, from the relaunch)"
+        let mark = { (name: String) in document?.marks.first { $0.name == name } }
+        if let progress = mark("progress-shown") {
+            let fromCommand = mark("open-command").map { "from-command-ms=\(ms((progress.time - $0.time) * 1000))" }
+            let landed = mark("open-landed").map { "landed-from-relaunch-ms=\(ms(($0.time - launched) * 1000))" }
+            numbers["QB-L9 P4 progress"] = [
+                fromCommand ?? "no open-command mark", "progress-from-relaunch-ms=\(ms((progress.time - launched) * 1000))",
+                landed ?? "no open-landed mark", canvas, "(target 100 ms, gate \(ms(Self.progressGateMilliseconds)) ms from the command)",
+            ].joined(separator: " ")
         } else {
-            numbers["QB-L9 P4 progress"] = "no progress-shown mark in suite.perf: Design's open records none yet; "
-                + "\(canvas) report-only (gate 100 ms, from the relaunch)"
+            numbers["QB-L9 P4 progress"] = "no progress-shown mark in suite.perf; \(canvas)"
         }
         if let document, !document.intervals.isEmpty {
             for (series, intervals) in document.intervals {

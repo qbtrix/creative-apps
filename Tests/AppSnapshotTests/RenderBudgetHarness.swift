@@ -20,7 +20,7 @@
 // (a debug-only `bodyRuns` counter the caller reads; each window puts its own
 // BodyTally in its environment and reports to the running test's, so the
 // counter reads this test's windows, never a parallel suite's), the root hosting view's
-// layout passes and time, the per-step p50 / p95 (FrameProbe's nearest
+// layout passes, their time and (`longestLayout`) the longest one, the per-step p50 / p95 (FrameProbe's nearest
 // rank), the slowest step and the opening (the slower of the press and the
 // first sample). `expectBodies` gates a body count; `expectP95` judges time and
 // belongs only in tests Tests/perf-suites.txt lists.
@@ -452,13 +452,17 @@ final class CountingHostingView<Content: View>: NSHostingView<Content> {
     private(set) var layouts = 0
     /// Milliseconds spent in all the layout passes.
     private(set) var layoutTime = 0.0
+    /// Milliseconds of the longest layout pass, timed steps or not (an async landing lays out between steps).
+    var longestLayout = 0.0
 
     override func layout() {
         layouts += 1
         let clock = ContinuousClock()
         let began = clock.now
         super.layout()
-        layoutTime += Double((clock.now - began) / .microseconds(1)) / 1000
+        let ms = Double((clock.now - began) / .microseconds(1)) / 1000
+        layoutTime += ms
+        longestLayout = Swift.max(longestLayout, ms)
     }
 }
 

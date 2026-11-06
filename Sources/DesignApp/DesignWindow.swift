@@ -13,7 +13,9 @@
 //
 // Files: Open and Save As use AppKit's panels. Open fills this window only while
 // it holds no file (DesignWorkspace.takesOpenedFile); otherwise the chosen file
-// opens in a new window, so Open never loses work. Save writes to the file the
+// opens in a new window, so Open never loses work. An open shows "Opening <name>…"
+// in the status line at once and reads and decodes the file off the main thread;
+// the document lands on the main actor (files-history P4). Save writes to the file the
 // window opened or last saved (DesignWorkspace.documentURL), after finishing any
 // text being typed. New File clears that URL, so Save then asks for a name; Undo
 // and Redo of New File swap it back with the document they restore, so Save
@@ -432,10 +434,7 @@ struct DesignWindow: View, BodyCounted {
         started = true
         #if DEBUG
         Self.openExport = { perform(.export) }
-        Self.openFile = { url in
-            open(url)
-            Self.lastWorkspace = model
-        }
+        Self.openFile = { open($0) }
         Self.liveAdopt = (read: { model }, write: { perform(.adoptLive($0)) })
         #endif
         if seeded {
@@ -496,16 +495,30 @@ struct DesignWindow: View, BodyCounted {
         }
     }
 
-    /// Replaces the window's document with the file's. A file that can't open leaves it as it was.
+    /// Replaces the window's document with the file's. The status line says "Opening <name>…" at once
+    /// while the file is read and decoded off the main thread (files-history P4, QB-L9); the document
+    /// lands on the main actor. A file that can't open leaves the window as it was.
     private func open(_ url: URL) {
-        let began = ProcessInfo.processInfo.systemUptime
-        do {
-            try model.open(Data(contentsOf: url), at: url)
-            openBegan = began
-            fitting = true
-            fit()
-        } catch {
-            problem = .opening(url.lastPathComponent, Self.reason(error))
+        let name = url.lastPathComponent
+        let filing = model.services.filing
+        openBegan = ProcessInfo.processInfo.systemUptime
+        note = "Opening \(name)…"
+        Task {
+            let read = await Task.detached(priority: .userInitiated) {
+                Result { () throws -> DesignDocument in try filing.decode(Data(contentsOf: url)) }
+            }.value
+            switch read {
+            case .success(let document):
+                model.open(document, at: url)
+                fitting = true
+                fit()
+                #if DEBUG
+                Self.lastWorkspace = model
+                #endif
+            case .failure(let error):
+                note = nil
+                problem = .opening(name, Self.reason(error))
+            }
         }
     }
 
