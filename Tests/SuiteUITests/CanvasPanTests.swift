@@ -2,7 +2,10 @@
 // arrow keys (CanvasLayout's clamped and panned): the content follows the
 // pointer, an arrow steps a tenth of the viewport (Shift a whole one), and
 // no pan scrolls past the scrollable area; and SuiteCanvasNavigating's
-// panStep, the same step as a vector. No SwiftUI rendering. macOS only.
+// panStep, the same step as a vector; and that a text field on the canvas
+// keeps Space and the arrows (keysPan, read by CanvasViewport's key handler).
+// No SwiftUI rendering. macOS only.
+import AppKit
 import CoreGraphics
 import SuiteUI
 import SwiftUI
@@ -75,4 +78,21 @@ private let zoomedIn = CanvasLayout(
     let step = n.panStep(.right, viewport: PlaneExtent(width: 800, height: 600), modifiers: [])
     let moved = zoomedIn.panned(from: CGPoint(x: 500, y: 500), key: .rightArrow, page: false)
     #expect(moved == CGPoint(x: 500 + step.x, y: 500 + step.y))
+}
+
+@MainActor @Test func canvasKeysPanUnlessATextFieldTakesTyping() throws {
+    #expect(CanvasLayout.keysPan(firstResponder: NSView()))
+    #expect(CanvasLayout.keysPan(firstResponder: nil))
+    #expect(!CanvasLayout.keysPan(firstResponder: NSTextView()), "Space typed into a canvas text field panned (#4826)")
+    let field = NSTextField()
+    field.isEditable = true
+    #expect(!CanvasLayout.keysPan(firstResponder: field))
+    // The key handler asks it before Space arms the pan and before an arrow scrolls.
+    let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        .deletingLastPathComponent()
+    let source = try String(contentsOf: root.appending(path: "Sources/SuiteUI/CanvasViewport.swift"), encoding: .utf8)
+        .filter { !$0.isWhitespace }
+    #expect(source.contains("letpans=CanvasLayout.keysPan(firstResponder:NSApp.keyWindow?.firstResponder)"))
+    #expect(source.contains("spaceHeld=pans&&press.phase!=.upreturnpans?.handled:.ignored"))
+    #expect(source.contains("guardpans,press.modifiers.isDisjoint"))
 }
