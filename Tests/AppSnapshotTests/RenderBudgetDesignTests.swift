@@ -47,6 +47,42 @@ extension BodyCountSuites {
             // #6281: the press and the copy's first sample each fit two 60 Hz frames; the press on the
             // selection is quiet, so the window doesn't run until mouse-up.
             #expect(option.opening <= 33, "\(option) (budget 33 ms for the press and the first sample, #6281)")
+            // files-history P4: the open of crowd.design blocks the main thread at most 2 refreshes (QB-L12), so the
+            // file shows well inside QB-L9's 100 ms.
+            let (open, opened) = try await Self.openCrowd()
+            #expect(opened, "crowd.design never landed: \(open)")
+            #expect(open.slowest <= 33, "\(open) (QB-L12: the open blocks the main thread at most 2 refreshes, 33 ms)")
+        }
+
+        /// files-history P4 in the real window (QD-S11, QB-L9, QB-L12): an empty window opens `crowd.design`
+        /// (2,000 layers) as Finder or Recents hands it over. The one timed step is the open's whole main-thread
+        /// cost, read, decode, fit, and the layout and display of the opened file, since the open is synchronous.
+        @Test(.timeLimit(.minutes(2))) func openCrowdLands() async throws {
+            #if DEBUG
+            let (step, opened) = try await Self.openCrowd()
+            #expect(opened, "crowd.design never landed in the window: \(step)")
+            #endif
+        }
+
+        static func openCrowd() async throws -> (step: RenderStep, opened: Bool) {
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("crowd-\(UUID()).design")
+            try DesignFixtures.crowd.fileData().write(to: file)
+            defer { try? FileManager.default.removeItem(at: file) }
+            DesignWindow.openFile = nil
+            let w = RenderBudgetWindow(DesignWindow())
+            defer { w.close() }
+            try await w.settle(500)
+            let open = try #require(DesignWindow.openFile, "the window never started")
+            let step = try await w.measure("design open crowd.design (2,000 layers)", bodies: { nil }) {
+                w.timed { open(file) }
+            }
+            #if DEBUG
+            let opened = DesignWindow.lastWorkspace?.documentURL == file
+                && DesignWindow.lastWorkspace?.pages == DesignFixtures.crowd.pages
+            #else
+            let opened = true
+            #endif
+            return (step, opened)
         }
 
         /// A 120-sample Option-drag of Rectangle 1 on `crowd` in the real window: the press copies it, the
