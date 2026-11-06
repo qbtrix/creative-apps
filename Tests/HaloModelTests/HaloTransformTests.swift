@@ -3,7 +3,8 @@
 // Flip says it isn't in Halo yet and the selected layer reads its drawn box.
 // HT-5: a turn at 12 on an animated Rotation keys 12, on a static one sets
 // the value, a scale about the centre keeps the centre and a 120-sample drag
-// is one step. On `-HaloFixture keyed` Ball. Linux and macOS.
+// is one step, and mid viewer drag the box moves with the layer. On
+// `-HaloFixture keyed` Ball. Linux and macOS.
 import FlareCore
 @testable import HaloModel
 import SuiteKernel
@@ -93,5 +94,21 @@ private func centre(_ t: TransformBox) -> (Double, Double) {
         }
         #expect(project.history.undo.count == 1)
         #expect(abs((project.transformSelection?.degrees ?? 0) - 60) < 1e-6)
+    }
+
+    /// Mid viewer drag the box moves with the dragged layer's preview, so the
+    /// handles follow it; mouse-up leaves it where the layer landed.
+    @Test func theBoxFollowsAViewerDrag() throws {
+        var project = try ballProject()
+        let rest = try #require(project.transformSelection)
+        let (cx, cy) = centre(rest)
+        project.beginViewerDrag(at: HaloPoint(x: cx, y: cy))
+        project.moveViewerDrag(to: HaloPoint(x: cx + 100, y: cy - 30))
+        let moving = try #require(project.transformSelection)
+        #expect(abs(centre(moving).0 - (cx + 100)) < 1e-6 && abs(centre(moving).1 - (cy - 30)) < 1e-6)
+        #expect(moving.degrees == rest.degrees)
+        project.endViewerDrag()
+        let landed = try #require(project.transformSelection)
+        #expect(abs(centre(landed).0 - (cx + 100)) < 1e-6 && abs(centre(landed).1 - (cy - 30)) < 1e-6)
     }
 }

@@ -2,8 +2,9 @@
 // TransformTarget (transform HT-1 stubs, HT-5 bodies;
 // docs/blueprints/halo/features/transform.md). The box is the layer's rect
 // scaled by its sampled scale, centred where its world matrix puts the rect's
-// centre at the playhead, turned by its sampled rotation; a negative scale is
-// a mirror. `setTransform` writes Scale, Rotation and Position back at the
+// centre at the playhead (moved by the preview offset while a viewer drag of
+// that layer lasts, so the handles follow it), turned by its sampled
+// rotation; a negative scale is a mirror. `setTransform` writes Scale, Rotation and Position back at the
 // playhead through `services.keying` (a key when the track is animated, the
 // static value when not), only the rows that change, as one step named
 // `name`; writes under one `drag` token fold into that step. The turn keeps
@@ -25,7 +26,8 @@ extension HaloProject: TransformTarget {
         func v(_ p: HaloProperty) -> Double { placing.value(p, of: layer.id, in: comp, at: f) ?? layer.defaultValue(p, in: comp) }
         let b = layer.bounds(in: comp)
         let world = placing.worldMatrix(of: layer.id, in: comp, at: f) ?? .identity
-        let c = world.apply(HaloPoint(x: b.x + b.width / 2, y: b.y + b.height / 2))
+        var c = world.apply(HaloPoint(x: b.x + b.width / 2, y: b.y + b.height / 2))
+        if let drag = viewerDrag, drag.layerID == layer.id { c = HaloPoint(x: c.x + drag.delta.x, y: c.y + drag.delta.y) }
         let (sx, sy) = (v(.scaleX), v(.scaleY))
         let (w, h) = (abs(sx) * b.width, abs(sy) * b.height)
         return TransformBox(

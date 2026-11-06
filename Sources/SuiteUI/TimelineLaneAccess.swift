@@ -163,10 +163,21 @@ extension EnvironmentValues {
         get { self[TimelineIdentifierPrefixKey.self] }
         set { self[TimelineIdentifierPrefixKey.self] = newValue }
     }
+
+    /// The track rows a host that scrolls the strip itself has in view; the
+    /// strip builds only those. nil builds every row (#1262).
+    public var timelineRowsShown: Range<Int>? {
+        get { self[TimelineRowsShownKey.self] }
+        set { self[TimelineRowsShownKey.self] = newValue }
+    }
 }
 
 private struct TimelineKeyPickerKey: EnvironmentKey {
     static let defaultValue: TimelineKeyPicker? = nil
+}
+
+private struct TimelineRowsShownKey: EnvironmentKey {
+    static let defaultValue: Range<Int>? = nil
 }
 
 private struct TimelineLaneMappingKey: EnvironmentKey {

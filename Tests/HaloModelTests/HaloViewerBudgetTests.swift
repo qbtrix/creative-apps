@@ -6,7 +6,8 @@
 // playback tick (`tick(now:)`, `viewerDrawList`) under 2 ms. Ten times each
 // in debug CI. HB-2 also holds on `crowd` (300 layers) with the real
 // LiveLayerPlacing, so placing a frame's layers stays linear in the layer
-// count (#5844). Runs on Linux and macOS.
+// count (#5844), and a press's hit test on `huge` (2,000 layers) stays linear
+// too. Runs on Linux and macOS.
 @testable import HaloModel
 import Testing
 
@@ -50,6 +51,23 @@ struct HaloViewerBudgetTests {
         }
         #expect(cost <= budget)
         #expect(drawn == 300)
+    }
+
+    /// H-J5: a viewer press's hit test on `huge` (2,000 layers) looked each
+    /// layer up by id to place it, so a press cost layers squared.
+    @Test func liveHitOnHuge() throws {
+        var project = HaloProject(services: .fake)
+        project.restore(try #require(HaloFixtures.project("huge")))
+        let comp = try #require(project.selectedComposition)
+        let budget = haloBudget(device: 2)
+        // Off the frame: no layer hits, so every layer is placed and tested.
+        var hit: String? = "unset"
+        let cost = haloP95("hit-live-huge", budget: budget) {
+            hit = LiveViewerDragging().hit(comp, at: 0, point: HaloPoint(x: -5000, y: -5000))
+        }
+        #expect(cost <= budget)
+        #expect(hit == nil)
+        #expect(LiveViewerDragging().hit(comp, at: 0, point: HaloPoint(x: 960, y: 540)) != nil)
     }
 
     @Test func playheadScrubStep() throws {

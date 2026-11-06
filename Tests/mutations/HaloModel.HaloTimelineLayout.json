@@ -1,5 +1,8 @@
 [
 {"label":"a click in the name column hits a lane","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"x > labelColumn + divider, y >= ruler","replace":"x >= 0, y >= ruler","tests":"HaloTimelineLayoutTests"},
 {"label":"a click on the ruler hits the first lane","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"x > labelColumn + divider, y >= ruler","replace":"x > labelColumn + divider, y >= 0","tests":"HaloTimelineLayoutTests"},
-{"label":"a click under the last lane hits one","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"y < ruler + lane * Double(max(rows, 0))","replace":"y <= ruler + lane * Double(max(rows, 0))","tests":"HaloTimelineLayoutTests"}
+{"label":"a click under the last lane hits one","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"y < ruler + lane * Double(max(rows, 0))","replace":"y <= ruler + lane * Double(max(rows, 0))","tests":"HaloTimelineLayoutTests"},
+{"label":"every lane row is built before the first scroll report (#1262)","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"else { return 0..<min(48, count) }","replace":"else { return 0..<count }","tests":"HaloTimelineLayoutTests"},
+{"label":"no overscan above the rows in view","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"let first = max(row(y.lowerBound) - overscan, 0)","replace":"let first = max(row(y.lowerBound), 0)","tests":"HaloTimelineLayoutTests"},
+{"label":"the rows ignore the ruler above the lanes","file":"Sources/HaloModel/HaloTimelineLayout.swift","find":"let row = { (v: Double) in Int(min(max(0, v - ruler) / lane, Double(count))) }","replace":"let row = { (v: Double) in Int(min(max(0, v) / lane, Double(count))) }","tests":"HaloTimelineLayoutTests"}
 ]
