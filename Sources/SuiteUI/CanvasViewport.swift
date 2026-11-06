@@ -16,7 +16,7 @@
 // starts with Space held scrolls it with the pointer (the grab pointer) and
 // never reaches `onDrag` or `onDragEnd`, and Space never reaches `onKey`; an
 // arrow key `onKey` ignores scrolls a tenth of the viewport, Shift a whole
-// one. Whether a drag pans is decided when it starts, so a tool drag always
+// one. A text field on the canvas keeps its Space and arrows (keysPan). Whether a drag pans is decided when it starts, so a tool drag always
 // gets its `onDragEnd`. The host owns the zoom (the top bar and status bar
 // show it) and learns the viewport's size from `onSize` to work out a fit.
 // With `onZoomLevel` (or the older `onZoom`, which takes the level as a
@@ -50,6 +50,7 @@
 // container registers as the enabled control `suite.canvas` (`.suiteControl`),
 // and under a probe host each tool-drag or Space-pan move reports a sample of
 // series `canvas-drag` (CanvasProbe, SP2).
+import AppKit
 import enum SuiteKernel.ZoomKey
 import enum SuiteKernel.ZoomLevel
 import SwiftUI
@@ -148,6 +149,12 @@ public struct CanvasLayout: Equatable, Sendable {
             pointer: pointer, origin: CGPoint(x: self.origin.x - scrolled.x, y: self.origin.y - scrolled.y),
             from: scale, to: next.scale)
         return next.clamped(CGPoint(x: next.origin.x - origin.x, y: next.origin.y - origin.y))
+    }
+
+    /// Whether Space and the arrows pan the canvas while `firstResponder` has the keys: not while
+    /// it takes typing (an inline text editor on the canvas), which keeps its spaces and caret (#4826).
+    @MainActor public static func keysPan(firstResponder: NSResponder?) -> Bool {
+        !ToolKeys.isTextInput(firstResponder)
     }
 
     /// The scroll offset after `key`: an arrow scrolls a tenth of the viewport its way,
@@ -357,9 +364,10 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     /// Space (all its phases) arms the pan and stays here. Every other key reaches `onKey`
     /// going down, as before; an arrow it ignores pans the canvas.
     private func key(_ press: KeyPress, _ layout: CanvasLayout) -> KeyPress.Result {
+        let pans = CanvasLayout.keysPan(firstResponder: NSApp.keyWindow?.firstResponder)
         if press.key == .space {
-            spaceHeld = press.phase != .up
-            return .handled
+            spaceHeld = pans && press.phase != .up
+            return pans ? .handled : .ignored
         }
         guard press.phase == .down else { return .ignored }
         if let level = zoomKey(press) {
@@ -367,7 +375,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             return .handled
         }
         if case .handled? = onKey?(press) { return .handled }
-        guard press.modifiers.isDisjoint(with: [.command, .option, .control]),
+        guard pans, press.modifiers.isDisjoint(with: [.command, .option, .control]),
             let offset = layout.panned(from: scrolled, key: press.key, page: press.modifiers.contains(.shift))
         else { return .ignored }
         position.scrollTo(point: offset)
