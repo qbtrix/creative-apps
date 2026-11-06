@@ -184,7 +184,7 @@ process:
 
 | Check | How | Fails when |
 |---|---|---|
-| step p95 | the `suite.perf` samples the gesture added (event to the turn that showed it) | over 33 ms |
+| step p95 | the `suite.perf` samples the gesture added (event to the turn that showed it) | over 33 ms (16 ms, the render contract's hard line, for a gesture that passes `budget: Health.realTimeBudget`: Design's `option-move`) |
 | main thread | `/usr/bin/sample <pid> 3` during the gesture, `scripts/sample-surfaces` | over 20% of main-thread samples under `IOSurfaceCreate` / `SurfacePool::alloc` |
 | hang | an XCUITest window query right after | no answer within 2 s |
 | idle CPU | 3 s after, CPU over two 1 s windows (`ps -o time=`) | both over 10% |

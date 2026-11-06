@@ -34,6 +34,9 @@ import XCTest
 /// The limits the real-app checks hold every gesture to.
 enum Health {
     static let stepBudget = 33.0      // ms, p95 of a gesture's steps at 8K
+    /// The render contract's hard line (rules 3 and 6) for a drag step on a real-size document;
+    /// a gesture that holds it passes `budget: Health.realTimeBudget` to `health`.
+    static let realTimeBudget = 16.0
     static let idleLimit = 10.0       // percent CPU
     static let idleWait = 3.0         // seconds after the gesture
     static let hangLimit = 2.0        // seconds for an accessibility answer
@@ -79,9 +82,11 @@ extension Journey {
     /// Runs `gesture` with every health check on the app `pid`, reports one
     /// line for `label` and fails each check that misses its limit. `series`
     /// is the `suite.perf` series the gesture's steps record under; nil when
-    /// `gesture` returns its own step times (round trips, report-only).
+    /// `gesture` returns its own step times (round trips, report-only). `budget`
+    /// gates the steps' p95 in ms.
     @discardableResult
-    func health(_ label: String, pid: pid_t, series: String?, gesture: () -> [Double]) -> String {
+    func health(_ label: String, pid: pid_t, series: String?, budget: Double = Health.stepBudget,
+                gesture: () -> [Double]) -> String {
         let before = series.map { probeSamples($0).count } ?? 0
         let inbox = FileManager.default.temporaryDirectory.appending(path: "realperf")
         try? FileManager.default.createDirectory(at: inbox, withIntermediateDirectories: true)
@@ -128,13 +133,13 @@ extension Journey {
             let steps = probeSamples(series).dropFirst(before).map { ($0.shownAt - $0.eventTime) * 1000 }
             let p95 = Self.p95(steps)
             parts.insert(String(format: "steps %d p95 %@ ms (budget %.0f ms, %@)", steps.count,
-                                p95.map { String(format: "%.0f", $0) } ?? "n/a", Health.stepBudget, series), at: 0)
+                                p95.map { String(format: "%.0f", $0) } ?? "n/a", budget, series), at: 0)
             // The five slowest steps as step:ms, in step order, so a p95 reads as spikes or as every step.
             let slowest = steps.enumerated().sorted { $0.element > $1.element }.prefix(5).sorted { $0.offset < $1.offset }
             if !slowest.isEmpty {
                 parts.insert("slowest " + slowest.map { String(format: "%d:%.0f", $0.offset, $0.element) }.joined(separator: " "), at: 1)
             }
-            if let p95 { XCTAssertLessThanOrEqual(p95, Health.stepBudget, "\(label): step p95 \(Int(p95)) ms over \(Int(Health.stepBudget)) ms") }
+            if let p95 { XCTAssertLessThanOrEqual(p95, budget, "\(label): step p95 \(Int(p95)) ms over \(Int(budget)) ms") }
         } else {
             let p95 = Self.p95(roundTrips.map { $0 * 1000 })
             parts.insert(String(format: "steps %d round-trip p95 %@ ms (report-only)", roundTrips.count,
