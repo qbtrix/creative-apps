@@ -3,7 +3,7 @@
 // -SuiteGallery check, so the page never recurses): the save state as subtitle, Pages with a SidebarActionRow and Layers in the sidebar,
 // New and Open beside the title, Save, Undo, Redo and the zooms trailing, an EditorDetail with a 1600 x 1000 artboard
 // fitted by EditorDetailLayout, and a 304 pt inspector. Add and Delete Page are the edits Undo and Redo step through;
-// a tool's key picks it. Opened from the index, the page sizes its window to the editor's launch size (the
+// a tool's key picks it through ToolKeys. Opened from the index, the page sizes its window to the editor's launch size (the
 // index's window is narrower than the page's minimum). Every control acts or says why, with a `suite.gallery.*` id, so the `suiteui` audit stays 0.
 import SwiftUI
 
@@ -11,14 +11,22 @@ enum GalleryEditorWindow {
     static let name = "editor-window"
 
     @MainActor static let pages: GalleryPages = [name: { AnyView(GalleryEditorWindowPage()) }]
+
+    static let tools: [(title: String, systemImage: String, key: Character)] = [
+        ("Select", "cursorarrow", "v"), ("Rectangle", "rectangle", "r"), ("Ellipse", "circle", "e"),
+        ("Pen", "pencil.tip", "p"), ("Text", "textformat", "t"),
+    ]
+
+    /// The title of the tool `characters` picks through ToolKeys, in either case; nil for anything but one tool letter.
+    static func tool(forTyped characters: String) -> String? {
+        guard characters.count == 1, let key = characters.first else { return nil }
+        let faces = tools.map { ToolFace(id: $0.title, title: $0.title, shortcut: $0.key, unavailableHelp: nil) }
+        return ToolKeys.id(forKey: key, in: faces)
+    }
 }
 
 private struct GalleryEditorWindowPage: View {
     private static let document = CGSize(width: 1600, height: 1000)
-    private static let tools: [(title: String, systemImage: String, key: Character)] = [
-        ("Select", "cursorarrow", "v"), ("Rectangle", "rectangle", "r"), ("Ellipse", "circle", "e"),
-        ("Pen", "pencil.tip", "p"), ("Text", "textformat", "t"),
-    ]
     private static let layers = [
         SidebarItem(id: "layer.title", title: "Title Text", systemImage: "textformat"),
         SidebarItem(id: "layer.shape", title: "Shape", systemImage: "circle"),
@@ -36,7 +44,7 @@ private struct GalleryEditorWindowPage: View {
     @State private var viewport = CGSize.zero  // the area inside the rulers, as CanvasViewport reports it
 
     private var fitZoom: Double {
-        EditorDetailLayout(viewport: viewport, toolCount: Self.tools.count).fitScale(artboard: Self.document)
+        EditorDetailLayout(viewport: viewport, toolCount: GalleryEditorWindow.tools.count).fitScale(artboard: Self.document)
     }
 
     private var zoom: Double { chosenZoom ?? fitZoom }
@@ -166,7 +174,7 @@ private struct GalleryEditorWindowPage: View {
     }
 
     private var palette: [ToolbarAction] {
-        Self.tools.map { item in
+        GalleryEditorWindow.tools.map { item in
             ToolbarAction(
                 item.title, systemImage: item.systemImage, isSelected: item.title == tool, shortcut: item.key,
                 identifier: "suite.gallery.tool.\(item.title.lowercased())"
@@ -174,12 +182,12 @@ private struct GalleryEditorWindowPage: View {
         }
     }
 
-    /// The tool whose key was pressed, with no Command, Option or Control held.
+    /// The tool whose key was pressed (through ToolKeys), with no Command, Option or Control held.
     private func pick(_ press: KeyPress) -> KeyPress.Result {
         guard press.modifiers.isDisjoint(with: [.command, .option, .control]),
-            let item = Self.tools.first(where: { String($0.key) == press.characters.lowercased() })
+            let picked = GalleryEditorWindow.tool(forTyped: press.characters)
         else { return .ignored }
-        tool = item.title
+        tool = picked
         return .handled
     }
 

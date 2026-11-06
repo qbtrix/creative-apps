@@ -15,6 +15,16 @@ import Testing
         "grid", "grid-2000", "canvas", "canvas-pt", "marks", "timeline", "timeline-long", "graph", "graph-loop",
     ]
 
+    /// The editor-window page picks a tool by its letter through ToolKeys (AC-tools), in either case; an unknown
+    /// letter or more than one character picks nothing.
+    @Test func theEditorWindowPicksToolsThroughToolKeys() {
+        #expect(GalleryEditorWindow.tool(forTyped: "r") == "Rectangle")
+        #expect(GalleryEditorWindow.tool(forTyped: "T") == "Text")
+        #expect(GalleryEditorWindow.tool(forTyped: "x") == nil)
+        #expect(GalleryEditorWindow.tool(forTyped: "rv") == nil)
+        #expect(GalleryEditorWindow.tool(forTyped: "") == nil)
+    }
+
     @Test func theParserReadsThePageFakesAndWidth() {
         #expect(SuiteGallery.request(from: ["Library", "-SuiteGallery", "editor"])
             == GalleryRequest(page: "editor", fakes: false, width: nil))
