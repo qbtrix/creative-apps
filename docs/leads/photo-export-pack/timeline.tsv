@@ -745,3 +745,4 @@ utc	stage	event	ref	note
 2026-11-05T23:27Z	check-in	quiet: no merges, no new findings or photo issues; no dev-red; #5353 still a92b4651; 43 photo findings
 2026-11-05T23:58Z	check-in	#6291 (suiteui Copy As snapshots) merged 23:41Z; no new findings or photo issues; no dev-red; #5353 still a92b4651; 43 photo findings
 2026-11-06T00:30Z	check-in	quiet: no merges, no new findings or photo issues; no dev-red; #5353 still a92b4651; 43 photo findings
+2026-11-06T01:01Z	check-in	dev-red #6292 opened 00:58Z (macos, GestureContractTests photo, range #6280 #6291, captain's; flake rerun running; not ours, untouched); no merges or new findings; #5353 still a92b4651; 43 photo findings
