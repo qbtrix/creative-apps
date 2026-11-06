@@ -230,7 +230,7 @@ private func gradientCards() -> DesignWorkspace {
     // Option on the selected A only begins the copy: nothing shows, so the press stays on the copy (#6281).
     let pressed = try #require(model.quietPress(at: start, modifiers: .option))
     var live = DesignLiveEdit()
-    live.begin(from: pressed, replaying: start, modifiers: .option)
+    live.begin(from: pressed)
     for i in 1...20 { live.sample(from: start, to: sample(i), modifiers: .option) }
     #expect(model == { var m = cards(); m.selectItem("node-2"); return m }(), "the press wrote the workspace")
     live.end(into: &model)

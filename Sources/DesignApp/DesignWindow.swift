@@ -200,7 +200,7 @@ struct DesignWindow: View, BodyCounted {
                 // A press that shows nothing (Option on the selection) stays on the copy, so the window
                 // doesn't run; one that selects goes to the workspace, so the selection shows at once.
                 if let pressed = model.quietPress(at: start, modifiers: modifiers) {
-                    live.begin(from: pressed, replaying: start, modifiers: modifiers)
+                    live.begin(from: pressed)
                 } else {
                     model.drag(from: start, to: start, modifiers: modifiers)
                     live.begin(from: model)
