@@ -393,3 +393,4 @@ utc	stage	event	ref	note
 2026-11-06T02:17Z	3	check-in	quiet	full 42116923493 failed, 0 Halo cases; 42147603609 pending; no halo run; blockers open
 2026-11-06T04:20Z	3	check-in	quiet	full 42147603609 running; no halo run; blockers open
 2026-11-06T06:22Z	3	check-in	quiet	full 42147603609 failed, 0 Halo cases; no halo run; blockers open
+2026-11-06T08:25Z	3	check-in	quiet	full 42186946042 in progress; no halo run; blockers open
