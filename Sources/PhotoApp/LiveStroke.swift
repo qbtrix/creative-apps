@@ -79,10 +79,11 @@ enum SamplePress: Equatable {
 }
 
 extension DragModifiers {
-    /// The keys among `flags` a canvas drag reads: Shift and Option.
-    init(flags: NSEvent.ModifierFlags) {
+    /// The keys among `held` a canvas drag reads: Shift and Option. AppKit's flags come in through SuiteUI's
+    /// `KeyModifiers(flags:)`, the suite's one map (AC-tools), as Flare's stage drag does.
+    init(_ held: KeyModifiers) {
         self.init()
-        if flags.contains(.shift) { insert(.shift) }
-        if flags.contains(.option) { insert(.option) }
+        if held.contains(.shift) { insert(.shift) }
+        if held.contains(.option) { insert(.option) }
     }
 }

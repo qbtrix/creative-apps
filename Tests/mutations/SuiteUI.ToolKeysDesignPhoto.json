@@ -47,5 +47,19 @@
     "find": "let group = faces.filter { picking.tool(forKey: key, in: [$0]) != nil }.map(\\.id)",
     "replace": "let group = faces.filter { $0.shortcut?.lowercased() == key.lowercased() }.map(\\.id)",
     "tests": "ToolKeysTests|PhotoToolsKeyTests"
+  },
+  {
+    "label": "photoShiftDropped: Shift no longer reaches a Photo canvas drag, so Shift can no longer add to a selection",
+    "file": "Sources/PhotoApp/LiveStroke.swift",
+    "find": "if held.contains(.shift) { insert(.shift) }",
+    "replace": "_ = held",
+    "tests": "PhotoStrokePacerTests"
+  },
+  {
+    "label": "photoOptionDropped: Option no longer reaches a Photo canvas drag, so Option-click no longer sets a clone source or samples a color",
+    "file": "Sources/PhotoApp/LiveStroke.swift",
+    "find": "if held.contains(.option) { insert(.option) }",
+    "replace": "_ = held",
+    "tests": "PhotoStrokePacerTests"
   }
 ]

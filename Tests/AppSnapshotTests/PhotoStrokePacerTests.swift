@@ -8,6 +8,7 @@
 import AppKit
 import CoreRaster
 import PhotoModel
+import SuiteUI
 import SwiftUI
 import Testing
 
@@ -53,13 +54,13 @@ import Testing
         #expect(applied == held)
     }
 
+    /// The flags reach a drag through SuiteUI's one map, `KeyModifiers(flags:)` (AC-tools): Shift and Option stay,
+    /// Command, Control and Caps Lock go.
     @Test func modifierFlagsMapToDragModifiers() {
-        let none: NSEvent.ModifierFlags = []
-        let shiftCommand: NSEvent.ModifierFlags = [.shift, .command]
-        let optionShift: NSEvent.ModifierFlags = [.option, .shift]
-        #expect(DragModifiers(flags: none).isEmpty)
-        #expect(DragModifiers(flags: shiftCommand) == .shift)
-        #expect(DragModifiers(flags: optionShift) == [.shift, .option])
+        #expect(DragModifiers(KeyModifiers(flags: [])).isEmpty)
+        #expect(DragModifiers(KeyModifiers(flags: [.shift, .command])) == .shift)
+        #expect(DragModifiers(KeyModifiers(flags: [.option, .shift])) == [.shift, .option])
+        #expect(DragModifiers(KeyModifiers(flags: [.control, .capsLock])).isEmpty)
     }
 
     @Test func aPendingCropIsAnIdentifiedImageNotAButton() throws {

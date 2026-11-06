@@ -240,7 +240,7 @@ struct PhotoWindow: View {
             NSEvent.isMouseCoalescingEnabled = false
             let move = (
                 Mask.Point(x: from.x, y: from.y), Mask.Point(x: to.x, y: to.y), SuitePointerPressure.current,
-                DragModifiers(flags: NSEvent.modifierFlags))
+                DragModifiers(KeyModifiers(flags: NSEvent.modifierFlags)))
             // The picture starts at once, not after SwiftUI's next pass reaches `.onChange`. A paint
             // stroke draws on LiveStroke's copy, so its samples don't re-run the panels.
             pacer.add(move) { moves in
