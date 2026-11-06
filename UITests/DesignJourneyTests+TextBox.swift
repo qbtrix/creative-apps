@@ -125,14 +125,12 @@ final class DesignTextBoxJourneyTests: XCTestCase {
             .matching(NSPredicate(format: "label == %@", "Size")).firstMatch
     }
 
-    /// The number a Frame field (Width, Height) reads, from its spoken value ("1,440 points").
+    /// The number a Frame field (Width, Height) reads (Journey.inspectorNumber).
     @MainActor private func frameValue(_ design: Journey, _ name: String) -> Double? {
         let field = design.element("suite.inspector").descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@", name)).firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "no \(name) field in the inspector")
-        let spoken = field.value as? String ?? ""
-        guard let word = spoken.split(separator: " ").first else { return nil }
-        return Double(word.filter { character in character.isNumber || character == "." || character == "-" })
+        return design.inspectorNumber(name)
     }
 
     /// Whether `element` is gone within five seconds.
