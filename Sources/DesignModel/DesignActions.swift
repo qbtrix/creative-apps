@@ -149,11 +149,10 @@ extension DesignWorkspace {
     mutating func apply(_ edit: DesignEdit, mint: DesignIDMint? = nil) {
         guard let index = pages.firstIndex(where: { $0.id == selectedPageID }) else { return }
         let before = snapshot
-        // A style edit keeps every id where it was, so the held ids stand; only a change to the
-        // tree's ids rebuilds them, which on `crowd` is most of a scrub step (#2303).
+        // A style edit keeps every id where it was, so the held ids stand; a change to the tree's
+        // ids swaps only the child lists the edit copied (#2303, #6281).
         if !Self.sameIDs(pages[index].nodes, edit.nodes) {
-            held.remove(pages[index].nodes)
-            for id in Self.ids(in: edit.nodes) { held.insert(id) }
+            held.swap(pages[index].nodes, for: edit.nodes)
         }
         pages[index].nodes = edit.nodes
         selectedNodeIDs = edit.selection
@@ -203,9 +202,5 @@ extension DesignWorkspace {
             return false
         }
         return true
-    }
-
-    private static func ids(in nodes: [DesignNode]) -> [String] {
-        nodes.flatMap { [$0.id] + ids(in: $0.children) }
     }
 }

@@ -44,8 +44,8 @@
 // over one, asks Save, Don't Save or Cancel first. Save runs File > Save and lands only when
 // the workspace then reads clean, so a cancelled Save panel keeps the document.
 //
-// Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace,
-// then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
+// Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace
+// (a quiet press, one that shows nothing, to the copy alone), then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
 // draws, so the window doesn't run per sample. Mouse-up, or the scrub's end
 // run, replays the last one into the workspace as one step (`live.land(into:)`),
 // written before the copy is cleared.
@@ -197,9 +197,14 @@ struct DesignWindow: View, BodyCounted {
         case .drag(let from, let to, let modifiers):
             let start = DesignPoint(from)
             if !live.isLive {
-                // The press goes to the workspace, so the selection shows at once.
-                model.drag(from: start, to: start, modifiers: modifiers)
-                live.begin(from: model)
+                // A press that shows nothing (Option on the selection) stays on the copy, so the window
+                // doesn't run; one that selects goes to the workspace, so the selection shows at once.
+                if let pressed = model.quietPress(at: start, modifiers: modifiers) {
+                    live.begin(from: pressed, replaying: start, modifiers: modifiers)
+                } else {
+                    model.drag(from: start, to: start, modifiers: modifiers)
+                    live.begin(from: model)
+                }
             }
             live.sample(from: start, to: DesignPoint(to), modifiers: modifiers)
         case .endDrag: endLive { model.endDrag() }

@@ -1,0 +1,5 @@
+[
+{"label":"swap never drops a removed layer","file":"Sources/DesignModel/DesignHeldIDs.swift","find":"added: &added) } else { remove([node]) }","replace":"added: &added) }","tests":"DesignApplyHeldIDsTests"},
+{"label":"swap never holds an added layer's children","file":"Sources/DesignModel/DesignHeldIDs.swift","find":"        for child in node.children { collect(child) }","replace":"","tests":"DesignApplyHeldIDsTests"},
+{"label":"swap stops at the top level","file":"Sources/DesignModel/DesignHeldIDs.swift","find":"if let match = kept[node.id] { drop(node.children, keeping: match.children, added: &added) }","replace":"if kept[node.id] != nil {}","tests":"DesignApplyHeldIDsTests"}
+]
