@@ -1388,3 +1388,5 @@ Loop: v3 (the packet has a `## Slices` table).
 - 14:30Z check-in: #3482 quiet, no open Flare file-flow findings (Photo's #5833 still open on line:photo, not ours). Gaps #4764 and #1829 still open.
 
 - 15:02Z check-in: #3482 quiet, no open Flare file-flow findings (Photo's #5833 still open on line:photo, not ours). Gaps #4764 and #1829 still open.
+
+- 15:34Z check-in: #3482 quiet, no open Flare file-flow findings (Photo's #5833 still open on line:photo, not ours). Gaps #4764 and #1829 still open. #1829's new comment is the CI bot's timeline key button overlap note (run 42225884113), not file-flow work.
