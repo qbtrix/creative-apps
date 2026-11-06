@@ -30,8 +30,8 @@
   {
     "label": "open replaces the pages without asking the filing",
     "file": "Sources/DesignModel/DesignFile.swift",
-    "find": "let document = try services.filing.decode(data)",
-    "replace": "let document = (try? services.filing.decode(data)) ?? DesignDocument(pages: [])",
+    "find": "open(try services.filing.decode(data), at: url)",
+    "replace": "open((try? services.filing.decode(data)) ?? DesignDocument(pages: []), at: url)",
     "tests": "DesignFilingTests"
   },
   {
