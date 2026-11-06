@@ -7,8 +7,8 @@
 // a dragged stop's index follows the copy's re-sorts), and the workspace is
 // left alone. A transform scrub (the inspector's Rotation bar) previews its
 // kernel intent the same way (`preview(_: TransformIntent)`).
-// A quiet press (DesignWorkspace.quietPress) is begun from the pressed copy; the
-// workspace needs no press of its own, since its first `drag` begins the gesture.
+// A quiet press (DesignWorkspace.quietPress) is begun from the pressed copy with
+// `replaying:`, and `end(into:)` presses the workspace first.
 // `end(into:)` replays the gesture into the workspace through its own methods
 // (the last sample, `drag` then `endDrag`; the last value, `setStyle` or
 // `runTransform` then `endEditRun`; every fill intent, `runFill` then
@@ -32,12 +32,25 @@ public struct DesignLiveEdit: Sendable, Equatable {
     /// The workspace as `begin` found it, the base every preview starts from.
     private var base: DesignWorkspace?
     private var last: Last?
+    /// A press that went to the copy alone, which `end(into:)` makes on the workspace first.
+    private var press: Press?
+
+    private struct Press: Sendable, Equatable {
+        let at: DesignPoint
+        let modifiers: DesignModifiers
+    }
 
     public init() {}
 
     /// Starts showing a copy of `model` (after the press went to it).
     public mutating func begin(from model: DesignWorkspace) {
-        (workspace, base, last) = (model, model, nil)
+        (workspace, base, last, press) = (model, model, nil, nil)
+    }
+
+    /// Starts showing `pressed`, a quiet press's copy; `end(into:)` makes the press at `start` first.
+    public mutating func begin(from pressed: DesignWorkspace, replaying start: DesignPoint, modifiers: DesignModifiers) {
+        begin(from: pressed)
+        press = Press(at: start, modifiers: modifiers)
     }
 
     /// One pointer sample of the gesture, run on the copy only. Nothing before `begin`.
@@ -77,7 +90,8 @@ public struct DesignLiveEdit: Sendable, Equatable {
     /// the copy. A drag with no sample after the press only ends. Returns a refused value's reason.
     @discardableResult
     public mutating func end(into model: inout DesignWorkspace) -> DesignRefusal? {
-        defer { (workspace, base, last) = (nil, nil, nil) }
+        defer { (workspace, base, last, press) = (nil, nil, nil, nil) }
+        if let press { model.drag(from: press.at, to: press.at, modifiers: press.modifiers) }
         switch last {
         case .drag(let start, let end, let modifiers):
             model.drag(from: start, to: end, modifiers: modifiers)

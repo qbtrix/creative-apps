@@ -56,6 +56,13 @@ import SwiftUI
         if scrubbed != nil { scrubbed = nil }
     }
 
+    /// Starts showing `pressed`, a quiet press's copy; landing makes the press on the workspace first.
+    func begin(from pressed: DesignWorkspace, replaying start: DesignPoint, modifiers: DesignModifiers) {
+        isLanding = false
+        edit.begin(from: pressed, replaying: start, modifiers: modifiers)
+        if scrubbed != nil { scrubbed = nil }
+    }
+
     /// One pointer sample, run on the copy only.
     func sample(from start: DesignPoint, to end: DesignPoint, modifiers: DesignModifiers) {
         edit.sample(from: start, to: end, modifiers: modifiers)

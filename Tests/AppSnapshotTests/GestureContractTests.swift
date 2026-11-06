@@ -41,7 +41,6 @@ extension BodyCountSuites {
 
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
         static let exclusions: [String: (reason: String, issue: Int)] = [
-            "design.move": ("2 root bodies with the pointer down", 6021),
             "library.*": ("no canvas tool enum, so no adapter", 6022),
         ]
 
