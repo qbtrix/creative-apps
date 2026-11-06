@@ -47,6 +47,13 @@ public struct TiledPixels: Sendable, Equatable {
         }
     }
 
+    /// Whether `other` holds this one's tile array (a copy neither has written since): then the pixels are equal,
+    /// checked in constant time. False says nothing about the pixels.
+    func sharesTiles(with other: TiledPixels) -> Bool {
+        width == other.width && height == other.height
+            && tiles.withUnsafeBufferPointer { mine in other.tiles.withUnsafeBufferPointer { $0.baseAddress == mine.baseAddress } }
+    }
+
     var columns: Int { max((width + PixelBuffer.tileSize - 1) / PixelBuffer.tileSize, 1) }
     var rows: Int { max((height + PixelBuffer.tileSize - 1) / PixelBuffer.tileSize, 1) }
 
