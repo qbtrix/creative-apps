@@ -14,6 +14,8 @@ import Darwin
 public enum GradientRules {
     /// The most stops a gradient holds, and why a gradient can't drop below two.
     public static let maxStops = 64, stopHelp = "A gradient needs at least two stops."
+    /// Why `fill.type` none refuses on a target whose layers always have a fill.
+    public static let noFillHelp = "This layer always has a fill."
     /// What an app's `setFill` throws until its adopt builds it.
     public static let notBuilt = CatalogError.notBuilt(id: "fill", feature: "gradient-fill GF-6")
 
@@ -26,22 +28,37 @@ public enum GradientRules {
         }
     }
 
-    /// `fill` as `type` in `box`: solid to linear is the colour to white at 0°, to radial the same stops about the
-    /// centre out to half the diagonal; linear and radial keep their stops; to solid keeps the first colour.
-    public static func converted(_ fill: Fill, to type: FillType, in box: Rect) -> Fill {
-        guard type != Self.type(of: fill) else { return fill }
+    /// `fill` as `type` in `box`: a linear line at `memory`'s angle (0° without one), a radial at `memory`'s centre and
+    /// radius (the box's centre and half its diagonal without them); solid becomes its colour to white; linear and
+    /// radial keep their stops; to solid keeps the first colour. `none` isn't a paint (a target clears its fill
+    /// instead), so it returns `fill`. Pass the memory from `remembering` so a switch back restores what it left.
+    public static func converted(_ fill: Fill, to type: FillType, in box: Rect, memory: FillMemory = FillMemory()) -> Fill {
+        guard type != Self.type(of: fill), type != .none else { return fill }
         let stops = if case .solid(let color) = fill {
             [GradientStop(offset: 0, color: color), GradientStop(offset: 1, color: .white)]
         } else { fill.stops }
         let center = center(of: box)
         switch type {
-        case .solid: return .solid(stops.first?.color ?? .black)
-        case .linear: return rotated(.linear(stops: stops, start: center, end: center), to: 0, in: box)
+        case .solid, .none: return .solid(stops.first?.color ?? .black)
+        case .linear: return rotated(.linear(stops: stops, start: center, end: center), to: memory.angle ?? 0, in: box)
         case .radial:
             // ponytail: a box with no diagonal still gets a 1-unit radius, so the fill stays valid.
-            let radius = (box.width * box.width + box.height * box.height).squareRoot() / 2
-            return .radial(stops: stops, center: center, radius: radius > 0 && radius.isFinite ? radius : 1)
+            let diagonal = (box.width * box.width + box.height * box.height).squareRoot() / 2
+            let radius = memory.radius.flatMap { $0 > 0 && $0.isFinite ? $0 : nil } ?? diagonal
+            let kept = memory.center.flatMap { $0.x.isFinite && $0.y.isFinite ? $0 : nil } ?? center
+            return .radial(stops: stops, center: kept, radius: radius > 0 && radius.isFinite ? radius : 1)
         }
+    }
+
+    /// `memory` with what `fill` holds now: a linear fill's angle, or a radial's centre and radius; a solid adds nothing.
+    public static func remembering(_ fill: Fill, in memory: FillMemory) -> FillMemory {
+        var kept = memory
+        switch fill {
+        case .solid: break
+        case .linear: kept.angle = angle(of: fill)
+        case .radial(_, let center, let radius): (kept.center, kept.radius) = (center, radius)
+        }
+        return kept
     }
 
     /// A linear fill's angle in degrees, in [0, 360); nil for solid and radial (0 for a line with no length).

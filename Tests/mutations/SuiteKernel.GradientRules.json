@@ -40,5 +40,19 @@
     "find": "guard type(of: fill) != .solid, offset.isFinite, fill.stops.count < maxStops else { return nil }",
     "replace": "guard type(of: fill) != .solid, offset.isFinite else { return nil }",
     "tests": "GradientRulesTests"
+  },
+  {
+    "label": "linearRadialLinearKeepsTheAngle: the remembered angle ignored, so a switch back starts at 0°",
+    "file": "Sources/SuiteKernel/Fill/GradientRules.swift",
+    "find": "to: memory.angle ?? 0, in: box)",
+    "replace": "to: 0, in: box)",
+    "tests": "FillMemoryTests"
+  },
+  {
+    "label": "radialLinearRadialKeepsTheCentreAndRadius: a radial's centre and radius not remembered",
+    "file": "Sources/SuiteKernel/Fill/GradientRules.swift",
+    "find": "case .radial(_, let center, let radius): (kept.center, kept.radius) = (center, radius)",
+    "replace": "case .radial: break",
+    "tests": "FillMemoryTests"
   }
 ]
