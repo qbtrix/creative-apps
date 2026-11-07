@@ -6,12 +6,12 @@
 // or a failed open's `loadState` message in a system alert each time the
 // Model sets it again, and opens `-FlareOpenFile`'s file once, in the first
 // window, the way Open Recent does. FlareFileDialogs are the AppKit panels:
-// open for .flare and Lottie JSON files, save for .flare files, the export's folder, and the close prompt's
-// Save, Don't Save and Cancel, in the kernel's shared words (UnsavedPrompt).
+// open for .flare and Lottie JSON files, save for .flare files and the
+// export's folder. Save, Don't Save and Cancel before a dirty animation goes
+// are SuiteUI's unsaved guard (FlareWindow.swift, `unsavedHooks`).
 // The window title is SuiteWindow's (`model.title`).
 import AppKit
 import FlareModel
-import SuiteKernel
 import SuiteUI
 import SwiftUI
 import UniformTypeIdentifiers
@@ -71,10 +71,8 @@ final class FlareEditedView: NSView {
     }
 }
 
-/// The open and save panels and the close prompt.
+/// The open, save and folder panels.
 @MainActor enum FlareFileDialogs {
-    enum Choice { case save, discard, cancel }
-
     /// The `.flare` extension as the system types a file on disk.
     static let fileType = UTType(filenameExtension: "flare") ?? .data
 
@@ -103,27 +101,5 @@ final class FlareEditedView: NSView {
         panel.canCreateDirectories = true
         panel.prompt = "Export"
         return panel.runModal() == .OK ? panel.url : nil
-    }
-
-    /// Asks whether to save `title`'s changes before it closes: a sheet on
-    /// `window`, or a dialog without one.
-    static func askToSave(_ title: String, in window: NSWindow?) async -> Choice {
-        let alert = NSAlert()
-        alert.alertStyle = .warning
-        alert.messageText = UnsavedPrompt.message(for: title)
-        alert.informativeText = UnsavedPrompt.informativeText
-        let identifiers: [UnsavedPrompt.Answer: String] =
-            [.save: "flare.close.save", .dontSave: "flare.close.discard", .cancel: "flare.close.cancel"]
-        for answer in UnsavedPrompt.answers {
-            alert.addButton(withTitle: UnsavedPrompt.title(of: answer))
-                .setAccessibilityIdentifier(identifiers[answer, default: "flare.close.cancel"])
-        }
-        let response = if let window { await alert.beginSheetModal(for: window) } else { alert.runModal() }
-        let index = response.rawValue - NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
-        switch UnsavedPrompt.answer(forButton: index) {
-        case .save: return .save
-        case .dontSave: return .discard
-        case .cancel: return .cancel
-        }
     }
 }
