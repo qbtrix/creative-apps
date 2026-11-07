@@ -13,7 +13,9 @@
 //
 // Files: Open and Save As use AppKit's panels. Open fills this window only while
 // it holds no file (DesignWorkspace.takesOpenedFile); otherwise the chosen file
-// opens in a new window, so Open never loses work. Save writes to the file the
+// opens in a new window, so Open never loses work. An open shows "Opening <name>…"
+// in the status line at once and reads and decodes the file off the main thread;
+// the document lands on the main actor (files-history P4). Save writes to the file the
 // window opened or last saved (DesignWorkspace.documentURL), after finishing any
 // text being typed. New File clears that URL, so Save then asks for a name; Undo
 // and Redo of New File swap it back with the document they restore, so Save
@@ -85,6 +87,8 @@ struct DesignWindow: View, BodyCounted {
     @State private var exportRequest = DesignExportRequest()
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
+    /// When the last file open began (uptime); DesignEditor marks it as `open-command` once the file shows.
+    @State private var openBegan: Double?
     @Environment(\.openWindow) private var openWindow
     /// Cut, Copy and Paste through the suite's coder; the PNG is drawn here, on the main actor.
     private let pasteboard = DesignPasteboardAdapter(png: { raster in
@@ -107,6 +111,9 @@ struct DesignWindow: View, BodyCounted {
     /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
     // view-static: main-actor
     static var openExport: (@MainActor () -> Void)?
+    /// Opens a file in the last started window as Finder or Recents does; RenderBudgetDesignTests times it.
+    // view-static: main-actor
+    static var openFile: (@MainActor (URL) -> Void)?
     /// The last started window's intents; RenderBudgetDesignAnimateTests plays through it.
     // view-static: main-actor
     static var lastPerform: DesignPerform?
@@ -130,7 +137,7 @@ struct DesignWindow: View, BodyCounted {
         let _ = bodyTally.ran(Self.self)
         #endif
         DesignEditor(
-            model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom,
+            model: model, documentName: model.documentURL?.lastPathComponent, openBegan: openBegan, note: note, zoom: zoom,
             onViewport: viewportChanged, onZoom: userZoom, perform: perform
         )
         .focusedSceneValue(\.designMenu, DesignMenu(model: model, perform: perform))
@@ -427,6 +434,7 @@ struct DesignWindow: View, BodyCounted {
         started = true
         #if DEBUG
         Self.openExport = { perform(.export) }
+        Self.openFile = { open($0) }
         Self.liveAdopt = (read: { model }, write: { perform(.adoptLive($0)) })
         #endif
         if seeded {
@@ -487,14 +495,30 @@ struct DesignWindow: View, BodyCounted {
         }
     }
 
-    /// Replaces the window's document with the file's. A file that can't open leaves it as it was.
+    /// Replaces the window's document with the file's. The status line says "Opening <name>…" at once
+    /// while the file is read and decoded off the main thread (files-history P4, QB-L9); the document
+    /// lands on the main actor. A file that can't open leaves the window as it was.
     private func open(_ url: URL) {
-        do {
-            try model.open(Data(contentsOf: url), at: url)
-            fitting = true
-            fit()
-        } catch {
-            problem = .opening(url.lastPathComponent, Self.reason(error))
+        let name = url.lastPathComponent
+        let filing = model.services.filing
+        openBegan = ProcessInfo.processInfo.systemUptime
+        note = "Opening \(name)…"
+        Task {
+            let read = await Task.detached(priority: .userInitiated) {
+                Result { () throws -> DesignDocument in try filing.decode(Data(contentsOf: url)) }
+            }.value
+            switch read {
+            case .success(let document):
+                model.open(document, at: url)
+                fitting = true
+                fit()
+                #if DEBUG
+                Self.lastWorkspace = model
+                #endif
+            case .failure(let error):
+                note = nil
+                problem = .opening(name, Self.reason(error))
+            }
         }
     }
 

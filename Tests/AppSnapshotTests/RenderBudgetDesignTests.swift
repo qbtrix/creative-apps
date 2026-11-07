@@ -11,7 +11,9 @@
 // Option held through `DesignModifiers.held` since a test's events can't hold it, must end as one copy. Before each drag the window settles until its body count stops
 // moving (BodyCountSuites' `settle(untilStable:)`), so the bodies counted are
 // the drag's alone, not the open's late layouts on a slow runner (#1974). Nested in BodyCountSuites, as every suite that reads a body
-// counter is. macOS only.
+// counter is. `openCrowdLands` and `timing` also open crowd.design into an
+// empty window (files-history P4): the "Opening <name>…" note shows before the
+// file lands, and no step or layout of the open blocks over 3 refreshes. macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -47,6 +49,58 @@ extension BodyCountSuites {
             // #6281: the press and the copy's first sample each fit two 60 Hz frames; the press on the
             // selection is quiet, so the window doesn't run until mouse-up.
             #expect(option.opening <= 33, "\(option) (budget 33 ms for the press and the first sample, #6281)")
+            // files-history P4: opening crowd.design says "Opening…" in the command's own step (QB-L9, 100 ms)
+            // and no step of the open, its landing included, blocks the main thread over 3 refreshes.
+            let open = try await Self.openCrowd()
+            #expect(open.landed, "crowd.design never landed: \(open.step)")
+            #expect(open.step.opening <= 100, "\(open.step) (QB-L9: \"Opening…\" shows within 100 ms of the command)")
+            // Release at load 5: slowest 31.7-45.6 ms, landing layout 26-38 ms (sync open was 207-338 ms).
+            // Budget 3 refreshes, 50 ms; QB-L12's 2 refreshes, 33 ms, is the target (#6306).
+            #expect(open.step.slowest <= 50, "\(open.step) (budget 50 ms, QB-L12 target 33 ms, #6306)")
+            #expect(open.landing <= 50, "the landing's longest layout took \(open.landing) ms (budget 50 ms, target 33 ms, #6306)")
+        }
+
+        /// files-history P4 in the real window (QD-S11, QB-L9): an empty window opens `crowd.design` (2,000 layers)
+        /// as Finder or Recents hands it over. Before it lands the status line shows "Opening <name>…";
+        /// the file is read and decoded off the main thread and lands a few ticks later with all its pages.
+        @Test(.timeLimit(.minutes(2))) func openCrowdLands() async throws {
+            #if DEBUG
+            let open = try await Self.openCrowd()
+            #expect(open.progress?.hasPrefix("Opening crowd-") == true, "the open showed \(open.progress ?? "no note")")
+            #expect(open.landed, "crowd.design never landed in the window: \(open.step)")
+            #endif
+        }
+
+        /// Opens crowd.design in an empty window, one tick per 1/120 s until it lands (at most 2 s): the steps,
+        /// the first status note shown before the landing, whether the file landed, and the longest layout pass.
+        static func openCrowd() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double) {
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("crowd-\(UUID()).design")
+            try DesignFixtures.crowd.fileData().write(to: file)
+            defer { try? FileManager.default.removeItem(at: file) }
+            DesignWindow.openFile = nil
+            DesignWindow.lastWorkspace = nil
+            let w = RenderBudgetWindow(DesignWindow())
+            defer { w.close() }
+            try await w.settle(500)
+            let open = try #require(DesignWindow.openFile, "the window never started")
+            // lastWorkspace is a debug hook; the release timing builds with -DDEBUG to read it too.
+            let landed = { DesignWindow.lastWorkspace?.documentURL == file }
+            var progress: String?
+            w.host.longestLayout = 0
+            let step = try await w.measure("design open crowd.design (2,000 layers)", bodies: { nil }) {
+                try await w.ticks(1) { _ in open(file) }
+                var waits = 0
+                while !landed(), waits < 240 {
+                    if progress == nil { progress = w.value(DesignControlID.statusNote) }  // a Text's words are its value
+                    waits += 1
+                    try await w.ticks(1) { _ in }
+                }
+                // The landing's own layout runs on the tick after the document changes.
+                try await w.ticks(2) { _ in }
+            }
+            print("design open crowd.design: longest layout \(w.host.longestLayout) ms")
+            return (step, progress, landed() && DesignWindow.lastWorkspace?.pages == DesignFixtures.crowd.pages,
+                    w.host.longestLayout)
         }
 
         /// A 120-sample Option-drag of Rectangle 1 on `crowd` in the real window: the press copies it, the

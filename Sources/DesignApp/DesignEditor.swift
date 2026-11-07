@@ -21,8 +21,9 @@
 // `suite.controls` (.suiteControl), which DesignWindow's `.suiteProbes()`
 // publishes. The note keeps to one line, cut in the middle, and shows its
 // whole text as help. The window's edited dot follows `model.isDirty`
-// (`.suiteDocumentEdited`), and a file landing in the window marks
-// `progress-shown` on `design.open` in `suite.perf` (P4). In debug builds `bodyRuns` counts its body's runs, so
+// (`.suiteDocumentEdited`). An open marks `open-command` (when it began) and `progress-shown` (its
+// "Opening…" note showing) on `design.open` in `suite.perf`, and `open-landed` once the file shows
+// (P4, QB-L9). In debug builds `bodyRuns` counts its body's runs, so
 // DesignWindowDragTests can prove a canvas drag leaves the editor still.
 import DesignModel
 import SuiteUI
@@ -31,6 +32,8 @@ import SwiftUI
 struct DesignEditor: View, BodyCounted {
     let model: DesignWorkspace
     var documentName: String?
+    /// When the window's last open began (uptime), marked as `open-command` beside `progress-shown`.
+    var openBegan: Double?
     var note: String?
     var zoom = 1.0
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
@@ -39,7 +42,7 @@ struct DesignEditor: View, BodyCounted {
     /// The window's History panel, which the History button toggles.
     @Environment(\.designHistory) private var history
     @Environment(\.suiteReduceMotion) private var reduceMotion
-    /// The window's frame probe: an opened file marks `progress-shown` on `design.open` (files-history P4, QB-L9).
+    /// The window's frame probe: an open marks its progress and landing on `design.open` (files-history P4, QB-L9).
     @Environment(\.suiteProbeRecorder) private var recorder
 
     /// The commands beside the title, then the trailing ones, in toolbar order.
@@ -103,9 +106,15 @@ struct DesignEditor: View, BodyCounted {
         }
         // The close button's edited dot, from the same save state the subtitle reads (files-history FH-4).
         .suiteDocumentEdited(model.isDirty)
+        // An open's "Opening <name>…" shows in this update: the command's start and its progress (P4, QB-L9).
+        .onChange(of: openBegan) {
+            guard let openBegan else { return }
+            recorder?.mark("open-command", series: "design.open", at: openBegan)
+            recorder?.mark("progress-shown", series: "design.open")
+        }
         // ponytail: a Save As to a new name marks again; P4 reads the first mark only.
         .onChange(of: documentName, initial: true) {
-            if documentName != nil { recorder?.mark("progress-shown", series: "design.open") }
+            if documentName != nil { recorder?.mark("open-landed", series: "design.open") }
         }
     }
 

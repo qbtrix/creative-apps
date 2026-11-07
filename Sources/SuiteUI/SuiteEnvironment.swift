@@ -237,6 +237,12 @@ private struct SuiteProbesModifier: ViewModifier {
         probe.mark(name, series: series, at: ProcessInfo.processInfo.systemUptime)
     }
 
+    /// An in-app moment on `series` that happened at `time`, on the same uptime clock (a command's start,
+    /// marked once its result is shown).
+    public func mark(_ name: String, series: String, at time: Double) {
+        probe.mark(name, series: series, at: time)
+    }
+
     private func mark(_ mark: ProbeMark) {
         probe.mark(mark.name, series: mark.series, at: mark.time)
     }

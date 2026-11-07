@@ -1,7 +1,8 @@
 // DesignFile.swift: Design's file errors, their alert (DesignFileProblem: a title
 // and a message) and the workspace's Open and Save.
 // `fileData()` writes the open document and `open(_:at:)` replaces it with a
-// file's pages, both through `services.filing` (on the live services that is
+// file's pages (from its bytes, or from a document the window decoded off the
+// main thread), both through `services.filing` (on the live services that is
 // LiveFiling, the codec: sorted-key JSON, version 1, and every refusal with its
 // reason). `open` remembers where the file came from (`documentURL`, which
 // `didSave(to:)` moves after a save and records on the kernel's session in
@@ -83,7 +84,12 @@ extension DesignWorkspace {
     /// page and clears the undo history; `url` becomes `documentURL`. A refused file throws and
     /// changes nothing.
     public mutating func open(_ data: Data, at url: URL? = nil) throws(DesignFileError) {
-        let document = try services.filing.decode(data)
+        open(try services.filing.decode(data), at: url)
+    }
+
+    /// Replaces the document with `document`, already read by `services.filing` (the window reads a
+    /// file off the main thread and lands it here), as `open(_:at:)` does.
+    public mutating func open(_ document: DesignDocument, at url: URL? = nil) {
         load(document.pages)
         time = document.time
         documentURL = url

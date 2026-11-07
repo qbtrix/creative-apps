@@ -76,8 +76,10 @@ In `UITests/DesignJourneyTests+Files.swift`, class
    fake.)
 4. **P4** `testOpenLargeFile` (`+PerfFiles`, class
    `DesignPerfFilesJourneyTests`) on `crowd` with `-DesignSaveTo <tmp>`,
-   then `-DesignOpenFile <tmp>`: ⌘S; relaunch on the saved file; progress
-   within QB-L9, no stall over QB-L12; report-only.
+   then `-DesignOpenFile <tmp>`: ⌘S; relaunch on the saved file. The
+   window's "Opening <name>…" note (`progress-shown`) within QB-L9 of its
+   `open-command` mark, gated at the 200 ms CI placeholder; no stall over
+   QB-L12, report-only (RenderBudgetDesignTests' `timing` times it).
 
 J3 (`testDrawShapesAddTextAndSave`, existing) keeps passing: its save and
 reopen now run through `LiveFiling`.

@@ -47,5 +47,19 @@
     "find": "        time = document.time\n",
     "replace": "",
     "tests": "LiveFilingVersionTests"
+  },
+  {
+    "label": "Open from bytes forgets the file's URL",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "open(try services.filing.decode(data), at: url)",
+    "replace": "open(try services.filing.decode(data), at: nil)",
+    "tests": "DesignModelTests.aDecodedDocument"
+  },
+  {
+    "label": "a decoded document lands without its pages",
+    "file": "Sources/DesignModel/DesignFile.swift",
+    "find": "        load(document.pages)\n",
+    "replace": "",
+    "tests": "DesignModelTests.aDecodedDocument"
   }
 ]
