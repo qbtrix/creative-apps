@@ -80,3 +80,5 @@ look.list
 look.apply
 look.save
 look.delete
+photo.remove-from-catalog
+photo.relink

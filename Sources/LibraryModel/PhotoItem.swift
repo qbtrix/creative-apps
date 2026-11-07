@@ -26,8 +26,9 @@ public struct PhotoItem: Identifiable, Sendable, Hashable {
     public internal(set) var rating: Int  // stars, 0...5
     public internal(set) var flag: PhotoFlag
     public internal(set) var label: PhotoLabel?
-    /// The file's absolute path; nil for a generated sample. Equal to `id` for an imported photo.
-    public let path: String?
+    /// The file's absolute path; nil for a generated sample. Equal to `id` for an imported photo until Relink
+    /// points it at the file's new place (catalog-files LC-6).
+    public internal(set) var path: String?
     /// After the Exif orientation; samples are 4032 × 3024.
     public let pixelSize: PixelSize
     /// Edit instructions; neutral until the person develops the photo.

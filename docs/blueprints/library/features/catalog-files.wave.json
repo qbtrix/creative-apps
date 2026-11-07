@@ -2,7 +2,7 @@
   "title": "Library manages its files: copy on import (into a dated folder), remove from the catalog keeping the files, and relink missing photos by locating their folder",
   "wave": 7,
   "order": 10,
-  "status": "planned",
+  "status": "built",
   "feature_issue": "file when ready",
   "beta": true,
   "covers": "beta gaps 2026-10-21 Library must-haves (audit rows 5, 7, 8); feature map A7 (the copy half of card ingest); real jobs RJ-L50, RJ-L51, RJ-L52 (new)",

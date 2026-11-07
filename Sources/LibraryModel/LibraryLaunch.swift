@@ -32,6 +32,9 @@ public struct LibraryLaunch: Sendable, Equatable {
     public let importFolder: String?
     /// `-LibraryImportOnLaunch`: import `importFolder` right after launch.
     public let importOnLaunch: Bool
+    /// `-LibraryImportCopyTo <path>` and `-LibraryImportByDate`: the import's copy choice, no panel.
+    /// The dated switch counts only with a copy folder.
+    public let importCopy: ImportCopyOptions
     /// `-LibraryExportTo <path>`: the export sheet's folder, no panel.
     public let exportTo: String?
     /// `-LibraryFakeMode ok|fail|slow`; anything else is `.ok`.
@@ -51,11 +54,12 @@ public struct LibraryLaunch: Sendable, Equatable {
 
     public init(arguments: [String]) {
         let switches: Set<String> = [
-            "-LibraryImportOnLaunch", "-LibraryPerfProbe", "-LibraryTestValues", "-LibraryReduceMotion",
+            "-LibraryImportOnLaunch", "-LibraryImportByDate", "-LibraryPerfProbe", "-LibraryTestValues", "-LibraryReduceMotion",
         ]
         let valued: Set<String> = [
             "-LibraryFixture", "-LibraryCatalogDir", "-LibraryImportFolder", "-LibraryExportTo",
             "-LibraryFakeMode", "-LibraryWindowSize", "-LibraryLargeFixture", "-LibraryFixtureBackups",
+            "-LibraryImportCopyTo",
         ]
         var values: [String: String] = [:]
         var present: Set<String> = []
@@ -74,6 +78,8 @@ public struct LibraryLaunch: Sendable, Equatable {
         catalogDir = values["-LibraryCatalogDir"]
         importFolder = values["-LibraryImportFolder"]
         importOnLaunch = present.contains("-LibraryImportOnLaunch")
+        let copyTo = values["-LibraryImportCopyTo"]
+        importCopy = ImportCopyOptions(copyTo: copyTo, byDate: copyTo != nil && present.contains("-LibraryImportByDate"))
         exportTo = values["-LibraryExportTo"]
         fakeMode = values["-LibraryFakeMode"].flatMap(FakeMode.init(rawValue:)) ?? .ok
         perfProbe = present.contains("-LibraryPerfProbe")

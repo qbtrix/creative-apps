@@ -1,18 +1,33 @@
-// LibraryImportOptions.swift (catalog-files LC-3): the import panel's copy choice, its own state until the
-// import takes it (LC-7). While `help` says why copying can't run, every control is disabled with it.
+// LibraryImportOptions.swift (catalog-files LC-3, LC-7): the import panel's copy choice. Its `ImportCopyChoice`
+// is the panel's own state, which the import takes once the panel closes; picking Copy starts at Pictures, and
+// a second panel then picks the folder (LibraryWindow+Import.swift).
+import Foundation
 import LibraryModel
 import SuiteUI
 import SwiftUI
 
+/// The copy choice the open panel's accessory edits; not the catalog's state.
+@Observable final class ImportCopyChoice {
+    var options: ImportCopyOptions
+    init(_ options: ImportCopyOptions = ImportCopyOptions()) { self.options = options }
+
+    /// The user's Pictures folder, where a copy starts.
+    static var pictures: String {
+        FileManager.default.urls(for: .picturesDirectory, in: .userDomainMask).first?.path(percentEncoded: false)
+            ?? NSHomeDirectory()
+    }
+}
+
 struct LibraryImportOptions: View {
-    /// Why the copy choice can't change the import yet; nil once copying lands.
-    var help: String? = LibraryCatalog.catalogFilesHelp
-    @State private var options = ImportCopyOptions()
+    let choice: ImportCopyChoice
 
     var body: some View {
-        let copying = Binding<Bool>(get: { options.copyTo != nil },
-                                    set: { (copy: Bool) -> Void in options.copyTo = copy ? "Photos" : nil })
-        let dated = Binding<Bool>(get: { options.byDate }, set: { (on: Bool) -> Void in options.byDate = on })
+        let choice = self.choice
+        let copying = Binding<Bool>(get: { choice.options.copyTo != nil }, set: { (copy: Bool) -> Void in
+            choice.options.copyTo = copy ? ImportCopyChoice.pictures : nil
+            if !copy { choice.options.byDate = false }
+        })
+        let dated = Binding<Bool>(get: { choice.options.byDate }, set: { (on: Bool) -> Void in choice.options.byDate = on })
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             Picker("Import", selection: copying) {
                 Text("Add in place").tag(false)
@@ -22,12 +37,11 @@ struct LibraryImportOptions: View {
             .accessibilityIdentifier("library.import.copy")
             Toggle("Into dated folders", isOn: dated)
                 .toggleStyle(.checkbox)
-                .disabled(options.copyTo == nil)
+                .disabled(choice.options.copyTo == nil)
                 .accessibilityIdentifier("library.import.dated")
-            Text(options.summary).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
+            Text(choice.options.summary).font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText)
         }
-        .disabled(help != nil)
-        .help(help ?? "Add the photos where they are, or copy them into a folder first.")
+        .help("Add the photos where they are, or copy them into a folder first.")
         .padding(SuiteSpacing.m)
     }
 }

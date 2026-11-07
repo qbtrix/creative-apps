@@ -1,8 +1,7 @@
 {
   "version": 1,
   "app": "library",
-  "why": "RJ-L51, pending LC-7 (catalog-files): rate three photos 3, remove them from the catalog, then undo; the files stay on disk and the undo brings the photos back with their ratings. The trap is a remove that deletes the files, or an undo that loses the ratings. Until LC-7 the input is the four-photo shoot; LC-7 swaps in the 10-photo folder, checks the files are still there, and turns the job on.",
-  "pending": "LC-7",
+  "why": "RJ-L51 (catalog-files LC-7): rate three photos 3, remove them from the catalog, then undo; the undo brings the photos back with their ratings. The trap is a remove that deletes the files, or an undo that loses the ratings. LibraryCatalogFilesJobTests runs these steps on a 10-photo folder on disk and checks every file is still there after the remove.",
   "inputs": ["input/*.library"],
   "steps": [
     {"id": "edit.select", "params": {"ids": ["beach", "dock", "fog"]}},
@@ -23,5 +22,5 @@
       ]
     }}
   },
-  "platforms": []
+  "platforms": ["linux", "macos"]
 }

@@ -36,13 +36,19 @@ import Testing
         #expect(library.removeCount == 4)
     }
 
-    /// On an empty catalog both controls are off and say why, whether the stubs or LC-6's bodies answer.
-    @Test func fileCommandsAreOffWithTheReason() {
-        let library = LibraryCatalog()
-        for id in ["photo.remove-from-catalog", "photo.relink"] {
+    /// LC-7: each control takes its own command's reason, and nothing is off for file management any more.
+    @Test func fileCommandsAreOffWithTheirOwnReason() {
+        var library = LibraryCatalog()
+        for (id, why) in [("photo.remove-from-catalog", LibraryCatalog.removeHelp), ("photo.relink", LibraryCatalog.relinkHelp)] {
             #expect(LibraryCatalog.fileSpec(id)?.id == id)
-            #expect(LibraryCatalog.fileCommands.availability(id, on: library).why?.isEmpty == false)
+            #expect(LibraryCatalog.fileCommands.availability(id, on: library).why == why)
         }
+        library.load(LibraryFixtures.photos(named: "large-missing"))
+        library.select(Set(library.order.prefix(3)))
+        for id in ["photo.remove-from-catalog", "photo.relink"] {
+            #expect(LibraryCatalog.fileCommands.availability(id, on: library).why == nil)
+        }
+        #expect(library.importKnownIDs == Set(library.items.map(\.id)) && library.importKnownIDs.count == 10_000)
     }
 
     @Test func importCopySummarySaysWhereThePhotosGo() {
