@@ -5,9 +5,9 @@
 // Scene 1; selecting Scene 1's row selects it and brings back its layers;
 // Ball's eye and lock hide and lock it; New Layer adds "Layer 1", renamed
 // "Sky". Each edit is one ⌘Z: the journey undoes it, sees the state before,
-// and redoes it with ⇧⌘Z. The dimmed rows wait on SuiteUI #146 (the Model's
-// layerRowIsDimmed is proven by FlareSidebarHelpTests), and removing a scene
-// waits on the row menus (LF-2). The sidebar is read by its row titles top
+// and redoes it with ⇧⌘Z. Ball hidden and locked reads dimmed in step 5's shot
+// (FlareLayersSnapshots pins the look); the row menus are J-LF2,
+// FlareSceneMenuJourneys. The sidebar is read by its row titles top
 // first, section headers left out. One shot per step, `flare-scenes-<step>`.
 import XCTest
 
