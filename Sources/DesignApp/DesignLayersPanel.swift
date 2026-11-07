@@ -56,25 +56,19 @@ struct DesignLayersPanel: View {
     let model: DesignWorkspace
     let perform: DesignPerform
     /// Seeds the insertion line, so a snapshot can show a drag in flight; the app passes none.
-    let seededLine: DesignLayerDropLine?
+    var seededLine: DesignLayerDropLine? = nil
     /// The layer row being renamed, its draft and the last refusal; the panel's own state.
     @State private var rename = DesignRenameState()
     /// Where a dragged layer would land; nil with no drag, or over a row that refuses it.
     @State private var dropLine: DesignLayerDropLine?
     /// The dragged layer and the rows' frames; a box SwiftUI doesn't watch.
     @State private var rowFrames = DesignLayerRowFrames()
-    /// How many top-level layers the tree has caught up to; it lags a landing file by a few frames.
-    @State private var shownLayers: Int
+    /// How many top-level layers the tree has caught up to, set when it appears; it lags a landing file
+    /// by a few frames. Nil before it appears: a panel drawn once, as a snapshot is, lists every layer.
+    @State private var shownLayers: Int?
 
     /// Top-level layers the tree adds per frame when a file lands with more than this many new ones.
     static let layersPerFrame = 4
-
-    init(model: DesignWorkspace, perform: @escaping DesignPerform, seededLine: DesignLayerDropLine? = nil) {
-        self.model = model
-        self.perform = perform
-        self.seededLine = seededLine
-        _shownLayers = State(initialValue: model.selectedPage?.nodes.count ?? 0)
-    }
 
     /// The page's top-level layer count.
     private var layerCount: Int { model.selectedPage?.nodes.count ?? 0 }
@@ -97,7 +91,7 @@ struct DesignLayersPanel: View {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
                     DesignLayerTree(
                         nodes: nodes, model: model, perform: perform, drag: layerDrag,
-                        limit: Self.shown(of: nodes.count, caughtUp: shownLayers))
+                        limit: Self.shown(of: nodes.count, caughtUp: shownLayers ?? nodes.count))
                 } else {
                     let notes = Self.emptyNotes(isOpen: model.isOpen)
                     ForEach(notes.indices, id: \.self) { line in
@@ -121,14 +115,15 @@ struct DesignLayersPanel: View {
         .font(SuiteFont.inspectorLabel)
         .accessibilityIdentifier("design.layers")
         .designPasteboardCommands(model, perform)
+        .onAppear { if shownLayers == nil { shownLayers = layerCount } }
         .task(id: layerCount) {
             let count = layerCount
-            while shownLayers < count {
+            while let shown = shownLayers, shown < count {
                 try? await Task.sleep(for: .milliseconds(8))
                 guard !Task.isCancelled else { return }
-                shownLayers = min(count, shownLayers + Self.layersPerFrame)
+                shownLayers = min(count, shown + Self.layersPerFrame)
             }
-            if shownLayers > count { shownLayers = count }
+            if let shown = shownLayers, shown > count { shownLayers = count }
         }
     }
 
