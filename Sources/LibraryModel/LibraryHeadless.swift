@@ -1,11 +1,12 @@
 // LibraryHeadless.swift (adopt-command-catalog AC-l3): Library's document with no window, for the afterglow CLI, MCP
 // and the real jobs. A `.library` file is a stored zip (core's ZipStore): `catalog.json` in the catalog file's format
-// (LiveCatalogCoding) and the photos under `images/`. Opening it imports every image the catalog doesn't list yet.
-// Commands are `LibraryCatalog.catalog`'s, lifted; saving writes the zip back; export writes the catalog file
-// ("json") or the picks as PNGs at a long side through CoreRaster's codec, which refuses until core's PNG lands
-// (qbtrix/creative-core#562); any other export failure is a plain sentence naming the photo. Options failing the
-// format's `exportSchemas` are malformed params, so the CLI exits 65 with the issues and writes nothing. The catalog (about 1.7 KB inline) lives in a copy-on-write box, so copying the document
-// is a pointer copy and fits a small thread stack (#5032). Linux-safe: no UI imports.
+// (LiveCatalogCoding) and the photos under `images/`, PNG or JPEG (a JPEG upright by its EXIF orientation). Opening
+// it imports every image the catalog doesn't list yet. Commands are `LibraryCatalog.catalog`'s, lifted; saving writes
+// the zip back; export writes the catalog file ("json") or the picks as sRGB-tagged PNGs at a long side through
+// CoreRaster's codecs, at Deflate's fastest level and a few picks at once across the cores; any export failure is a
+// plain sentence naming the photo. Options failing the format's `exportSchemas` are malformed params, so the CLI
+// exits 65 with the issues and writes nothing. The catalog (about 1.7 KB inline) lives in a copy-on-write box, so
+// copying the document is a pointer copy and fits a small thread stack (#5032). Linux-safe: no UI imports.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -91,7 +92,7 @@ public struct LibraryHeadless: HeadlessDocument {
     /// An empty library.
     public static func new(_ options: JSONValue) throws -> LibraryHeadless { LibraryHeadless(photos: [], images: [:], stem: "Library") }
 
-    /// Adds the PNG `data` as `images/<name>`, a new photo whose id and name are the name without its extension.
+    /// Adds the PNG or JPEG `data` as `images/<name>`, a new photo whose id and name are the name without its extension.
     public mutating func importImage(_ data: Data, name: String) throws {
         let item = try Self.photo(data, path: Self.imageFolder + name)
         guard images[Self.imageFolder + name] == nil, !library.items.contains(where: { $0.id == item.id }) else {
@@ -125,19 +126,36 @@ public struct LibraryHeadless: HeadlessDocument {
         let plan = exportPlan(longSide: try options.decode(ExportSize.self).longSide)
         guard !plan.items.isEmpty else { throw CatalogError.failed(id: "export.png", message: "No photo is a pick; pick one to export it.") }
         let photos = Dictionary(library.items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        return try plan.items.map { item in
+        let jobs = try plan.items.map { item in
             guard let photo = photos[item.photoID], let data = photo.path.flatMap({ images[$0] }) else {
                 throw CatalogError.failed(id: "export.png", message: "\(item.photoID) has no image in the library.")
             }
+            return (item, photo, data)
+        }
+        return try Self.inBatches(jobs.count) { i in
+            let (item, photo, data) = jobs[i]
             do {
-                let buffer = try LiveExporter.developed(PNG.read(data), photo: photo, longSide: item.size.longSide,
+                let buffer = try LiveExporter.developed(Self.pixels(data), photo: photo, longSide: item.size.longSide,
                                                         develop: LiveDevelop())
-                return ExportedFile(suggestedName: item.fileName, format: format, data: try PNG.write(buffer))
+                let png = try PNG.write(buffer, level: Self.pngLevel)
+                return ExportedFile(suggestedName: item.fileName, format: format, data: Self.taggedSRGB(png))
             } catch CodecError.unsupported {
                 throw CatalogError.notBuilt(id: "export.png", feature: Self.pngFeature)
             } catch {
                 throw CatalogError.failed(id: "export.png", message: "Couldn't export \(item.photoID): \(Self.plainWords(error))")
             }
+        }
+    }
+
+    /// Deflate's fastest level: on a 24 MP photo level 6 took 11 s to write and level 1 2.7 s, for a file 13 % larger.
+    static let pngLevel = 1
+    /// Picks exported at once: each 24 MP pick holds about 200 MB while it runs, so a few at a time.
+    static let batch = 4
+
+    /// `work(0) ... work(count - 1)`, `batch` at a time across the cores, in index order.
+    static func inBatches<T: Sendable>(_ count: Int, _ work: @Sendable (Int) throws -> T) throws -> [T] {
+        try stride(from: 0, to: count, by: batch).flatMap { start in
+            try LiveDevelop.inParallel(min(batch, count - start)) { try work(start + $0) }
         }
     }
 
@@ -173,9 +191,11 @@ public struct LibraryHeadless: HeadlessDocument {
         }
     }
 
-    /// A new photo for the PNG at `path`: its size from the header, an id and name from the file name.
+    /// A new photo for the PNG or JPEG at `path`: its upright size from the header, an id and name from the file name.
     static func photo(_ data: Data, path: String) throws -> PhotoItem {
-        guard let size = pngSize(data) else { throw CatalogError.failed(id: "import", message: "\(path) isn't a PNG.") }
+        guard let size = imageSize(data) else {
+            throw CatalogError.failed(id: "import", message: "\(path) isn't a PNG or JPEG image.")
+        }
         let name = fileStem(String(path.dropFirst(imageFolder.count)))
         return PhotoItem(id: name, name: name, captureDate: Date(timeIntervalSince1970: 0),
                          color: Color3(0.5, 0.5, 0.5), path: path, pixelSize: size)
@@ -188,6 +208,35 @@ public struct LibraryHeadless: HeadlessDocument {
         let width = b[16..<20].reduce(0) { $0 << 8 | Int($1) }, height = b[20..<24].reduce(0) { $0 << 8 | Int($1) }
         return width > 0 && height > 0 ? PixelSize(width: width, height: height) : nil
     }
+
+    /// A PNG's size, or a JPEG's as its EXIF orientation turns it; nil for anything else.
+    static func imageSize(_ data: Data) -> PixelSize? {
+        if let size = pngSize(data) { return size }
+        guard isJPEG(data), let info = try? JPEG.info(data) else { return nil }
+        let s = (Orientation(rawValue: info.orientation) ?? .up).size(info.width, info.height)
+        return PixelSize(width: s.width, height: s.height)
+    }
+
+    /// An image's upright pixels: a PNG's, or a JPEG's turned as its EXIF orientation says.
+    static func pixels(_ data: Data) throws -> PixelBuffer {
+        guard isJPEG(data) else { return try PNG.read(data) }
+        let facing = Orientation(rawValue: try JPEG.info(data).orientation) ?? .up
+        return try JPEG.read(data).oriented(facing)
+    }
+
+    static func isJPEG(_ data: Data) -> Bool { data.prefix(3).elementsEqual([0xFF, 0xD8, 0xFF]) }
+
+    /// `png` (core's writer, which names no colour space) with an sRGB chunk, rendering intent perceptual, right after
+    /// its IHDR (W3C PNG 11.3.3.5), so readers take the pixels as sRGB, as the window's ImageIO export does.
+    static func taggedSRGB(_ png: Data) -> Data {
+        guard png.count >= srgbAt else { return png }
+        var tagged = png
+        tagged.insert(contentsOf: [0, 0, 0, 1, 0x73, 0x52, 0x47, 0x42, 0, 0xAE, 0xCE, 0x1C, 0xE9], at: png.startIndex + srgbAt)
+        return tagged
+    }
+
+    /// Where IHDR ends: the 8-byte signature, then its length, type, 13 bytes and CRC.
+    static let srgbAt = 33
 
     static func fileStem(_ name: String) -> String {
         guard let dot = name.lastIndex(of: "."), dot != name.startIndex else { return name }

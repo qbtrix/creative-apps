@@ -1,6 +1,8 @@
 // PresetGrid.swift: a grid of preset buttons where one may be on (two equal
 // columns by default, 4 pt apart), drawn as Flare's easing presets
-// (SuiteChipStyle). An option's `identifier` lands on its own button.
+// (SuiteChipStyle). An option's `identifier` lands on its own button; an
+// option with `unavailableHelp` is a disabled button with that tooltip, which
+// neither a click, an arrow nor Space can choose.
 // `selected` may be nil (no preset matches, as after a handle drag). Arrow
 // keys move focus within the grid through a PresetNavigating rule (UC4; the
 // live SuitePresetNavigating stops at the edges, a gallery page may pass
@@ -66,13 +68,14 @@ public struct PresetGrid<ID: Hashable & Sendable>: View {
     ) -> ID? {
         guard let current = options.firstIndex(where: { $0.id == focused }),
             let next = navigation.neighbor(of: current, arrow, count: options.count, columns: columns),
-            options.indices.contains(next)
+            options.indices.contains(next), options[next].unavailableHelp == nil
         else { return nil }
         return options[next].id
     }
 
     /// Presses `id`: it takes focus, then the grid reports the choice.
     private func press(_ id: ID) {
+        guard options.first(where: { $0.id == id })?.unavailableHelp == nil else { return }
         focused = id
         ChipProbe.press(probe) { onSelect(id) }
     }
@@ -91,6 +94,8 @@ public struct PresetGrid<ID: Hashable & Sendable>: View {
                     .focused($focused, equals: option.id)
                     .accessibilityAddTraits(option.id == selected ? .isSelected : [])
                     .accessibilityIdentifier(option.identifier ?? "")
+                    .disabled(option.unavailableHelp != nil)
+                    .help(option.unavailableHelp ?? "")
             }
         }
         .onKeyPress(keys: [.leftArrow, .rightArrow, .upArrow, .downArrow]) { key in

@@ -1,9 +1,10 @@
 // LibraryJourneyTests+PerfExport.swift: P8, export throughput (packet
 // docs/blueprints/library/features/export.md, Budgets; slice EX-e), on J7B's
 // steps. Live (L): ten landscape 6000 × 4000 `shoot` JPEGs at 2048, three runs;
-// each run's time and `progress` mark (S-L8, #782) go to
-// .build/ui-screens/perf-testExportThroughput.json. Report-only: it asserts
-// the files, never the gates. Skips "waits on EX-13" (then "waits on #782").
+// each run's time and `progress` mark (the export sheet's running row marks it
+// in suite.perf) go to .build/ui-screens/perf-testExportThroughput.json.
+// Report-only: it asserts the files, never the gates; the model half is gated
+// in LibraryDevelopBudgetTests+Export.swift.
 import Foundation
 import XCTest
 
@@ -13,7 +14,6 @@ extension LibraryExportBatchJourneyTests {
 
     /// P8: three exports of ten 6000 × 4000 JPEGs at 2048; report each run's mark and time.
     @MainActor func testExportThroughput() throws {
-        throw XCTSkip("waits on #782")
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
         let out = try LibraryFiles.freshPhotoFolder()
@@ -37,7 +37,7 @@ extension LibraryExportBatchJourneyTests {
             XCTAssertEqual(Self.text(summary), "Exported 10 photos.", "run \(run): the summary")
             let marks = library.perf()?.marks.filter { $0.name.contains("progress") } ?? []
             let mark = marks.last.map { String(format: "progress-ms=%.0f", ($0.time - started) * 1000) }
-                ?? "no progress mark in suite.perf (S-L8, #782)"
+                ?? "no progress mark in suite.perf"
             numbers["P8 run \(run)"] = String(format: "whole-ms=%.0f ", wholeMs) + mark
                 + " report-only (gates: progress 100 ms, whole 15000 ms)"
             closeSheet(library)
