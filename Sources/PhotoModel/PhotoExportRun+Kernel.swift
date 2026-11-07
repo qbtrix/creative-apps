@@ -4,7 +4,8 @@
 // open over a running write, no start but from the sheet); this file says
 // which move each window action is. Export… opens the sheet on the last
 // choices, a pick in the sheet (export-pack PX-2) changes the open sheet's
-// choice, Export starts one write on it, and the write's outcome (the file's
+// choice, the sheet's note says the size it writes and what the format does
+// with transparency, Export starts one write on it, and the write's outcome (the file's
 // name, a cancelled save panel, an error) ends it.
 // Linux-safe.
 import SuiteKernel
@@ -34,6 +35,14 @@ extension PhotoWorkspace {
     public var exportChoice: ExportOptions? {
         if case .editing(let o) = exportRun { return o }
         return nil
+    }
+
+    /// The open sheet's note: the size it writes, then what the format does
+    /// with transparent pixels; nil with no sheet open.
+    public var exportNote: String? {
+        guard let choice = exportChoice, let canvas else { return nil }
+        let alpha = choice.format == .png ? "PNG keeps transparent pixels." : "JPEG has no transparency: transparent pixels export white."
+        return "Exports \(Self.sizeText(width: canvas.width, height: canvas.height)).\n\(alpha)"
     }
 
     /// A pick in the open sheet (a format chip, Quality): the sheet shows `o`,

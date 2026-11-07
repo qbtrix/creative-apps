@@ -9,7 +9,8 @@
 // PhotoExportSheetAdapter (export-pack PX-2) is SuiteUI's export sheet on the
 // workspace's run, its ids under `photo.export`: Format chips for the formats
 // the app writes today and Quality for JPEG, each pick the open run's choice
-// (`editExport`). Its Size row stays off until the app's write resizes (PX-4).
+// (`editExport`), and its note is the model's `exportNote` (the output size and
+// what the format does with transparency). Its Size row stays off until the app's write resizes (PX-4).
 import AppKit
 import PhotoModel
 import SuiteKernel
@@ -82,10 +83,7 @@ struct PhotoExportSheetAdapter: View {
             onExport: onExport,
             onClose: onClose
         ) {
-            let format = model.exportChoice?.format ?? .png
-            InspectorNote(
-                format == .png ? "PNG keeps transparent pixels." : "JPEG has no transparency: transparent pixels export white.",
-                identifier: "photo.export.note")
+            InspectorNote(model.exportNote ?? "", identifier: "photo.export.note")
         }
     }
 

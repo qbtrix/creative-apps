@@ -19,5 +19,26 @@
     "find": "return exportRun.begin(picked)",
     "replace": "exportOptions = picked\n        return exportRun.begin(picked)",
     "tests": "PhotoExportRunTests"
+  },
+  {
+    "label": "theNoteShowsTheOutputSize: the note says nothing of the size",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "return \"Exports \\(Self.sizeText(width: canvas.width, height: canvas.height)).\\n\\(alpha)\"",
+    "replace": "return alpha",
+    "tests": "PhotoExportRunTests"
+  },
+  {
+    "label": "theNoteShowsTheOutputSize: the note shows with no sheet open",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "guard let choice = exportChoice, let canvas else { return nil }",
+    "replace": "let choice = exportChoice ?? exportOptions\n        guard let canvas else { return nil }",
+    "tests": "PhotoExportRunTests"
+  },
+  {
+    "label": "theNoteShowsTheOutputSize: width and height swapped",
+    "file": "Sources/PhotoModel/PhotoExportRun+Kernel.swift",
+    "find": "sizeText(width: canvas.width, height: canvas.height)).\\n\\(alpha)",
+    "replace": "sizeText(width: canvas.height, height: canvas.width)).\\n\\(alpha)",
+    "tests": "PhotoExportRunTests"
   }
 ]

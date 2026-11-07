@@ -119,4 +119,14 @@ import Testing
         writing.dismissExport()
         #expect(writing.isExportRunning)
     }
+
+    /// The sheet's note says the size it writes before Export, then what the format does with transparency.
+    @Test func theNoteShowsTheOutputSize() throws {
+        var workspace = try whiteImage(6, 4)
+        #expect(workspace.exportNote == nil)
+        workspace.openExport()
+        #expect(workspace.exportNote == "Exports 6 × 4 px.\nPNG keeps transparent pixels.")
+        workspace.editExport(jpeg)
+        #expect(workspace.exportNote == "Exports 6 × 4 px.\nJPEG has no transparency: transparent pixels export white.")
+    }
 }
