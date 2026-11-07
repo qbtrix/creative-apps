@@ -1,7 +1,8 @@
 // TimelineLook.swift: the timeline strip's look rules, with no SwiftUI: they
 // answer with SuitePalette entries and rects, so a lane, the playhead and a
 // later CoreGraphics lane layer draw alike (timeline packet, TL-5). A key's
-// fill follows only its own state, never the track's selection (#1423). Its
+// fill follows only its own state, never the track's selection (#1423): a
+// picked key is accent even at the playhead, an idle one there stateKeyed. Its
 // 1 pt edge carries contrast on a clip (#62): white when picked in the dark
 // appearances, the primary ink in the light ones, where white on a clip
 // measures 1.46:1. The time pill stays inside the visible stretch.
@@ -45,9 +46,9 @@ public enum TimelineLook {
         keyFill(picked: track.pickedFrames.contains(key.frame), atPlayhead: key.frame == playhead)
     }
 
-    /// The fill of a key that is `picked` or `atPlayhead`.
+    /// The fill of a key that is `picked` or `atPlayhead`; a pick outranks the playhead.
     public static func keyFill(picked: Bool, atPlayhead: Bool) -> SuiteHex {
-        atPlayhead ? SuitePalette.stateKeyed : picked ? SuitePalette.accent : SuitePalette.textSecondary
+        picked ? SuitePalette.accent : atPlayhead ? SuitePalette.stateKeyed : SuitePalette.textSecondary
     }
 
     /// The 1 pt edge of a key that is `picked` or not.

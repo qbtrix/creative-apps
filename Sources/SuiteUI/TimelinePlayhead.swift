@@ -5,8 +5,8 @@
 // 2 pt ground knock-out so the ruler never draws for the playhead (#1257),
 // widened over the text of any ruler label the pill touches so none shows in
 // part (TimelinePlayheadGrab.grounds);
-// the keys at the playhead on the visible rows in stateKeyed, so no lane
-// redraws for it either. The pill and a 16 pt band down the line grab it
+// the keys at the playhead on the visible rows (stateKeyed, accent when
+// picked; TimelineLook.keyFill), so no lane redraws for it either. The pill and a 16 pt band down the line grab it
 // (TimelinePlayheadGrab); a drag scrubs through TimelineScrubSender, which
 // the ruler's drag uses too and which calls onScrub only when the frame
 // changes (#1297). With a work area, the lanes before its first tick and
