@@ -237,12 +237,7 @@ final class DesignSnapJourneyTests: XCTestCase {
 
     /// The inspector's field `name` (its spoken value, "200 points") passes `condition` within five seconds.
     @MainActor private func expectField(_ design: Journey, _ name: String, _ step: String, _ condition: (Double) -> Bool) {
-        let field = design.element("suite.inspector").descendants(matching: .any)
-            .matching(NSPredicate(format: "label == %@", name)).firstMatch
-        let read = { () -> Double? in
-            guard field.exists, let spoken = field.value as? String, let word = spoken.split(separator: " ").first else { return nil }
-            return Double(word.filter { $0.isNumber || $0 == "." || $0 == "-" })
-        }
+        let read = { design.inspectorNumber(name) }
         XCTAssert(Self.poll { read().map(condition) == true }, "after \(step) the inspector's \(name) reads \(String(describing: read()))")
     }
 

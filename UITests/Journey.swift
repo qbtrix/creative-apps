@@ -202,6 +202,18 @@ struct Journey {
         return all.matching(NSPredicate(format: "identifier == %@", identifier)).firstMatch
     }
 
+    /// The number the inspector's field labelled `name` reads, or nil when there is no such field.
+    /// A SuiteUI ScrubField is a slider, so macOS gives its value as a number (#4822); a text
+    /// field spells it out ("1,440 points"). Read inspector numbers here, not with `as? String`.
+    func inspectorNumber(_ name: String) -> Double? {
+        let field = element("suite.inspector").descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", name)).firstMatch
+        guard field.exists else { return nil }
+        if let number = field.value as? NSNumber { return number.doubleValue }
+        guard let word = (field.value as? String)?.split(separator: " ").first else { return nil }
+        return Double(word.filter { $0.isNumber || $0 == "." || $0 == "-" })
+    }
+
     /// "New Composition…" becomes "new-composition".
     func slug(_ title: String) -> String {
         title.lowercased().split { !$0.isLetter && !$0.isNumber }.joined(separator: "-")
