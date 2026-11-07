@@ -1,7 +1,8 @@
 // SuiteUnsavedSheetSnapshots.swift (adopt-kernel-unsaved-prompt UP-4): suiteui-unsaved-sheet-light and -dark. The
 // gallery's fake document ("Poster", edited) in a titled 1440 x 900 window behind `.unsavedChangesGuard`; a close
 // puts the guard's sheet up (the kernel's words, Save, Don't Save and Cancel), and the PNG is the window's content
-// with the sheet drawn over its top centre, where AppKit attaches it. Cancel takes the sheet down again, so the
+// with the sheet drawn over its top centre, where AppKit attaches it, on the window background color of the sheet's
+// appearance (cacheDisplay can't draw the alert's material, and a transparent card hides the dark sheet's text). Cancel takes the sheet down again, so the
 // window is left open and dirty. UnsavedSheetFixture is shared with RenderBudgetUnsavedGuardTests; nested in
 // BodyCountSuites, since its document counts the bodies that test reads. The close waits for the guard to hold the
 // window's delegate (a run-loop turn after the window shows), and the close and Cancel go through the fixture's
@@ -33,6 +34,7 @@ extension BodyCountSuites {
                 }
                 sheet.appearance = window.appearance
                 let image = try #require(Self.composite(window, sheet: sheet), "the sheet didn't draw")
+                Self.expectOpaqueCard(image, sheet: sheet, scheme: scheme)
                 try Self.write(image, name: "suiteui-unsaved-sheet-\(scheme.name)")
                 UnsavedSheetFixture.press(.cancel, in: window)
                 _ = await UnsavedSheetFixture.eventually { window.attachedSheet == nil }
@@ -53,9 +55,26 @@ extension BodyCountSuites {
             NSGraphicsContext.saveGraphicsState()
             NSGraphicsContext.current = context
             let origin = CGPoint(x: (size.width - card.bounds.width) / 2, y: size.height - card.bounds.height)
-            cardImage.draw(in: CGRect(origin: origin, size: card.bounds.size))
+            let frame = CGRect(origin: origin, size: card.bounds.size)
+            // cacheDisplay leaves the alert's material out, so its backdrop goes in first, then the card over it.
+            sheet.effectiveAppearance.performAsCurrentDrawingAppearance {
+                NSColor.windowBackgroundColor.setFill()
+                frame.fill()
+            }
+            cardImage.draw(in: frame, from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: false, hints: nil)
             NSGraphicsContext.restoreGraphicsState()
             return image
+        }
+
+        /// The card's corner is opaque and in `scheme`'s brightness: a transparent card shows the dark sheet's
+        /// white text on nothing, so the PNG can't be read.
+        static func expectOpaqueCard(_ image: NSBitmapImageRep, sheet: NSWindow, scheme: ColorScheme) {
+            let width = sheet.contentView?.bounds.width ?? 0
+            let x = Int((UnsavedSheetFixture.size.width - width) / 2) + 4
+            let corner = image.colorAt(x: x, y: 4)?.usingColorSpace(.deviceRGB)
+            #expect(corner?.alphaComponent == 1, "the \(scheme.name) sheet's card is transparent")
+            let brightness = corner?.brightnessComponent ?? 0
+            #expect(scheme == .dark ? brightness < 0.5 : brightness > 0.5, "the \(scheme.name) card reads \(brightness)")
         }
 
         private static func bitmap(_ size: CGSize) -> NSBitmapImageRep? {
