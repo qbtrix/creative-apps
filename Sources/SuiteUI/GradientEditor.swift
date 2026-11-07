@@ -95,7 +95,7 @@ public struct GradientEditor: View {
             .hexIdentifier("suite.gradient.color")
             if Self.showsAngleRow(fill, showsAngle: showsAngle) {
                 InspectorSliderRow("Angle", value: GradientRules.angle(of: fill) ?? 0, in: 0...359, step: 1, unit: "°", decimals: 0) { degrees in
-                    let token = angleToken ?? GradientBarDrag.newToken()
+                    let token = CoalesceKey.token(angleToken)
                     angleToken = token
                     send(.angle(degrees, drag: token))
                 } onEnd: {
@@ -191,7 +191,7 @@ public struct GradientEditor: View {
     }
 
     private func begin(at point: CGPoint, width: CGFloat) {
-        let next = GradientBarDrag(at: point, width: width, fill: fill, token: GradientBarDrag.newToken())
+        let next = GradientBarDrag(at: point, width: width, fill: fill, token: CoalesceKey.token(nil))
         if let stop = next.stop { selected = stop }
         drag = next
     }
@@ -201,7 +201,7 @@ public struct GradientEditor: View {
         guard type != .solid, fill.stops.indices.contains(index) else { return .ignored }
         let offset = min(max(fill.stops[index].offset + step, 0), 1)
         selected = GradientRules.movingStop(fill, index: index, to: offset).index
-        send(.move(index: index, offset: offset, drag: GradientBarDrag.newToken()))
+        send(.move(index: index, offset: offset, drag: CoalesceKey.token(nil)))
         return .handled
     }
 
@@ -218,7 +218,7 @@ public struct GradientEditor: View {
 
     /// The colour row's pick: the selected stop's colour and opacity, under the session's token.
     private func recolor(_ hex: HexColor, _ alpha: Double) {
-        let token = colorToken ?? GradientBarDrag.newToken()
+        let token = CoalesceKey.token(colorToken)
         colorToken = token
         send(.color(index: index, GradientEditorText.fillColor(hex, alpha: alpha), drag: token))
     }
@@ -292,9 +292,6 @@ struct GradientBarDrag: Equatable {
         stop = hits.min { $0.1 < $1.1 }?.0
         lastOffset = stop.map { fill.stops[$0].offset }
     }
-
-    /// A fresh drag token.
-    static func newToken() -> String { String(UUID().uuidString.prefix(8)) }
 
     /// Where the handle of a stop at `offset` is centred in a row `width` wide.
     static func x(of offset: Double, width: CGFloat) -> CGFloat {

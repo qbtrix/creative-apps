@@ -76,7 +76,7 @@ public struct TextStyleRows: View {
     /// One scrub edit: the gesture's token (made on its first change), then the one intent it asks for.
     private func edit(_ field: TextStyleField, to value: Double) {
         guard let style else { return }
-        let token = drag ?? UUID().uuidString
+        let token = CoalesceKey.token(drag)
         drag = token
         if let intent = Self.intent(field, to: value, from: style, drag: token) { onIntent(intent) }
     }

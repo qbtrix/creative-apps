@@ -1,6 +1,7 @@
 // ToneRowsTests.swift: ToneRows (tone-controls TC-3) through ToneRowsRules, the decisions its rows make: drag tokens,
 // typed values, Auto, section Resets, and why a row is off. No rendering. macOS only.
 import SuiteImaging
+import SuiteKernel
 import Testing
 
 @testable import SuiteUI
@@ -13,7 +14,7 @@ private func rules(_ settings: ToneSettings? = .neutral, help: String? = nil, hi
 private func drag(_ values: [Double], _ intent: (Double, String) -> ToneIntent?) -> [ToneIntent] {
     var open: String?
     return values.compactMap { value in
-        let token = ToneRowsRules.token(open)
+        let token = CoalesceKey.token(open)
         open = token
         return intent(value, token)
     }

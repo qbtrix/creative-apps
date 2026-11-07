@@ -19,7 +19,7 @@ private func rules(_ stroke: VectorStroke? = VectorStroke(width: 2), help: Strin
 private func scrub(_ values: [Double], _ intent: (Double, String) -> StrokeIntent?) -> [StrokeIntent] {
     var open: String?
     return values.compactMap { value in
-        let token = StrokeEditorRules.token(open)
+        let token = CoalesceKey.token(open)
         open = token
         return intent(value, token)
     }
