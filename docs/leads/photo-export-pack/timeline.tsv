@@ -807,3 +807,4 @@ utc	stage	event	ref	note
 2026-11-07T08:26Z	check-in	quiet: no merges, no new findings or photo issues; no dev-red; #5353 still a92b4651; 43 photo findings
 2026-11-07T08:58Z	check-in	dev-red #6308 (macos, range only #6300 design; failing GestureContractTests photo(_:), lane flake re-run pending) - no photo PR in range, no action; no merges; no new findings; #5353 still a92b4651; 43 photo findings
 2026-11-07T09:31Z	check-in	dev-red #6308 still open (flake re-run attempt 2 in progress; range only #6300 design) - no action; no merges; no new findings or photo issues; #5353 still a92b4651; 43 photo findings
+2026-11-07T10:03Z	check-in	#6308 closed 09:37Z as a flake (rerun green, main moved to 20acbf0; flake logged on #6127, line:suite) - no action; no merges; no new findings or photo issues; #5353 still a92b4651; 43 photo findings
