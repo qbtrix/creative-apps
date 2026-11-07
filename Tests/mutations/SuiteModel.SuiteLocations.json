@@ -1,5 +1,7 @@
 [
 {"label":"appFolder returns the root with no app segment","file":"Sources/SuiteModel/Store/SuiteLocations.swift","find":"supportFolder(arguments: arguments, home: home) + \"/\" + app","replace":"supportFolder(arguments: arguments, home: home)","tests":"SuiteLocationsAppFolderTests/appFolderHasAppSegment"},
 {"label":"plan moves when both exist","file":"Sources/SuiteModel/Store/LegacySupport.swift","find":"        if exists(new) { return .keepBoth(old: old) }\n","replace":"","tests":"SuiteLocationsAppFolderTests/neverOverwrites"},
-{"label":"the flag ignored","file":"Sources/SuiteModel/Store/SuiteLocations.swift","find":"supportFolder(arguments: arguments, home: home) + \"/\" + app","replace":"supportFolder(arguments: [], home: home) + \"/\" + app","tests":"SuiteLocationsAppFolderTests/flagReachesApp"}
+{"label":"the flag ignored","file":"Sources/SuiteModel/Store/SuiteLocations.swift","find":"supportFolder(arguments: arguments, home: home) + \"/\" + app","replace":"supportFolder(arguments: [], home: home) + \"/\" + app","tests":"SuiteLocationsAppFolderTests/flagReachesApp"},
+{"label":"a test process gets the real folder","file":"Sources/SuiteModel/Store/SuiteLocations.swift","find":"        if arguments.contains(where: { $0.hasSuffix(\".xctest\") || $0.contains(\".xctest/\") }) { return testProcessFolder }\n","replace":"","tests":"SuiteLocationsTestProcessTests"},
+{"label":"a bundle path inside the test bundle is missed","file":"Sources/SuiteModel/Store/SuiteLocations.swift","find":"|| $0.contains(\".xctest/\")","replace":"|| false","tests":"SuiteLocationsTestProcessTests/aTestBundleGetsATemporaryFolder"}
 ]

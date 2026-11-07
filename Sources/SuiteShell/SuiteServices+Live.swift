@@ -8,7 +8,7 @@
 // `with(animations:updates:)`. `SuiteLocations.processSupportFolder` is the
 // support folder a real process uses: the `SuiteSupportDir` default (the
 // `-SuiteSupportDir` launch argument, or the one the snapshot tests register),
-// else AfterGlow's folder in the home.
+// else a test process's temporary folder, else AfterGlow's folder in the home.
 import Foundation
 import SuiteModel
 
@@ -26,10 +26,12 @@ public struct SlotContext: Sendable {
 
 extension SuiteLocations {
     /// This process's support folder, read at each use: UserDefaults holds the `-SuiteSupportDir` launch
-    /// argument and any registered default.
+    /// argument and any registered default; with neither, the process's own arguments decide (a test
+    /// process gets its temporary folder, never the real one).
     public static var processSupportFolder: String {
         supportFolder(
-            arguments: [supportDirFlag, UserDefaults.standard.string(forKey: "SuiteSupportDir") ?? ""],
+            arguments: [supportDirFlag, UserDefaults.standard.string(forKey: "SuiteSupportDir") ?? ""]
+                + ProcessInfo.processInfo.arguments,
             home: NSHomeDirectory())
     }
 }
