@@ -60,12 +60,16 @@ struct RenderStep: CustomStringConvertible {
     let slowest: Double
     /// The slower of the first two steps, the press and the first sample (#6281).
     let opening: Double
+    /// The longest the main thread was busy between ticks: how late a tick woke past its 1/120 s slot or the
+    /// end of the step before it. Work SwiftUI runs from the run loop's observers, such as a List landing its
+    /// rows, blocks there, outside every timed step (#6306).
+    var stall: Double = 0
 
     var description: String {
         "RENDER-BUDGET \(name): steps \(steps) | window bodies \(bodies.map(String.init) ?? "n/a") | layout passes "
             + "\(layouts) (\(String(format: "%.1f", layoutMilliseconds)) ms) | step p50 \(String(format: "%.2f", p50)) ms "
             + "p95 \(String(format: "%.2f", p95)) ms slowest \(String(format: "%.2f", slowest)) ms "
-            + "opening \(String(format: "%.2f", opening)) ms"
+            + "opening \(String(format: "%.2f", opening)) ms stall \(String(format: "%.2f", stall)) ms"
     }
 }
 
@@ -91,6 +95,8 @@ private final class KeyCapableWindow: NSWindow {
     }
     /// Wall milliseconds of each step in the interaction being measured.
     private var stepTimes: [Double] = []
+    /// Milliseconds the main thread kept each tick of the interaction from waking on time (RenderStep.stall).
+    private var stalls: [Double] = []
 
     /// `keyCapable` builds a window that may become key, for a test that sends keys. Never isa-swizzle the window
     /// instead: it is KVO-observed from the start, and a swapped class makes its dealloc throw (NSRangeException
@@ -132,6 +138,7 @@ private final class KeyCapableWindow: NSWindow {
         let layouts = host.layouts
         let layoutTime = host.layoutTime
         stepTimes = []
+        stalls = []
         try await interaction()
         try await settle(100)
         let times = stepTimes.sorted()
@@ -139,7 +146,7 @@ private final class KeyCapableWindow: NSWindow {
             name: name, steps: times.count, bodies: bodies().map { $0 - (before ?? 0) },
             layouts: host.layouts - layouts, layoutMilliseconds: host.layoutTime - layoutTime,
             p50: SuiteFrameProbe.nearestRank(times, 0.5) ?? 0, p95: SuiteFrameProbe.nearestRank(times, 0.95) ?? 0,
-            slowest: times.last ?? 0, opening: stepTimes.prefix(2).max() ?? 0)
+            slowest: times.last ?? 0, opening: stepTimes.prefix(2).max() ?? 0, stall: stalls.max() ?? 0)
         print(step)
         return step
     }
@@ -160,9 +167,13 @@ private final class KeyCapableWindow: NSWindow {
     func ticks(_ count: Int, _ tick: (Int) -> Void) async throws {
         let clock = ContinuousClock()
         let began = clock.now
+        var ready = began
         for i in 1...count {
-            try await Task.sleep(until: began + .microseconds(8_333 * i), clock: clock)
+            let due = Swift.max(began + .microseconds(8_333 * i), ready)
+            try await Task.sleep(until: due, clock: clock)
+            stalls.append(Double((clock.now - due) / .microseconds(1)) / 1000)
             timed { tick(i) }
+            ready = clock.now
         }
     }
 

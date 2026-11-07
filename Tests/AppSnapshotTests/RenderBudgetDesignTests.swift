@@ -13,7 +13,9 @@
 // the drag's alone, not the open's late layouts on a slow runner (#1974). Nested in BodyCountSuites, as every suite that reads a body
 // counter is. `openCrowdLands` and `timing` also open crowd.design into an
 // empty window (files-history P4): the "Opening <name>…" note shows before the
-// file lands, and no step or layout of the open blocks over 3 refreshes. macOS only.
+// file lands, no step or layout of the open blocks over 3 refreshes, and the main
+// thread's longest stall between ticks (RenderStep.stall), where the layer
+// List sizes its new rows, stays in budget. macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -58,6 +60,9 @@ extension BodyCountSuites {
             // Budget 3 refreshes, 50 ms; QB-L12's 2 refreshes, 33 ms, is the target (#6306).
             #expect(open.step.slowest <= 50, "\(open.step) (budget 50 ms, QB-L12 target 33 ms, #6306)")
             #expect(open.landing <= 50, "the landing's longest layout took \(open.landing) ms (budget 50 ms, target 33 ms, #6306)")
+            // Between ticks: the List sizing crowd's 40 new layer rows at once stalled 206-541 ms (release, load 6);
+            // listed a few a frame, 93-133 ms, the rest the window's own landing layout. Target QB-L12, 33 ms (#6306).
+            #expect(open.step.stall <= 150, "the open stalled the main thread \(open.step.stall) ms between ticks (budget 150 ms, target 33 ms, #6306)")
         }
 
         /// files-history P4 in the real window (QD-S11, QB-L9): an empty window opens `crowd.design` (2,000 layers)
@@ -95,8 +100,9 @@ extension BodyCountSuites {
                     waits += 1
                     try await w.ticks(1) { _ in }
                 }
-                // The landing's own layout runs on the tick after the document changes.
-                try await w.ticks(2) { _ in }
+                // The landing's own layout runs on the tick after the document changes, and the layer tree
+                // lists crowd's 40 frames a few a frame after it (DesignLayersPanel.layersPerFrame): 200 ms of ticks.
+                try await w.ticks(24) { _ in }
             }
             print("design open crowd.design: longest layout \(w.host.longestLayout) ms")
             return (step, progress, landed() && DesignWindow.lastWorkspace?.pages == DesignFixtures.crowd.pages,
