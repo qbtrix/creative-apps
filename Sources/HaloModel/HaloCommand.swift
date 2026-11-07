@@ -165,8 +165,6 @@ public enum HaloWindowRequest: Hashable, Sendable {
     case renameLayer(String)
     case saveAs
     case open
-    /// The unsaved-changes question, then this command if the user goes on.
-    case confirmUnsaved(then: HaloCommand)
 }
 
 extension HaloProject {
