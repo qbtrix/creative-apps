@@ -72,7 +72,7 @@ import Testing
             FlareInspectorFill(paint: paint, reasonFor: reasonFor, perform: { _ in })
         }
             .padding(SuiteSpacing.m)
-            .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .top)
+            .frame(width: FlareWindow.inspectorWidth, alignment: .top)
             .background(SuiteColor.panel)
     }
 }

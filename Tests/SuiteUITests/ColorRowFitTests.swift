@@ -2,7 +2,8 @@
 // field and the eyedropper button at fixed widths; when those take too much, the label ends in "…" (Flare's SCENE
 // row read "Bac…und"). This measures "Background", the longest label any app gives the row, in the row's label
 // font against the row inside Flare's inspector column (the editor panel and its gutters), where that row lives;
-// "Stroke", the longest label a row at the ideal inspector width carries; and "#FFFFFF" in its value font.
+// "Stop 10 · 100%", the widest label the gradient editor's selected stop row gives, in that same column; "Stroke",
+// the longest label a row at the ideal inspector width carries; and "#FFFFFF" in its value font.
 // macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -29,6 +30,12 @@ import Testing
         let room = Self.room(SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m)
         let label = Self.width("Background", .systemFont(ofSize: Self.size))
         #expect(label <= room, "\"Background\" is \(label) pt; the row leaves it \(room) pt")
+    }
+
+    @Test func theWidestStopLabelFitsBesideTheSwatchHexAndEyedropperInTheEditorInspector() {
+        let room = Self.room(SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m)
+        let label = Self.width("Stop 10 · 100%", .systemFont(ofSize: Self.size))
+        #expect(label <= room, "\"Stop 10 · 100%\" is \(label) pt; the row leaves it \(room) pt")
     }
 
     @Test func strokeFitsBesideTheSwatchHexAndEyedropperAtTheIdealInspectorWidth() {

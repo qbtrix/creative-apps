@@ -106,7 +106,7 @@ import Testing
     private static func content(_ model: FlareWorkspace) -> some View {
         FlareInspector(model: model, tab: .properties, perform: { _ in }, easing: EmptyView())
             .padding(SuiteSpacing.m)
-            .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .top)
+            .frame(width: FlareWindow.inspectorWidth, alignment: .top)
     }
 
     /// The panel: the content on the panel background, as tall as the content.

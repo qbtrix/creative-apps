@@ -30,7 +30,7 @@ import Testing
         try snapshot(
             FlareInspector(model: model, tab: .library, perform: { _ in }, easing: EmptyView())
                 .padding(SuiteSpacing.m)
-                .frame(width: SuiteSize.inspectorWidth.ideal, height: SuiteSize.windowLaunch.height, alignment: .top),
+                .frame(width: FlareWindow.inspectorWidth, height: SuiteSize.windowLaunch.height, alignment: .top),
             name: "flare-inspector-library", scheme: .light)
     }
 

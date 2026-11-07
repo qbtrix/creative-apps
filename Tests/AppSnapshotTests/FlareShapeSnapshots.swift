@@ -43,7 +43,7 @@ import Testing
         let options = FlareShapeOptions(spec: model.shapeTool, help: ShapeRules.help(model.shapeTool)) { _ in }
         return FlareInspector(model: model, tab: .properties, perform: { _ in }, easing: EmptyView(), shape: options)
             .padding(SuiteSpacing.m)
-            .frame(width: SuiteSize.inspectorWidth.ideal, height: SuiteSize.windowLaunch.height, alignment: .top)
+            .frame(width: FlareWindow.inspectorWidth, height: SuiteSize.windowLaunch.height, alignment: .top)
             .background(SuiteColor.panel)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
