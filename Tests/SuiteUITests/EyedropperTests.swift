@@ -65,4 +65,17 @@ import Testing
         #expect(SampleSizeChips.options.map(\.title) == ["Point", "3 × 3", "5 × 5"])
         #expect(SampleSizeChips.options.map(\.id) == SampleSize.allCases)
     }
+
+    /// Mac finish: the row's eyedropper button lights on hover and press (HoverButtonStyle), never a bare `.plain`
+    /// icon that gives the pointer no sign it is a button.
+    @Test func buttonShowsHoverAndPressedStates() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let source = try String(contentsOf: root.appending(path: "Sources/SuiteUI/Eyedropper.swift"), encoding: .utf8)
+        let start = try #require(source.range(of: "public struct EyedropperButton: View {"), "the button moved")
+        let end = try #require(source.range(of: "private func sample()", range: start.upperBound..<source.endIndex))
+        let body = source[start.upperBound..<end.lowerBound]
+        #expect(body.contains(".buttonStyle(HoverButtonStyle())"))
+        #expect(!body.contains(".buttonStyle(.plain)"))
+    }
 }
