@@ -380,3 +380,4 @@ utc	stage	event	ref	note
 2026-11-07T23:11:02Z	blocked	poll	SC-f/SC-15	AK-photo waits on shared-codecs SC-f (SC-15), unmerged, no PR open; AK-z waits on the SC-library replacement for closed #5265
 2026-11-08T00:12:50Z	blocked	poll	SC-f/SC-15	AK-photo waits on shared-codecs SC-f (SC-15), unmerged, no PR open; AK-z waits on the SC-library replacement for closed #5265
 2026-11-08T01:14:30Z	blocked	poll	SC-f/SC-15	AK-photo waits on shared-codecs SC-f (SC-15), unmerged, no PR open; AK-z waits on the SC-library replacement for closed #5265
+2026-11-08T02:16:21Z	blocked	poll	SC-f/SC-15	AK-photo waits on shared-codecs SC-f (SC-15), unmerged, no PR open; AK-z waits on the SC-library replacement for closed #5265
