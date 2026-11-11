@@ -14,7 +14,8 @@
 // A layer with children is a DisclosureGroup whose expanded state is the
 // workspace's (`isExpanded`), sent back as `.setExpanded`, so collapsing the
 // parent of the selection selects the parent (#121). Each layer is SuiteUI's
-// SidebarRow with an eye and a lock toggle (`layerToggles`); a click flips
+// SidebarRow with an eye and a lock toggle (`layerToggles`, from the group
+// state the tree passes down, so no row walks the page); a click flips
 // that layer's own flag, one undo step (#45). A layer hidden by itself or by
 // a group around it reads dimmed (SuiteColor.textSecondary, which keeps 4.5:1
 // on a highlighted row), and a child of a hidden or locked group
@@ -308,13 +309,13 @@ private struct DesignLayerTree: View {
     let drag: DesignLayerDrag
     /// The frontmost layers the tree lists; nil lists them all.
     var limit: Int?
+    /// Whether a group around these nodes is hidden or locked, passed down so no row walks the page.
+    var hiddenAbove = false, lockedAbove = false
 
     var body: some View {
         let shown = nodes.frontToBack.prefix(limit ?? nodes.count)
         if nodes.allSatisfy(\.children.isEmpty) {
-            ForEach(shown) { node in
-                DesignLayerRow(node: node, model: model, perform: perform, drag: drag).tag(node.id)
-            }
+            ForEach(shown) { node in row(node).tag(node.id) }
         } else {
             mixed(shown)
         }
@@ -323,20 +324,27 @@ private struct DesignLayerTree: View {
     private func mixed(_ shown: ArraySlice<DesignNode>) -> some View {
         ForEach(shown) { node in
             if node.children.isEmpty {
-                DesignLayerRow(node: node, model: model, perform: perform, drag: drag).tag(node.id)
+                row(node).tag(node.id)
             } else {
                 DisclosureGroup(
                     isExpanded: Binding(
                         get: { model.isExpanded(node.id) }, set: { perform(.setExpanded(node.id, $0)) })
                 ) {
-                    DesignLayerTree(nodes: node.children, model: model, perform: perform, drag: drag)
+                    DesignLayerTree(
+                        nodes: node.children, model: model, perform: perform, drag: drag,
+                        hiddenAbove: hiddenAbove || node.isHidden, lockedAbove: lockedAbove || node.isLocked)
                 } label: {
-                    DesignLayerRow(node: node, model: model, perform: perform, drag: drag, isDisclosureLabel: true)
-                        .tag(node.id)
+                    row(node, isDisclosureLabel: true).tag(node.id)
                 }
                 .tag(node.id)
             }
         }
+    }
+
+    private func row(_ node: DesignNode, isDisclosureLabel: Bool = false) -> DesignLayerRow {
+        DesignLayerRow(
+            node: node, perform: perform, drag: drag, hiddenAbove: hiddenAbove, lockedAbove: lockedAbove,
+            isDisclosureLabel: isDisclosureLabel)
     }
 }
 
@@ -344,15 +352,16 @@ private struct DesignLayerTree: View {
 /// the eye and lock toggles; it drags to reorder and draws the insertion line when it is the target.
 private struct DesignLayerRow: View {
     let node: DesignNode
-    let model: DesignWorkspace
     let perform: DesignPerform
     let drag: DesignLayerDrag
+    /// Whether a group around the node is hidden or locked (the tree passes it down).
+    let hiddenAbove: Bool, lockedAbove: Bool
     /// A group's row: its disclosure flattens the label into one checkbox, so the row combines.
     var isDisclosureLabel = false
 
     var body: some View {
         let id = node.id
-        let toggles = model.layerToggles(id)
+        let toggles = DesignWorkspace.layerToggles(node, hiddenAbove: hiddenAbove, lockedAbove: lockedAbove)
         let line = drag.line?.rowID == id ? drag.line?.position : nil
         SidebarRow(
             SidebarItem(
@@ -369,7 +378,7 @@ private struct DesignLayerRow: View {
         )
         .lineLimit(1)
         .truncationMode(.middle)
-        .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.textSecondary : Color.primary)
+        .foregroundStyle(hiddenAbove || node.isHidden ? SuiteColor.textSecondary : Color.primary)
         .simultaneousGesture(TapGesture().modifiers(.shift).onEnded { perform(.toggleSelect(id)) })
         .background { if line == .into { RoundedRectangle(cornerRadius: SuiteRadius.row).fill(SuiteColor.dragFill) } }
         .overlay(alignment: line == .above ? .top : .bottom) {

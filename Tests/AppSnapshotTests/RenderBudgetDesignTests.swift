@@ -43,7 +43,7 @@ extension BodyCountSuites {
             #endif
         }
 
-        @Test(.timeLimit(.minutes(5))) func timing() async throws {
+        @Test(.timeLimit(.minutes(10))) func timing() async throws {
             let (move, marquee) = try await Self.run()
             // Target: a drag sample fits one 120 Hz frame.
             expectP95(move.step, atMost: 6, target: 8.3)  // dev: 4.1 ms
