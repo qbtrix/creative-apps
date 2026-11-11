@@ -15,7 +15,8 @@
 // empty window (files-history P4): the "Opening <name>…" note shows before the
 // file lands, no step or layout of the open blocks over 3 refreshes, and the main
 // thread's longest stall between ticks (RenderStep.stall), where the layer
-// List sizes its new rows, stays in budget. macOS only.
+// List sizes its new rows, stays in budget; `openFlatLands` and `timing` do the same
+// for a page of 5,000 top-level layers. macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -67,6 +68,11 @@ extension BodyCountSuites {
             for _ in 1..<3 { stalls.append(try await Self.openCrowd().step.stall) }
             let median = stalls.sorted()[1]
             #expect(median <= 150, "opening crowd.design stalled the main thread \(stalls) ms between ticks (median budget 150 ms, target 33 ms, #6306)")
+            // A flat file listing all 5,000 top-level layers at once must not stall for seconds, as a ForEach of
+            // mixed rows did (release: 4.2 s for 2,000, 24.5 s for 5,000, growing with the square). Release, load 3: 110 ms.
+            let flat = try await Self.openFlat()
+            #expect(flat.landed, "flat.design never landed: \(flat.step)")
+            #expect(flat.step.stall <= 250, "opening 5,000 top-level layers stalled the main thread \(flat.step.stall) ms between ticks (budget 250 ms)")
         }
 
         /// files-history P4 in the real window (QD-S11, QB-L9): an empty window opens `crowd.design` (2,000 layers)
@@ -87,15 +93,17 @@ extension BodyCountSuites {
         }
 
         /// files-history P4 on a file whose layers all sit at the top of the page (the re-audit's flat file):
-        /// every layer is a top-level row of the layer tree. Its open, ticked until the tree has listed every
-        /// layer, must not stall the main thread for seconds, as listing them all at once did (release: 4.2 s
-        /// for 2,000, 24.5 s for 5,000, growing with the square). Release at load 3: 110 ms.
-        @Test(.timeLimit(.minutes(2))) func openFlatDoesNotStall() async throws {
+        /// every layer is a top-level row of the layer tree, and the file lands in the window. `timing` gates its stall.
+        @Test(.timeLimit(.minutes(2))) func openFlatLands() async throws {
+            let open = try await Self.openFlat()
+            #expect(open.landed, "flat.design never landed: \(open.step)")
+        }
+
+        /// Opens a flat 5,000-layer file, ticked until the tree has listed every layer.
+        static func openFlat() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double) {
             let count = 5_000
             let settle = count / DesignLayersPanel.layersPerFrame(leavesOnly: true) + 24
-            let open = try await Self.open(DesignFixtures.flat(count), as: "flat", "flat.design (5,000 top-level layers)", settle: settle)
-            #expect(open.landed, "flat.design never landed: \(open.step)")
-            #expect(open.step.stall <= 250, "opening 5,000 top-level layers stalled the main thread \(open.step.stall) ms between ticks (budget 250 ms)")
+            return try await open(DesignFixtures.flat(count), as: "flat", "flat.design (5,000 top-level layers)", settle: settle)
         }
 
         /// Opens `workspace`'s file in an empty window, one tick per 1/120 s until it lands (at most 2 s), then
