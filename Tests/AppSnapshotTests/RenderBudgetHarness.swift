@@ -141,6 +141,7 @@ private final class KeyCapableWindow: NSWindow {
         stalls = []
         try await interaction()
         try await settle(100)
+        print("DBGSTALLS", stalls.enumerated().filter { $0.element > 15 }.map { "\($0.offset):\(Int($0.element))" })
         let times = stepTimes.sorted()
         let step = RenderStep(
             name: name, steps: times.count, bodies: bodies().map { $0 - (before ?? 0) },

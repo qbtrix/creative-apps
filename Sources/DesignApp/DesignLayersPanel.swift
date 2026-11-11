@@ -43,7 +43,13 @@
 // with no layers says so and points at the Frame tool. The rename refusal state
 // (DesignRenameState, `design.layers.rename-refusal`) is the panel's own. The list shows no
 // scroll indicators, as the inspector doesn't, so on a long layer tree no legacy
-// scroller reads as an unlabelled button (#2552). Values in, intents out.
+// scroller reads as an unlabelled button (#2552). A file landing with many more
+// top-level layers than the tree shows lists them a few rows a frame
+// (`layersPerFrame`): the list sizes each new row on the main thread, so 40 at
+// once stalled the window (#6199 P4). A page of plain layers lists them in one
+// leaf-only ForEach: a ForEach whose rows are sometimes a DisclosureGroup has a
+// varying row count per element, which the List walks with a cost growing as the
+// square of the layer count (24.5 s for 5,000). Values in, intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -60,6 +66,20 @@ struct DesignLayersPanel: View {
     @State private var dropLine: DesignLayerDropLine?
     /// The dragged layer and the rows' frames; a box SwiftUI doesn't watch.
     @State private var rowFrames = DesignLayerRowFrames()
+    /// How many top-level layers the tree has caught up to, set when it appears; it lags a landing file
+    /// by a few frames. Nil before it appears: a panel drawn once, as a snapshot is, lists every layer.
+    @State private var shownLayers: Int?
+
+    /// Top-level layers the tree adds per frame when a file lands with more than this many new ones: 4 when
+    /// any has children (16 of crowd's frames a tick stalled 165 ms), 16 on a page of plain layers, whose rows
+    /// cost little each (release: 110-160 ms longest tick listing 2,000 to 5,000).
+    nonisolated static func layersPerFrame(leavesOnly: Bool) -> Int { leavesOnly ? 100_000 : 4 }
+
+    /// The page's top-level layer count.
+    private var layerCount: Int { model.selectedPage?.nodes.count ?? 0 }
+
+    /// This page's `layersPerFrame`.
+    private var step: Int { Self.layersPerFrame(leavesOnly: model.selectedPage?.nodes.allSatisfy(\.children.isEmpty) ?? true) }
 
     var body: some View {
         List(selection: selection) {
@@ -77,7 +97,9 @@ struct DesignLayersPanel: View {
             }
             Section {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
-                    DesignLayerTree(nodes: nodes, model: model, perform: perform, drag: layerDrag)
+                    DesignLayerTree(
+                        nodes: nodes, model: model, perform: perform, drag: layerDrag,
+                        limit: Self.shown(of: nodes.count, caughtUp: shownLayers ?? nodes.count, step: step))
                 } else {
                     let notes = Self.emptyNotes(isOpen: model.isOpen)
                     ForEach(notes.indices, id: \.self) { line in
@@ -101,6 +123,22 @@ struct DesignLayersPanel: View {
         .font(SuiteFont.inspectorLabel)
         .accessibilityIdentifier("design.layers")
         .designPasteboardCommands(model, perform)
+        .onAppear { if shownLayers == nil { shownLayers = layerCount } }
+        .task(id: layerCount) {
+            let (count, step) = (layerCount, step)
+            while let shown = shownLayers, shown < count {
+                try? await Task.sleep(for: .milliseconds(8))
+                guard !Task.isCancelled else { return }
+                shownLayers = min(count, shown + step); print("DBGSHOWN", shownLayers ?? -1)
+            }
+            if let shown = shownLayers, shown > count { shownLayers = count }
+        }
+    }
+
+    /// The top-level layers the tree lists: all of `count` when at most `step` are new since `caughtUp`,
+    /// so an added layer shows at once; otherwise `caughtUp` plus the first frame's `step`.
+    nonisolated static func shown(of count: Int, caughtUp: Int, step: Int) -> Int {
+        count - caughtUp <= step ? count : caughtUp + step
     }
 
     /// The rows' drag: the pointer `y` points down row `rowID` moves the line only when it changes,
@@ -266,9 +304,22 @@ private struct DesignLayerTree: View {
     let model: DesignWorkspace
     let perform: DesignPerform
     let drag: DesignLayerDrag
+    /// The frontmost layers the tree lists; nil lists them all.
+    var limit: Int?
 
     var body: some View {
-        ForEach(nodes.frontToBack) { node in
+        let shown = nodes.frontToBack.prefix(limit ?? nodes.count)
+        if nodes.allSatisfy(\.children.isEmpty) {
+            ForEach(shown) { node in
+                DesignLayerRow(node: node, model: model, perform: perform, drag: drag).tag(node.id)
+            }
+        } else {
+            mixed(shown)
+        }
+    }
+
+    private func mixed(_ shown: ArraySlice<DesignNode>) -> some View {
+        ForEach(shown) { node in
             if node.children.isEmpty {
                 DesignLayerRow(node: node, model: model, perform: perform, drag: drag).tag(node.id)
             } else {

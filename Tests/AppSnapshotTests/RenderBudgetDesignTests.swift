@@ -83,8 +83,28 @@ extension BodyCountSuites {
         /// Opens crowd.design in an empty window, one tick per 1/120 s until it lands (at most 2 s): the steps,
         /// the first status note shown before the landing, whether the file landed, and the longest layout pass.
         static func openCrowd() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double) {
-            let file = FileManager.default.temporaryDirectory.appendingPathComponent("crowd-\(UUID()).design")
-            try DesignFixtures.crowd.fileData().write(to: file)
+            try await open(DesignFixtures.crowd, as: "crowd", "crowd.design (2,000 layers)")
+        }
+
+        /// files-history P4 on a file whose layers all sit at the top of the page (the re-audit's flat file):
+        /// every layer is a top-level row of the layer tree. Its open, ticked until the tree has listed every
+        /// layer, must not stall the main thread for seconds, as listing them all at once did (release: 4.2 s
+        /// for 2,000, 24.5 s for 5,000, growing with the square). Release at load 3: 110 ms.
+        @Test(.timeLimit(.minutes(2))) func openFlatDoesNotStall() async throws {
+            let count = 5_000
+            let settle = count / DesignLayersPanel.layersPerFrame(leavesOnly: true) + 24
+            let open = try await Self.open(DesignFixtures.flat(count), as: "flat", "flat.design (5,000 top-level layers)", settle: settle)
+            #expect(open.landed, "flat.design never landed: \(open.step)")
+            #expect(open.step.stall <= 250, "opening 5,000 top-level layers stalled the main thread \(open.step.stall) ms between ticks (budget 250 ms)")
+        }
+
+        /// Opens `workspace`'s file in an empty window, one tick per 1/120 s until it lands (at most 2 s), then
+        /// `settle` more ticks.
+        static func open(_ workspace: DesignWorkspace, as name: String, _ title: String, settle: Int = 24) async throws
+            -> (step: RenderStep, progress: String?, landed: Bool, landing: Double)
+        {
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("\(name)-\(UUID()).design")
+            try workspace.fileData().write(to: file)
             defer { try? FileManager.default.removeItem(at: file) }
             DesignWindow.openFile = nil
             DesignWindow.lastWorkspace = nil
@@ -96,7 +116,7 @@ extension BodyCountSuites {
             let landed = { DesignWindow.lastWorkspace?.documentURL == file }
             var progress: String?
             w.host.longestLayout = 0
-            let step = try await w.measure("design open crowd.design (2,000 layers)", bodies: { nil }) {
+            let step = try await w.measure("design open \(title)", bodies: { nil }) {
                 try await w.ticks(1) { _ in open(file) }
                 var waits = 0
                 while !landed(), waits < 240 {
@@ -105,11 +125,11 @@ extension BodyCountSuites {
                     try await w.ticks(1) { _ in }
                 }
                 // The landing's own layout runs on the tick after the document changes, and the layer tree
-                // lists crowd's 40 frames a few a frame after it (DesignLayersPanel.layersPerFrame): 200 ms of ticks.
-                try await w.ticks(24) { _ in }
+                // lists a few top-level layers a frame after it (DesignLayersPanel.layersPerFrame): crowd's 40 frames fit the default 200 ms.
+                try await w.ticks(settle) { _ in }
             }
-            print("design open crowd.design: longest layout \(w.host.longestLayout) ms")
-            return (step, progress, landed() && DesignWindow.lastWorkspace?.pages == DesignFixtures.crowd.pages,
+            print("design open \(title): longest layout \(w.host.longestLayout) ms")
+            return (step, progress, landed() && DesignWindow.lastWorkspace?.pages == workspace.pages,
                     w.host.longestLayout)
         }
 
