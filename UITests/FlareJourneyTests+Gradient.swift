@@ -1,7 +1,6 @@
 // FlareJourneyTests+Gradient.swift: FJ-G1 (gradient-fill FG-4, live since FG-7). On the gradient-circle sample
 // (`FlareFixtures.gradientCircle` on live services) it selects the circle (FILL shows the stop bar, not the word
-// "Gradient"), recolours the middle stop red in its hex field (`suite.gradient.color` is the field itself), types 90
-// into the angle bar, undoes both one step each, then picks Radial
+// "Gradient"), recolours the middle stop red, types 90 in the angle row, undoes both one step each, then picks Radial
 // for the solid rectangle. Shots are `flare-fg-<step>`.
 import XCTest
 
@@ -17,11 +16,11 @@ final class FlareGradientJourneyTests: XCTestCase {
         // 2. Middle stop red: the stage changes.
         let before = stage.screenshot().pngRepresentation
         flare.element("suite.gradient.stop.1").click()
-        flare.typeValue("#FF0000", into: "suite.gradient.color")
+        flare.element("suite.gradient.color").textFields.firstMatch.typeText("FF0000\r")
         XCTAssert(stage.screenshot().pngRepresentation != before, "the stage looks the same after the stop colour")
         flare.shot("fg-2-red")
         // 3. Angle 90: the gradient runs top to bottom.
-        flare.typeValue("90", into: "suite.gradient.angle")
+        flare.element("suite.gradient.angle").textFields.firstMatch.typeText("90\r")
         flare.shot("fg-3-angle")
         // 4. Undo twice: the angle, then the colour.
         flare.press(character: "z", .command)

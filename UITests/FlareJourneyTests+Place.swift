@@ -1,5 +1,5 @@
 // FlareJourneyTests+Place.swift (svg-place PF-7; docs/blueprints/flare/features/svg-place.md,
-// Journey steps): New (the shared New sheet's Create); File > Place… (Shift-Command-P) picks two-groups.svg in the open panel by its path (Shift-
+// Journey steps): New; File > Place… (Shift-Command-P) picks two-groups.svg in the open panel by its path (Shift-
 // Command-G): layers `red` and `blue` and "Placed two-groups.svg: 2 layers."; key blue's x; undo the keys, then both
 // layers in one step. Step 5's PNG is covered by FlarePlaceMenuTests (the panel offers SVG only). Shots "place-".
 import XCTest
@@ -15,7 +15,7 @@ final class FlarePlaceJourneyTests: XCTestCase {
             + "<g id=\"blue\"><rect x=\"140\" width=\"100\" height=\"80\" fill=\"#1E88E5\"/></g></svg>").utf8).write(to: svg)
 
         let flare = Journey("Flare", self) // 1.
-        flare.newDocument()
+        flare.press(character: "n", .command)
         XCTAssert(flare.element("suite.canvas").waitForExistence(timeout: 10), "New made no stage (suite.canvas)")
         flare.shot("place-new")
 

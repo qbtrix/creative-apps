@@ -10,31 +10,18 @@
 // menu closes, which failed a run with "No matches found" (run 38814195169).
 // An inspector row gives its identifier to its label text as well as its
 // menu button, so `inspectorMenu` matches the button by type. `newDocument`
-// is File > New through the shared New sheet every editor opens; `fillNewDocument`
-// types sizes into that sheet while it is up.
+// is File > New through the shared New sheet that Design and Photo open.
 import XCTest
 
 extension Journey {
-    /// File > New: once a window is up, Command-N opens the shared New sheet (SuiteUI's NewDocumentSheet), and
-    /// Create makes a document at the sheet's default size.
+    /// File > New: once a window is up, Command-N opens the shared New sheet (Photo #4901, Design's
+    /// DesignNewDocumentSheet), and Create makes a document at the sheet's default size.
     func newDocument() {
         XCTAssert(app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         app.typeKey("n", modifierFlags: .command)
         let create = element("suite.newdoc.create")
         XCTAssert(create.waitForExistence(timeout: 10), "File > New opened no New sheet (suite.newdoc)")
         create.click()
-    }
-
-    /// Types each value into the open New sheet's field `suite.newdoc.<field>` ("width", "height", "duration"),
-    /// in order, replacing what the field held.
-    func fillNewDocument(_ fields: KeyValuePairs<String, String>) {
-        for (field, value) in fields {
-            let box = element("suite.newdoc.\(field)")
-            XCTAssert(box.waitForExistence(timeout: 5), "the New sheet has no \(field) field (suite.newdoc.\(field))")
-            box.doubleClick()
-            app.typeKey("a", modifierFlags: .command)
-            app.typeText(value)
-        }
     }
 
     /// Whether any of the app's menus is on screen.

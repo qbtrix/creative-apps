@@ -83,8 +83,8 @@ final class FlareExportJourneys: XCTestCase {
         for id in ["flare.export.from", "flare.export.to", "flare.export.step", "flare.export.transparent"] {
             XCTAssert(flare.element(id).waitForExistence(timeout: 5), "the PNG sequence sheet has no \(id)")
         }
-        flare.typeValue("12", into: "flare.export.to")
-        flare.typeValue("2", into: "flare.export.step")
+        type("12", into: "flare.export.to", flare)
+        type("2", into: "flare.export.step", flare)
         let count = flare.element("flare.export.count")
         XCTAssert(
             Self.waitFor { count.exists && [count.label, count.value as? String].contains("7 files") },
@@ -129,8 +129,21 @@ final class FlareExportJourneys: XCTestCase {
 
     /// The sheet reads `text` (a warning or the run's line) within ten seconds.
     @MainActor private func expectLine(_ text: String, _ flare: Journey) {
-        // A SwiftUI Text reaches XCUITest as its value, a warning (an InspectorNote, #4109) as its label.
-        XCTAssert(flare.shows(text, in: flare.app.sheets.firstMatch), "the sheet never read \"\(text)\"")
+        // A SwiftUI Text reaches XCUITest as its value, not its label (as the other journeys match). A warning is an
+        // InspectorNote, its own element labelled with its text but not a static text (#4109), so match any type.
+        let reads = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", text, text)
+        let line = flare.app.sheets.firstMatch.descendants(matching: .any).matching(reads).firstMatch
+        XCTAssert(line.waitForExistence(timeout: 10), "the sheet never read \"\(text)\"")
+    }
+
+    /// Clicks the bar `id` to type, selects its text and enters `text`.
+    @MainActor private func type(_ text: String, into id: String, _ flare: Journey) {
+        let bar = flare.element(id)
+        XCTAssert(bar.waitForExistence(timeout: 5), "no \(id)")
+        bar.click()
+        flare.press(character: "a", .command)
+        flare.app.typeText(text)
+        flare.press(.return)
     }
 
     /// Done once the run finished; the sheet goes.
