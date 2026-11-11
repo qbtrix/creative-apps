@@ -16,7 +16,9 @@
 // file lands, no step or layout of the open blocks over 3 refreshes, and the main
 // thread's longest stall between ticks (RenderStep.stall), p95 over 20 opens, is
 // at most 2 refreshes over a one-layer file's: the layer List sizing its new rows
-// adds no stall to the window's own landing. `openFlatLands` and `timing` do the
+// adds no stall to the window's own landing. After the landing the inspector
+// and the tool box, which land a frame after the canvas, both show
+// (`openCrowdLands`). `openFlatLands` and `timing` do the
 // same for a page of 5,000 top-level layers. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -100,18 +102,19 @@ extension BodyCountSuites {
             let open = try await Self.openCrowd()
             #expect(open.progress?.hasPrefix("Opening crowd-") == true, "the open showed \(open.progress ?? "no note")")
             #expect(open.landed, "crowd.design never landed in the window: \(open.step)")
+            #expect(open.panels, "the inspector or the tool box never showed after the landing")
             #endif
         }
 
         /// Opens crowd.design in an empty window, one tick per 1/120 s until it lands (at most 2 s): the steps,
         /// the first status note shown before the landing, whether the file landed, and the longest layout pass.
-        static func openCrowd() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double) {
+        static func openCrowd() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool) {
             // Ticked until the tree has listed crowd's 40 frames, one a frame.
             try await open(DesignFixtures.crowd, as: "crowd", "crowd.design (2,000 layers)", settle: 40 / DesignLayersPanel.layersPerFrame(leavesOnly: false) + 24)
         }
 
         /// Opens a file of one layer: the window's own landing, with no layer list to grow.
-        static func openOneLayer() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double) {
+        static func openOneLayer() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool) {
             try await open(DesignFixtures.flat(1), as: "one", "one.design (1 layer)")
         }
 
@@ -123,7 +126,7 @@ extension BodyCountSuites {
         }
 
         /// Opens a flat 5,000-layer file, ticked until the tree has listed every layer.
-        static func openFlat() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double) {
+        static func openFlat() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool) {
             let count = 5_000
             let settle = count / DesignLayersPanel.layersPerFrame(leavesOnly: true) + 24
             return try await open(DesignFixtures.flat(count), as: "flat", "flat.design (5,000 top-level layers)", settle: settle)
@@ -132,7 +135,7 @@ extension BodyCountSuites {
         /// Opens `workspace`'s file in an empty window, one tick per 1/120 s until it lands (at most 2 s), then
         /// `settle` more ticks.
         static func open(_ workspace: DesignWorkspace, as name: String, _ title: String, settle: Int = 24) async throws
-            -> (step: RenderStep, progress: String?, landed: Bool, landing: Double)
+            -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool)
         {
             let file = FileManager.default.temporaryDirectory.appendingPathComponent("\(name)-\(UUID()).design")
             try workspace.fileData().write(to: file)
@@ -160,8 +163,11 @@ extension BodyCountSuites {
                 try await w.ticks(settle) { _ in }
             }
             print("design open \(title): longest layout \(w.host.longestLayout) ms")
+            // The inspector and the tool box land a frame after the canvas (DesignEditor's panelsLanded); by now both show.
+            let ids = Set(w.identifiers())
+            let panels = ids.contains("design.properties") && DesignTool.allCases.allSatisfy { ids.contains(DesignControlID.tool($0)) }
             return (step, progress, landed() && DesignWindow.lastWorkspace?.pages == workspace.pages,
-                    w.host.longestLayout)
+                    w.host.longestLayout, panels)
         }
 
         /// A 120-sample Option-drag of Rectangle 1 on `crowd` in the real window: the press copies it, the
