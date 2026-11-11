@@ -1,6 +1,6 @@
 // TimelineLanesView+Access.swift: TL-23, the AppKit lanes' VoiceOver tree.
 // Each key a lane draws is an accessibility child of TimelineLanesView, a
-// button over its 16 pt token, mirroring TimelineLaneAccess (TL-12): its label
+// button over its 16 pt token (narrowed to the gap to its nearest key), mirroring TimelineLaneAccess (TL-12): its label
 // is TimelineLaneSpeech's key label, its value the lane's spoken value, it is
 // selected while picked, and its default action is a plain click on the key
 // through the view's pointer, which picks it alone (.replace). The strings and
@@ -37,9 +37,11 @@ enum TimelineLanesAccess {
         for (index, (lane, frame)) in zip(lanes, frames).enumerated() {
             let track = track(of: lane, index: index)
             let value = TimelineLaneSpeech.value(of: track)
-            for child in TimelineLaneSpeech.children(of: track, visibleX: shown, mapping: shown == nil ? nil : lane.mapping) {
+            let children = TimelineLaneSpeech.children(of: track, visibleX: shown, mapping: shown == nil ? nil : lane.mapping)
+            let widths = TimelineLaneSpeech.hitWidths(of: children, frameWidth: lane.mapping.frameWidth)
+            for (child, width) in zip(children, widths) {
                 let token = CGRect(
-                    x: tickX(lane.mapping, child.frame) - size / 2, y: frame.midY - size / 2, width: size, height: size)
+                    x: tickX(lane.mapping, child.frame) - width / 2, y: frame.midY - size / 2, width: width, height: size)
                 keys.append(TimelineLaneKeyAccess(lane: index, child: child, value: value, token: token))
             }
         }
