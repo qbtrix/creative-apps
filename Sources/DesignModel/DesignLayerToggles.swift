@@ -112,8 +112,15 @@ extension DesignWorkspace {
     /// The eye and lock toggles for node `id`'s row, in that order; empty for an unknown id.
     public func layerToggles(_ id: String) -> [DesignLayerToggle] {
         guard let node = findNode(id) else { return [] }
-        let hiddenByGroup = !node.isHidden && isHiddenInTree(id)
-        let lockedByGroup = !node.isLocked && isLockedInTree(id)
+        return Self.layerToggles(node, hiddenAbove: isHiddenInTree(id), lockedAbove: isLockedInTree(id))
+    }
+
+    /// The toggles for `node`'s row when a group around it is hidden (`hiddenAbove`) or locked
+    /// (`lockedAbove`): what `layerToggles(id)` returns, with no walk of the page. The Layers panel
+    /// passes each group's state down to its rows, so listing 5,000 rows reads no tree per row.
+    public static func layerToggles(_ node: DesignNode, hiddenAbove: Bool, lockedAbove: Bool) -> [DesignLayerToggle] {
+        let hiddenByGroup = !node.isHidden && hiddenAbove
+        let lockedByGroup = !node.isLocked && lockedAbove
         return [
             DesignLayerToggle(
                 flag: .hidden,
