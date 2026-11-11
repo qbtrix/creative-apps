@@ -5,6 +5,8 @@
 // value or selection, or the control list. After each it presses Escape and
 // ⌘Z. A control is judged as the list gives it now, since earlier clicks move
 // state Undo doesn't restore; New goes last, as it replaces the document.
+// A click that brings up a sheet or dialog (Open's panel) is shot as the whole
+// screen, which skips the audit: the panel covers the window's elements.
 // This is a sweep, not feature coverage.
 import XCTest
 
@@ -28,7 +30,7 @@ final class FlareControlJourneys: XCTestCase {
             control.click()
             Thread.sleep(forTimeInterval: 0.5)
             let changed = before != Self.state(of: control, flare)
-            flare.shot("control-\(flare.slug(id))")
+            flare.shot("control-\(flare.slug(id))", screen: flare.panelIsUp)
             XCTAssert(changed, "\(id) is enabled but clicking it changed nothing")
             flare.press(.escape)
             flare.press(character: "z", .command)

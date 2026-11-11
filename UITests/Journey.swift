@@ -61,6 +61,9 @@ struct Journey {
         }
     }
 
+    /// Whether a sheet or dialog (Open's panel, an alert) covers the window now.
+    var panelIsUp: Bool { app.sheets.firstMatch.exists || app.dialogs.firstMatch.exists }
+
     /// Attaches the whole window as "<app>-<step>" and audits it; `screen`
     /// takes the whole screen instead, for a menu that hangs outside the
     /// window, and skips the audit (the menu covers the window's pixels).
