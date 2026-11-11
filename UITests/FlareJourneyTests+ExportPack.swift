@@ -54,7 +54,10 @@ final class FlareExportPackJourneyTests: XCTestCase {
         // The movie writer creates its file when the run starts and fills it frame by frame, so the header is
         // read only once the run has finished and said so.
         waitForDone(flare)
-        XCTAssert(flare.app.staticTexts["Exported scene-1.mp4."].exists, "the MP4 run didn't finish with Exported scene-1.mp4.")
+        // A SwiftUI Text reaches XCUITest as its value, not its label (FlareJourneyTests+Export's expectLine).
+        let finished = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", "Exported scene-1.mp4.", "Exported scene-1.mp4.")
+        XCTAssert(flare.app.sheets.firstMatch.descendants(matching: .any).matching(finished).firstMatch.waitForExistence(timeout: 5),
+                  "the MP4 run didn't finish with Exported scene-1.mp4.")
         let mp4 = folder.appending(path: "scene-1.mp4")
         XCTAssert(FileManager.default.fileExists(atPath: mp4.path), "Export wrote no scene-1.mp4")
         let head = (try? Data(contentsOf: mp4)).map { [UInt8]($0.prefix(8)) } ?? []
