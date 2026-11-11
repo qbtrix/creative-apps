@@ -217,6 +217,12 @@ struct Journey {
         return Double(word.filter { $0.isNumber || $0 == "." || $0 == "-" })
     }
 
+    /// The text `element` shows: its label, else its value. A bare SwiftUI Text (a status pill) reaches XCUITest
+    /// with an empty label and its text as the value.
+    func shownText(_ element: XCUIElement) -> String {
+        element.label.isEmpty ? (element.value as? String) ?? "" : element.label
+    }
+
     /// "New Composition…" becomes "new-composition".
     func slug(_ title: String) -> String {
         title.lowercased().split { !$0.isLetter && !$0.isNumber }.joined(separator: "-")
