@@ -71,9 +71,9 @@ struct DesignLayersPanel: View {
     @State private var shownLayers: Int?
 
     /// Top-level layers the tree adds per frame when a file lands with more than this many new ones: 4 when
-    /// any has children (16 of crowd's frames a tick stalled 165 ms); a page of plain layers lists them all at
-    /// once, its leaf-only rows cost little each (release: 110-160 ms longest tick listing 2,000 to 5,000).
-    nonisolated static func layersPerFrame(leavesOnly: Bool) -> Int { leavesOnly ? 100_000 : 4 }
+    /// any has children (16 of crowd's frames a tick stalled 165 ms), 16 on a page of plain layers, whose rows
+    /// cost little each (release: 110-160 ms longest tick listing 2,000 to 5,000; all 5,000 at once, 430 ms).
+    nonisolated static func layersPerFrame(leavesOnly: Bool) -> Int { leavesOnly ? 16 : 4 }
 
     /// The page's top-level layer count.
     private var layerCount: Int { model.selectedPage?.nodes.count ?? 0 }

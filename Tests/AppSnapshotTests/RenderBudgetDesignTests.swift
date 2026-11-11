@@ -68,8 +68,8 @@ extension BodyCountSuites {
             for _ in 1..<3 { stalls.append(try await Self.openCrowd().step.stall) }
             let median = stalls.sorted()[1]
             #expect(median <= 150, "opening crowd.design stalled the main thread \(stalls) ms between ticks (median budget 150 ms, target 33 ms, #6306)")
-            // A flat file listing all 5,000 top-level layers at once must not stall for seconds, as a ForEach of
-            // mixed rows did (release: 4.2 s for 2,000, 24.5 s for 5,000, growing with the square). Release, load 3: 110 ms.
+            // A flat file listing its 5,000 top-level layers, 16 a frame, must not stall for seconds, as a ForEach of
+            // mixed rows did (release: 4.2 s for 2,000, 24.5 s for 5,000, growing with the square; all at once in a leaf-only ForEach, 430 ms). Release, load 3: 110 ms.
             let flat = try await Self.openFlat()
             #expect(flat.landed, "flat.design never landed: \(flat.step)")
             #expect(flat.step.stall <= 250, "opening 5,000 top-level layers stalled the main thread \(flat.step.stall) ms between ticks (budget 250 ms)")
