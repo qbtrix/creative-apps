@@ -24,6 +24,7 @@ import SwiftUI
 import Testing
 
 @testable import DesignApp
+@testable import SuiteUI
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetDesignTests {
@@ -61,13 +62,12 @@ extension BodyCountSuites {
             // Budget 3 refreshes, 50 ms; QB-L12's 2 refreshes, 33 ms, is the target (#6306).
             #expect(open.step.slowest <= 50, "\(open.step) (budget 50 ms, QB-L12 target 33 ms, #6306)")
             #expect(open.landing <= 50, "the landing's longest layout took \(open.landing) ms (budget 50 ms, target 33 ms, #6306)")
-            // Between ticks: the List sizing crowd's 40 new layer rows at once stalled 206-541 ms (release, load 6);
-            // listed a few a frame, 93-133 ms, the rest the window's own landing layout. One open in ten hits about
-            // 240 ms, so the budget holds the median of 3 opens. Target QB-L12, 33 ms (#6306).
+            // Between ticks: the List sizing crowd's 40 new layer rows at once stalled 206-541 ms (release, load 6).
+            // QB-L12: no open stalls the main thread over 2 refreshes, 33 ms, p95 of 20 opens.
             var stalls = [open.step.stall]
-            for _ in 1..<3 { stalls.append(try await Self.openCrowd().step.stall) }
-            let median = stalls.sorted()[1]
-            #expect(median <= 150, "opening crowd.design stalled the main thread \(stalls) ms between ticks (median budget 150 ms, target 33 ms, #6306)")
+            for _ in 1..<20 { stalls.append(try await Self.openCrowd().step.stall) }
+            let p95 = SuiteFrameProbe.nearestRank(stalls.sorted(), 0.95) ?? 0
+            #expect(p95 <= 33, "opening crowd.design stalled the main thread \(stalls) ms between ticks (QB-L12: p95 33 ms over 20 opens)")
             // A flat file listing its 5,000 top-level layers, 16 a frame, must not stall for seconds, as a ForEach of
             // mixed rows did (release: 4.2 s for 2,000, 24.5 s for 5,000, growing with the square; all at once in a leaf-only ForEach, 430 ms).
             // 16 a frame, release: 110 ms at load 3, 258-264 ms at load 5 with swap full. Target QB-L12, 33 ms (#6306).
