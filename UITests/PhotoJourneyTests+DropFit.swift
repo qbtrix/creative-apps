@@ -21,10 +21,11 @@ final class PhotoDropFitJourneyTests: XCTestCase {
         let big = folder.appending(path: "Big.png")
         try writeTestPhoto(to: big, width: 3200, height: 2400)
         dragFile(big, onto: canvas)
-        XCTAssert(photo.app.staticTexts["Big"].waitForExistence(timeout: 15), "dropping Big.png listed no layer Big")
+        // The status message clears 4 s after it shows, so read it before the slower layer query.
         let status = photo.app.staticTexts.matching(
             NSPredicate(format: "label == 'Placed at 25%.' OR value == 'Placed at 25%.'")).firstMatch
-        XCTAssert(status.waitForExistence(timeout: 5), "the status line doesn't read Placed at 25%.")
+        XCTAssert(status.waitForExistence(timeout: 3), "the status line doesn't read Placed at 25%.")
+        XCTAssert(photo.app.staticTexts["Big"].waitForExistence(timeout: 15), "dropping Big.png listed no layer Big")
         photo.shot("drop-fitted")
         photo.press(character: "z", .command)
         XCTAssert(photo.app.staticTexts["Big"].waitForNonExistence(timeout: 5), "one Undo didn't take Big away")
