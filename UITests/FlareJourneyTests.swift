@@ -94,7 +94,9 @@ final class FlareJourneyTests: XCTestCase {
         for id in ["suite.sidebar", "suite.inspector", "flare.timeline"] {
             let region = flare.element(id)
             XCTAssert(region.waitForExistence(timeout: 5), "no \(id)")
-            regions[id] = rect(region.frame)
+            // A column's span between the split view's dividers: its `.contain` element is only as wide as its
+            // children, the inspector's content inside the column's padding (280 of 304).
+            regions[id] = rect(flare.regionFrame(id) ?? region.frame)
         }
         regions["toolbar"] = rect(flare.app.toolbars.firstMatch.frame)
         let minimums: [String: (width: Double, height: Double)] = [
@@ -111,12 +113,9 @@ final class FlareJourneyTests: XCTestCase {
         flare.shot("easing-geometry")
     }
 
-    /// The least width `suite.inspector` reads: SuiteSize.editorPanelWidth (280),
-    /// the content inside FlareWindow.inspectorWidth's column (304) less its
-    /// SuiteSpacing.m (12) padding on each side (#1853). The element is a
-    /// `.contain` container, and SwiftUI gives one the frame of its children,
-    /// not of the column around them, so it never reads 304.
-    static let inspectorWidth = 280.0
+    /// FlareWindow.inspectorWidth: SuiteSize.editorPanelWidth (280) plus
+    /// SuiteSpacing.m (12) on each side (#1853).
+    static let inspectorWidth = 304.0
 
     /// Each preset chip is at least as wide as its title drawn in the chip's
     /// font (caption, semibold) plus its 4 pt side padding, so no title is
