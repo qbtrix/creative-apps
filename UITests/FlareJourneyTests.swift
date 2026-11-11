@@ -111,9 +111,12 @@ final class FlareJourneyTests: XCTestCase {
         flare.shot("easing-geometry")
     }
 
-    /// FlareWindow.inspectorWidth: SuiteSize.editorPanelWidth (280) plus
-    /// SuiteSpacing.m (12) on each side (#1853).
-    static let inspectorWidth = 304.0
+    /// The least width `suite.inspector` reads: SuiteSize.editorPanelWidth (280),
+    /// the content inside FlareWindow.inspectorWidth's column (304) less its
+    /// SuiteSpacing.m (12) padding on each side (#1853). The element is a
+    /// `.contain` container, and SwiftUI gives one the frame of its children,
+    /// not of the column around them, so it never reads 304.
+    static let inspectorWidth = 280.0
 
     /// Each preset chip is at least as wide as its title drawn in the chip's
     /// font (caption, semibold) plus its 4 pt side padding, so no title is
