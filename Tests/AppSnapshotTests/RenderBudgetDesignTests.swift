@@ -13,12 +13,12 @@
 // the drag's alone, not the open's late layouts on a slow runner (#1974). Nested in BodyCountSuites, as every suite that reads a body
 // counter is. `openCrowdLands` and `timing` also open crowd.design into an
 // empty window (files-history P4): the "Opening <name>…" note shows before the
-// file lands, no step or layout of the open blocks over 3 refreshes, and the main
-// thread's longest stall between ticks (RenderStep.stall), p95 over 20 opens, is
-// at most 2 refreshes over a one-layer file's: the layer List sizing its new rows
-// adds no stall to the window's own landing. After the landing the inspector
-// and the tool box, which land a frame after the canvas, both show
-// (`openCrowdLands`). `openFlatLands` and `timing` do the
+// file lands, and the main thread's longest run-loop pass (RenderStep.busy),
+// p95 over 20 opens interleaved with a one-layer file's, stays in budget
+// (QB-L12's target is 2 refreshes). Only `openCrowdLands` reads the note: an
+// accessibility walk would land in the passes `timing` measures. After the
+// landing the inspector and the tool box, which land in the last of its
+// passes, both show (`openCrowdLands`). `openFlatLands` and `timing` do the
 // same for a page of 5,000 top-level layers. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -65,33 +65,34 @@ extension BodyCountSuites {
             // Budget 3 refreshes, 50 ms; QB-L12's 2 refreshes, 33 ms, is the target (#6306).
             #expect(open.step.slowest <= 50, "\(open.step) (budget 50 ms, QB-L12 target 33 ms, #6306)")
             #expect(open.landing <= 50, "the landing's longest layout took \(open.landing) ms (budget 50 ms, target 33 ms, #6306)")
-            // Between ticks: the List sizing crowd's 40 new layer rows at once stalled 206-541 ms (release, load 6).
-            // The tree now lists none in the landing's frame, then one group row a frame (8-12 ms each), so what is
-            // left is the window's own empty-to-open landing, which a one-layer file pays too (release, load 5:
-            // crowd 57-103 ms, one layer 55-82 ms, p95 103 and 102). Gated against that, interleaved so both see the same load:
-            // the layers add at most 2 refreshes, 33 ms, to the p95 of 20 opens. QB-L12's 33 ms for the whole
-            // open waits on the landing itself (#6306).
-            var stalls = [open.step.stall], plain: [Double] = []
+            // QB-L12 counts the main thread's longest run-loop pass (RenderStep.busy); a tick's lateness has a
+            // 30-100 ms floor with no window at all, so `stall` judges nothing here. One-layer and crowd opens
+            // interleave so both see the same load: the window's own empty-to-open landing, which DesignEditor
+            // splits into four passes (title and status, canvas, sidebar, inspector), and the layers' rows on top.
+            // Release at load 9, 20 opens: one layer p50 25 ms, p95 83 ms; crowd p50 38 ms, p95 106 ms (one landing pass
+            // was 51/107 and 57/121). The p95s are the box's load spikes (153 ms in both lists at once).
+            var crowds = [open.step.busy], plain: [Double] = []
             for i in 0..<20 {
-                plain.append(try await Self.openOneLayer().step.stall)
-                if i > 0 { stalls.append(try await Self.openCrowd().step.stall) }
+                plain.append(try await Self.openOneLayer().step.busy)
+                if i > 0 { crowds.append(try await Self.openCrowd().step.busy) }
             }
-            let p95 = SuiteFrameProbe.nearestRank(stalls.sorted(), 0.95) ?? 0
+            let p95 = SuiteFrameProbe.nearestRank(crowds.sorted(), 0.95) ?? 0
             let plainP95 = SuiteFrameProbe.nearestRank(plain.sorted(), 0.95) ?? 0
-            #expect(p95 <= plainP95 + 33, "crowd.design's open stalled \(stalls) ms between ticks, a one-layer file's \(plain) ms: its layers add over 33 ms to the p95 of 20 (QB-L12)")
-            #expect(p95 <= 150, "opening crowd.design stalled the main thread \(stalls) ms between ticks (budget p95 150 ms over 20 opens, target 33 ms, #6306)")
+            print("design open busy: one layer \(plain) p95 \(plainP95), crowd \(crowds) p95 \(p95)")
+            #expect(plainP95 <= 100, "a one-layer file's open held the main thread \(plain) ms in one pass (budget p95 100 ms over 20 opens, QB-L12 target 33 ms, #6306)")
+            #expect(p95 <= 120, "crowd.design's open held the main thread \(crowds) ms in one pass (budget p95 120 ms over 20 opens, QB-L12 target 33 ms, #6306)")
             // A flat file listing its 5,000 top-level layers, 16 a frame, must not stall for seconds, as a ForEach of
-            // mixed rows did (release: 4.2 s for 2,000, 24.5 s for 5,000, growing with the square; all at once in a
-            // leaf-only ForEach, 430 ms; 16 beside the landing, 180-273 ms). Release at load 5: 73-258 ms, p95 213 ms, the window's own
-            // landing (55-82 ms on a one-layer file) included.
+            // mixed rows did (release: 4.2 s for 2,000, 24.5 s for 5,000, growing with the square). Release at load 9: p50
+            // 63 ms, p95 107 ms.
             var flats: [Double] = []
             for _ in 0..<20 {
                 let flat = try await Self.openFlat()
                 #expect(flat.landed, "flat.design never landed: \(flat.step)")
-                flats.append(flat.step.stall)
+                flats.append(flat.step.busy)
             }
             let flatP95 = SuiteFrameProbe.nearestRank(flats.sorted(), 0.95) ?? 0
-            #expect(flatP95 <= 300, "opening 5,000 top-level layers stalled the main thread \(flats) ms between ticks (budget p95 300 ms over 20 opens, target 33 ms, #6306)")
+            print("design open busy: flat \(flats) p95 \(flatP95)")
+            #expect(flatP95 <= 150, "opening 5,000 top-level layers held the main thread \(flats) ms in one pass (budget p95 150 ms over 20 opens, target 33 ms, #6306)")
         }
 
         /// files-history P4 in the real window (QD-S11, QB-L9): an empty window opens `crowd.design` (2,000 layers)
@@ -99,7 +100,7 @@ extension BodyCountSuites {
         /// the file is read and decoded off the main thread and lands a few ticks later with all its pages.
         @Test(.timeLimit(.minutes(2))) func openCrowdLands() async throws {
             #if DEBUG
-            let open = try await Self.openCrowd()
+            let open = try await Self.openCrowd(readsNote: true)
             #expect(open.progress?.hasPrefix("Opening crowd-") == true, "the open showed \(open.progress ?? "no note")")
             #expect(open.landed, "crowd.design never landed in the window: \(open.step)")
             #expect(open.panels, "the inspector or the tool box never showed after the landing")
@@ -108,9 +109,10 @@ extension BodyCountSuites {
 
         /// Opens crowd.design in an empty window, one tick per 1/120 s until it lands (at most 2 s): the steps,
         /// the first status note shown before the landing, whether the file landed, and the longest layout pass.
-        static func openCrowd() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool) {
+        static func openCrowd(readsNote: Bool = false) async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool) {
             // Ticked until the tree has listed crowd's 40 frames, one a frame.
-            try await open(DesignFixtures.crowd, as: "crowd", "crowd.design (2,000 layers)", settle: 40 / DesignLayersPanel.layersPerFrame(leavesOnly: false) + 24)
+            try await open(DesignFixtures.crowd, as: "crowd", "crowd.design (2,000 layers)", settle: 40 / DesignLayersPanel.layersPerFrame(leavesOnly: false) + 24,
+                           readsNote: readsNote)
         }
 
         /// Opens a file of one layer: the window's own landing, with no layer list to grow.
@@ -133,8 +135,9 @@ extension BodyCountSuites {
         }
 
         /// Opens `workspace`'s file in an empty window, one tick per 1/120 s until it lands (at most 2 s), then
-        /// `settle` more ticks.
-        static func open(_ workspace: DesignWorkspace, as name: String, _ title: String, settle: Int = 24) async throws
+        /// `settle` more ticks. `readsNote` reads the status note while it waits: an accessibility walk on the main
+        /// thread, which lands in the measured passes, so only a test that checks the note asks for it.
+        static func open(_ workspace: DesignWorkspace, as name: String, _ title: String, settle: Int = 24, readsNote: Bool = false) async throws
             -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool)
         {
             let file = FileManager.default.temporaryDirectory.appendingPathComponent("\(name)-\(UUID()).design")
@@ -154,7 +157,7 @@ extension BodyCountSuites {
                 try await w.ticks(1) { _ in open(file) }
                 var waits = 0
                 while !landed(), waits < 240 {
-                    if progress == nil { progress = w.value(DesignControlID.statusNote) }  // a Text's words are its value
+                    if readsNote, progress == nil { progress = w.value(DesignControlID.statusNote) }  // a Text's words are its value
                     waits += 1
                     try await w.ticks(1) { _ in }
                 }
