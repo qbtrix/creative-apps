@@ -5,7 +5,8 @@
 // where each layer sits (`frames`: tiles at the strip's lane pitch, top down).
 // TL-22's pointer input asks `route` what a press lands on: the playhead band
 // first, as the strip's playhead layer sits over the lanes and takes the press
-// today (TimelinePlayheadGrab.band, strictly inside its edge), else the lane's
+// (TimelinePlayheadGrab.band, strictly inside its edge), less the band-tall hole
+// that grab leaves around a key at the playhead, which is the key's; else the lane's
 // own classification from TimelineLanePress.target (key, clip end, bed), which
 // TimelineLaneInput owns and this file never copies. Point x is the lanes' x,
 // past timelineInset; y runs down from the lane area's top, as a flipped NSView
@@ -79,7 +80,8 @@ enum TimelineLaneLayers {
     }
 
     /// What a press at `point` on `lanes` lands on: nil off every lane; the
-    /// playhead band when the point is inside it; else the lane's own
+    /// playhead band when the point is inside it, but a key at the playhead
+    /// inside the grab's hole; else the lane's own
     /// classification (TimelineLanePress.target: key, clip end, bed).
     @MainActor static func route<ID>(
         press point: CGPoint, in lanes: [TimelineTrack<ID>], mapping: FrameMapping, playhead: Int,
@@ -89,10 +91,13 @@ enum TimelineLaneLayers {
               let index = lane(atY: point.y, count: lanes.count, laneHeight: laneHeight, spacing: spacing),
               lanes.indices.contains(index)
         else { return nil }
-        if onPlayheadBand(x: point.x, playhead: playhead, mapping: mapping) {
-            return Route(lane: index, press: .playheadBand)
-        }
         let target = TimelineLanePress.target(atX: point.x, on: lanes[index], mapping: mapping)
+        if onPlayheadBand(x: point.x, playhead: playhead, mapping: mapping) {
+            // The grab's hole (TimelinePlayheadGrab.shape): a key at the playhead, band-tall about the lane's middle.
+            let middle = CGFloat(index) * (finite(laneHeight) + finite(spacing)) + finite(laneHeight) / 2
+            let inHole = target == .key(playhead) && abs(point.y - middle) < TimelinePlayheadGrab.band / 2
+            return Route(lane: index, press: inHole ? .key(playhead) : .playheadBand)
+        }
         return Route(lane: index, press: Press(target))
     }
 
