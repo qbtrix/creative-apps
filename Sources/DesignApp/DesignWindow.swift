@@ -532,7 +532,7 @@ struct DesignWindow: View, BodyCounted {
     /// The SF Symbols a landing document's Layers rows, palette, toolbar and inspector draw. A
     /// process's first lookup of each reads the symbol catalog, so `open` looks them up off the main
     /// thread while the file decodes, and the landing pass doesn't pay for it (files-history P4 cold).
-    private static var documentSymbols: [String] {
+    nonisolated private static var documentSymbols: [String] {
         DesignNodeKind.allCases.map(\.systemImage) + DesignLayerFlag.allCases.flatMap(\.symbols)
             + DesignTool.allCases.map(\.systemImage) + DesignToolbarItem.allCases.map(\.systemImage)
             + DesignAlignEdge.allCases.map(\.systemImage) + ["plus", "trash", "doc"]
