@@ -11,7 +11,6 @@
 // (CanvasLayout's anchoredOffset over ZoomMath.anchoredOrigin), once the
 // content has taken its new size. Key presses
 // reach `onKey` while the canvas has focus, which it takes when it appears
-// or starts taking keys (a document landing in a kept-mounted canvas),
 // and a drag on it gives back.
 // While it has focus the canvas also pans without a scroll wheel: a drag that
 // starts with Space held scrolls it with the pointer (the grab pointer) and
@@ -357,8 +356,6 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         .focusEffectDisabled()
         // A new or opened document's canvas has the keys at once, so a tool key works before any click (#4768).
         .onAppear { if takesKeys { isFocused = true } }
-        // A canvas kept mounted while its window is empty takes the keys once a document lands in it.
-        .onChange(of: takesKeys) { _, takes in if takes { isFocused = true } }
         // Space let go while focus was elsewhere never arrives here.
         .onChange(of: isFocused) { _, focused in if !focused { spaceHeld = false } }
         .onKeyPress(phases: .all) { press in key(press, layout) }

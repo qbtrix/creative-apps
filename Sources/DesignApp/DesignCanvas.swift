@@ -1,12 +1,7 @@
 // DesignCanvas.swift: the canvas of Design's editor shell: the selected page on
 // SuiteUI's CanvasViewport (rulers in points, matching the status bar and the
 // inspector; checkerboard; zoom), with its nodes painted by DesignArtwork, or the
-// empty state with a New File button when nothing is open. The viewport stays
-// mounted under the empty state, hidden, untouchable and out of the
-// accessibility tree (no `suite.canvas`), taking no drags, keys or zooms, so a
-// file landing in an empty window fills the canvas's platform views instead of
-// inserting them, and the fit sees the viewport's size at once (QB-L12, #6306).
-// CanvasViewport takes the keys when a document lands in it. Pointer drags go to
+// empty state with a New File button when nothing is open. Pointer drags go to
 // the workspace as `.drag` with the modifier keys held, and the release as
 // `.endDrag`; the workspace decides what a press hits and which tool acts. The
 // pointer and the pointer handler come from DesignCanvasFeedback. The overlay
@@ -46,22 +41,15 @@ struct DesignCanvas: View {
 
     var body: some View {
         let shown = Self.shown(live?.workspace ?? model, at: live?.playingFrame)
-        let page = shown.shownPage
-        // The viewport stays mounted while nothing is open, hidden under the empty state, so a file landing
-        // fills its scroll view and checkerboard instead of inserting them (QB-L12, #6306).
-        canvas(page, shown: shown)
-            .opacity(page == nil ? 0 : 1)
-            .allowsHitTesting(page != nil)
-            .accessibilityHidden(page == nil)
-            .overlay { if page == nil { emptyState } }
-    }
-
-    private var emptyState: some View {
-        EmptyStateView(
-            "No File Open", systemImage: "square.on.square.dashed",
-            message: "Create a file to lay out frames, shapes and text.",
-            action: ToolbarAction("New File", systemImage: "plus") { perform(.newFile) })
-        .accessibilityIdentifier("design.new-file")
+        if let page = shown.shownPage {
+            canvas(page, shown: shown)
+        } else {
+            EmptyStateView(
+                "No File Open", systemImage: "square.on.square.dashed",
+                message: "Create a file to lay out frames, shapes and text.",
+                action: ToolbarAction("New File", systemImage: "plus") { perform(.newFile) })
+            .accessibilityIdentifier("design.new-file")
+        }
     }
 
     /// `workspace` at the frame playback shows; itself when nothing plays.
@@ -73,31 +61,18 @@ struct DesignCanvas: View {
     }
 
     /// `page` of `shown`, the live copy while a drag or scrub lasts and `model` otherwise.
-    /// With no page, an empty viewport that takes no drags, keys or zooms.
-    private func canvas(_ page: DesignPage?, shown: DesignWorkspace) -> some View {
-        let feedback = DesignCanvasFeedback(model: shown, zoom: zoom, perform: perform)
-        let open = page != nil
-        return CanvasViewport(
-            documentSize: CGSize(width: page?.frameWidth ?? 1, height: page?.frameHeight ?? 1), zoom: zoom,
-            pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoom: open ? onZoom : nil,
-            // The Eyedropper picks through DesignSampleLoupe's tap alone, so a click picks once, not twice.
-            onDrag: !open || model.tool == .eyedropper ? nil : { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
-            onKey: open && model.editingTextID == nil ? { key($0) } : nil, onPointer: open ? feedback.onPointer : nil
-        ) {
-            if let page {
-                DesignPageArtwork(page: page, zoom: zoom, editingTextID: model.editingTextID, lift: shown.moveLift).equatable()
-            }
-        } overlay: {
-            if let page { overlay(page, shown: shown, feedback: feedback) }
-        }
-        .designPasteboardCommands(model, perform)
-        // Listed under its DesignControlID; CanvasViewport keeps its own `suite.canvas` identifier.
-        .suiteControl(id: open ? DesignControlID.canvas : nil, enabled: true, reason: nil, identifies: false)
-    }
-
-    /// The marks over `page`, bottom to top.
-    @ViewBuilder private func overlay(_ page: DesignPage, shown: DesignWorkspace, feedback: DesignCanvasFeedback) -> some View {
+    private func canvas(_ page: DesignPage, shown: DesignWorkspace) -> some View {
         let painted = page.painted
+        let feedback = DesignCanvasFeedback(model: shown, zoom: zoom, perform: perform)
+        return CanvasViewport(
+            documentSize: CGSize(width: page.frameWidth, height: page.frameHeight), zoom: zoom,
+            pointer: feedback.pointer, unit: "pt", onSize: onViewport, onZoom: onZoom,
+            // The Eyedropper picks through DesignSampleLoupe's tap alone, so a click picks once, not twice.
+            onDrag: model.tool == .eyedropper ? nil : { perform(.drag($0, $1, .current)) }, onDragEnd: { perform(.endDrag) },
+            onKey: model.editingTextID == nil ? { key($0) } : nil, onPointer: feedback.onPointer
+        ) {
+            DesignPageArtwork(page: page, zoom: zoom, editingTextID: model.editingTextID, lift: shown.moveLift).equatable()
+        } overlay: {
             DesignPastEdge(page: page, painted: painted, zoom: zoom, editingTextID: model.editingTextID)
             DesignFrameLabels(labels: DesignFrameLabel.labels(on: page), zoom: zoom)
             DesignAgentGlow(step: shown.agentWork.lastStep, zoom: zoom) {
@@ -109,6 +84,10 @@ struct DesignCanvas: View {
             if let marquee = shown.marquee { SelectBoxMark(rect: marquee.cgRect, zoom: zoom) }
             DesignTextOverlay(model: model, zoom: zoom, perform: perform)
             feedback
+        }
+        .designPasteboardCommands(model, perform)
+        // Listed under its DesignControlID; CanvasViewport keeps its own `suite.canvas` identifier.
+        .suiteControl(id: DesignControlID.canvas, enabled: true, reason: nil, identifies: false)
     }
 
     /// The Model decides the arrows, Delete, Escape and Return (canvasKeyAction: every selected
