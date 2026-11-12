@@ -3,8 +3,8 @@
 // SR-a, ST-6). On `cards` at 1024 × 768, live services: open Desktop's row
 // in Layers (a file opens with its rows collapsed) and click A's row; click
 // the Corners Radius bar, type 12, Return: it reads 12 and the top bar's Undo
-// reads "Undo Change Corner Radius"; drag the Opacity bar to 50%: "Undo
-// Change Opacity"; click Add Stroke: the Width bar reads 1
+// reads "Undo Change Corner Radius"; type 50 into the Opacity bar the same
+// way: "Undo Change Opacity"; click Add Stroke: the Width bar reads 1
 // (DesignStroke.default); give the Width bar the keys and press → three
 // times: it reads 2.5 (the editor's Width steps by 0.5), and the three quick
 // presses are one "Undo Change Stroke" step (the run lands once the keys
@@ -13,7 +13,11 @@
 // hint reads "Show Hidden to change it." The bars are ScrubFields: XCUI finds
 // each as a slider by its `design.inspector.<name>` id (DesignControlID), its
 // value spoken with the unit ("12 points", "50 percent"); a click without a
-// drag opens its typing field, and Escape closes it and gives the bar the keys.
+// drag opens its typing field (`suite.scrub.typing`), and Escape closes it and
+// gives the bar the keys. At 768 high the style rows sit below the
+// inspector's fold, so each is scrolled into reach before its click; XCUI's
+// adjust(toNormalizedSliderPosition:) can't drive a bar (no orientation, #3105),
+// so Opacity is typed.
 import XCTest
 
 final class DesignStyleJourneyTests: XCTestCase {
@@ -40,20 +44,15 @@ final class DesignStyleJourneyTests: XCTestCase {
         design.clickDesignLayer(Self.rowA)
         let radius = control(design, Self.radius)
         XCTAssert(radius.waitForExistence(timeout: 5), "no Radius bar in the inspector (\(Self.radius))")
-        radius.click()
-        let field = typingField(design, in: radius)
-        XCTAssert(field.waitForExistence(timeout: 5), "clicking Radius opened no typing field")
-        design.press(character: "a", .command)
-        field.typeText("12")
-        design.press(.return)
+        type("12", into: radius, design)
         XCTAssert(Self.waitUntil { Self.number(radius) == 12 }, "Radius reads \(Self.text(radius)), not 12")
         XCTAssert(Self.waitForLabel(undo, "Undo Change Corner Radius"), "Radius made no step (Undo reads \(undo.label))")
         design.shot("style-radius-12")
 
-        // 2. The Opacity bar dragged to 50%: one Change Opacity step.
+        // 2. The Opacity bar typed to 50%: one Change Opacity step.
         let opacity = control(design, Self.opacity)
         XCTAssert(opacity.waitForExistence(timeout: 5), "no Opacity bar in the inspector (\(Self.opacity))")
-        opacity.adjust(toNormalizedSliderPosition: 0.5)
+        type("50", into: opacity, design)
         XCTAssert(Self.waitUntil { Self.number(opacity) == 50 }, "Opacity reads \(Self.text(opacity)), not 50%")
         XCTAssert(Self.waitForLabel(undo, "Undo Change Opacity"), "Opacity made no step (Undo reads \(undo.label))")
         design.shot("style-opacity-50")
@@ -61,6 +60,7 @@ final class DesignStyleJourneyTests: XCTestCase {
         // 3. Add Stroke: the Width bar appears at DesignStroke.default's width, 1.
         let add = control(design, Self.addStroke)
         XCTAssert(add.waitForExistence(timeout: 5), "no Add Stroke in the inspector (\(Self.addStroke))")
+        design.reveal(add)
         add.click()
         let width = control(design, Self.strokeWidth)
         XCTAssert(width.waitForExistence(timeout: 5), "Add Stroke showed no Width bar (\(Self.strokeWidth))")
@@ -68,6 +68,7 @@ final class DesignStyleJourneyTests: XCTestCase {
         XCTAssert(Self.waitForLabel(undo, "Undo Change Stroke"), "Add Stroke made no step (Undo reads \(undo.label))")
 
         // 4. The Width bar takes the keys (a click opens typing; Escape closes it), then → three times: 2.5.
+        design.reveal(width)
         width.click()
         design.press(.escape)
         for _ in 0..<3 { design.press(.rightArrow) }
@@ -97,11 +98,18 @@ final class DesignStyleJourneyTests: XCTestCase {
         design.element("suite.inspector").descendants(matching: .any)[identifier].firstMatch
     }
 
-    /// The typing field a clicked bar opens: inside the bar, else the inspector's only one.
-    @MainActor private func typingField(_ design: Journey, in bar: XCUIElement) -> XCUIElement {
-        let inside = bar.textFields.firstMatch
-        if inside.waitForExistence(timeout: 2) { return inside }
-        return design.element("suite.inspector").textFields.firstMatch
+    /// Scrolls `bar` into reach, clicks it and types `value` into the field the click opens, then Return.
+    /// The field is the scrub's own (`suite.scrub.typing`), never the inspector's first text field, Fill's hex.
+    @MainActor private func type(_ value: String, into bar: XCUIElement, _ design: Journey) {
+        design.reveal(bar)
+        XCTAssert(bar.isHittable, "\(bar.identifier) stays below the inspector's fold")
+        bar.click()
+        let field = design.element("suite.inspector").textFields["suite.scrub.typing"]
+        XCTAssert(field.waitForExistence(timeout: 5), "clicking \(bar.identifier) opened no typing field")
+        field.click()
+        design.press(character: "a", .command)
+        field.typeText(value)
+        design.press(.return)
     }
 
     /// The first number an element reads ("12 points", "50 percent", "4"), or nil.

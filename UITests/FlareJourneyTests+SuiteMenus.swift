@@ -87,11 +87,8 @@ final class FlareSuiteMenusJourneyTests: XCTestCase {
             XCTAssert(switchTo.menuItems[title].exists && switchTo.menuItems[title].isEnabled, "Switch To's \(title) is missing or disabled")
         }
         home.click()
-        let deadline = Date().addingTimeInterval(15)
-        while NSWorkspace.shared.frontmostApplication?.bundleIdentifier != Self.launcher, Date() < deadline {
-            Thread.sleep(forTimeInterval: 0.2)
-        }
-        XCTAssertEqual(NSWorkspace.shared.frontmostApplication?.bundleIdentifier, Self.launcher, "clicking Home didn't bring the launcher forward")
+        XCTAssert(waitForFrontmost(Self.launcher, timeout: 15),
+                  "clicking Home didn't bring the launcher forward (front: \(NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "none"))")
         NSRunningApplication.runningApplications(withBundleIdentifier: Self.launcher).forEach { $0.terminate() }
         flare.app.activate()
     }
