@@ -28,7 +28,7 @@ final class PhotoPlaceJourneyTests: XCTestCase {
         try writeImage(to: logo, width: 200, height: 100, type: .png)
         try writeImage(to: large, width: 4000, height: 3000, type: .jpeg)
 
-        let photo = Journey("Photo", self, arguments: photoArguments(open: canvas)) // 1.
+        let photo = Journey("Photo", self, arguments: photoArguments(open: canvas) + ["-PhotoStatusSeconds", "30"]) // 1.
         XCTAssert(photo.window(named: "canvas.png").waitForExistence(timeout: 30), "canvas.png didn't open")
         let background = photo.app.staticTexts["Background"]
         XCTAssert(background.waitForExistence(timeout: 5), "the layer list doesn't list Background")
