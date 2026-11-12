@@ -5,7 +5,7 @@
 // goes down the environment as `suiteInspectorSwap`, which SuiteWindow shows in that column
 // (presenting it even when the user hid the inspector), and the inspector comes back when the
 // panel closes (captain 2026-10-24, #4291). The width compared is the one the window proposes,
-// read by a zero-size probe the root never measures; the row's own width runs past a window
+// read by a zero-height probe the root never measures; the row's own width runs past a window
 // sized below its minimum (the journeys' 1024 pt runner), so it can't decide.
 import SwiftUI
 
@@ -58,11 +58,13 @@ struct SidePanelArea<Panel: View>: ViewModifier {
     let isShown: Bool
     let inspectorWidth: CGFloat?
     let panel: Panel
-    /// The width the window proposes; 0 until measured, which swaps (the safe side).
-    @State private var proposed: CGFloat = 0
+    /// Whether the panel fits beside the columns at the width the window proposes; false until measured
+    /// (the safe side). A Bool, so a window resize changes it only when it crosses that width.
+    @State private var fits = false
 
     func body(content: Content) -> some View {
-        let beside = isShown && SuiteSize.sidePanelFits(windowWidth: proposed, inspectorWidth: inspectorWidth)
+        let beside = isShown && fits
+        let inspectorWidth = self.inspectorWidth
         ProposalProbe {
             HStack(spacing: 0) {
                 content.environment(\.suiteInspectorSwap, isShown && !beside ? InspectorSwap(content: AnyView(panel)) : nil)
@@ -72,7 +74,9 @@ struct SidePanelArea<Panel: View>: ViewModifier {
                         .padding(SuiteSpacing.s)
                 }
             }
-            Color.clear.onGeometryChange(for: CGFloat.self) { $0.size.width } action: { proposed = $0 }
+            Color.clear.onGeometryChange(for: Bool.self) {
+                SuiteSize.sidePanelFits(windowWidth: $0.size.width, inspectorWidth: inspectorWidth)
+            } action: { fits = $0 }
         }
     }
 }
