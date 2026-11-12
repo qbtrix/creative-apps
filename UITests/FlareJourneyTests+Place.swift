@@ -37,8 +37,13 @@ final class FlarePlaceJourneyTests: XCTestCase {
 
         for _ in 0..<3 { flare.press(character: "z", .command) } // 4.
         XCTAssert(waitFor { !red.exists && !blue.exists }, "Undo didn't take both placed layers in one step")
-        XCTAssert(flare.app.buttons["Redo Place Image"].waitForExistence(timeout: 5), "Undo didn't undo a Place Image step")
-        flare.shot("place-undone")
+        // Flare's toolbar Redo is titled "Redo" alone; the Edit menu names the step (as the Draw journey reads it).
+        let edit = flare.app.menuBars.firstMatch.menuBarItems["Edit"]
+        edit.click()
+        XCTAssert(edit.menus.firstMatch.menuItems["Redo Place Image"].waitForExistence(timeout: 5),
+                  "Undo didn't undo a Place Image step")
+        flare.shot("place-undone", screen: true)
+        flare.press(.escape)
     }
 
     /// File > Place…, then the file at `url` chosen in the panel by its path.

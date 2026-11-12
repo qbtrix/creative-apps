@@ -54,14 +54,16 @@ final class FlareExportPackJourneyTests: XCTestCase {
         // The movie writer creates its file when the run starts and fills it frame by frame, so the header is
         // read only once the run has finished and said so.
         waitForDone(flare)
-        // A SwiftUI Text reaches XCUITest as its value, not its label (FlareJourneyTests+Export's expectLine).
-        let finished = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", "Exported scene-1.mp4.", "Exported scene-1.mp4.")
-        XCTAssert(flare.app.sheets.firstMatch.descendants(matching: .any).matching(finished).firstMatch.waitForExistence(timeout: 5),
+        // A snapshot walk (`Journey.shows`): a `label CONTAINS … OR value CONTAINS …` query on this sheet times out.
+        XCTAssert(flare.shows("Exported scene-1.mp4.", in: flare.app.sheets.firstMatch),
                   "the MP4 run didn't finish with Exported scene-1.mp4.")
         let mp4 = folder.appending(path: "scene-1.mp4")
         XCTAssert(FileManager.default.fileExists(atPath: mp4.path), "Export wrote no scene-1.mp4")
-        let head = (try? Data(contentsOf: mp4)).map { [UInt8]($0.prefix(8)) } ?? []
-        XCTAssertEqual(Array(head.suffix(4)), Array("ftyp".utf8), "scene-1.mp4 has no ftyp box")
+        // The read's error and the file's size go in the message, so a red run says why the header is missing.
+        let read = Result { try Data(contentsOf: mp4) }
+        let head = ((try? read.get()) ?? Data()).prefix(8)
+        let size = (try? FileManager.default.attributesOfItem(atPath: mp4.path))?[.size] ?? "unknown"
+        XCTAssertEqual(Array(head.suffix(4)), Array("ftyp".utf8), "scene-1.mp4 has no ftyp box (size \(size), read \(read))")
         flare.shot("export-pack-3-mp4")
 
         // 4. On the fakes, a fresh folder; MP4; Export; Cancel within the run: the sheet goes, the folder stays empty.
