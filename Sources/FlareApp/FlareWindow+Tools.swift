@@ -5,7 +5,8 @@
 // Object > Finish Path) commits the open pen path (`model.finishPath`), with
 // `finishPathHelp` as its reason. The stage's
 // keys (`toolKey`): Return finishes the path, Escape cancels the draft or
-// the drag under way; the tool letters are the stage's own (FlareStage).
+// the drag under way, a Space tap plays or pauses as Animate > Play does;
+// the tool letters are the stage's own (FlareStage).
 import FlareModel
 import SwiftUI
 
@@ -26,12 +27,17 @@ extension FlareWindow {
         }
     }
 
-    /// A key pressed on the stage: Return finishes an open pen path, Escape cancels; anything else is left alone.
+    /// A key pressed on the stage: Return finishes an open pen path, Escape cancels, a Space tap plays or pauses;
+    /// anything else is left alone.
     func toolKey(_ key: KeyPress) -> KeyPress.Result {
         guard key.modifiers.isEmpty else { return .ignored }
         switch key.key {
         case .return: perform(.tools(.finishPath))
         case .escape: perform(.stage(.cancelDrag))
+        // The canvas hands on a Space tap (CanvasViewport.spaceTap): Animate > Play's own intent and reason.
+        case .space:
+            guard help(for: .timeline(.togglePlay)) == nil else { return .ignored }
+            perform(.timeline(.togglePlay))
         default: return .ignored
         }
         return .handled

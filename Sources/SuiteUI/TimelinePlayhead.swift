@@ -7,7 +7,8 @@
 // part (TimelinePlayheadGrab.grounds);
 // the keys at the playhead on the visible rows in stateKeyed, so no lane
 // redraws for it either. The pill and a 16 pt band down the line grab it
-// (TimelinePlayheadGrab); a drag scrubs through TimelineScrubSender, which
+// (TimelinePlayheadGrab), less the token of each key at the playhead, which
+// the lane's own key drag takes; a drag scrubs through TimelineScrubSender, which
 // the ruler's drag uses too and which calls onScrub only when the frame
 // changes (#1297). With a work area, the lanes before its first tick and
 // after its last are dimmed to 60 % here (laneBed at 40 % over them,
@@ -58,7 +59,8 @@ struct TimelinePlayhead: View, BodyCounted {
                     .offset(x: pill.minX, y: pill.minY)
                     .accessibilityIdentifier("suite.timeline.playhead")
             }
-            .contentShape(TimelinePlayheadGrab.shape(lineX: lineX, pill: pill, height: proxy.size.height))
+            .contentShape(TimelinePlayheadGrab.shape(
+                lineX: lineX, pill: pill, height: proxy.size.height, keyYs: keys.map { keyY($0) }))
             .gesture(DragGesture(minimumDistance: 0).onChanged { drag in
                 let frame = mapping.frame(atX: Double(drag.location.x + scroll.x - timelineInset))
                 sender.send(frame, from: playhead, to: onScrub)
@@ -85,12 +87,16 @@ struct TimelinePlayhead: View, BodyCounted {
         let line = TimelinePlayheadGrab.line
         context.fill(Path(CGRect(x: lineX - line / 2, y: 0, width: line, height: size.height)), with: .color(SuiteColor.accent))
         for key in keys {
-            let y = ruler + SuiteSize.timelineLane * (CGFloat(key.row) + 0.5) - scroll.y
-            let shape = TimelineLaneGeometry.keyShape(key.glyph, center: CGPoint(x: lineX, y: y), size: SuiteSize.timelineKeyframe)
+            let shape = TimelineLaneGeometry.keyShape(key.glyph, center: CGPoint(x: lineX, y: keyY(key)), size: SuiteSize.timelineKeyframe)
             let edge = TimelineLook.keyEdge(picked: key.picked)
             lanes.fill(shape, with: .color(TimelineLook.keyFill(picked: key.picked, atPlayhead: true).color()))
             lanes.stroke(shape, with: .color(edge.color.color()), lineWidth: CGFloat(edge.width))
         }
+    }
+
+    /// The layer y of a key at the playhead: its lane's middle under the ruler, scrolled.
+    private func keyY(_ key: TimelinePlayheadKey) -> CGFloat {
+        SuiteSize.timelineRuler + SuiteSize.timelineLane * (CGFloat(key.row) + 0.5) - scroll.y
     }
 
     /// The keys at `playhead` on `tracks`' rows inside `rows`.
@@ -188,9 +194,19 @@ enum TimelinePlayheadGrab {
         return [pill.insetBy(dx: -knockOut, dy: -knockOut)] + labels
     }
 
-    /// What grabs the playhead: the pill and the band, `height` tall.
-    static func shape(lineX: CGFloat, pill: CGRect, height: CGFloat) -> Path {
-        var path = Path(CGRect(x: lineX - band / 2, y: 0, width: band, height: max(height, 0)))
+    /// What grabs the playhead: the pill and the band, `height` tall, less a
+    /// key token (`band` tall) around each y in `keyYs`, so a press on a key at
+    /// the playhead reaches the key and drags it rather than the playhead.
+    static func shape(lineX: CGFloat, pill: CGRect, height: CGFloat, keyYs: [CGFloat] = []) -> Path {
+        var path = Path()
+        var top: CGFloat = 0
+        let bottom = max(height, 0)
+        for y in keyYs.sorted() {
+            let holeTop = min(y - band / 2, bottom)
+            if holeTop > top { path.addRect(CGRect(x: lineX - band / 2, y: top, width: band, height: holeTop - top)) }
+            top = max(top, y + band / 2)
+        }
+        if bottom > top { path.addRect(CGRect(x: lineX - band / 2, y: top, width: band, height: bottom - top)) }
         path.addRect(pill)
         return path
     }

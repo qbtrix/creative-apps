@@ -3,7 +3,8 @@
 // pointer, an arrow steps a tenth of the viewport (Shift a whole one), and
 // no pan scrolls past the scrollable area; and SuiteCanvasNavigating's
 // panStep, the same step as a vector; and that a text field on the canvas
-// keeps Space and the arrows (keysPan, read by CanvasViewport's key handler).
+// keeps Space and the arrows (keysPan, read by CanvasViewport's key handler),
+// and that a Space tap with no pan reaches the host (spaceTap).
 // No SwiftUI rendering. macOS only.
 import AppKit
 import CoreGraphics
@@ -93,6 +94,22 @@ private let zoomedIn = CanvasLayout(
     let source = try String(contentsOf: root.appending(path: "Sources/SuiteUI/CanvasViewport.swift"), encoding: .utf8)
         .filter { !$0.isWhitespace }
     #expect(source.contains("letpans=CanvasLayout.keysPan(firstResponder:NSApp.keyWindow?.firstResponder)"))
-    #expect(source.contains("spaceHeld=pans&&press.phase!=.upreturnpans?.handled:.ignored"))
+    #expect(source.contains("guardpanselse{return.ignored}"))
     #expect(source.contains("guardpans,press.modifiers.isDisjoint"))
+}
+
+/// A Space tap (down, then up with no pan between) is the host's: it reaches `onKey` going up, so Flare's Play
+/// (testKeys "Space didn't play", #2267) runs while the canvas has the keys. A Space-drag stays a pan.
+@MainActor @Test func aSpaceTapReachesTheHostAndASpaceDragDoesNot() throws {
+    #expect(CanvasLayout.spaceTap(phase: .up, held: true, panned: false))
+    #expect(!CanvasLayout.spaceTap(phase: .up, held: true, panned: true), "a Space-drag played")
+    #expect(!CanvasLayout.spaceTap(phase: .up, held: false, panned: false), "a Space let go after focus moved played")
+    #expect(!CanvasLayout.spaceTap(phase: .down, held: false, panned: false))
+    #expect(!CanvasLayout.spaceTap(phase: .repeat, held: true, panned: false))
+    let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        .deletingLastPathComponent()
+    let source = try String(contentsOf: root.appending(path: "Sources/SuiteUI/CanvasViewport.swift"), encoding: .utf8)
+        .filter { !$0.isWhitespace }
+    #expect(source.contains("iftap{_=onKey?(press)}"), "the key handler doesn't hand a tap to the host")
+    #expect(source.contains("spacePanned=true"), "a pan doesn't mark the Space hold as a drag")
 }

@@ -94,7 +94,9 @@ final class FlareJourneyTests: XCTestCase {
         for id in ["suite.sidebar", "suite.inspector", "flare.timeline"] {
             let region = flare.element(id)
             XCTAssert(region.waitForExistence(timeout: 5), "no \(id)")
-            regions[id] = rect(region.frame)
+            // A column's span between the split view's dividers: its `.contain` element is only as wide as its
+            // children, the inspector's content inside the column's padding (280 of 304).
+            regions[id] = rect(flare.regionFrame(id) ?? region.frame)
         }
         regions["toolbar"] = rect(flare.app.toolbars.firstMatch.frame)
         let minimums: [String: (width: Double, height: Double)] = [

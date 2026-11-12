@@ -1,6 +1,7 @@
 // FlareEdit.swift: the Edit menu (docs/blueprints/flare.md, sections 2 and 3.4). Each act is one named undo step (Cut
 // is the workspace's own group: copy, then remove); Copy and Cut return the data the app puts on the pasteboard. An act
-// that can't run gives its menu item's disabled reason in `editHelp` and refuses with that text.
+// that can't run gives its menu item's disabled reason in `editHelp` and refuses with that text. Delete under Direct
+// Select takes the path's picked anchors (the kernel's "Delete Points") when there are any, else the picked items.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -94,10 +95,12 @@ extension FlareWorkspace {
         if layerError == nil { selectLayers(added) }
     }
 
-    /// Deletes the edited layers in one "Delete" step; Direct Select deletes the selected items instead.
+    /// Deletes the edited layers in one "Delete" step; Direct Select deletes the picked anchors, else the selected items.
     public mutating func delete() {
         if let reason = editHelp(.delete) { return refuse(.refused(reason)) }
         guard tool == .directSelect, !selection.isEmpty else { return removeEditLayers("Delete") }
+        // Picked anchors of the path in edit go as one "Delete Points"; the shape stays.
+        if pathInEdit != nil, !anchorSelection.ordered.isEmpty { return runPath(.remove) }
         let shapes = services.shapes, items = selection
         step { try shapes.delete(items, in: &$0) }
         if layerError == nil { setSelection([]) }

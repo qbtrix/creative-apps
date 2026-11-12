@@ -1,6 +1,7 @@
 // TimelinePlayheadTests.swift: TL-8's playhead (timeline packet, acceptance
 // row TL-8). A press inside half the 16 pt band beside the line, down in a
-// lane, grabs it and one 9 pt off doesn't; the pill grabs too. A drag that
+// lane, grabs it and one 9 pt off doesn't, nor one on a key at the playhead;
+// the pill grabs too. A drag that
 // stays on one frame sends one onScrub, and none at the playhead's own frame.
 // The pill reads the playhead in the host's unit. Lanes outside the work
 // area dim from the inset to its first tick and from its last tick to the
@@ -24,6 +25,20 @@ import Testing
         #expect(!shape.contains(CGPoint(x: lineX + 9, y: laneY)))
         #expect(!shape.contains(CGPoint(x: lineX - 9, y: laneY)))
         #expect(shape.contains(CGPoint(x: pill.maxX - 1, y: pill.midY)))
+    }
+
+    /// A key at the playhead leaves a hole in the band, so a press on it drags the key, not the playhead
+    /// (testRetimeDeleteInsertAndLabel: key 29 under the playhead at 29); the line elsewhere and the pill still grab.
+    @Test func aKeyAtThePlayheadIsNotThePlayheadsToGrab() {
+        let lineX: CGFloat = 300
+        let pill = TimelinePlayheadGrab.pill(lineX: lineX, label: "29", width: 600)
+        let keyY = SuiteSize.timelineRuler + SuiteSize.timelineLane * 2.5
+        let shape = TimelinePlayheadGrab.shape(lineX: lineX, pill: pill, height: 400, keyYs: [keyY])
+        #expect(!shape.contains(CGPoint(x: lineX, y: keyY)))
+        #expect(!shape.contains(CGPoint(x: lineX + 7, y: keyY + 7)))
+        #expect(shape.contains(CGPoint(x: lineX, y: SuiteSize.timelineRuler + SuiteSize.timelineLane * 0.5)))
+        #expect(shape.contains(CGPoint(x: lineX, y: SuiteSize.timelineRuler + SuiteSize.timelineLane * 4.5)))
+        #expect(shape.contains(CGPoint(x: pill.midX, y: pill.midY)))
     }
 
     @Test func draggingOverTheSameFrameSendsOneScrub() {

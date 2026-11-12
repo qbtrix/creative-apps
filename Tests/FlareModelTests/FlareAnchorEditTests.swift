@@ -244,4 +244,20 @@ import Testing
         workspace.runPath(.move(dx: 30, dy: 0, drag: nil))
         #expect(Self.anchors(workspace).dropFirst().first?.point.x == before.dropFirst().first.map { $0.point.x + 15 })
     }
+
+    /// Edit > Delete under Direct Select with anchors picked by a marquee deletes those points, one "Delete Points",
+    /// and keeps the shape (testPenThenDragAnchor step 5); with no anchor picked it still deletes the shape.
+    @Test func deleteTakesTheMarqueedAnchorsNotTheShape() throws {
+        var workspace = Self.picked()
+        let before = Self.anchors(workspace), selection = workspace.selection
+        workspace.drag(from: Point(x: 0, y: 35), to: Point(x: 60, y: 45))
+        #expect(workspace.selection == selection && workspace.anchorSelection.ordered.count == 2)
+        #expect(workspace.editHelp(.delete) == nil)
+        workspace.delete()
+        #expect(workspace.selection == selection && workspace.pathInEdit != nil, "Delete took the shape")
+        #expect(Self.anchors(workspace).count == before.count - 2 && workspace.undoActionName == "Undo Delete Points")
+        #expect(Self.anchors(workspace).allSatisfy { $0.point.y < 35 })
+        workspace.delete()
+        #expect(workspace.selection.isEmpty && workspace.pathInEdit == nil)
+    }
 }
