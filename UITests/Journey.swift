@@ -217,6 +217,38 @@ struct Journey {
         return Double(word.filter { $0.isNumber || $0 == "." || $0 == "-" })
     }
 
+    /// The text `element` shows: its label, else its value. A bare SwiftUI Text (a status pill) reaches XCUITest
+    /// with an empty label and its text as the value.
+    func shownText(_ element: XCUIElement) -> String {
+        element.label.isEmpty ? (element.value as? String) ?? "" : element.label
+    }
+
+    /// Whether `root` shows `text` in some element's label or text value within `timeout` seconds, read from one
+    /// snapshot of `root` per try. A `label CONTAINS … OR value CONTAINS …` query asks XCUITest for every element's
+    /// value and can time out while it evaluates (Flare's export sheet, run 42954267514); a walk can't.
+    func shows(_ text: String, in root: XCUIElement, timeout: TimeInterval = 10) -> Bool {
+        func holds(_ node: any XCUIElementSnapshot) -> Bool {
+            node.label.contains(text) || (node.value as? String)?.contains(text) == true || node.children.contains(where: holds)
+        }
+        let deadline = Date(timeIntervalSinceNow: timeout)
+        repeat {
+            if let snapshot = try? root.snapshot(), holds(snapshot) { return true }
+            Thread.sleep(forTimeInterval: 0.3)
+        } while Date() < deadline
+        return false
+    }
+
+    /// Clicks the field or scrub bar `identifier` (a bar opens its typing field on a click), selects its text,
+    /// types `text` and presses Return to commit it.
+    func typeValue(_ text: String, into identifier: String) {
+        let field = element(identifier)
+        XCTAssert(field.waitForExistence(timeout: 5), "no \(identifier) to type into")
+        field.click()
+        app.typeKey("a", modifierFlags: .command)
+        app.typeText(text)
+        app.typeKey(.return, modifierFlags: [])
+    }
+
     /// "New Composition…" becomes "new-composition".
     func slug(_ title: String) -> String {
         title.lowercased().split { !$0.isLetter && !$0.isNumber }.joined(separator: "-")

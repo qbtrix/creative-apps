@@ -81,3 +81,23 @@ func aToggleReservesEverySymbolItCanShow(flag: DesignLayerFlag) throws {
         }
     }
 }
+
+/// The panel passes each group's hidden and locked state down to its rows (no page walk per row, #6199
+/// P4); the toggles it builds that way are the ones `layerToggles(id)` reads from the tree.
+@Test func togglesFromTheGroupAboveMatchTheTreeWalk() throws {
+    var workspace = try sample()
+    try workspace.addNode(.rectangle, frame: rc(130, 140, 20, 20), in: "node-2")
+    for (hide, lock) in [(false, false), (true, false), (false, true), (true, true)] {
+        try workspace.setNodeHidden("node-2", hide)
+        try workspace.setNodeLocked("node-2", lock)
+        try workspace.setNodeHidden("node-4", lock)
+        func walk(_ nodes: [DesignNode], hidden: Bool, locked: Bool) {
+            for node in nodes {
+                let passed = DesignWorkspace.layerToggles(node, hiddenAbove: hidden, lockedAbove: locked)
+                #expect(passed == workspace.layerToggles(node.id), "\(node.id) hide \(hide) lock \(lock)")
+                walk(node.children, hidden: hidden || node.isHidden, locked: locked || node.isLocked)
+            }
+        }
+        walk(try #require(workspace.selectedPage?.nodes), hidden: false, locked: false)
+    }
+}
