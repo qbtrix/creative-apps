@@ -95,6 +95,16 @@ extension BodyCountSuites {
             #expect(flatP95 <= 150, "opening 5,000 top-level layers held the main thread \(flats) ms in one pass (budget p95 150 ms over 20 opens, target 33 ms, #6306)")
         }
 
+        /// files-history P4 cold: the first open in a process, before any document view has run (Finder
+        /// handing a file to an app that just launched). `timing`'s opens all run warm. Cold only when it is
+        /// the process's first Design open, so it runs alone: `--filter RenderBudgetDesignTests/coldOpen`.
+        @Test(.timeLimit(.minutes(2))) func coldOpen() async throws {
+            let open = try await Self.openCrowd()
+            #expect(open.landed, "crowd.design never landed: \(open.step)")
+            print("design cold open busy: \(open.step.busy) ms")
+            #expect(open.step.busy <= 120, "the first crowd.design open in the process held the main thread \(open.step.busy) ms in one pass (budget 120 ms, as timing's warm p95; QB-L12 target 33 ms, #6306)")
+        }
+
         /// files-history P4 in the real window (QD-S11, QB-L9): an empty window opens `crowd.design` (2,000 layers)
         /// as Finder or Recents hands it over. Before it lands the status line shows "Opening <name>…";
         /// the file is read and decoded off the main thread and lands a few ticks later with all its pages.
