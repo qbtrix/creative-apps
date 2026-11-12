@@ -10,7 +10,9 @@
 // in the strip's visible x (timelineVisibleX), plus one key past each edge,
 // get a child, and the value speaks the first 10 keys, so a 20,000 pt lane of
 // 400 keys doesn't flood the tree (#1800). A child is the 16 pt token, narrowed
-// to the gap to its nearest key (hitWidths), so keys a frame apart don't overlap. Identifiers are opt-in: with a
+// to the gap to its nearest key (hitWidths), so keys a frame apart don't overlap. The children's stack takes
+// its keys' frames as its identity, so a key added or moved builds fresh children: reused ones kept a stale
+// frame, the first key stretched over a key added after it. Identifiers are opt-in: with a
 // timelineIdentifierPrefix P the lane is `P.lane.<id>` and each key child
 // `P.key.<id>.<frame>`; with none nothing inside gets one. Halo sets
 // `halo.timeline` and Flare `flare.timeline`.
@@ -53,6 +55,8 @@ struct TimelineLaneAccess<ID: Hashable & Sendable>: ViewModifier {
                     }
                 }
                 .frame(maxWidth: .infinity, minHeight: SuiteSize.timelineLane, alignment: .topLeading)
+                // Fresh children whenever the keys change: an updated stack stretched its first key over the rest.
+                .id(children.map(\.frame))
             }
     }
 }

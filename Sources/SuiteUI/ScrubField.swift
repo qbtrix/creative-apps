@@ -13,7 +13,8 @@
 // tenth; a modifier change re-anchors so nothing jumps), click or press
 // Return to type (Return or a click away commits, Escape cancels; after
 // Return or Escape the field has the keys again), arrows step with the same
-// modifiers, and the bar takes Home and End. A click or drag gives it the
+// modifiers, and the bar takes Home and End, ahead of any menu item bound to
+// the same bare key (ScrubKeyMonitor). A click or drag gives it the
 // keys (focus interactions `.edit`), with or without keyboard navigation. Hover shows a dotted underline under the
 // value; focus draws the 2 pt accent ring 1 pt outside; disabled draws at 40%.
 // A ScrubTrack lets the bar move along a non-linear track (Photo's log gamma);
@@ -67,6 +68,8 @@ public struct ScrubField: View {
     @FocusState private var isFocused: Bool
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.controlActiveState) private var activeState
+    @State private var keys = ScrubKeyMonitor()
 
     /// `label` names the field for VoiceOver and the typing field; it is not
     /// drawn (InspectorRow draws the label). `step` defaults to
@@ -112,6 +115,9 @@ public struct ScrubField: View {
         let ring = isFocused || editing || bar?.preview == .focus
         let invalid = draft.map { !NumericInput.accepts($0) } ?? false
         let radius = bar == nil ? SuiteRadius.field : SuiteRadius.row
+        // The keys go to the field before the menu bar while it holds them (ScrubKeyMonitor).
+        let holdsKeys = isFocused && !editing && isEnabled && activeState == .key
+        let _ = (keys.handle = { take($0) })
         Group {
             if let bar { barBody(bar) } else { valueText(SuiteColor.textPrimary) }
         }
@@ -136,6 +142,8 @@ public struct ScrubField: View {
         .focusEffectDisabled()
         .onHover { hovering = $0 }
         .onKeyPress(keys: [.upArrow, .downArrow, .leftArrow, .rightArrow, .home, .end, .return, .space]) { press($0) }
+        .onChange(of: holdsKeys, initial: true) { _, holds in keys.watch(holds) }
+        .onDisappear { keys.watch(false) }
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: hovering)
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: anchor == nil)
         .help(label)
@@ -302,25 +310,32 @@ public struct ScrubField: View {
     }
 
     private func press(_ press: KeyPress) -> KeyPress.Result {
-        guard draft == nil, isEnabled else { return .ignored }
-        let key: ScrubKey
+        let (shift, option) = (press.modifiers.contains(.shift), press.modifiers.contains(.option))
         switch press.key {
-        case .upArrow, .rightArrow: key = .increment
-        case .downArrow, .leftArrow: key = .decrement
-        case .home where bar != nil: key = .home
-        case .end where bar != nil: key = .end
-        case .return, .space:
-            beginTyping()
-            return .handled
+        case .upArrow, .rightArrow: return take(.step(.increment, shift: shift, option: option)) ? .handled : .ignored
+        case .downArrow, .leftArrow: return take(.step(.decrement, shift: shift, option: option)) ? .handled : .ignored
+        case .home: return take(.step(.home, shift: shift, option: option)) ? .handled : .ignored
+        case .end: return take(.step(.end, shift: shift, option: option)) ? .handled : .ignored
+        case .return, .space: return take(.type) ? .handled : .ignored
         default: return .ignored
         }
+    }
+
+    /// A key on the field, from its own key press or ScrubKeyMonitor: an arrow steps it, Home and End take a bar
+    /// to its ends, Return and Space open the typing field. False for a key it doesn't take now.
+    private func take(_ press: ScrubKeyMonitor.Press) -> Bool {
+        guard draft == nil, isEnabled else { return false }
+        guard case .step(let key, let shift, let option) = press else {
+            beginTyping()
+            return true
+        }
+        guard bar != nil || (key != .home && key != .end) else { return false }
         let eventTime = NSApp.currentEvent?.timestamp ?? ProcessInfo.processInfo.systemUptime
         let changed = set(position: ScrubValue.pressed(
-            key, from: track.position(value), shift: press.modifiers.contains(.shift),
-            option: press.modifiers.contains(.option), on: track))
+            key, from: track.position(value), shift: shift, option: option, on: track))
         if changed && bar != nil { report(eventTime, series: ScrubProbe.keySeries) }
         if ends.stepped() { onEnd() }
-        return .handled
+        return true
     }
 
     /// VoiceOver's increment and decrement, and XCUI's adjust, on the bar.
