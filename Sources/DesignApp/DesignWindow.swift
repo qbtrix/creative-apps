@@ -14,8 +14,10 @@
 // Files: Open and Save As use AppKit's panels. Open fills this window only while
 // it holds no file (DesignWorkspace.takesOpenedFile); otherwise the chosen file
 // opens in a new window, so Open never loses work. An open shows "Opening <name>…"
-// in the status line at once and reads and decodes the file off the main thread;
-// the document lands on the main actor (files-history P4). Save writes to the file the
+// in the status line at once and reads and decodes the file off the main thread,
+// looking up the document views' SF Symbols beside it (`documentSymbols`), so even
+// a process's first open lands without a catalog read; the document lands on the
+// main actor (files-history P4). Save writes to the file the
 // window opened or last saved (DesignWorkspace.documentURL), after finishing any
 // text being typed. New File clears that URL, so Save then asks for a name; Undo
 // and Redo of New File swap it back with the document they restore, so Save
@@ -503,10 +505,15 @@ struct DesignWindow: View, BodyCounted {
         let filing = model.services.filing
         openBegan = ProcessInfo.processInfo.systemUptime
         note = "Opening \(name)…"
+        let symbols = Self.documentSymbols
         Task {
+            let warm = Task.detached(priority: .userInitiated) {
+                for symbol in symbols { _ = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?.size }
+            }
             let read = await Task.detached(priority: .userInitiated) {
                 Result { () throws -> DesignDocument in try filing.decode(Data(contentsOf: url)) }
             }.value
+            await warm.value
             switch read {
             case .success(let document):
                 model.open(document, at: url)
@@ -520,6 +527,15 @@ struct DesignWindow: View, BodyCounted {
                 problem = .opening(name, Self.reason(error))
             }
         }
+    }
+
+    /// The SF Symbols a landing document's Layers rows, palette, toolbar and inspector draw. A
+    /// process's first lookup of each reads the symbol catalog, so `open` looks them up off the main
+    /// thread while the file decodes, and the landing pass doesn't pay for it (files-history P4 cold).
+    private static var documentSymbols: [String] {
+        DesignNodeKind.allCases.map(\.systemImage) + DesignLayerFlag.allCases.flatMap(\.symbols)
+            + DesignTool.allCases.map(\.systemImage) + DesignToolbarItem.allCases.map(\.systemImage)
+            + DesignAlignEdge.allCases.map(\.systemImage) + ["plus", "trash", "doc"]
     }
 
     /// Writes over the file the window opened or last saved; with none, it is Save As.
