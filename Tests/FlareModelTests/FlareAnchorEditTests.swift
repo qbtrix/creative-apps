@@ -261,3 +261,34 @@ import Testing
         #expect(workspace.selection.isEmpty && workspace.pathInEdit == nil)
     }
 }
+
+extension FlareAnchorEditTests {
+    /// testPenThenDragAnchor on the model, scene points of the 550 by 400 stage: a four-point pen path (the second
+    /// dragged, so smooth), closed on the first; Direct Select picks it, drags the smooth anchor 30 right, Option-drags
+    /// its out handle 30 down; a marquee over the last two anchors and Delete leave two anchors. Known issue until
+    /// creative-core's `PathContour.close()` folds a closing curve whose end handle sits on the first point: the two
+    /// left anchors write a cubic back to the first (the second keeps its out handle), and reading it back keeps a
+    /// third anchor on the first. Drop the `withKnownIssue` with the core bump that fixes it.
+    @Test func penPathMarqueeAndDeleteLeaveTwoAnchors() throws {
+        var workspace = FlareWorkspace(services: .built)
+        workspace.newDocument()
+        workspace.selectTool(.pen)
+        let corners = [Point(x: 110, y: 80), Point(x: 275, y: 80), Point(x: 275, y: 240), Point(x: 110, y: 240)]
+        for (i, corner) in corners.enumerated() {
+            workspace.drag(from: corner, to: i == 1 ? Point(x: 330, y: 60) : corner)
+        }
+        workspace.drag(from: corners[0], to: corners[0])
+        workspace.selectTool(.directSelect)
+        workspace.drag(from: Point(x: 192.5, y: 240), to: Point(x: 192.5, y: 240))
+        #expect(Self.anchors(workspace).count == 4, "\(Self.anchors(workspace))")
+        workspace.drag(from: corners[1], to: Point(x: 305, y: 80))
+        let out = Self.scene(workspace, try #require(Self.anchors(workspace).dropFirst().first?.handleOut))
+        workspace.drag(from: out, to: Point(x: out.x, y: out.y + 30), modifiers: [.option])
+        workspace.drag(from: Point(x: 55, y: 200), to: Point(x: 319, y: 280))
+        #expect(workspace.anchorSelection.ordered.count == 2, "\(workspace.anchorSelection.ordered)")
+        workspace.delete()
+        withKnownIssue("creative-core reads the closing curve back as a third anchor on the first") {
+            #expect(Self.anchors(workspace).count == 2, "\(Self.anchors(workspace))")
+        }
+    }
+}
