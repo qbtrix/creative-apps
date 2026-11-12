@@ -22,7 +22,10 @@
 // counter reads this test's windows, never a parallel suite's), the root hosting view's
 // layout passes, their time and (`longestLayout`) the longest one, the per-step p50 / p95 (FrameProbe's nearest
 // rank), the slowest step and the opening (the slower of the press and the
-// first sample). `expectBodies` gates a body count; `expectP95` judges time and
+// first sample), the `stall` (how late a 120 Hz tick woke) and the `busy`
+// (the longest run-loop pass, wake to idle, Core Animation's commit included).
+// A tick's lateness has a floor of about 30 ms in the test process even with
+// no window open, so a main-thread stall budget (QB-L12) gates `busy`. `expectBodies` gates a body count; `expectP95` judges time and
 // belongs only in tests Tests/perf-suites.txt lists.
 //
 // What a test process can't drive: it is never the active app, so every press
@@ -64,13 +67,41 @@ struct RenderStep: CustomStringConvertible {
     /// end of the step before it. Work SwiftUI runs from the run loop's observers, such as a List landing its
     /// rows, blocks there, outside every timed step (#6306).
     var stall: Double = 0
+    /// The longest the main thread stayed busy in one run-loop pass, from waking to going idle again, its
+    /// observers (layout, Core Animation's commit) included: a main-thread stall as QB-L12 counts it.
+    var busy: Double = 0
 
     var description: String {
         "RENDER-BUDGET \(name): steps \(steps) | window bodies \(bodies.map(String.init) ?? "n/a") | layout passes "
             + "\(layouts) (\(String(format: "%.1f", layoutMilliseconds)) ms) | step p50 \(String(format: "%.2f", p50)) ms "
             + "p95 \(String(format: "%.2f", p95)) ms slowest \(String(format: "%.2f", slowest)) ms "
-            + "opening \(String(format: "%.2f", opening)) ms stall \(String(format: "%.2f", stall)) ms"
+            + "opening \(String(format: "%.2f", opening)) ms stall \(String(format: "%.2f", stall)) ms "
+            + "busy \(String(format: "%.2f", busy)) ms"
     }
+}
+
+/// Times the main run loop's passes while it lives: from each wake (`afterWaiting`, before any other
+/// observer) to the next idle (`beforeWaiting`, after every other observer, Core Animation's commit included).
+/// Main thread only.
+private final class BusyMeter {
+    private(set) var longest = 0.0
+    private var woke = CFAbsoluteTimeGetCurrent()
+    private var observers: [CFRunLoopObserver] = []
+
+    init() {
+        let wake = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.afterWaiting.rawValue, true, CFIndex.min) {
+            [weak self] _, _ in self?.woke = CFAbsoluteTimeGetCurrent()
+        }
+        let idle = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, CFIndex.max) {
+            [weak self] _, _ in
+            guard let self else { return }
+            self.longest = max(self.longest, (CFAbsoluteTimeGetCurrent() - self.woke) * 1000)
+        }
+        observers = [wake, idle].compactMap { $0 }
+        observers.forEach { CFRunLoopAddObserver(CFRunLoopGetMain(), $0, .commonModes) }
+    }
+
+    func stop() { observers.forEach { CFRunLoopObserverInvalidate($0) } }
 }
 
 /// The harness's borderless window, allowed to be key so a test's key presses reach it. It refuses key while a
@@ -139,14 +170,17 @@ private final class KeyCapableWindow: NSWindow {
         let layoutTime = host.layoutTime
         stepTimes = []
         stalls = []
+        let busy = BusyMeter()
         try await interaction()
         try await settle(100)
+        busy.stop()
         let times = stepTimes.sorted()
         let step = RenderStep(
             name: name, steps: times.count, bodies: bodies().map { $0 - (before ?? 0) },
             layouts: host.layouts - layouts, layoutMilliseconds: host.layoutTime - layoutTime,
             p50: SuiteFrameProbe.nearestRank(times, 0.5) ?? 0, p95: SuiteFrameProbe.nearestRank(times, 0.95) ?? 0,
-            slowest: times.last ?? 0, opening: stepTimes.prefix(2).max() ?? 0, stall: stalls.max() ?? 0)
+            slowest: times.last ?? 0, opening: stepTimes.prefix(2).max() ?? 0, stall: stalls.max() ?? 0,
+            busy: busy.longest)
         print(step)
         return step
     }
