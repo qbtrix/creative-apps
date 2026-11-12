@@ -2,7 +2,8 @@
 // client in the support folder a journey passes as `-SuiteSupportDir` (preferences.json, FileStore's
 // {"revision", "value"} envelope; AIAccessGrants' `perApp[<app>]["aiAccess.<client>"] = "alwaysForClient"`), so
 // the app runs the call with no approval sheet. `runLive` sends one `live/run` to the app's newest socket in
-// ~/Library/Application Support/AfterGlow/live (`<app>-<pid>.sock`, LiveCommandChannel) and returns its reply.
+// ~/Library/Application Support/AfterGlow/live (`<app>-<pid>.sock`, LiveCommandChannel) and returns its reply. That
+// ~ is the account's real home (`realHome`), not the sandboxed runner's container.
 import Foundation
 import XCTest
 
@@ -36,9 +37,15 @@ enum JourneyLive {
         return result
     }
 
+    /// The user's home as the app sees it. The runner is sandboxed, so its NSHomeDirectory() is its container's
+    /// Data folder; the app isn't, and listens under the account's real home (the passwd entry).
+    static var realHome: String {
+        getpwuid(getuid()).flatMap { $0.pointee.pw_dir.map { String(cString: $0) } } ?? NSHomeDirectory()
+    }
+
     /// The newest `<app>-*.sock` in the live folder.
     static func socket(of app: String) throws -> String {
-        let dir = NSHomeDirectory() + "/Library/Application Support/AfterGlow/live"
+        let dir = realHome + "/Library/Application Support/AfterGlow/live"
         let names = ((try? FileManager.default.contentsOfDirectory(atPath: dir)) ?? [])
             .filter { $0.hasPrefix(app + "-") && $0.hasSuffix(".sock") }
         let dated = names.map { name -> (String, Date) in
