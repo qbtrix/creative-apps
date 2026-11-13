@@ -68,6 +68,9 @@ struct DesignEditor: View, BodyCounted {
     /// `model` once the landing reaches `stage`, an empty workspace (its part's empty state) before.
     private func staged(_ stage: Int) -> DesignWorkspace { landed >= stage ? model : Self.empty }
 
+    /// The inspector column's width: the editor's panel and its inset on both sides.
+    static let inspectorWidth = SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
+
     /// The commands beside the title, then the trailing ones, in toolbar order.
     private static let documentItems: [DesignToolbarItem] = [.newFile, .open, .save]
     private static let trailingItems: [DesignToolbarItem] = [.undo, .redo, .history, .zoomOut, .fit, .zoomIn]
@@ -86,7 +89,7 @@ struct DesignEditor: View, BodyCounted {
             subtitle: DesignSaveStatus.subtitle(model),
             documentActions: Self.documentItems.map { action($0) },
             actions: Self.trailingItems.map { action($0) },
-            inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
+            inspectorWidth: Self.inspectorWidth
         ) {
             DesignSidebarTabs(model: staged(2), perform: perform)
         } content: {
