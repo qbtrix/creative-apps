@@ -1,5 +1,8 @@
 // SuiteSidebarList.swift: the system sidebar List SuiteWindow's sections inits
 // draw, one Section per SidebarSection (SidebarSectionHeader, SidebarNode rows).
+// A section with an add button draws its header as the section's first row,
+// not the List's own header: the List folds a section header into one heading
+// element, so a button there never reaches accessibility (#4831).
 // `onSelect` gets a selection; `onToggle`, `onMove` and `onRename` turn on a row
 // toggle click, a drag reorder within a section's top-level rows and a
 // double-click rename (nil turns that gesture off). A rename can be refused:
@@ -58,10 +61,11 @@ public struct SuiteSidebarList: View {
         List(selection: Binding(get: { selection }, set: { id in if let id { onSelect(id) } })) {
             ForEach(sections) { section in
                 Section {
+                    if section.addAction != nil { SidebarSectionHeader(section: section).asRow }
                     ForEach(section.items) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
                         .onMove(perform: moveAction(in: section.id))
                 } header: {
-                    SidebarSectionHeader(section: section)
+                    if section.addAction == nil { SidebarSectionHeader(section: section) }
                 }
             }
         }
