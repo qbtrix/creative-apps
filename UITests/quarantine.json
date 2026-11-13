@@ -103,5 +103,16 @@
     "reason": "New with #6039. On GitHub's GPU-less macOS runner every tool's case waits out its 300 s limit in the shared PixelMover settle and idle wait, the same wait #6075 owns, so the shard hits its 75 min timeout (run 40951412671). The marquee and lasso drags stay covered by GestureContractTests' photo rows. Owned by #6075; renewed 10-31 for 48 h, the owner issue is still open. Renewed 11-01 to 11-04: owner still open; beta-cut fixes in progress. Renewed 11-11 to 11-18: deferred past beta (captain 11-05); owner still open.",
     "expires": "2026-11-18",
     "scope": "all"
+  },
+  {
+    "test": "AppSnapshotTests.BodyCountSuites/GestureContractTests/photo",
+    "owner": "#6344",
+    "reason": "Quarantined by the fast lane: fails on dev at 8de0a7f (dev-red #6342) with no culprit to revert; #6344 owns the fix",
+    "expires": "2026-11-14",
+    "lane": {
+      "red": "#6342",
+      "range": "main..8de0a7f",
+      "until": "2026-11-14T14:22:43Z"
+    }
   }
 ]
