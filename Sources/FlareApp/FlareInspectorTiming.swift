@@ -2,9 +2,7 @@
 // FlareTimingRow is a Span picker over the layer's keyframe spans and an
 // Easing button (`flare.inspector.easing`) reading the span's preset name, or
 // "Custom", drawn like the Span picker's value with a chevron, which opens
-// FlareEasingPopover. The button is as wide as its widest name whatever it
-// reads, so the popover on its leading edge never moves under a drag. It only
-// reads the editor and
+// FlareEasingPopover. It only reads the editor and
 // calls the window's Model easing closures: every edit is one undo step.
 import FlareCore
 import FlareModel
@@ -39,14 +37,7 @@ struct FlareTimingRow<Editor: EasingEditing>: View {
                 Button { showsPopover = true } label: {
                     // Drawn like the Span picker's value above it, so it reads as a control.
                     HStack(spacing: SuiteSpacing.xs) {
-                        // Every name it can read is laid out, only the current one drawn, so the button keeps
-                        // its frame from "Ease Out" to "Custom" and the popover on its leading edge stays put
-                        // under a handle drag.
-                        ZStack(alignment: .trailing) {
-                            ForEach(names, id: \.self) { Text($0).hidden() }
-                            Text(easingName)
-                        }
-                        .font(SuiteFont.inspectorValue)
+                        Text(easingName).font(SuiteFont.inspectorValue)
                         Image(systemName: "chevron.right").imageScale(.small).foregroundStyle(SuiteColor.textSecondary)
                             .accessibilityHidden(true)
                     }
@@ -64,9 +55,6 @@ struct FlareTimingRow<Editor: EasingEditing>: View {
             }
         }
     }
-
-    /// Every name the Easing button can read.
-    private var names: [String] { EasingPreset.allCases.map(\.title) + ["Custom", "None"] }
 
     /// The selected span's preset name, "Custom" off every preset, "None" with no span.
     private var easingName: String {
