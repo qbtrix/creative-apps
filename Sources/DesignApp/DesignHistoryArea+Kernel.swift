@@ -2,9 +2,9 @@
 // (design/autosave-history DA-2). DesignHistoryArea keeps whether the panel shows as its own
 // state, so the toggle itself never runs the window's body (the narrower canvas still reports
 // its new viewport), and publishes that to View > Show History
-// as the focused scene value `designHistoryPanel`. Shown, SuiteUI's HistoryPanel sits in a
-// GlassPanel beside the editor at the window's trailing edge, so the editor's columns (the
-// inspector included) narrow to make room, on the workspace's `historyListing`; a click or
+// as the focused scene value `designHistoryPanel`. Shown, SuiteUI's HistoryPanel sits beside the
+// editor at the window's trailing edge through `.suiteSidePanel`, or in the inspector column's
+// place when the window is too narrow for both (#4291), on the workspace's `historyListing`; a click or
 // Return hands the state to `jump`, and a refusal goes to the status line through `onNote`.
 // `.autosaveRecovery` reads the workspace through AutosaveHooks: the open file's name, whether it
 // is dirty, its `recoveryBytes()` and `restore` for a copy left behind (DesignRecovery+Kernel.swift).
@@ -72,10 +72,10 @@ struct DesignHistoryArea: ViewModifier {
         let shown = DesignHistoryShown(isShown: isShown) { toggled.toggle() }
         // A sibling, not a trailing safeAreaInset: the editor's NavigationSplitView ignores the
         // inset, so its inspector stayed full width under the panel (#4072).
-        return HStack(spacing: 0) {
-            content.environment(\.designHistory, shown)
-            if isShown { Self.panel(model.historyListing, onJump: jumped) }
-        }
+        return content.environment(\.designHistory, shown)
+            .suiteSidePanel(isShown: isShown, inspectorWidth: DesignEditor.inspectorWidth) {
+                Self.panelContent(model.historyListing, onJump: jumped)
+            }
         .focusedSceneValue(\.designHistoryPanel, shown)
         .autosaveRecovery(hooks, folder: Self.folder, delay: 2, edits: model.documentSession.currentToken)
     }
@@ -135,20 +135,24 @@ struct DesignHistoryArea: ViewModifier {
         listing.steps.count == 1 ? "1 step" : "\(listing.steps.count) steps"
     }
 
-    /// The panel on `listing` under its "History" title and step count, at the editor's panel
+    /// The panel on `listing` as it sits beside the editor: in a GlassPanel at the editor's panel
     /// width, inset from the window's edge (#3945).
     @MainActor static func panel(_ listing: HistoryListing, onJump: @escaping @MainActor (Int) -> Void) -> some View {
-        GlassPanel {
-            VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-                header(listing)
-                HistoryPanel(listing: listing, onJump: onJump)
-                    .frame(maxHeight: .infinity, alignment: .top)
-            }
+        GlassPanel { panelContent(listing, onJump: onJump) }
+            .frame(width: SuiteSize.editorPanelWidth)
+            .padding(SuiteSpacing.s)
+    }
+
+    /// The rows on `listing` under the "History" title and step count; `.suiteSidePanel` puts them
+    /// beside the editor or, in a narrow window, in the inspector column (#4291).
+    @MainActor static func panelContent(_ listing: HistoryListing, onJump: @escaping @MainActor (Int) -> Void) -> some View {
+        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+            header(listing)
+            HistoryPanel(listing: listing, onJump: onJump)
+                .frame(maxHeight: .infinity, alignment: .top)
         }
-        .frame(width: SuiteSize.editorPanelWidth)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(panelID)
-        .padding(SuiteSpacing.s)
     }
 
     /// "History" in the headline font, the step count after it in secondary text; one header
