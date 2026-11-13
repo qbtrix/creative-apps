@@ -4,12 +4,13 @@
 // 2. Title.flare dropped on the stage opens in a new window.
 // 3. logo.svg dropped on the stage: its group becomes a layer, the status reads "Placed logo.svg: 1 layer." and
 //    nothing opens.
-// 4. File > Open In ▸ Halo: Halo starts with the scene (flare-in-halo, SJ17's path).
+// 4. File > Open In ▸ offers no Halo yet: a .flare's only reader is Flare (SuiteTypeRegistry.standard) until
+//    flare-in-halo FH-1 adds Halo, which then starts with the scene (SJ17's path). Until then the step checks
+//    the submenu lists no Halo and the test ends in a skip naming FH-1, so steps 1-3 still count.
 // The files are dragged from a small floating window the test runner shows, as a person drags from a folder
 // window (`dragFile`, Journey+FileDrag.swift). Every file lives in this test's own temp folder. One shot per
 // step, `flare-file-flow-<step>`. FL-7 turned it on once the drop, Open Recent and Open In ran on live
 // services (FL-3, FL-4, SF-8).
-import AppKit
 import XCTest
 
 final class FlareFileFlowJourneyTests: XCTestCase {
@@ -83,27 +84,16 @@ final class FlareFileFlowJourneyTests: XCTestCase {
         flare.shot("file-flow-3-svg-placed")
         XCTAssertEqual(flare.app.windows.count, windows + 1, "dropping logo.svg opened a window")
 
-        // 4. File > Open In ▸ Halo: Halo starts with the scene.
+        // 4. File > Open In ▸: no Halo until flare-in-halo FH-1 (Halo refuses .importAnimation till then).
         file.click()
         let openIn = file.menuItems["Open In"]
         XCTAssert(openIn.waitForExistence(timeout: 5), "File has no Open In")
-        XCTAssert(openIn.isEnabled, "Open In is off with Title.flare open and saved")
         openIn.hover()
-        let halo = openIn.menuItems["Halo"]
-        XCTAssert(halo.waitForExistence(timeout: 5), "Open In doesn't offer Halo for a .flare")
+        XCTAssertFalse(openIn.menuItems["Halo"].waitForExistence(timeout: 2),
+                       "Open In offers Halo for a .flare: flare-in-halo FH-1 landed, so turn the Halo half of step 4 on")
         flare.shot("file-flow-4-open-in", screen: true)
-        halo.click()
-        addTeardownBlock { @MainActor () async -> Void in
-            NSRunningApplication.runningApplications(withBundleIdentifier: "org.creativesuite.halo").forEach { $0.terminate() }
-        }
-        let started = NSPredicate { _, _ in
-            !NSRunningApplication.runningApplications(withBundleIdentifier: "org.creativesuite.halo").isEmpty
-        }
-        XCTAssertEqual(XCTWaiter.wait(for: [expectation(for: started, evaluatedWith: nil)], timeout: 30), .completed,
-                       "Open In ▸ Halo started no Halo")
-        let bundle = try XCTUnwrap(
-            NSRunningApplication.runningApplications(withBundleIdentifier: "org.creativesuite.halo").first?.bundleURL)
-        XCTAssert(XCUIApplication(url: bundle).windows.firstMatch.waitForExistence(timeout: 30),
-                  "Halo made no composition window for the scene")
+        flare.press(.escape)
+        flare.press(.escape)
+        throw XCTSkip("step 4's Open In ▸ Halo waits on flare-in-halo FH-1: no other app reads a .flare yet")
     }
 }
