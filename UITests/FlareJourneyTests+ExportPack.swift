@@ -4,9 +4,8 @@
 // File > Export… shows the MP4 and GIF chips; GIF with Loop forever writes scene-1.gif, 48 frames that loop
 // forever; MP4 writes scene-1.mp4 (an `ftyp` box), read only once the run says it finished, since the movie writer
 // fills its file while frames arrive. Steps 1 to 3 run on the live services (LiveMedia) since FV-7.
-// Step 4 relaunches on `-FlareFixture bounce` with `-FlareExportFrameDelay 200` (the fakes, 200 ms per frame, so the
-// 48-frame run lasts about 10 s; at their 20 ms default it ended before the click) because live frames have no pause,
-// so Cancel on a running MP4 is only reachable there; it closes the sheet and leaves the folder empty (the fakes keep
+// Step 4 relaunches on `-FlareFixture bounce` (the fakes, 20 ms per frame) because live frames have no pause, so
+// Cancel on a running MP4 is only reachable there; it closes the sheet and leaves the folder empty (the fakes keep
 // MP4 bytes in memory, so the empty folder is a floor, not the proof; FakeVideoMedia's cancel log is, in the Model
 // tests). Hovering the GIF chip shows its hover state (#5019). One shot per step, `flare-export-pack-<step>`.
 import ImageIO
@@ -71,9 +70,7 @@ final class FlareExportPackJourneyTests: XCTestCase {
         close(flare)
         let fresh = folder.appending(path: "Fresh")
         try FileManager.default.createDirectory(at: fresh, withIntermediateDirectories: true)
-        let fakes = Journey(
-            "Flare", self,
-            arguments: ["-FlareFixture", "bounce", "-FlareExportFrameDelay", "200", "-FlareExportTo", fresh.path])
+        let fakes = Journey("Flare", self, arguments: ["-FlareFixture", "bounce", "-FlareExportTo", fresh.path])
         XCTAssert(fakes.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened on the fakes")
         let again = openSheet(fakes)
         fakes.element("flare.export.format.mp4").click()
