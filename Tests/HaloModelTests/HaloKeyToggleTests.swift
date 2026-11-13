@@ -100,13 +100,13 @@ func parentChoicesNeverOfferACycle(_ services: HaloServices) throws {
 
 @Test func blendChoicesListEveryModeWithItsTitle() {
     let choices = HaloProject().blendChoices
-    #expect(choices.count == 16)
+    #expect(choices.count == 18)
     #expect(choices.map(\.mode) == BlendMode.allCases)
     #expect(choices.first?.title == "Normal")
     #expect(choices.contains { $0.mode == .multiply && $0.title == "Multiply" })
     #expect(choices.contains { $0.mode == .colorDodge && $0.title == "Color Dodge" })
     #expect(choices.contains { $0.mode == .softLight && $0.title == "Soft Light" })
-    #expect(Set(choices.map(\.title)).count == 16)
+    #expect(Set(choices.map(\.title)).count == 18)
 }
 
 @Test(arguments: toggleServices)

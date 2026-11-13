@@ -35,8 +35,8 @@ import Testing
     @Test func pathInEditIsTheOneDirectSelectedShape() throws {
         var workspace = Self.picked()
         let edit = try #require(workspace.pathInEdit)
-        // Today's rectangle path draws its closing edge as a line back to the start, a fifth anchor on the first.
-        #expect(edit.path.contours.first?.anchors.count == 5 && workspace.pathHelp == nil, "\(edit.path.elements)")
+        // creative-core folds the rectangle path's closing line back onto the first anchor, so it reads as four anchors.
+        #expect(edit.path.contours.first?.anchors.count == 4 && workspace.pathHelp == nil, "\(edit.path.elements)")
         workspace.selectTool(.select)
         #expect(workspace.pathInEdit == nil)
         #expect(workspace.pathHelp == nil, "off Direct Select only no document or a locked layer stops a path (FP-6)")
@@ -177,7 +177,7 @@ import Testing
         workspace.dragChanged(from: Point(x: 2, y: 2), to: Point(x: 110, y: 50))
         #expect(workspace.marquee != nil)
         workspace.endDrag()
-        #expect(workspace.selection == selection && workspace.anchorSelection.ordered.count == 5)
+        #expect(workspace.selection == selection && workspace.anchorSelection.ordered.count == 4)
         #expect(workspace.anchorSelection.ordered.allSatisfy { $0.contour == 0 })
     }
 
@@ -239,7 +239,7 @@ import Testing
         let middle = try #require(workspace.stageList?.items.first.map { $0.transform.apply(local) })
         workspace.drag(from: middle, to: middle)
         let before = Self.anchors(workspace)
-        try #require(before.count == 5)
+        try #require(before.count == 4)
         workspace.runPath(.select(anchors: [AnchorRef(contour: 0, index: 1)], rect: nil, extend: false))
         workspace.runPath(.move(dx: 30, dy: 0, drag: nil))
         #expect(Self.anchors(workspace).dropFirst().first?.point.x == before.dropFirst().first.map { $0.point.x + 15 })
@@ -265,10 +265,9 @@ import Testing
 extension FlareAnchorEditTests {
     /// testPenThenDragAnchor on the model, scene points of the 550 by 400 stage: a four-point pen path (the second
     /// dragged, so smooth), closed on the first; Direct Select picks it, drags the smooth anchor 30 right, Option-drags
-    /// its out handle 30 down; a marquee over the last two anchors and Delete leave two anchors. Known issue until
-    /// creative-core's `PathContour.close()` folds a closing curve whose end handle sits on the first point: the two
-    /// left anchors write a cubic back to the first (the second keeps its out handle), and reading it back keeps a
-    /// third anchor on the first. Drop the `withKnownIssue` with the core bump that fixes it.
+    /// its out handle 30 down; a marquee over the last two anchors and Delete leave two anchors. creative-core's
+    /// `PathContour.close()` folds a closing anchor that lands on the first point, so the cubic the two left anchors
+    /// write back to the first reads back as two anchors, not three.
     @Test func penPathMarqueeAndDeleteLeaveTwoAnchors() throws {
         var workspace = FlareWorkspace(services: .built)
         workspace.newDocument()
@@ -287,8 +286,6 @@ extension FlareAnchorEditTests {
         workspace.drag(from: Point(x: 55, y: 200), to: Point(x: 319, y: 280))
         #expect(workspace.anchorSelection.ordered.count == 2, "\(workspace.anchorSelection.ordered)")
         workspace.delete()
-        withKnownIssue("creative-core reads the closing curve back as a third anchor on the first") {
-            #expect(Self.anchors(workspace).count == 2, "\(Self.anchors(workspace))")
-        }
+        #expect(Self.anchors(workspace).count == 2, "\(Self.anchors(workspace))")
     }
 }

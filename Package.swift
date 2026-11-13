@@ -136,7 +136,7 @@ let package = Package(
     platforms: [.macOS("26.0")],
     products: products,
     dependencies: [
-        .package(url: "https://github.com/qbtrix/creative-core", revision: "7966e5a990ce887bbced25b58ee1134a5b170435"),
+        .package(url: "https://github.com/qbtrix/creative-core", revision: "836fc2ea11f44653a85e1b79e4f55a5a07ae6d4e"),
     ],
     targets: targets
 )
