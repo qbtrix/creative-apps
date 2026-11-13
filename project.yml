@@ -68,6 +68,8 @@ targetTemplates:
   Journey:
     type: bundle.ui-testing
     platform: macOS
+    # The runner's extra sandbox rule (the live socket); the file says why.
+    settings: { base: { CODE_SIGN_ENTITLEMENTS: UITests/JourneyRunner.entitlements } }
     sources:
       - path: UITests
         includes: ["Journey*.swift", "Audit.swift", "${target_name}*.swift"]
