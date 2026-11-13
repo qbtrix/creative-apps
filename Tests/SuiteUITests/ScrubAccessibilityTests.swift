@@ -6,7 +6,8 @@
 // element costs the same whatever the range: a slider over -100,000...100,000
 // at step 1 (Halo's X) renders as fast as one over 0...1, where a stepped
 // Slider used to make one tick per step on every body pass. The exact field is
-// the same slider, read by XCUI as its number (#4822). macOS only.
+// the same slider, read by XCUI as its number (#4822). A mixed bar reads
+// "Mixed" as its value, still labelled and adjustable. macOS only.
 import AppKit
 import SuiteUI
 import SwiftUI
@@ -25,6 +26,24 @@ import Testing
     #expect(node.accessibilityPerformIncrement?() == true)
     #expect(node.accessibilityPerformDecrement?() == true)
     #expect(log.values == [46, 44] && log.ends == 2)
+}
+
+/// A mixed bar (several items, different values) reads "Mixed" as its AXValue, the attribute XCUI's `.value`
+/// reads, and VoiceOver hears "Mixed", never the 0 the bar keeps under it (Flare J7 read X as 0 with Ball and Shadow
+/// selected). It keeps its label and stays adjustable.
+@MainActor @Test func aMixedBarReadsMixed() throws {
+    let log = AdjustLog()
+    let window = axWindow(InspectorSliderRow(
+        "X", value: 0, in: -10_000...10_000, step: 0.1, unit: "pt", decimals: 1, mixed: true,
+        onChange: { log.values.append($0) }, onEnd: { log.ends += 1 }
+    ).accessibilityIdentifier("test.x"))
+    defer { window.orderOut(nil) }
+    let bar = try #require(axElement(in: window, identifier: "test.x"), "no mixed bar")
+    let node = bar as AnyObject
+    #expect(node.accessibilityLabel?() == "X")
+    #expect(bar.value(forKey: "accessibilityValue") as? String == "Mixed")
+    #expect(node.accessibilityPerformIncrement?() == true)
+    #expect(log.values.count == 1 && log.ends == 1)
 }
 
 /// The exact field (#4822) is the same adjustable slider: XCUI reads its
@@ -119,3 +138,14 @@ private struct Rows: View {
     }
     return nil
 }
+
+/// The first element under `element` identified `identifier`, in tree order.
+@MainActor private func axElement(in element: Any, identifier: String) -> NSObject? {
+    let node = element as AnyObject
+    if (node.accessibilityIdentifier?() ?? nil) == identifier { return node as? NSObject }
+    for child in (node.accessibilityChildren?() ?? nil) ?? [] {
+        if let found = axElement(in: child, identifier: identifier) { return found }
+    }
+    return nil
+}
+
