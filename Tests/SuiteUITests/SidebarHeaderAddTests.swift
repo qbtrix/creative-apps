@@ -15,18 +15,24 @@ import Testing
             SidebarSection(
                 id: "scenes", title: "Scenes", items: [SidebarItem(id: "bounce", title: "Bounce", systemImage: "film")],
                 addAction: ToolbarAction("New Scene", systemImage: "plus") {}),
+            SidebarSection(id: "library", title: "Library", items: [SidebarItem(id: "all", title: "All", systemImage: "photo")]),
         ]
-        _ = sections
         let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 208, height: 400), styleMask: [.titled],
                               backing: .buffered, defer: false)
         window.contentView = NSHostingView(rootView: SuiteSidebarList(sections: sections, selection: nil, onSelect: { _ in }))
         window.orderFrontRegardless()
         defer { window.orderOut(nil) }
-        spinUntil(timeout: 3) { axLabelledButtons(in: window)["New Scene"] != nil }
-        print(axDump(window, 0))
-        let frame = axLabelledButtons(in: window)["New Scene"]
-        #expect(frame != nil, "no New Scene button in the sidebar's tree")
-        if let frame { #expect(window.frame.contains(frame), "New Scene \(frame) is outside the sidebar \(window.frame)") }
+        // The row also has its title as a heading, and the button sits inside the sidebar, left of its trailing edge.
+        spinUntil(timeout: 3) { (axElements(in: window)["AXButton New Scene"]?.width ?? 0) > 0 }
+        let found = axElements(in: window)
+        let button = found["AXButton New Scene"]
+        #expect(button != nil, "no New Scene button in the sidebar's tree: \(found.keys.sorted())")
+        if let button {
+            #expect(window.frame.insetBy(dx: 1, dy: 0).contains(button), "New Scene \(button) is outside \(window.frame)")
+        }
+        #expect(found["AXHeading Scenes"] != nil, "no Scenes heading: \(found.keys.sorted())")
+        // A section with no add button keeps the List's own header.
+        #expect(found["AXHeading Library"] != nil, "no Library heading: \(found.keys.sorted())")
     }
 }
 
@@ -44,20 +50,12 @@ import Testing
     }
 }
 
-@MainActor private func axDump(_ element: Any, _ depth: Int) -> String {
-    let node = AXNode(object: element as! NSObject)
-    var out = String(repeating: "  ", count: depth) + "\(node.role) '\(node.label)' \(node.frame) \(type(of: node.object))\n"
-    guard depth < 16 else { return out }
-    for child in node.children { out += axDump(child.object, depth + 1) }
-    return out
-}
-
-/// Each labelled button's frame under `element`.
-@MainActor private func axLabelledButtons(in element: Any, depth: Int = 0) -> [String: CGRect] {
-    let node = AXNode(object: element as! NSObject)
+/// Each labelled element's frame under `element`, keyed "<role> <label>".
+@MainActor private func axElements(in element: NSObject, depth: Int = 0) -> [String: CGRect] {
+    let node = AXNode(object: element)
     var found = [String: CGRect]()
-    if node.role == NSAccessibility.Role.button.rawValue, !node.label.isEmpty { found[node.label] = node.frame }
+    if !node.label.isEmpty { found["\(node.role) \(node.label)"] = node.frame }
     guard depth < 16 else { return found }
-    for child in node.children { found.merge(axLabelledButtons(in: child.object, depth: depth + 1)) { $1 } }
+    for child in node.children { found.merge(axElements(in: child.object, depth: depth + 1)) { $1 } }
     return found
 }
