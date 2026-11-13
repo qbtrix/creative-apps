@@ -3,7 +3,8 @@
 // {"revision", "value"} envelope; AIAccessGrants' `perApp[<app>]["aiAccess.<client>"] = "alwaysForClient"`), so
 // the app runs the call with no approval sheet. `runLive` sends one `live/run` to the app's newest socket in
 // ~/Library/Application Support/AfterGlow/live (`<app>-<pid>.sock`, LiveCommandChannel) and returns its reply. That
-// ~ is the account's real home (`realHome`), not the sandboxed runner's container.
+// ~ is the account's real home (`realHome`), not the sandboxed runner's container; the runner may connect there
+// because UITests/JourneyRunner.entitlements allows that one socket name in that folder.
 import Foundation
 import XCTest
 
