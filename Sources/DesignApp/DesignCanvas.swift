@@ -59,7 +59,7 @@ struct DesignCanvas: View {
     /// 400 ms of the landing pass when it came with an opened file (#6354); here it is paid
     /// before the user picks one.
     @MainActor private static var renderWarmup: some View {
-        Canvas { context, size in
+        Canvas { context, size in  // render-contract: allow a one-point warm-up behind the empty state, never over a page
             context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SuiteColor.overlayInk.opacity(0.01)))
         }
         .frame(width: SuiteSize.focusRingGap, height: SuiteSize.focusRingGap)
