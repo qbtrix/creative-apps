@@ -62,7 +62,7 @@ struct DesignCanvas: View {
         Canvas { context, size in
             context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SuiteColor.overlayInk.opacity(0.01)))
         }
-        .frame(width: 1, height: 1)
+        .frame(width: SuiteSize.focusRingGap, height: SuiteSize.focusRingGap)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
