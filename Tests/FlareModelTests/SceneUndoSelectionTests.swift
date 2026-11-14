@@ -1,5 +1,7 @@
 // SceneUndoSelectionTests.swift: undoing Add Scene or redoing Delete Scene moves the selection to a scene that still
-// exists, the removed one's neighbour clamped to the scene list (#570).
+// exists, the removed one's neighbour clamped to the scene list (#570); a scene that was selected when it went is
+// selected again when a redo or undo brings it back, so the sidebar shows its layers (J16), and an unselected one
+// coming and going keeps the selection.
 import FlareCore
 @testable import FlareModel
 import Testing
@@ -38,4 +40,24 @@ private func bounce() -> FlareWorkspace {
     w.selectScene("scene-1")
     w.undo()
     #expect(w.selectedSceneID == "scene-1")
+    w.redo()
+    #expect(w.scenes.count == 2 && w.selectedSceneID == "scene-1")
+}
+
+@Test func redoingAddSceneSelectsTheSceneItBringsBack() {
+    var w = bounce()
+    w.addScene()
+    w.undo()
+    w.redo()
+    #expect(w.scenes.map(\.id) == ["scene-1", "scene-2"] && w.selectedSceneID == "scene-2")
+    #expect(w.ownerLayers?.isEmpty == true)
+}
+
+@Test func undoingDeleteSceneSelectsTheSceneItBringsBack() {
+    var w = bounce()
+    w.addScene()
+    w.removeScene("scene-2")
+    #expect(w.selectedSceneID == "scene-1")
+    w.undo()
+    #expect(w.selectedSceneID == "scene-2")
 }

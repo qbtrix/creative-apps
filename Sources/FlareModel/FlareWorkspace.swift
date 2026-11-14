@@ -38,6 +38,8 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     /// The use cases the workspace edits through; `.live` or `.fake()`.
     public internal(set) var services: FlareServices
     public internal(set) var selectedSceneID: String?
+    /// The scene an edit or undo removed while it was selected; an undo or redo that brings it back selects it again.
+    var displacedSceneID: String?
     public internal(set) var selectedLayerID: String? {
         didSet { if oldValue != selectedLayerID { easingSelection = nil; easingDragSerial &+= 1 } }
     }
@@ -160,7 +162,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     /// and the file path last noted stay.
     mutating func load(_ document: Document) {
         engine = CommandEngine(document: document)
-        selectedSceneID = document.scenes.first?.id
+        (selectedSceneID, displacedSceneID) = (document.scenes.first?.id, nil)
         selectedLayerID = nil
         easingSelection = nil
         layerError = nil
@@ -223,9 +225,17 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
     }
 
     /// Undoes or redoes the last change; nothing to undo or redo is a no-op. A step that changes the machines stops
-    /// the machine preview, and an edited machine the document no longer has leaves nothing edited (#658).
-    public mutating func undo() { if canUndo { historyStep { try $0.undo() } } }
-    public mutating func redo() { if canRedo { historyStep { try $0.redo() } } }
+    /// the machine preview, and an edited machine the document no longer has leaves nothing edited (#658). A scene
+    /// that was selected when it went (a redone Add Scene, an undone Delete Scene) is selected again when it comes
+    /// back; an unselected one coming back leaves the selection alone (#570).
+    public mutating func undo() { if canUndo { historyStep { try $0.undo() }; reselectDisplacedScene() } }
+    public mutating func redo() { if canRedo { historyStep { try $0.redo() }; reselectDisplacedScene() } }
+
+    private mutating func reselectDisplacedScene() {
+        guard let id = displacedSceneID, scenes.contains(where: { $0.id == id }) else { return }
+        displacedSceneID = nil
+        selectScene(id)
+    }
 
     /// Runs `command` as one undo step, then sets the layer selection to
     /// `selection` when it is `.layer`. On a throw nothing changes but `layerError`.
@@ -277,7 +287,7 @@ public struct FlareWorkspace: Sendable, Equatable, HistoryReading {
         engine = next
         layerError = nil
         if editingSymbolID != nil, editingSymbol == nil { exitSymbol() }
-        if let id = selectedSceneID, selectedScene == nil { selectNeighbour(of: id, in: order) }
+        if let id = selectedSceneID, selectedScene == nil { displacedSceneID = id; selectNeighbour(of: id, in: order) }
         if let id = selectedLayerID, ownerLayers?.contains(where: { $0.id == id }) != true {
             selectedLayerID = nil
         }
