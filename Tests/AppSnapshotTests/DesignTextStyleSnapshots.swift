@@ -5,8 +5,9 @@
 // "A isn't a text layer." (-text-style-a-{light,dark}.png); Title and A
 // together read Title's style and set Title only; the Size field's Return
 // commits once, as one "Change Text Style" step, and a drag commits only at
-// its end. The intents the view sends are applied as DesignWindow applies
-// them. The inventory stands in for the tooltips. macOS only.
+// its end; each chip carries its own identifier and Family's is its menu's.
+// The intents the view sends are applied as DesignWindow applies them. The
+// inventory stands in for the tooltips. macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -110,6 +111,21 @@ private let textIDs = [
             family: "System", size: 32, weight: 700, alignment: .leading))
         #expect(node(recorder.model, "node-2")?.textStyle == before)
         #expect(recorder.model.undoActionName == "Undo Change Text Style")
+    }
+
+    /// J11 finds each chip by its own identifier (the audit's `identifier` check), and Family's identifier is its
+    /// menu's, not the row's "Family" label, which a click doesn't open.
+    @Test(.timeLimit(.minutes(1))) func chipsAndTheFamilyMenuAreIdentified() async throws {
+        let w = RenderBudgetWindow(TextPanel(model: cards(["node-5"])), size: CGSize(width: 1440, height: 1600))
+        defer { w.close() }
+        try await w.settle(500)
+        for id in ["text-weight.bold", "text-weight.extra-light", "text-alignment.center", "text-width.auto-width",
+                   "text-width.fixed-width"] {
+            #expect(await w.element("design.inspector.\(id)") != nil, "no design.inspector.\(id)")
+        }
+        _ = try #require(await w.element(DesignControlID.inspectorTextFamily), "no Family row")
+        let role = w.role(DesignControlID.inspectorTextFamily)
+        #expect(role != .staticText && role != nil, "\(DesignControlID.inspectorTextFamily) is a \(String(describing: role))")
     }
 
     @Test func sizeCommitsOnceOnReturn() throws {

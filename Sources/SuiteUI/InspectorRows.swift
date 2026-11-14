@@ -235,6 +235,15 @@ public struct InspectorPickerRow<ID: Hashable & Sendable>: View {
     private let label: String
     /// The value menu the row draws on its right: FrameRateMenu's too (#4362).
     let menu: InspectorValueMenu<ID>
+    private var menuID: String?
+
+    /// This row with its menu identified as `id`. An identifier set on the whole row lands on its label first,
+    /// a static text a click doesn't open.
+    public func menuIdentifier(_ id: String) -> InspectorPickerRow {
+        var named = self
+        named.menuID = id
+        return named
+    }
 
     public init(
         _ label: String, options: [InspectorOption<ID>], selection: ID,
@@ -245,7 +254,7 @@ public struct InspectorPickerRow<ID: Hashable & Sendable>: View {
     }
 
     public var body: some View {
-        InspectorRow(label) { menu }
+        InspectorRow(label) { menu.accessibilityIdentifier(menuID ?? "", isEnabled: menuID != nil) }
     }
 }
 
