@@ -1,7 +1,8 @@
 // DesignCanvas.swift: the canvas of Design's editor shell: the selected page on
 // SuiteUI's CanvasViewport (rulers in points, matching the status bar and the
 // inspector; checkerboard; zoom), with its nodes painted by DesignArtwork, or the
-// empty state with a New File button when nothing is open. Pointer drags go to
+// empty state with a New File button when nothing is open, behind which a
+// one-point Canvas warms the process's GPU path (`renderWarmup`, #6354). Pointer drags go to
 // the workspace as `.drag` with the modifier keys held, and the release as
 // `.endDrag`; the workspace decides what a press hits and which tool acts. The
 // pointer and the pointer handler come from DesignCanvasFeedback. The overlay
@@ -49,7 +50,21 @@ struct DesignCanvas: View {
                 message: "Create a file to lay out frames, shapes and text.",
                 action: ToolbarAction("New File", systemImage: "plus") { perform(.newFile) })
             .accessibilityIdentifier("design.new-file")
+            .background(alignment: .topLeading) { Self.renderWarmup }
         }
+    }
+
+    /// One point the eye can't see, painted by a Canvas while the window is empty. A process's
+    /// first Canvas layer sets up its GPU path (RenderBox's first Metal submits), which took up to
+    /// 400 ms of the landing pass when it came with an opened file (#6354); here it is paid
+    /// before the user picks one.
+    private static var renderWarmup: some View {
+        Canvas { context, size in
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SuiteColor.overlayInk.opacity(0.01)))
+        }
+        .frame(width: 1, height: 1)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
     /// `workspace` at the frame playback shows; itself when nothing plays.
