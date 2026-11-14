@@ -2,8 +2,12 @@
 // FP-3; packet docs/blueprints/suiteui/features/font-picker.md, FP-4). Rows
 // are keyed by family name, so a filter run twice keeps the same ids; a pick
 // reports once, and a pick that changes nothing reports nothing. Choosing a
-// family keeps the size and takes the nearest face. macOS only.
+// family keeps the size and takes the nearest face. The family list shows no
+// scroller (a legacy scroller's page area is an unnamed button with no
+// identifier to the app audit). macOS only.
+import AppKit
 import SuiteModel
+import SwiftUI
 import Testing
 
 @testable import SuiteUI
@@ -22,6 +26,27 @@ import Testing
         let narrowed = FontPicker.rows(Self.families, query: "sys")
         #expect(narrowed.allSatisfy(first.contains), "a filter made up an id: \(narrowed)")
         #expect(FontPicker.rows(Self.families, query: "sys") == narrowed, "a repeated query changed the ids")
+    }
+
+    @Test func theFamilyListShowsNoScroller() throws {
+        let families = (0..<200).map { FontFamily(name: "Family \($0)", faces: [Self.regular]) }
+        let host = NSHostingView(rootView: FontPicker(families: families, pick: Self.start) { _ in }.frame(width: 280))
+        let window = NSWindow(
+            contentRect: CGRect(x: 0, y: 0, width: 320, height: 600), styleMask: [.borderless], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = host
+        window.setFrameOrigin(NSPoint(x: -20_000, y: -20_000))
+        window.orderFrontRegardless()
+        defer { window.close() }
+        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        func scrollViews(_ view: NSView) -> [NSScrollView] {
+            ((view as? NSScrollView).map { [$0] } ?? []) + view.subviews.flatMap(scrollViews)
+        }
+        let lists = scrollViews(host)
+        #expect(!lists.isEmpty, "the picker hosts no list")
+        for list in lists {
+            #expect(!list.hasVerticalScroller || list.verticalScroller?.isHidden == true, "the family list shows a scroller")
+        }
     }
 
     @Test func aPickCallsOnPickOnce() throws {
