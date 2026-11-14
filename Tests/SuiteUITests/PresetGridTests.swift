@@ -2,7 +2,8 @@
 // SuitePresetNavigating rule stops at the edges, where FakePresetNavigating
 // wraps), that an arrow moves on from the focused preset and passes on when
 // none has focus (#2927), that a toggle chip reports On and Off, that each option's
-// identifier lands on its own button (#1148), and that a chip's state change
+// identifier lands on its own button (#1148), that an option with
+// unavailableHelp is a disabled button no arrow lands on (#6205), and that a chip's state change
 // records one `fade-start`/`fade-end` pair on series `chip` with the Reduce
 // Motion switch off (about 0.14 s apart) and on (at once). macOS only.
 import AppKit
@@ -78,6 +79,27 @@ import Testing
     defer { window.orderOut(nil) }
     RunLoop.main.run(until: Date().addingTimeInterval(0.3))
     #expect(axButtons(in: window).map(\.id) == ["p.Square", "p.Wide", ""])
+}
+
+/// An option with `unavailableHelp` stays in the grid as a disabled button, and an arrow skips past it (#6205: the
+/// export sheet dropped a format this Mac can't write instead of showing it off with the reason).
+@MainActor @Test func anUnavailableOptionIsADisabledButtonNoArrowLandsOn() {
+    let app = NSApplication.shared
+    for attribute in ["AXManualAccessibility", "AXEnhancedUserInterface"] {
+        app.accessibilitySetValue(true, forAttribute: NSAccessibility.Attribute(rawValue: attribute))
+    }
+    let options = [
+        InspectorOption(id: 1, title: "JPEG", identifier: "f.JPEG"),
+        InspectorOption(id: 2, title: "HEIC", identifier: "f.HEIC", unavailableHelp: "This Mac can't write HEIC files."),
+    ]
+    #expect(PresetGrid<Int>.target(of: .right, from: 1, in: options, columns: 2, navigation: SuitePresetNavigating()) == nil)
+    let window = NSWindow(
+        contentRect: CGRect(x: 0, y: 0, width: 300, height: 100), styleMask: [.titled], backing: .buffered, defer: false)
+    window.contentView = NSHostingView(rootView: PresetGrid(options: options, selected: 1, columns: 2) { _ in }.padding(20))
+    window.orderFrontRegardless()
+    defer { window.orderOut(nil) }
+    spinUntil { axEnabled(in: window).count == 2 }
+    #expect(axEnabled(in: window) == ["f.JPEG": true, "f.HEIC": false])
 }
 
 /// One chip turned on then off records two fade pairs on series `chip`: about
