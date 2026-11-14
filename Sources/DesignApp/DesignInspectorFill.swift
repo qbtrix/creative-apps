@@ -4,8 +4,8 @@
 // `fillHelp` says why (nothing selected, a locked layer, or gradients not built yet) the switch is off
 // and that reason is its tooltip and a note under it. The switch is SuiteUI's: a gradient shows its
 // GradientEditor (the switch, its stops, colour and angle; GF-3 landed it, gradient-fill DG-u), a solid
-// its `GradientTypeSwitch` alone, both under `design.inspector.fill-type`. While the mouse is down in the
-// editor (a stop drag, an angle scrub) its intents preview on the window's live box (DesignLiveDrag), which
+// its `GradientTypeSwitch` alone, both under `design.inspector.fill-type`. While a pointer drag moves in the
+// editor (a stop drag, an angle scrub; `onPointerDrag`, never a click into its hex field) its intents preview on the window's live box (DesignLiveDrag), which
 // this section and the canvas read, and mouse-up lands them as one step (`.endEditRun`), so the window
 // doesn't run per sample; a click, key or picked colour goes straight to `.fill`. Values in, intents out.
 import DesignModel
@@ -20,7 +20,7 @@ struct DesignInspectorFill: View, BodyCounted {
     #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
     #endif
-    /// The mouse is down in the editor: its intents preview until mouse-up.
+    /// A pointer drag is under way in the editor: its intents preview until mouse-up.
     @State private var pressing = false
 
     var body: some View {
@@ -38,13 +38,10 @@ struct DesignInspectorFill: View, BodyCounted {
                                typeHelp: help) { send($0) }
                     .disabled(help != nil)
                     .help(help ?? "Gradient stops and angle")
-                    .simultaneousGesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { _ in pressing = true }
-                            .onEnded { _ in
-                                pressing = false
-                                perform(.endEditRun)
-                            })
+                    .onPointerDrag(moved: { pressing = true }, ended: {
+                        pressing = false
+                        perform(.endEditRun)
+                    })
             } else {
                 GradientTypeSwitch(type: type, typeID: DesignControlID.inspectorFillType, help: help) {
                     perform(.fill(.type($0)))
