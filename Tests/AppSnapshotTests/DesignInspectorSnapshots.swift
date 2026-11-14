@@ -2,7 +2,7 @@
 // editor's panel width: a page with no layer selected, a rectangle selected
 // (Layer, Frame, Corners, Fill, then Stroke, checked by strokeSitsUnderFill), a locked rectangle (its rows
 // disabled, with the hint saying why in the value column, whose x is checked
-// against the X field's on the hosted view), a rectangle inside a locked group
+// against the X field's on the hosted view, as are the Y, W and H fields'), a rectangle inside a locked group
 // (disabled the same way), and A on `cards` styled: radius 12, opacity 50% and
 // a 4 pt stroke, A's Fill section with its type switch, and A's Transform
 // section. The styled A's Stroke section also gets a shot of its
@@ -142,6 +142,21 @@ import Testing
         let x = try #require(await w.element(DesignControlID.frameField(.x)), "no X field")
         let hint = try #require(await w.element("design.inspector.hint"), "no hint")
         #expect(abs(hint.minX - x.minX) < 1, "the hint starts at \(hint.minX), the X field at \(x.minX)")
+    }
+
+    /// Y, W and H start where X does (design.md 7.3 rule 3), though only X and Y carry a key button.
+    @Test(.timeLimit(.minutes(1))) func frameFieldsShareTheValueColumn() async throws {
+        var model = DesignFixtures.cards
+        model.useServices(.live)
+        model.selectItem("node-2")
+        let w = RenderBudgetWindow(PanelSample(model: model))
+        defer { w.close() }
+        try await w.settle(500)
+        let x = try #require(await w.element(DesignControlID.frameField(.x)), "no X field")
+        for field in [DesignFrameField.y, .width, .height] {
+            let frame = try #require(await w.element(DesignControlID.frameField(field)), "no \(field) field")
+            #expect(abs(frame.minX - x.minX) < 0.5, "\(field) starts at \(frame.minX), X at \(x.minX)")
+        }
     }
 }
 
