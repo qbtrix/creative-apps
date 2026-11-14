@@ -1,6 +1,6 @@
 // LivePropertiesTests.swift: KY-1, the live inspector read (docs/blueprints/flare/features/live-keys.md). It agrees with
 // FakeProperties on `bounce` for every selection and frame the packet names, reads a symbol's layer the same way, and
-// returns no rows when nothing is selected.
+// returns no rows when nothing is selected. Select All from Ball at frame 20 reads X Mixed (J7 step 6).
 import FlareCore
 @testable import FlareModel
 import Testing
@@ -49,4 +49,17 @@ func aSymbolLayerReadsLikeTheFake(frame: Int) {
     #expect(live.properties(FlareFixtures.bounce, owner: scene, layerIDs: [], frame: 0).isEmpty)
     #expect(live.properties(FlareFixtures.bounce, owner: scene, layerIDs: ["nope"], frame: 0).isEmpty)
     #expect(live.properties(FlareFixtures.bounce, owner: .scene("missing"), layerIDs: ["ball"], frame: 0).isEmpty)
+}
+
+/// J7 step 6 on the built services: Ball picked at frame 20, then Select All, reads X as Mixed (nil) for Ball and
+/// Shadow, so the journey's "X reads 0" was the bar's accessibility, not the selection.
+@Test func selectAllAtFrame20FromBallReadsXMixed() {
+    var w = FlareWorkspace(services: .built)
+    w.load(FlareFixtures.bounce)
+    w.selectLayer("ball")
+    w.setCurrentFrame(20)
+    #expect(w.animatedProperties.first { $0.name == "x" }?.value != nil)
+    w.selectAll()
+    #expect(Set(w.propertyLayerIDs) == ["ball", "shadow"])
+    #expect(w.animatedProperties.first { $0.name == "x" }.map { $0.value == nil } == true)
 }

@@ -30,7 +30,8 @@
 // key step `slider-key` (ScrubProbe). Both looks are a real slider to
 // VoiceOver and XCUI (an accessibility representation): XCUI reads the number,
 // VoiceOver hears the row's text with its unit spelled out, and increment and
-// decrement step as the arrows do; while typing it is the text field.
+// decrement step as the arrows do; while typing it is the text field, and a
+// mixed bar is a static text labelled with the row whose value is "Mixed".
 // Owns presentation state only: the typed draft and whether it was edited,
 // the drag anchor, the gesture's run, hover.
 import AppKit
@@ -149,7 +150,7 @@ public struct ScrubField: View {
         .help(label)
         .modifier(ScrubAccessibility(
             label: label, spoken: NumericInput.spoken(value, decimals: decimals, unit: unit), editing: editing,
-            track: track, position: track.position(value), adjust: adjust))
+            mixed: bar?.mixed ?? false, track: track, position: track.position(value), adjust: adjust))
     }
 
     /// The bar slider, drawn as the Studio editor's number row (Flare's easing
@@ -471,19 +472,30 @@ private struct ScrubProbeKey: EnvironmentKey {
 /// and reads the number as AXValue; a plain element sent its value only as the
 /// description, so XCUI read "" and VoiceOver heard no value, #4822), spoken
 /// with the unit, except while typing, when the text field shows through, as
-/// a text field. The slider takes no `step:`: a stepped Slider
+/// a text field, and while mixed, when the slider's number would be a
+/// meaningless 0, as an adjustable static text reading "Mixed". The slider takes no `step:`: a stepped Slider
 /// builds one tick per step on every body pass (200,001 for Halo's X), so it
 /// snaps a set value itself and steps through its adjustable action.
 struct ScrubAccessibility: ViewModifier {
     let label: String
     let spoken: String
     let editing: Bool
+    let mixed: Bool
     let track: ScrubTrack
     let position: Double
     let adjust: @MainActor (Double) -> Void
 
     func body(content: Content) -> some View {
-        if !editing {
+        if mixed, !editing {
+            content.accessibilityRepresentation {
+                // A Slider's AXValue is its number (0 here) whatever its value text says, and a static text's
+                // label becomes its AXValue unless a value is set: label and value both, so XCUI reads "Mixed".
+                Text(verbatim: "Mixed")
+                    .accessibilityLabel(label)
+                    .accessibilityValue(Text(verbatim: "Mixed"))
+                    .accessibilityAdjustableAction(step)
+            }
+        } else if !editing {
             content.accessibilityRepresentation {
                 Slider(
                     value: Binding(get: { position }, set: { adjust(ScrubValue.snapped($0, to: track.step, in: track.positions)) }),
