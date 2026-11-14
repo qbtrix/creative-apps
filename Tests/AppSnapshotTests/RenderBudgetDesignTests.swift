@@ -98,8 +98,9 @@ extension BodyCountSuites {
         /// files-history P4 cold: the first open in a process, before any document view has run (Finder
         /// handing a file to an app that just launched). `timing`'s opens all run warm. Cold only when it is
         /// the process's first Design open, so it runs alone: `--filter RenderBudgetDesignTests/coldOpen`.
-        /// Release, 13 processes each: median 122 ms before DesignWindow warmed the symbols, 73 ms after;
-        /// a 150-410 ms tail still fails it (#6199).
+        /// Release, 13 processes each: median 122 ms before DesignWindow warmed the symbols, 73 ms after.
+        /// 11-14, 15 processes at load 4-5: median 58 ms, 4 over budget (120.5, 152, 270, 355 ms). A sample of the
+        /// slow ones shows RenderBox's first Metal submits waiting on the GPU queue, not Design code (#6199).
         @Test(.timeLimit(.minutes(2)))
         func coldOpen() async throws {
             let open = try await Self.openCrowd()
