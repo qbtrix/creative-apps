@@ -57,20 +57,10 @@ struct DesignCanvas: View {
     /// One point the eye can't see, painted by a Canvas while the window is empty. A process's
     /// first Canvas layer sets up its GPU path (RenderBox's first Metal submits), which took up to
     /// 400 ms of the landing pass when it came with an opened file (#6354); here it is paid
-    /// before the user picks one. It draws each kind of mark a page lands with (a fill, a frame's
-    /// stroke, clipped text in a shading, as DesignTextArtwork and the rulers draw it), so each
-    /// first use is paid here, not only the fill's.
+    /// before the user picks one.
     @MainActor private static var renderWarmup: some View {
         Canvas { context, size in  // render-contract: allow a one-point warm-up behind the empty state, never over a page
-            let box = Path(CGRect(origin: .zero, size: size))
-            let ink = SuiteColor.overlayInk.opacity(0.01)
-            context.fill(box, with: .color(ink))
-            context.stroke(box, with: .color(ink), lineWidth: 1)
-            var clipped = context
-            clipped.clip(to: box)
-            var text = clipped.resolve(Text("0").font(SuiteFont.rulerLabel))
-            text.shading = .color(ink)
-            clipped.draw(text, at: .zero, anchor: .topLeading)
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SuiteColor.overlayInk.opacity(0.01)))
         }
         .frame(width: SuiteSize.focusRingGap, height: SuiteSize.focusRingGap)
         .allowsHitTesting(false)
