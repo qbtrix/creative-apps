@@ -6,9 +6,10 @@
 // restoration off so the size never carries into a plain launch. The visible
 // frame moves while an app launches (the Dock resizes for its tile, a few
 // points at a time; #1778: a window fitted at launch sat 3 pt into the Dock
-// when the journey measured it), so the sizer fits the window again whenever
-// the screen parameters change and once more a second after launch. A fit
-// only ever shrinks or moves the window; `SuiteWindowSize.fitted` is the math.
+// when the journey measured it), and not every Dock resize posts a screen
+// parameters change, so the sizer fits the window again whenever they change
+// and once a second for as long as it is in the window. A fit only ever
+// shrinks or moves the window; `SuiteWindowSize.fitted` is the math.
 import AppKit
 import SwiftUI
 
@@ -54,13 +55,22 @@ struct SuiteWindowSizer: NSViewRepresentable {
 
 /// Applies its requested size to the first window it joins, on the next main-actor turn
 /// so the window has finished placing itself first, then keeps that window inside the
-/// screen's visible frame as the frame changes.
+/// screen's visible frame as the frame changes, checking every `interval`.
 final class SuiteWindowSizingView: NSView {
     private let requested: CGSize
+    private let interval: Duration
+    /// The visible frame a window is kept inside: its screen's (the main screen's before it has one).
+    private let visible: @MainActor (NSWindow) -> NSRect?
     private var done = false
 
-    init(requested: CGSize) {
+    /// A test passes its own `visible` frame and a short `interval`.
+    init(
+        requested: CGSize, every interval: Duration = .seconds(1),
+        visible: @escaping @MainActor (NSWindow) -> NSRect? = { ($0.screen ?? NSScreen.main)?.visibleFrame }
+    ) {
         self.requested = requested
+        self.interval = interval
+        self.visible = visible
         super.init(frame: .zero)
     }
 
@@ -74,10 +84,13 @@ final class SuiteWindowSizingView: NSView {
         NotificationCenter.default.addObserver(
             self, selector: #selector(screenParametersChanged),
             name: NSApplication.didChangeScreenParametersNotification, object: nil)
-        Task { @MainActor [weak self] in
+        Task { @MainActor [weak self, interval] in
             self?.applySize()
-            try? await Task.sleep(for: .seconds(1))
-            self?.refit()
+            while true {
+                try? await Task.sleep(for: interval)
+                guard let self, self.window != nil else { return }
+                self.refit()
+            }
         }
     }
 
@@ -87,7 +100,7 @@ final class SuiteWindowSizingView: NSView {
         target.isRestorable = false
         let current = target.frame
         let frame = NSRect(origin: NSPoint(x: current.minX, y: current.maxY - requested.height), size: requested)
-        target.setFrame(Self.fitted(frame, to: target), display: true)
+        target.setFrame(fitted(frame, to: target), display: true)
     }
 
     /// The Dock or the menu bar changed the visible frame (the system posts this on the main actor).
@@ -98,13 +111,13 @@ final class SuiteWindowSizingView: NSView {
     /// Moves or shrinks the window the least that keeps it inside its screen's visible frame.
     private func refit() {
         guard let target = window else { return }
-        let frame = Self.fitted(target.frame, to: target)
+        let frame = fitted(target.frame, to: target)
         if frame != target.frame { target.setFrame(frame, display: true) }
     }
 
-    /// `frame` fitted to the visible frame of `window`'s screen (the main screen before it has one).
-    private static func fitted(_ frame: NSRect, to window: NSWindow) -> NSRect {
-        guard let visible = (window.screen ?? NSScreen.main)?.visibleFrame else { return frame }
+    /// `frame` fitted to the visible frame around `window`.
+    private func fitted(_ frame: NSRect, to window: NSWindow) -> NSRect {
+        guard let visible = visible(window) else { return frame }
         return SuiteWindowSize.fitted(frame, in: visible)
     }
 }
