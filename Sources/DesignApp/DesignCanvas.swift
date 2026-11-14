@@ -58,7 +58,7 @@ struct DesignCanvas: View {
     /// first Canvas layer sets up its GPU path (RenderBox's first Metal submits), which took up to
     /// 400 ms of the landing pass when it came with an opened file (#6354); here it is paid
     /// before the user picks one.
-    private static var renderWarmup: some View {
+    @MainActor private static var renderWarmup: some View {
         Canvas { context, size in
             context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SuiteColor.overlayInk.opacity(0.01)))
         }
