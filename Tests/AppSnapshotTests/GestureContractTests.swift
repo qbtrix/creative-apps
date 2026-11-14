@@ -4,14 +4,17 @@
 // on every sample). Here every tool of every app, through its PaletteTool `gesture` class (SuiteUI's
 // ToolGesture), runs the same drag on its app's real window (RenderBudgetHarness.swift) and owes its class's
 // contract:
-//   movesContent  no pixel work past `pixelNoise` and at most 1 root body while the pointer is down (the move rides a live copy)
-//   selects       no pixel work past `pixelNoise` while the pointer is down
+//   movesContent  no pixel work and at most 1 root body while the pointer is down (the move rides a live copy)
+//   selects       no pixel work while the pointer is down
 //   every class   root bodies while the pointer is down within `bodyBound`, set at today's best path
 // A movesContent or selects row presses at the centre of an existing layer or object, read from the app's
 // model, and must change something at the release (the moved thing by the drag's delta, or the selection). Select
 // (V, a selects tool in Photo and Design) moves the object it presses, so its row owes the move's delta;
 // one that changes nothing fails "drag hit nothing", which no exclusion covers. Pixel work is Photo's PhotoRenderCount (regions, layer composites, resamples); the other apps have no pixel
-// counter yet, so they owe the body bound only. Step p95 is printed per tool (GESTURE-CONTRACT lines), not gated:
+// counter yet, so they owe the body bound only. The count starts from a settled canvas (`idle`): the 12 MP
+// fixture's first picture is about 940 renders that go on landing after the editor's bodies settle, and a count
+// begun before the last one charges the rest to the drag. Select's move lifts the layer once at its first sample
+// (one render of the canvas without it), so its count starts once that lift has landed. Step p95 is printed per tool (GESTURE-CONTRACT lines), not gated:
 // a timing gate belongs in Tests/perf-suites.txt. A tool skips its contract only through `exclusions` (reason
 // and issue each); a skipped tool runs under `withKnownIssue`, so an exclusion fails once its tool passes.
 // Every app in GestureApp needs an adapter here, or `everyAppHasAnAdapter` fails. Nested in BodyCountSuites:
@@ -44,11 +47,6 @@ extension BodyCountSuites {
             "library.*": ("no canvas tool enum, so no adapter", 6022),
         ]
 
-        /// Pixel renders a drag that changes nothing costs on Photo's window (eyedropper 101, pen 85 on
-        /// 2026-10-29): the canvas's own region renders, which PhotoRenderCount counts with the tool's.
-        // ponytail: a noise floor, not 0; gate 0 once the counter splits the tool's work from the canvas's.
-        static let pixelNoise = 150
-
         /// Apps the cross-app run covers; each iterates its own tool enum's `allCases`.
         static let adapters: [GestureApp: [(tool: String, gesture: ToolGesture)]] = [
             .photo: PhotoTool.allCases.map { ($0.rawValue, $0.gesture) },
@@ -80,6 +78,8 @@ extension BodyCountSuites {
             defer { w.close() }
             _ = try #require(await w.first(PhotoWindowEditedView.self))
             try await w.settle(untilStable: PhotoWindowStrokeTests.editorBodies)
+            // The first picture is still landing here; its renders are not the drag's.
+            try #require(await RenderBudgetPhotoLiveTransformTests.idle(w, limit: .seconds(150)), "the first picture never landed")
             let pixels = {
                 PhotoRenderCount.regions.withLock { $0 } + PhotoRenderCount.layerComposites.withLock { $0 }
                     + PhotoRenderCount.resamples.withLock { $0 }
@@ -91,7 +91,9 @@ extension BodyCountSuites {
             let layer = try #require(model.selectedLayer)
             let target = Self.aims(tool.gesture) ? w.point(CGPoint(x: 2000, y: 1500), on: size, in: board) : nil
             try await Self.run(.photo, tool.rawValue, tool.gesture, w, at: target, bodies: PhotoWindowStrokeTests.editorBodies,
-                pixels: pixels, effect: {
+                pixels: pixels, lifted: tool == .select ? {
+                    try #require(await RenderBudgetPhotoLiveTransformTests.idle(w, limit: .seconds(150)), "the lift never landed")
+                } : nil, effect: {
                 guard let after = edited.workspace else { return "no workspace after the release" }
                 if tool.gesture == .selects, tool != .select { return after == model ? "the selection didn't change" : nil }
                 let moved = after.layers.first { $0.id == layer.id }
@@ -179,11 +181,12 @@ extension BodyCountSuites {
         }
 
         /// One press, `samples` drag samples and a release from the canvas's middle; checks `gesture`'s contract on
-        /// what ran while the pointer was down and prints the tool's row.
+        /// what ran while the pointer was down and prints the tool's row. A tool whose first sample lifts its
+        /// content passes `lifted`, which waits for the lift: the pixel count starts after it.
         static func run<V: View>(
             _ app: GestureApp, _ tool: String, _ gesture: ToolGesture, _ w: RenderBudgetWindow<V>,
             at target: CGPoint? = nil, bodies: @escaping () -> Int?, pixels: (() -> Int)? = nil,
-            effect: () async -> String? = { nil }
+            lifted: (() async throws -> Void)? = nil, effect: () async -> String? = { nil }
         ) async throws {
             var canvas = await w.element("suite.canvas.artboard")
             if canvas == nil { canvas = await w.element("halo.viewer.canvas") }
@@ -194,10 +197,16 @@ extension BodyCountSuites {
             let point = { (i: Int) in
                 i <= half ? CGPoint(x: start.x + Double(i) * 4, y: start.y) : CGPoint(x: start.x + Double(2 * samples), y: start.y - Double(i - half) * 2)
             }
-            let (bodies0, pixels0) = (bodies() ?? 0, pixels?() ?? 0)
+            let bodies0 = bodies() ?? 0
+            var pixels0 = pixels?() ?? 0
             var (bodiesDown, pixelsDown) = (0, 0)
             let step = try await w.measure("gesture \(app.rawValue).\(tool)", bodies: bodies) {
                 w.timed { w.send(.leftMouseDown, at: start) }
+                if let lifted {
+                    w.timed { w.send(.leftMouseDragged, at: point(1)) }
+                    try await lifted()
+                    pixels0 = pixels?() ?? 0
+                }
                 try await w.ticks(samples) { w.send(.leftMouseDragged, at: point($0)) }
                 try await w.settle(200)
                 (bodiesDown, pixelsDown) = ((bodies() ?? 0) - bodies0, (pixels?() ?? 0) - pixels0)
@@ -214,7 +223,7 @@ extension BodyCountSuites {
             contract("\(app.rawValue).\(tool)") {
                 #expect(bodiesDown <= bodyBound(gesture), "\(app.rawValue) \(tool) (\(gesture)): \(bodiesDown) root bodies with the pointer down")
                 if pixels != nil, gesture == .movesContent || gesture == .selects {
-                    #expect(pixelsDown <= pixelNoise, "\(app.rawValue) \(tool) (\(gesture)): \(pixelsDown) pixel renders with the pointer down")
+                    #expect(pixelsDown == 0, "\(app.rawValue) \(tool) (\(gesture)): \(pixelsDown) pixel renders with the pointer down")
                 }
             }
         }
