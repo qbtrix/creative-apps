@@ -63,6 +63,18 @@ public struct HaloTimelineLayout: Sendable, Hashable {
         return Int((y - ruler) / lane)
     }
 
+    /// The lane rows to build when `visibleY` (the timeline's scroll, ruler
+    /// at 0) shows: those in view plus `overscan` each side, or the first 48
+    /// before the first report. Huge's 2,000 rows stay out of the tree (#1262).
+    public func rowsShown(visibleY: ClosedRange<Double>?, rows: Int, overscan: Int = 8) -> Range<Int> {
+        let count = max(rows, 0)
+        guard let y = visibleY, lane > 0, y.lowerBound.isFinite, y.upperBound.isFinite else { return 0..<min(48, count) }
+        let row = { (v: Double) in Int(min(max(0, v - ruler) / lane, Double(count))) }
+        let first = max(row(y.lowerBound) - overscan, 0)
+        let end = min(Int(min((max(0, y.upperBound - ruler) / lane).rounded(.up), Double(count))) + overscan, count)
+        return min(first, end)..<end
+    }
+
     /// The ruler and one lane per row; an empty timeline keeps one lane's
     /// height for its hint.
     public func contentHeight(rows: Int) -> Double {

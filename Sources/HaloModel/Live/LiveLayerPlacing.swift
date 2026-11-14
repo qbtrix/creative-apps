@@ -13,6 +13,12 @@ public struct LiveLayerPlacing: LayerPlacing {
     public func worldMatrix(of layerID: String, in composition: HaloComposition, at frame: Int) -> HaloMatrix? {
         HaloKeyRules.worldMatrix(of: layerID, in: composition, at: frame)
     }
+    public func value(_ property: HaloProperty, of layer: HaloLayer, in composition: HaloComposition, at frame: Int) -> Double? {
+        HaloKeyRules.value(property, of: layer, in: composition, at: frame)
+    }
+    public func worldMatrix(of layer: HaloLayer, in composition: HaloComposition, at frame: Int) -> HaloMatrix? {
+        HaloKeyRules.worldMatrix(of: layer, in: composition, at: frame)
+    }
     public func parentCandidates(for layerID: String, in composition: HaloComposition) -> [String] {
         HaloKeyRules.parentCandidates(for: layerID, in: composition)
     }

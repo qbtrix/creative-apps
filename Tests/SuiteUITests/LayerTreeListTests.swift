@@ -11,7 +11,8 @@
 // it among its siblings (before, after, first, last; refused on a locked
 // target or an unknown id), the root as parent at depth 0. Multi-select
 // (multi-layer-select PM-1): Shift extends, Command toggles, a plain click
-// replaces, and every id in `selected` draws selected. macOS only.
+// replaces, and every id in `selected` draws selected. An embedded list goes
+// lazy past `embeddedEagerLimit` rows (#1283). macOS only.
 @testable import SuiteUI
 import SuiteKernel
 import SwiftUI
@@ -256,6 +257,17 @@ import Testing
         #expect(LayerRowLook.resolve(selected: false, lit: false, hovering: true) == .hover)
         #expect(LayerRowLook.resolve(selected: true, lit: false, hovering: true) == .selected)
         #expect(LayerRowLook.resolve(selected: true, lit: true, hovering: true) == .dropTarget)
+    }
+
+    /// Embedded in a host's scroll view a panel-sized list stays eager, so a
+    /// journey can press a row below the fold; a 2,000-layer one goes lazy, or
+    /// every row joins the accessibility tree and a UI query times out (#1283).
+    @Test func embeddedListGoesLazyOnlyWhenLong() {
+        #expect(LayerTreeList.embeddedEager(rowCount: 0))
+        #expect(LayerTreeList.embeddedEager(rowCount: LayerTreeList.embeddedEagerLimit))
+        #expect(!LayerTreeList.embeddedEager(rowCount: LayerTreeList.embeddedEagerLimit + 1))
+        #expect(!LayerTreeList.embeddedEager(rowCount: 2_000))
+        #expect(LayerTreeList.embeddedEagerLimit >= 200)
     }
 
     /// A legacy scroller's page area is a `button ''` to the app audit, so the

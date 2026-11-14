@@ -17,7 +17,9 @@
 // picked: `unpickedNote`. A refusal on
 // `halo.easing` shows under the group. Every control goes through
 // `.haloControl` with a `halo.easing.*` id, disabled with
-// `model.unavailableHelp(for:)` as help. It only reads the model and calls
+// `model.unavailableHelp(for:)` as help, a segment's asked once for all rows.
+// Past `eagerRows` segments the rows build lazily in the inspector's scroll,
+// so a commit on huge's ~1,000 doesn't lay out every one. It only reads the model and calls
 // `perform`. Owns presentation state only: the hovered row.
 import AppKit
 import HaloModel
@@ -40,6 +42,10 @@ struct HaloEasingInspector: View {
     static let curveNote = "X is time, Y is progress: 0 at this key, 1 at the next. The dashed line is Linear."
     /// The curve's tooltip while it can act (#1416).
     static let curveTip = "Drag a handle to shape the easing between this key and the next."
+
+    /// How many segment rows the group builds eagerly, so a journey can
+    /// reach each one; past it (huge's ~1,000) only the rows in view.
+    static let eagerRows = 300
 
     /// The preset chips a row: the short titles two by two, "Ease In and
     /// Out" alone, so every title fits at the inspector's minimum width.
@@ -79,8 +85,16 @@ struct HaloEasingInspector: View {
                     note(Self.emptyNote)
                 }
             } else {
+                // One help for every row: picking a span doesn't depend on which.
+                let pickHelp = segments.first.flatMap { model.unavailableHelp(for: .selectKey($0.key, extending: false)) }
                 InspectorSection("Easing") {
-                    ForEach(segments) { segmentRow($0) }
+                    if segments.count <= Self.eagerRows {
+                        ForEach(segments) { segmentRow($0, help: pickHelp) }
+                    } else {
+                        LazyVStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+                            ForEach(segments) { segmentRow($0, help: pickHelp) }
+                        }
+                    }
                     if let segment = model.pickedSegment, let handles = model.easingHandles {
                         editor(segment, handles: handles)
                     } else {
@@ -103,9 +117,8 @@ struct HaloEasingInspector: View {
             .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func segmentRow(_ segment: HaloKeySegment) -> some View {
+    private func segmentRow(_ segment: HaloKeySegment, help: String?) -> some View {
         let key = segment.key
-        let help = model.unavailableHelp(for: .selectKey(key, extending: false))
         return Button {
             perform(.selectKey(key, extending: NSEvent.modifierFlags.contains(.shift)))
         } label: {

@@ -278,6 +278,9 @@ private func key(_ layerID: String, _ property: HaloProperty, _ frame: Int) -> H
     project.deleteKeys()
     #expect(project.selectedComposition?.layers.allSatisfy { $0.tracks.values.allSatisfy { $0.count < 2 } } == true)
     #expect(project.history.undo.count == 1)
+    // Only static tracks left (one key each): nothing to select.
+    #expect(project.selectedComposition?.layers.contains { $0.tracks.values.contains { $0.count == 1 } } == true)
+    #expect(project.selectAllKeysHelp == "There are no keys to select.")
     var empty = commandProject("three-layers", .fake)
     #expect(empty.selectAllKeysHelp == "There are no keys to select.")
     empty.selectAllKeys()
