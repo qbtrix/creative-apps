@@ -100,7 +100,9 @@ extension BodyCountSuites {
         /// the process's first Design open, so it runs alone: `--filter RenderBudgetDesignTests/coldOpen`.
         /// Release, 13 processes each: median 122 ms before DesignWindow warmed the symbols, 73 ms after.
         /// 11-14, 15 processes at load 4-5: median 58 ms, 4 over budget (120.5, 152, 270, 355 ms). A sample of the
-        /// slow ones shows RenderBox's first Metal submits waiting on the GPU queue, not Design code (#6199).
+        /// slow ones shows RenderBox's first Metal submits waiting on the GPU queue, not Design code (#6199). With the
+        /// empty canvas's Canvas warm-up (DesignCanvas.renderWarmup), interleaved A/B at load 4-6: 3 of 50 over (median 50 ms, p95 121 ms)
+        /// against 10 of 45 without (median 66 ms, p95 402 ms); the rest of the tail is #6354.
         @Test(.timeLimit(.minutes(2)))
         func coldOpen() async throws {
             let open = try await Self.openCrowd()
