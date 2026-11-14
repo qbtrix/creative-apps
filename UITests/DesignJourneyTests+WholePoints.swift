@@ -52,8 +52,12 @@ final class DesignWholePointsJourneyTests: XCTestCase {
         XCTAssert(Self.waitForLabel(undo, "Undo Move"), "the drag didn't move the rectangle (Undo reads \(undo.label))")
         expectWhole(design, ["X position", "Y position"], after: "moving")
 
-        // Drag its bottom-right handle, which sits on the moved corner, by another odd distance.
-        let handle = canvas.coordinate(withNormalizedOffset: end).withOffset(moveBy)
+        // Drag its bottom-right handle by another odd distance. The handle is found from the selection's mark,
+        // 4 pt out from its corner: zoomed out this far the rectangle is compact, so its corner handles sit half
+        // a handle outside the box and a press on or inside the corner moves it (DesignCompactSelectionTests).
+        let mark = design.element("design.canvas.selection")
+        XCTAssert(mark.waitForExistence(timeout: 5), "the moved rectangle shows no selection mark (design.canvas.selection)")
+        let handle = mark.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1)).withOffset(CGVector(dx: 4, dy: 4))
         handle.press(forDuration: 0.1, thenDragTo: handle.withOffset(CGVector(dx: 29, dy: 17)))
         design.shot("whole-resized")
         XCTAssert(Self.waitForLabel(undo, "Undo Resize"), "the handle drag didn't resize (Undo reads \(undo.label))")

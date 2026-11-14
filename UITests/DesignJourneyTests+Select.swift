@@ -132,7 +132,9 @@ final class DesignSelectJourneyTests: XCTestCase {
 
         // 1. A pressed, Title Shift-pressed, ⌘G: the card, A and Title in one group.
         point((150, 140), on: artboard).click()
-        XCUIElement.perform(withKeyModifiers: .shift) { point((150, 56), on: artboard).click() }
+        // Title is pressed at x 270: with A selected its rotate knob hangs over Title at (150, 36), and at this
+        // zoom the knob's reach takes in (150, 56), so a press there turns A instead of adding Title.
+        XCUIElement.perform(withKeyModifiers: .shift) { point((270, 56), on: artboard).click() }
         expectCount(design, "2 Layers", after: "Shift-pressing Title")
         design.press(character: "g", .command)
         XCTAssert(Self.waitForLabel(undo, "Undo Group"), "⌘G made no Group step (Undo reads \(undo.label))")
