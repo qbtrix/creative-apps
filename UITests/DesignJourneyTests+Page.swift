@@ -4,11 +4,11 @@
 // page's row in Pages and finds the inspector's Width 1440 and Height 1024
 // (`design.inspector.page-width`, `design.inspector.page-height`), clicks
 // Width, types 800 over the value the click selected and clicks the page's row
-// to commit, as a mouse user does: the status line reads "800 × 1024 pt" and
+// to commit, as a mouse user does: the status line reads "Page 800 × 1024 pt" and
 // the toolbar's Undo (`design.bar.undo`) reads "Undo Change Page Size". It
 // shoots the canvas, where Desktop's part past 800 still shows, dimmed (the
 // shot is attached; the pixels are CB-9's snapshot). Then Height the same way
-// to 768: "800 × 768 pt", one more step. Undo puts Height back at 1024, a
+// to 768: "Page 800 × 768 pt", one more step. Undo puts Height back at 1024, a
 // second Undo Width at 1440. Every step uses the mouse on visible controls but
 // the typed numbers: no Command-A and no Return, so the journey fails if a
 // ScrubField stops selecting its value on open or committing on focus loss.
@@ -117,9 +117,11 @@ final class DesignPageJourneyTests: XCTestCase {
         XCTAssert(waitUntil { !field.exists }, "clicking away left the \(side.identifier) field open")
     }
 
-    /// Whether the status line shows `words`, read by label or value, within five seconds.
-    @MainActor private func statusReads(_ status: XCUIElement, _ words: String) -> Bool {
-        status.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", words, words))
+    /// Whether the status line's size chip shows the page size `size`, read by label or value, within five
+    /// seconds. The chip names what it measures, "Page 800 × 1024 pt" (DesignWorkspace.statusSizeText, #2353).
+    @MainActor private func statusReads(_ status: XCUIElement, _ size: String) -> Bool {
+        let words = "Page \(size)"
+        return status.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", words, words))
             .firstMatch.waitForExistence(timeout: 5)
     }
 

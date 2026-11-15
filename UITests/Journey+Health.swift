@@ -176,11 +176,21 @@ extension Journey {
         }
     }
 
-    /// Scrolls the inspector until `element` is hittable (at most ten tries).
+    /// Scrolls the inspector until `element` is hittable and whole inside it, 8 pt clear of the window's
+    /// bottom edge (at most ten tries). Hittable alone isn't enough: a row the window's edge cuts is
+    /// "hittable" on the few points that show, and a click there lands on the window's resize band, not
+    /// the row (Design's Radius bar on the 1024 × 768 runner). An element taller than the inspector only
+    /// needs its middle in reach.
     func reveal(_ element: XCUIElement) {
         let inspector = self.element("suite.inspector")
-        for _ in 0..<10 where !element.isHittable {
-            inspector.scroll(byDeltaX: 0, deltaY: element.frame.midY > inspector.frame.midY ? -120 : 120)
+        for _ in 0..<10 {
+            let reach = inspector.frame.intersection(app.windows.firstMatch.frame)
+            let (top, bottom) = (reach.minY, reach.maxY - 8)
+            let frame = element.frame
+            let inside = frame.height <= bottom - top
+                ? frame.minY >= top && frame.maxY <= bottom : (top...bottom).contains(frame.midY)
+            if inside, element.isHittable { return }
+            inspector.scroll(byDeltaX: 0, deltaY: frame.midY > reach.midY ? -120 : 120)
         }
     }
 
