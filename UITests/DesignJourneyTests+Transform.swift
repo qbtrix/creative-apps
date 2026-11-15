@@ -4,10 +4,11 @@
 // 1. Draw a rectangle, Shift-drag its rotate knob a little past 15°: one "Rotate" step, Rotation
 //    (`design.inspector.rotation`) reads 15.
 // 2. Drag the right handle outward along the turned edge: one "Resize" step, Width grows, the turn stays 15.
-// 3. Object > Flip Horizontal: one "Flip Horizontal" step, the selection box stays where it was.
-// 4. Type 0 in Rotation: one "Transform" step, it reads 0; one Undo goes back to the flip and 15 (one step
+// 3. Object > Flip Horizontal: one "Flip Horizontal" step, the selection box stays where it was. A mirror
+//    negates the turn (TransformRules.flipped), so Rotation reads -15.
+// 4. Type 0 in Rotation: one "Transform" step, it reads 0; one Undo goes back to the flip and -15 (one step
 //    per gesture).
-// 5. ⇧⌘E, SVG, Export: the rect carries `transform="rotate(15 …)"`.
+// 5. ⇧⌘E, SVG, Export: the rect carries `transform="rotate(-15 …)"`.
 // Shots: design-transform-drawn, -turned, -grown, -flipped, -upright, -exported.
 import XCTest
 
@@ -71,9 +72,10 @@ final class DesignTransformJourneyTests: XCTestCase {
         let flipped = mark.frame
         XCTAssert(abs(flipped.midX - grown.midX) <= 1 && abs(flipped.midY - grown.midY) <= 1 && abs(flipped.width - grown.width) <= 1,
                   "Flip Horizontal moved the box from \(grown) to \(flipped)")
+        XCTAssert(Self.waitUntil { Self.number(rotation) == -15 }, "the mirror left Rotation at \(Self.text(rotation)), not -15")
         design.shot("transform-flipped")
 
-        // 4. 0 in Rotation stands it up as one Transform step; one Undo goes back to the flip, at 15.
+        // 4. 0 in Rotation stands it up as one Transform step; one Undo goes back to the flip, at -15.
         design.reveal(rotation)
         rotation.click()
         let field = typingField(design, in: rotation)
@@ -86,14 +88,14 @@ final class DesignTransformJourneyTests: XCTestCase {
         design.shot("transform-upright")
         undo.click()
         XCTAssert(Self.waitForLabel(undo, "Undo Flip Horizontal"), "one Undo took more than the 0 (Undo reads \(undo.label))")
-        XCTAssert(Self.waitUntil { Self.number(rotation) == 15 }, "Undo left Rotation at \(Self.text(rotation)), not 15")
+        XCTAssert(Self.waitUntil { Self.number(rotation) == -15 }, "Undo left Rotation at \(Self.text(rotation)), not -15")
 
         // 5. The SVG writes the turn about the centre.
         exportSVG(design)
         let files = try FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
         let file = try XCTUnwrap(files.first { $0.pathExtension == "svg" }, "the export wrote no SVG into \(folder.path)")
         let svg = try String(contentsOf: file, encoding: .utf8)
-        XCTAssert(svg.contains(#"transform="rotate(15 "#), "\(file.lastPathComponent) carries no rotate(15 …): \(svg.prefix(400))")
+        XCTAssert(svg.contains(#"transform="rotate(-15 "#), "\(file.lastPathComponent) carries no rotate(-15 …): \(svg.prefix(400))")
         design.shot("transform-exported")
     }
 

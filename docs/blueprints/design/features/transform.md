@@ -53,9 +53,10 @@ Model walk in `DesignTransformTests` (Linux).
 1. Draw a rectangle, drag its rotate knob (DT-3, `DesignTransformJourneyTests.testRotateAndFlip`):
    it turns; Shift-drag lands on 15°; the inspector's Rotation reads 15°.
 2. Drag the right handle along the turned edge: the box grows in its own frame.
-3. Object > Flip Horizontal: the rectangle mirrors in place.
-4. Type 0 in Rotation: it stands up again; one step per gesture.
-5. Export SVG (DT-6): the rect carries `transform="rotate(15 …)"`.
+3. Object > Flip Horizontal: the rectangle mirrors in place; a mirror negates the turn
+   (`TransformRules.flipped`), so Rotation reads -15°.
+4. Type 0 in Rotation: it stands up again; one step per gesture, so one Undo is back at the flip.
+5. Export SVG (DT-6): the rect carries `transform="rotate(-15 …)"`.
 
 ## Jobs
 
