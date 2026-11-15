@@ -38,7 +38,9 @@ final class DesignPerfScrubJourneyTests: XCTestCase {
         let opacity = scrub(design, Self.opacity, step: "perf-scrub-opacity")
         numbers["QD-S7 P2 opacity-bar"] = opacity.summary
 
-        canvas.coordinate(withNormalizedOffset: Self.insideText).doubleClick()
+        // Through the artboard, which is exactly the page: `suite.canvas` also takes in the frame names above the
+        // page and the size badge under the bottom row's Text, so its fractions land below Frame 36 (#3043).
+        design.element("suite.canvas.artboard").coordinate(withNormalizedOffset: Self.insideText).doubleClick()
         XCTAssert(design.element("design.text").waitForExistence(timeout: 5), "double-clicking Frame 36's Text opened no editor")
         var trips: [Double] = []
         for round in 0..<2 {

@@ -95,3 +95,15 @@ private func smallTextBox() throws -> DesignWorkspace {
     try opened.open(try workspace.fileData())
     #expect(!opened.takesOpenedFile)
 }
+
+/// The points DesignSelectJourneyTests presses on `cards` at its fitted zoom of 25%, where a handle
+/// reaches 32 document points: A's rotate knob hangs over Title, so a press on Title under the knob
+/// turns A, and the journey presses Title clear of it.
+@Test func aSmallLayersKnobTakesAPressOnTheLayerAboveIt() throws {
+    var workspace = DesignFixtures.cards
+    workspace.setHandleTolerance(32)
+    try workspace.select(["node-2"])
+    #expect(workspace.handle(at: pt(150, 56)) == .rotate)
+    #expect(workspace.handle(at: pt(270, 56)) == nil)
+    #expect(workspace.hitTest(pt(270, 56)) == "node-5")
+}
