@@ -80,6 +80,8 @@ struct SidebarNode: View {
     let onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)?
     /// Nil to accept a rename, or the message the row shows when the app refuses it (LL-6).
     let onRename: (@MainActor (SidebarItem.ID, String) -> String?)?
+    /// The list's selection, for a click on a renamable name, which the List itself never sees (#2496).
+    var onSelect: (@MainActor (SidebarItem.ID) -> Void)?
     /// The window's `contextActions`; nil gives no row a menu (LL-8a).
     @Environment(\.sidebarContextActions) private var contextActions
     /// The window's `expanded` and `onExpand`; nil keeps `isOpen` (LL-9).
@@ -94,7 +96,9 @@ struct SidebarNode: View {
             row
         } else {
             DisclosureGroup(isExpanded: Self.expansion(for: item.id, in: expansion, local: $isOpen)) {
-                ForEach(item.secondLevelRows) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
+                ForEach(item.secondLevelRows) {
+                    SidebarNode(item: $0, onToggle: onToggle, onRename: onRename, onSelect: onSelect)
+                }
             } label: {
                 // The row's toggles stay their own elements beside the disclosure.
                 row.accessibilityElement(children: .contain)
@@ -119,7 +123,9 @@ struct SidebarNode: View {
         if let onRename { rename = { onRename(id, $0) } }
         var ask: (@MainActor () -> Void)?
         if onRename != nil { ask = { renameAsk += 1 } }
-        return SidebarRow(item, onToggle: toggle, refusableRename: rename, renameAsk: renameAsk)
+        var select: (@MainActor () -> Void)?
+        if let onSelect { select = { onSelect(id) } }
+        return SidebarRow(item, onToggle: toggle, refusableRename: rename, renameAsk: renameAsk, onSelect: select)
             .modifier(SidebarContextMenu(items: Self.menu(for: id, from: contextActions, rename: ask)))
             .tag(id)
     }
