@@ -64,7 +64,12 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         let widthBefore = frameValue(design, "Width")
         let size = sizeField(design)
         XCTAssert(size.waitForExistence(timeout: 5), "no text Size field in the inspector")
+        // At 768 high the Text rows sit below the inspector's fold: scrolled into reach, then typed into the
+        // scrub's own field once the click has opened it.
+        design.reveal(size)
         size.click()
+        XCTAssert(design.element("suite.inspector").textFields["suite.scrub.typing"].waitForExistence(timeout: 5),
+                  "clicking Size opened no typing field")
         design.app.typeKey("a", modifierFlags: .command)
         design.app.typeText("48\r")
         XCTAssert(design.app.buttons["Undo Change Text Style"].waitForExistence(timeout: 5), "the Size field made no undo step")

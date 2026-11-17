@@ -3,7 +3,7 @@
 // and TIFF written by `JPEGWriter` from `LiveExporter.render` decode back
 // equal to the render, bit for bit; HEIC, when ImageIO on this Mac can write
 // it, decodes within 35 dB PSNR; each file starts with its format's magic
-// bytes. The real `ImageIODecoder` and `JPEGWriter` read and write the files;
+// bytes, and the PNG names the sRGB profile. The real `ImageIODecoder` and `JPEGWriter` read and write the files;
 // the bytes and pixels are the oracle.
 //
 // Written before its code (lead.md, contract rule 13, EX-7); EX-8 enables
@@ -128,10 +128,13 @@ import UniformTypeIdentifiers
         #expect(!FileManager.default.fileExists(atPath: out.appending(path: "IMG_0001.gif").path))
     }
 
-    /// PNG starts 89 50 4E 47 and decodes back to the render, bit for bit.
+    /// PNG starts 89 50 4E 47, carries the sRGB profile (#6205) and decodes back to the render, bit for bit.
     @Test func pngIsLossless() async throws {
         let (rendered, bytes, decoded) = try await roundTrip(.png)
         #expect([UInt8](bytes.prefix(4)) == [0x89, 0x50, 0x4E, 0x47], "the PNG doesn't start 89 50 4E 47")
+        let properties = CGImageSourceCreateWithData(bytes as CFData, nil)
+            .flatMap { CGImageSourceCopyPropertiesAtIndex($0, 0, nil) as? [CFString: Any] }
+        #expect(properties?[kCGImagePropertyProfileName] as? String == "sRGB IEC61966-2.1", "the PNG has no sRGB profile")
         #expect(decoded.size == rendered.size)
         #expect(decoded.rgba8 == rendered.rgba8, "the PNG's pixels differ from the render")
     }

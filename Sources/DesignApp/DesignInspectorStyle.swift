@@ -43,6 +43,19 @@ import SwiftUI
     }
 }
 
+extension View {
+    /// Tells a row when a pointer drag over it has moved and when it lets go, beside the row's own gestures.
+    /// A press that hasn't moved says nothing: a click into a text field (a hex, a scrub's typing field) is
+    /// tracked by the field's own mouse loop, so its mouse-up never arrives here, and a flag set at the press
+    /// would stay on and turn the value typed next into a preview that never lands.
+    func onPointerDrag(moved: @escaping @MainActor () -> Void, ended: @escaping @MainActor () -> Void) -> some View {
+        simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { if $0.translation != .zero { moved() } }
+                .onEnded { _ in ended() })
+    }
+}
+
 /// One of X, Y, W and H over the selection. A drag previews and lands once at mouse-up; a typed
 /// value, an arrow key or an accessibility adjust is one step of its own. Disabled with `help`.
 struct DesignFrameScrub: View {
@@ -62,13 +75,10 @@ struct DesignFrameScrub: View {
         ScrubField(name, value: value, in: range, step: 1, unit: "pt", decimals: 1) { new in
             dragging ? send.preview(.frame(field, new)) : send.commit(.frame(field, new))
         }
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in dragging = true }
-                .onEnded { _ in
-                    dragging = false
-                    send.end()
-                })
+        .onPointerDrag(moved: { dragging = true }, ended: {
+            dragging = false
+            send.end()
+        })
         .disabled(help != nil)
         .help(help ?? "")
         .suiteControl(id: DesignControlID.frameField(field), enabled: help == nil, reason: help)
@@ -145,7 +155,7 @@ struct DesignInspectorStyle: View, BodyCounted {
     #endif
     /// A stroke scrub's run is open: its samples preview until it lands.
     @State private var strokeRun = false
-    /// A mouse button is down in the stroke editor, so a resting scrub is still one gesture.
+    /// A pointer drag is under way in the stroke editor, so a resting scrub is still one gesture.
     @State private var pressing = false
     /// Lands the open run once the keys rest (the editor ends each key press but tells no host).
     @State private var settle: Task<Void, Never>?
@@ -167,13 +177,10 @@ struct DesignInspectorStyle: View, BodyCounted {
                      styleHelp: model.strokeStyleHelp, showsTrim: false) {
             stroke($0, shown: shown, send: send)
         }
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in pressing = true }
-                .onEnded { _ in
-                    pressing = false
-                    endStrokeRun(send)
-                })
+        .onPointerDrag(moved: { pressing = true }, ended: {
+            pressing = false
+            endStrokeRun(send)
+        })
     }
 
     /// One editor intent as the Model's style change on the shown copy (so a colour pick keeps a previewed

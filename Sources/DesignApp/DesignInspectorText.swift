@@ -73,10 +73,7 @@ struct DesignInspectorText: View {
                         ScrubField("Font size", value: style.size, in: 1...1000, step: 1, unit: "pt", decimals: 0) {
                             sizeChanged($0, in: scrub)
                         }
-                        .simultaneousGesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { _ in scrub.dragging = true }
-                                .onEnded { _ in sizeDragEnded(in: scrub) })
+                        .onPointerDrag(moved: { scrub.dragging = true }, ended: { sizeDragEnded(in: scrub) })
                         .disabled(help != nil)
                         .help(help ?? "")
                         .suiteControl(id: DesignControlID.inspectorTextSize, enabled: help == nil, reason: help)
