@@ -1,9 +1,11 @@
-// SidebarRenameGestureTests.swift: guards against #54 coming back. #54 was
-// the rename double-click sitting on the whole row, so a double-click on a
-// toggle flipped it twice and opened the rename field. The rename predicate
-// (`SidebarRow.doubleClickRenames`) can stay right while the gesture moves
-// back onto the row, so these tests read SidebarRow.swift and check where the
-// double-click gesture is attached. macOS only.
+// SidebarRenameGestureTests.swift: guards against #54 and #2496 coming back.
+// #54 was the rename double-click sitting on the whole row, so a double-click
+// on a toggle flipped it twice and opened the rename field. #2496 was a timed
+// `TapGesture(count: 2)` on the title taking the List's single click, so a
+// click on a name never selected the row. The title's one tap reads the
+// event's click count and selects or renames. The predicates can stay right
+// while the gesture moves, so these tests read SidebarRow.swift and check
+// where the click gesture is attached. macOS only.
 //
 // A spelling check alone misses a gesture written another way (#308): a named
 // `some Gesture`, a helper modifier that hides `TapGesture`, or a modifier
@@ -72,11 +74,20 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     return (modifiers, calls)
 }
 
-@Test func sidebarRowHasExactlyOneDoubleClickGesture() throws {
+@Test func sidebarRowHasExactlyOneClickGesture() throws {
     let source = squeezed(try sidebarRowSource())
-    #expect(occurrences(of: "TapGesture(count:2", in: source) == 1)
-    #expect(occurrences(of: "onTapGesture(", in: source) == 0)
+    // A timed double tap on the title takes the List's single click, so a click on a name never selected (#2496).
+    #expect(occurrences(of: "TapGesture(count:", in: source) == 0, "a timed double tap swallows the List's click (#2496)")
+    #expect(occurrences(of: "onTapGesture{", in: source) == 1)
     #expect(occurrences(of: "someGesture", in: source) == 0, "a named gesture can be attached anywhere in the row (#308)")
+}
+
+/// The title's one click handler: the second click of a double-click (the event's own count, #6217) renames,
+/// any other click selects the row, since the tap takes the List's own selection click (#2496).
+@Test func aClickOnTheTitleSelectsAndItsDoubleClickRenames() throws {
+    let source = try sidebarRowSource()
+    let click = try #require(region(of: source, from: "private func clickTitle", to: "private func beginRename"))
+    #expect(squeezed(click).contains("ifPointerClick.count()>=2{beginRename(on:.title)}else{onSelect?()}"))
 }
 
 @Test func renameStartsFromOneCallSiteOnly() throws {
@@ -86,7 +97,7 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     // checks `keyRenames` and never reads which part was clicked.
     #expect(
         occurrences(of: "beginRename", in: source) == 3,
-        "beginRename is declared once and used by the title label and requestRename only")
+        "beginRename is declared once and used by the title's click and requestRename only")
     let request = try #require(region(of: source, from: "private func requestRename", to: "\n}"))
     #expect(squeezed(request).contains("guardSelf.keyRenames(renamable:onRename!=nil,renaming:field.isOpen)"))
     let flat = squeezed(source)
@@ -136,8 +147,8 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
         squeezed(title).contains(
             "Label{Text(item.title)}icon:{SidebarRowIcon(item:item)}"
                 + ".modifier(SidebarRowDimming(color:SidebarRowLook(item).title)).contentShape(Rectangle())"
-                + ".simultaneousGesture(TapGesture(count:2).onEnded{beginRename(on:.title)})}"),
-        "the rename gesture must sit right on the title Label (its icon and dimming gesture-free), with nothing after it")
+                + ".onTapGesture{clickTitle()}}"),
+        "the click must sit right on the title Label (its icon and dimming gesture-free), with nothing after it")
     #expect(!title.lowercased().contains("toggle"), "the title must not draw the toggles inside its hit area (#308)")
     #expect(!title.contains("beginRename(on: .toggle)"))
     let names = callNames(in: title)
@@ -151,13 +162,13 @@ private func callNames(in text: some StringProtocol) -> (modifiers: Set<String>,
     // `refusals`) only moves the field sideways, and `SidebarRenameMessage`
     // draws the reason (#3462). None can start a rename.
     let modifiers: Set = [
-        "focused", "onSubmit", "onExitCommand", "onChange", "contentShape", "simultaneousGesture", "onEnded",
+        "focused", "onSubmit", "onExitCommand", "onChange", "contentShape", "onTapGesture",
         "modifier", "isOpen", "type", "cancel", "message", "font", "foregroundStyle", "accessibilityIdentifier",
         "refusalShake", "refusals",
     ]
     let calls: Set = [
-        "View", "nil", "else", "focused", "TextField", "Binding", "commitRename", "Label", "Rectangle", "TapGesture",
-        "beginRename", "Text", "SidebarRowIcon", "SidebarRowDimming", "SidebarRowLook", "VStack", "loseFocus",
+        "View", "nil", "else", "focused", "TextField", "Binding", "commitRename", "Label", "Rectangle",
+        "clickTitle", "Text", "SidebarRowIcon", "SidebarRowDimming", "SidebarRowLook", "VStack", "loseFocus",
         "SidebarRenameMessage",
     ]
     #expect(

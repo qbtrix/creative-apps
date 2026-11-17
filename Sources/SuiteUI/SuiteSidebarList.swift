@@ -62,7 +62,7 @@ public struct SuiteSidebarList: View {
             ForEach(sections) { section in
                 Section {
                     if section.addAction != nil { SidebarSectionHeader(section: section).asRow }
-                    ForEach(section.items) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
+                    ForEach(section.items) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename, onSelect: onSelect) }
                         .onMove(perform: moveAction(in: section.id))
                 } header: {
                     if section.addAction == nil { SidebarSectionHeader(section: section) }

@@ -13,7 +13,10 @@
 // rows draw a refusal the same way. The Void form still renames.
 // Return on the focused row and the "Rename" accessibility action open the
 // same field as the double-click, and only on a row with `onRename` (LL-7). A row without
-// `onRename` has no double-click gesture on its name, so a click there selects (#2496). Each toggle icon lays out both of its symbols and draws one,
+// `onRename` has no click gesture on its name, so the List's own click selects. A renamable
+// name's one tap reads the event's click count: the second click of a double-click renames,
+// any other selects the row through `onSelect`, since the tap takes the List's click (#2496).
+// Each toggle icon lays out both of its symbols and draws one,
 // so it is as wide in every state and the toggles form a column (#53). The
 // icon is hidden from accessibility, so each toggle carries its own
 // identifier, `suite.sidebar.<item id>.<toggle id>` (the app audit, #262).
@@ -181,6 +184,8 @@ public struct SidebarRow: View {
     private let item: SidebarItem
     private let onToggle: (@MainActor (SidebarToggle.ID) -> Void)?
     private let onRename: (@MainActor (String) -> String?)?
+    /// Selects this row: a click on a renamable title takes the List's own click, so the row selects itself (#2496).
+    private let onSelect: (@MainActor () -> Void)?
     /// Bumped by the row's context menu Rename; each change opens the field.
     private let renameAsk: Int
     @State private var field = SidebarRenameField()
@@ -209,11 +214,12 @@ public struct SidebarRow: View {
     init(
         _ item: SidebarItem, onToggle: (@MainActor (SidebarToggle.ID) -> Void)?,
         refusableRename: (@MainActor (String) -> String?)?, field: SidebarRenameField = SidebarRenameField(),
-        renameAsk: Int = 0
+        renameAsk: Int = 0, onSelect: (@MainActor () -> Void)? = nil
     ) {
         self.item = item
         self.onToggle = onToggle
         self.onRename = refusableRename
+        self.onSelect = onSelect
         self.renameAsk = renameAsk
         _field = State(initialValue: field)
     }
@@ -284,7 +290,7 @@ public struct SidebarRow: View {
             Label { Text(item.title) } icon: { SidebarRowIcon(item: item) }
                 .modifier(SidebarRowDimming(color: SidebarRowLook(item).title))
                 .contentShape(Rectangle())
-                .simultaneousGesture(TapGesture(count: 2).onEnded { beginRename(on: .title) })
+                .onTapGesture { clickTitle() }
         }
     }
 
@@ -304,6 +310,12 @@ public struct SidebarRow: View {
 
     /// The accessibility action VoiceOver lists on a renamable row.
     nonisolated public static let renameActionName = "Rename"
+
+    /// A click on the title: the second click of a double-click (the event's own count, #6217) opens the rename
+    /// field, any other click selects the row, since the tap takes the List's selection click (#2496).
+    private func clickTitle() {
+        if PointerClick.count() >= 2 { beginRename(on: .title) } else { onSelect?() }
+    }
 
     private func beginRename(on part: SidebarRowPart) {
         guard Self.doubleClickRenames(part, renamable: onRename != nil, renaming: field.isOpen) else { return }
