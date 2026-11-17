@@ -5,7 +5,8 @@
 // (#4208), is its catalog command's MenuCommand on the window's catalog
 // (command-state CS-6), so it is off with the command's reason too. The
 // Metadata row (export-pack LX-2) picks the kernel's ExportMetadata policy,
-// read through the shared ExportPick (`pick`).
+// read through the shared ExportPick (`pick`). Under `-SuitePerfProbe` the
+// running row marks `progress` in suite.perf when it appears (P8's mark).
 import LibraryModel
 import SuiteKernel
 import SuiteUI
@@ -27,6 +28,7 @@ struct LibraryExportSheet: View {
     @State private var qualityText: String
     @State private var savingPreset = false
     @State private var presetName = ""
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     init(run: ExportRun<ExportOptions>, summary: ExportSummary?, count: Int, preview: String?, writable: Set<ExportFormat>,
          exportHelp: String?, presets: [ExportPreset], actions: Actions = Actions(), progressDelay: Duration = .milliseconds(100),
@@ -58,9 +60,10 @@ struct LibraryExportSheet: View {
             InspectorOption(id: edge, title: edge == 0 ? "Original Size" : String(edge),
                             identifier: "library.export.size." + (edge == 0 ? "original" : String(edge)))
         }
-        let formats: [InspectorOption<ExportFormat>] = ExportFormat.allCases.filter { $0.help(writable: writable) == nil }
-            .map { InspectorOption(id: $0, title: $0.rawValue, identifier: "library.export.format.\($0.rawValue)") }
-        let formatHelp = ExportFormat.allCases.compactMap { $0.help(writable: writable) }.joined(separator: " ")
+        let formats: [InspectorOption<ExportFormat>] = ExportFormat.allCases.map {
+            InspectorOption(id: $0, title: $0.rawValue, identifier: "library.export.format.\($0.rawValue)",
+                            unavailableHelp: $0.help(writable: writable))
+        }
         let blocked: String? = fieldsHelp(options) ?? exportHelp
         Form {
             LabeledContent("Size") {
@@ -87,7 +90,6 @@ struct LibraryExportSheet: View {
                 ChoiceChips(options: formats, selected: options.format) { (format: ExportFormat) -> Void in
                     change { $0.format = format }
                 }
-                .help(formatHelp)
             }
             LabeledContent("Metadata") {
                 ChoiceChips(options: Self.metadataOptions, selected: Self.pick(options).metadata) {
@@ -135,6 +137,7 @@ struct LibraryExportSheet: View {
     @ViewBuilder private func running(done: Int, total: Int) -> some View {
         BusyNote(ExportProgress(done: done + 1, total: total).text, identifier: "library.export.progress",
                  fraction: (done, total), delay: progressDelay)
+            .onAppear { recorder?.mark("progress", series: "library.export") }
         HStack {
             Spacer()
             MenuCommand("export.cancel", on: catalog, title: "Cancel", action: actions.cancel,

@@ -155,7 +155,7 @@ private struct KeyframeButtonHost: View {
 }
 
 /// Each identified button's enabled state under `element`.
-@MainActor private func axEnabled(in element: Any) -> [String: Bool] {
+@MainActor func axEnabled(in element: Any) -> [String: Bool] {
     let node = element as AnyObject
     var found = [String: Bool]()
     if node.accessibilityRole?() == .button, let id = node.accessibilityIdentifier?() ?? nil, !id.isEmpty {
