@@ -159,7 +159,7 @@ private struct DesignNodeProperties: View {
                                     DesignKeyControl(model: model, property: property, help: lockHelp, perform: perform)
                                 } else {
                                     // W and H carry no key button; its room is kept, so every field starts at one x.
-                                    Color.clear.frame(width: 2 * SuiteSize.keyframeButton, height: 0)
+                                    Spacer(minLength: 0).frame(width: SuiteSize.keyframeButton * 2)
                                         .accessibilityHidden(true)
                                 }
                             }
