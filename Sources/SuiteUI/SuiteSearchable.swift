@@ -75,6 +75,7 @@ private struct SearchFieldNamer: NSViewRepresentable {
         private func sheetTick() {
             name()
             windowDidUpdate()
+            if let path = UserDefaults.standard.string(forKey: "SuiteAXProbe") { Self.probe(to: path) }
             guard window?.attachedSheet == nil else { return }
             sheetTimer?.invalidate()
             sheetTimer = nil
@@ -136,6 +137,46 @@ private struct SearchFieldNamer: NSViewRepresentable {
                 view.subviews.forEach(walk)
             }
             walk(toolbar)
+        }
+
+        // DIAG ONLY (never lands): what serves the Search button under a sheet.
+        static func probe(to path: String) {
+            var out = "os \(ProcessInfo.processInfo.operatingSystemVersionString) t=\(Date().timeIntervalSince1970)\n"
+            func ptr(_ o: AnyObject?) -> String { o.map { "\(type(of: $0))@\(Unmanaged.passUnretained($0).toOpaque())" } ?? "nil" }
+            func id(_ o: NSObject) -> String {
+                let a = o.accessibilityAttributeValue(.identifier) as? String
+                let b = (o as? NSAccessibilityProtocol)?.accessibilityIdentifier()
+                return "attr=\(a ?? "nil") proto=\(b ?? "nil")"
+            }
+            for window in NSApp.windows {
+                out += "window \(ptr(window)) title=\(window.title) sheet=\(ptr(window.attachedSheet)) key=\(window.isKeyWindow)\n"
+                guard let root = window.contentView?.superview else { continue }
+                for field in searchFields(in: root) {
+                    let cell = field.cell as? NSSearchFieldCell
+                    out += " field \(ptr(field)) \(id(field)) frame=\(field.frame) super=\(ptr(field.superview))\n"
+                    out += "  cell \(ptr(cell)) \(cell.map(id) ?? "")\n"
+                    out += "  searchButtonCell \(ptr(cell?.searchButtonCell)) \(cell?.searchButtonCell.map(id) ?? "")\n"
+                    out += "  cancelButtonCell \(ptr(cell?.cancelButtonCell)) \(cell?.cancelButtonCell.map(id) ?? "")\n"
+                    for case let kid as NSObject in (field.accessibilityChildren() ?? []) {
+                        out += "  fieldKid \(kid) \(id(kid))\n"
+                        for case let k2 as NSObject in (kid.accessibilityAttributeValue(.children) as? [Any] ?? []) {
+                            out += "   kid2 \(k2) \(id(k2)) real=\(k2.responds(to: NSSelectorFromString("realElement")) ? ptr(k2.perform(NSSelectorFromString("realElement"))?.takeUnretainedValue()) : "n/a")\n"
+                        }
+                    }
+                }
+                func walk(_ o: NSObject, _ depth: Int) {
+                    guard depth < 40 else { return }
+                    let role = o.accessibilityAttributeValue(.role) as? String ?? ""
+                    let title = (o.accessibilityAttributeValue(.description) as? String) ?? (o.accessibilityAttributeValue(.title) as? String) ?? ""
+                    if role == "AXButton" && title == "Search" || role == "AXSearchField" || role == "AXTextField" && depth < 12 {
+                        let frame = (o.accessibilityAttributeValue(.position) as? NSValue).map { "\($0)" } ?? "?"
+                        out += " ax d\(depth) \(role) '\(title)' \(o) \(id(o)) pos=\(frame)\n"
+                    }
+                    for case let k as NSObject in (o.accessibilityAttributeValue(.children) as? [Any] ?? []) { walk(k, depth + 1) }
+                }
+                walk(window, 0)
+            }
+            try? out.write(toFile: path, atomically: true, encoding: .utf8)
         }
 
         private static func set(_ element: NSAccessibilityProtocol, _ name: String) {

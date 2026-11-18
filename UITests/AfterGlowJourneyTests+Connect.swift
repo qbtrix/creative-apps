@@ -14,7 +14,7 @@ extension AfterGlowHelpJourneyTests {
         let home = FileManager.default.temporaryDirectory.appendingPathComponent("suite-home-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: home) }
-        let launcher = SuiteHarness(self).launch(fixture: "firstLaunch", arguments: ["-SuiteHomeDir", home.path])
+        let launcher = SuiteHarness(self).launch(fixture: "firstLaunch", arguments: ["-SuiteHomeDir", home.path, "-SuiteAXProbe", "/tmp/suite-ax-probe.txt"])
         let item = Self.openHelp(launcher).menuItems["Connect an AI Assistant…"]
         XCTAssert(item.waitForExistence(timeout: 5), "the Help menu has no Connect an AI Assistant…")
         XCTAssert(item.isEnabled, "Connect an AI Assistant… is disabled in AfterGlow.app")
@@ -26,6 +26,12 @@ extension AfterGlowHelpJourneyTests {
             XCTAssert(sheet.descendants(matching: .any)[id].waitForExistence(timeout: 5), "the sheet has no \(id)")
         }
         launcher.shot("help-connect")
+        Thread.sleep(forTimeInterval: 1)
+        let probe = XCTAttachment(string: (try? String(contentsOfFile: "/tmp/suite-ax-probe.txt", encoding: .utf8)) ?? "no probe file")
+        probe.name = "ax-probe"
+        probe.lifetime = .keepAlways
+        add(probe)
+        print("AXPROBE BEGIN\n" + ((try? String(contentsOfFile: "/tmp/suite-ax-probe.txt", encoding: .utf8)) ?? "no probe file") + "\nAXPROBE END")
 
         // The command names the CLI inside the bundle, quoted.
         let command = sheet.descendants(matching: .any)["suite.help.connect.command"]
