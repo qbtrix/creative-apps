@@ -145,7 +145,7 @@ private struct SearchFieldNamer: NSViewRepresentable {
             func ptr(_ o: AnyObject?) -> String { o.map { "\(type(of: $0))@\(Unmanaged.passUnretained($0).toOpaque())" } ?? "nil" }
             func id(_ o: NSObject) -> String {
                 let a = o.accessibilityAttributeValue(.identifier) as? String
-                let b = (o as? NSAccessibilityProtocol)?.accessibilityIdentifier()
+                let p = o as? NSAccessibilityProtocol; let b = p?.accessibilityIdentifier()
                 return "attr=\(a ?? "nil") proto=\(b ?? "nil")"
             }
             for window in NSApp.windows {
@@ -167,9 +167,9 @@ private struct SearchFieldNamer: NSViewRepresentable {
                 func walk(_ o: NSObject, _ depth: Int) {
                     guard depth < 40 else { return }
                     let role = o.accessibilityAttributeValue(.role) as? String ?? ""
-                    let title = (o.accessibilityAttributeValue(.description) as? String) ?? (o.accessibilityAttributeValue(.title) as? String) ?? ""
+                    let desc = o.accessibilityAttributeValue(.description) as? String; let ttl = o.accessibilityAttributeValue(.title) as? String; let title = desc ?? ttl ?? ""
                     if role == "AXButton" && title == "Search" || role == "AXSearchField" || role == "AXTextField" && depth < 12 {
-                        let frame = (o.accessibilityAttributeValue(.position) as? NSValue).map { "\($0)" } ?? "?"
+                        let pos = o.accessibilityAttributeValue(.position); let frame = pos.map { String(describing: $0) } ?? "?"
                         out += " ax d\(depth) \(role) '\(title)' \(o) \(id(o)) pos=\(frame)\n"
                     }
                     for case let k as NSObject in (o.accessibilityAttributeValue(.children) as? [Any] ?? []) { walk(k, depth + 1) }
