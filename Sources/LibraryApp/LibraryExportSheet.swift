@@ -1,6 +1,7 @@
 // LibraryExportSheet.swift: File > Export… (export EX-6): editing, the progress
 // row, the summary, or a failed run's error, read from the kernel's ExportRun
-// and the catalog's `exportFinished`. Values in, closures out; a nil action disables its control.
+// and the catalog's `exportFinished`; while the window's export area shows a run
+// ahead of the catalog (`live.shown`: Export's running row, each step), that one. Values in, closures out; a nil action disables its control.
 // Each control but the dismiss-only Cancel and Done, and the name alert's Save
 // (#4208), is its catalog command's MenuCommand on the window's catalog
 // (command-state CS-6), so it is off with the command's reason too. The
@@ -26,6 +27,8 @@ struct LibraryExportSheet: View {
     let presets: [ExportPreset], actions: Actions, progressDelay: Duration
     /// The window's catalog, which the controls' specs read; nil (a snapshot) leaves the actions alone to decide.
     var catalog: LibraryCatalog?
+    /// The window's export area, whose `shown` run wins; read here, so a progress step reruns this sheet only.
+    var live: ExportAreaState?
     @State private var longEdgeText: String
     @State private var qualityText: String
     @State private var savingPreset = false
@@ -34,9 +37,10 @@ struct LibraryExportSheet: View {
 
     init(run: ExportRun<ExportOptions>, summary: ExportSummary?, count: Int, preview: String?, writable: Set<ExportFormat>,
          exportHelp: String?, presets: [ExportPreset], actions: Actions = Actions(), progressDelay: Duration = .milliseconds(100),
-         catalog: LibraryCatalog? = nil) {
+         catalog: LibraryCatalog? = nil, live: ExportAreaState? = nil) {
         (self.run, self.summary, self.count, self.preview, self.writable) = (run, summary, count, preview, writable)
         (self.exportHelp, self.presets, self.actions, self.progressDelay, self.catalog) = (exportHelp, presets, actions, progressDelay, catalog)
+        self.live = live
         let options = run.editingOptions
         _longEdgeText = State(initialValue: options?.longEdge.map(String.init) ?? "")
         _qualityText = State(initialValue: options.map { String($0.quality) } ?? "")
@@ -45,7 +49,7 @@ struct LibraryExportSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             Text(Self.title(count)).font(SuiteFont.headline)
-            switch run {
+            switch live?.shown ?? run {
             case .idle: EmptyView()
             case .editing(let options): editing(options)
             case .running(_, let done, let total): running(done: done, total: total)
