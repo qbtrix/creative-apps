@@ -110,5 +110,26 @@
     "find": "let target = croppedSize(photo).fitting(longSide: longSide)",
     "replace": "let target = PixelSize(width: buffer.width, height: buffer.height).fitting(longSide: longSide)",
     "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "P8: render decodes every photo at full size again, so the CPU shrinks 24 MP for a 2,048 px export",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "return side < photo.pixelSize.longSide ? side : nil",
+    "replace": "return nil",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "P8: the decode drops its two-pixel margin and asks for the covering size itself",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "coveringSide(photo, longSide: longSide) + 2",
+    "replace": "coveringSide(photo, longSide: longSide)",
+    "tests": "LibraryExportPlanTests"
+  },
+  {
+    "label": "P8: the shrink fits the decode's own rounding, not the photo's grid, so develop runs a row past the plan",
+    "file": "Sources/LibraryModel/Live/LiveExporter.swift",
+    "find": "let size = photo.pixelSize.fitting(longSide: coveringSide(photo, longSide: longSide))",
+    "replace": "let size = PixelSize(width: b.width, height: b.height).fitting(longSide: coveringSide(photo, longSide: longSide))",
+    "tests": "LibraryExportPlanTests"
   }
 ]

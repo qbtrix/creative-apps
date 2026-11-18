@@ -1,7 +1,7 @@
 // LibraryExportPlanTests.swift: EX-2, the live exporter. The plan fits the
-// long edge and never enlarges; render decodes at full size, develops with
-// the photo's settings on the source shrunk to the smallest size whose crop
-// covers the plan, resizes to exactly the plan, draws samples without a decode and passes decode errors through. EX-14: a cropped photo plans at its crop.
+// long edge and never enlarges; render decodes a couple of pixels past the
+// smallest size whose crop covers the plan (full size only for a full-size
+// export, P8), develops with the photo's settings on the source shrunk to that size, resizes to exactly the plan, draws samples without a decode and passes decode errors through. EX-14: a cropped photo plans at its crop.
 import CoreColor
 import CoreRaster
 import Foundation
@@ -94,7 +94,7 @@ private func photo(_ id: String, _ size: PixelSize, file: Bool = true,
         #expect(plan.items.map(\.photoID) == twice.map(\.id) && plan.options == options)
     }
 
-    @Test func renderDecodesFullSizeDevelopsAndResizesToThePlan() async throws {
+    @Test func renderDecodesNearThePlanDevelopsAndResizesToThePlan() async throws {
         let full = PixelSize(width: 400, height: 300)
         let decoder = FlatDecoder(size: full)
         let spy = DevelopSpy()
@@ -107,8 +107,24 @@ private func photo(_ id: String, _ size: PixelSize, file: Bool = true,
         let image = try await exporter.render(planned, photo: item)
         #expect(image.size == planned.size)
         #expect(image.rgba8.count == 100 * 75 * 4)
-        #expect(await decoder.asked == [nil])
+        // P8 (#6205): 102, not a full-size decode the CPU then shrinks.
+        #expect(await decoder.asked == [102])
         #expect(spy.settings == [settings])
+        #expect(spy.sizes == [planned.size])
+    }
+
+    /// A full-size export, or a plan at the photo's own size, still decodes at full size.
+    @Test func aFullSizeExportDecodesAtFullSize() async throws {
+        let full = PixelSize(width: 400, height: 300)
+        for edge in [nil, 400, 399] as [Int?] {
+            let decoder = FlatDecoder(size: full)
+            let exporter = LiveExporter(decoder: decoder, develop: DevelopSpy())
+            let item = photo("a", full)
+            let planned = try #require(exporter.plan([item], options: ExportOptions(longEdge: edge, folder: "/out"),
+                                                     existingNames: []).items.first)
+            #expect(try await exporter.render(planned, photo: item).size == planned.size)
+            #expect(await decoder.asked == [nil], "long edge \(edge.map(String.init) ?? "nil")")
+        }
     }
 
     /// Quality gate #5953: develop runs on the export's pixels, shrunk before develop by the crop's scale.
