@@ -47,7 +47,7 @@ Blueprint sections: 1.4 (the v1 export row), 2.2 (`library-export`), 2.3
 | Complaint in this area | What export does | Slice |
 |---|---|---|
 | An export wrote over an earlier file | Never overwrites: `IMG_0001 2.jpg`, and the writer refuses an existing name even if the plan raced | EX-a, EX-b |
-| The file doesn't look like the edit (color shift, crop lost) | One pipeline: full-size decode, develop and crop, lanczos3, sRGB-tagged; QB-V4 holds it to the loupe | EX-a, EX-b, EX-e |
+| The file doesn't look like the edit (color shift, crop lost) | One pipeline: decode near the plan's size (full size for a full-size export), develop and crop, lanczos3, sRGB-tagged; QB-V4 holds it to the loupe | EX-a, EX-b, EX-e |
 | A small photo came out blurry and huge | Never enlarges: the long edge is a ceiling | EX-a |
 | Export froze the app with no idea how long | Off the main actor, "Exporting 3 of 24" with Cancel, within 100 ms | EX-b, EX-e |
 | One bad file killed the whole batch | Every other file is still written; each failure is listed with its reason; Try Again re-runs only those | EX-e |
