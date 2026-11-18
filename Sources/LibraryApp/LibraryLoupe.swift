@@ -27,9 +27,22 @@
 // Straighten step the catalog hasn't taken yet from `\.libraryCropLive`. The photo
 // carries Photo's Rotate Left and Rotate Right as accessibility actions
 // (orientation-crop OC-9). Values in, closures out; LibraryCatalog holds the state.
+// LibraryTool names the loupe's two canvas drags as palette tools (a plain
+// drag only gives the canvas focus; Crop moves the frame's handles), so
+// Library declares each tool's ToolGesture like every app (#6022).
 import LibraryModel
 import SuiteUI
 import SwiftUI
+
+/// The loupe's canvas tools: a plain drag only focuses the canvas; Crop (R) drags the frame's handles.
+enum LibraryTool: String, CaseIterable, PaletteTool {
+    case view, crop
+    var title: String { self == .view ? "View" : "Crop" }
+    var systemImage: String { self == .view ? "eye" : "crop" }
+    var unavailableHelp: String? { nil }
+    var shortcut: Character? { self == .crop ? "r" : nil }
+    var gesture: ToolGesture { self == .view ? .none : .selects }
+}
 
 struct LibraryLoupe: View {
     let model: LibraryCatalog

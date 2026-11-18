@@ -23,6 +23,7 @@
 import AppKit
 import DesignModel
 import HaloModel
+import LibraryModel
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -33,6 +34,7 @@ import Testing
 @testable import FlareApp
 @testable import FlareModel
 @testable import HaloApp
+@testable import LibraryApp
 @testable import PhotoApp
 
 /// Every app with a canvas.
@@ -43,9 +45,7 @@ extension BodyCountSuites {
         static let samples = 60
 
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
-        static let exclusions: [String: (reason: String, issue: Int)] = [
-            "library.*": ("no canvas tool enum, so no adapter", 6022),
-        ]
+        static let exclusions: [String: (reason: String, issue: Int)] = [:]
 
         /// Apps the cross-app run covers; each iterates its own tool enum's `allCases`.
         static let adapters: [GestureApp: [(tool: String, gesture: ToolGesture)]] = [
@@ -53,6 +53,7 @@ extension BodyCountSuites {
             .design: DesignTool.allCases.map { ($0.rawValue, $0.gesture) },
             .flare: FlareTool.allCases.map { ($0.rawValue, $0.gesture) },
             .halo: HaloTool.allCases.map { ($0.rawValue, $0.gesture) },
+            .library: LibraryTool.allCases.map { ($0.rawValue, $0.gesture) },
         ]
 
         /// The most root bodies a class may run while the pointer is down.
@@ -177,6 +178,34 @@ extension BodyCountSuites {
                     let was = project.viewerDrawList?.worldBox(of: floor) else { return "no Floor in the draw list" }
                 if got.x == was.x && got.y == was.y { return "Floor didn't move" }
                 return abs(got.x - want.x) < 0.5 && abs(got.y - want.y) < 0.5 ? nil : "Floor at \(got.x),\(got.y), want \(want.x),\(want.y)"
+            })
+        }
+
+        @Test(.timeLimit(.minutes(5)), arguments: LibraryTool.allCases) func library(_ tool: LibraryTool) async throws {
+            let w = RenderBudgetWindow(
+                LibraryWindow(arguments: ["Library", "-LibraryFixture", "shoot"]).allowsWindowActivationEvents(), keyCapable: true)
+            defer { w.close() }
+            w.window.makeKey()
+            _ = w.window.makeFirstResponder(w.host)
+            try await w.settle(800)
+            let bodies = { LibraryWindow.bodyRuns }
+            try await w.settle(untilStable: bodies, turns: 8)
+            let first = try #require(w.identifiers().first { $0.hasPrefix(LibraryGrid.cellIdentifierPrefix) })
+            #expect(w.perform("Open", on: first), "no Open action on \(first)")
+            let photo = try #require(await w.element("library.loupe.photo"), "Open showed no loupe photo")
+            try await w.ticks(1) { _ in w.click(at: CGPoint(x: photo.midX, y: photo.midY)) }
+            try await w.settle(200)
+            // Crop presses on the frame's top-left handle (R opens the frame on the whole photo); View anywhere.
+            var target: CGPoint?
+            if tool == .crop {
+                RenderBudgetBrushKeysTests.press("r", in: w.window)
+                let handle = try #require(await w.element(LibraryCropOverlay.handleID(.topLeft)), "R showed no crop frame")
+                target = CGPoint(x: handle.midX, y: handle.midY)
+            }
+            try await w.settle(untilStable: bodies, turns: 8)
+            let frame = w.label("library.crop.frame")
+            try await Self.run(.library, tool.rawValue, tool.gesture, w, at: target, bodies: bodies, effect: {
+                w.label("library.crop.frame") == frame ? "the crop frame didn't change" : nil
             })
         }
 
