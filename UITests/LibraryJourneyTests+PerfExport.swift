@@ -5,7 +5,10 @@
 // marks (`export` when Export runs, `progress` when the running row appears,
 // `summary` when the result does), so XCUITest's click and polling stay out
 // of it, and gated: progress ≤ 100 ms and the whole run ≤ 15 s after Export
-// (budget row QB-L9, QB-LIB-7). The numbers, with the test-side wall time,
+// (budget row QB-L9, QB-LIB-7). The runs start once the launch import's
+// progress row is gone, so they time the export, not the import beside it, and
+// every run is gated after all three ran, so one slow run never hides the
+// others' numbers. The numbers, with the test-side wall time,
 // go to .build/ui-screens/perf-testExportThroughput.json. The model half is
 // gated on a release build in LibraryDevelopBudgetTests+Export.swift.
 import Foundation
@@ -27,9 +30,11 @@ extension LibraryExportBatchJourneyTests {
             "-LibraryCatalogDir", catalog.path, "-LibraryExportTo", out.path, "-SuitePerfProbe", "YES",
         ])
         sortByName(library)
+        XCTAssert(library.element("library.import.progress").waitForNonExistence(timeout: 120), "the import never finished")
         select(Self.landscape, library)
 
         var numbers: [String: String] = [:]
+        var misses: [String] = []
         for run in 1...3 {
             openExport(library)
             let started = ProcessInfo.processInfo.systemUptime
@@ -48,14 +53,15 @@ extension LibraryExportBatchJourneyTests {
             let (progressMs, appMs) = ((progress - export) * 1000, (done - export) * 1000)
             numbers["P8 run \(run)"] = String(format: "progress-ms=%.0f app-ms=%.0f wall-ms=%.0f", progressMs, appMs, wholeMs)
                 + " (gates: progress 100 ms, whole 15000 ms)"
-            XCTAssertLessThanOrEqual(progressMs, 100, "run \(run): the running row came \(Int(progressMs)) ms after Export")
-            XCTAssertLessThanOrEqual(appMs, 15000, "run \(run): ten photos at 2048 took \(Int(appMs)) ms")
+            if progressMs > 100 { misses.append("run \(run): the running row came \(Int(progressMs)) ms after Export") }
+            if appMs > 15000 { misses.append("run \(run): ten photos at 2048 took \(Int(appMs)) ms") }
             closeSheet(library)
         }
+        report(numbers)
+        XCTAssert(misses.isEmpty, "P8 over budget (progress 100 ms, whole 15000 ms): \(misses.joined(separator: "; "))")
         let written = (try? FileManager.default.contentsOfDirectory(atPath: out.path)) ?? []
         XCTAssertEqual(written.count, 30, "three runs of ten wrote \(written.count) files")
         library.app.terminate()
-        report(numbers)
     }
 
     /// The sheet's Done or Close button, then the sheet is gone.

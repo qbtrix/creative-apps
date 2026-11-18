@@ -2,8 +2,8 @@
 // opens the sheet; Export plans on the catalog and runs ExportRunner off the
 // main actor, its progress and summary streamed back as the import area does.
 // The presets and the last options live in `export-presets.json` beside the
-// catalog file (EX-11): read when the sheet first opens, written whenever
-// either changes, so they come back after a relaunch.
+// catalog file (EX-11): read when the sheet first opens, written off the main
+// actor whenever either changes, so they come back after a relaunch.
 import AppKit
 import Foundation
 import LibraryModel
@@ -18,6 +18,8 @@ import SwiftUI
     var presets: [ExportPreset] = ExportPresets.builtIns
     var loaded = false
     var run: Task<ExportSummary, Never>?
+    /// The last presets write; each new one waits for it, so writes land in order.
+    var save: Task<Void, Never>?
 }
 
 /// `export-presets.json` in the catalog's folder, through SuiteModel's FileStore
@@ -142,7 +144,12 @@ extension LibraryWindow {
     private func saveExportPresets() {
         let state = areas.export
         guard state.loaded else { return }
-        state.store.write(ExportPresetFile(presets: state.presets, last: state.last))
+        let (store, file) = (state.store, ExportPresetFile(presets: state.presets, last: state.last))
+        // Off the main actor: the write never holds up a click (Export's running row, P8).
+        state.save = Task.detached(priority: .utility) { [previous = state.save] in
+            await previous?.value
+            store.write(file)
+        }
     }
 
     private func cancelExport() { if model.cancelExport() { areas.export.run?.cancel() } }
