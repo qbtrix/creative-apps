@@ -21,8 +21,11 @@
 // turned by the draft's angle with `.rotationEffect` (a compositor transform,
 // so a straighten step never waits for a render), under the crop frame
 // overlay; a canvas drag moves the handle under its press (or the whole
-// frame), Escape cancels and the arrows nudge the frame 1 px (Shift 10);
-// otherwise the artboard is the photo at its stored crop (`crop.artboard`).
+// frame), shown live and taken by the catalog at the release, Escape cancels
+// and the arrows nudge the frame 1 px (Shift 10); otherwise the artboard is
+// the photo at its stored crop (`crop.artboard`). `LibraryTool` names those
+// two canvas gestures (view, crop) as palette tools with their ToolGesture,
+// as every app's canvas declares them (the gesture contract).
 // The crop controls come from the window through `\.libraryCrop`, with a
 // Straighten step the catalog hasn't taken yet from `\.libraryCropLive`. The photo
 // carries Photo's Rotate Left and Rotate Right as accessibility actions
@@ -30,6 +33,20 @@
 import LibraryModel
 import SuiteUI
 import SwiftUI
+
+/// The loupe's canvas tools: outside crop mode a drag only gives the canvas
+/// focus; with a crop draft open (R, Photo > Crop) it moves the crop frame.
+enum LibraryTool: String, CaseIterable, PaletteTool {
+    case view, crop
+    var title: String { self == .view ? "View" : "Crop" }
+    var systemImage: String { self == .view ? "hand.point.up.left" : "crop" }
+    var unavailableHelp: String? { nil }
+    var shortcut: Character? { self == .crop ? "r" : nil }
+    var gesture: ToolGesture { self == .view ? .none : .selects }
+
+    /// The tool the loupe's drag acts as: crop while a draft is open.
+    static func current(_ crop: LibraryMenu.Crop) -> Self { crop.drag == nil ? .view : .crop }
+}
 
 struct LibraryLoupe: View {
     let model: LibraryCatalog
@@ -57,8 +74,12 @@ struct LibraryLoupe: View {
         CanvasViewport(
             documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false, holdsRulerBand: false,
             onSize: { viewport = $0 }, onZoom: menu.view.zoomTo,
-            // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
-            onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key
+            // The view tool's drag only gives the canvas focus, so its keys reach it.
+            onDrag: { from, to in if LibraryTool.current(crop) == .crop { cropDrag(from: from, to: to, zoom: zoom) } },
+            onDragEnd: {
+                grabbed = nil
+                crop.endDrag?()
+            }, onKey: key
         ) {
             if let draft = crop.draft, let canvas = crop.canvas, let photo = model.loupePhotoSize {
                 // The unturned picture turned by the draft's angle on the GPU, centred
@@ -161,6 +182,7 @@ struct LibraryLoupe: View {
             case .downArrow: drag(.inside, 0, step)
             default: return .ignored
             }
+            crop.endDrag?()
             return .handled
         }
         switch press.key {

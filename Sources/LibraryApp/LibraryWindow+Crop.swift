@@ -9,11 +9,12 @@
 // `.full`. A straighten, Auto or a reset inside the draft renders nothing:
 // the loupe's picture is the unturned photo, which the loupe turns itself.
 // Auto measures that picture off the main actor and sets the draft to the
-// leveler's turn. A Straighten step (#6222) changes only `CropAreaState`'s
-// live draft, which the loupe and the CROP section read through
-// `\.libraryCropLive`, so a step reruns those views, not the window; the
-// catalog takes the angle once the steps pause for `CropAreaState.settle`, and
-// every other crop action takes it first (`cropAreaFlush`). A live draft whose
+// leveler's turn. A Straighten step (#6222) and a handle drag's step (#6022)
+// change only `CropAreaState`'s live draft, which the loupe and the CROP
+// section read through `\.libraryCropLive`, so a step reruns those views, not
+// the window; the catalog takes a Straighten draft once the steps pause for
+// `CropAreaState.settle` and a drag's at its release (`endDrag`), and every
+// other crop action takes it first (`cropAreaFlush`). A live draft whose
 // base is no longer the catalog's draft is shown nowhere and dropped. Every
 // state change is a LibraryCatalog method. The window merges this half with
 // the develop half.
@@ -26,7 +27,7 @@ import LibraryModel
 import SuiteKernel
 import SwiftUI
 
-/// The Straighten steps the catalog hasn't taken yet (#6222); the catalog holds the draft.
+/// The Straighten and drag steps the catalog hasn't taken yet (#6222, #6022); the catalog holds the draft.
 @Observable final class CropAreaState {
     /// A shown step: `draft` and its frame, canvas and frame value, made from the catalog's `base`.
     struct Live {
@@ -66,8 +67,10 @@ extension LibraryMenu {
         var setAspect: (@MainActor (CropAspect) -> Void)?
         /// The aspect picker's pick: its crop.* command on the draft.
         var pick: (@MainActor (CropPick) -> Void)?
-        /// A handle drag or arrow nudge, in photo pixels.
+        /// A handle drag's step or arrow nudge, in photo pixels: shown at once, taken by `endDrag`.
         var drag: (@MainActor (CropHandle, Double, Double) -> Void)?
+        /// The drag's release (or a nudge's): the catalog takes the shown draft.
+        var endDrag: Action?
         var setAngle: (@MainActor (Double) -> Void)?
         var level, apply, cancel, reset: Action?
     }
@@ -149,11 +152,9 @@ extension LibraryWindow {
         }
         var drag: (@MainActor (CropHandle, Double, Double) -> Void)?
         if cropping {
-            drag = { (handle: CropHandle, dx: Double, dy: Double) in
-                cropAreaFlush()
-                model.dragCrop(handle, dx: dx, dy: dy)
-            }
+            drag = { (handle: CropHandle, dx: Double, dy: Double) in cropAreaDrag(handle, dx: dx, dy: dy) }
         }
+        let endDrag: LibraryMenu.Action? = enabled(cropping) { () in cropAreaFlush() }
         // The loupe turns its picture itself, so an angle needs no render.
         let setAngle: (@MainActor (Double) -> Void)? = enabled(cropping) { (degrees: Double) in
             cropAreaStep(degrees)
@@ -180,7 +181,7 @@ extension LibraryWindow {
             frame: model.cropFrame, canvas: model.cropCanvas, frameValue: model.cropFrameValue,
             artboard: artboard,
             resetHelp: model.resetCropHelp, levelHelp: model.levelHelp,
-            setAspect: setAspect, pick: pick, drag: drag, setAngle: setAngle,
+            setAspect: setAspect, pick: pick, drag: drag, endDrag: endDrag, setAngle: setAngle,
             level: level, apply: apply, cancel: cancel, reset: reset)
     }
 
@@ -199,7 +200,22 @@ extension LibraryWindow {
         }
     }
 
-    /// The live Straighten step into the catalog, while the catalog's draft is
+    /// A drag step: the shown draft (the catalog's, or the live one made from
+    /// it) dragged by `dx`, `dy` shows at once through `areas.crop`; the
+    /// catalog takes it at the release. A pending Straighten commit waits for that too.
+    private func cropAreaDrag(_ handle: CropHandle, dx: Double, dy: Double) {
+        guard let base = model.cropDraft else { return }
+        let state = areas.crop
+        state.commit?.cancel()
+        state.commit = nil
+        let shown = state.live.flatMap { $0.base == base ? $0.draft : nil } ?? base
+        guard let draft = model.cropDraft(shown, dragging: handle, dx: dx, dy: dy) else { return }
+        state.show(CropAreaState.Live(
+            base: base, draft: draft, frame: model.cropFrame(of: draft), canvas: model.cropCanvas(of: draft),
+            frameValue: model.cropFrameValue(of: draft)))
+    }
+
+    /// The live Straighten or drag step into the catalog, while the catalog's draft is
     /// still the one it was made from; dropped otherwise.
     func cropAreaFlush() {
         let state = areas.crop
@@ -207,7 +223,7 @@ extension LibraryWindow {
         state.commit = nil
         guard let live = state.live else { return }
         state.show(nil)
-        if model.cropDraft == live.base { model.setCropAngle(live.draft.angle) }
+        if model.cropDraft == live.base { model.setCropDraft(live.draft) }
     }
 
     /// The loupe's picture again for the catalog's current settings (the
