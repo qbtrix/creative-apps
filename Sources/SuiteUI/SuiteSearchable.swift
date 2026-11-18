@@ -16,9 +16,9 @@
 // no event, so no window update, after it (the Help menu's sheets, #6204), and
 // accessibility reads whichever cell is current. A copy of a cell drops the
 // identifiers set on it, and AppKit reads its buttons through copies of the
-// field's cell no rename reaches, so each button cell becomes a
-// `NamedButtonCell`, which carries its name in its unused `alternateTitle`
-// (copies keep both the class and that title).
+// field's cell no rename reaches, so each button cell is rebuilt as a
+// `NamedButtonCell` with the same look, which carries its name in its unused
+// `alternateTitle` (copies keep both the class and that title).
 import AppKit
 import SwiftUI
 
@@ -113,8 +113,14 @@ private struct SearchFieldNamer: NSViewRepresentable {
             // the button cells while the field keeps its name, so each is checked on its own.
             set(field, name)
             if let cell { set(cell, name) }
-            if let search = cell?.searchButtonCell { nameButton(search, name + ".search") }
-            if let cancel = cell?.cancelButtonCell { nameButton(cancel, name + ".cancel") }
+            if let cell, let search = cell.searchButtonCell {
+                let named = namedButton(search, name + ".search")
+                if named !== search { cell.searchButtonCell = named }
+            }
+            if let cell, let cancel = cell.cancelButtonCell {
+                let named = namedButton(cancel, name + ".cancel")
+                if named !== cancel { cell.cancelButtonCell = named }
+            }
             // A collapsed toolbar search item shows a Search button beside the field, read through its cell.
             for case let button as NSButton in field.superview?.subviews ?? [] {
                 set(button, name + ".collapsed")
@@ -142,15 +148,34 @@ private struct SearchFieldNamer: NSViewRepresentable {
             walk(toolbar)
         }
 
-        /// Turns a plain button cell into a `NamedButtonCell` (same size, no stored properties, so the class swap
-        /// is safe) that answers `name` from every copy AppKit makes of it. An image-only cell never shows its
-        /// `alternateTitle`.
-        private static func nameButton(_ cell: NSButtonCell, _ name: String) {
-            set(cell, name)
-            if type(of: cell) == NSButtonCell.self, cell.imagePosition == .imageOnly {
-                object_setClass(cell, NamedButtonCell.self)
+        /// The button cell as a `NamedButtonCell` answering `name` from every copy AppKit makes of it: a plain
+        /// image-only cell is rebuilt as one with the same look, target and action. An image-only cell never
+        /// shows its `alternateTitle`.
+        private static func namedButton(_ button: NSButtonCell, _ name: String) -> NSButtonCell {
+            set(button, name)
+            if let named = button as? NamedButtonCell {
+                if named.alternateTitle != name { named.alternateTitle = name }
+                return named
             }
-            if cell is NamedButtonCell, cell.alternateTitle != name { cell.alternateTitle = name }
+            guard type(of: button) == NSButtonCell.self, button.imagePosition == .imageOnly else { return button }
+            let named = NamedButtonCell(imageCell: button.image)
+            named.alternateImage = button.alternateImage
+            named.title = button.title
+            named.isBordered = button.isBordered
+            named.bezelStyle = button.bezelStyle
+            named.imageScaling = button.imageScaling
+            named.imagePosition = button.imagePosition
+            named.highlightsBy = button.highlightsBy
+            named.showsStateBy = button.showsStateBy
+            named.imageDimsWhenDisabled = button.imageDimsWhenDisabled
+            named.isEnabled = button.isEnabled
+            named.controlSize = button.controlSize
+            named.target = button.target
+            named.action = button.action
+            named.setAccessibilityLabel(button.accessibilityLabel())
+            named.setAccessibilityIdentifier(name)
+            named.alternateTitle = name
+            return named
         }
 
         private static func set(_ element: NSAccessibilityProtocol, _ name: String) {
