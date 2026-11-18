@@ -94,24 +94,6 @@ import Testing
                 "the renaming stopped while the Connect sheet was still up")
     }
 
-    /// AppKit can read the Search button through a copy of the field's cell, and `NSCell.copy()` drops the
-    /// identifiers, so the copy (and its own button cells, AppKit's, at their own size) arrives named.
-    @Test(.timeLimit(.minutes(3))) func aCopiedSearchCellKeepsItsButtonNames() async throws {
-        let window = Self.window()
-        defer { window.close() }
-        try await Task.sleep(for: .milliseconds(800))
-        let cell = try #require(Self.searchCell(in: window), "no toolbar search field")
-        let copy = try #require(cell.copy() as? NSSearchFieldCell)
-        #expect(copy.accessibilityIdentifier() == "afterglow.home.search")
-        #expect(copy.searchButtonCell?.accessibilityIdentifier() == "afterglow.home.search.search")
-        #expect(copy.cancelButtonCell?.accessibilityIdentifier() == "afterglow.home.search.cancel")
-        #expect(copy.searchButtonCell.map { "\(type(of: $0))" } == cell.searchButtonCell.map { "\(type(of: $0))" },
-                "the copy's Search button isn't AppKit's own cell")
-        let field = try #require(window.toolbar?.items.lazy.compactMap { ($0 as? NSSearchToolbarItem)?.searchField }.first)
-        let rect = cell.searchButtonRect(forBounds: field.bounds)
-        #expect(rect.width < 30, "the Search button grew to \(rect)")
-    }
-
     /// The toolbar search item's field cell.
     static func searchCell(in window: NSWindow) -> NSSearchFieldCell? {
         window.toolbar?.items.lazy.compactMap { ($0 as? NSSearchToolbarItem)?.searchField.cell as? NSSearchFieldCell }.first

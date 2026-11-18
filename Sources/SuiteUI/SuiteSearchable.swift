@@ -105,7 +105,6 @@ private struct SearchFieldNamer: NSViewRepresentable {
 
         private static func name(_ field: NSSearchField, _ name: String) {
             let cell = field.cell as? NSSearchFieldCell
-            if let cell { SearchCellCopyNames.install(on: cell) }
             // Accessibility reads the cell, not the field (under a sheet the bare field shows), and AppKit can swap
             // the button cells while the field keeps its name, so each is checked on its own.
             set(field, name)
@@ -146,47 +145,6 @@ private struct SearchFieldNamer: NSViewRepresentable {
         private static func searchFields(in view: NSView) -> [NSSearchField] {
             if let field = view as? NSSearchField { return [field] }
             return view.subviews.flatMap(searchFields)
-        }
-    }
-}
-
-/// Makes copies of a search field cell carry its identifiers. AppKit can read the Search button through a copy
-/// of the field's cell, and `NSCell.copy()` drops accessibility identifiers (#6204). SwiftUI's cell is its own
-/// private subclass (its field editor, font and placeholder), so it can't be rebuilt as ours, and a rebuilt
-/// button cell loses AppKit's size and hit-testing. Instead the cell's class, when it has no `copyWithZone:` of
-/// its own (SwiftUI's has none), gets one that runs the inherited copy and then names the copy and its own
-/// button cells as the original is named. Nothing else about the cell or its buttons changes.
-enum SearchCellCopyNames {
-    @MainActor private static var done = Set<ObjectIdentifier>()
-
-    @MainActor static func install(on cell: NSSearchFieldCell) {
-        let cls: AnyClass = type(of: cell)
-        guard done.insert(ObjectIdentifier(cls)).inserted else { return }
-        let selector = NSSelectorFromString("copyWithZone:")
-        typealias Copy = @convention(c) (AnyObject, Selector, OpaquePointer?) -> Unmanaged<AnyObject>?
-        // The implementation the class inherits now; `class_addMethod` below refuses a class that has its own.
-        guard let inherited = class_getMethodImplementation(cls, selector),
-              let types = class_getInstanceMethod(cls, selector).flatMap(method_getTypeEncoding) else { return }
-        let copy = unsafeBitCast(inherited, to: Copy.self)
-        let block: @convention(block) (AnyObject, OpaquePointer?) -> Unmanaged<AnyObject>? = { source, zone in
-            // The copy comes back retained, as the copy family returns it; it passes through untouched.
-            let result = copy(source, selector, zone)
-            if Thread.isMainThread, let original = source as? NSSearchFieldCell,
-               let made = result?.takeUnretainedValue() as? NSSearchFieldCell {
-                MainActor.assumeIsolated { carryNames(from: original, to: made) }
-            }
-            return result
-        }
-        class_addMethod(cls, selector, imp_implementationWithBlock(block), types)
-    }
-
-    @MainActor static func carryNames(from original: NSSearchFieldCell, to copy: NSSearchFieldCell) {
-        copy.setAccessibilityIdentifier(original.accessibilityIdentifier())
-        if let name = original.searchButtonCell?.accessibilityIdentifier(), !name.isEmpty {
-            copy.searchButtonCell?.setAccessibilityIdentifier(name)
-        }
-        if let name = original.cancelButtonCell?.accessibilityIdentifier(), !name.isEmpty {
-            copy.cancelButtonCell?.setAccessibilityIdentifier(name)
         }
     }
 }
