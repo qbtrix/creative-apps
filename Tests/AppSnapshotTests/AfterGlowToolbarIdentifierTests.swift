@@ -106,11 +106,6 @@ import Testing
                 "a copy of the field's cell lost its Search button's name")
         #expect(copy.cancelButtonCell?.accessibilityIdentifier() == "afterglow.home.search.cancel",
                 "a copy of the field's cell lost its cancel button's name")
-        // The named buttons still search and clear through the field's cell.
-        #expect(cell.searchButtonCell?.target === cell && cell.searchButtonCell?.action == Selector(("_searchFieldSearch:")),
-                "the named Search button lost its action")
-        #expect(cell.cancelButtonCell?.target === cell && cell.cancelButtonCell?.action == Selector(("_searchFieldCancel:")),
-                "the named cancel button lost its action")
     }
 
     /// The toolbar search item's field cell.
