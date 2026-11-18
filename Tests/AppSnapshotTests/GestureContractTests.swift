@@ -8,7 +8,8 @@
 //   selects       no pixel work while the pointer is down
 //   every class   root bodies while the pointer is down within `bodyBound`, set at today's best path
 // A movesContent or selects row presses at the centre of an existing layer or object, read from the app's
-// model, and must change something at the release (the moved thing by the drag's delta, or the selection). Select
+// model (Library's crop presses its frame's top-left handle), and must change something at the release (the moved
+// thing by the drag's delta, or the selection). Select
 // (V, a selects tool in Photo and Design) moves the object it presses, so its row owes the move's delta;
 // one that changes nothing fails "drag hit nothing", which no exclusion covers. Pixel work is Photo's PhotoRenderCount (regions, layer composites, resamples); the other apps have no pixel
 // counter yet, so they owe the body bound only. The count starts from a settled canvas (`idle`): the 12 MP
@@ -23,6 +24,7 @@
 import AppKit
 import DesignModel
 import HaloModel
+import LibraryModel
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -33,6 +35,7 @@ import Testing
 @testable import FlareApp
 @testable import FlareModel
 @testable import HaloApp
+@testable import LibraryApp
 @testable import PhotoApp
 
 /// Every app with a canvas.
@@ -43,9 +46,7 @@ extension BodyCountSuites {
         static let samples = 60
 
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
-        static let exclusions: [String: (reason: String, issue: Int)] = [
-            "library.*": ("no canvas tool enum, so no adapter", 6022),
-        ]
+        static let exclusions: [String: (reason: String, issue: Int)] = [:]
 
         /// Apps the cross-app run covers; each iterates its own tool enum's `allCases`.
         static let adapters: [GestureApp: [(tool: String, gesture: ToolGesture)]] = [
@@ -53,6 +54,7 @@ extension BodyCountSuites {
             .design: DesignTool.allCases.map { ($0.rawValue, $0.gesture) },
             .flare: FlareTool.allCases.map { ($0.rawValue, $0.gesture) },
             .halo: HaloTool.allCases.map { ($0.rawValue, $0.gesture) },
+            .library: LibraryTool.allCases.map { ($0.rawValue, $0.gesture) },
         ]
 
         /// The most root bodies a class may run while the pointer is down.
@@ -178,6 +180,46 @@ extension BodyCountSuites {
                 if got.x == was.x && got.y == was.y { return "Floor didn't move" }
                 return abs(got.x - want.x) < 0.5 && abs(got.y - want.y) < 0.5 ? nil : "Floor at \(got.x),\(got.y), want \(want.x),\(want.y)"
             })
+        }
+
+        /// The loupe on the `shoot` fixture's first 6000 × 4000 photo; `crop` presses R first and drags the
+        /// frame's top-left handle, which holds the photo's aspect: the left edge owes the drag's x, the top edge follows.
+        @Test(.timeLimit(.minutes(5)), arguments: LibraryTool.allCases) func library(_ tool: LibraryTool) async throws {
+            let w = RenderBudgetWindow(
+                LibraryWindow(arguments: ["Library", "-LibraryFixture", "shoot"]).allowsWindowActivationEvents(), keyCapable: true)
+            defer { w.close() }
+            w.window.makeKey()
+            _ = w.window.makeFirstResponder(w.host)
+            try await w.settle(800)
+            try await w.settle(untilStable: { LibraryWindow.bodyRuns }, turns: 8)
+            let first = try #require(w.identifiers().first { $0.hasPrefix(LibraryGrid.cellIdentifierPrefix) })
+            #expect(w.perform("Open", on: first), "no Open action on \(first)")
+            let photo = try #require(await w.element("library.loupe.photo"), "Open showed no loupe photo")
+            try await w.ticks(1) { _ in w.click(at: CGPoint(x: photo.midX, y: photo.midY)) }
+            try await w.settle(200)
+            if tool == .crop { RenderBudgetBrushKeysTests.press("r", in: w.window) }
+            try await w.settle(untilStable: { LibraryWindow.bodyRuns }, turns: 8)
+            let before = Self.cropFrame(w)
+            var target: CGPoint?
+            if Self.aims(tool.gesture) {
+                let frame = try #require(before, "R showed no crop frame")
+                let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
+                target = w.point(frame.origin, on: frame.size, in: board)
+            }
+            let board = await w.element("suite.canvas.artboard")
+            try await Self.run(.library, tool.rawValue, tool.gesture, w, at: target, bodies: { LibraryWindow.bodyRuns }, effect: {
+                guard let before, let board, let after = Self.cropFrame(w) else { return "no crop frame after the release" }
+                // R's frame is the whole photo, so its size is the canvas; a corner moves by the drag on each axis.
+                return Self.near(CGVector(dx: after.minX - before.minX, dy: after.minY - before.minY),
+                                 Self.delta(board.width / before.width), "the crop frame's top-left")
+            })
+        }
+
+        /// `library.crop.frame`'s label, "4000 × 4000 at 1000, 0", as a rect in photo pixels.
+        static func cropFrame<V: View>(_ w: RenderBudgetWindow<V>) -> CGRect? {
+            guard let label = w.label("library.crop.frame") else { return nil }
+            let n = label.split(whereSeparator: { !"0123456789.-".contains($0) }).compactMap { Double($0) }
+            return n.count == 4 ? CGRect(x: n[2], y: n[3], width: n[0], height: n[1]) : nil
         }
 
         /// One press, `samples` drag samples and a release from the canvas's middle; checks `gesture`'s contract on

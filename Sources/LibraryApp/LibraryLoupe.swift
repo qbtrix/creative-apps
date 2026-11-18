@@ -26,7 +26,9 @@
 // The crop controls come from the window through `\.libraryCrop`, with a
 // Straighten step the catalog hasn't taken yet from `\.libraryCropLive`. The photo
 // carries Photo's Rotate Left and Rotate Right as accessibility actions
-// (orientation-crop OC-9). Values in, closures out; LibraryCatalog holds the state.
+// (orientation-crop OC-9). The canvas drag goes by the catalog's `loupeTool`,
+// whose PaletteTool conformance here gives each tool its gesture class for the
+// gesture contract. Values in, closures out; LibraryCatalog holds the state.
 import LibraryModel
 import SuiteUI
 import SwiftUI
@@ -58,7 +60,7 @@ struct LibraryLoupe: View {
             documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false, holdsRulerBand: false,
             onSize: { viewport = $0 }, onZoom: menu.view.zoomTo,
             // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
-            onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key
+            onDrag: { from, to in if model.loupeTool == .crop { cropDrag(from: from, to: to, zoom: zoom) } }, onDragEnd: { grabbed = nil }, onKey: key
         ) {
             if let draft = crop.draft, let canvas = crop.canvas, let photo = model.loupePhotoSize {
                 // The unturned picture turned by the draft's angle on the GPU, centred
@@ -171,6 +173,15 @@ struct LibraryLoupe: View {
         }
         return .handled
     }
+}
+
+extension LibraryTool: PaletteTool {
+    public var title: String { self == .view ? "View" : "Crop" }
+    public var systemImage: String { self == .view ? "hand.point.up.left" : "crop" }
+    public var unavailableHelp: String? { nil }
+    public var shortcut: Character? { self == .crop ? "r" : nil }
+    /// A view drag only gives the canvas its keys; a crop drag picks the frame's handle and moves it.
+    public var gesture: ToolGesture { self == .view ? .none : .selects }
 }
 
 /// The CPU route's picture, rebuilt only when the shown render changes, so a

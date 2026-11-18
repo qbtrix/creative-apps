@@ -2,7 +2,10 @@
 // takes it (#6222). `cropDraft(angle:)` gives the draft `setCropAngle` would
 // leave, without changing the catalog, and `cropFrame(of:)`, `cropCanvas(of:)`
 // and `cropFrameValue(of:)` give that draft's frame, canvas and frame value as
-// the catalog's own read once it holds the draft. Runs on Linux and macOS.
+// the catalog's own read once it holds the draft. A handle drag shows the
+// same way: `cropDraft(_:dragging:dx:dy:)` chains samples off the catalog and
+// `takeCropDraft(_:over:)` lands them, so the samples taken together equal
+// `dragCrop` per sample, and a stale draft is dropped. Runs on Linux and macOS.
 @testable import LibraryModel
 import Testing
 
@@ -35,5 +38,25 @@ struct LibraryCropLiveAngleTests {
         var cropping = catalog
         cropping.beginCrop()
         #expect(cropping.cropDraft(angle: .nan) == nil)
+    }
+
+    @Test func liveDragEqualsDragCrop() throws {
+        var catalog = cropLiveLoupe()
+        catalog.beginCrop()
+        let base = try #require(catalog.cropDraft)
+        var stepped = catalog, shown = base
+        for (dx, dy) in [(40.0, 20.0), (35.5, -7.0), (12.0, 30.0)] {
+            stepped.dragCrop(.topLeft, dx: dx, dy: dy)
+            shown = try #require(catalog.cropDraft(shown, dragging: .topLeft, dx: dx, dy: dy))
+        }
+        // Showing the samples leaves the catalog alone; taking them equals dragging each.
+        #expect(catalog.cropDraft == base && shown != base)
+        catalog.takeCropDraft(shown, over: base)
+        #expect(catalog.cropDraft == stepped.cropDraft)
+        #expect(catalog.history.undo.isEmpty)
+        // A draft made from an older base is dropped.
+        catalog.takeCropDraft(base, over: base)
+        #expect(catalog.cropDraft == stepped.cropDraft)
+        #expect(catalog.cropDraft(base, dragging: .inside, dx: .nan, dy: 0) == nil)
     }
 }
