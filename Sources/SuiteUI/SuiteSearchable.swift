@@ -14,11 +14,7 @@
 // While a sheet is attached it names every search field in the window every
 // quarter second: AppKit can swap the field's button cells under a sheet with
 // no event, so no window update, after it (the Help menu's sheets, #6204), and
-// accessibility reads whichever cell is current. A copy of a cell drops the
-// identifiers set on it, and AppKit reads its buttons through copies of the
-// field's cell no rename reaches, so each button cell becomes a
-// `NamedButtonCell`, which carries its name in its unused `alternateTitle`
-// (copies keep both the class and that title).
+// accessibility reads whichever cell is current.
 import AppKit
 import SwiftUI
 
@@ -113,8 +109,8 @@ private struct SearchFieldNamer: NSViewRepresentable {
             // the button cells while the field keeps its name, so each is checked on its own.
             set(field, name)
             if let cell { set(cell, name) }
-            if let search = cell?.searchButtonCell { nameButton(search, name + ".search") }
-            if let cancel = cell?.cancelButtonCell { nameButton(cancel, name + ".cancel") }
+            if let search = cell?.searchButtonCell { set(search, name + ".search") }
+            if let cancel = cell?.cancelButtonCell { set(cancel, name + ".cancel") }
             // A collapsed toolbar search item shows a Search button beside the field, read through its cell.
             for case let button as NSButton in field.superview?.subviews ?? [] {
                 set(button, name + ".collapsed")
@@ -142,17 +138,6 @@ private struct SearchFieldNamer: NSViewRepresentable {
             walk(toolbar)
         }
 
-        /// Turns a plain button cell into a `NamedButtonCell` (same size, no stored properties, so the class swap
-        /// is safe) that answers `name` from every copy AppKit makes of it. An image-only cell never shows its
-        /// `alternateTitle`.
-        private static func nameButton(_ cell: NSButtonCell, _ name: String) {
-            set(cell, name)
-            if type(of: cell) == NSButtonCell.self, cell.imagePosition == .imageOnly {
-                object_setClass(cell, NamedButtonCell.self)
-            }
-            if cell is NamedButtonCell, cell.alternateTitle != name { cell.alternateTitle = name }
-        }
-
         private static func set(_ element: NSAccessibilityProtocol, _ name: String) {
             if element.accessibilityIdentifier() != name { element.setAccessibilityIdentifier(name) }
         }
@@ -161,12 +146,5 @@ private struct SearchFieldNamer: NSViewRepresentable {
             if let field = view as? NSSearchField { return [field] }
             return view.subviews.flatMap(searchFields)
         }
-    }
-}
-
-/// A search field's button cell whose accessibility identifier lives in its `alternateTitle`, which a copy keeps.
-private final class NamedButtonCell: NSButtonCell {
-    override func accessibilityIdentifier() -> String {
-        alternateTitle.isEmpty ? super.accessibilityIdentifier() : alternateTitle
     }
 }

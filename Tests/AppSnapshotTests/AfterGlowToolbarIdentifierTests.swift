@@ -94,20 +94,6 @@ import Testing
                 "the renaming stopped while the Connect sheet was still up")
     }
 
-    /// A copy of the field's cell names its buttons too. Copying a cell drops the identifiers set on it, and the
-    /// Help sheets' audit read the Search button of such a copy, which no window update or timer ever sees (#6204).
-    @Test(.timeLimit(.minutes(3))) func aCopiedSearchCellKeepsItsButtonNames() async throws {
-        let window = Self.window()
-        defer { window.close() }
-        try await Task.sleep(for: .milliseconds(800))
-        let cell = try #require(Self.searchCell(in: window), "no toolbar search field")
-        let copy = try #require(cell.copy() as? NSSearchFieldCell)
-        #expect(copy.searchButtonCell?.accessibilityIdentifier() == "afterglow.home.search.search",
-                "a copy of the field's cell lost its Search button's name")
-        #expect(copy.cancelButtonCell?.accessibilityIdentifier() == "afterglow.home.search.cancel",
-                "a copy of the field's cell lost its cancel button's name")
-    }
-
     /// The toolbar search item's field cell.
     static func searchCell(in window: NSWindow) -> NSSearchFieldCell? {
         window.toolbar?.items.lazy.compactMap { ($0 as? NSSearchToolbarItem)?.searchField.cell as? NSSearchFieldCell }.first
