@@ -1,10 +1,13 @@
 // LibraryJourneyTests+PerfExport.swift: P8, export throughput (packet
 // docs/blueprints/library/features/export.md, Budgets; slice EX-e), on J7B's
-// steps. Live (L): ten landscape 6000 × 4000 `shoot` JPEGs at 2048, three runs;
-// each run's time and `progress` mark (the export sheet's running row marks it
-// in suite.perf) go to .build/ui-screens/perf-testExportThroughput.json.
-// Report-only: it asserts the files, never the gates; the model half is gated
-// in LibraryDevelopBudgetTests+Export.swift.
+// steps. Live (L): ten landscape 6000 × 4000 `shoot` JPEGs at 2048, three runs.
+// Each run is timed on the app's own clock from the export sheet's suite.perf
+// marks (`export` when Export runs, `progress` when the running row appears,
+// `summary` when the result does), so XCUITest's click and polling stay out
+// of it, and gated: progress ≤ 100 ms and the whole run ≤ 15 s after Export
+// (budget row QB-L9, QB-LIB-7). The numbers, with the test-side wall time,
+// go to .build/ui-screens/perf-testExportThroughput.json. The model half is
+// gated on a release build in LibraryDevelopBudgetTests+Export.swift.
 import Foundation
 import XCTest
 
@@ -12,7 +15,7 @@ extension LibraryExportBatchJourneyTests {
     /// The first ten landscape photos of `shoot` by name (every third is portrait).
     static let landscape = (1...15).filter { $0 % 3 != 0 }.map { String(format: "IMG_%04d", $0) }
 
-    /// P8: three exports of ten 6000 × 4000 JPEGs at 2048; report each run's mark and time.
+    /// P8: three exports of ten 6000 × 4000 JPEGs at 2048, each gated on its progress row and whole time.
     @MainActor func testExportThroughput() throws {
         let folder = try LibraryFiles.freshPhotoFolder()
         let catalog = try LibraryFiles.freshCatalogDir()
@@ -35,11 +38,18 @@ extension LibraryExportBatchJourneyTests {
             XCTAssert(summary.waitForExistence(timeout: 120), "run \(run): no summary within 120 s")
             let wholeMs = (ProcessInfo.processInfo.systemUptime - started) * 1000
             XCTAssertEqual(Self.text(summary), "Exported 10 photos.", "run \(run): the summary")
-            let marks = library.perf()?.marks.filter { $0.name.contains("progress") } ?? []
-            let mark = marks.last.map { String(format: "progress-ms=%.0f", ($0.time - started) * 1000) }
-                ?? "no progress mark in suite.perf"
-            numbers["P8 run \(run)"] = String(format: "whole-ms=%.0f ", wholeMs) + mark
-                + " report-only (gates: progress 100 ms, whole 15000 ms)"
+            let marks = library.perf()?.marks.filter { $0.series == "library.export" } ?? []
+            let at = { (name: String) in marks.last { $0.name == name }?.time }
+            guard let export = at("export"), let progress = at("progress"), let done = at("summary") else {
+                XCTFail("run \(run): suite.perf lacks an export, progress or summary mark: \(marks.map(\.name))")
+                closeSheet(library)
+                continue
+            }
+            let (progressMs, appMs) = ((progress - export) * 1000, (done - export) * 1000)
+            numbers["P8 run \(run)"] = String(format: "progress-ms=%.0f app-ms=%.0f wall-ms=%.0f", progressMs, appMs, wholeMs)
+                + " (gates: progress 100 ms, whole 15000 ms)"
+            XCTAssertLessThanOrEqual(progressMs, 100, "run \(run): the running row came \(Int(progressMs)) ms after Export")
+            XCTAssertLessThanOrEqual(appMs, 15000, "run \(run): ten photos at 2048 took \(Int(appMs)) ms")
             closeSheet(library)
         }
         let written = (try? FileManager.default.contentsOfDirectory(atPath: out.path)) ?? []

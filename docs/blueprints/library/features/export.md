@@ -490,7 +490,7 @@ so it lands last.
 |---|---|---|
 | QB-L9 model half | `beginExport` on `large` (10,000) ≤ 10 ms (1 ms release) | `LargeCatalogModelBudgetTests.beginExportWithinBudget` (perf list) |
 | QB-LIB-7 model half | `LiveExporter.plan` for 1,000 photos ≤ 50 ms (5 ms release), with a name template and sidecars on | `LargeCatalogModelBudgetTests.exportPlanWithinBudget` (perf list) |
-| QB-L9, QB-LIB-7 probe | `progress` mark ≤ 100 ms after Export; 10 × 6000 × 4000 at 2048 ≤ 15 s; report-only | P8 (EX-13) |
+| QB-L9, QB-LIB-7 probe | `progress` mark ≤ 100 ms after the `export` mark; 10 × 6000 × 4000 at 2048 ≤ 15 s from `export` to `summary`; gated, on the app's clock | P8 (EX-13) |
 | QB-V4 | exact, WYSIWYG within QB-V2's tolerance, PSNR ≥ 40 dB after JPEG | `LibraryExportFidelityTests` (EX-5, EX-14) |
 | QB-F1 no dead controls | every slot disabled with its reason until its slice lands | `library-export` snapshot; J7 step 5 |
 | QB-F2 progress and errors in place | the sheet's progress row, summary and failure list; never an alert | J7 step 2, J7B |

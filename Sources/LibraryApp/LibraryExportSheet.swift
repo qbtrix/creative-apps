@@ -6,7 +6,9 @@
 // (command-state CS-6), so it is off with the command's reason too. The
 // Metadata row (export-pack LX-2) picks the kernel's ExportMetadata policy,
 // read through the shared ExportPick (`pick`). Under `-SuitePerfProbe` the
-// running row marks `progress` in suite.perf when it appears (P8's mark).
+// sheet marks P8's moments in suite.perf on series `library.export`: `export`
+// when Export runs, `progress` when the running row appears and `summary`
+// when the result does, so P8 gates on the app's own clock.
 import LibraryModel
 import SuiteKernel
 import SuiteUI
@@ -123,7 +125,7 @@ struct LibraryExportSheet: View {
             Spacer()
             Button("Cancel") { actions.close?() }.keyboardShortcut(.cancelAction)
                 .accessibilityIdentifier("library.export.cancel")
-            MenuCommand("file.export", on: catalog, title: "Export", action: blocked == nil ? actions.export : nil,
+            MenuCommand("file.export", on: catalog, title: "Export", action: blocked == nil ? marked(actions.export) : nil,
                         reason: blocked ?? Self.notEditing, shortcut: .defaultAction)
                 .accessibilityIdentifier("library.export.export")
         }
@@ -146,17 +148,17 @@ struct LibraryExportSheet: View {
         }
     }
 
-    @ViewBuilder private func finished(_ summary: ExportSummary) -> some View {
-        let failed = !summary.failures.isEmpty
-        if failed {
-            InspectorNote(summary.message, kind: .error, identifier: "library.export.summary")
-            InspectorNote(Self.failureLines(summary.failures).joined(separator: "\n"), identifier: "library.export.failures")
-        } else if summary.cancelled {
-            InspectorNote(summary.message, identifier: "library.export.summary")
-        } else {
-            Label(summary.message, systemImage: "checkmark.circle").foregroundStyle(SuiteColor.stateSuccess)
-                .accessibilityIdentifier("library.export.summary")
+    /// `action`, marking `export` first (P8's start).
+    private func marked(_ action: LibraryMenu.Action?) -> LibraryMenu.Action? {
+        guard let action else { return nil }
+        return { [recorder] in
+            recorder?.mark("export", series: "library.export")
+            action()
         }
+    }
+
+    @ViewBuilder private func finished(_ summary: ExportSummary) -> some View {
+        summaryLine(summary).onAppear { recorder?.mark("summary", series: "library.export") }
         HStack {
             if !summary.failedIDs.isEmpty {
                 MenuCommand("export.retry", on: catalog, title: "Try Again", action: actions.retry,
@@ -171,6 +173,19 @@ struct LibraryExportSheet: View {
             }
             Button("Done") { actions.close?() }.keyboardShortcut(.defaultAction)
                 .accessibilityIdentifier("library.export.done")
+        }
+    }
+
+    /// The result in words: the failures, a cancel, or the success line.
+    @ViewBuilder private func summaryLine(_ summary: ExportSummary) -> some View {
+        if !summary.failures.isEmpty {
+            InspectorNote(summary.message, kind: .error, identifier: "library.export.summary")
+            InspectorNote(Self.failureLines(summary.failures).joined(separator: "\n"), identifier: "library.export.failures")
+        } else if summary.cancelled {
+            InspectorNote(summary.message, identifier: "library.export.summary")
+        } else {
+            Label(summary.message, systemImage: "checkmark.circle").foregroundStyle(SuiteColor.stateSuccess)
+                .accessibilityIdentifier("library.export.summary")
         }
     }
 
