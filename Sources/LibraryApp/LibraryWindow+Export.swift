@@ -1,12 +1,17 @@
 // LibraryWindow+Export.swift: the export area (export EX-6): File > Export…
 // opens the sheet; Export plans on the catalog and runs ExportRunner off the
 // main actor, its progress and summary streamed back as the import area does.
+// The sheet reads the run through `shown`, ahead of the catalog: Export shows
+// the running row at once and each progress step lands there alone, so only the
+// sheet reruns; the catalog takes the start once planned and the summary at the
+// end, two window bodies a run, not one a step (P8, #6205).
 // The presets and the last options live in `export-presets.json` beside the
-// catalog file (EX-11): read when the sheet first opens, written whenever
-// either changes, so they come back after a relaunch.
+// catalog file (EX-11): read when the sheet first opens, written off the main
+// actor whenever either changes, so they come back after a relaunch.
 import AppKit
 import Foundation
 import LibraryModel
+import SuiteKernel
 import SuiteModel
 import SwiftUI
 
@@ -18,6 +23,10 @@ import SwiftUI
     var presets: [ExportPreset] = ExportPresets.builtIns
     var loaded = false
     var run: Task<ExportSummary, Never>?
+    /// The run the sheet shows while the catalog's lags it (Export's running row, each step); nil otherwise.
+    var shown: ExportRun<ExportOptions>?
+    /// The last presets write; each new one waits for it, so writes land in order.
+    var save: Task<Void, Never>?
 }
 
 /// `export-presets.json` in the catalog's folder, through SuiteModel's FileStore
@@ -67,7 +76,7 @@ extension LibraryWindow {
         return LibraryExportSheet(
             run: model.exportRun, summary: model.exportFinished, count: model.exportTargets.count, preview: model.exportPreview,
             writable: JPEGWriter.writableFormats(), exportHelp: help, presets: areas.export.presets, actions: actions,
-            catalog: model)
+            catalog: model, live: areas.export)
     }
 
     /// The sheet in the launch folder, the last one, or Pictures; the stored
@@ -85,9 +94,15 @@ extension LibraryWindow {
 
     private func startExport() {
         guard let options = model.exportRun.editingOptions else { return }
-        areas.export.last = options
-        saveExportPresets()
-        planExport(options) { (names: Set<String>) -> ExportPlan? in model.exportPlan(existingNames: names) }
+        var running = model.exportRun
+        if running.start(total: model.exportTargets.count) { areas.export.shown = running }
+        // The last options land with the plan, in one main-actor turn: set here, they'd rerun the window
+        // before the planning task could start (P8's running row, #6205).
+        planExport(options) { (names: Set<String>) -> ExportPlan? in
+            areas.export.last = options
+            saveExportPresets()
+            return model.exportPlan(existingNames: names)
+        }
     }
 
     /// Try Again: the failed photos only, under the last options.
@@ -102,7 +117,7 @@ extension LibraryWindow {
         let writer = model.services.writer
         Task {
             let existing = (try? await writer.existingNames(in: options.folder)) ?? []
-            if let planned = plan(existing) { runExport(planned) }
+            if let planned = plan(existing) { runExport(planned) } else { areas.export.shown = nil }
         }
     }
 
@@ -111,7 +126,6 @@ extension LibraryWindow {
         let exporter = model.services.exporter
         let writer = model.services.writer
         let sidecars = JPEGWriter()
-        let total = plan.items.count
         let (events, sink) = AsyncStream<Int>.makeStream()
         let run = Task.detached(priority: .userInitiated) { () -> ExportSummary in
             let summary = await ExportRunner.run(
@@ -122,11 +136,12 @@ extension LibraryWindow {
             return summary
         }
         areas.export.run = run
+        areas.export.shown = model.exportRun
         Task {
-            for await done in events { model.showExportProgress(done: done, total: total) }
+            for await done in events { areas.export.shown?.progressed(done: done) }
             let summary = await run.value
             model.finishExport(summary)
-            areas.export.run = nil
+            (areas.export.run, areas.export.shown) = (nil, nil)
         }
     }
 
@@ -142,7 +157,12 @@ extension LibraryWindow {
     private func saveExportPresets() {
         let state = areas.export
         guard state.loaded else { return }
-        state.store.write(ExportPresetFile(presets: state.presets, last: state.last))
+        let (store, file) = (state.store, ExportPresetFile(presets: state.presets, last: state.last))
+        // Off the main actor: the write never holds up a click (Export's running row, P8).
+        state.save = Task.detached(priority: .utility) { [previous = state.save] in
+            await previous?.value
+            store.write(file)
+        }
     }
 
     private func cancelExport() { if model.cancelExport() { areas.export.run?.cancel() } }
