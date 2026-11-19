@@ -94,6 +94,22 @@ import Testing
                 "the renaming stopped while the Connect sheet was still up")
     }
 
+    /// On the runner's macOS 26.7 the Search button's proxy forwarded no new-API identifier from its cell under the
+    /// Help sheets (journeys run 44294026219), so the cell carries its name as an override too, which the proxy
+    /// hands the accessibility server whatever the bridge does.
+    @Test(.timeLimit(.minutes(3))) func searchButtonProxyCarriesAnOverriddenIdentifier() async throws {
+        let window = Self.window()
+        defer { window.close() }
+        try await Task.sleep(for: .milliseconds(800))
+        let cell = try #require(Self.searchCell(in: window), "no toolbar search field")
+        let proxies = cell.accessibilityAttributeValue(.children) as? [NSObject] ?? []
+        let ids = proxies.compactMap { proxy -> String? in
+            guard proxy.responds(to: NSSelectorFromString("accessibilityOverriddenAttributes")) else { return nil }
+            return (proxy.value(forKey: "accessibilityOverriddenAttributes") as? [String: Any])?["AXIdentifier"] as? String
+        }
+        #expect(ids.contains("afterglow.home.search.search"), "the Search button's proxy overrides no identifier: \(ids)")
+    }
+
     /// The toolbar search item's field cell.
     static func searchCell(in window: NSWindow) -> NSSearchFieldCell? {
         window.toolbar?.items.lazy.compactMap { ($0 as? NSSearchToolbarItem)?.searchField.cell as? NSSearchFieldCell }.first
