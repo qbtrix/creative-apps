@@ -6,7 +6,8 @@
 // window's search fields once it is in a window (and again on the next turn of
 // the run loop, after the toolbar is built) and names the field and its cell
 // `<identifier>` (accessibility reads the cell), its buttons `<identifier>.search`
-// and `<identifier>.cancel`, and a collapsed item's Search button
+// and `<identifier>.cancel` (also as an accessibility override, the one form the
+// buttons' proxies reliably forward), and a collapsed item's Search button
 // `<identifier>.collapsed`. On each window update it names a toolbar search
 // item's field again, which AppKit rebuilds when the item collapses or the page
 // changes, and the toolbar's "more toolbar items" pop-up, if a titlebar
@@ -109,8 +110,8 @@ private struct SearchFieldNamer: NSViewRepresentable {
             // the button cells while the field keeps its name, so each is checked on its own.
             set(field, name)
             if let cell { set(cell, name) }
-            if let search = cell?.searchButtonCell { set(search, name + ".search") }
-            if let cancel = cell?.cancelButtonCell { set(cancel, name + ".cancel") }
+            if let search = cell?.searchButtonCell { setButton(search, name + ".search") }
+            if let cancel = cell?.cancelButtonCell { setButton(cancel, name + ".cancel") }
             // A collapsed toolbar search item shows a Search button beside the field, read through its cell.
             for case let button as NSButton in field.superview?.subviews ?? [] {
                 set(button, name + ".collapsed")
@@ -140,6 +141,14 @@ private struct SearchFieldNamer: NSViewRepresentable {
 
         private static func set(_ element: NSAccessibilityProtocol, _ name: String) {
             if element.accessibilityIdentifier() != name { element.setAccessibilityIdentifier(name) }
+        }
+
+        /// A search field's button reaches accessibility as a proxy built on each read, which forwards its cell's
+        /// overridden attributes; on macOS 26.7 it forwarded no new-API identifier under a sheet, so the cell
+        /// carries its name both ways.
+        private static func setButton(_ cell: NSButtonCell, _ name: String) {
+            set(cell, name)
+            _ = cell.accessibilitySetOverrideValue(name, forAttribute: .identifier)
         }
 
         private static func searchFields(in view: NSView) -> [NSSearchField] {
