@@ -11,8 +11,8 @@
 // order, where it attaches its sheets, alerts, importers and launch tasks.
 // A dialog an area's route asks for is the one `request`; that area's hook
 // presents it and sets it back to nil. New Composition opens
-// NewCompositionSheet; a refused rename opens RenameRefusalAlert with the
-// typed name kept. The window publishes `perform` as the `haloPerform`
+// NewCompositionSheet; a refused rename keeps the sidebar row's field open
+// with the typed name and HaloProject's reason under it. The window publishes `perform` as the `haloPerform`
 // focused value and its project as `haloProject` (the menus read titles and
 // availability from it), opens on HaloLaunch's project and, under
 // `-HaloControlsProbe`, publishes the `halo.controls` JSON
@@ -72,7 +72,11 @@ struct HaloWindow: View, BodyCounted {
                             addAction: newComposition)],
                         selection: model.selectedCompositionID,
                         onSelect: { perform(.selectComposition($0)) },
-                        onRename: { perform(.renameComposition($0, $1)) })
+                        // A refused name keeps the row's field open with its reason under it (#139).
+                        onRename: { id, name in
+                            perform(.renameComposition(id, name))
+                            return model.renameRefusal(id)
+                        })
                 } ai: {
                     // Halo layers can't hide yet, so the list has no eye.
                     AgentActivityList(requests: model.agentRequests, layerNames: model.layerNamesByID, hidden: [],
@@ -110,12 +114,7 @@ struct HaloWindow: View, BodyCounted {
                     settings: model.suggestedSettings, state: HaloMenuState(project: model),
                     onCreate: { settings in if model.newComposition(settings) { showsNewComposition = false } },
                     onCancel: { showsNewComposition = false })
-            }
-            .modifier(RenameRefusalAlert(
-                refusal: model.refusedRename,
-                problem: { model.renameProblem($0.id, to: $1) },
-                onRename: { perform(.renameComposition($0.id, $1)) },
-                onDismiss: { model.dismissRefusedRename() })))
+            })
         .environment(\.haloLiveEdit, live)
         .onAppear { live.current = { model } }
         .modifier(RefreshLinkHandoff(live: live))
