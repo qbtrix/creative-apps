@@ -126,6 +126,19 @@ import Testing
         #expect(source.contains("case .toolbar: chip"))
     }
 
+    /// DS-u finish: in a sheet's grid of bordered pickers the rate is the same stock menu Picker at regular size,
+    /// not the inspector's chrome-less value text, so it reads as a control beside Preset and Unit.
+    @MainActor @Test func formPlacementIsAStockMenuPicker() throws {
+        let form = FrameRateMenu(rate: Self.ntsc, placement: .form) { _ in }
+        #expect(form.controlSize == .regular)
+        let source = try Self.source("Sources/SuiteUI/FrameRateMenu.swift")
+        let start = try #require(source.range(of: "private var picker: some View {"), "the picker moved; point this test at it")
+        let picker = source[start.upperBound...]
+        #expect(picker.contains(".pickerStyle(.menu)"))
+        #expect(source.contains("case .form: picker"))
+        #expect(try Self.source("Sources/SuiteUI/NewDocumentSheet.swift").contains("placement: .form"))
+    }
+
     /// #4603: at fps 30, 30 and 29.97 differ only by rate; the ruler and the pill must redraw for it.
     @MainActor @Test func rulerAndPillRedrawWhenOnlyTheRateChanges() {
         let mapping = FrameMapping(duration: 9_999, frameWidth: 2)
