@@ -10,8 +10,9 @@
 // A movesContent or selects row presses at the centre of an existing layer or object, read from the app's
 // model, and must change something at the release (the moved thing by the drag's delta, or the selection). Select
 // (V, a selects tool in Photo and Design) moves the object it presses, so its row owes the move's delta;
-// one that changes nothing fails "drag hit nothing", which no exclusion covers. Pixel work is Photo's PhotoRenderCount (regions, layer composites, resamples); the other apps have no pixel
-// counter yet, so they owe the body bound only. The count starts from a settled canvas (`idle`): the 12 MP
+// one that changes nothing fails "drag hit nothing", which no exclusion covers. Pixel work is Photo's PhotoRenderCount (regions, layer composites, resamples) and Library's loupe renders
+// (LibraryLoupeRenders); the other apps have no pixel counter yet, so they owe the body bound only. Library's crop
+// row first pulls the new frame's corner in, so the frame it then drags has room to move. The count starts from a settled canvas (`idle`): the 12 MP
 // fixture's first picture is about 940 renders that go on landing after the editor's bodies settle, and a count
 // begun before the last one charges the rest to the drag. Select's move lifts the layer once at its first sample
 // (one render of the canvas without it), so its count starts once that lift has landed. Step p95 is printed per tool (GESTURE-CONTRACT lines), not gated:
@@ -23,6 +24,7 @@
 import AppKit
 import DesignModel
 import HaloModel
+import LibraryModel
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -33,6 +35,7 @@ import Testing
 @testable import FlareApp
 @testable import FlareModel
 @testable import HaloApp
+@testable import LibraryApp
 @testable import PhotoApp
 
 /// Every app with a canvas.
@@ -43,9 +46,7 @@ extension BodyCountSuites {
         static let samples = 60
 
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
-        static let exclusions: [String: (reason: String, issue: Int)] = [
-            "library.*": ("no canvas tool enum, so no adapter", 6022),
-        ]
+        static let exclusions: [String: (reason: String, issue: Int)] = [:]
 
         /// Apps the cross-app run covers; each iterates its own tool enum's `allCases`.
         static let adapters: [GestureApp: [(tool: String, gesture: ToolGesture)]] = [
@@ -53,6 +54,7 @@ extension BodyCountSuites {
             .design: DesignTool.allCases.map { ($0.rawValue, $0.gesture) },
             .flare: FlareTool.allCases.map { ($0.rawValue, $0.gesture) },
             .halo: HaloTool.allCases.map { ($0.rawValue, $0.gesture) },
+            .library: LibraryTool.allCases.map { ($0.rawValue, $0.gesture) },
         ]
 
         /// The most root bodies a class may run while the pointer is down.
@@ -178,6 +180,53 @@ extension BodyCountSuites {
                 if got.x == was.x && got.y == was.y { return "Floor didn't move" }
                 return abs(got.x - want.x) < 0.5 && abs(got.y - want.y) < 0.5 ? nil : "Floor at \(got.x),\(got.y), want \(want.x),\(want.y)"
             })
+        }
+
+        @Test(.timeLimit(.minutes(5)), arguments: LibraryTool.allCases) func library(_ tool: LibraryTool) async throws {
+            let w = RenderBudgetWindow(
+                LibraryWindow(arguments: ["Library", "-LibraryFixture", "shoot"]).allowsWindowActivationEvents(), keyCapable: true)
+            defer { w.close() }
+            w.window.makeKey()
+            _ = w.window.makeFirstResponder(w.host)
+            let bodies: () -> Int? = { LibraryWindow.bodyRuns }
+            try await w.settle(800)
+            try await w.settle(untilStable: bodies, turns: 8)
+            let first = try #require(w.identifiers().first { $0.hasPrefix(LibraryGrid.cellIdentifierPrefix) })
+            #expect(w.perform("Open", on: first), "no Open action on \(first)")
+            let photo = try #require(await w.element("library.loupe.photo"), "Open showed no loupe photo")
+            try await w.settle(untilStable: bodies, turns: 8)
+            try await w.ticks(1) { _ in w.click(at: CGPoint(x: photo.midX, y: photo.midY)) }
+            try await w.settle(200)
+            var target: CGPoint?
+            var before: (frame: CGRect, at: CGPoint)?
+            if tool == .crop {
+                RenderBudgetBrushKeysTests.press("r", in: w.window)
+                let full = try #require(await w.element("library.crop.frame"), "R showed no crop frame")
+                // The new frame fills the photo, so pull its bottom-right corner in first: the frame then has room to move.
+                let corner = CGPoint(x: full.maxX, y: full.minY)
+                w.send(.leftMouseDown, at: corner)
+                try await w.ticks(10) { w.send(.leftMouseDragged, at: CGPoint(x: corner.x - full.width * Double($0) / 30, y: corner.y + full.height * Double($0) / 30)) }
+                w.send(.leftMouseUp, at: CGPoint(x: corner.x - full.width / 3, y: corner.y + full.height / 3))
+                try await w.settle(untilStable: bodies, turns: 8)
+                let frame = try #require(await w.element("library.crop.frame"))
+                before = (frame, try #require(Self.cropOrigin(w.label("library.crop.frame")), "no frame value"))
+                target = CGPoint(x: frame.midX, y: frame.midY)
+            }
+            try await Self.run(.library, tool.rawValue, tool.gesture, w, at: target, bodies: bodies,
+                pixels: { BodyTally.runs(of: LibraryLoupeRenders.self) }, effect: {
+                guard let before, let size = Self.cropSize(w.label("library.crop.frame")),
+                    let after = Self.cropOrigin(w.label("library.crop.frame")) else { return "no crop frame after the release" }
+                let got = CGVector(dx: after.x - before.at.x, dy: after.y - before.at.y)
+                return Self.near(got, Self.delta(before.frame.width / size.width), "the crop frame")
+            })
+        }
+
+        /// The crop frame value's size and origin ("4000 × 4000 at 1000, 0"), in photo pixels.
+        static func cropSize(_ value: String?) -> CGSize? { cropNumbers(value).map { CGSize(width: $0[0], height: $0[1]) } }
+        static func cropOrigin(_ value: String?) -> CGPoint? { cropNumbers(value).map { CGPoint(x: $0[2], y: $0[3]) } }
+        static func cropNumbers(_ value: String?) -> [Double]? {
+            let numbers = (value ?? "").split { !"0123456789.-".contains($0) }.compactMap { Double($0) }
+            return numbers.count == 4 ? numbers : nil
         }
 
         /// One press, `samples` drag samples and a release from the canvas's middle; checks `gesture`'s contract on

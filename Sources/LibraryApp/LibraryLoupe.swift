@@ -20,8 +20,8 @@
 // artboard is the straightened photo (`crop.canvas`): the unturned render
 // turned by the draft's angle with `.rotationEffect` (a compositor transform,
 // so a straighten step never waits for a render), under the crop frame
-// overlay; a canvas drag moves the handle under its press (or the whole
-// frame), Escape cancels and the arrows nudge the frame 1 px (Shift 10);
+// overlay; a canvas drag (LibraryTool's crop) moves the handle under its
+// press (or the whole frame), Escape cancels and the arrows nudge the frame 1 px (Shift 10);
 // otherwise the artboard is the photo at its stored crop (`crop.artboard`).
 // The crop controls come from the window through `\.libraryCrop`, with a
 // Straighten step the catalog hasn't taken yet from `\.libraryCropLive`. The photo
@@ -45,6 +45,8 @@ struct LibraryLoupe: View {
     @Environment(\.libraryCropLive) private var live
     /// The crop controls with the live Straighten step, if any.
     private var crop: LibraryMenu.Crop { live.shown(controls) }
+    /// The canvas tool: Crop while a draft is open, else the plain view.
+    private var tool: LibraryTool { controls.draft == nil ? .view : .crop }
     @Environment(\.libraryLoupeGPU) private var gpu
 
     var body: some View {
@@ -57,8 +59,12 @@ struct LibraryLoupe: View {
         CanvasViewport(
             documentSize: document, zoom: zoom, checkerboard: false, showsRulers: false, holdsRulerBand: false,
             onSize: { viewport = $0 }, onZoom: menu.view.zoomTo,
-            // Outside crop mode a drag only gives the canvas focus, so its keys reach it.
-            onDrag: { from, to in cropDrag(from: from, to: to, zoom: zoom) }, onDragEnd: { grabbed = nil }, onKey: key
+            // With the view tool (no crop draft) a drag only gives the canvas focus, so its keys reach it.
+            onDrag: { from, to in if tool == .crop { cropDrag(from: from, to: to, zoom: zoom) } },
+            onDragEnd: {
+                grabbed = nil
+                crop.dragEnd?()
+            }, onKey: key
         ) {
             if let draft = crop.draft, let canvas = crop.canvas, let photo = model.loupePhotoSize {
                 // The unturned picture turned by the draft's angle on the GPU, centred
