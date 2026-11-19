@@ -87,7 +87,7 @@ final class SuiteWindowSizingView: NSView {
         Task { @MainActor [weak self, interval] in
             self?.applySize()
             while true {
-                try? await Task.sleep(for: interval)
+                do { try await Task.sleep(for: interval) } catch { return }
                 guard let self, self.window != nil else { return }
                 self.refit()
             }
