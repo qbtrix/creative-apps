@@ -16,7 +16,7 @@
 // draws over a margin of the unsharp's reach, then is sharpened and cropped. With no adjustment layer the
 // sharpened base is what the cache keeps, so a slider step still draws over kept pixels. `liveStack` is nil,
 // and the region takes the dispatcher route, when the image's Blur is on (it reads neighbours), when a visible
-// layer has an enabled mask, when a layer's opacity is outside 0...1, or when the services' adjustment layers
+// layer other than a drag frame's draft has an enabled mask, when a layer's opacity is outside 0...1, or when the services' adjustment layers
 // are not the live ones. The dispatcher route keeps its own base per region in the same `PhotoCompositeCache`
 // (`composite`): the layers the stack still shares, from the bottom, with the last render, so a Move,
 // transform, opacity or visibility step composites the changed layer and the ones above it, not a hundred
@@ -69,7 +69,7 @@ extension PhotoWorkspace {
         guard shown.allSatisfy({ (0...1).contains(Float($0.opacity)) }) else { return nil }  // render-contract: cpu-op layer-opacity-range
         var operations: [PhotoLayer.ID: [ToneProgram.Operation]] = [:]
         for layer in shown {
-            guard shownMask(of: layer) == nil else { return nil }  // render-contract: cpu-op masked-layer
+            guard shownMask(of: layer) == nil || layer.id == liveDraftLayer else { return nil }  // render-contract: cpu-op masked-layer
             guard case .adjustment(var settings) = layer.kind else { continue }
             settings.apply(.setEnabled(.blur, false))  // a layer never blurs (LiveAdjustmentLayering)
             operations[layer.id] = settings.toneOperations ?? []
@@ -211,6 +211,8 @@ public final class PhotoCompositeCache: Sendable {
         let layer: PhotoLayer.ID
         let part: PixelRect
         let pixels: TiledPixels
+        /// The layer's shown mask, multiplied into the source; nil without one.
+        let mask: TiledPixels?
         let level: Int
         static let restLevel = -1
     }
