@@ -1,5 +1,5 @@
 // PhotoDraftGPUTests.swift: a Free Transform drag frame on a layer that can't lift (a non-normal blend on the
-// layer, a blended layer above it, or a blended layer's selected part) draws on the GPU with Metal's `.affine` composite: on the resident route,
+// layer, a blended layer above it, a blended layer's selected part, or a blended, masked layer) draws on the GPU with Metal's `.affine` composite: on the resident route,
 // with the app's texture target and without one, a rotate, a stretch and a shrink frame resample the layer on
 // the CPU 0 times (PhotoRenderCount's `resamples` through a Tally, debug only; a shrink makes its halved source
 // once per draft), and the frame's bytes match the CPU route's drag frame within a few levels (both bilinear).
@@ -29,6 +29,8 @@ import Testing
         case above
         /// Multiply, the square selected on a layer painted outside it too: the rest draws as it is.
         case onPart
+        /// Multiply on the dragged layer, whose mask hides the layer's left half: the mask moves with the pixels.
+        case masked
         var description: String { rawValue }
     }
 
@@ -50,6 +52,11 @@ import Testing
         switch blend {
         case .onTheLayer:
             model.setBlendMode(dragged, .multiply)
+        case .masked:
+            model.setBlendMode(dragged, .multiply)
+            var mask: [UInt8] = []
+            for _ in 0..<height { for x in 0..<width { mask += x < width / 2 ? [0, 0, 0, 255] : [255, 255, 255, 255] } }
+            model.masks[dragged] = try TiledPixels(rgba8: mask, width: width, height: height)
         case .onPart:
             model.setToolOption(.color(red: 30, green: 160, blue: 60))
             model.setSelection(PixelRect(x: width / 16, y: height / 16, width: width / 8, height: height / 8))
@@ -112,6 +119,12 @@ import Testing
             let (got, want) = (PhotoRenderBackendTests.laid(try await PhotoRenderer.update(workspace, since: nil, route: gpu, live: true)),
                                PhotoRenderBackendTests.laid(reference))
             #expect(got.count == want.count)
+            if blend == .masked {
+                // (270, 200) maps back into the square's masked-out left half on every step: the cyan shows.
+                let at = (200 * 600 + 270) * 4
+                #expect(abs(Int(got[at]) - 60) <= 6 && abs(Int(got[at + 1]) - 180) <= 6 && abs(Int(got[at + 2]) - 220) <= 6,
+                        "masked \(name): the mask didn't hide the square, (270, 200) is \(got[at..<(at + 3)].map { $0 })")
+            }
             let off = stride(from: 0, to: min(got.count, want.count), by: 4).filter { i in
                 (i..<(i + 4)).contains { abs(Int(got[$0]) - Int(want[$0])) > 6 }
             }.count
