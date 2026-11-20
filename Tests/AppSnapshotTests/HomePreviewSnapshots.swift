@@ -1,6 +1,7 @@
 // HomePreviewSnapshots.swift: Golden/afterglow/home-recents-previews-{light,dark} (shared-thumbnails
-// ST-4): three Recent cards with FakeThumbnails' previews, the fourth with its app's mark. `.task`
-// doesn't run in a snapshot, so the previews are loaded first. macOS only.
+// ST-4): three Recent cards with FakeThumbnails' previews, the fourth with its app's mark, tall enough
+// to show the mark card's caption. `.task` doesn't run in a snapshot, so the previews are loaded first.
+// macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteModel
@@ -19,7 +20,7 @@ import Testing
         await previews.load(refs, from: thumbnails)
         #expect(model.state.cards.map { previews.kind(for: $0.item.ref) } == [.preview, .preview, .preview, .mark])
         for appearance in [SnapshotAppearance.light, .dark] {
-            assertGolden(HomePreviewFixture.grid(model, services, previews: previews), size: CGSize(width: 800, height: 460),
+            assertGolden(HomePreviewFixture.grid(model, services, previews: previews), size: CGSize(width: 800, height: 520),
                          name: "home-recents-previews", area: "afterglow", appearance: appearance)
         }
     }

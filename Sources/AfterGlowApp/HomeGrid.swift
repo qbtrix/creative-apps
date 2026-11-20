@@ -101,7 +101,7 @@ struct HomeGrid: View, BodyCounted {
     private func item(_ card: RecentCard) -> ThumbnailItem<String> { Self.item(card, images: images, previews: previews) }
 
     /// A card as a cell: its name and age, the app in the tooltip. With `previews`, its published
-    /// preview, else its own thumbnail, else the app's mark once the preview answered nil; the
+    /// preview, else its own thumbnail, else the app's mark (also while its answer is out); the
     /// accessibility value then says which ("Today, preview" or "Today, app mark").
     static func item(_ card: RecentCard, images: [String: Image], previews: HomePreviews<Image>? = nil) -> ThumbnailItem<String> {
         let name = card.item.ref.displayName
