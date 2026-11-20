@@ -20,7 +20,8 @@
 // are not the live ones. The dispatcher route keeps its own base per region in the same `PhotoCompositeCache`
 // (`composite`): the layers the stack still shares, from the bottom, with the last render, so a Move,
 // transform, opacity or visibility step composites the changed layer and the ones above it, not a hundred
-// layers. Linux-safe.
+// layers. The same cache keeps a Free Transform drag's draft source on the GPU (`draftSource`), uploaded once per
+// draft and released by the still frame after the drag. Linux-safe.
 import CoreRaster
 import CoreRender
 import SuiteImaging
@@ -146,7 +147,7 @@ extension PhotoWorkspace {
             case .pixels(let layer):
                 try owned()
                 if layer.id == liveDraftLayer, let draft = transformDraft, let tiled = pixels[layer.id] {
-                    try compositeDraft(draft, tiled, of: layer, onto: &picture, at: work, on: dispatcher)
+                    try compositeDraft(draft, tiled, of: layer, onto: &picture, at: work, on: dispatcher, cache: cache)
                 } else {
                     try dispatcher.composite(residentSteps([layer], in: work, resident: resident), onto: &picture)
                 }
@@ -204,7 +205,22 @@ public final class PhotoCompositeCache: Sendable {
         let pixels: PixelBuffer
     }
 
+    /// A drag frame's draft source (`draftSource`): the layer, the part of its pixels and how often it is halved.
+    struct DraftKey: Equatable, Sendable {
+        let layer: PhotoLayer.ID
+        let part: PixelRect
+        let pixels: TiledPixels
+        let level: Int
+    }
+
+    private struct DraftSource: Sendable {
+        let key: DraftKey
+        let surface: RenderSurface
+        let backend: any RenderBackend
+    }
+
     private let entries = Mutex<[PixelRect: Entry]>([:])
+    private let drafts = Mutex<[DraftSource]>([])
     private let buffers = Mutex<[PixelRect: Pixels]>([:])
     private let makes = Mutex(0)
 
@@ -287,8 +303,37 @@ public final class PhotoCompositeCache: Sendable {
         return made
     }
 
+    /// The source a drag frame composites the draft from on `backend`: kept under `key` for every frame of the
+    /// draft, else `make()`'s (made under the lock, so parallel regions upload it once). A key for another layer,
+    /// part or pixels releases the sources kept for the old one; the levels of one draft stay side by side.
+    func draftSource(_ key: DraftKey, on backend: any RenderBackend, make: () throws -> RenderSurface) throws -> RenderSurface {
+        var stale: [DraftSource] = []
+        defer { for old in stale { old.backend.release(old.surface) } }
+        return try drafts.withLock { drafts in
+            if let held = drafts.first(where: { $0.key == key && $0.backend.name == backend.name }) { return held.surface }
+            let same = { (old: DraftSource) in
+                old.key.layer == key.layer && old.key.part == key.part && old.key.pixels == key.pixels && old.backend.name == backend.name
+            }
+            stale = drafts.filter { !same($0) }
+            drafts.removeAll { !same($0) }
+            let made = try make()
+            drafts.append(DraftSource(key: key, surface: made, backend: backend))
+            return made
+        }
+    }
+
+    /// Releases the drag frames' draft sources: the drag is over.
+    public func removeDraftSources() {
+        let all = drafts.withLock { drafts -> [DraftSource] in
+            defer { drafts = [] }
+            return drafts
+        }
+        for old in all { old.backend.release(old.surface) }
+    }
+
     /// Releases every kept region.
     public func removeAll() {
+        removeDraftSources()
         buffers.withLock { $0 = [:] }
         let all = entries.withLock { entries -> [Entry] in
             defer { entries = [:] }

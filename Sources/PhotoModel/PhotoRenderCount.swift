@@ -29,7 +29,7 @@ public enum PhotoRenderCount {
     @TaskLocal static var countingRows = false
 
     /// One test's counts, under the same names IdleWorkTests reads: "regions", "layers", "bases", "hits", "rows",
-    /// "rowLayers".
+    /// "rowLayers", "resamples".
     public final class Tally: Sendable {
         private let counts = Mutex<[String: Int]>([:])
         public init() {}
@@ -90,6 +90,7 @@ public enum PhotoRenderCount {
     @inline(__always) static func resample() {
         #if DEBUG
         resamples.withLock { $0 += 1 }
+        tally?.add("resamples")
         #endif
     }
 
