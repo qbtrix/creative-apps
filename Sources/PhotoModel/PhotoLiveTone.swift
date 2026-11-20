@@ -4,7 +4,8 @@
 // .writeToned`, the app's Metal `display_tone`) and a backend that runs one over a surface (CoreRender's
 // `ToneRendering`), a region is drawn from `liveStack()`: the pixel layers under the lowest visible adjustment
 // layer, composited from resident tiles and kept per region in `PhotoCompositeCache` until one of them changes;
-// then the layers above it bottom-up, an adjustment layer as one program pass (composited back onto the picture
+// then the layers above it bottom-up, drawn on the region's own copy of that base (the dispatcher's `copied`, a
+// GPU blit with no wait, never a tone pass that waits on the GPU), an adjustment layer as one program pass (composited back onto the picture
 // with its blend mode and opacity when those aren't normal and 1) and a pixel layer as one batched composite;
 // then the adjustment layers at the top (normal, opacity 1) and the image's adjustments, folded into the one
 // program the target writes the picture through. A whole-image slider step is that write over the cached
@@ -129,7 +130,7 @@ extension PhotoWorkspace {
         defer { if picture != base { dispatcher.release(picture) } }
         /// The picture as a surface of this region's own, never the cached base.
         func owned() throws {
-            if picture == base { picture = try tone.adjusted(base, tone: ToneProgram([])) }
+            if picture == base { picture = try dispatcher.copied(base) }
         }
         PhotoRenderCount.layers(stack.steps.count)
         for step in stack.steps {

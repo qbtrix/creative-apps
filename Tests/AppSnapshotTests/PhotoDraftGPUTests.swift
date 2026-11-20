@@ -3,12 +3,12 @@
 // with the app's texture target and without one, a rotate, a stretch and a shrink frame resample the layer on
 // the CPU 0 times (PhotoRenderCount's `resamples` through a Tally, debug only; a shrink makes its halved source
 // once per draft), and the frame's bytes match the CPU route's drag frame within a few levels (both bilinear).
-// `blendedDragOn24Megapixels` times the rotate frame at 6000 x 4000 on the texture target in an optimized build
-// (`swift test -c release -Xswiftc -DDEBUG -Xswiftc -enable-testing`): it fails over `budget`, a little above what
-// it measures (p95 53 to 101 ms at load 30 to 36; the CPU resample measured 753 ms), and reports the 8 ms target.
-// The rest is the live route's whole-canvas cost: each region copies its base onto a new Metal surface, which core
-// fills from the CPU (qbtrix/creative-core#833). It reads the wall clock, so it stays disabled until
-// Tests/perf-suites.txt lists it (#6380). macOS only, skipped without a GPU.
+// `blendedDragOn24Megapixels` times the rotate frame of a blended layer and of a blended, masked one at 6000 x 4000 on the
+// texture target in an optimized build (`swift test -c release -Xswiftc -DDEBUG -Xswiftc -enable-testing`): it
+// fails over the 16 ms hard budget and reports the 8 ms target (p50 about 8.8 ms, p95 9 to 14 ms at load 6 to 10).
+// Each region copies its cached base with the dispatcher's no-wait GPU `copied` (qbtrix/creative-core#834); an
+// identity tone pass there waited on the GPU per region (p95 19 ms). It reads the wall clock, so it stays disabled
+// until Tests/perf-suites.txt lists it (#6380). macOS only, skipped without a GPU.
 import CoreRaster
 import CoreRender
 import CoreRenderMetal
@@ -149,15 +149,15 @@ import Testing
         #endif
     }
 
-    /// The 24 MP frame's p95 budget in an optimized build; the target is 8 ms once core#833 lands.
-    static let budget = 150.0
+    /// The 24 MP frame's p95 budget in an optimized build: one frame, the hard limit; the target is 8 ms.
+    static let budget = 16.0
 
-    /// One display frame's half: a 24 MP blended layer's rotate frame on the app's texture target.
+    /// One display frame: a 24 MP blended (or blended, masked) layer's rotate frame on the app's texture target.
     @Test(.disabled("reads the wall clock: waits on a Tests/perf-suites.txt line (#6380)"),
-          .enabled(if: device != nil), .timeLimit(.minutes(5)))
-    func blendedDragOn24Megapixels() async throws {
+          .enabled(if: device != nil), .timeLimit(.minutes(5)), arguments: [Blend.onTheLayer, .masked])
+    func blendedDragOn24Megapixels(_ blend: Blend) async throws {
         let metal = try MetalBackend(device: #require(Self.device), cacheURL: nil)
-        var workspace = try Self.draft(.onTheLayer, width: 6000, height: 4000)
+        var workspace = try Self.draft(blend, width: 6000, height: 4000)
         let route = PhotoRenderRoute(preferred: metal, resident: ResidentSurfaces(backend: metal))
         let target = try PhotoRenderBudgetTests.textureTarget(metal, width: 6000, height: 4000)
         var shown = try await PhotoRenderer.update(workspace, since: nil, route: route, target: target).revision
@@ -178,10 +178,10 @@ import Testing
         }
         times.sort()
         let p95 = times[min(times.count - 1, times.count * 95 / 100)]
-        print("PhotoDraftGPUTests 24 MP blended turn frame: p50 \(times[times.count / 2]) ms, p95 \(p95) ms, tally \(tally.snapshot)")
+        print("PhotoDraftGPUTests 24 MP \(blend) turn frame: p50 \(times[times.count / 2]) ms, p95 \(p95) ms, tally \(tally.snapshot)")
         #if DEBUG
         #expect(tally.snapshot["resamples", default: 0] == 0, "the drag resampled on the CPU: \(tally.snapshot)")
         #endif
-        if optimized { #expect(p95 <= Self.budget, "24 MP blended turn frame p95 \(p95) ms, over \(Self.budget) ms (target 8 ms)") }
+        if optimized { #expect(p95 <= Self.budget, "24 MP \(blend) turn frame p95 \(p95) ms, over \(Self.budget) ms (target 8 ms)") }
     }
 }
