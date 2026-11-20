@@ -205,17 +205,23 @@ public final class PhotoCompositeCache: Sendable {
         let pixels: PixelBuffer
     }
 
-    /// A drag frame's draft source (`draftSource`): the layer, the part of its pixels and how often it is halved.
+    /// A drag frame's draft source (`draftSource`): the layer, the part of its pixels and how often it is halved
+    /// (`restLevel` for the layer's pixels outside the part, which the frame draws as they are).
     struct DraftKey: Equatable, Sendable {
         let layer: PhotoLayer.ID
         let part: PixelRect
         let pixels: TiledPixels
         let level: Int
+        static let restLevel = -1
     }
+
+    /// A draft source's surface and where its pixel (0, 0) lies in the layer; nil when it has nothing painted.
+    typealias Placed = (surface: RenderSurface, x: Int, y: Int)
 
     private struct DraftSource: Sendable {
         let key: DraftKey
-        let surface: RenderSurface
+        let surface: RenderSurface?
+        let x: Int, y: Int
         let backend: any RenderBackend
     }
 
@@ -305,20 +311,23 @@ public final class PhotoCompositeCache: Sendable {
 
     /// The source a drag frame composites the draft from on `backend`: kept under `key` for every frame of the
     /// draft, else `make()`'s (made under the lock, so parallel regions upload it once). A key for another layer,
-    /// part or pixels releases the sources kept for the old one; the levels of one draft stay side by side.
-    func draftSource(_ key: DraftKey, on backend: any RenderBackend, make: () throws -> RenderSurface) throws -> RenderSurface {
+    /// part or pixels releases the sources kept for the old one; the levels of one draft, and the rest of the
+    /// layer outside its box, stay side by side.
+    func draftSource(_ key: DraftKey, on backend: any RenderBackend, make: () throws -> Placed?) throws -> Placed? {
         var stale: [DraftSource] = []
-        defer { for old in stale { old.backend.release(old.surface) } }
+        defer { for old in stale { old.surface.map(old.backend.release) } }
         return try drafts.withLock { drafts in
-            if let held = drafts.first(where: { $0.key == key && $0.backend.name == backend.name }) { return held.surface }
+            func placed(_ held: DraftSource) -> Placed? { held.surface.map { ($0, held.x, held.y) } }
+            if let held = drafts.first(where: { $0.key == key && $0.backend.name == backend.name }) { return placed(held) }
             let same = { (old: DraftSource) in
                 old.key.layer == key.layer && old.key.part == key.part && old.key.pixels == key.pixels && old.backend.name == backend.name
             }
             stale = drafts.filter { !same($0) }
             drafts.removeAll { !same($0) }
             let made = try make()
-            drafts.append(DraftSource(key: key, surface: made, backend: backend))
-            return made
+            let held = DraftSource(key: key, surface: made?.surface, x: made?.x ?? 0, y: made?.y ?? 0, backend: backend)
+            drafts.append(held)
+            return placed(held)
         }
     }
 
@@ -328,7 +337,7 @@ public final class PhotoCompositeCache: Sendable {
             defer { drafts = [] }
             return drafts
         }
-        for old in all { old.backend.release(old.surface) }
+        for old in all { old.surface.map(old.backend.release) }
     }
 
     /// Releases every kept region.

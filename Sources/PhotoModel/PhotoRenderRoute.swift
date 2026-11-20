@@ -271,12 +271,12 @@ extension PhotoWorkspace {
         guard let back = m.inverse, scale > 0,
             mapped(back, rect).allSatisfy({ $0.0.isFinite && $0.1.isFinite && abs($0.0) < 1e9 && abs($0.1) < 1e9 })
         else { return try composite(tiled, of: layer, onto: &picture, at: rect, on: dispatcher) }
+        if let cache, try compositeDraftOnGPU(m, tiled, box: draft.box, of: layer, onto: &picture, at: rect, on: dispatcher, cache: cache) {
+            return
+        }
         let cut = try boxCut(of: layer, in: draft.box)
         if let cut { try composite(cut.rest, of: layer, onto: &picture, at: rect, on: dispatcher) }
         let whole = cut?.part ?? PixelRect(x: 0, y: 0, width: tiled.width, height: tiled.height)
-        if let cache, try compositeDraftOnGPU(m, tiled, part: whole, of: layer, onto: &picture, at: rect, on: dispatcher, cache: cache) {
-            return
-        }
         PhotoRenderCount.resample()
         // Bilinear reads one source pixel around each sample, more when the layer shrinks; one more for rounding.
         let reach = (max(1, 1 / scale) + 1).rounded(.up)
@@ -316,18 +316,24 @@ extension PhotoWorkspace {
         try dispatcher.composite(surface, onto: &picture, x: 0, y: 0, mode: layer.blendMode, opacity: Float(layer.opacity))
     }
 
-    /// A drag frame's draft on the GPU: the layer's `part` (the whole layer, or the box's pixels) uploaded once
-    /// per draft and kept in `cache`, then one composite through the draft's matrix (CoreRender's `.affine`,
-    /// bilinear) with the layer's blend mode and opacity, so no drag frame resamples on the CPU. The kernel
+    /// A drag frame's draft on the GPU: the layer's part under `box` (the whole layer when the box covers it)
+    /// uploaded once per draft and kept in `cache`, then one composite through the draft's matrix (CoreRender's
+    /// `.affine`, bilinear) with the layer's blend mode and opacity, so no drag frame resamples on the CPU. A box
+    /// on part of the layer draws the rest first (`boxCut`'s rest, its painted bounds kept in `cache` too), so a
+    /// frame only composites kept surfaces. The kernel
     /// samples at a stretch of 1 or more, so a shrink composites the source halved once per halving it needs
     /// (each half made once per draft as well). False when the route's GPU doesn't run `.affine` or the opacity
     /// is out of range: the caller resamples on the CPU (and CoreRaster reports the opacity).
-    private func compositeDraftOnGPU(_ m: AffineMatrix, _ tiled: TiledPixels, part: PixelRect, of layer: PhotoLayer,
+    private func compositeDraftOnGPU(_ m: AffineMatrix, _ tiled: TiledPixels, box: PixelRect, of layer: PhotoLayer,
                                      onto picture: inout RenderSurface, at rect: PixelRect, on dispatcher: RenderDispatcher,
                                      cache: PhotoCompositeCache) throws -> Bool {
         guard let gpu = dispatcher.preferred, gpu.isHealthy, gpu.supports.contains(.affine),
             (0...1).contains(Float(layer.opacity))
         else { return false }
+        let whole = PixelRect(x: 0, y: 0, width: tiled.width, height: tiled.height)
+        // boxCut's part: the box's pixels when it covers less than the whole layer.
+        let cut = box.offsetBy(-layer.offsetX, -layer.offsetY).intersection(whole).flatMap { $0 == whole ? nil : $0 }
+        let part = cut ?? whole
         /// Source pixel (u, v) at `level` is layer pixel (part.x + 2^level u, part.y + 2^level v); out to `rect`.
         /// A turn's inverse rows come out a rounding over 1, so the stretch gets a nudge far below a pixel's width.
         func through(_ level: Int) -> AffineMatrix {
@@ -342,8 +348,27 @@ extension PhotoWorkspace {
             return inv.a * inv.a + inv.c * inv.c <= 1 && inv.b * inv.b + inv.d * inv.d <= 1
         }
         guard let level = (0...12).first(where: { onKernel(through($0)) }) else { return false }
+        let (mode, opacity) = (layer.blendMode, Float(layer.opacity))
+        if let cut {
+            let key = PhotoCompositeCache.DraftKey(layer: layer.id, part: cut, pixels: tiled, level: PhotoCompositeCache.DraftKey.restLevel)
+            let rest = try cache.draftSource(key, on: gpu) {
+                guard let rest = try boxCut(of: layer, in: box, tiles: tiled)?.rest else { return nil }
+                let indices = Array(rest.tiles.indices)
+                let painted = try PhotoLayerComposite.inParallel(indices.count) { i in
+                    try PhotoLayerComposite.paintedRect(of: rest.tiles[indices[i]])
+                        .map { $0.offsetBy(rest.tileRect(indices[i]).x, rest.tileRect(indices[i]).y) }
+                }.compactMap { $0 }
+                guard let first = painted.first else { return nil }
+                let bounds = painted.dropFirst().reduce(first) { $0.union($1) }
+                return (try gpu.surface(rest.flattened(bounds)), bounds.x, bounds.y)
+            }
+            if let rest {
+                try dispatcher.composite(rest.surface, onto: &picture, x: layer.offsetX + rest.x - rect.x,
+                                         y: layer.offsetY + rest.y - rect.y, mode: mode, opacity: opacity)
+            }
+        }
         let key = PhotoCompositeCache.DraftKey(layer: layer.id, part: part, pixels: tiled, level: level)
-        let source = try cache.draftSource(key, on: gpu) {
+        let placed = try cache.draftSource(key, on: gpu) {
             var buffer = try tiled.flattened(part)
             for _ in 0..<level {
                 // Halved at each 2 x 2 block's centre: bilinear there is the block's mean.
@@ -351,10 +376,10 @@ extension PhotoWorkspace {
                 buffer = try buffer.transformed(AffineMatrix(a: 0.5, b: 0, c: 0, d: 0.5, tx: 0, ty: 0),
                                                 width: (buffer.width + 1) / 2, height: (buffer.height + 1) / 2, filter: .bilinear)
             }
-            return try gpu.surface(buffer)
+            return (try gpu.surface(buffer), 0, 0)
         }
-        try dispatcher.composite(source, onto: &picture, through: through(level), mode: layer.blendMode,
-                                 opacity: Float(layer.opacity), filter: .bilinear)
+        guard let source = placed?.surface else { return true }
+        try dispatcher.composite(source, onto: &picture, through: through(level), mode: mode, opacity: opacity, filter: .bilinear)
         return true
     }
 

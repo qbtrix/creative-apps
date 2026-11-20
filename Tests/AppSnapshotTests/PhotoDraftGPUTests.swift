@@ -1,5 +1,5 @@
 // PhotoDraftGPUTests.swift: a Free Transform drag frame on a layer that can't lift (a non-normal blend on the
-// layer, or a blended layer above it) draws on the GPU with Metal's `.affine` composite: on the resident route,
+// layer, a blended layer above it, or a blended layer's selected part) draws on the GPU with Metal's `.affine` composite: on the resident route,
 // with the app's texture target and without one, a rotate, a stretch and a shrink frame resample the layer on
 // the CPU 0 times (PhotoRenderCount's `resamples` through a Tally, debug only; a shrink makes its halved source
 // once per draft), and the frame's bytes match the CPU route's drag frame within a few levels (both bilinear).
@@ -23,6 +23,8 @@ import Testing
         case onTheLayer
         /// A normal dragged layer under a Screen layer.
         case above
+        /// Multiply, the square selected on a layer painted outside it too: the rest draws as it is.
+        case onPart
         var description: String { rawValue }
     }
 
@@ -38,6 +40,12 @@ import Testing
         model.deselect()
         switch blend {
         case .onTheLayer:
+            model.setBlendMode(dragged, .multiply)
+        case .onPart:
+            model.setToolOption(.color(red: 30, green: 160, blue: 60))
+            model.setSelection(PixelRect(x: width / 16, y: height / 16, width: width / 8, height: height / 8))
+            model.fillSelection()
+            model.setSelection(PixelRect(x: width / 4, y: height / 4, width: width / 2, height: height / 2))
             model.setBlendMode(dragged, .multiply)
         case .above:
             model.addLayer()
