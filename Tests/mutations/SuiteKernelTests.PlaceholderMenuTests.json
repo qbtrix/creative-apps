@@ -47,5 +47,26 @@
     "find": "if modifiers.contains(\".disabled(true)\") || compact.contains(\"isEnabled:false\") {",
     "replace": "if modifiers.contains(\".disabled(true)\") {",
     "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "eachKindIsFound: an app's menu.item(...) {} helper is never scanned, so Design's Rename Page passes (#6203)",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "static let methodItemCalls = [\".item(\"]",
+    "replace": "static let methodItemCalls: [String] = []",
+    "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "eachKindIsFound: a Model menu state's notBuilt( reason is never scanned (#6203)",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "static let reasonCalls = [\"notConnected(\", \"notBuilt(\"]",
+    "replace": "static let reasonCalls = [\"notConnected(\"]",
+    "tests": "PlaceholderMenuTests"
+  },
+  {
+    "label": "liveReasonPasses: an empty action that gives way to the system's item counts as dead",
+    "file": "Tests/SuiteKernelTests/PlaceholderMenuTests.swift",
+    "find": "if givesWay { kinds.remove(.emptyAction) }",
+    "replace": "if false && givesWay { kinds.remove(.emptyAction) }",
+    "tests": "PlaceholderMenuTests"
   }
 ]
