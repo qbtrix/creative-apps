@@ -1,7 +1,8 @@
 // PhotoHealToolTests.swift: the Heal tool (#422) drives the clone stamp with
 // the tone match: Option-click, or a first drag with no source, samples the
 // source and paints nothing; a later drag lays the source's texture in the
-// tone of where it lands, as one undo step "Heal". Runs on Linux and macOS.
+// tone of where it lands, as one undo step "Heal". A heal that changes no
+// pixel (a flat source onto a flat area) records no step. Runs on Linux and macOS.
 import CoreRaster
 import PhotoModel
 import Testing
@@ -71,6 +72,22 @@ import Testing
         #expect(try after.pixel(x: 46, y: 32).r < after.pixel(x: 46, y: 22).r)
         #expect(workspace.historySteps.count == steps + 1)
         #expect(workspace.undoActionName == "Undo Heal")
+    }
+
+    /// A flat source has no texture to lay, so healing a flat area with it
+    /// leaves every pixel as it was and adds nothing to undo.
+    @Test func healingAFlatAreaFromAFlatSourceRecordsNoStep() throws {
+        var workspace = try whiteImage()
+        workspace.selectTool(.heal)
+        workspace.drag(from: point(16, 32), to: point(16, 32), sampling: true)
+        workspace.endDrag()
+        let before = try layer(workspace), steps = workspace.historySteps.count
+        workspace.drag(from: point(40, 32), to: point(40, 32))
+        workspace.drag(from: point(40, 32), to: point(48, 32))
+        workspace.endDrag()
+        #expect(try layer(workspace) == before)
+        #expect(workspace.historySteps.count == steps)
+        #expect(workspace.undoActionName != "Undo Heal")
     }
 
     @Test func undoRestoresTheLayerExactly() throws {
