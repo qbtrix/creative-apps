@@ -57,6 +57,14 @@ actor AskingThumbnails: ThumbnailPublishing {
     }
 }
 
+/// The mark a preview-less card shows is drawn at 2× its points, as sharp as the previews beside it.
+@MainActor @Test func homeCardMarkIsRetinaSharp() throws {
+    let image = try #require(HomeGrid.markImage(.halo), "no mark drawn")
+    let bitmap = try #require(image.cgImage(forProposedRect: nil, context: nil, hints: nil))
+    #expect(image.size == CGSize(width: HomeLayout.cardMax, height: HomeLayout.cardMax * 3 / 4))
+    #expect(bitmap.width == Int(HomeLayout.cardMax * 2), "the mark is \(bitmap.width) px for \(HomeLayout.cardMax) pt")
+}
+
 extension BodyCountSuites {
     @MainActor @Suite struct HomeGridPreviewTests {
         @Test(.timeLimit(.minutes(1))) func threePreviewsAMarkAndOneAskPerCard() async throws {

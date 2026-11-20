@@ -127,12 +127,18 @@ struct HomeGrid: View, BodyCounted {
     /// The app's mark (SuiteUI AppMark, never a symbol) centred at half the card's height on a
     /// clear 4:3 card, rendered once so a card draws it as any other picture.
     // view-static: main-actor
-    static func mark(_ app: SuiteApp) -> Image? {
+    static func mark(_ app: SuiteApp) -> Image? { markImage(app).map { Image(nsImage: $0) } }
+
+    /// The mark's bitmap at 2 pixels per point: ImageRenderer draws at scale 1 by default, which a
+    /// Retina card upscales into a soft mark beside sharp previews.
+    // view-static: main-actor
+    static func markImage(_ app: SuiteApp) -> NSImage? {
         let width = HomeLayout.cardMax, height = HomeLayout.cardMax * 3 / 4
         let renderer = ImageRenderer(content: AppMark(app: app, style: .icon)
             .frame(width: height / 2, height: height / 2)
             .frame(width: width, height: height))
-        return renderer.nsImage.map { Image(nsImage: $0) }
+        renderer.scale = 2
+        return renderer.nsImage
     }
 
     /// "2 items matching “logo”" beside RECENT while a search is on; nil without one (HomeModel's, #1866).
