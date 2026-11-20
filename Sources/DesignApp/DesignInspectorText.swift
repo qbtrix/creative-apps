@@ -1,9 +1,9 @@
 // DesignInspectorText.swift: the Text section of Design's inspector, shown
 // after Fill for every selected layer (style-rows, SR-t). Family is a
 // picker over the system's font families, Size a scrub field (1...1000 pt),
-// Weight, Alignment and Width chips (Width switches the box between auto
-// width and fixed width, #3337; switching to auto keeps the width until the
-// next edit measures the text). Every row reads the style the selected text
+// Weight, Alignment and Width chips, each chip identified `<row id>.<title>`
+// (Width switches the box between auto width and fixed width, #3337;
+// switching to auto keeps the width until the next edit measures the text). Every row reads the style the selected text
 // layers share (`sharedTextStyle`), or "Mixed" when they differ, and each
 // change is one `.setStyle(.textStyle(...))`, one "Change Text Style" step
 // that sets only the text layers. Size commits on Return, on focus loss, on
@@ -138,13 +138,16 @@ struct DesignInspectorText: View {
         return InspectorPickerRow("Family", options: options, selection: current) { family in
             if !family.isEmpty { commit { $0.family = family } }
         }
+        // The id is the menu's: on the whole row it lands on the "Family" label first, which a click doesn't open.
+        .menuIdentifier(DesignControlID.inspectorTextFamily)
         .disabled(help != nil)
         .help(help ?? "")
         .accessibilityValue(Text(verbatim: style?.family ?? "Mixed"))
-        .suiteControl(id: DesignControlID.inspectorTextFamily, enabled: help == nil, reason: help)
+        .suiteControl(id: DesignControlID.inspectorTextFamily, enabled: help == nil, reason: help, identifies: false)
     }
 
-    /// A label over a chip group; the group is one container carrying `id`, its chips found by title.
+    /// A label over a chip group; the group is one container carrying `id`, each chip `<id>.<its title, dashed>`
+    /// ("design.inspector.text-width.auto-width").
     private func chipsRow<ID: Hashable & Sendable>(
         _ label: String, options: [InspectorOption<ID>], selected: ID?, help: String?, id: String,
         onSelect: @escaping @MainActor (ID) -> Void
@@ -156,13 +159,19 @@ struct DesignInspectorText: View {
                     Text("Mixed").font(SuiteFont.inspectorValue).foregroundStyle(SuiteColor.secondaryText)
                 }
             }
-            ChoiceChips(options: options, selected: selected, onSelect: onSelect)
+            ChoiceChips(options: options.map { Self.identified($0, in: id) }, selected: selected, onSelect: onSelect)
                 .disabled(help != nil)
                 .help(help ?? "")
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(label)
                 .suiteControl(id: id, enabled: help == nil, reason: help)
         }
+    }
+
+    /// `option` with its chip's identifier in the row `id`.
+    nonisolated static func identified<ID>(_ option: InspectorOption<ID>, in id: String) -> InspectorOption<ID> {
+        let name = option.title.lowercased().replacingOccurrences(of: " ", with: "-")
+        return InspectorOption(id: option.id, title: option.title, identifier: "\(id).\(name)")
     }
 
     /// A Size row whose values differ: plain text, still listed as the row's control.

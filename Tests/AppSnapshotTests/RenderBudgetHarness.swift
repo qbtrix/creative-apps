@@ -336,6 +336,11 @@ private final class KeyCapableWindow: NSWindow {
         Self.node(identifier, in: host)?.accessibilityLabel?() ?? nil
     }
 
+    /// The accessibility role of the first element called `identifier`; nil when there is no such element.
+    func role(_ identifier: String) -> NSAccessibility.Role? {
+        Self.node(identifier, in: host)?.accessibilityRole?() ?? nil
+    }
+
     /// The accessibility value of the element called `identifier` as text (a slider row's "42 px"); nil when
     /// there is no such element or it has no value.
     func value(_ identifier: String) -> String? {
