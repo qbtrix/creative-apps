@@ -154,7 +154,7 @@ import Testing
 
     /// One display frame: a 24 MP blended (or blended, masked) layer's rotate frame on the app's texture target.
     @Test(.disabled("reads the wall clock: waits on a Tests/perf-suites.txt line (#6380)"),
-          .enabled(if: device != nil), .timeLimit(.minutes(5)), arguments: [Blend.onTheLayer, .masked])
+          .enabled(if: device != nil), .serialized, .timeLimit(.minutes(5)), arguments: [Blend.onTheLayer, .masked])
     func blendedDragOn24Megapixels(_ blend: Blend) async throws {
         let metal = try MetalBackend(device: #require(Self.device), cacheURL: nil)
         var workspace = try Self.draft(blend, width: 6000, height: 4000)
