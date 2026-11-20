@@ -118,9 +118,12 @@ import Testing
 
     /// PB-2 (packet photo-seams S-13): a clone or heal drag event to its
     /// picture on the `large` fixture, timed the way the brush's events are.
-    /// Option at a press sets the source at (1200, 1500); the stroke presses
-    /// 400 px to its right, untimed, then 60 events each move 20 px, more than
+    /// Option at a press sets the source at (1200, 1700); the stroke presses
+    /// at (1600, 1500), untimed, then 60 events each move 20 px, more than
     /// a 64 px dab's 16 px spacing, so every timed event puts down a dab.
+    /// The source sits a tile row below the stroke: the stroke's own row of
+    /// the Noise layer is one flat color, and a heal from flat onto flat
+    /// changes no pixel and records no step.
     /// Release p50 within 8 ms; debug reports it. Fewer than 60 samples fails.
     @MainActor @Test(arguments: [PhotoTool.clone, .heal])
     func aCloneOrHealDragEventBecomesAFrameWithinBudget(tool: PhotoTool) async throws {
@@ -130,7 +133,7 @@ import Testing
         open.selectTool(tool)
         open.setToolOption(.size(64))
         let state = StateBox(open)
-        let source = Mask.Point(x: 1200, y: 1500)
+        let source = Mask.Point(x: 1200, y: 1700)
         state.drag(from: source, to: source, modifiers: [.option])
         state.endDrag()
         #expect(state.value.cloneSource?.point == source)
