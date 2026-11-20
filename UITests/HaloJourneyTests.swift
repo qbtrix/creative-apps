@@ -447,8 +447,8 @@ final class HaloJourneyTests: XCTestCase {
         let start = halo.element("halo.render.start")
         XCTAssert(waitFor(seconds: 5) { start.isEnabled }, "the start button is disabled with -HaloRenderTo set")
         start.click()
-        XCTAssert(text("Exported 48 PNG files into \"Loop\"", halo).waitForExistence(timeout: 60),
-                  "the render never read \"Exported 48 PNG files into \"Loop\"\"")
+        XCTAssert(text("Rendered 48 PNG files into \"Loop\"", halo).waitForExistence(timeout: 60),
+                  "the render never read \"Rendered 48 PNG files into \"Loop\"\"")
         let pngs = folder.appending(path: "Loop", directoryHint: .isDirectory)
         let names = try FileManager.default.contentsOfDirectory(atPath: pngs.path).sorted()
         XCTAssertEqual(names, (1...48).map { String(format: "Loop_%04d.png", $0) }, "the files in \(pngs.path)")

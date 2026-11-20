@@ -5,7 +5,10 @@
 // a policy) Metadata rows, 8 pt apart, then the host's own options rows (the slot, #1989),
 // a progress bar while running, the finished or failed line after, and the
 // actions that state offers (ExportSheetAction); Export is disabled, its help
-// saying why, while the run is under way or the host's `blocked` reason holds. Every control's identifier
+// saying why, while the run is under way or the host's `blocked` reason holds.
+// The host's verb (ExportVerb, #3402: Export, or Halo's Render) names the
+// title, the start button, its help, the progress, the busy reason and the
+// finished line; the identifiers never change with it. Every control's identifier
 // hangs off the host's prefix (ExportSheetIDs, "suite.export" by default) and
 // registers in `suite.controls`. When the progress row appears it marks
 // `progress-shown` on the prefix's series in the window's `suite.perf`
@@ -40,11 +43,26 @@ public struct ExportPick: Hashable, Sendable {
     }
 }
 
+/// The action a host's sheet names (#3402): Export by default, Render for Halo. Its words only; ids stay put.
+public enum ExportVerb: String, Hashable, Sendable {
+    case export, render
+    /// The title and start button: "Export", "Render".
+    public var title: String { self == .export ? "Export" : "Render" }
+    /// The start button's help.
+    public var help: String { "\(title) with these settings" }
+    var ongoing: String { self == .export ? "Exporting" : "Rendering" }
+    var past: String { self == .export ? "Exported" : "Rendered" }
+    /// Why a control can't edit once the run has started: "The export is under way or done."
+    public var busy: String { "The \(rawValue) is under way or done." }
+}
+
 /// A running export's steps, done clamped to 0...total and total at least 1.
 public struct ExportProgress: Hashable, Sendable {
     public let done: Int, total: Int
     public init(done: Int, total: Int) { (self.total, self.done) = (max(total, 1), min(max(done, 0), max(total, 1))) }
-    public var text: String { "Exporting \(done) of \(total)" }
+    public var text: String { text(.export) }
+    /// "Rendering 4 of 10" for the host's verb.
+    public func text(_ verb: ExportVerb) -> String { "\(verb.ongoing) \(done) of \(total)" }
 }
 
 /// What the sheet shows for a run; only editing is `editable`.
@@ -64,6 +82,8 @@ public struct ExportSheetRows: Hashable, Sendable {
         public var title: String { self == .scale ? "Scale" : self == .pixels ? "Pixels" : "Long edge" }
     }
     public let rows: [Row], editable: Bool, progress: ExportProgress?, line: Line?
+    /// The host's verb, which names the sheet's words.
+    public let verb: ExportVerb
     /// What the Size chips offer for the pick's format: Scale only for a vector one, otherwise every mode.
     public let sizeModes: [SizeMode]
 
@@ -78,7 +98,7 @@ public struct ExportSheetRows: Hashable, Sendable {
 
     /// Why Export can't run now, nil when it can: the run is under way or done, or the host's `blocked` reason
     /// for the pick as it stands ("Select a layer first.").
-    public func startHelp(blocked: String?) -> String? { editable ? blocked : "The export is already under way or done." }
+    public func startHelp(blocked: String?) -> String? { editable ? blocked : "The \(verb.rawValue) is already under way or done." }
 
     /// Columns for the Format chips: up to four formats fill one row (no empty column, no orphan chip), more wrap by three.
     public static func formatColumns(_ count: Int) -> Int { count <= 4 ? max(count, 1) : 3 }
@@ -162,10 +182,10 @@ public struct ExportSheetRows: Hashable, Sendable {
     }
 
     /// `showsSize: false` leaves out the Size row, for a host that draws its own scale control; `source` is the
-    /// artwork's pixels at 1x, which a pick's `size` reads against.
+    /// artwork's pixels at 1x, which a pick's `size` reads against; `verb` names the sheet's words.
     public init<Options: Hashable & Sendable>(
         _ run: ExportRun<Options>, formats: [FormatChoice], showsSize: Bool = true,
-        source: (width: Int, height: Int) = (0, 0), pick: (Options) -> ExportPick
+        source: (width: Int, height: Int) = (0, 0), verb: ExportVerb = .export, pick: (Options) -> ExportPick
     ) {
         var modes = SizeMode.allCases
         func shown(_ options: Options) -> [Row] {
@@ -182,10 +202,10 @@ public struct ExportSheetRows: Hashable, Sendable {
         case .idle: rows = []
         case .editing(let o): rows = shown(o); editable = true
         case .running(let o, let done, let total): rows = shown(o); progress = ExportProgress(done: done, total: total)
-        case .finished(let o, let files): rows = shown(o); line = .finished("Exported " + files.joined(separator: ", "))
+        case .finished(let o, let files): rows = shown(o); line = .finished(verb.past + " " + files.joined(separator: ", "))
         case .failed(let o, let error): rows = shown(o); line = .failed(error)
         }
-        (self.progress, self.line, self.editable, self.sizeModes) = (progress, line, editable, modes)
+        (self.progress, self.line, self.editable, self.sizeModes, self.verb) = (progress, line, editable, modes, verb)
     }
 }
 
@@ -240,14 +260,14 @@ public struct SuiteExportSheet<Options: View>: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.l) {
-            Text("Export").font(SuiteFont.title)
+            Text(readout.verb.title).font(SuiteFont.title)
             VStack(spacing: SuiteSpacing.s) {
                 ForEach(Array(readout.rows.enumerated()), id: \.offset) { row($0.element) }
                 options
             }
             .disabled(!readout.editable)
             if let p = readout.progress {
-                BusyNote(p.text, identifier: ids.progress, fraction: (p.done, p.total))
+                BusyNote(p.text(readout.verb), identifier: ids.progress, fraction: (p.done, p.total))
                     .onAppear { recorder?.mark("progress-shown", series: ids.prefix) }
             }
             switch readout.line {
@@ -272,8 +292,8 @@ public struct SuiteExportSheet<Options: View>: View {
                 .keyboardShortcut(.cancelAction).suiteControl(id: ids.id(action), enabled: true, reason: nil)
         case .start:
             let help = readout.startHelp(blocked: blocked)
-            Button("Export", action: onExport)
-                .keyboardShortcut(.defaultAction).disabled(help != nil).help(help ?? "Export with these settings")
+            Button(readout.verb.title, action: onExport)
+                .keyboardShortcut(.defaultAction).disabled(help != nil).help(help ?? readout.verb.help)
                 .suiteControl(id: ids.start, enabled: help == nil, reason: help, role: "primary")
         }
     }
@@ -288,7 +308,7 @@ public struct SuiteExportSheet<Options: View>: View {
                     selected: id, columns: ExportSheetRows.formatColumns(formats.count), onSelect: onFormat)
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel("Format")
-                    .suiteControl(id: ids.formats, enabled: readout.editable, reason: readout.editable ? nil : "The export is under way or done.")
+                    .suiteControl(id: ids.formats, enabled: readout.editable, reason: readout.editable ? nil : readout.verb.busy)
             }
         case .size(let scale):
             StudioScrubRow(label: "Size", value: scale, range: 0.25...4, step: 0.25, unit: row.unit, onChange: onScale)
@@ -308,7 +328,7 @@ public struct SuiteExportSheet<Options: View>: View {
 
     /// Why a row's controls can't edit: the run is past editing, or the host doesn't handle `what`.
     private func editReason(handled: Bool, what: String) -> String? {
-        !readout.editable ? "The export is under way or done." : handled ? nil : "This sheet doesn't change the \(what) here."
+        !readout.editable ? readout.verb.busy : handled ? nil : "This sheet doesn't change the \(what) here."
     }
 
     /// The Size row: the mode chips, the mode's fields, and the readout of the pixels it writes.

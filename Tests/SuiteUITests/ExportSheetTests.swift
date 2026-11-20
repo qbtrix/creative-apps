@@ -84,6 +84,20 @@ import Testing
         #expect(rows(.finished(png, ["a.png"])).startHelp(blocked: "Select a layer first.") == "The export is already under way or done.")
     }
 
+    /// A host names the sheet's action (#3402): Halo renders, so its title, button, help, progress, busy reason
+    /// and finished line say Render; every other host keeps Export.
+    @Test func aHostNamesTheVerb() {
+        let png = ExportPick(format: "png")
+        func rendered(_ run: ExportRun<ExportPick>) -> ExportSheetRows {
+            ExportSheetRows(run, formats: GalleryEditorKernelChrome.formats, verb: .render) { $0 }
+        }
+        #expect(rendered(.finished(png, ["a", "b"])).line == .finished("Rendered a, b"))
+        #expect(rendered(.running(png, done: 4, total: 10)).progress?.text(.render) == "Rendering 4 of 10")
+        #expect(rendered(.running(png, done: 1, total: 3)).startHelp(blocked: nil) == "The render is already under way or done.")
+        #expect(ExportVerb.render.title == "Render" && ExportVerb.render.help == "Render with these settings")
+        #expect(rows(.idle).verb == .export && ExportVerb.export.title == "Export" && ExportVerb.export.help == "Export with these settings")
+    }
+
     /// A sheet with prefix `flare.export` registers its chips' group, its actions and the host's options row.
     @MainActor @Test func hostedSheetRegistersTheHostsIDs() {
         let formats = ["svgFrame", "lottie", "pngSequence"].map { FormatChoice(id: $0, name: $0, hasQuality: false) }
