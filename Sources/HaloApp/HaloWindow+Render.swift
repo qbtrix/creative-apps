@@ -9,11 +9,11 @@
 // Codec and Transparent background rows (HaloRenderSheet+Suite.swift, HX-2), the
 // Folder label over the folder's name (`-HaloRenderTo`, one line, its path the
 // help, in the secondary text colour while the sheet is off) and Choose… (its `render.choose-folder` spec's
-// MenuCommand, its disabled help the sheet's Export wording), and one note at
+// MenuCommand, its disabled help the sheet's busy wording), and one note at
 // the labels' inset: "Frame n of N" while
 // running, else the summary, or, with no folder, why (the error color). A
 // format chip or the Size row calls `setRenderSettings`. The sheet's start
-// button (titled Export until #3402) asks for a folder when there is none
+// button (Render: the sheet's verb, #3402) asks for a folder when there is none
 // (#3297 tracks disabling it instead), then `renderStart(into:)`: the Model
 // starts the run, a detached task writes the frames off the main actor through
 // the PNG writer, or for a movie through the suite's LiveMedia, made here the
@@ -24,7 +24,7 @@
 // `endRender(_:)`. Cancel stops a run under way (`cancelRender`, which
 // leaves it idle, so the sheet closes) or closes the editing sheet; Done
 // calls `dismissRender`; the finished line is the Model's `renderWrittenText`
-// ("Exported 48 PNG files into "Bounce""); Try Again reopens a failed run's settings; Reveal
+// ("Rendered 48 PNG files into "Bounce""); Try Again reopens a failed run's settings; Reveal
 // in Finder selects what the run wrote. Once the run is idle the host
 // cancels its task. `.startRender` from a menu does nothing: only the sheet
 // knows the folder. In DEBUG, `renderDrive` edits the shown window's model
@@ -193,7 +193,7 @@ struct HaloRenderExportAdapter: View {
         }
     }
 
-    /// The Model's run, a finished one read as what it wrote ("Exported 48 PNG
+    /// The Model's run, a finished one read as what it wrote ("Rendered 48 PNG
     /// files into "Bounce""), not its every file name.
     private var run: ExportRun<HaloRenderSettings> {
         guard case .finished(let settings, let files) = model.renderRun else { return model.renderRun }
@@ -202,7 +202,7 @@ struct HaloRenderExportAdapter: View {
     }
 
     var readout: ExportSheetRows {
-        ExportSheetRows(run, formats: Self.formats, showsSize: false) { ExportPick(format: $0.format.rawValue, scale: $0.halfSize ? 0.5 : 1) }
+        ExportSheetRows(run, formats: Self.formats, showsSize: false, verb: .render) { ExportPick(format: $0.format.rawValue, scale: $0.halfSize ? 0.5 : 1) }
     }
 
     var body: some View {
@@ -229,8 +229,8 @@ struct HaloRenderExportAdapter: View {
 /// Halo's rows in the export sheet's options slot: the Size chips and the folder, each under its label, and one note.
 struct HaloRenderOptionRows: View {
     nonisolated static let noDestination = "Choose a folder to render into."
-    /// The export sheet's own words on its disabled Export button, so one state has one name (#4457).
-    nonisolated static let busy = "The export is already under way or done."
+    /// The export sheet's own words on its disabled Render button, so one state has one name (#4457).
+    nonisolated static let busy = "The render is already under way or done."
 
     /// The rows' own space; a note's column at its x 0 is the labels' inset, not InspectorNote's m inset in from it (#4454).
     nonisolated static let rowsSpace = "halo.render.rows"
