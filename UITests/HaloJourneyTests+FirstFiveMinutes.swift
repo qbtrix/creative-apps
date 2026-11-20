@@ -40,7 +40,7 @@ final class HaloFirstFiveJourneys: XCTestCase {
         segment("Movie", halo)
         segment("Half", halo)
         halo.snap("first5-render-sheet")
-        halo.reachable("Render", in: halo.app.sheets.firstMatch, stuck: "(the sheet's button reads Export until #3402)").click()
+        halo.reachable("Render", in: halo.app.sheets.firstMatch).click()
         let written = try XCTUnwrap(FirstFive.file(in: renders, ext: "mp4", timeout: 240), "Render wrote no .mp4")
         let head = try Data(contentsOf: written).prefix(12)
         XCTAssertEqual(String(decoding: head.dropFirst(4).prefix(4), as: UTF8.self), "ftyp", "the movie isn't MPEG-4")
