@@ -86,6 +86,14 @@ extension BodyCountSuites {
                 == [" preview", " preview", " preview", " app mark"])
             #expect(previews.pictures.count == 3)
         }
+
+        /// The mark is a Retina bitmap: two pixels a point, so a card's mark isn't upscaled soft on a 2x
+        /// screen. Read the CGImage: the NSImage's snapshot rep reports the screen's pixels, not the bitmap's.
+        @Test func markIsDrawnAtTwoPixelsAPoint() throws {
+            let image = try #require(HomeGrid.markImage(.halo))
+            let bitmap = try #require(image.cgImage(forProposedRect: nil, context: nil, hints: nil))
+            #expect(bitmap.width == Int(HomeLayout.cardMax * 2), "the mark is \(bitmap.width) px for \(image.size.width) pt")
+        }
     }
 }
 #endif
