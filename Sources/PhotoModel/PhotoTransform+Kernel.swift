@@ -22,7 +22,8 @@
 // compositor moves the box's pixels over the rest (`boxCut`). Any other drag's
 // frames (`transformPreview(live:)`) draw the rest, then the box's pixels
 // through the draft's matrix region by region (PhotoRenderRoute.swift,
-// bilinear); the exact frame follows at the release. A flip mirrors the box's
+// bilinear, one GPU composite with the layer's blend mode where the route runs
+// `.affine`); the exact frame follows at the release. A flip mirrors the box's
 // pixels in place at once (`boxChanged` again), never a draft, so a small square
 // on a canvas-sized layer stays where it is. Canvas Size is PhotoImageOps'.
 // Linux-safe.
@@ -293,9 +294,10 @@ extension PhotoWorkspace {
     /// draws the draft's layer through its matrix on each region and nothing resamples (the exact frame comes
     /// with the next still one). A masked layer, the identity and a layer without pixels take the still frame.
     /// A layer that lifts (`liftKey`) never comes here mid-drag: the compositor moves its pixels.
-    /// ponytail: a drag frame resamples the layer in 256 px chunks on the CPU (bilinear, the chunks across the cores); a
-    /// Metal `.affine` kernel is the upgrade for the layers that still can't lift (a blend on the
-    /// layer or on a layer above it).
+    /// A layer that can't lift (a blend on it or on a layer above it) draws through its matrix on the GPU where the
+    /// route runs `.affine`, and in 256 px chunks on the CPU elsewhere (`compositeDraft`).
+    /// ponytail: a masked layer that can't lift still takes the still frame, one whole resample a step; give
+    /// `compositeDraft` the masked source if a blended, masked layer's drag profiles slow.
     func transformPreview(live: Bool) -> PhotoWorkspace {
         guard live, let draft = transformDraft, draft.transform != .identity, let at = index(of: draft.layerID),
             pixels[draft.layerID] != nil, shownMask(of: layers[at]) == nil
