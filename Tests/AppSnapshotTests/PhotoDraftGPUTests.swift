@@ -7,7 +7,8 @@
 // (`swift test -c release -Xswiftc -DDEBUG -Xswiftc -enable-testing`): it fails over `budget`, a little above what
 // it measures (p95 53 to 101 ms at load 30 to 36; the CPU resample measured 753 ms), and reports the 8 ms target.
 // The rest is the live route's whole-canvas cost: each region copies its base onto a new Metal surface, which core
-// fills from the CPU (qbtrix/creative-core#833). macOS only, skipped without a GPU.
+// fills from the CPU (qbtrix/creative-core#833). It reads the wall clock, so it stays disabled until
+// Tests/perf-suites.txt lists it (#6380). macOS only, skipped without a GPU.
 import CoreRaster
 import CoreRender
 import CoreRenderMetal
@@ -139,7 +140,8 @@ import Testing
     static let budget = 150.0
 
     /// One display frame's half: a 24 MP blended layer's rotate frame on the app's texture target.
-    @Test(.enabled(if: device != nil), .timeLimit(.minutes(5)))
+    @Test(.disabled("reads the wall clock: waits on a Tests/perf-suites.txt line (#6380)"),
+          .enabled(if: device != nil), .timeLimit(.minutes(5)))
     func blendedDragOn24Megapixels() async throws {
         let metal = try MetalBackend(device: #require(Self.device), cacheURL: nil)
         var workspace = try Self.draft(.onTheLayer, width: 6000, height: 4000)
