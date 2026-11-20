@@ -31,10 +31,15 @@ import Testing
         var description: String { rawValue }
     }
 
-    /// A white image with a red square on a second layer, Free Transform begun on it, and `blend` in place.
+    /// A white image, its left half cyan, with a red square on a second layer, Free Transform begun on it, and `blend` in place.
     static func draft(_ blend: Blend, width: Int, height: Int) throws -> PhotoWorkspace {
         var model = PhotoWorkspace()
         try model.newImage(DocumentSetup(width: Double(width), height: Double(height)))
+        // A cyan left half under the square, so a blend that was dropped shows (multiply over white is the square).
+        model.setToolOption(.color(red: 60, green: 180, blue: 220))
+        model.setSelection(PixelRect(x: 0, y: 0, width: width / 2, height: height))
+        model.fillSelection()
+        model.deselect()
         model.addLayer()
         let dragged = try #require(model.selectedLayer?.id)
         model.setToolOption(.color(red: 200, green: 30, blue: 40))
