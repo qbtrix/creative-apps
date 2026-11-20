@@ -125,7 +125,7 @@ private struct InspectorSectionHeader: View {
 
 /// One filled inspector row, the Studio row's 28 pt: `label` inside on
 /// the left in secondary text, `value` on the right at SuiteSize.compactControl,
-/// the hover fill. Disabled, the label dims to 40% with its control. An empty
+/// the hover fill. Disabled, the controls dim and the hover fill goes; the label stays readable. An empty
 /// label leaves `value` on the left, for a checkbox that carries its own title.
 public struct InspectorRow<Value: View>: View {
     private let label: String
@@ -148,7 +148,7 @@ public struct InspectorRow<Value: View>: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .layoutPriority(1)
-                    .opacity(isEnabled ? 1 : SuiteColor.disabledOpacity)
+                    .opacity(Self.labelOpacity(enabled: isEnabled))
             }
             value
                 .font(SuiteFont.inspectorLabel)
@@ -161,6 +161,10 @@ public struct InspectorRow<Value: View>: View {
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: hovering)
         .controlSize(SuiteSize.compactControl)
     }
+
+    /// The label never dims: it is text beside the row's controls, not inside a disabled one, so it must stay
+    /// readable (4.5:1, the audit's `contrast`); a disabled row's controls dim themselves (#2263).
+    nonisolated static func labelOpacity(enabled: Bool) -> Double { 1 }
 }
 
 /// The bar slider: the whole 28 pt Studio row is the control, label inside on
@@ -212,16 +216,20 @@ public struct InspectorStepperRow: View {
 }
 
 /// One choice in an InspectorPickerRow or a PresetGrid. `identifier` is the
-/// accessibility identifier a PresetGrid gives this option's button (#1148).
+/// accessibility identifier a PresetGrid gives this option's button (#1148);
+/// `unavailableHelp`, when set, disables that button and is its tooltip (no
+/// dead controls: the choice shows, off, with why).
 public struct InspectorOption<ID: Hashable & Sendable>: Identifiable, Hashable, Sendable {
     public let id: ID
     public let title: String
     public let identifier: String?
+    public let unavailableHelp: String?
 
-    public init(id: ID, title: String, identifier: String? = nil) {
+    public init(id: ID, title: String, identifier: String? = nil, unavailableHelp: String? = nil) {
         self.id = id
         self.title = title
         self.identifier = identifier
+        self.unavailableHelp = unavailableHelp
     }
 }
 

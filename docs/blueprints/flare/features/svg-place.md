@@ -1,7 +1,7 @@
 # Feature packet: svg-place (Flare)
 
 **Feature:** SVG art comes into Flare as layers you animate. File > Place…
-(⇧⌘P) and a drop on the window read an SVG with FlareCore's `SVGImport` and
+(⇧⌘P) and a drop on the stage read an SVG with FlareCore's `SVGImport` and
 add its layers to the edited scene or symbol, fitted inside the scene and
 centred, each group its own layer with its colours, in one undo step. What the
 reader skipped (filters, embedded images) shows in the status line. It runs
@@ -23,8 +23,9 @@ the pinned core.
 
 **Hand-offs:** `FlareCommands.swift` is adopt-command-catalog's (#2999): PF-3
 starts after AC-flare's `Belt-Slice-Done:`. The stage view is stage-edit's
-(`FlareStage.swift`), so the drop target sits on the window, not the stage,
-and places at the scene centre.
+(`FlareStage.swift`), so the drop target first sat on the window. It moved to
+the stage's `suiteFileDrop`, which places an SVG at the scene centre: a
+window-wide target shadowed the stage and refused every other dropped file.
 
 **Rule 20.** No Flare importer and no picture type. FlareCore reads the SVG;
 `FlarePlace+Kernel.swift` conforms `FlareWorkspace` to `PlacedImageTarget`
@@ -105,7 +106,7 @@ extension FlareWorkspace: PlacedImageTarget {
 |---|---|---|---|---|---|
 | PF-1 | – | The conformance and `placeReport` as stubs; `FlarePlaceTests` written, disabled | `Sources/FlareModel/FlarePlace+Kernel.swift`, `Tests/FlareModelTests/FlarePlaceTests.swift` | PL-a | ~150, 2 |
 | PF-2 | – | RJ-F06's job folder with `waits_on: PF-6`, its fixtures | `Tests/RealJobs/flare/place-svg/` | PF-1 | ~80, 3 |
-| PF-3 | – | Reachable: File > Place… ⇧⌘P (the panel limited to SVG), the window's `placeDropTarget(formats: [.svg])`, both running `place.image` with no point; the report in the status line | `Sources/FlareApp/FlarePlace.swift`, `Sources/FlareApp/FlareCommands.swift`, `Sources/FlareApp/FlareWindow.swift` | PF-1 | ~160, 3 |
+| PF-3 | – | Reachable: File > Place… ⇧⌘P (the panel limited to SVG), an SVG dropped on the stage (FlareStage's `suiteFileDrop`), both running `place.image` with no point; the report in the status line | `Sources/FlareApp/FlarePlace.swift`, `Sources/FlareApp/FlareCommands.swift`, `Sources/FlareApp/FlareWindow.swift` | PF-1 | ~160, 3 |
 | PF-4 | – | Snapshots, the render budget test, the journey written and skipped (`XCTSkip("waits on PF-7")`) | `Tests/AppSnapshotTests/FlarePlaceSnapshots.swift`, `Tests/AppSnapshotTests/RenderBudgetFlarePlaceTests.swift`, `UITests/FlareJourneyTests+Place.swift` | PF-3 | ~200, 3 |
 | PF-5 | – | Conformance bodies: import, fit matrix, one apply group, the report; turns on `FlarePlaceTests` | `Sources/FlareModel/FlarePlace+Kernel.swift`, `Tests/FlareModelTests/FlarePlaceTests.swift`, `Tests/mutations/FlareModel.FlarePlace+Kernel.json` | PF-1, PL-7 | ~260, 3 |
 | PF-6 | – | The five specs in the catalog and the id list; turns on RJ-F06 | `Sources/FlareModel/FlareCommandCatalog.swift`, `Tests/command-ids/flare.txt`, `Tests/RealJobs/flare/place-svg/` | PF-2, PF-5, gradient-fill:FG-m | ~40, 3 |

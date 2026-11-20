@@ -104,6 +104,28 @@ import Testing
         }
     }
 
+    /// At the journeys' 1024-wide window the panel takes the inspector column, every row inside the window
+    /// (#4291); in a window wide enough for both it sits beside the inspector.
+    @Test(.timeLimit(.minutes(1))) func shownPanelFitsTheWindow() async throws {
+        let model = try Self.edited(12)
+        for (width, beside) in [(CGFloat(1024), false), (1600, true)] {
+            let w = RenderBudgetWindow(
+                DesignEditor(model: model, zoom: 0.5)
+                    .modifier(DesignHistoryArea(model: model, jump: { _ in }, restore: { _, _ in }, onNote: { _ in }, shown: true)),
+                size: CGSize(width: width, height: 768))
+            defer { w.close() }
+            try await w.settle()
+            let row = try #require(await w.element("suite.history.row.12"), "no row 12 at width \(width)")
+            let inspector = try #require(await w.element("suite.inspector"), "no inspector at width \(width)")
+            #expect(row.minX >= 0 && row.maxX <= width, "row 12 at \(row) runs out of the \(width)-wide window")
+            if beside {
+                #expect(row.minX >= inspector.maxX, "row 12 at \(row) isn't beside the inspector at \(inspector)")
+            } else {
+                #expect(inspector.contains(CGPoint(x: row.midX, y: row.midY)), "row 12 at \(row) isn't in the inspector column \(inspector)")
+            }
+        }
+    }
+
     @Test(.timeLimit(.minutes(1))) func panelFollowsUndoAndRedo() async throws {
         var model = try Self.edited(3)
         let w = RenderBudgetWindow(AnyView(DesignHistoryArea.panel(model.historyListing, onJump: { _ in })))

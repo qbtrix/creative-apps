@@ -20,8 +20,12 @@
 // (a debug-only `bodyRuns` counter the caller reads; each window puts its own
 // BodyTally in its environment and reports to the running test's, so the
 // counter reads this test's windows, never a parallel suite's), the root hosting view's
-// layout passes and time, and the per-step p50 / p95 (FrameProbe's nearest
-// rank). `expectBodies` gates a body count; `expectP95` judges time and
+// layout passes, their time and (`longestLayout`) the longest one, the per-step p50 / p95 (FrameProbe's nearest
+// rank), the slowest step and the opening (the slower of the press and the
+// first sample), the `stall` (how late a 120 Hz tick woke) and the `busy`
+// (the longest run-loop pass, wake to idle, Core Animation's commit included).
+// A tick's lateness has a floor of about 30 ms in the test process even with
+// no window open, so a main-thread stall budget (QB-L12) gates `busy`. `expectBodies` gates a body count; `expectP95` judges time and
 // belongs only in tests Tests/perf-suites.txt lists.
 //
 // What a test process can't drive: it is never the active app, so every press
@@ -55,12 +59,49 @@ struct RenderStep: CustomStringConvertible {
     /// Per-step main-thread milliseconds: sendEvent plus the layout and display it forced.
     let p50: Double
     let p95: Double
+    /// The slowest single step, the press included; a one-off hitch the p95 hides.
+    let slowest: Double
+    /// The slower of the first two steps, the press and the first sample (#6281).
+    let opening: Double
+    /// The longest the main thread was busy between ticks: how late a tick woke past its 1/120 s slot or the
+    /// end of the step before it. Work SwiftUI runs from the run loop's observers, such as a List landing its
+    /// rows, blocks there, outside every timed step (#6306).
+    var stall: Double = 0
+    /// The longest the main thread stayed busy in one run-loop pass, from waking to going idle again, its
+    /// observers (layout, Core Animation's commit) included: a main-thread stall as QB-L12 counts it.
+    var busy: Double = 0
 
     var description: String {
         "RENDER-BUDGET \(name): steps \(steps) | window bodies \(bodies.map(String.init) ?? "n/a") | layout passes "
             + "\(layouts) (\(String(format: "%.1f", layoutMilliseconds)) ms) | step p50 \(String(format: "%.2f", p50)) ms "
-            + "p95 \(String(format: "%.2f", p95)) ms"
+            + "p95 \(String(format: "%.2f", p95)) ms slowest \(String(format: "%.2f", slowest)) ms "
+            + "opening \(String(format: "%.2f", opening)) ms stall \(String(format: "%.2f", stall)) ms "
+            + "busy \(String(format: "%.2f", busy)) ms"
     }
+}
+
+/// Times the main run loop's passes while it lives: from each wake (`afterWaiting`, before any other
+/// observer) to the next idle (`beforeWaiting`, after every other observer, Core Animation's commit included).
+/// Main thread only.
+private final class BusyMeter {
+    private(set) var longest = 0.0
+    private var woke = CFAbsoluteTimeGetCurrent()
+    private var observers: [CFRunLoopObserver] = []
+
+    init() {
+        let wake = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.afterWaiting.rawValue, true, CFIndex.min) {
+            [weak self] _, _ in self?.woke = CFAbsoluteTimeGetCurrent()
+        }
+        let idle = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, CFIndex.max) {
+            [weak self] _, _ in
+            guard let self else { return }
+            self.longest = max(self.longest, (CFAbsoluteTimeGetCurrent() - self.woke) * 1000)
+        }
+        observers = [wake, idle].compactMap { $0 }
+        observers.forEach { CFRunLoopAddObserver(CFRunLoopGetMain(), $0, .commonModes) }
+    }
+
+    func stop() { observers.forEach { CFRunLoopObserverInvalidate($0) } }
 }
 
 /// The harness's borderless window, allowed to be key so a test's key presses reach it. It refuses key while a
@@ -85,6 +126,8 @@ private final class KeyCapableWindow: NSWindow {
     }
     /// Wall milliseconds of each step in the interaction being measured.
     private var stepTimes: [Double] = []
+    /// Milliseconds the main thread kept each tick of the interaction from waking on time (RenderStep.stall).
+    private var stalls: [Double] = []
 
     /// `keyCapable` builds a window that may become key, for a test that sends keys. Never isa-swizzle the window
     /// instead: it is KVO-observed from the start, and a swapped class makes its dealloc throw (NSRangeException
@@ -126,13 +169,18 @@ private final class KeyCapableWindow: NSWindow {
         let layouts = host.layouts
         let layoutTime = host.layoutTime
         stepTimes = []
+        stalls = []
+        let busy = BusyMeter()
         try await interaction()
         try await settle(100)
+        busy.stop()
         let times = stepTimes.sorted()
         let step = RenderStep(
             name: name, steps: times.count, bodies: bodies().map { $0 - (before ?? 0) },
             layouts: host.layouts - layouts, layoutMilliseconds: host.layoutTime - layoutTime,
-            p50: SuiteFrameProbe.nearestRank(times, 0.5) ?? 0, p95: SuiteFrameProbe.nearestRank(times, 0.95) ?? 0)
+            p50: SuiteFrameProbe.nearestRank(times, 0.5) ?? 0, p95: SuiteFrameProbe.nearestRank(times, 0.95) ?? 0,
+            slowest: times.last ?? 0, opening: stepTimes.prefix(2).max() ?? 0, stall: stalls.max() ?? 0,
+            busy: busy.longest)
         print(step)
         return step
     }
@@ -153,9 +201,13 @@ private final class KeyCapableWindow: NSWindow {
     func ticks(_ count: Int, _ tick: (Int) -> Void) async throws {
         let clock = ContinuousClock()
         let began = clock.now
+        var ready = began
         for i in 1...count {
-            try await Task.sleep(until: began + .microseconds(8_333 * i), clock: clock)
+            let due = Swift.max(began + .microseconds(8_333 * i), ready)
+            try await Task.sleep(until: due, clock: clock)
+            stalls.append(Double((clock.now - due) / .microseconds(1)) / 1000)
             timed { tick(i) }
+            ready = clock.now
         }
     }
 
@@ -445,13 +497,17 @@ final class CountingHostingView<Content: View>: NSHostingView<Content> {
     private(set) var layouts = 0
     /// Milliseconds spent in all the layout passes.
     private(set) var layoutTime = 0.0
+    /// Milliseconds of the longest layout pass, timed steps or not (an async landing lays out between steps).
+    var longestLayout = 0.0
 
     override func layout() {
         layouts += 1
         let clock = ContinuousClock()
         let began = clock.now
         super.layout()
-        layoutTime += Double((clock.now - began) / .microseconds(1)) / 1000
+        let ms = Double((clock.now - began) / .microseconds(1)) / 1000
+        layoutTime += ms
+        longestLayout = Swift.max(longestLayout, ms)
     }
 }
 

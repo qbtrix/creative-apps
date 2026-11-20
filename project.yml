@@ -43,7 +43,7 @@ settings:
 packages:
   creative-core:
     url: https://github.com/qbtrix/creative-core
-    revision: 7966e5a990ce887bbced25b58ee1134a5b170435
+    revision: 836fc2ea11f44653a85e1b79e4f55a5a07ae6d4e
 targetTemplates:
   # Release graph: <X>Model compiles Sources/<X>Model and links SuiteModel,
   # SuiteKernel and the engines through CreativeEngines.
@@ -68,6 +68,8 @@ targetTemplates:
   Journey:
     type: bundle.ui-testing
     platform: macOS
+    # The runner's extra sandbox rule (the live socket); the file says why.
+    settings: { base: { CODE_SIGN_ENTITLEMENTS: UITests/JourneyRunner.entitlements } }
     sources:
       - path: UITests
         includes: ["Journey*.swift", "Audit.swift", "${target_name}*.swift"]

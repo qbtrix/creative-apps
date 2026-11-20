@@ -134,6 +134,7 @@ private func checkInvariants(_ workspace: PhotoWorkspace) {
         #expect(titles == [
             "Normal", "Multiply", "Screen", "Overlay", "Darken", "Lighten", "Color Dodge", "Color Burn",
             "Hard Light", "Soft Light", "Difference", "Exclusion", "Hue", "Saturation", "Color", "Luminosity",
+            "Linear Dodge", "Linear Burn",
         ])
         #expect(Set(titles).count == titles.count)
     }

@@ -57,10 +57,11 @@ final class FlareSceneInspectorJourneys: XCTestCase {
         let pill = flare.element("flare.status.fps")
         XCTAssert(pill.waitForExistence(timeout: 5), "no fps pill (flare.status.fps)")
         func reading() -> Double? {
-            pill.label.range(of: #"[0-9]+(\.[0-9]+)?"#, options: .regularExpression).flatMap { Double(pill.label[$0]) }
+            let text = flare.shownText(pill)
+            return text.range(of: #"[0-9]+(\.[0-9]+)?"#, options: .regularExpression).flatMap { Double(text[$0]) }
         }
         XCTAssert(waitFor { reading().map { abs($0 - 23.976) / 23.976 <= 0.01 && $0 != 24 } ?? false },
-                  "the fps pill reads \(pill.label), not 23.976 fps")
+                  "the fps pill reads \(flare.shownText(pill)), not 23.976 fps")
         flare.shot("scene-2398-2-picked")
     }
 

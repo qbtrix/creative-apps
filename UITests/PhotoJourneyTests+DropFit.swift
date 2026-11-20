@@ -13,7 +13,7 @@ final class PhotoDropFitJourneyTests: XCTestCase {
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
         let sunset = folder.appending(path: "Sunset.png")
         try writeTestPhoto(to: sunset)
-        let photo = Journey("Photo", self, arguments: photoArguments(open: sunset))
+        let photo = Journey("Photo", self, arguments: photoArguments(open: sunset) + ["-PhotoStatusSeconds", "30"])
         XCTAssert(photo.window(named: "Sunset.png").waitForExistence(timeout: 30), "Sunset.png didn't open")
         let canvas = photo.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 5), "Photo shows no canvas (suite.canvas)")
@@ -21,10 +21,11 @@ final class PhotoDropFitJourneyTests: XCTestCase {
         let big = folder.appending(path: "Big.png")
         try writeTestPhoto(to: big, width: 3200, height: 2400)
         dragFile(big, onto: canvas)
-        XCTAssert(photo.app.staticTexts["Big"].waitForExistence(timeout: 15), "dropping Big.png listed no layer Big")
+        // XCUI's drag returns about 4 s after the drop, so the launch holds the status message 30 s.
         let status = photo.app.staticTexts.matching(
             NSPredicate(format: "label == 'Placed at 25%.' OR value == 'Placed at 25%.'")).firstMatch
-        XCTAssert(status.waitForExistence(timeout: 5), "the status line doesn't read Placed at 25%.")
+        XCTAssert(status.waitForExistence(timeout: 3), "the status line doesn't read Placed at 25%.")
+        XCTAssert(photo.app.staticTexts["Big"].waitForExistence(timeout: 15), "dropping Big.png listed no layer Big")
         photo.shot("drop-fitted")
         photo.press(character: "z", .command)
         XCTAssert(photo.app.staticTexts["Big"].waitForNonExistence(timeout: 5), "one Undo didn't take Big away")

@@ -2,19 +2,19 @@
 // TIMING's Span picker, Easing button and popover on Keyed Ball: TIMING reads
 // "Ease Out", then "Custom"; the numbers are read from where the curve draws
 // the handles (XCUITest gets no value from the rows); each edit is one ⌘Z.
+// The Span picker is found by Journey.inspectorMenu, its button, not its label.
 import XCTest
 
 extension FlareJourneyTests {
     @MainActor func testEasingPresetAndCurve() {
         let flare = Journey("Flare", self, arguments: ["-SuiteWindowSize", "1024x768"])
         flare.openSample("Keyed Ball")
-        let span = flare.element("flare.inspector.span")
+        // The row's label text carries the identifier too, and a click on it opens nothing: click the menu button.
+        let span = flare.inspectorMenu("flare.inspector.span", label: "Span")
         XCTAssert(span.waitForExistence(timeout: 10), "TIMING has no Span picker")
         expectEasingGeometry(flare)
         span.click()
-        let item = flare.app.menuItems["x frames 0 → 24"]
-        XCTAssert(item.waitForExistence(timeout: 5), "Span doesn't list x frames 0 → 24")
-        item.click()
+        XCTAssert(flare.chooseShownMenuItem("x frames 0 → 24", timeout: 5), "Span doesn't list x frames 0 → 24")
         expectTiming(reads: "Linear", flare)
         flare.shot("easing-span")
         // 1. The Easing button opens the popover; Ease Out lands on the span.

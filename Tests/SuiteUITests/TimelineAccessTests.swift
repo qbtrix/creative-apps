@@ -34,6 +34,20 @@ import Testing
         #expect(TimelineLaneSpeech.value(of: Self.track("a", keys: [12])) == "1 keyframe at 12")
     }
 
+    /// Keys a frame apart at 4 pt a frame (Flare's Button sample at 1024 pt) get tokens no wider than their gap, so the
+    /// app audit's overlap check passes; a key with room keeps the full 16 pt token (testEveryMenuOpens, fault #215).
+    @Test func keyTokensNeverOverlapANeighbour() {
+        let children = TimelineLaneSpeech.children(of: Self.track("button", keys: [0, 23, 24, 47, 48, 72]))
+        let widths = TimelineLaneSpeech.hitWidths(of: children, frameWidth: 4.3)
+        #expect(widths.first == SuiteSize.timelineKeyframeHit && widths.last == SuiteSize.timelineKeyframeHit)
+        for (i, j) in zip(children.indices, children.indices.dropFirst()) {
+            let gap = CGFloat(children[j].frame - children[i].frame) * 4.3
+            #expect(widths[i] / 2 + widths[j] / 2 <= gap + 0.001, "keys \(children[i].frame) and \(children[j].frame) overlap")
+        }
+        #expect(TimelineLaneSpeech.hitWidths(of: children, frameWidth: nil).allSatisfy { $0 == SuiteSize.timelineKeyframeHit })
+        #expect(TimelineLaneSpeech.hitWidths(of: children, frameWidth: 0).allSatisfy { $0 == SuiteSize.timelineKeyframeHit })
+    }
+
     @Test func aKeyChildReadsItsFrameAndShapeAndFollowsThePick() {
         let children = TimelineLaneSpeech.children(of: Self.ball)
         #expect(children.map(\.frame) == [0, 12, 24, 36])

@@ -9,7 +9,10 @@
 // strings and the children are TimelineLaneSpeech, with no view. Only keys
 // in the strip's visible x (timelineVisibleX), plus one key past each edge,
 // get a child, and the value speaks the first 10 keys, so a 20,000 pt lane of
-// 400 keys doesn't flood the tree (#1800). Identifiers are opt-in: with a
+// 400 keys doesn't flood the tree (#1800). A child is the 16 pt token, narrowed
+// to the gap to its nearest key (hitWidths), so keys a frame apart don't overlap. The children's stack takes
+// its keys' frames as its identity, so a key added or moved builds fresh children: reused ones kept a stale
+// frame, the first key stretched over a key added after it. Identifiers are opt-in: with a
 // timelineIdentifierPrefix P the lane is `P.lane.<id>` and each key child
 // `P.key.<id>.<frame>`; with none nothing inside gets one. Halo sets
 // `halo.timeline` and Flare `flare.timeline`.
@@ -29,7 +32,7 @@ struct TimelineLaneAccess<ID: Hashable & Sendable>: ViewModifier {
         let prefix = prefix
         let children = TimelineLaneSpeech.children(of: track, visibleX: visibleX, mapping: mapping)
         let laneID = TimelineLaneSpeech.identifier(prefix, "lane", track.id)
-        let size = SuiteSize.timelineKeyframeHit
+        let widths = TimelineLaneSpeech.hitWidths(of: children, frameWidth: mapping?.frameWidth)
         return content
             .accessibilityElement()
             .accessibilityLabel(track.name)
@@ -37,10 +40,10 @@ struct TimelineLaneAccess<ID: Hashable & Sendable>: ViewModifier {
             .accessibilityIdentifier(laneID ?? "", isEnabled: laneID != nil)
             .accessibilityChildren {
                 ZStack(alignment: .topLeading) {
-                    ForEach(children, id: \.frame) { child in
+                    ForEach(Array(zip(children, widths)), id: \.0.frame) { child, width in
                         let keyID = TimelineLaneSpeech.identifier(prefix, "key", track.id, frame: child.frame)
                         Rectangle()
-                            .frame(width: size, height: size)
+                            .frame(width: width, height: SuiteSize.timelineKeyframeHit)
                             .position(
                                 x: mapping.map { tickX($0, child.frame) } ?? 0,
                                 y: SuiteSize.timelineLane / 2)
@@ -52,6 +55,8 @@ struct TimelineLaneAccess<ID: Hashable & Sendable>: ViewModifier {
                     }
                 }
                 .frame(maxWidth: .infinity, minHeight: SuiteSize.timelineLane, alignment: .topLeading)
+                // Fresh children whenever the keys change: an updated stack stretched its first key over the rest.
+                .id(children.map(\.frame))
             }
     }
 }
@@ -109,6 +114,22 @@ enum TimelineLaneSpeech {
         let high = min(last, all.count - 1)
         guard low <= high else { return [] }
         return Array(all[low...high])
+    }
+
+    /// Each child's hit width: the 16 pt key token, narrowed to the gap to its
+    /// nearest neighbour, so keys a frame apart at a tight zoom never cover
+    /// each other (the app audit's overlap check) and each covers what a click
+    /// picks (the nearest key). With no frame width, the full token.
+    static func hitWidths(of children: [TimelineKeyChild], frameWidth: Double?) -> [CGFloat] {
+        let hit = SuiteSize.timelineKeyframeHit
+        guard let frameWidth, frameWidth > 0, frameWidth.isFinite else { return children.map { _ in hit } }
+        return children.indices.map { i in
+            var width = hit
+            for j in [i - 1, i + 1] where children.indices.contains(j) {
+                width = min(width, CGFloat(Double(abs(children[j].frame - children[i].frame)) * frameWidth))
+            }
+            return width
+        }
     }
 
     /// A strip part's identifier under `prefix` (`P.lane.<id>`, `P.key.<id>.<frame>`,

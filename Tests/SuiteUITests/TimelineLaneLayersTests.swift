@@ -4,7 +4,8 @@
 // gap or overlap, ending at TimelineStripLayout.lanesHeight; a press at a
 // key's 16 pt token routes `.key`, at a clip end `.clipEnd`, on the bed
 // `.bed`, strictly inside half the playhead's 16 pt band `.playheadBand`
-// (8 pt out is the bed), and off every lane nowhere. macOS only.
+// (8 pt out is the bed) unless it is on a key at the playhead, inside the
+// grab's hole, which is `.key`, and off every lane nowhere. macOS only.
 import Foundation
 @testable import SuiteUI
 import Testing
@@ -90,9 +91,20 @@ import Testing
         #expect(route(1_000 - half + 0.5)?.press == .playheadBand)
         #expect(route(1_000 + half)?.press == .bed, "the band's edge is strictly inside")
         #expect(route(1_000 - half)?.press == .bed, "the band's edge is strictly inside")
-        // A key under the band goes to the band, as the strip's playhead layer takes the press today.
-        #expect(route(300, playhead: 30)?.press == .playheadBand)
         #expect(route(300 - 8, playhead: 30)?.press == .key(30), "8 pt out of the band is the key's token")
+    }
+
+    /// A key at the playhead is the key's to drag (J11's drag of 29 onto 37): the playhead's grab leaves a band-tall
+    /// hole around it (TimelinePlayheadGrab.shape), so the lanes must take that press too, or nothing does.
+    @Test func aKeyAtThePlayheadTakesThePressInsideTheGrabsHole() {
+        let half = TimelinePlayheadGrab.band / 2
+        #expect(route(300, playhead: 30)?.press == .key(30))
+        #expect(route(300 + half - 0.5, playhead: 30)?.press == .key(30))
+        // Above or below the hole the playhead's grab holds the band.
+        let top = CGPoint(x: timelineInset + 300, y: Self.lane * 3 + 1)
+        #expect(TimelineLaneLayers.route(press: top, in: Self.lanes, mapping: Self.mapping, playhead: 30)?.press == .playheadBand)
+        // A key under the band but off the playhead's frame has no hole: the band keeps it.
+        #expect(route(303, playhead: 31)?.press == .playheadBand)
     }
 
     @Test func aPressOffEveryLaneRoutesNowhere() {

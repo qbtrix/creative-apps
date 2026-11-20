@@ -13,7 +13,11 @@
 //
 // Files: Open and Save As use AppKit's panels. Open fills this window only while
 // it holds no file (DesignWorkspace.takesOpenedFile); otherwise the chosen file
-// opens in a new window, so Open never loses work. Save writes to the file the
+// opens in a new window, so Open never loses work. An open shows "Opening <name>…"
+// in the status line at once and reads and decodes the file off the main thread,
+// looking up the document views' SF Symbols beside it (`documentSymbols`), so even
+// a process's first open lands without a catalog read; the document lands on the
+// main actor (files-history P4). Save writes to the file the
 // window opened or last saved (DesignWorkspace.documentURL), after finishing any
 // text being typed. New File clears that URL, so Save then asks for a name; Undo
 // and Redo of New File swap it back with the document they restore, so Save
@@ -44,8 +48,8 @@
 // over one, asks Save, Don't Save or Cancel first. Save runs File > Save and lands only when
 // the workspace then reads clean, so a cancelled Save panel keeps the document.
 //
-// Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace,
-// then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
+// Canvas drags and inspector scrubs (D0-8a): the press goes to the workspace
+// (a quiet press, one that shows nothing, to the copy alone), then each later sample goes to DesignLiveDrag's copy, which only DesignCanvas
 // draws, so the window doesn't run per sample. Mouse-up, or the scrub's end
 // run, replays the last one into the workspace as one step (`live.land(into:)`),
 // written before the copy is cleared.
@@ -85,6 +89,8 @@ struct DesignWindow: View, BodyCounted {
     @State private var exportRequest = DesignExportRequest()
     /// The rect Zoom to Selection asked to show; the canvas takes it once it has that input (D0-5b).
     @State private var show: DesignRect?
+    /// When the last file open began (uptime); DesignEditor marks it as `open-command` once the file shows.
+    @State private var openBegan: Double?
     @Environment(\.openWindow) private var openWindow
     /// Cut, Copy and Paste through the suite's coder; the PNG is drawn here, on the main actor.
     private let pasteboard = DesignPasteboardAdapter(png: { raster in
@@ -107,6 +113,9 @@ struct DesignWindow: View, BodyCounted {
     /// Opens the last started window's export sheet; RenderBudgetDesignExportTests calls it (no menu bar there).
     // view-static: main-actor
     static var openExport: (@MainActor () -> Void)?
+    /// Opens a file in the last started window as Finder or Recents does; RenderBudgetDesignTests times it.
+    // view-static: main-actor
+    static var openFile: (@MainActor (URL) -> Void)?
     /// The last started window's intents; RenderBudgetDesignAnimateTests plays through it.
     // view-static: main-actor
     static var lastPerform: DesignPerform?
@@ -130,7 +139,7 @@ struct DesignWindow: View, BodyCounted {
         let _ = bodyTally.ran(Self.self)
         #endif
         DesignEditor(
-            model: model, documentName: model.documentURL?.lastPathComponent, note: note, zoom: zoom,
+            model: model, documentName: model.documentURL?.lastPathComponent, openBegan: openBegan, note: note, zoom: zoom,
             onViewport: viewportChanged, onZoom: userZoom, perform: perform
         )
         .focusedSceneValue(\.designMenu, DesignMenu(model: model, perform: perform))
@@ -197,9 +206,14 @@ struct DesignWindow: View, BodyCounted {
         case .drag(let from, let to, let modifiers):
             let start = DesignPoint(from)
             if !live.isLive {
-                // The press goes to the workspace, so the selection shows at once.
-                model.drag(from: start, to: start, modifiers: modifiers)
-                live.begin(from: model)
+                // A press that shows nothing (Option on the selection) stays on the copy, so the window
+                // doesn't run; one that selects goes to the workspace, so the selection shows at once.
+                if let pressed = model.quietPress(at: start, modifiers: modifiers) {
+                    live.begin(from: pressed, replaying: start, modifiers: modifiers)
+                } else {
+                    model.drag(from: start, to: start, modifiers: modifiers)
+                    live.begin(from: model)
+                }
             }
             live.sample(from: start, to: DesignPoint(to), modifiers: modifiers)
         case .endDrag: endLive { model.endDrag() }
@@ -422,6 +436,7 @@ struct DesignWindow: View, BodyCounted {
         started = true
         #if DEBUG
         Self.openExport = { perform(.export) }
+        Self.openFile = { open($0) }
         Self.liveAdopt = (read: { model }, write: { perform(.adoptLive($0)) })
         #endif
         if seeded {
@@ -482,15 +497,45 @@ struct DesignWindow: View, BodyCounted {
         }
     }
 
-    /// Replaces the window's document with the file's. A file that can't open leaves it as it was.
+    /// Replaces the window's document with the file's. The status line says "Opening <name>…" at once
+    /// while the file is read and decoded off the main thread (files-history P4, QB-L9); the document
+    /// lands on the main actor. A file that can't open leaves the window as it was.
     private func open(_ url: URL) {
-        do {
-            try model.open(Data(contentsOf: url), at: url)
-            fitting = true
-            fit()
-        } catch {
-            problem = .opening(url.lastPathComponent, Self.reason(error))
+        let name = url.lastPathComponent
+        let filing = model.services.filing
+        openBegan = ProcessInfo.processInfo.systemUptime
+        note = "Opening \(name)…"
+        let symbols = Self.documentSymbols
+        Task {
+            let warm = Task.detached(priority: .userInitiated) {
+                for symbol in symbols { _ = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?.size }
+            }
+            let read = await Task.detached(priority: .userInitiated) {
+                Result { () throws -> DesignDocument in try filing.decode(Data(contentsOf: url)) }
+            }.value
+            await warm.value
+            switch read {
+            case .success(let document):
+                model.open(document, at: url)
+                fitting = true
+                fit()
+                #if DEBUG
+                Self.lastWorkspace = model
+                #endif
+            case .failure(let error):
+                note = nil
+                problem = .opening(name, Self.reason(error))
+            }
         }
+    }
+
+    /// The SF Symbols a landing document's Layers rows, palette, toolbar and inspector draw. A
+    /// process's first lookup of each reads the symbol catalog, so `open` looks them up off the main
+    /// thread while the file decodes, and the landing pass doesn't pay for it (files-history P4 cold).
+    nonisolated private static var documentSymbols: [String] {
+        DesignNodeKind.allCases.map(\.systemImage) + DesignLayerFlag.allCases.flatMap(\.symbols)
+            + DesignTool.allCases.map(\.systemImage) + DesignToolbarItem.allCases.map(\.systemImage)
+            + DesignAlignEdge.allCases.map(\.systemImage) + ["plus", "trash", "doc"]
     }
 
     /// Writes over the file the window opened or last saved; with none, it is Save As.

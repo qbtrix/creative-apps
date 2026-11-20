@@ -2,7 +2,8 @@
 // to the window's DesignWorkspace re-runs DesignWindow and lays out the whole
 // editor (toolbar, palette, sidebar, inspector, menus), so a canvas drag that
 // wrote the workspace per pointer sample ran the window per sample. Instead the
-// press goes to the workspace (the selection shows at once) and the later
+// press goes to the workspace (the selection shows at once), or to the copy
+// alone when it shows nothing (a quiet press, #6281), and the later
 // samples go here, to a copy of it (DesignLiveEdit) that only DesignCanvas
 // reads: `live.workspace ?? model`. The inspector reads `scrubbed`, the copy
 // only a scrub's values set (a style row's, the Rotation bar's or a fill editor
@@ -52,6 +53,13 @@ import SwiftUI
     func begin(from model: DesignWorkspace) {
         isLanding = false
         edit.begin(from: model)
+        if scrubbed != nil { scrubbed = nil }
+    }
+
+    /// Starts showing `pressed`, a quiet press's copy; landing makes the press on the workspace first.
+    func begin(from pressed: DesignWorkspace, replaying start: DesignPoint, modifiers: DesignModifiers) {
+        isLanding = false
+        edit.begin(from: pressed, replaying: start, modifiers: modifiers)
         if scrubbed != nil { scrubbed = nil }
     }
 

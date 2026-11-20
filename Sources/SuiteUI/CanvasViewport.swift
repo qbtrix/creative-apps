@@ -10,12 +10,14 @@
 // pointer: the viewport scrolls so the document point under it stays put
 // (CanvasLayout's anchoredOffset over ZoomMath.anchoredOrigin), once the
 // content has taken its new size. Key presses
-// reach `onKey` while the canvas has focus, which a drag on it gives it.
+// reach `onKey` while the canvas has focus, which it takes when it appears
+// and a drag on it gives back.
 // While it has focus the canvas also pans without a scroll wheel: a drag that
 // starts with Space held scrolls it with the pointer (the grab pointer) and
-// never reaches `onDrag` or `onDragEnd`, and Space never reaches `onKey`; an
+// never reaches `onDrag` or `onDragEnd`; Space reaches `onKey` only as a tap,
+// going up after no pan (spaceTap), so a host's bare-Space Play still runs; an
 // arrow key `onKey` ignores scrolls a tenth of the viewport, Shift a whole
-// one. Whether a drag pans is decided when it starts, so a tool drag always
+// one. A text field on the canvas keeps its Space and arrows (keysPan). Whether a drag pans is decided when it starts, so a tool drag always
 // gets its `onDragEnd`. The host owns the zoom (the top bar and status bar
 // show it) and learns the viewport's size from `onSize` to work out a fit.
 // With `onZoomLevel` (or the older `onZoom`, which takes the level as a
@@ -49,6 +51,7 @@
 // container registers as the enabled control `suite.canvas` (`.suiteControl`),
 // and under a probe host each tool-drag or Space-pan move reports a sample of
 // series `canvas-drag` (CanvasProbe, SP2).
+import AppKit
 import enum SuiteKernel.ZoomKey
 import enum SuiteKernel.ZoomLevel
 import SwiftUI
@@ -149,6 +152,18 @@ public struct CanvasLayout: Equatable, Sendable {
         return next.clamped(CGPoint(x: next.origin.x - origin.x, y: next.origin.y - origin.y))
     }
 
+    /// Whether a Space press is a tap the host hears: Space let go (`phase` up) while it was `held`
+    /// on the canvas and no pan ran (`panned`) since it went down.
+    public static func spaceTap(phase: KeyPress.Phases, held: Bool, panned: Bool) -> Bool {
+        phase == .up && held && !panned
+    }
+
+    /// Whether Space and the arrows pan the canvas while `firstResponder` has the keys: not while
+    /// it takes typing (an inline text editor on the canvas), which keeps its spaces and caret (#4826).
+    @MainActor public static func keysPan(firstResponder: NSResponder?) -> Bool {
+        !ToolKeys.isTextInput(firstResponder)
+    }
+
     /// The scroll offset after `key`: an arrow scrolls a tenth of the viewport its way,
     /// a whole viewport with `page` (Shift). Nil for any other key.
     public func panned(from offset: CGPoint, key: KeyEquivalent, page: Bool) -> CGPoint? {
@@ -204,6 +219,8 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
     @State private var pendingScroll: CGPoint?
     @State private var position = ScrollPosition()
     @State private var spaceHeld = false
+    /// A pan ran while Space was held, so letting Space go is not a tap.
+    @State private var spacePanned = false
     /// The scroll offset where the pan under way began; nil while no pan is.
     @State private var panStart: CGPoint?
     @FocusState private var isFocused: Bool
@@ -346,16 +363,25 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
         .focusable(takesKeys)
         .focused($isFocused)
         .focusEffectDisabled()
+        // A new or opened document's canvas has the keys at once, so a tool key works before any click (#4768).
+        .onAppear { if takesKeys { isFocused = true } }
         // Space let go while focus was elsewhere never arrives here.
         .onChange(of: isFocused) { _, focused in if !focused { spaceHeld = false } }
         .onKeyPress(phases: .all) { press in key(press, layout) }
     }
 
-    /// Space (all its phases) arms the pan and stays here. Every other key reaches `onKey`
+    /// Space (all its phases) arms the pan and stays here, but a tap (no pan while held) reaches `onKey` going up.
+    /// Every other key reaches `onKey`
     /// going down, as before; an arrow it ignores pans the canvas.
     private func key(_ press: KeyPress, _ layout: CanvasLayout) -> KeyPress.Result {
+        let pans = CanvasLayout.keysPan(firstResponder: NSApp.keyWindow?.firstResponder)
         if press.key == .space {
+            guard pans else { return .ignored }
+            let tap = CanvasLayout.spaceTap(phase: press.phase, held: spaceHeld, panned: spacePanned)
+            if press.phase == .down { spacePanned = false }
             spaceHeld = press.phase != .up
+            // A tap reaches the host going up, so a bare-Space action (Flare's Play) runs while the canvas has the keys.
+            if tap { _ = onKey?(press) }
             return .handled
         }
         guard press.phase == .down else { return .ignored }
@@ -364,7 +390,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             return .handled
         }
         if case .handled? = onKey?(press) { return .handled }
-        guard press.modifiers.isDisjoint(with: [.command, .option, .control]),
+        guard pans, press.modifiers.isDisjoint(with: [.command, .option, .control]),
             let offset = layout.panned(from: scrolled, key: press.key, page: press.modifiers.contains(.shift))
         else { return .ignored }
         position.scrollTo(point: offset)
@@ -411,6 +437,7 @@ public struct CanvasViewport<Content: View, Overlay: View>: View {
             .onChanged { value in
                 guard let start = panStart ?? (spaceHeld && last == nil ? scrolled : nil) else { return }
                 panStart = start
+                spacePanned = true
                 let eventTime = ProcessInfo.processInfo.systemUptime
                 position.scrollTo(point: layout.panned(from: start, by: value.translation))
                 report(eventTime)

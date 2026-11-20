@@ -222,3 +222,44 @@ private func gradientCards() -> DesignWorkspace {
     #expect(model.selectedNode?.rotation == 0)
     #expect(!model.canUndo)
 }
+
+@Test func anOptionPressOnTheSelectionIsQuietAndLandsAsTheDirectDrag() throws {
+    var model = cards()
+    model.selectItem("node-2")
+    let start = sample(0)
+    // Option on the selected A only begins the copy: nothing shows, so the press stays on the copy (#6281).
+    let pressed = try #require(model.quietPress(at: start, modifiers: .option))
+    var live = DesignLiveEdit()
+    live.begin(from: pressed, replaying: start, modifiers: .option)
+    for i in 1...20 { live.sample(from: start, to: sample(i), modifiers: .option) }
+    #expect(model == { var m = cards(); m.selectItem("node-2"); return m }(), "the press wrote the workspace")
+    live.end(into: &model)
+    var direct = cards()
+    direct.selectItem("node-2")
+    for i in 0...20 { direct.drag(from: start, to: sample(i), modifiers: .option) }
+    direct.endDrag()
+    #expect(model == direct)
+    #expect(model.undoActionName == "Undo Duplicate")
+}
+
+@Test func aPressThatSelectsIsNotQuiet() {
+    var model = cards()
+    model.deselect()
+    #expect(model.quietPress(at: sample(0), modifiers: []) == nil, "pressing A selects it, which shows")
+    model.selectItem("node-2")
+    #expect(model.quietPress(at: pt(350, 170), modifiers: []) == nil, "pressing B with A selected selects B")
+}
+
+@Test func anOptionLetGoMidDragStillLandsAsTheCopy() throws {
+    var model = cards()
+    model.selectItem("node-2")
+    let start = sample(0)
+    // The press's modifiers pick the route: Option let go after it still copies, as the direct drag does.
+    let pressed = try #require(model.quietPress(at: start, modifiers: .option))
+    var live = DesignLiveEdit()
+    live.begin(from: pressed, replaying: start, modifiers: .option)
+    for i in 1...20 { live.sample(from: start, to: sample(i), modifiers: []) }
+    live.end(into: &model)
+    #expect(model.undoActionName == "Undo Duplicate")
+    #expect(model.selectedNodeID != "node-2", "the copy is selected, not the original")
+}

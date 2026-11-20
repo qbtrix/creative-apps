@@ -172,6 +172,8 @@ struct LibraryWindow: View, BodyCounted {
             persistAreaFlush()
             filtersAreaFlush(areas.filters)
         }
+        // Outside the sheets, so the export sheet's `progress` mark reaches suite.perf (P8); SuiteWindow's own sees it and passes through.
+        .suiteProbes()
     }
 
     /// The menu bar's items, each sub-struct from its area's file.

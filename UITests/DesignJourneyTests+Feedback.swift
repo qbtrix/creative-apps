@@ -156,12 +156,7 @@ final class DesignFeedbackJourneyTests: XCTestCase {
 
     /// Whether the inspector's field `name` reads `expected` (its spoken value, "300 points") within five seconds.
     @MainActor private static func waitForInspector(_ design: Journey, _ name: String, _ expected: Double) -> Bool {
-        poll {
-            let field = design.element("suite.inspector").descendants(matching: .any)
-                .matching(NSPredicate(format: "label == %@", name)).firstMatch
-            guard field.exists, let spoken = field.value as? String, let word = spoken.split(separator: " ").first else { return false }
-            return Double(word.filter { $0.isNumber || $0 == "." || $0 == "-" }) == expected
-        }
+        poll { design.inspectorNumber(name) == expected }
     }
 
     /// Polls `condition` for up to five seconds, with the run loop turning meanwhile.

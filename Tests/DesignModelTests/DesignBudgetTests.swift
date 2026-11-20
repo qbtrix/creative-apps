@@ -76,7 +76,7 @@ import Testing
     @Test func fileRoundTrip() throws {
         let crowd = DesignFixtures.crowd
         let expected = try crowd.fileData()
-        let gate = DesignBudget.linuxDebugGate(device: .milliseconds(50))
+        let gate = DesignBudget.gate(device: .milliseconds(50))
         var reopened = DesignWorkspace()
         var trips = 0
         let report = try DesignBudget.expect("QD-S11 file round trip on crowd", runs: 200, gate: gate) {

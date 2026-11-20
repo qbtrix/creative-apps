@@ -11,9 +11,10 @@
 // its name and the state still reads "Saved" (a ⌘Z sent to the document would
 // undo the X step and read "Edited"). Escape closes the field, and Edit >
 // Undo then names the document's step. Drawing a rectangle reads "Edited";
-// ⌘S reads "Saved" with no save panel, and the file is on disk. (The window's
-// edited dot waits on a SuiteUI modifier, #2861; until then "Edited" is the
-// state shown.) J14 draws on `cards` and presses ⌘W: the close prompt, an
+// ⌘S reads "Saved" with no save panel, and the file is on disk. XCUITest
+// can't see the window's edited dot, so SuiteUI's hidden `suite.window.edited`
+// element carries the window's own flag: "edited" after the draw, "saved"
+// after ⌘S. J14 draws on `cards` and presses ⌘W: the close prompt, an
 // NSAlert sheet (SuiteUI's unsaved guard), names "Untitled", the fixture's name;
 // Cancel (`design.close.cancel`) keeps the window; ⌘W again and Don't Save
 // (`design.close.dontSave`) closes it. A fresh, clean `cards` window closes
@@ -28,6 +29,7 @@ final class DesignFilesJourneyTests: XCTestCase {
     static let desktopRow = "design.layer.node-1", rowA = "design.layer.node-2"
     static let xBar = "design.inspector.x", saveState = "design.status.save", undoID = "design.bar.undo"
     static let cancelID = "design.close.cancel", dontSaveID = "design.close.dontSave"
+    static let windowEdited = "suite.window.edited"
 
     /// J13: ⌘Z in the X field undoes its typing, not the document; a draw reads Edited, ⌘S Saved, no panel.
     @MainActor func testUndoInTextFieldsAndDirtyState() throws {
@@ -86,9 +88,11 @@ final class DesignFilesJourneyTests: XCTestCase {
         design.drag(on: "suite.canvas", from: CGVector(dx: 0.56, dy: 0.61), to: CGVector(dx: 0.70, dy: 0.75))
         XCTAssert(Self.waitUntil { undo.label == "Undo Add Rectangle" }, "drawing made no Add Rectangle step (Undo reads \(undo.label))")
         XCTAssert(Self.waitUntil { self.state(design) == "Edited" }, "a draw left the state at \(state(design)), not Edited")
+        XCTAssert(Self.waitUntil { self.windowDot(design) == "edited" }, "a draw left the window's dot at \(windowDot(design)), not edited")
         design.shot("files-edited")
         design.press(character: "s", .command)
         XCTAssert(Self.waitUntil { self.state(design) == "Saved" }, "⌘S left the state at \(state(design)), not Saved")
+        XCTAssert(Self.waitUntil { self.windowDot(design) == "saved" }, "⌘S left the window's dot at \(windowDot(design)), not saved")
         expectNoPanel(design, after: "⌘S")
         XCTAssert(FileManager.default.fileExists(atPath: file.path), "⌘S wrote no file at -DesignSaveTo")
         design.shot("files-saved")
@@ -163,6 +167,12 @@ final class DesignFilesJourneyTests: XCTestCase {
     @MainActor private func state(_ design: Journey) -> String {
         let label = design.element(Self.saveState)
         return label.exists ? Self.text(label) : ""
+    }
+
+    /// The window's edited dot as SuiteUI's `suite.window.edited` reads it ("edited", "saved"), or "" when absent.
+    @MainActor private func windowDot(_ design: Journey) -> String {
+        let dot = design.element(Self.windowEdited)
+        return dot.exists ? dot.label : ""
     }
 
     /// Edit > Undo's title, read from the open menu, which then closes.

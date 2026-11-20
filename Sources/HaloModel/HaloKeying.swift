@@ -120,6 +120,8 @@ extension HaloProject {
         case .lighten: "Lighten"
         case .colorDodge: "Color Dodge"
         case .colorBurn: "Color Burn"
+        case .linearDodge: "Linear Dodge"
+        case .linearBurn: "Linear Burn"
         case .hardLight: "Hard Light"
         case .softLight: "Soft Light"
         case .difference: "Difference"

@@ -142,10 +142,12 @@ struct PhotoWindow: View {
                 fitPending = true
                 fit()
             }
-            // The status line's message goes 4 s after it appears; a new message restarts the wait.
+            // The status line's message goes 4 s after it appears (`-PhotoStatusSeconds <n>` holds it longer, for
+            // journeys whose drag returns after 4 s); a new message restarts the wait.
             .task(id: model.statusMessage) {
                 guard model.statusMessage != nil else { return }
-                do { try await Task.sleep(for: .seconds(4)) } catch { return }
+                let hold = UserDefaults.standard.double(forKey: "PhotoStatusSeconds")
+                do { try await Task.sleep(for: .seconds(hold > 0 ? hold : 4)) } catch { return }
                 takeStroke()
                 model.clearStatus()
             }

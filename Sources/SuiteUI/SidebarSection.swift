@@ -14,7 +14,9 @@
 // `onExpand` (the environment's `sidebarExpansion`), the disclosure shows the
 // app's set and a click calls onExpand; without onExpand the group keeps its
 // own state (LL-9). A parent row keeps its toggles as their own elements.
-// Selection stays one SidebarItem.ID across every section. A header's
+// Selection stays one SidebarItem.ID across every section. A header with an
+// add button is drawn as a row (`asRow`), where the button is its own
+// accessibility element; a List's section header would swallow it. A header's
 // title is SuiteColor.textSecondary: the sidebar style's own header gray is
 // about 2.2:1 on the sidebar, under the 4.5:1 the app audit asks for.
 import SwiftUI
@@ -43,7 +45,7 @@ struct SidebarSectionHeader: View {
 
     var body: some View {
         HStack {
-            Text(section.title).foregroundStyle(Self.titleColor)
+            Text(section.title).foregroundStyle(Self.titleColor).accessibilityAddTraits(.isHeader)
             Spacer(minLength: SuiteSpacing.s)
             if let add = section.addAction {
                 Button(action: add.perform) {
@@ -56,6 +58,19 @@ struct SidebarSectionHeader: View {
             }
         }
     }
+
+    /// The system header's text starts this far left of a row's content.
+    private static let rowLeadingOutset: CGFloat = 2
+
+    /// The header as a List row that can't be selected, looking like the List's own section header.
+    /// A List's section header is one heading element to accessibility, whatever it holds, so a
+    /// section with an add button draws its header here, where the button is a button (#4831).
+    var asRow: some View {
+        self
+            .font(.subheadline.weight(.semibold))
+            .padding(.leading, -Self.rowLeadingOutset)
+            .selectionDisabled()
+    }
 }
 
 /// One top-level item and, through a system disclosure group, its
@@ -65,6 +80,8 @@ struct SidebarNode: View {
     let onToggle: (@MainActor (SidebarItem.ID, SidebarToggle.ID) -> Void)?
     /// Nil to accept a rename, or the message the row shows when the app refuses it (LL-6).
     let onRename: (@MainActor (SidebarItem.ID, String) -> String?)?
+    /// The list's selection, for a click on a renamable name, which the List itself never sees (#2496).
+    var onSelect: (@MainActor (SidebarItem.ID) -> Void)?
     /// The window's `contextActions`; nil gives no row a menu (LL-8a).
     @Environment(\.sidebarContextActions) private var contextActions
     /// The window's `expanded` and `onExpand`; nil keeps `isOpen` (LL-9).
@@ -79,7 +96,9 @@ struct SidebarNode: View {
             row
         } else {
             DisclosureGroup(isExpanded: Self.expansion(for: item.id, in: expansion, local: $isOpen)) {
-                ForEach(item.secondLevelRows) { SidebarNode(item: $0, onToggle: onToggle, onRename: onRename) }
+                ForEach(item.secondLevelRows) {
+                    SidebarNode(item: $0, onToggle: onToggle, onRename: onRename, onSelect: onSelect)
+                }
             } label: {
                 // The row's toggles stay their own elements beside the disclosure.
                 row.accessibilityElement(children: .contain)
@@ -104,7 +123,9 @@ struct SidebarNode: View {
         if let onRename { rename = { onRename(id, $0) } }
         var ask: (@MainActor () -> Void)?
         if onRename != nil { ask = { renameAsk += 1 } }
-        return SidebarRow(item, onToggle: toggle, refusableRename: rename, renameAsk: renameAsk)
+        var select: (@MainActor () -> Void)?
+        if let onSelect { select = { onSelect(id) } }
+        return SidebarRow(item, onToggle: toggle, refusableRename: rename, renameAsk: renameAsk, onSelect: select)
             .modifier(SidebarContextMenu(items: Self.menu(for: id, from: contextActions, rename: ask)))
             .tag(id)
     }

@@ -1,10 +1,9 @@
 // AfterGlowJourneyTests+FileFlow.swift: SJ-F1 (packet suite/features/file-flow.md, Journey steps 1 to 3;
 // SF-2 written, SF-4 turned on). On `weekOfWork`, File > Open Recent ▸ on the home lists the week's files
 // newest first; Intro.halo dragged onto the home shows "Open in Halo"; notes.xyz is refused in words and
-// opens nothing. The files are dragged from a small floating window the test runner shows, as a person drags
-// from a folder window. It lives in the launcher's bundle, which has SuiteHarness, so its shots go under
+// opens nothing. The files are dragged from the test runner's small window (Journey+FileDrag.swift), as a person
+// drags from a folder window. It lives in the launcher's bundle, which has SuiteHarness, so its shots go under
 // `afterglow` and are audited.
-import AppKit
 import XCTest
 
 final class SuiteFileFlowJourneyTests: XCTestCase {
@@ -48,46 +47,9 @@ final class SuiteFileFlowJourneyTests: XCTestCase {
         XCTAssertEqual(home.app.windows.count, windows, "dropping notes.xyz opened a window")
     }
 
-    /// Writes `file`, shows it in a floating window at the screen's top left and drags it onto `target`'s middle.
+    /// Writes `file` and drags it onto `target` from the runner's small window (Journey+FileDrag.swift).
     @MainActor private func drag(_ file: URL, onto target: XCUIElement) {
         FileManager.default.createFile(atPath: file.path, contents: Data())
-        let screen = NSScreen.screens.first?.frame ?? .zero
-        let frame = CGRect(x: screen.minX + 40, y: screen.maxY - 200, width: 120, height: 120)
-        let panel = NSPanel(contentRect: frame, styleMask: [.nonactivatingPanel], backing: .buffered, defer: false)
-        panel.level = .floating
-        panel.isReleasedWhenClosed = false
-        panel.contentView = FileDragSource(file: file)
-        panel.orderFrontRegardless()
-        defer { panel.close() }
-        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
-        // XCUI coordinates are screen points from the top left; AppKit's from the bottom left.
-        let origin = target.frame.origin
-        let from = target.coordinate(withNormalizedOffset: .zero)
-            .withOffset(CGVector(dx: frame.midX - origin.x, dy: screen.maxY - frame.midY - origin.y))
-        from.press(forDuration: 0.3, thenDragTo: target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
-        RunLoop.main.run(until: Date().addingTimeInterval(0.3))
+        dragFile(file, onto: target)
     }
-}
-
-/// A view that starts a file drag of `file` when the pointer drags on it.
-private final class FileDragSource: NSView, NSDraggingSource {
-    private let file: URL
-
-    init(file: URL) {
-        self.file = file
-        super.init(frame: .zero)
-    }
-
-    required init?(coder: NSCoder) { nil }
-
-    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-
-    override func mouseDragged(with event: NSEvent) {
-        let item = NSDraggingItem(pasteboardWriter: file as NSURL)
-        item.setDraggingFrame(bounds, contents: NSWorkspace.shared.icon(forFile: file.path))
-        beginDraggingSession(with: [item], event: event, source: self)
-    }
-
-    func draggingSession(_ session: NSDraggingSession,
-                         sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation { .copy }
 }

@@ -14,7 +14,8 @@
 // A layer with children is a DisclosureGroup whose expanded state is the
 // workspace's (`isExpanded`), sent back as `.setExpanded`, so collapsing the
 // parent of the selection selects the parent (#121). Each layer is SuiteUI's
-// SidebarRow with an eye and a lock toggle (`layerToggles`); a click flips
+// SidebarRow with an eye and a lock toggle (`layerToggles`, from the group
+// state the tree passes down, so no row walks the page); a click flips
 // that layer's own flag, one undo step (#45). A layer hidden by itself or by
 // a group around it reads dimmed (SuiteColor.textSecondary, which keeps 4.5:1
 // on a highlighted row), and a child of a hidden or locked group
@@ -43,7 +44,14 @@
 // with no layers says so and points at the Frame tool. The rename refusal state
 // (DesignRenameState, `design.layers.rename-refusal`) is the panel's own. The list shows no
 // scroll indicators, as the inspector doesn't, so on a long layer tree no legacy
-// scroller reads as an unlabelled button (#2552). Values in, intents out.
+// scroller reads as an unlabelled button (#2552). A file landing with many more
+// top-level layers than the tree shows lists none in the landing's own frame and
+// then a few rows a frame (`layersPerFrame`): the list sizes each new row on the
+// main thread, so 40 at once stalled the window, and even 4 beside the landing's
+// window layout doubled its stall (#6199 P4). A page of plain layers lists them in one
+// leaf-only ForEach: a ForEach whose rows are sometimes a DisclosureGroup has a
+// varying row count per element, which the List walks with a cost growing as the
+// square of the layer count (24.5 s for 5,000). Values in, intents out.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -60,6 +68,20 @@ struct DesignLayersPanel: View {
     @State private var dropLine: DesignLayerDropLine?
     /// The dragged layer and the rows' frames; a box SwiftUI doesn't watch.
     @State private var rowFrames = DesignLayerRowFrames()
+    /// How many top-level layers the tree has caught up to, set when it appears; it lags a landing file
+    /// by a few frames. Nil before it appears: a panel drawn once, as a snapshot is, lists every layer.
+    @State private var shownLayers: Int?
+
+    /// Top-level layers the tree adds per frame when a file lands with more than this many new ones: 1 when
+    /// any has children (a group row with its disclosure costs 8-12 ms to insert, release; 4 a frame stalled
+    /// 33-46 ms), 16 on a page of plain layers, whose rows cost little each (all 5,000 at once, 430 ms).
+    nonisolated static func layersPerFrame(leavesOnly: Bool) -> Int { leavesOnly ? 16 : 1 }
+
+    /// The page's top-level layer count.
+    private var layerCount: Int { model.selectedPage?.nodes.count ?? 0 }
+
+    /// This page's `layersPerFrame`.
+    private var step: Int { Self.layersPerFrame(leavesOnly: model.selectedPage?.nodes.allSatisfy(\.children.isEmpty) ?? true) }
 
     var body: some View {
         List(selection: selection) {
@@ -77,7 +99,9 @@ struct DesignLayersPanel: View {
             }
             Section {
                 if let nodes = model.selectedPage?.nodes, !nodes.isEmpty {
-                    DesignLayerTree(nodes: nodes, model: model, perform: perform, drag: layerDrag)
+                    DesignLayerTree(
+                        nodes: nodes, model: model, perform: perform, drag: layerDrag,
+                        limit: Self.shown(of: nodes.count, caughtUp: shownLayers ?? nodes.count, step: step))
                 } else {
                     let notes = Self.emptyNotes(isOpen: model.isOpen)
                     ForEach(notes.indices, id: \.self) { line in
@@ -101,6 +125,23 @@ struct DesignLayersPanel: View {
         .font(SuiteFont.inspectorLabel)
         .accessibilityIdentifier("design.layers")
         .designPasteboardCommands(model, perform)
+        .onAppear { if shownLayers == nil { shownLayers = layerCount } }
+        .task(id: layerCount) {
+            let (count, step) = (layerCount, step)
+            while let shown = shownLayers, shown < count {
+                try? await Task.sleep(for: .milliseconds(8))
+                guard !Task.isCancelled else { return }
+                shownLayers = min(count, shown + step)
+            }
+            if let shown = shownLayers, shown > count { shownLayers = count }
+        }
+    }
+
+    /// The top-level layers the tree lists: all of `count` when at most `step` are new since `caughtUp`,
+    /// so an added layer shows at once; otherwise only `caughtUp`, so a landing file's window lays out
+    /// before any of its rows, which the catch-up task adds `step` a frame from the next one.
+    nonisolated static func shown(of count: Int, caughtUp: Int, step: Int) -> Int {
+        count - caughtUp <= step ? count : caughtUp
     }
 
     /// The rows' drag: the pointer `y` points down row `rowID` moves the line only when it changes,
@@ -266,24 +307,44 @@ private struct DesignLayerTree: View {
     let model: DesignWorkspace
     let perform: DesignPerform
     let drag: DesignLayerDrag
+    /// The frontmost layers the tree lists; nil lists them all.
+    var limit: Int?
+    /// Whether a group around these nodes is hidden or locked, passed down so no row walks the page.
+    var hiddenAbove = false, lockedAbove = false
 
     var body: some View {
-        ForEach(nodes.frontToBack) { node in
+        let shown = nodes.frontToBack.prefix(limit ?? nodes.count)
+        if nodes.allSatisfy(\.children.isEmpty) {
+            ForEach(shown) { node in row(node).tag(node.id) }
+        } else {
+            mixed(shown)
+        }
+    }
+
+    private func mixed(_ shown: ArraySlice<DesignNode>) -> some View {
+        ForEach(shown) { node in
             if node.children.isEmpty {
-                DesignLayerRow(node: node, model: model, perform: perform, drag: drag).tag(node.id)
+                row(node).tag(node.id)
             } else {
                 DisclosureGroup(
                     isExpanded: Binding(
                         get: { model.isExpanded(node.id) }, set: { perform(.setExpanded(node.id, $0)) })
                 ) {
-                    DesignLayerTree(nodes: node.children, model: model, perform: perform, drag: drag)
+                    DesignLayerTree(
+                        nodes: node.children, model: model, perform: perform, drag: drag,
+                        hiddenAbove: hiddenAbove || node.isHidden, lockedAbove: lockedAbove || node.isLocked)
                 } label: {
-                    DesignLayerRow(node: node, model: model, perform: perform, drag: drag, isDisclosureLabel: true)
-                        .tag(node.id)
+                    row(node, isDisclosureLabel: true).tag(node.id)
                 }
                 .tag(node.id)
             }
         }
+    }
+
+    private func row(_ node: DesignNode, isDisclosureLabel: Bool = false) -> DesignLayerRow {
+        DesignLayerRow(
+            node: node, perform: perform, drag: drag, hiddenAbove: hiddenAbove, lockedAbove: lockedAbove,
+            isDisclosureLabel: isDisclosureLabel)
     }
 }
 
@@ -291,15 +352,16 @@ private struct DesignLayerTree: View {
 /// the eye and lock toggles; it drags to reorder and draws the insertion line when it is the target.
 private struct DesignLayerRow: View {
     let node: DesignNode
-    let model: DesignWorkspace
     let perform: DesignPerform
     let drag: DesignLayerDrag
+    /// Whether a group around the node is hidden or locked (the tree passes it down).
+    let hiddenAbove: Bool, lockedAbove: Bool
     /// A group's row: its disclosure flattens the label into one checkbox, so the row combines.
     var isDisclosureLabel = false
 
     var body: some View {
         let id = node.id
-        let toggles = model.layerToggles(id)
+        let toggles = DesignWorkspace.layerToggles(node, hiddenAbove: hiddenAbove, lockedAbove: lockedAbove)
         let line = drag.line?.rowID == id ? drag.line?.position : nil
         SidebarRow(
             SidebarItem(
@@ -316,7 +378,7 @@ private struct DesignLayerRow: View {
         )
         .lineLimit(1)
         .truncationMode(.middle)
-        .foregroundStyle(model.isHiddenInTree(id) ? SuiteColor.textSecondary : Color.primary)
+        .foregroundStyle(hiddenAbove || node.isHidden ? SuiteColor.textSecondary : Color.primary)
         .simultaneousGesture(TapGesture().modifiers(.shift).onEnded { perform(.toggleSelect(id)) })
         .background { if line == .into { RoundedRectangle(cornerRadius: SuiteRadius.row).fill(SuiteColor.dragFill) } }
         .overlay(alignment: line == .above ? .top : .bottom) {

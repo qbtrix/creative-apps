@@ -2,7 +2,8 @@
 // panel shown from the toolbar's History button (DA-3), on the `cards` fixture. After four added
 // rectangles the panel lists "Open" and four steps, the last current, and the History button reads
 // as selected; after one undo the fourth step is no longer current and the third is. Writes
-// design-history-steps-{light,dark}.png and design-history-undo-{light,dark}.png. macOS only.
+// design-history-steps-{light,dark}.png and design-history-undo-{light,dark}.png. In the journeys'
+// 1024-wide window the panel takes the inspector column: design-history-narrow-{light,dark}.png. macOS only.
 import DesignModel
 import SuiteUI
 import SwiftUI
@@ -23,6 +24,20 @@ import Testing
         model.undo()
         #expect(model.historyListing.index == 3 && model.historyListing.steps.count == 4)
         try Self.shoot(model, name: "design-history-undo")
+    }
+
+    /// The journeys' 1024 x 768 window, too narrow for the panel beside the inspector: the panel takes
+    /// the inspector column (#4291).
+    @Test func panelInANarrowWindow() throws {
+        let model = try Self.edited()
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                DesignEditor(model: model, zoom: 0.5)
+                    .modifier(DesignHistoryArea(model: model, jump: { _ in }, restore: { _, _ in }, onNote: { _ in }, shown: true))
+                    .frame(width: 1024, height: 768)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading),
+                name: "design-history-narrow-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
     }
 
     /// The `cards` fixture after four added rectangles.

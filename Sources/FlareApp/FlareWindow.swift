@@ -21,8 +21,9 @@
 // model only FlareCanvas reads at its frame, so a refresh never runs this body.
 // It publishes the menu bar's FlareMenu (FlareCommands.swift): `perform` and
 // `help` for every section 3.4 item, the Undo and Redo step names, Loop and
-// the selection's Edit reasons, and File > Place…'s reason and action; the
-// window takes SVG drops (FlarePlace.swift). The model's file flow follows the
+// the selection's Edit reasons, and File > Place…'s reason and action. Drops
+// are the stage's alone (FlareStage's `suiteFileDrop`, an SVG placed there): a
+// window-wide drop target would shadow it and refuse every other file. The model's file flow follows the
 // suite's recents (the bridge's list, the only one Open Recent reads; #5126).
 import FlareModel
 import SuiteModel
@@ -123,7 +124,6 @@ struct FlareWindow: View, BodyCounted {
             model.takeLive($0)
             followPlayback()
         })
-        .placeDropTarget(formats: model.placeFormats) { files, _ in place(files) }
         .onChange(of: model.isPlaying, initial: true) { syncPlayback() }
         .onDisappear { player.stop() }
         .modifier(RefreshLinkHandoff(player: player))

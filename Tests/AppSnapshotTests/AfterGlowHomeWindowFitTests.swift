@@ -55,10 +55,12 @@ import Testing
         #expect(cell.cancelButtonCell?.accessibilityIdentifier() == "afterglow.home.search.cancel")
         // A toolbar item's field AppKit rebuilt (collapsed, another page) is named on the next window update.
         let item = try #require(window.toolbar?.items.lazy.compactMap { $0 as? NSSearchToolbarItem }.first)
-        let rebuilt = NSSearchField()
-        item.searchField = rebuilt
+        let original = item.searchField
+        item.searchField = NSSearchField()
         window.update()
         #expect(item.searchField.accessibilityIdentifier() == "afterglow.home.search")
+        // SwiftUI casts the item's field to its own class on its next update: put that field back first.
+        item.searchField = original
     }
 }
 #endif

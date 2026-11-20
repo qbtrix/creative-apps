@@ -6,7 +6,7 @@
 // the sidebar's Layers and AI tabs (DesignSidebarTabs), the canvas in
 // EditorDetail with the floating tool palette over its leading edge while a
 // file is open, the timeline slot (DesignTimeline) sliding in under it once the
-// document has keys, and the status line under that (zoom, "Page 1440 × 1024 pt", the last
+// document has keys, and the status line under that (zoom while a file is open, "Page 1440 × 1024 pt", the last
 // message, "2 Layers" with a selection, the save state's slot
 // (DesignSaveStatus), the active tool), and Properties (DesignInspector) in the
 // inspector. Values in, intents out: it reads the workspace and sends every
@@ -21,8 +21,13 @@
 // `suite.controls` (.suiteControl), which DesignWindow's `.suiteProbes()`
 // publishes. The note keeps to one line, cut in the middle, and shows its
 // whole text as help. The window's edited dot follows `model.isDirty`
-// (`.suiteDocumentEdited`), and a file landing in the window marks
-// `progress-shown` on `design.open` in `suite.perf` (P4). In debug builds `bodyRuns` counts its body's runs, so
+// (`.suiteDocumentEdited`). An open marks `open-command` (when it began) and `progress-shown` (its
+// "Opening…" note showing) on `design.open` in `suite.perf`, and `open-landed` once the file shows
+// (P4, QB-L9). A file landing in an empty window lands in four run-loop passes
+// (`landed`): the title, toolbar and status line, then the canvas, then the
+// sidebar, then the inspector and tool box, each part keeping its empty state
+// until its pass, so no pass holds the main thread over 2 refreshes (QB-L12,
+// #6306). In debug builds `bodyRuns` counts its body's runs, so
 // DesignWindowDragTests can prove a canvas drag leaves the editor still.
 import DesignModel
 import SuiteUI
@@ -31,6 +36,8 @@ import SwiftUI
 struct DesignEditor: View, BodyCounted {
     let model: DesignWorkspace
     var documentName: String?
+    /// When the window's last open began (uptime), marked as `open-command` beside `progress-shown`.
+    var openBegan: Double?
     var note: String?
     var zoom = 1.0
     var onViewport: @MainActor (CGSize) -> Void = { _ in }
@@ -39,8 +46,30 @@ struct DesignEditor: View, BodyCounted {
     /// The window's History panel, which the History button toggles.
     @Environment(\.designHistory) private var history
     @Environment(\.suiteReduceMotion) private var reduceMotion
-    /// The window's frame probe: an opened file marks `progress-shown` on `design.open` (files-history P4, QB-L9).
+    /// The window's frame probe: an open marks its progress and landing on `design.open` (files-history P4, QB-L9).
     @Environment(\.suiteProbeRecorder) private var recorder
+    /// How far a file landing in an empty window has come: 0 shows its title, toolbar and status, 1 its
+    /// canvas, 2 its sidebar, 3 its inspector and tool box. Each is its own run-loop pass (QB-L12, #6306).
+    @State private var landed: Int
+
+    init(
+        model: DesignWorkspace, documentName: String? = nil, openBegan: Double? = nil, note: String? = nil,
+        zoom: Double = 1.0, onViewport: @escaping @MainActor (CGSize) -> Void = { _ in },
+        onZoom: @escaping @MainActor (Double) -> Void = { _ in }, perform: @escaping DesignPerform = { _ in }
+    ) {
+        (self.model, self.documentName, self.openBegan, self.note, self.zoom) = (model, documentName, openBegan, note, zoom)
+        (self.onViewport, self.onZoom, self.perform) = (onViewport, onZoom, perform)
+        _landed = State(initialValue: model.isOpen ? 3 : 0)
+    }
+
+    /// The inspector and tool box show the open file's contents.
+    private var showsPanels: Bool { model.isOpen && landed >= 3 }
+    private static let empty = DesignWorkspace()
+    /// `model` once the landing reaches `stage`, an empty workspace (its part's empty state) before.
+    private func staged(_ stage: Int) -> DesignWorkspace { landed >= stage ? model : Self.empty }
+
+    /// The inspector column's width: the editor's panel and its inset on both sides.
+    static let inspectorWidth = SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
 
     /// The commands beside the title, then the trailing ones, in toolbar order.
     private static let documentItems: [DesignToolbarItem] = [.newFile, .open, .save]
@@ -60,14 +89,14 @@ struct DesignEditor: View, BodyCounted {
             subtitle: DesignSaveStatus.subtitle(model),
             documentActions: Self.documentItems.map { action($0) },
             actions: Self.trailingItems.map { action($0) },
-            inspectorWidth: SuiteSize.editorPanelWidth + 2 * SuiteSpacing.m
+            inspectorWidth: Self.inspectorWidth
         ) {
-            DesignSidebarTabs(model: model, perform: perform)
+            DesignSidebarTabs(model: staged(2), perform: perform)
         } content: {
             EditorDetail {
-                DesignCanvas(model: model, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform)
+                DesignCanvas(model: staged(1), zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform)
             } palette: {
-                if model.isOpen {
+                if showsPanels {
                     ToolbarGroup(palette, axis: .vertical, style: .floating)
                 }
             } timeline: {
@@ -75,7 +104,7 @@ struct DesignEditor: View, BodyCounted {
                     DesignTimeline(model: model, perform: perform).transition(.move(edge: .bottom))
                 }
             } status: {
-                ViewerStatusBar(zoom: model.isOpen ? zoom : 0, size: model.statusSizeText) {
+                ViewerStatusBar(zoom: model.isOpen ? zoom : nil, size: model.statusSizeText) {
                     if let note {
                         Text(note)
                             .lineLimit(1)
@@ -95,17 +124,32 @@ struct DesignEditor: View, BodyCounted {
             }
             .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: model.showsTimeline)
         } inspector: {
-            if model.isOpen {
+            if showsPanels {
                 DesignInspector(model: model, perform: perform)
             } else {
                 EmptyStateView("No Selection", systemImage: "square.dashed", message: "Create a file to start designing.")
             }
         }
+        // A landing file's canvas, sidebar, then inspector and tool box each come a frame after the last (QB-L12, #6306).
+        .task(id: model.isOpen) {
+            guard model.isOpen else { landed = 0; return }
+            while landed < 3 {
+                try? await Task.sleep(for: .milliseconds(8))
+                if Task.isCancelled { return }
+                landed += 1
+            }
+        }
         // The close button's edited dot, from the same save state the subtitle reads (files-history FH-4).
         .suiteDocumentEdited(model.isDirty)
+        // An open's "Opening <name>…" shows in this update: the command's start and its progress (P4, QB-L9).
+        .onChange(of: openBegan) {
+            guard let openBegan else { return }
+            recorder?.mark("open-command", series: "design.open", at: openBegan)
+            recorder?.mark("progress-shown", series: "design.open")
+        }
         // ponytail: a Save As to a new name marks again; P4 reads the first mark only.
         .onChange(of: documentName, initial: true) {
-            if documentName != nil { recorder?.mark("progress-shown", series: "design.open") }
+            if documentName != nil { recorder?.mark("open-landed", series: "design.open") }
         }
     }
 

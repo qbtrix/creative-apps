@@ -1,11 +1,12 @@
 // PhotoTransformLiftTests.swift: what a Free Transform drag lifts for the compositor (PhotoTransformLift+Kernel.swift).
 // The draft's layer lifts when plain overs draw it as the canvas does: the Logo under a visible translucent
 // Wash lifts with the Wash as its cover, unless the Logo or the Wash isn't at normal blend; per-pixel
-// adjustments tone the sprite and the base, and a blur keeps the layer down. A lift's pixels are the layer's in the box (premultiplied sRGB), its base is the
+// adjustments and adjustment layers above tone the sprite and the base, and a blur lifts with its margin. A lift's pixels are the layer's in the box (premultiplied sRGB), its base is the
 // workspace without the layer (a selection's keeps the layer outside the box) or the draft, and its placement puts each lifted pixel where the draft's matrix
 // (the one commit resamples through) puts that layer pixel. Runs on Linux and macOS.
 import CoreRaster
 import Foundation
+import SuiteImaging
 import SuiteKernel
 import Testing
 
@@ -49,9 +50,8 @@ import Testing
         #expect(underMultiply.liftKey == nil, "a multiply cover reads what is under it")
     }
 
-    /// Per-pixel adjustments lift with the sprite toned and the base under it toned (#6259); a blur reads
-    /// neighbours across the lift's edge, so it keeps the layer down.
-    @Test func perPixelAdjustmentsLiftTonedAndABlurStaysDown() throws {
+    /// Per-pixel adjustments lift with the sprite toned and the base under it toned (#6259).
+    @Test func perPixelAdjustmentsLiftToned() throws {
         var adjusted = try Self.turned()
         adjusted.adjust(.exposure(1))
         _ = try #require(adjusted.liftKey, "an exposure change lifts")
@@ -64,10 +64,134 @@ import Testing
         grey.adjust(.setEnabled(.invert, true))
         let inverted = try #require(try grey.lifted())
         #expect(Array(inverted.rgba8.prefix(4)) == [0, 255, 255, 255], "the sprite is toned: inverted red is cyan")
+    }
+
+    /// A blur or sharpen on the image lifts (#6259): the lifted pixels carry the blur's margin, clear, on every
+    /// side and blur alone, so the lift's edge is soft, and the placement puts lifted pixel (margin, margin) at the
+    /// layer pixel the box starts on.
+    @Test func aBlurredImageLiftsWithItsMarginBlurred() throws {
         var blurred = try Self.turned()
         blurred.adjust(.blurSigma(2))
         blurred.adjust(.setEnabled(.blur, true))
-        #expect(blurred.liftKey == nil)
+        let margin = blurred.adjustments.readMargin
+        #expect(margin == 6)
+        _ = try #require(blurred.liftKey, "a blurred image lifts")
+        let lift = try #require(try blurred.lifted())
+        #expect((lift.width, lift.height) == (60 + 2 * margin, 40 + 2 * margin))
+        #expect(lift.rgba8[3] == 0, "the margin's corner is clear")
+        let centre = ((lift.height / 2) * lift.width + lift.width / 2) * 4
+        #expect(Array(lift.rgba8[centre..<centre + 4]) == [255, 0, 0, 255], "the Logo's middle stays opaque red")
+        let edge = ((lift.height / 2) * lift.width + margin) * 4
+        #expect(lift.rgba8[edge + 3] > 0 && lift.rgba8[edge + 3] < 255, "the Logo's edge is blurred soft")
+        #expect(lift.base.adjustments == blurred.adjustments, "the picture under the lift is blurred too")
+        let place = try #require(blurred.liftPlacement), plain = try #require(try Self.turned().liftPlacement)
+        let m = Double(margin)
+        #expect(abs(place.a * m + place.c * m + place.tx - plain.tx) < 1e-9, "lifted (margin, margin) is layer (0, 0)")
+        #expect(abs(place.b * m + place.d * m + place.ty - plain.ty) < 1e-9)
+    }
+
+    /// An adjustment layer above lifts (#6259): it tones the lifted pixels and stays in the picture under the lift,
+    /// with no cover; a masked one lifts toned the same, as the canvas tones through no adjustment layer's mask.
+    @Test func anAdjustmentLayerAboveTonesTheLift() throws {
+        var workspace = try PhotoLiveTransformTests.transforming()
+        workspace.cancelTransform()
+        let wash = try #require(workspace.layers.first { $0.name == "Wash" })
+        workspace.toggleVisibility(wash.id)
+        let logo = try #require(workspace.layers.first { $0.name == "Logo" }?.id)
+        workspace.selectLayer(logo)
+        workspace.addAdjustmentLayer(.invert)
+        let invert = try #require(workspace.selectedLayerID)
+        #expect(invert != logo)
+        workspace.selectLayer(logo)
+        try workspace.beginTransform()
+        try workspace.setTransform(TransformBox(box: Rect(minX: 130, minY: 90, maxX: 190, maxY: 130)), name: "Move", drag: "m")
+        _ = try #require(workspace.liftKey, "a layer under an Invert layer lifts")
+        let lift = try #require(try workspace.lifted())
+        #expect(Array(lift.rgba8.prefix(4)) == [0, 255, 255, 255], "the Invert layer tones the sprite: red is cyan")
+        #expect(lift.cover == nil, "an adjustment layer draws no cover")
+        let at = try #require(lift.base.index(of: invert))
+        #expect(lift.base.layers[at].isVisible, "the Invert layer still tones the picture under the lift")
+        var hidden = workspace
+        hidden.toggleVisibility(invert)
+        #expect(hidden.liftSprite != workspace.liftSprite, "hiding the tone makes another sprite")
+        var masked = workspace
+        let at2 = try #require(masked.index(of: invert))
+        masked.layers[at2].hasMask = true
+        masked.masks[invert] = try TiledPixels(width: 300, height: 200)
+        _ = try #require(masked.liftKey, "a masked Invert layer lifts: the canvas tones through no adjustment mask")
+        #expect(try masked.lifted()?.rgba8 == lift.rgba8, "toned as the canvas draws it")
+    }
+
+    /// A styled layer lifts with its plain pixels: the canvas draws no layer style.
+    @Test func aStyledLayerLiftsItsPlainPixels() throws {
+        var styled = try Self.turned()
+        let id = try #require(styled.transformDraft?.layerID)
+        let at = try #require(styled.index(of: id))
+        styled.layers[at].style = LayerStyle(effects: [StyleRules.defaults(.dropShadow)], fillOpacity: 1)
+        _ = try #require(styled.liftKey, "a drop-shadowed layer lifts")
+        #expect(try styled.lifted()?.rgba8 == Self.turned().lifted()?.rgba8, "with the same pixels the canvas draws")
+    }
+
+    /// `turned()` with a mask on the Logo that hides its left half.
+    static func maskedTurned() throws -> PhotoWorkspace {
+        var masked = try turned()
+        let id = try #require(masked.transformDraft?.layerID)
+        let at = try #require(masked.index(of: id))
+        var mask = try PixelBuffer(width: 60, height: 40, fill: RGBA(r: 1, g: 1, b: 1, a: 1))
+        for y in 0..<40 { for x in 0..<30 { try mask.setPixel(x: x, y: y, RGBA(r: 0, g: 0, b: 0, a: 1)) } }
+        masked.layers[at].hasMask = true
+        masked.masks[id] = TiledPixels(mask)
+        return masked
+    }
+
+    /// A masked layer lifts with its mask in the sprite (#6259): the mask moves with the pixels, as commit moves it.
+    @Test func aMaskedLayerLiftsMasked() throws {
+        let masked = try Self.maskedTurned()
+        _ = try #require(masked.liftKey, "a masked layer lifts")
+        let lift = try #require(try masked.lifted())
+        #expect(Array(lift.rgba8.prefix(4)) == [0, 0, 0, 0], "the mask hides the Logo's left half in the sprite")
+        #expect(Array(lift.rgba8[(59 * 4)..<(60 * 4)]) == [255, 0, 0, 255], "its right half lifts red")
+        #expect(try masked.liftSprite != Self.turned().liftSprite, "a masked sprite is another sprite")
+    }
+
+    /// Return takes a layer's mask through the draft with its pixels, as a flip or a turn does: the mask still
+    /// hides the Logo's left half where the turned Logo lands, and stays the layer's size.
+    @Test func commitTakesTheMaskAlong() throws {
+        var masked = try Self.maskedTurned()
+        let id = try #require(masked.transformDraft?.layerID)
+        let m = try #require(try Self.turned().liftPlacement, "Logo pixel to canvas pixel")
+        try masked.commitTransform()
+        let pixels = try #require(masked.pixels[id]), mask = try #require(masked.masks[id])
+        #expect((mask.width, mask.height) == (pixels.width, pixels.height), "the mask is the placed layer's size")
+        let picture = try masked.composite()
+        func shown(_ x: Double, _ y: Double) throws -> RGBA {
+            try picture.pixel(x: Int((m.a * x + m.c * y + m.tx).rounded(.down)), y: Int((m.b * x + m.d * y + m.ty).rounded(.down)))
+        }
+        let right = try shown(45, 20), left = try shown(15, 20)
+        #expect(right.a > 0.9 && right.g < 0.1, "the Logo's right half shows red: \(right)")
+        #expect(left.a < 0.1 || left.g > 0.9, "its left half stays hidden: \(left)")
+    }
+
+    /// A blurring adjustment layer above lifts (#6259) with its margin added to the image's, and blurs the sprite.
+    @Test func aBlurLayerAboveLiftsWithTheSummedMargin() throws {
+        var workspace = try Self.turned()
+        let logo = try #require(workspace.transformDraft?.layerID)
+        let at = try #require(workspace.index(of: logo))
+        var settings = AdjustmentSettings()
+        settings.apply(.blurSigma(1))
+        settings.apply(.setEnabled(.blur, true))
+        var blur = PhotoLayer(id: "blur", name: "Blur 1")
+        blur.kind = .adjustment(settings)
+        workspace.layers.insert(blur, at: at)
+        workspace.adjust(.blurSigma(2))
+        workspace.adjust(.setEnabled(.blur, true))
+        _ = try #require(workspace.liftKey, "a layer under a Blur layer lifts")
+        let lift = try #require(try workspace.lifted())
+        #expect((lift.width, lift.height) == (60 + 2 * 9, 40 + 2 * 9), "3 px for the layer's blur plus 6 px for the image's")
+        let edge = ((lift.height / 2) * lift.width + 9) * 4
+        #expect(lift.rgba8[edge + 3] > 0 && lift.rgba8[edge + 3] < 255, "the Logo's edge is blurred soft")
+        let place = try #require(workspace.liftPlacement), plain = try #require(try Self.turned().liftPlacement)
+        #expect(abs(place.a * 9 + place.c * 9 + place.tx - plain.tx) < 1e-9, "lifted (9, 9) is layer (0, 0)")
     }
 
     @Test func theLiftIsTheLayersPixelsOverTheWorkspaceWithoutIt() throws {

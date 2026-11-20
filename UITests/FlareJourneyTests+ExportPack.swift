@@ -2,9 +2,11 @@
 // docs/blueprints/flare/features/export-pack.md, Journey steps), on `-FlareSample bounce` (550 × 400, 24 fps,
 // 48 frames, scene `scene-1`) with `-FlareExportTo` on this test's own temp folder, so Export writes with no panel.
 // File > Export… shows the MP4 and GIF chips; GIF with Loop forever writes scene-1.gif, 48 frames that loop
-// forever; MP4 writes scene-1.mp4 (an `ftyp` box). Steps 1 to 3 run on the live services (LiveMedia) since FV-7.
-// Step 4 relaunches on `-FlareFixture bounce` (the fakes, 20 ms per frame) because live frames have no pause, so
-// Cancel on a running MP4 is only reachable there; it closes the sheet and leaves the folder empty (the fakes keep
+// forever; MP4 writes scene-1.mp4 (an `ftyp` box), read only once the run says it finished, since the movie writer
+// fills its file while frames arrive. Steps 1 to 3 run on the live services (LiveMedia) since FV-7.
+// Step 4 relaunches on `-FlareFixture bounce` with `-FlareExportFrameDelay 200` (the fakes, 200 ms per frame, so the
+// 48-frame run lasts about 10 s; at their 20 ms default it ended before the click) because live frames have no pause,
+// so Cancel on a running MP4 is only reachable there; it closes the sheet and leaves the folder empty (the fakes keep
 // MP4 bytes in memory, so the empty folder is a floor, not the proof; FakeVideoMedia's cancel log is, in the Model
 // tests). Hovering the GIF chip shows its hover state (#5019). One shot per step, `flare-export-pack-<step>`.
 import ImageIO
@@ -50,17 +52,28 @@ final class FlareExportPackJourneyTests: XCTestCase {
         flare.element("flare.export.format.mp4").click()
         XCTAssertFalse(flare.element("flare.export.loop").exists, "MP4 shows Loop forever")
         mp4Start.click()
+        // The movie writer creates its file when the run starts and fills it frame by frame, so the header is
+        // read only once the run has finished and said so.
+        waitForDone(flare)
+        // A snapshot walk (`Journey.shows`): a `label CONTAINS … OR value CONTAINS …` query on this sheet times out.
+        XCTAssert(flare.shows("Exported scene-1.mp4.", in: flare.app.sheets.firstMatch),
+                  "the MP4 run didn't finish with Exported scene-1.mp4.")
         let mp4 = folder.appending(path: "scene-1.mp4")
-        XCTAssert(Self.waitFor { FileManager.default.fileExists(atPath: mp4.path) }, "Export wrote no scene-1.mp4")
-        let head = (try? Data(contentsOf: mp4)).map { [UInt8]($0.prefix(8)) } ?? []
-        XCTAssertEqual(Array(head.suffix(4)), Array("ftyp".utf8), "scene-1.mp4 has no ftyp box")
+        XCTAssert(FileManager.default.fileExists(atPath: mp4.path), "Export wrote no scene-1.mp4")
+        // The read's error and the file's size go in the message, so a red run says why the header is missing.
+        let read = Result { try Data(contentsOf: mp4) }
+        let head = ((try? read.get()) ?? Data()).prefix(8)
+        let size = (try? FileManager.default.attributesOfItem(atPath: mp4.path))?[.size] ?? "unknown"
+        XCTAssertEqual(Array(head.suffix(4)), Array("ftyp".utf8), "scene-1.mp4 has no ftyp box (size \(size), read \(read))")
         flare.shot("export-pack-3-mp4")
 
         // 4. On the fakes, a fresh folder; MP4; Export; Cancel within the run: the sheet goes, the folder stays empty.
         close(flare)
         let fresh = folder.appending(path: "Fresh")
         try FileManager.default.createDirectory(at: fresh, withIntermediateDirectories: true)
-        let fakes = Journey("Flare", self, arguments: ["-FlareFixture", "bounce", "-FlareExportTo", fresh.path])
+        let fakes = Journey(
+            "Flare", self,
+            arguments: ["-FlareFixture", "bounce", "-FlareExportFrameDelay", "200", "-FlareExportTo", fresh.path])
         XCTAssert(fakes.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened on the fakes")
         let again = openSheet(fakes)
         fakes.element("flare.export.format.mp4").click()
@@ -88,11 +101,16 @@ final class FlareExportPackJourneyTests: XCTestCase {
         return start
     }
 
-    /// Done once the run finished; the sheet goes.
-    @MainActor private func close(_ flare: Journey) {
+    /// Waits for the run to finish: Done shows.
+    @MainActor private func waitForDone(_ flare: Journey) {
         let done = flare.element("flare.export.dismiss")
         XCTAssert(Self.waitFor { done.exists }, "the run never finished (no Done)")
-        done.click()
+    }
+
+    /// Done once the run finished; the sheet goes.
+    @MainActor private func close(_ flare: Journey) {
+        waitForDone(flare)
+        flare.element("flare.export.dismiss").click()
         XCTAssert(flare.app.sheets.firstMatch.waitForNonExistence(timeout: 5), "Done left the sheet open")
     }
 

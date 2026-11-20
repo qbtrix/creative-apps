@@ -1,5 +1,5 @@
 // DesignFileTests.swift: the file codec (DesignFile). A saved document opens
-// again equal; the next id after opening is above every opened id; opening
+// again equal, from its bytes or from the document the window decoded; the next id after opening is above every opened id; opening
 // clears undo; and every refused file (not JSON, a newer version, no pages, a
 // repeated id, children under a shape, a size under 1) throws the right error
 // and leaves the workspace exactly as it was. Reaches the internal load(_:)
@@ -86,6 +86,19 @@ private func sample() throws -> DesignWorkspace {
     workspace.gesture(.rectangle, pt(1, 1), pt(5, 5))
     try workspace.open(data)
     #expect(workspace.pages.count == 2 && !workspace.canUndo)
+}
+
+@Test func aDecodedDocumentOpensAsItsBytesDo() throws {
+    let source = try sample()
+    let data = try source.fileData()
+    let url = URL(fileURLWithPath: "/tmp/sample.design")
+    var fromBytes = DesignWorkspace(), fromDocument = DesignWorkspace()
+    try fromBytes.open(data, at: url)
+    // The window decodes off the main thread, then lands the document.
+    fromDocument.open(try fromDocument.services.filing.decode(data), at: url)
+    #expect(fromDocument.pages == source.pages && fromDocument.pages == fromBytes.pages)
+    #expect(fromDocument.documentURL == url && fromBytes.documentURL == url && fromDocument.time == fromBytes.time)
+    #expect(fromDocument.selectedPageID == fromBytes.selectedPageID && !fromDocument.canUndo)
 }
 
 @Test func savingWithNothingOpenThrows() {

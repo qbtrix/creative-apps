@@ -49,16 +49,11 @@ final class DesignEveryControlJourneyTests: XCTestCase {
             control.click()
             Thread.sleep(forTimeInterval: 0.5)
             let changed = before != Self.state(of: control, design)
-            design.shot("control-\(design.slug(id))", screen: Self.panelIsUp(design))
+            design.shot("control-\(design.slug(id))", screen: design.panelIsUp)
             XCTAssert(changed, "\(id) is enabled but clicking it changed nothing")
             design.press(.escape)
             design.press(character: "z", .command)
         }
-    }
-
-    /// Whether a sheet or dialog (Open's panel, an alert) covers the window now.
-    @MainActor private static func panelIsUp(_ design: Journey) -> Bool {
-        design.app.sheets.firstMatch.exists || design.app.dialogs.firstMatch.exists
     }
 
     /// The `design.*` entries of `suite.controls` as listed now.

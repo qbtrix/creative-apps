@@ -6,7 +6,8 @@
 // building the menu's items reads the document and runs no page body, and the
 // one change the menu reflects (Copy Text, which puts text on the fake
 // pasteboard and turns Paste as Image off) runs at most 2 page bodies
-// (target 1). The journey proves the items show. Nested in BodyCountSuites: it
+// (target 1); the page's pasteboard line must then read text, so a click that
+// never landed can't pass at 0 bodies. The journey proves the items show. Nested in BodyCountSuites: it
 // reads a global body counter. macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -45,6 +46,8 @@ extension BodyCountSuites {
             let step = try await w.measure("copy-as copy text", bodies: bodies) {
                 try await w.ticks(1) { _ in w.click(at: CGPoint(x: copyText.midX, y: copyText.midY)) }
             }
+            // The click reached the page, so the budget above counted a real change.
+            #expect(w.value("suite.gallery.menu-command.pasteboard") == "Pasteboard: text", "Copy Text never ran")
             expectBodies(step, atMost: 2, target: 1)
         }
     }

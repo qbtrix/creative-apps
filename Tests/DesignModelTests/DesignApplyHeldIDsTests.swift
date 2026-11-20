@@ -1,8 +1,10 @@
 // DesignApplyHeldIDsTests.swift: `apply` rebuilds the held-id index only when an
 // edit changes the tree's ids (#2303). `sameIDs` is true exactly when two trees
 // hold the same ids in the same places; a style scrub keeps the index as it was,
-// and an edit that adds layers still brings the index up to date. Runs on Linux
-// and macOS.
+// and an edit that adds layers still brings the index up to date. `swap` updates
+// the index by walking only the child lists that changed (an Option-drag sample on
+// `crowd` rebuilt all 2,000 ids, #6281), and always lands where a full scan does.
+// Runs on Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -42,5 +44,33 @@ import Testing
         let pages = workspace.pages
         let expected = allIDs(pages.flatMap(\.nodes)).union(pages.map(\.id))
         #expect(expected.count > held.count && workspace.held.ids == expected)
+    }
+
+    @Test func swapLandsWhereAFullScanDoes() {
+        let edits: [(String, [DesignNode])] = [
+            ("a layer added inside a frame", [node("f", [node("a"), node("b"), node("d")]), node("c")]),
+            ("a nested layer removed", [node("f", [node("a")]), node("c")]),
+            ("a frame removed with its children", [node("c")]),
+            ("a layer moved out of its frame", [node("f", [node("a")]), node("b"), node("c")]),
+            ("a layer moved into a new group", [node("f", [node("g", [node("a")]), node("b")]), node("c")]),
+            ("an id renamed", [node("f", [node("a"), node("x")]), node("c")]),
+        ]
+        for (name, edited) in edits {
+            var held = DesignHeldIDs()
+            held.scan([DesignPage(id: "p", name: "Page", frameWidth: 10, frameHeight: 10, nodes: tree)])
+            held.swap(tree, for: edited)
+            #expect(held.ids == allIDs(edited).union(["p"]), "\(name)")
+        }
+    }
+
+    @Test func anOptionDragSampleKeepsTheIndexWhole() throws {
+        var workspace = DesignFixtures.crowd
+        workspace.useServices(.live)
+        workspace.selectItem("node-2")
+        workspace.drag(from: DesignPoint(x: 20, y: 20), to: DesignPoint(x: 20, y: 20), modifiers: .option)
+        for x in [30.0, 60, 90] { workspace.drag(from: DesignPoint(x: 20, y: 20), to: DesignPoint(x: x, y: 40), modifiers: .option) }
+        let pages = workspace.pages
+        #expect(workspace.held.ids == allIDs(pages.flatMap(\.nodes)).union(pages.map(\.id)))
+        #expect(workspace.held.ids.count == DesignFixtures.crowd.held.ids.count + 1, "one copy, held once")
     }
 }

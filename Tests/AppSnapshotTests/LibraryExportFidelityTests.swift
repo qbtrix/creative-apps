@@ -1,11 +1,12 @@
 // LibraryExportFidelityTests.swift: QB-V4 on an uncropped photo (packet
 // docs/blueprints/library/features/export.md, EX-4; slice EX-b). An exported
 // file looks like the loupe: (a) `LiveExporter.render` of a 2000 × 1500 file
-// with exposure +0.5 at 1024 equals decode → lanczos3 to the smallest size
-// whose crop covers the plan → `LiveDevelop.render` → lanczos3 to the plan, by
-// hand, bit for bit (develop runs on the export's pixels, as the loupe's runs
-// on its decode, #5992), and is at most 2/255 on any channel from developing
-// at full size; (b) it sits within a mean absolute difference of
+// with exposure +0.5 at 1024 equals a decode two pixels past the smallest
+// size whose crop covers the plan → lanczos3 to that size → `LiveDevelop.render`
+// → lanczos3 to the plan, by hand, bit for bit (develop runs on the export's
+// pixels, as the loupe's runs on its decode, #5992; the decoder shrinks, P8
+// #6205), and is within QB-V2's mean 1/255 (0.56 measured) and at most 8/255
+// on any channel (5 measured) from decoding and developing at full size; (b) it sits within a mean absolute difference of
 // 1/255 of the loupe's `.full` render at 1024; (c) written at quality 95 and
 // decoded, it is at least 40 dB PSNR from (a), the file starts `FF D8` and is
 // tagged sRGB, and a second write to the same name throws `writeFailed` and
@@ -107,15 +108,16 @@ import UniformTypeIdentifiers
         return (photo, try #require(plan.items.first))
     }
 
-    /// Decode at full size → lanczos3 to the smallest size whose crop covers the item's (`fullSize` skips it)
-    /// → develop → lanczos3 to the item's size, by hand.
+    /// Decode two pixels past the smallest size whose crop covers the item's → lanczos3 to that size → develop
+    /// → lanczos3 to the item's size, by hand; `fullSize` decodes and develops at full size instead.
     private func byHand(_ photo: PhotoItem, at item: ExportPlan.Item, fullSize: Bool = false) async throws -> DisplayImage {
         let path = try #require(photo.path)
-        let decoded = try await decoder.decode(path: path, maxLongSide: nil)
-        var buffer = try PixelBuffer(rgba8: decoded.rgba8, width: decoded.size.width, height: decoded.size.height)
         let side = try shrunkSide(photo, at: item)
-        if !fullSize, side < decoded.size.longSide {
-            let shrunk = decoded.size.fitting(longSide: side)
+        let near = !fullSize && side + 2 < photo.pixelSize.longSide
+        let decoded = try await decoder.decode(path: path, maxLongSide: near ? side + 2 : nil)
+        var buffer = try PixelBuffer(rgba8: decoded.rgba8, width: decoded.size.width, height: decoded.size.height)
+        if near {
+            let shrunk = photo.pixelSize.fitting(longSide: side)
             buffer = try buffer.resized(width: shrunk.width, height: shrunk.height, filter: .lanczos3)
         }
         var developed = try develop.render(buffer, settings: photo.develop)
@@ -176,8 +178,9 @@ import UniformTypeIdentifiers
         return mse == 0 ? .infinity : 10 * log10(255 * 255 / mse)
     }
 
-    /// (a) The exporter's render is the hand-made pipeline, bit for bit, and develop's order doesn't show:
-    /// developing at full size instead is at most 2/255 on any channel (1 measured on 3 of 2.4 M channels).
+    /// (a) The exporter's render is the hand-made pipeline, bit for bit, and neither the decoder's shrink nor
+    /// develop's order shows: decoding and developing at full size instead is 0.56/255 apart on average and
+    /// 5/255 at most on one channel (1/255 at most before P8, #6205, moved the big shrink into the decoder).
     @Test func renderEqualsTheHandMadePipeline() async throws {
         let photo = try writePhoto(in: try folder())
         let exporter = LiveExporter(decoder: decoder, develop: develop)
@@ -186,8 +189,10 @@ import UniformTypeIdentifiers
         #expect(rendered.size == PixelSize(width: 1024, height: 768))
         #expect(rendered.size == expected.size)
         #expect(rendered.rgba8 == expected.rgba8, "the export's pixels differ from decode → shrink → develop")
-        let fullSize = maxDifference(rendered, try await byHand(photo, at: item, fullSize: true))
-        #expect(fullSize <= 2, "the export is \(fullSize)/255 from developing at full size on one channel")
+        let full = try await byHand(photo, at: item, fullSize: true)
+        let (mean, most) = (meanDifference(rendered, full), maxDifference(rendered, full))
+        #expect(mean <= 1, "the export is \(mean)/255 from developing at full size on average")
+        #expect(most <= 8, "the export is \(most)/255 from developing at full size on one channel")
     }
 
     /// (b) The export at 1024 looks like the loupe's `.full` render at 1024.

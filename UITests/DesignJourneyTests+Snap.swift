@@ -187,8 +187,10 @@ final class DesignSnapJourneyTests: XCTestCase {
         design.app.menuBars.firstMatch.menuBarItems["View"].click()
     }
 
-    /// Whether a menu item shows its checkmark: its value reads 1 (Unverified API).
+    /// Whether a menu item shows its checkmark: it reads selected, or its mark ("✓", 1) in its value
+    /// (SuiteJourneyTests' rate menu reads its check the same way).
     @MainActor private func isChecked(_ item: XCUIElement) -> Bool {
+        if item.isSelected { return true }
         if let number = item.value as? NSNumber { return number.boolValue }
         let text = item.value as? String ?? ""
         return text == "1" || text == "✓"
@@ -237,12 +239,7 @@ final class DesignSnapJourneyTests: XCTestCase {
 
     /// The inspector's field `name` (its spoken value, "200 points") passes `condition` within five seconds.
     @MainActor private func expectField(_ design: Journey, _ name: String, _ step: String, _ condition: (Double) -> Bool) {
-        let field = design.element("suite.inspector").descendants(matching: .any)
-            .matching(NSPredicate(format: "label == %@", name)).firstMatch
-        let read = { () -> Double? in
-            guard field.exists, let spoken = field.value as? String, let word = spoken.split(separator: " ").first else { return nil }
-            return Double(word.filter { $0.isNumber || $0 == "." || $0 == "-" })
-        }
+        let read = { design.inspectorNumber(name) }
         XCTAssert(Self.poll { read().map(condition) == true }, "after \(step) the inspector's \(name) reads \(String(describing: read()))")
     }
 

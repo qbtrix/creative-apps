@@ -1,6 +1,7 @@
 // SuiteWindow.swift: the one window shell every app uses. A NavigationSplitView
 // with a sidebar list of SidebarSections, the app's content as the detail, and a
-// trailing inspector the user can hide (toolbar button, Option-Command-I).
+// trailing inspector the user can hide (toolbar button, Option-Command-I). A side panel
+// too wide to sit beside the columns takes the inspector column's place (SidePanel.swift).
 // The window chrome (toolbar, sidebar, inspector) is system Liquid Glass; the
 // content stays flat. Apps pass state in and get selection out through
 // `onSelect`, `onToggle`, `onMove` and `onRename`; a nil closure turns that
@@ -76,6 +77,8 @@ public struct SuiteWindow<Sidebar: View, Content: View, Inspector: View>: View {
     @Environment(\.suiteSwitcher) private var switcher
     /// True while a `.searchable` field applied to this window is open (#3357).
     @Environment(\.isSearching) private var isSearching
+    /// A side panel in the inspector column's place while set (SidePanel.swift).
+    @Environment(\.suiteInspectorSwap) private var swap
 }
 
 extension SuiteWindow where Sidebar == SuiteSidebarList {
@@ -231,7 +234,7 @@ extension SuiteWindow {
         }
         // The window opens at its ideal size: the launch size the column tokens add up to.
         .frame(
-            minWidth: SuiteSize.sidebarWidth.ideal + SuiteSize.contentMinimum.width + inspectorColumn.ideal,
+            minWidth: SuiteSize.windowMinimumWidth(inspectorWidth: inspectorWidth),
             idealWidth: SuiteSize.sidebarWidth.ideal + SuiteSize.contentIdealWidth + inspectorColumn.ideal,
             minHeight: SuiteSize.windowMinimum.height, idealHeight: SuiteSize.windowLaunch.height)
     }
@@ -239,6 +242,11 @@ extension SuiteWindow {
     /// The app's expansion for the sidebar's groups; nil when the window was given neither part (LL-9).
     private var sidebarExpansion: SidebarExpansion? {
         expanded == nil && onExpand == nil ? nil : SidebarExpansion(expanded: expanded, onExpand: onExpand)
+    }
+
+    /// Whether the inspector column shows: the user's choice, or always while a side panel holds it.
+    private var inspectorShown: Binding<Bool> {
+        Binding(get: { showsInspector || swap != nil }, set: { showsInspector = $0 })
     }
 
     /// The inspector column's widths: `inspectorWidth` as minimum and ideal, else the token.
@@ -271,12 +279,16 @@ extension SuiteWindow {
                     idealWidth: SuiteSize.contentIdealWidth - SuiteSize.detailInspectorAllowance,
                     maxWidth: .infinity, minHeight: SuiteSize.contentMinimum.height, maxHeight: .infinity)
                 .tint(SuiteColor.accent)
-                .inspector(isPresented: $showsInspector) {
+                .inspector(isPresented: inspectorShown) {
                     // Its own hosting view re-reads its minimum and maximum size on every update; this
                     // frame answers both from the column widths, so a row's layout change (one Rotation
                     // scrub step) doesn't measure the whole scrolling inspector again (#6229).
                     InspectorFrame(minWidth: inspectorColumn.min, idealWidth: inspectorColumn.ideal) {
-                        inspector.padding(SuiteSpacing.m)
+                        if let swap {
+                            swap.content.padding(SuiteSpacing.m)
+                        } else {
+                            inspector.padding(SuiteSpacing.m)
+                        }
                     }
                     .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("suite.inspector")
@@ -310,7 +322,7 @@ extension SuiteWindow {
                 let fit = AppSwitcher.toolbarFit(
                     windowWidth: windowWidth, itemCount: state.items.count,
                     documentActions: documentActions.map { toolbarItem($0) }, actions: actions.map { toolbarItem($0) },
-                    inspectorWidth: showsInspector ? inspectorColumn.ideal : 0, searching: isSearching)
+                    inspectorWidth: inspectorShown.wrappedValue ? inspectorColumn.ideal : 0, searching: isSearching)
                 AppSwitcher(
                     items: state.shownItems(everyItem: fit.showsEveryItem), current: state.current,
                     spacing: fit.spacing, onSelect: state.onSelect)

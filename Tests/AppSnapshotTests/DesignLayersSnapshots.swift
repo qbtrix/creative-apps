@@ -207,6 +207,16 @@ extension BodyCountSuites {
             }
         }
 
+        /// A landing file lists none of its many top-level layers in the landing's frame, then a frame's step at
+        /// a time; a few new ones show at once (#6199 P4).
+        @Test func aLandingFileListsAFewLayersAFrame() {
+            #expect(DesignLayersPanel.shown(of: 40, caughtUp: 0, step: 4) == 0)
+            #expect(DesignLayersPanel.shown(of: 40, caughtUp: 8, step: 4) == 8)
+            #expect(DesignLayersPanel.shown(of: 40, caughtUp: 36, step: 4) == 40)
+            #expect(DesignLayersPanel.shown(of: 41, caughtUp: 40, step: 4) == 41)
+            #expect(DesignLayersPanel.shown(of: 3, caughtUp: 40, step: 4) == 3)
+        }
+
         static let size = CGSize(width: 1440, height: 900)
 
         /// The hosted window's view as a 1440 × 900 PNG in .build/snapshots, as `snapshot` writes one.

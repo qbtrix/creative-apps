@@ -107,7 +107,9 @@ struct FlareExportOptionRows: View {
                 }
                 .accessibilityIdentifier("flare.export.fps")
                 if options.format == .gif {
-                    InspectorRow("Loop") {
+                    // No row label: the checkbox carries its title, so a finished run's dimmed sheet has no
+                    // stray faint text outside a disabled control (like Transparent background below).
+                    InspectorRow("") {
                         Toggle("Loop forever", isOn: Binding(get: { options.loop }, set: { perform(.export(.setLoop($0))) }))
                             .toggleStyle(.checkbox)
                             .accessibilityIdentifier("flare.export.loop")

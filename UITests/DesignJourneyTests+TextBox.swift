@@ -64,7 +64,12 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         let widthBefore = frameValue(design, "Width")
         let size = sizeField(design)
         XCTAssert(size.waitForExistence(timeout: 5), "no text Size field in the inspector")
+        // At 768 high the Text rows sit below the inspector's fold: scrolled into reach, then typed into the
+        // scrub's own field once the click has opened it.
+        design.reveal(size)
         size.click()
+        XCTAssert(design.element("suite.inspector").textFields["suite.scrub.typing"].waitForExistence(timeout: 5),
+                  "clicking Size opened no typing field")
         design.app.typeKey("a", modifierFlags: .command)
         design.app.typeText("48\r")
         XCTAssert(design.app.buttons["Undo Change Text Style"].waitForExistence(timeout: 5), "the Size field made no undo step")
@@ -125,14 +130,12 @@ final class DesignTextBoxJourneyTests: XCTestCase {
             .matching(NSPredicate(format: "label == %@", "Size")).firstMatch
     }
 
-    /// The number a Frame field (Width, Height) reads, from its spoken value ("1,440 points").
+    /// The number a Frame field (Width, Height) reads (Journey.inspectorNumber).
     @MainActor private func frameValue(_ design: Journey, _ name: String) -> Double? {
         let field = design.element("suite.inspector").descendants(matching: .any)
             .matching(NSPredicate(format: "label == %@", name)).firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "no \(name) field in the inspector")
-        let spoken = field.value as? String ?? ""
-        guard let word = spoken.split(separator: " ").first else { return nil }
-        return Double(word.filter { character in character.isNumber || character == "." || character == "-" })
+        return design.inspectorNumber(name)
     }
 
     /// Whether `element` is gone within five seconds.

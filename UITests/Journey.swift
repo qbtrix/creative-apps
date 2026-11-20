@@ -61,6 +61,9 @@ struct Journey {
         }
     }
 
+    /// Whether a sheet or dialog (Open's panel, an alert) covers the window now.
+    var panelIsUp: Bool { app.sheets.firstMatch.exists || app.dialogs.firstMatch.exists }
+
     /// Attaches the whole window as "<app>-<step>" and audits it; `screen`
     /// takes the whole screen instead, for a menu that hangs outside the
     /// window, and skips the audit (the menu covers the window's pixels).
@@ -200,6 +203,50 @@ struct Journey {
         let all = app.descendants(matching: .any)
         guard identifier.count > 128 else { return all[identifier].firstMatch }
         return all.matching(NSPredicate(format: "identifier == %@", identifier)).firstMatch
+    }
+
+    /// The number the inspector's field labelled `name` reads, or nil when there is no such field.
+    /// A SuiteUI ScrubField is a slider, so macOS gives its value as a number (#4822); a text
+    /// field spells it out ("1,440 points"). Read inspector numbers here, not with `as? String`.
+    func inspectorNumber(_ name: String) -> Double? {
+        let field = element("suite.inspector").descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", name)).firstMatch
+        guard field.exists else { return nil }
+        if let number = field.value as? NSNumber { return number.doubleValue }
+        guard let word = (field.value as? String)?.split(separator: " ").first else { return nil }
+        return Double(word.filter { $0.isNumber || $0 == "." || $0 == "-" })
+    }
+
+    /// The text `element` shows: its label, else its value. A bare SwiftUI Text (a status pill) reaches XCUITest
+    /// with an empty label and its text as the value.
+    func shownText(_ element: XCUIElement) -> String {
+        element.label.isEmpty ? (element.value as? String) ?? "" : element.label
+    }
+
+    /// Whether `root` shows `text` in some element's label or text value within `timeout` seconds, read from one
+    /// snapshot of `root` per try. A `label CONTAINS … OR value CONTAINS …` query asks XCUITest for every element's
+    /// value and can time out while it evaluates (Flare's export sheet, run 42954267514); a walk can't.
+    func shows(_ text: String, in root: XCUIElement, timeout: TimeInterval = 10) -> Bool {
+        func holds(_ node: any XCUIElementSnapshot) -> Bool {
+            node.label.contains(text) || (node.value as? String)?.contains(text) == true || node.children.contains(where: holds)
+        }
+        let deadline = Date(timeIntervalSinceNow: timeout)
+        repeat {
+            if let snapshot = try? root.snapshot(), holds(snapshot) { return true }
+            Thread.sleep(forTimeInterval: 0.3)
+        } while Date() < deadline
+        return false
+    }
+
+    /// Clicks the field or scrub bar `identifier` (a bar opens its typing field on a click), selects its text,
+    /// types `text` and presses Return to commit it.
+    func typeValue(_ text: String, into identifier: String) {
+        let field = element(identifier)
+        XCTAssert(field.waitForExistence(timeout: 5), "no \(identifier) to type into")
+        field.click()
+        app.typeKey("a", modifierFlags: .command)
+        app.typeText(text)
+        app.typeKey(.return, modifierFlags: [])
     }
 
     /// "New Composition…" becomes "new-composition".

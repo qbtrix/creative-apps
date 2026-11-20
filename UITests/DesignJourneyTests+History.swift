@@ -94,7 +94,11 @@ final class DesignHistoryJourneyTests: XCTestCase {
         let prompt = design.app.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", offer, offer)).firstMatch
         XCTAssert(prompt.waitForExistence(timeout: 30), "the relaunch didn't offer \(offer)")
         design.shot("history-recovery-offer")
-        design.app.buttons["suite.recovery.restore"].firstMatch.click()
+        // SwiftUI drops an alert button's accessibility identifier, so Restore is found by its title too.
+        let restore = design.app.buttons.matching(
+            NSPredicate(format: "identifier == %@ OR label == %@", "suite.recovery.restore", "Restore")).firstMatch
+        XCTAssert(restore.waitForExistence(timeout: 5), "the offer has no Restore (suite.recovery.restore)")
+        restore.click()
         XCTAssert(waitUntil(timeout: 10) { self.saveState(design) == "Edited" }, "the restored card reads \(saveState(design)), not Edited")
         XCTAssert(design.element("suite.canvas").exists, "Restore showed no canvas")
         design.shot("history-restored")

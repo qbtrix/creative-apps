@@ -1,7 +1,7 @@
 // AreaToolOptions.swift (area-selection AR-7): the area tools' options bar: shape and mode chips, Feather (0...250 px)
 // and, for the wand, Tolerance (0...255), Contiguous and All Layers. Each control names the `AreaSelectCommands`
-// command it feeds (`AreaControl.command`). While Shift or Option is held the mode chip shows the keys' mode, as a drag
-// uses it. The view keeps only the held keys; the host owns the options and gets each change with its control.
+// command it feeds (`AreaControl.command`); Feather shows one decimal, Tolerance whole levels (`AreaControl.decimals`).
+// While Shift or Option is held the mode chip shows the keys' mode, as a drag uses it. The view keeps only the held keys; the host owns the options and gets each change with its control.
 // Identifiers: `suite.area.tool-<shape>`, `suite.area.mode-<mode>` and `suite.area.<control>`.
 import SuiteKernel
 import SwiftUI
@@ -43,6 +43,9 @@ public enum AreaControl: String, CaseIterable, Hashable, Sendable {
         tool == .wand ? allCases : [.tool, .mode, .feather]
     }
 
+    /// The places a number control shows: one for Feather's pixels, none for Tolerance's whole levels.
+    public var decimals: Int { self == .tolerance ? 0 : 1 }
+
     static let feathers: ClosedRange<Double> = 0...250, tolerances: ClosedRange<Double> = 0...255
 }
 
@@ -77,12 +80,14 @@ public struct AreaToolOptions: View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
             ChoiceChips(options: Self.tools, selected: options.tool) { tool in send(.tool) { $0.tool = tool } }
             ChoiceChips(options: Self.modes, selected: Self.shownMode(options.mode, held: held)) { mode in send(.mode) { $0.mode = mode } }
-            StudioScrubRow(label: "Feather", value: options.feather, range: AreaControl.feathers, step: 1, unit: "px") { radius in
+            InspectorSliderRow("Feather", value: options.feather, in: AreaControl.feathers, step: 1, unit: "px",
+                               decimals: AreaControl.feather.decimals) { radius in
                 send(.feather) { $0.feather = radius }
             }
             .accessibilityIdentifier(AreaControl.feather.identifier)
             if shown.contains(.tolerance) {
-                StudioScrubRow(label: "Tolerance", value: options.tolerance, range: AreaControl.tolerances, step: 1) { tolerance in
+                InspectorSliderRow("Tolerance", value: options.tolerance, in: AreaControl.tolerances, step: 1,
+                                   decimals: AreaControl.tolerance.decimals) { tolerance in
                     send(.tolerance) { $0.tolerance = tolerance }
                 }
                 .accessibilityIdentifier(AreaControl.tolerance.identifier)

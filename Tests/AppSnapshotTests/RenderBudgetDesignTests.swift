@@ -11,7 +11,15 @@
 // Option held through `DesignModifiers.held` since a test's events can't hold it, must end as one copy. Before each drag the window settles until its body count stops
 // moving (BodyCountSuites' `settle(untilStable:)`), so the bodies counted are
 // the drag's alone, not the open's late layouts on a slow runner (#1974). Nested in BodyCountSuites, as every suite that reads a body
-// counter is. macOS only.
+// counter is. `openCrowdLands` and `timing` also open crowd.design into an
+// empty window (files-history P4): the "Opening <name>…" note shows before the
+// file lands, and the main thread's longest run-loop pass (RenderStep.busy),
+// p95 over 20 opens interleaved with a one-layer file's, stays in budget
+// (QB-L12's target is 2 refreshes). Only `openCrowdLands` reads the note: an
+// accessibility walk would land in the passes `timing` measures. After the
+// landing the inspector and the tool box, which land in the last of its
+// passes, both show (`openCrowdLands`). `openFlatLands` and `timing` do the
+// same for a page of 5,000 top-level layers. macOS only.
 #if canImport(AppKit)
 import AppKit
 import DesignModel
@@ -19,6 +27,7 @@ import SwiftUI
 import Testing
 
 @testable import DesignApp
+@testable import SuiteUI
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetDesignTests {
@@ -36,7 +45,7 @@ extension BodyCountSuites {
             #endif
         }
 
-        @Test(.timeLimit(.minutes(2))) func timing() async throws {
+        @Test(.timeLimit(.minutes(10))) func timing() async throws {
             let (move, marquee) = try await Self.run()
             // Target: a drag sample fits one 120 Hz frame.
             expectP95(move.step, atMost: 6, target: 8.3)  // dev: 4.1 ms
@@ -44,6 +53,140 @@ extension BodyCountSuites {
             let option = try await Self.optionDrag()
             // Real time: p95 within one 120 Hz frame, 8 ms. Release: 6.6-7.75 ms at load 12, its press copies once.
             expectP95(option, atMost: 8, target: 8.3)
+            // #6281: the press and the copy's first sample each fit two 60 Hz frames; the press on the
+            // selection is quiet, so the window doesn't run until mouse-up.
+            #expect(option.opening <= 33, "\(option) (budget 33 ms for the press and the first sample, #6281)")
+            // files-history P4: opening crowd.design says "Opening…" in the command's own step (QB-L9, 100 ms)
+            // and no step of the open, its landing included, blocks the main thread over 3 refreshes.
+            let open = try await Self.openCrowd()
+            #expect(open.landed, "crowd.design never landed: \(open.step)")
+            #expect(open.step.opening <= 100, "\(open.step) (QB-L9: \"Opening…\" shows within 100 ms of the command)")
+            // Release at load 5: slowest 31.7-45.6 ms, landing layout 26-38 ms (sync open was 207-338 ms).
+            // Budget 3 refreshes, 50 ms; QB-L12's 2 refreshes, 33 ms, is the target (#6306).
+            #expect(open.step.slowest <= 50, "\(open.step) (budget 50 ms, QB-L12 target 33 ms, #6306)")
+            #expect(open.landing <= 50, "the landing's longest layout took \(open.landing) ms (budget 50 ms, target 33 ms, #6306)")
+            // QB-L12 counts the main thread's longest run-loop pass (RenderStep.busy); a tick's lateness has a
+            // 30-100 ms floor with no window at all, so `stall` judges nothing here. One-layer and crowd opens
+            // interleave so both see the same load: the window's own empty-to-open landing, which DesignEditor
+            // splits into four passes (title and status, canvas, sidebar, inspector), and the layers' rows on top.
+            // Release at load 9, 20 opens: one layer p50 25 ms, p95 83 ms; crowd p50 38 ms, p95 106 ms (one landing pass
+            // was 51/107 and 57/121). The p95s are the box's load spikes (153 ms in both lists at once).
+            var crowds = [open.step.busy], plain: [Double] = []
+            for i in 0..<20 {
+                plain.append(try await Self.openOneLayer().step.busy)
+                if i > 0 { crowds.append(try await Self.openCrowd().step.busy) }
+            }
+            let p95 = SuiteFrameProbe.nearestRank(crowds.sorted(), 0.95) ?? 0
+            let plainP95 = SuiteFrameProbe.nearestRank(plain.sorted(), 0.95) ?? 0
+            print("design open busy: one layer \(plain) p95 \(plainP95), crowd \(crowds) p95 \(p95)")
+            #expect(plainP95 <= 100, "a one-layer file's open held the main thread \(plain) ms in one pass (budget p95 100 ms over 20 opens, QB-L12 target 33 ms, #6306)")
+            #expect(p95 <= 120, "crowd.design's open held the main thread \(crowds) ms in one pass (budget p95 120 ms over 20 opens, QB-L12 target 33 ms, #6306)")
+            // A flat file listing its 5,000 top-level layers, 16 a frame, must not stall for seconds, as a ForEach of
+            // mixed rows did (release: 4.2 s for 2,000, 24.5 s for 5,000, growing with the square). Release at load 9: p50
+            // 63 ms, p95 107 ms.
+            var flats: [Double] = []
+            for _ in 0..<20 {
+                let flat = try await Self.openFlat()
+                #expect(flat.landed, "flat.design never landed: \(flat.step)")
+                flats.append(flat.step.busy)
+            }
+            let flatP95 = SuiteFrameProbe.nearestRank(flats.sorted(), 0.95) ?? 0
+            print("design open busy: flat \(flats) p95 \(flatP95)")
+            #expect(flatP95 <= 150, "opening 5,000 top-level layers held the main thread \(flats) ms in one pass (budget p95 150 ms over 20 opens, target 33 ms, #6306)")
+        }
+
+        /// files-history P4 cold: the first open in a process, before any document view has run (Finder
+        /// handing a file to an app that just launched). `timing`'s opens all run warm. Cold only when it is
+        /// the process's first Design open, so it runs alone: `--filter RenderBudgetDesignTests/coldOpen`.
+        /// Release, 13 processes each: median 122 ms before DesignWindow warmed the symbols, 73 ms after.
+        /// 11-14, 15 processes at load 4-5: median 58 ms, 4 over budget (120.5, 152, 270, 355 ms). A sample of the
+        /// slow ones shows RenderBox's first Metal submits waiting on the GPU queue, not Design code (#6199). With the
+        /// empty canvas's Canvas warm-up (DesignCanvas.renderWarmup), interleaved A/B at load 4-6: 3 of 50 over (median 50 ms, p95 121 ms)
+        /// against 10 of 45 without (median 66 ms, p95 402 ms); the rest of the tail is #6354.
+        @Test(.timeLimit(.minutes(2)))
+        func coldOpen() async throws {
+            let open = try await Self.openCrowd()
+            #expect(open.landed, "crowd.design never landed: \(open.step)")
+            print("design cold open busy: \(open.step.busy) ms")
+            #expect(open.step.busy <= 120, "the first crowd.design open in the process held the main thread \(open.step.busy) ms in one pass (budget 120 ms, as timing's warm p95; QB-L12 target 33 ms, #6306)")
+        }
+
+        /// files-history P4 in the real window (QD-S11, QB-L9): an empty window opens `crowd.design` (2,000 layers)
+        /// as Finder or Recents hands it over. Before it lands the status line shows "Opening <name>…";
+        /// the file is read and decoded off the main thread and lands a few ticks later with all its pages.
+        @Test(.timeLimit(.minutes(2))) func openCrowdLands() async throws {
+            #if DEBUG
+            let open = try await Self.openCrowd(readsNote: true)
+            #expect(open.progress?.hasPrefix("Opening crowd-") == true, "the open showed \(open.progress ?? "no note")")
+            #expect(open.landed, "crowd.design never landed in the window: \(open.step)")
+            #expect(open.panels, "the inspector or the tool box never showed after the landing")
+            #endif
+        }
+
+        /// Opens crowd.design in an empty window, one tick per 1/120 s until it lands (at most 2 s): the steps,
+        /// the first status note shown before the landing, whether the file landed, and the longest layout pass.
+        static func openCrowd(readsNote: Bool = false) async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool) {
+            // Ticked until the tree has listed crowd's 40 frames, one a frame.
+            try await open(DesignFixtures.crowd, as: "crowd", "crowd.design (2,000 layers)", settle: 40 / DesignLayersPanel.layersPerFrame(leavesOnly: false) + 24,
+                           readsNote: readsNote)
+        }
+
+        /// Opens a file of one layer: the window's own landing, with no layer list to grow.
+        static func openOneLayer() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool) {
+            try await open(DesignFixtures.flat(1), as: "one", "one.design (1 layer)")
+        }
+
+        /// files-history P4 on a file whose layers all sit at the top of the page (the re-audit's flat file):
+        /// every layer is a top-level row of the layer tree, and the file lands in the window. `timing` gates its stall.
+        @Test(.timeLimit(.minutes(2))) func openFlatLands() async throws {
+            let open = try await Self.openFlat()
+            #expect(open.landed, "flat.design never landed: \(open.step)")
+        }
+
+        /// Opens a flat 5,000-layer file, ticked until the tree has listed every layer.
+        static func openFlat() async throws -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool) {
+            let count = 5_000
+            let settle = count / DesignLayersPanel.layersPerFrame(leavesOnly: true) + 24
+            return try await open(DesignFixtures.flat(count), as: "flat", "flat.design (5,000 top-level layers)", settle: settle)
+        }
+
+        /// Opens `workspace`'s file in an empty window, one tick per 1/120 s until it lands (at most 2 s), then
+        /// `settle` more ticks. `readsNote` reads the status note while it waits: an accessibility walk on the main
+        /// thread, which lands in the measured passes, so only a test that checks the note asks for it.
+        static func open(_ workspace: DesignWorkspace, as name: String, _ title: String, settle: Int = 24, readsNote: Bool = false) async throws
+            -> (step: RenderStep, progress: String?, landed: Bool, landing: Double, panels: Bool)
+        {
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("\(name)-\(UUID()).design")
+            try workspace.fileData().write(to: file)
+            defer { try? FileManager.default.removeItem(at: file) }
+            DesignWindow.openFile = nil
+            DesignWindow.lastWorkspace = nil
+            let w = RenderBudgetWindow(DesignWindow())
+            defer { w.close() }
+            try await w.settle(500)
+            let open = try #require(DesignWindow.openFile, "the window never started")
+            // lastWorkspace is a debug hook; the release timing builds with -DDEBUG to read it too.
+            let landed = { DesignWindow.lastWorkspace?.documentURL == file }
+            var progress: String?
+            w.host.longestLayout = 0
+            let step = try await w.measure("design open \(title)", bodies: { nil }) {
+                try await w.ticks(1) { _ in open(file) }
+                var waits = 0
+                while !landed(), waits < 240 {
+                    if readsNote, progress == nil { progress = w.value(DesignControlID.statusNote) }  // a Text's words are its value
+                    waits += 1
+                    try await w.ticks(1) { _ in }
+                }
+                // The landing's own layout runs on the tick after the document changes, and the layer tree
+                // lists a few top-level layers a frame after it (DesignLayersPanel.layersPerFrame), so a caller settles that long.
+                try await w.ticks(settle) { _ in }
+            }
+            print("design open \(title): longest layout \(w.host.longestLayout) ms")
+            // The inspector and the tool box land a frame after the canvas (DesignEditor's panelsLanded); by now both show.
+            let ids = Set(w.identifiers())
+            let panels = ids.contains("design.properties") && DesignTool.allCases.allSatisfy { ids.contains(DesignControlID.tool($0)) }
+            return (step, progress, landed() && DesignWindow.lastWorkspace?.pages == workspace.pages,
+                    w.host.longestLayout, panels)
         }
 
         /// A 120-sample Option-drag of Rectangle 1 on `crowd` in the real window: the press copies it, the

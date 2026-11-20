@@ -69,8 +69,11 @@ struct GalleryMenuCommandPage: View, BodyCounted {
     #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
     #endif
-    @State private var doc = GalleryClipDocument()
+    @State private var doc: GalleryClipDocument
     @State private var log: [String] = []
+
+    /// `doc` is the page's starting document; the snapshots start it with text on the pasteboard.
+    init(doc: GalleryClipDocument = GalleryClipDocument()) { _doc = State(initialValue: doc) }
 
     var body: some View {
         #if DEBUG

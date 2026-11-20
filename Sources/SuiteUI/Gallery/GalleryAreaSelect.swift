@@ -1,6 +1,7 @@
 // GalleryAreaSelect.swift (area-selection AR-7): the gallery's `area-select` page, AreaToolOptions over AreaAnts on a
 // local AreaSelectTarget fake: a drag runs the tool's `select.<shape>` in the shown mode, Feather `select.feather`, and
-// each command logs a line. `GalleryAreaSelectSheet` is the snapshot: the bar in each mode and the ants on a lasso.
+// each command logs a line. `GalleryAreaSelectSheet` is the snapshot: the bar in each mode and the ants on a lasso. The
+// white artboard carries an outline so it reads on the light page.
 import AppKit
 import Observation
 import SuiteKernel
@@ -88,7 +89,7 @@ struct GalleryAreaSelectPage: View, BodyCounted {
             }
             SuiteColor.artboard.frame(width: SuiteSize.contentMinimum.width, height: SuiteSize.contentMinimum.height)
                 .overlay(alignment: .topLeading) { GalleryAreaAntsLayer(outline: board.outline, draft: draft) }
-                .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+                .galleryAreaArtboard()
                 .contentShape(.rect)
                 .gesture(DragGesture(minimumDistance: 0)
                     .onChanged { draft.add(Point(x: $0.location.x, y: $0.location.y)) }
@@ -129,9 +130,17 @@ struct GalleryAreaSelectSheet: View {
                 .overlay(alignment: .topLeading) {
                     AreaAnts(outline: [GalleryAreaSelect.lasso], draft: GalleryAreaSelect.lasso.map { Point(x: $0.x + 120, y: $0.y + 60) }, zoom: 1)
                 }
-                .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+                .galleryAreaArtboard()
         }
         .padding(SuiteSpacing.xxl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+private extension View {
+    /// The white artboard's rounded clip and outline, so it reads on the light page too.
+    func galleryAreaArtboard() -> some View {
+        clipShape(.rect(cornerRadius: SuiteRadius.medium))
+            .overlay { RoundedRectangle(cornerRadius: SuiteRadius.medium).strokeBorder(SuiteColor.outline).allowsHitTesting(false) }
     }
 }

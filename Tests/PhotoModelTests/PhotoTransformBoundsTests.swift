@@ -164,4 +164,22 @@ import Testing
         try workspace.beginTransform()
         #expect(workspace.transformDraft?.box == PixelRect(x: 370, y: 280, width: 60, height: 50))
     }
+    /// The Transform rows' cached box keys on the layer's tiles, not on equal pixels: a layer rewritten with the
+    /// same pixels in new storage (Flip Canvas of a plain fill) reads its box once more and then reuses it, so a
+    /// body never compares every pixel of an 8K layer to the cached one (flipCanvasInOneBody hung on that).
+    @Test func theCachedBoxKeysOnTheLayersTiles() throws {
+        var w = try painted([square])
+        let id = try #require(w.selectedLayerID)
+        let tally = PhotoRenderCount.Tally()
+        var known: PhotoWorkspace.PaintedBox?
+        func box() -> PixelRect? { PhotoRenderCount.$tally.withValue(tally) { w.transformBounds(reusing: &known) } }
+        func reads() -> Int { tally.snapshot["paintedBoxes"] ?? 0 }
+
+        for _ in 1...3 { #expect(box() == square) }
+        #expect(reads() == 1, "unchanged tiles read the box \(reads()) times")
+
+        w.pixels[id] = TiledPixels(try #require(w.pixels[id]).flattened())
+        for _ in 1...3 { #expect(box() == square) }
+        #expect(reads() == 2, "equal pixels in new tiles read the box \(reads()) times, want once more")
+    }
 }

@@ -5,7 +5,7 @@
 // state `open(_:at:)` leaves: first page selected, empty history, no location
 // (an unsaved file). Frames are absolute page points; children are listed back
 // to front. Ids follow the counters' "page-N" and "node-N", so the next minted
-// id is past every fixture id. `animated(_:)` and `keyedCrowd` are the keyed documents the node-time tests
+// id is past every fixture id. `flat(_:)` is a page of top-level layers; `animated(_:)` and `keyedCrowd` are the keyed documents the node-time tests
 // and budgets use; `animated(_:kinds:)` is `animated(_:)` per node kind (text, gradient, stroke, a mixed
 // UI of cards), keyed the same way, for the raster costing rows. They stay off `names`. Linux-safe.
 
@@ -68,6 +68,16 @@ public enum DesignFixtures {
                            children: children))
         }
         return opened([DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: frames)])
+    }
+
+    /// `count` 16 × 16 rectangles straight on one 1440 × 1024 page, in rows of 80: a large file with no
+    /// frames, every layer a top-level row in the layer tree. Not in `names`: no journey opens it.
+    public static func flat(_ count: Int) -> DesignWorkspace {
+        let nodes = (0..<count).map { i in
+            DesignNode(id: "node-\(i + 1)", name: "Rectangle \(i + 1)", kind: .rectangle,
+                       frame: rect(10 + Double(i % 80) * 17.8, 10 + Double(i / 80) * 17.8, 16, 16))
+        }
+        return opened([DesignPage(id: "page-1", name: "Page 1", frameWidth: 1440, frameHeight: 1024, nodes: nodes)])
     }
 
     /// One 1440 × 1024 UI frame holding `count` 24 × 16 rectangles in rows of 25. Every rectangle's x, y and

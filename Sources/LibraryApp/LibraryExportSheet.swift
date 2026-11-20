@@ -1,11 +1,15 @@
 // LibraryExportSheet.swift: File > Export… (export EX-6): editing, the progress
 // row, the summary, or a failed run's error, read from the kernel's ExportRun
-// and the catalog's `exportFinished`. Values in, closures out; a nil action disables its control.
+// and the catalog's `exportFinished`; while the window's export area shows a run
+// ahead of the catalog (`live.shown`: Export's running row, each step), that one. Values in, closures out; a nil action disables its control.
 // Each control but the dismiss-only Cancel and Done, and the name alert's Save
 // (#4208), is its catalog command's MenuCommand on the window's catalog
 // (command-state CS-6), so it is off with the command's reason too. The
 // Metadata row (export-pack LX-2) picks the kernel's ExportMetadata policy,
-// read through the shared ExportPick (`pick`).
+// read through the shared ExportPick (`pick`). Under `-SuitePerfProbe` the
+// sheet marks P8's moments in suite.perf on series `library.export`: `export`
+// when Export runs, `progress` when the running row appears and `summary`
+// when the result does, so P8 gates on the app's own clock.
 import LibraryModel
 import SuiteKernel
 import SuiteUI
@@ -23,16 +27,20 @@ struct LibraryExportSheet: View {
     let presets: [ExportPreset], actions: Actions, progressDelay: Duration
     /// The window's catalog, which the controls' specs read; nil (a snapshot) leaves the actions alone to decide.
     var catalog: LibraryCatalog?
+    /// The window's export area, whose `shown` run wins; read here, so a progress step reruns this sheet only.
+    var live: ExportAreaState?
     @State private var longEdgeText: String
     @State private var qualityText: String
     @State private var savingPreset = false
     @State private var presetName = ""
+    @Environment(\.suiteProbeRecorder) private var recorder
 
     init(run: ExportRun<ExportOptions>, summary: ExportSummary?, count: Int, preview: String?, writable: Set<ExportFormat>,
          exportHelp: String?, presets: [ExportPreset], actions: Actions = Actions(), progressDelay: Duration = .milliseconds(100),
-         catalog: LibraryCatalog? = nil) {
+         catalog: LibraryCatalog? = nil, live: ExportAreaState? = nil) {
         (self.run, self.summary, self.count, self.preview, self.writable) = (run, summary, count, preview, writable)
         (self.exportHelp, self.presets, self.actions, self.progressDelay, self.catalog) = (exportHelp, presets, actions, progressDelay, catalog)
+        self.live = live
         let options = run.editingOptions
         _longEdgeText = State(initialValue: options?.longEdge.map(String.init) ?? "")
         _qualityText = State(initialValue: options.map { String($0.quality) } ?? "")
@@ -41,7 +49,7 @@ struct LibraryExportSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.m) {
             Text(Self.title(count)).font(SuiteFont.headline)
-            switch run {
+            switch live?.shown ?? run {
             case .idle: EmptyView()
             case .editing(let options): editing(options)
             case .running(_, let done, let total): running(done: done, total: total)
@@ -58,9 +66,10 @@ struct LibraryExportSheet: View {
             InspectorOption(id: edge, title: edge == 0 ? "Original Size" : String(edge),
                             identifier: "library.export.size." + (edge == 0 ? "original" : String(edge)))
         }
-        let formats: [InspectorOption<ExportFormat>] = ExportFormat.allCases.filter { $0.help(writable: writable) == nil }
-            .map { InspectorOption(id: $0, title: $0.rawValue, identifier: "library.export.format.\($0.rawValue)") }
-        let formatHelp = ExportFormat.allCases.compactMap { $0.help(writable: writable) }.joined(separator: " ")
+        let formats: [InspectorOption<ExportFormat>] = ExportFormat.allCases.map {
+            InspectorOption(id: $0, title: $0.rawValue, identifier: "library.export.format.\($0.rawValue)",
+                            unavailableHelp: $0.help(writable: writable))
+        }
         let blocked: String? = fieldsHelp(options) ?? exportHelp
         Form {
             LabeledContent("Size") {
@@ -87,7 +96,6 @@ struct LibraryExportSheet: View {
                 ChoiceChips(options: formats, selected: options.format) { (format: ExportFormat) -> Void in
                     change { $0.format = format }
                 }
-                .help(formatHelp)
             }
             LabeledContent("Metadata") {
                 ChoiceChips(options: Self.metadataOptions, selected: Self.pick(options).metadata) {
@@ -121,7 +129,7 @@ struct LibraryExportSheet: View {
             Spacer()
             Button("Cancel") { actions.close?() }.keyboardShortcut(.cancelAction)
                 .accessibilityIdentifier("library.export.cancel")
-            MenuCommand("file.export", on: catalog, title: "Export", action: blocked == nil ? actions.export : nil,
+            MenuCommand("file.export", on: catalog, title: "Export", action: blocked == nil ? marked(actions.export) : nil,
                         reason: blocked ?? Self.notEditing, shortcut: .defaultAction)
                 .accessibilityIdentifier("library.export.export")
         }
@@ -135,6 +143,7 @@ struct LibraryExportSheet: View {
     @ViewBuilder private func running(done: Int, total: Int) -> some View {
         BusyNote(ExportProgress(done: done + 1, total: total).text, identifier: "library.export.progress",
                  fraction: (done, total), delay: progressDelay)
+            .onAppear { recorder?.mark("progress", series: "library.export") }
         HStack {
             Spacer()
             MenuCommand("export.cancel", on: catalog, title: "Cancel", action: actions.cancel,
@@ -143,17 +152,17 @@ struct LibraryExportSheet: View {
         }
     }
 
-    @ViewBuilder private func finished(_ summary: ExportSummary) -> some View {
-        let failed = !summary.failures.isEmpty
-        if failed {
-            InspectorNote(summary.message, kind: .error, identifier: "library.export.summary")
-            InspectorNote(Self.failureLines(summary.failures).joined(separator: "\n"), identifier: "library.export.failures")
-        } else if summary.cancelled {
-            InspectorNote(summary.message, identifier: "library.export.summary")
-        } else {
-            Label(summary.message, systemImage: "checkmark.circle").foregroundStyle(SuiteColor.stateSuccess)
-                .accessibilityIdentifier("library.export.summary")
+    /// `action`, marking `export` first (P8's start).
+    private func marked(_ action: LibraryMenu.Action?) -> LibraryMenu.Action? {
+        guard let action else { return nil }
+        return { [recorder] in
+            recorder?.mark("export", series: "library.export")
+            action()
         }
+    }
+
+    @ViewBuilder private func finished(_ summary: ExportSummary) -> some View {
+        summaryLine(summary).onAppear { recorder?.mark("summary", series: "library.export") }
         HStack {
             if !summary.failedIDs.isEmpty {
                 MenuCommand("export.retry", on: catalog, title: "Try Again", action: actions.retry,
@@ -168,6 +177,19 @@ struct LibraryExportSheet: View {
             }
             Button("Done") { actions.close?() }.keyboardShortcut(.defaultAction)
                 .accessibilityIdentifier("library.export.done")
+        }
+    }
+
+    /// The result in words: the failures, a cancel, or the success line.
+    @ViewBuilder private func summaryLine(_ summary: ExportSummary) -> some View {
+        if !summary.failures.isEmpty {
+            InspectorNote(summary.message, kind: .error, identifier: "library.export.summary")
+            InspectorNote(Self.failureLines(summary.failures).joined(separator: "\n"), identifier: "library.export.failures")
+        } else if summary.cancelled {
+            InspectorNote(summary.message, identifier: "library.export.summary")
+        } else {
+            Label(summary.message, systemImage: "checkmark.circle").foregroundStyle(SuiteColor.stateSuccess)
+                .accessibilityIdentifier("library.export.summary")
         }
     }
 

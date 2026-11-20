@@ -185,6 +185,8 @@ enum HaloCanvasFit {
         case .lighten: .lighten
         case .colorDodge: .colorDodge
         case .colorBurn: .colorBurn
+        case .linearDodge: .plusLighter
+        case .linearBurn: .plusDarker
         case .hardLight: .hardLight
         case .softLight: .softLight
         case .difference: .difference

@@ -2,7 +2,8 @@
 // docs/blueprints/flare/features/draw-key-save.md), the whole loop on live
 // services: no `-FlareFixture`, so the window runs on `FlareServices.built`,
 // with `-FlareSaveTo <tmp>` so Save writes without a panel. New from the
-// toolbar, then the New Animation sheet's Web 550 × 400 and Create; the palette's Rectangle and drag a rectangle (Rectangle 1, its one
+// toolbar, then the shared New sheet's width 550, height 400 and duration 2 s (48 frames at 24 fps) and Create; the
+// palette's Rectangle and drag a rectangle (Rectangle 1, its one
 // key at 0); Auto-key on (the recording ring, `flare.recording`: SuiteWindow
 // drops Auto-key's selected state, #1621); the palette's Select; drag the
 // playhead to 24 on the Frame Ruler and drag the rectangle 200 scene points
@@ -10,7 +11,7 @@
 // Play/Pause plays and pauses; the toolbar's Undo takes the key at 24 away and
 // its Redo brings it back; its Save writes <tmp>/Untitled.flare and the title
 // reads "Untitled", not edited (`flare.file` reads "Saved"). Every step up to
-// here is a click (#1863); the keys are FlareJourneyTests' `testKeys`.
+// here is a click or a typed sheet field (#1863); the keys are FlareJourneyTests' `testKeys`.
 // End moves the playhead off 0, then File > Open Recent lists Untitled.flare
 // and opening it lands at frame 0 with keys at 0 and 24 on the lane and the
 // title "Untitled", not edited. Lanes, scene points and the ruler are read as
@@ -33,14 +34,19 @@ final class FlareLoopJourneys: XCTestCase {
         XCTAssert(flare.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         let toolbar = flare.app.toolbars.firstMatch
 
-        // 1. New from the toolbar, the sheet's Web 550 × 400 preset and Create: an empty 550 × 400 stage.
+        // 1. New from the toolbar; the sheet's width 550, height 400 and duration 2 s, then Create: an empty 550 × 400
+        // stage of 48 frames at 24 fps.
         let new = toolbar.buttons["flare.file.new"]
         XCTAssert(new.waitForExistence(timeout: 10), "no New in the toolbar (flare.file.new)")
         new.click()
-        flare.click("Web 550 × 400", in: .sheet)
+        flare.fillNewDocument(["width": "550", "height": "400", "duration": "2"])
+        let size = flare.element("suite.newdoc.pixels")
+        XCTAssert(waitFor { size.value as? String == "550 × 400 px" }, "the sheet reads \(String(describing: size.value))")
         flare.click("Create", in: .sheet)
         let canvas = flare.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 10), "New showed no stage (suite.canvas)")
+        XCTAssert(waitFor { flare.element("flare.timeline.frame").label.hasSuffix("/ 48") },
+                  "the new scene isn't 48 frames: \(flare.element("flare.timeline.frame").label)")
         // A click with Select on the empty stage only gives it the keyboard.
         point(530, 380, on: canvas).click()
         flare.shot("loop-1-new")
