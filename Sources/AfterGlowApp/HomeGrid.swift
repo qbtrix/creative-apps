@@ -11,8 +11,8 @@
 // the height left between the New row and the running strip and clip to it
 // (ThumbnailGrid scrolls itself live). Each card shows its document's
 // published preview, asked once through HomePreviews when the cards change
-// and kept for the window's life; a document without one shows its app's mark
-// (shared-thumbnails ST-3).
+// and kept for the window's life; a document without one shows its app's mark,
+// a 2x bitmap so it stays sharp on Retina (shared-thumbnails ST-3).
 import AppKit
 import SuiteModel
 import SuiteUI
@@ -127,12 +127,20 @@ struct HomeGrid: View, BodyCounted {
     /// The app's mark (SuiteUI AppMark, never a symbol) centred at half the card's height on a
     /// clear 4:3 card, rendered once so a card draws it as any other picture.
     // view-static: main-actor
-    static func mark(_ app: SuiteApp) -> Image? {
+    static func mark(_ app: SuiteApp) -> Image? { markImage(app).map { Image(decorative: $0, scale: markScale) } }
+
+    /// ImageRenderer draws at 1 pixel a point unless told; a Retina card would blur that mark.
+    static let markScale: CGFloat = 2
+
+    /// The mark's bitmap at `markScale` pixels a point.
+    // view-static: main-actor
+    static func markImage(_ app: SuiteApp) -> CGImage? {
         let width = HomeLayout.cardMax, height = HomeLayout.cardMax * 3 / 4
         let renderer = ImageRenderer(content: AppMark(app: app, style: .icon)
             .frame(width: height / 2, height: height / 2)
             .frame(width: width, height: height))
-        return renderer.nsImage.map { Image(nsImage: $0) }
+        renderer.scale = markScale
+        return renderer.cgImage
     }
 
     /// "2 items matching “logo”" beside RECENT while a search is on; nil without one (HomeModel's, #1866).

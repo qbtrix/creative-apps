@@ -1,7 +1,7 @@
 // HomeGridPreviewTests.swift: the home's Recent cards show their documents'
 // previews (shared-thumbnails ST-3) in a real window on FakeThumbnails: three
 // previews and a mark, no blank card, one ask per card however many bodies run.
-// HomePreviewFixture is shared with the ST-4 tests. macOS only.
+// The mark is a 2x bitmap. HomePreviewFixture is shared with the ST-4 tests. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SuiteModel
@@ -59,6 +59,12 @@ actor AskingThumbnails: ThumbnailPublishing {
 
 extension BodyCountSuites {
     @MainActor @Suite struct HomeGridPreviewTests {
+        /// The mark is drawn at 2 pixels a point, so a Retina card never upscales a 1x bitmap (it blurred).
+        @Test func markIsDrawnAtTwoPixelsAPoint() throws {
+            let image = try #require(HomeGrid.markImage(.halo))
+            #expect(image.width == Int(HomeLayout.cardMax * 2), "the mark is \(image.width) px wide for a \(HomeLayout.cardMax) pt card")
+        }
+
         @Test(.timeLimit(.minutes(1))) func threePreviewsAMarkAndOneAskPerCard() async throws {
             let refs = HomePreviewFixture.refs(4)
             let thumbnails = AskingThumbnails(seeded: Array(refs.prefix(3)))
