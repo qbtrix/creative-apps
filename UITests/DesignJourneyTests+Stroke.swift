@@ -70,8 +70,9 @@ final class DesignStrokeJourneyTests: XCTestCase {
         let width = old.element("suite.stroke.width")
         XCTAssert(width.waitForExistence(timeout: 5), "the old file's stroke opened as no stroke (no suite.stroke.width)")
         XCTAssertFalse(old.element(Self.addStroke).exists, "the old file's layer offers Add Stroke: its stroke was lost")
-        let three = width.descendants(matching: .any).matching(NSPredicate(format: "value BEGINSWITH '3'")).firstMatch
-        XCTAssert((width.value as? String ?? "").hasPrefix("3") || three.exists, "the old 3 pt stroke lost its width")
+        // The Width bar is a slider, so macOS gives its value as a number (#4822), not "3 pt".
+        let points = (width.value as? NSNumber)?.doubleValue
+        XCTAssert(points == 3 || (width.value as? String ?? "").hasPrefix("3"), "the old 3 pt stroke reads \(String(describing: width.value))")
         old.shot("stroke-old-file")
     }
 }

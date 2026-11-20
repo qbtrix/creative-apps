@@ -2,7 +2,8 @@
 // container identified `design.properties` inside the scroll view. A selected
 // layer shows its header (name, then kind unless the name says it, then size),
 // then Align (DesignAlignBar), then Layer (Hidden and Locked checkboxes), Frame (X, Y, W and H as scrub
-// fields; X and Y, like Opacity, carry DesignKeyControl), Transform (Rotation and the flips, DesignInspectorTransform, on one layer or several) and Fill (the type switch, then the color well, or the gradient editor in its place on a gradient layer; a text layer's is its text color, a group
+// fields; X and Y, like Opacity, carry DesignKeyControl, and W and H keep its room so the four fields start at one
+// x), Transform (Rotation and the flips, DesignInspectorTransform, on one layer or several) and Fill (the type switch, then the color well, or the gradient editor in its place on a gradient layer; a text layer's is its text color, a group
 // has none), then Text (DesignInspectorText, disabled on a layer that isn't text). A
 // locked layer, or one inside a locked group, can't be edited, so Frame and
 // Fill are disabled and a line says why. With only a page selected it shows
@@ -156,6 +157,10 @@ private struct DesignNodeProperties: View {
                                     } action: { if row.field == .x { valueColumn = $0 } }
                                 if let property = row.keyProperty {
                                     DesignKeyControl(model: model, property: property, help: lockHelp, perform: perform)
+                                } else {
+                                    // W and H carry no key button; its room is kept, so every field starts at one x.
+                                    Spacer(minLength: 0).frame(width: SuiteSize.keyframeButton * 2)
+                                        .accessibilityHidden(true)
                                 }
                             }
                         }

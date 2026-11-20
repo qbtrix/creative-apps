@@ -5,10 +5,14 @@
 // again when the visible frame moves (#1778): a launch size taller than the
 // display's visible frame comes out that frame's height at its top, a frame
 // that fits is unchanged, one past an edge moves inside, and an empty or
-// non-finite visible frame changes nothing. macOS only.
-import SuiteUI
+// non-finite visible frame changes nothing. The sizing view keeps its window
+// inside a visible frame that shrinks later with no notification (the Dock
+// growing for a tile mid-journey). macOS only.
+import AppKit
 import SwiftUI
 import Testing
+
+@testable import SuiteUI
 
 @Suite struct SuiteWindowSizeTests {
     /// The runner's 1024 x 768 display with its menu bar and Dock taken out, in points from the top left.
@@ -44,6 +48,24 @@ import Testing
         ] {
             #expect(SuiteWindowSize.fitted(frame, in: visible) == frame, "\(visible)")
         }
+    }
+
+    /// The Dock grew 63 pt well after launch and nothing was posted: the window still ends inside the visible frame.
+    @MainActor @Test func theWindowFollowsAVisibleFrameThatShrinksLater() async throws {
+        final class Screen { var visible = NSRect(x: 0, y: 0, width: 1024, height: 737) }
+        let screen = Screen()
+        let view = SuiteWindowSizingView(
+            requested: CGSize(width: 1024, height: 768), every: .milliseconds(20), visible: { _ in screen.visible })
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 300), styleMask: [.borderless], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        defer { window.close() }
+        window.contentView = view
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(window.frame == screen.visible, "the launch size wasn't fitted: \(window.frame)")
+        screen.visible = NSRect(x: 0, y: 63, width: 1024, height: 674)
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(window.frame == screen.visible, "the window stayed at \(window.frame) when the visible frame shrank")
     }
 
     @Test func theFlagGivesItsSize() {

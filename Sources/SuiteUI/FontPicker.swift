@@ -57,6 +57,9 @@ public struct FontPicker: View, BodyCounted {
                 }
             }
             .frame(height: SuiteSize.studioRow * 10) // ten rows
+            // No scroller: a legacy scroller's page area is an unnamed button with
+            // no identifier to the app audit (as in LayerTreeList, #2742).
+            .scrollIndicators(.never)
             InspectorPickerRow(
                 "Face", options: Self.faceOptions(family), selection: pick.face,
                 onChange: { choose(Self.choosing(face: $0, from: pick)) }
