@@ -86,6 +86,8 @@ extension PhotoRenderer {
         let damage = revision.map { workspace.damage(since: $0) } ?? .all
         // A new picture or size: the kept composites belong to the old regions.
         if revision == nil { route.composites.removeAll() }
+        // A still frame ends the drag: its draft's GPU source goes.
+        if !workspace.liveDraft { route.composites.removeDraftSources() }
         let rects = tiles(of: canvas, in: damage)
         let resident = route.isGPU ? route.residentTiles : nil
         resident?.prune(keeping: Set(workspace.layers.map(\.id)))
