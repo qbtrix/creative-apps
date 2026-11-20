@@ -13,7 +13,7 @@
 // When the photo doesn't open, the failure says why: the app's state and
 // windows, its status message, and the frames of a Photo crash report
 // written meanwhile. Then it drives, about 3 s each: the Levels Black slider,
-// the Hue slider, the Move tool across the canvas, a scroll-wheel pan at
+// the Hue slider, after a Free Transform drag of the pasted photo, normal and Multiply, the Move tool across the canvas, a scroll-wheel pan at
 // 300%, ⌘= / ⌘− zoom steps, then text-layers' two: key repeats into a Type
 // tool box and, once Return adds the layer, a drag of its Size field. Pinch
 // isn't driven: XCUITest on macOS can't make a magnify gesture, so the zoom
@@ -81,25 +81,37 @@ final class PhotoRealPerfJourneyTests: XCTestCase {
         text(photo, backend: backend, pid: pid)
     }
 
-    /// transform (#6206): the whole 8K photo pasted as a layer, Edit > Free Transform, and its
-    /// bottom-right handle dragged in and back. The sample must show the drag as a compositor
-    /// transform (no per-step resample); Escape drops the draft.
+    /// transform (#6206): the whole 8K photo pasted as a layer and Free Transform dragged, then the same
+    /// drag with the layer set to Multiply, which can't lift. Each sample must show the drag as a GPU
+    /// transform (no per-step resample); ⌘Z puts the blend back.
     @MainActor private func transform(_ photo: Journey, backend: String, pid: pid_t) {
         for key in ["a", "c", "v", "d"] { photo.press(character: key, .command) }
         guard photo.app.staticTexts["Pasted Layer"].waitForExistence(timeout: 30) else {
             return XCTFail("\(backend): the 8K paste made no Pasted Layer")
         }
         photo.element("suite.tools").buttons["Select"].click()
+        freeTransformDrag(photo, label: "\(backend) transform drag", pid: pid)
+        // A blended layer can't lift: its drag frame is one GPU composite over the region's base (#6206 box 7).
+        let picker = photo.inspectorMenu("photo.layer.blend", label: "Blend Mode")
+        guard picker.waitForExistence(timeout: 5) else { return XCTFail("\(backend): no Blend Mode menu (photo.layer.blend)") }
+        picker.click()
+        guard photo.chooseShownMenuItem("Multiply") else { return XCTFail("\(backend): the Blend Mode menu has no Multiply") }
+        freeTransformDrag(photo, label: "\(backend) blended transform drag", pid: pid)
+        photo.press(character: "z", .command)
+    }
+
+    /// Edit > Free Transform, its bottom-right handle dragged in and back, then Escape drops the draft.
+    @MainActor private func freeTransformDrag(_ photo: Journey, label: String, pid: pid_t) {
         let edit = photo.app.menuBars.firstMatch.menuBarItems["Edit"]
         edit.click()
         edit.menus.firstMatch.children(matching: .menuItem)["Free Transform"].click()
         let box = photo.element("photo.canvas.transform-box")
-        guard box.waitForExistence(timeout: 10) else { return XCTFail("\(backend): Free Transform put no box on the canvas") }
+        guard box.waitForExistence(timeout: 10) else { return XCTFail("\(label): Free Transform put no box on the canvas") }
         // The 8K paste and the draft's first picture settle first, so the sample holds only the drag.
         _ = XCTWaiter.wait(for: [XCTestExpectation(description: "settle")], timeout: 15)
         let corner = box.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 1))
         // The handles feed no probe series (only the viewport's own drag does), so the round trip is report-only.
-        photo.health("\(backend) transform drag", pid: pid, series: nil) {
+        photo.health(label, pid: pid, series: nil) {
             for offset in [CGVector(dx: -300, dy: -170), CGVector(dx: -40, dy: -20)] {
                 corner.click(forDuration: 0.05, thenDragTo: corner.withOffset(offset),
                              withVelocity: XCUIGestureVelocity(400), thenHoldForDuration: 0.05)
