@@ -52,6 +52,11 @@ git switch -q -c "$branch" origin/dev || die "can't create $branch from origin/d
 sed "s|/creative-core\", revision: \"$old\"|/creative-core\", revision: \"$new\"|" Package.swift >Package.swift.new \
   && mv Package.swift.new Package.swift
 grep -q "revision: \"$new\"" Package.swift || die "could not write the revision into Package.swift"
+# project.yml (the xcodegen graph scripts/ui-test builds) pins the same commit; BuildGraphTests checks they match.
+if [[ -f project.yml ]]; then
+  sed "s|revision: $old|revision: $new|" project.yml >project.yml.new && mv project.yml.new project.yml
+  grep -q "revision: $new" project.yml || die "could not write the revision into project.yml"
+fi
 swift package resolve || die "swift package resolve failed"
 grep -q "\"revision\" : \"$new\"" Package.resolved || die "Package.resolved does not pin $new after resolve"
 
@@ -116,7 +121,7 @@ body="$tmp/body.md"
   echo "Supervisor: run the macOS job on this branch and merge when it is green:"
   echo "gh workflow run ci.yml --ref $branch"
 } >"$body"
-git commit -q -m "$title" -m "Core range: https://github.com/$CORE/compare/$old...$new" Package.swift Package.resolved \
+git commit -q -m "$title" -m "Core range: https://github.com/$CORE/compare/$old...$new" Package.swift Package.resolved $([[ -f project.yml ]] && echo project.yml) \
   || die "git commit failed"
 git push -q -u origin "$branch" || die "git push failed"
 gh pr create --base dev --head "$branch" --title "$title" --body-file "$body" || die "gh pr create failed"
