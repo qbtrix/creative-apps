@@ -258,11 +258,19 @@ extension PhotoWorkspace {
     /// region-sized buffer that composites as a tile would, so the picture stays on the route's backend and a
     /// band uploads once. A matrix with no inverse, or one that maps the region out of range, draws the layer
     /// as it is. A box on part of the layer (a selection) draws the rest of the layer as it is first, then only
-    /// the box's pixels through the matrix (`boxCut`), as Return lays them.
+    /// the box's pixels through the matrix (`boxCut`), as Return lays them. A layer's shown mask multiplies its
+    /// pixels before they go through the matrix, so the mask moves with them.
     func compositeDraft(_ draft: TransformDraft, _ tiled: TiledPixels, of layer: PhotoLayer, onto picture: inout RenderSurface,
                         at rect: PixelRect, on dispatcher: RenderDispatcher, cache: PhotoCompositeCache? = nil) throws {
         let m = try services.transform.matrix(draft, origin: (layer.offsetX, layer.offsetY))
         let scale = min((m.a * m.a + m.b * m.b).squareRoot(), (m.c * m.c + m.d * m.d).squareRoot())
+        let mask = shownMask(of: layer), masking = services.masking
+        /// `buffer`, the layer's pixels from layer pixel (x, y), times the shown mask there.
+        @Sendable func shown(_ buffer: PixelBuffer, _ x: Int, _ y: Int) throws -> PixelBuffer {
+            guard let mask else { return buffer }
+            return try masking.masked(buffer, at: (x, y), by: mask)
+        }
+        func shown(_ tiles: TiledPixels) throws -> TiledPixels { try mask.map { try masked(tiles, by: $0) } ?? tiles }
         @Sendable func mapped(_ back: AffineMatrix, _ r: PixelRect) -> [(Double, Double)] {
             [(r.x, r.y), (r.maxX, r.y), (r.x, r.maxY), (r.maxX, r.maxY)].map { x, y in
                 (back.a * Double(x) + back.c * Double(y) + back.tx, back.b * Double(x) + back.d * Double(y) + back.ty)
@@ -270,12 +278,13 @@ extension PhotoWorkspace {
         }
         guard let back = m.inverse, scale > 0,
             mapped(back, rect).allSatisfy({ $0.0.isFinite && $0.1.isFinite && abs($0.0) < 1e9 && abs($0.1) < 1e9 })
-        else { return try composite(tiled, of: layer, onto: &picture, at: rect, on: dispatcher) }
-        if let cache, try compositeDraftOnGPU(m, tiled, box: draft.box, of: layer, onto: &picture, at: rect, on: dispatcher, cache: cache) {
+        else { return try composite(shown(tiled), of: layer, onto: &picture, at: rect, on: dispatcher) }
+        if let cache, try compositeDraftOnGPU(m, tiled, mask: mask, shown: shown, box: draft.box, of: layer, onto: &picture,
+                                              at: rect, on: dispatcher, cache: cache) {
             return
         }
         let cut = try boxCut(of: layer, in: draft.box)
-        if let cut { try composite(cut.rest, of: layer, onto: &picture, at: rect, on: dispatcher) }
+        if let cut { try composite(shown(cut.rest), of: layer, onto: &picture, at: rect, on: dispatcher) }
         let whole = cut?.part ?? PixelRect(x: 0, y: 0, width: tiled.width, height: tiled.height)
         PhotoRenderCount.resample()
         // Bilinear reads one source pixel around each sample, more when the layer shrinks; one more for rounding.
@@ -296,7 +305,7 @@ extension PhotoWorkspace {
             var local = m
             (local.tx, local.ty) = (m.tx + m.a * Double(part.x) + m.c * Double(part.y) - Double(chunk.x),
                                     m.ty + m.b * Double(part.x) + m.d * Double(part.y) - Double(chunk.y))
-            return try tiled.flattened(part).transformed(local, width: chunk.width, height: chunk.height, filter: .bilinear)
+            return try shown(tiled.flattened(part), part.x, part.y).transformed(local, width: chunk.width, height: chunk.height, filter: .bilinear)
         }
         // One surface and one composite per region: a band's chunks go into a region-sized buffer first (an
         // exact copy onto clear), so the GPU route uploads once rather than once per chunk.
@@ -322,9 +331,11 @@ extension PhotoWorkspace {
     /// on part of the layer draws the rest first (`boxCut`'s rest, its painted bounds kept in `cache` too), so a
     /// frame only composites kept surfaces. The kernel
     /// samples at a stretch of 1 or more, so a shrink composites the source halved once per halving it needs
-    /// (each half made once per draft as well). False when the route's GPU doesn't run `.affine` or the opacity
+    /// (each half made once per draft as well). `shown` multiplies a source by the layer's shown mask (`mask`, nil
+    /// without one) once, as the source is made. False when the route's GPU doesn't run `.affine` or the opacity
     /// is out of range: the caller resamples on the CPU (and CoreRaster reports the opacity).
-    private func compositeDraftOnGPU(_ m: AffineMatrix, _ tiled: TiledPixels, box: PixelRect, of layer: PhotoLayer,
+    private func compositeDraftOnGPU(_ m: AffineMatrix, _ tiled: TiledPixels, mask: TiledPixels?,
+                                     shown: (PixelBuffer, Int, Int) throws -> PixelBuffer, box: PixelRect, of layer: PhotoLayer,
                                      onto picture: inout RenderSurface, at rect: PixelRect, on dispatcher: RenderDispatcher,
                                      cache: PhotoCompositeCache) throws -> Bool {
         guard let gpu = dispatcher.preferred, gpu.isHealthy, gpu.supports.contains(.affine),
@@ -350,9 +361,11 @@ extension PhotoWorkspace {
         guard let level = (0...12).first(where: { onKernel(through($0)) }) else { return false }
         let (mode, opacity) = (layer.blendMode, Float(layer.opacity))
         if let cut {
-            let key = PhotoCompositeCache.DraftKey(layer: layer.id, part: cut, pixels: tiled, level: PhotoCompositeCache.DraftKey.restLevel)
+            let key = PhotoCompositeCache.DraftKey(layer: layer.id, part: cut, pixels: tiled, mask: mask,
+                                                level: PhotoCompositeCache.DraftKey.restLevel)
             let rest = try cache.draftSource(key, on: gpu) {
-                guard let rest = try boxCut(of: layer, in: box, tiles: tiled)?.rest else { return nil }
+                guard let cutRest = try boxCut(of: layer, in: box, tiles: tiled)?.rest else { return nil }
+                let rest = try mask.map { try masked(cutRest, by: $0) } ?? cutRest
                 let indices = Array(rest.tiles.indices)
                 let painted = try PhotoLayerComposite.inParallel(indices.count) { i in
                     try PhotoLayerComposite.paintedRect(of: rest.tiles[indices[i]])
@@ -367,9 +380,9 @@ extension PhotoWorkspace {
                                          y: layer.offsetY + rest.y - rect.y, mode: mode, opacity: opacity)
             }
         }
-        let key = PhotoCompositeCache.DraftKey(layer: layer.id, part: part, pixels: tiled, level: level)
+        let key = PhotoCompositeCache.DraftKey(layer: layer.id, part: part, pixels: tiled, mask: mask, level: level)
         let placed = try cache.draftSource(key, on: gpu) {
-            var buffer = try tiled.flattened(part)
+            var buffer = try shown(tiled.flattened(part), part.x, part.y)
             for _ in 0..<level {
                 // Halved at each 2 x 2 block's centre: bilinear there is the block's mean.
                 PhotoRenderCount.resample()

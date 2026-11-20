@@ -292,15 +292,14 @@ extension PhotoWorkspace {
 
     /// `transformPreview` for a still frame; for a drag frame (`live`), self with `liveDraft` set, so every route
     /// draws the draft's layer through its matrix on each region and nothing resamples (the exact frame comes
-    /// with the next still one). A masked layer, the identity and a layer without pixels take the still frame.
+    /// with the next still one); a masked layer draws its pixels times its mask, so the mask moves with them, as
+    /// Return takes it (`draftPlacedMask`). The identity and a layer without pixels take the still frame.
     /// A layer that lifts (`liftKey`) never comes here mid-drag: the compositor moves its pixels.
     /// A layer that can't lift (a blend on it or on a layer above it) draws through its matrix on the GPU where the
     /// route runs `.affine`, and in 256 px chunks on the CPU elsewhere (`compositeDraft`).
-    /// ponytail: a masked layer that can't lift still takes the still frame, one whole resample a step; give
-    /// `compositeDraft` the masked source if a blended, masked layer's drag profiles slow.
     func transformPreview(live: Bool) -> PhotoWorkspace {
         guard live, let draft = transformDraft, draft.transform != .identity, let at = index(of: draft.layerID),
-            pixels[draft.layerID] != nil, shownMask(of: layers[at]) == nil
+            pixels[draft.layerID] != nil
         else { return transformPreview }
         var shown = self
         shown.liveDraft = true

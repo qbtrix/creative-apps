@@ -181,7 +181,7 @@ extension PhotoWorkspace {
     }
 
     /// `tiles` with each tile multiplied by `mask` there (the layer's mask, its size), the tiles across the cores.
-    private func masked(_ tiles: TiledPixels, by mask: TiledPixels) throws -> TiledPixels {
+    func masked(_ tiles: TiledPixels, by mask: TiledPixels) throws -> TiledPixels {
         let masking = services.masking
         var out = tiles
         out.tiles = try PhotoLayerComposite.inParallel(tiles.tiles.count) { i in
