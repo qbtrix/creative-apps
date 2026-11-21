@@ -7,7 +7,9 @@
 // with the box's handles, but no knob, while the Model's `showsSelectionHandles` holds; a lock or
 // hidden layer in the selection leaves none. While a marquee is live only each hit
 // layer's outline draws: no box, no handles until the drag ends. Dashes are the live marquee's alone
-// (SuiteUI's SelectBoxMark), so a committed selection never reads as one in progress.
+// (SuiteUI's SelectBoxMark), so a committed selection never reads as one in progress. While a group is entered
+// (double-click, Return, Edit > Enter Group) its box draws dimmed under the selection (SuiteUI's GroupScopeMark),
+// so the scope the next click picks in shows.
 // A turned layer's outline and handles turn with it. The text node being edited shows its editor's box instead. The box carries the
 // one accessibility element, `design.canvas.selection` ("Selection"): a clear
 // rectangle at the box's frame, an image, never a control. Takes no clicks; the
@@ -25,6 +27,9 @@ struct DesignSelectionMarks: View {
     let zoom: Double
 
     var body: some View {
+        if let entered = model.groupScope.path.last, let group = painted.first(where: { $0.node.id == entered })?.node {
+            GroupScopeMark(rect: group.frame.cgRect, zoom: zoom)
+        }
         // A hidden node, or one inside a hidden frame, is not on the canvas, so it has no outline.
         if model.hasMultipleSelection {
             let ids = Set(model.selectedNodeIDs)
