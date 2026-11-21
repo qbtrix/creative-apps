@@ -72,7 +72,7 @@ import Testing
 /// The strongest blue-over-red lean among `pixels`: about 0.85 for the accent #1877F2, 0 for a
 /// neutral grey, black or white.
 @MainActor
-private func accentTint(_ image: NSBitmapImageRep, across pixels: [(Int, Int)]) -> Double {
+func accentTint(_ image: NSBitmapImageRep, across pixels: [(Int, Int)]) -> Double {
     pixels.compactMap { image.colorAt(x: $0.0, y: $0.1)?.usingColorSpace(.sRGB) }
         .map { Double($0.blueComponent - $0.redComponent) }
         .max() ?? 0
