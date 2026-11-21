@@ -2,7 +2,7 @@
 // it later: the app's presets (the clipboard image's size first, when there is one), width and height in a unit,
 // resolution, the pixel size they make, orientation, background and, for timed apps, rate and duration. Settings
 // mode drops the presets and adds the anchor grid that says where old content stays. Each field shows its
-// SetupProblem beside it and Create stays off until there are none; every control's help names the `file.new` or
+// SetupProblem beside it, the Preset menu names the preset the values match (`presetID`), and Create stays off until there are none; every control's help names the `file.new` or
 // `document.set-settings` parameter it sets. The rules are NewDocumentForm, plain and tested on its own; the sheet
 // owns that form as presentation state, so typing redraws the sheet, not the window behind it.
 import SuiteKernel
@@ -65,6 +65,18 @@ public struct NewDocumentForm: Sendable {
         }
         chosen = preset.id
         refresh()
+    }
+
+    /// The id of the first of `presets` whose values the setup holds now, "" (Custom) for none: the menu names
+    /// the preset the sheet opens on or is typed back to, and reads Custom after a swap or edit away from it.
+    /// A background the preset doesn't name doesn't count.
+    public func presetID(in presets: [NewDocumentPreset]) -> String {
+        presets.first { preset in
+            var picked = self
+            picked.pick(preset)
+            if preset.parameters["background"] == nil { picked.setup.background = setup.background }
+            return picked.setup == setup
+        }?.id ?? ""
     }
 
     /// The same pixels typed in `unit`.
@@ -195,7 +207,7 @@ public struct NewDocumentSheet: View {
     private var presetRow: some View {
         GridRow {
             Text("Preset")
-            Picker("Preset", selection: Binding(get: { form.chosen ?? "" }, set: { id in
+            Picker("Preset", selection: Binding(get: { form.presetID(in: NewDocumentForm.choices(mode)) }, set: { id in
                 if let preset = NewDocumentForm.choices(mode).first(where: { $0.id == id }) { form.pick(preset) }
             })) {
                 Text("Custom").tag("")

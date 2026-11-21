@@ -1,7 +1,7 @@
 // NewDocumentSheetTests.swift (document-setup DS-5): the New Document sheet's rules, on NewDocumentForm: a preset
 // fills every field, a unit change keeps the pixels, the clipboard choice shows only with a size, settings mode
 // shows the anchor grid instead of presets, rate and duration show only for timed apps, and every control names
-// the parameter it sets.
+// the parameter it sets, and the Preset menu names the preset the setup holds now.
 import SuiteKernel
 import SuiteModel
 import Testing
@@ -23,6 +23,24 @@ import Testing
         #expect(form.chosen == "flare.story")
         #expect(form.text(.width) == "1080" && form.text(.height) == "1920" && form.text(.resolution) == "144")
         #expect(form.text(.duration) == "12")
+    }
+
+    @Test func menuNamesThePresetTheSetupHolds() {
+        let desktop = NewDocumentPreset(id: "design.desktop", app: .design, title: "Desktop", detail: "1440 × 1024",
+                                        parameters: ["width": "1440", "height": "1024"])
+        let presets = [Self.story, desktop]
+        var form = NewDocumentForm(DocumentSetup(width: 1440, height: 1024), limits: DocumentLimits())
+        #expect(form.presetID(in: presets) == "design.desktop")
+        form.setBackground(.transparent)
+        #expect(form.presetID(in: presets) == "design.desktop")
+        form.swap()
+        #expect(form.presetID(in: presets) == "")
+        form.swap()
+        form.type("1441", into: .width)
+        #expect(form.presetID(in: presets) == "")
+        form.type("1440", into: .width)
+        #expect(form.presetID(in: presets) == "design.desktop")
+        #expect(NewDocumentForm(Self.start, limits: Self.timed).presetID(in: presets) == "")
     }
 
     @Test func unitChangeKeepsPixels() {

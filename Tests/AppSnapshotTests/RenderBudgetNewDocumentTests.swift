@@ -1,11 +1,13 @@
 // RenderBudgetNewDocumentTests.swift (document-setup DS-6's budget row): the gallery's `new-document` page in a
 // key-capable 1280 x 820 window; focus in Width and 20 typed digits run the page's body at most once, since
 // the form lives in the sheet's own state. The New Document snapshots sit beside it:
-// suite-new-document-{light,dark}.png and suite-document-settings-{light,dark}.png. Nested in BodyCountSuites: it
+// suite-new-document-{light,dark}.png, suite-document-settings-{light,dark}.png and, on Design's presets as File > New
+// shows them (its menu naming Desktop), design-new-document-{light,dark}.png. Nested in BodyCountSuites: it
 // reads global body counters. macOS only.
 #if canImport(AppKit)
 import AppKit
 import SwiftUI
+import DesignModel
 import Testing
 
 @testable import SuiteUI
@@ -60,6 +62,10 @@ extension BodyCountSuites {
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(GalleryNewDocumentSheet(settings: false), name: "suite-new-document-\(scheme.name)", scheme: scheme)
             try snapshot(GalleryNewDocumentSheet(settings: true), name: "suite-document-settings-\(scheme.name)", scheme: scheme)
+            let design = NewDocumentSheet(.new(presets: DesignWorkspace.newDocumentPresets, clipboard: nil),
+                                          setup: DesignWorkspace.newDocumentSetup, limits: DesignWorkspace.newDocumentLimits,
+                                          onDone: { _, _ in }, onCancel: {})
+            try snapshot(design, name: "design-new-document-\(scheme.name)", scheme: scheme)
         }
     }
 }
