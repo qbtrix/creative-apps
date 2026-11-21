@@ -3,10 +3,13 @@
 // drag slides it. `slideDragInThreeBodies`: on Halo's `three-layers`, Title's
 // bar (24...71, no keys) is dragged by its body 120 samples left: at most 3
 // window bodies (the lane draws each step on its own layer, TL-22; the
-// release sends one slide). TimelineSpanDragTests holds the rule with no
+// release sends one slide). Until Halo's slide spec (TK-6) can act, its bars
+// can't move, so on Halo this drag is a bed press and the bound is loose; the
+// lane's own move is proven windowless below. TimelineSpanDragTests holds the rule with no
 // window: a body drag reports one delta per frame crossed and never trims, an
 // end drag still trims and never slides, Shift lands an edge on the playhead,
-// and on a lane the host hears one slide on release. macOS only.
+// and on a lane the host hears one slide on release; while the host's clips
+// can't move, a body or end drag is a bed click and draws no move. macOS only.
 #if canImport(AppKit)
 import AppKit
 import HaloModel
@@ -102,12 +105,26 @@ extension BodyCountSuites {
         #expect(log.calls == ["select a"])
     }
 
+    @Test func whileClipsCantMoveABodyOrEndDragIsABedClick() {
+        for from in [170, 200] {
+            let log = Log()
+            let (view, end) = dragged(log, from: from, by: 40, clipsMove: false)
+            #expect(view.lanes.first?.spans == [100...200], "a clip the host can't move drew a move from \(from)")
+            view.release(at: end)
+            #expect(log.calls == ["select a"], "from \(from)")
+        }
+    }
+
     /// A lane view whose pointer reports to `log`, pressed at `frame` and dragged `dx` points.
-    private func dragged(_ log: Log, from frame: Int, by dx: Int) -> (TimelineLanesView, CGPoint) {
+    private func dragged(
+        _ log: Log, from frame: Int, by dx: Int, clipsMove: Bool = true
+    ) -> (TimelineLanesView, CGPoint) {
         let view = TimelineLanesView(frame: NSRect(x: 0, y: 0, width: 1_800, height: SuiteSize.timelineLane))
         let pointer = TimelineLanePointer<String>()
+        let context = TimelineLaneContext(playhead: 0, actions: log.actions)
+        context.clipsMove = clipsMove
         pointer.configure(
-            track: Self.track, mapping: Self.mapping, context: TimelineLaneContext(playhead: 0, actions: log.actions),
+            track: Self.track, mapping: Self.mapping, context: context,
             extras: TimelineLanePointerExtras(focus: nil, pill: .constant(nil), mark: nil))
         view.pointer = pointer
         view.update([TimelineLaneDrawing(Self.track, mapping: Self.mapping)])
