@@ -1,7 +1,8 @@
 // NewDocumentSheetTests.swift (document-setup DS-5): the New Document sheet's rules, on NewDocumentForm: a preset
 // fills every field, a unit change keeps the pixels, the clipboard choice shows only with a size, settings mode
-// shows the anchor grid instead of presets, rate and duration show only for timed apps, and every control names
-// the parameter it sets, and a sheet that opens on a preset's exact values names that preset, not Custom.
+// shows the anchor grid instead of presets (and no grid for an app that ignores the anchor), rate and duration show
+// only for timed apps, every control names the parameter it sets, and a sheet that opens on a preset's exact values
+// names that preset, not Custom.
 import SuiteKernel
 import SuiteModel
 import Testing
@@ -70,6 +71,12 @@ import Testing
         let settings = NewDocumentForm.sections(.settings, limits: DocumentLimits())
         #expect(new.contains(.presets) && !new.contains(.anchor))
         #expect(settings.contains(.anchor) && !settings.contains(.presets))
+    }
+
+    /// An app whose content keeps its coordinates (Flare) gets no anchor grid: nine buttons that do nothing.
+    @Test func settingsWithoutAnchorsHideTheGrid() {
+        let settings = NewDocumentForm.sections(.settings, limits: Self.timed, anchors: false)
+        #expect(settings == [.size, .background, .timing])
     }
 
     @Test func rateAndDurationOnlyForTimedApps() {
