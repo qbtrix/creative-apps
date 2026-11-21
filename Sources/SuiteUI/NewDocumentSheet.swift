@@ -4,7 +4,8 @@
 // mode drops the presets and adds the anchor grid that says where old content stays. Each field shows its
 // SetupProblem beside it and Create stays off until there are none; every control's help names the `file.new` or
 // `document.set-settings` parameter it sets. The rules are NewDocumentForm, plain and tested on its own; the sheet
-// owns that form as presentation state, so typing redraws the sheet, not the window behind it.
+// owns that form as presentation state, so typing redraws the sheet, not the window behind it. A sheet that opens on
+// a preset's exact values names that preset (Design's Desktop), not Custom.
 import SuiteKernel
 import SuiteModel
 import SwiftUI
@@ -34,9 +35,15 @@ public struct NewDocumentForm: Sendable {
     public let limits: DocumentLimits
     private var texts: [SetupField: String] = [:]
 
-    public init(_ setup: DocumentSetup, limits: DocumentLimits) {
+    /// `presets`: the menu's choices; the form opens on the first whose values are exactly `setup`'s, else Custom.
+    public init(_ setup: DocumentSetup, limits: DocumentLimits, presets: [NewDocumentPreset] = []) {
         (self.setup, self.limits) = (setup, limits)
         refresh()
+        chosen = presets.first { preset in
+            var form = self
+            form.pick(preset)
+            return form.setup == setup
+        }?.id
     }
 
     /// The text field `field` shows.
@@ -168,7 +175,7 @@ public struct NewDocumentSheet: View {
     public init(_ mode: NewDocumentMode, setup: DocumentSetup, limits: DocumentLimits,
                 onDone: @escaping @MainActor (DocumentSetup, BoxAnchor) -> Void, onCancel: @escaping @MainActor () -> Void) {
         (self.mode, self.onDone, self.onCancel) = (mode, onDone, onCancel)
-        _form = State(initialValue: NewDocumentForm(setup, limits: limits))
+        _form = State(initialValue: NewDocumentForm(setup, limits: limits, presets: NewDocumentForm.choices(mode)))
     }
 
     public var body: some View {
