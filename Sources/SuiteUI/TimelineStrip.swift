@@ -32,7 +32,7 @@
 // the bar on the ruler (TimelineWorkAreaBar, over the playhead), which call
 // onUnit and onWorkArea (TL-18). ⌘A while the strip has focus calls
 // onSelectAllKeys when the host passes one (TSA-1, TimelineStrip+Keys). Each lane's input (TimelineLaneInput) calls
-// the move closures for a key drag, the trim closures for a clip end and onSlide for a clip's body (TK-4). The strip owns its zoom (TL-17), a factor over the
+// the move closures for a key drag, the trim closures for a clip end and onSlide for a clip's body (TK-4; `editsSpans` off turns both off). The strip owns its zoom (TL-17), a factor over the
 // host's frameWidth kept in TimelineZoom's range (1 = fit): Command-plus,
 // Command-minus and Command-0 while it has focus (anchored on the playhead),
 // a pinch on the lanes (anchored under the pointer) and the toolbar row
@@ -70,6 +70,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private let onTrim: @MainActor (ID, SpanEdge, Int) -> Void
     private let onEndTrim: @MainActor () -> Void
     private let onSlide: @MainActor (ID, Int) -> Void
+    private let editsSpans: Bool
     private let onUnit: @MainActor (TimeUnit) -> Void
     private let onWorkArea: @MainActor (ClosedRange<Int>?) -> Void
     private let onSelectAllKeys: (@MainActor () -> Void)?
@@ -112,6 +113,8 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     /// toolbar. `onPickKeyframe` gets a nil frame when the bed is clicked;
     /// `onMoveKeyframes` gets the frames moved since its last call, and
     /// `onSlide` a clip body's track and the frames it moved since its last call.
+    /// `editsSpans` false: a clip's ends and body neither trim nor slide, and a
+    /// press there selects its track, for a host that can't take them yet.
     public init(
         tracks: [TimelineTrack<ID>], duration: Int, frameWidth: CGFloat, playhead: Int,
         unit: TimeUnit = .frames, fps: Int = 0, rate: FrameRate? = nil, workArea: ClosedRange<Int>? = nil, toolbar: Bool = false,
@@ -124,6 +127,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         onTrim: @escaping @MainActor (ID, SpanEdge, Int) -> Void = { _, _, _ in },
         onEndTrim: @escaping @MainActor () -> Void = {},
         onSlide: @escaping @MainActor (ID, Int) -> Void = { _, _ in },
+        editsSpans: Bool = true,
         onUnit: @escaping @MainActor (TimeUnit) -> Void = { _ in },
         onWorkArea: @escaping @MainActor (ClosedRange<Int>?) -> Void = { _ in },
         onSelectAllKeys: (@MainActor () -> Void)? = nil
@@ -145,6 +149,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         self.onTrim = onTrim
         self.onEndTrim = onEndTrim
         self.onSlide = onSlide
+        self.editsSpans = editsSpans
         self.onUnit = onUnit
         self.onWorkArea = onWorkArea
         self.onSelectAllKeys = onSelectAllKeys
@@ -253,7 +258,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         laneContext.actions = TimelineLaneActions(
             onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe,
             onMoveKeyframes: onMoveKeyframes, onEndKeyDrag: onEndKeyDrag, onTrim: onTrim, onEndTrim: onEndTrim,
-            onSlide: onSlide)
+            onSlide: onSlide, editsSpans: editsSpans)
     }
 
     /// The host's mapping at the strip's zoom.

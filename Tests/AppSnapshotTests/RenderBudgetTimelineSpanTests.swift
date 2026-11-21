@@ -1,42 +1,109 @@
-// RenderBudgetTimelineSpanTests.swift (timeline-keys TK-4, Quality tests,
-// packet docs/blueprints/suiteui/features/timeline-keys.md): a span's body
-// drag slides it. `slideDragInThreeBodies`: on Halo's `three-layers`, Title's
-// bar (24...71, no keys) is dragged by its body 120 samples left: at most 3
-// window bodies (the lane draws each step on its own layer, TL-22; the
-// release sends one slide). TimelineSpanDragTests holds the rule with no
+// RenderBudgetTimelineSpanTests.swift (timeline-keys TK-4 and TK-3, Quality
+// tests, packet docs/blueprints/suiteui/features/timeline-keys.md).
+// `slideDragInThreeBodies`: a strip whose host applies each slide to its one
+// bar (24...71 of 100, no keys), dragged by its body 120 samples left: at
+// most 3 window bodies (the lane draws each step on its own layer, TL-22) and
+// one slide on release. It hosts its own strip because Halo's bars can't
+// slide until TK-6 builds `layer.slide` (the strip then starts no slide);
+// TK-9 points it at Halo's window. `flareKeyClick`: on Flare's `bounce` with
+// Ball selected, one click on FILL's key button keys the fill at the playhead
+// in at most 2 window bodies. TimelineSpanDragTests holds the rule with no
 // window: a body drag reports one delta per frame crossed and never trims, an
 // end drag still trims and never slides, Shift lands an edge on the playhead,
-// and on a lane the host hears one slide on release. macOS only.
+// on a lane the host hears one slide on release, and a strip that can't edit
+// spans neither slides nor trims a bar: the press selects its track. macOS only.
 #if canImport(AppKit)
 import AppKit
-import HaloModel
+import FlareCore
+import FlareModel
 import SuiteKernel
 import SwiftUI
 import Testing
 
-@testable import HaloApp
+@testable import FlareApp
 @testable import SuiteUI
 
 extension BodyCountSuites {
     @MainActor @Suite struct RenderBudgetTimelineSpanTests {
-        static let title = "comp-1-layer-4"
-
         @Test(.timeLimit(.minutes(2))) func slideDragInThreeBodies() async throws {
-            let project = HaloLaunch(arguments: ["Halo", "-HaloFixture", "three-layers"]).project()
-            let w = RenderBudgetWindow(HaloWindow(model: project))
+            SpanSlideBudgetWindow.slides = []
+            let w = RenderBudgetWindow(SpanSlideBudgetWindow())
             defer { w.close() }
+            let bodies = { () -> Int? in
+                #if DEBUG
+                return SpanSlideBudgetWindow.bodyRuns
+                #else
+                return nil
+                #endif
+            }
             try await w.settle(500)
-            try await w.settle(untilStable: HaloWindowPlaybackTests.windowBodies)
-            let lane = try #require(await w.element("halo.timeline.lane.\(Self.title)"), "no lane for Title")
-            // About frame 47 of 71: inside Title's bar, far from its ends and the playhead at 0.
-            let start = CGPoint(x: lane.minX + lane.width * 0.66, y: lane.midY)
-            let step = try await w.measure("halo bar slide, 120 samples", bodies: HaloWindowPlaybackTests.windowBodies) {
+            try await w.settle(untilStable: bodies)
+            let lane = try #require(await w.element("budget.timeline.lane.title"), "no lane for Title")
+            // About frame 47 of 100: inside the bar, far from its ends and the playhead at 0.
+            let start = CGPoint(x: lane.minX + lane.width * 0.47, y: lane.midY)
+            let step = try await w.measure("bar slide, 120 samples", bodies: bodies) {
                 try await w.drag(from: start, by: CGVector(dx: -120, dy: 0))
             }
             print("BAR-SLIDE \(step)")
             #expect(step.steps >= 120, "the drag sent \(step.steps) steps")
+            #expect(SpanSlideBudgetWindow.slides.count == 1 && (SpanSlideBudgetWindow.slides.first ?? 0) < 0,
+                    "the release sent \(SpanSlideBudgetWindow.slides), not one slide left")
             expectBodies(step, atMost: 3, target: 3)
         }
+
+        @Test(.timeLimit(.minutes(2))) func flareKeyClick() async throws {
+            var model = FlareWorkspace(services: .built)
+            model.finishOpen(.success(try #require(FlareFixtures.named("bounce"))), named: "bounce.flare")
+            model.selectLayer("ball")
+            #expect(!model.canUndo && model.keyState(.fill) == .notAnimated, "Ball's fill starts keyed or edited")
+            #expect(model.paintKeyHelp(.fill) == nil, "FILL's key button is off: \(model.paintKeyHelp(.fill) ?? "")")
+            let w = RenderBudgetWindow(FlareWindow(model: model))
+            defer { w.close() }
+            let bodies = { () -> Int? in
+                #if DEBUG
+                return FlareWindow.bodyRuns
+                #else
+                return nil
+                #endif
+            }
+            try await w.settle(500)
+            try await w.settle(untilStable: bodies)
+            let key = try #require(await w.element("flare.inspector.key.fill"), "FILL shows no key button")
+            let step = try await w.measure("flare FILL key click", bodies: bodies) {
+                try await w.ticks(1) { _ in w.click(at: CGPoint(x: key.midX, y: key.midY)) }
+            }
+            try await w.settle(100)
+            #if DEBUG
+            // One key leaves the fill reading not animated (FlareColorKeysTests), so the undo step is the proof.
+            #expect(FlareWindow.shownModel?.undoName == "Add Keyframe", "the click keyed nothing: \(step)")
+            #endif
+            expectBodies(step, atMost: 2, target: 2)
+        }
+    }
+}
+
+/// The counted window: one strip whose host slides its one bar by each slide it hears.
+private struct SpanSlideBudgetWindow: View, BodyCounted {
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
+    // view-static: main-actor
+    static var slides: [Int] = []
+    @State private var span = 24...71
+
+    var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
+        TimelineStrip(
+            tracks: [TimelineTrack(id: "title", name: "Title", keys: [], spans: [span])],
+            duration: 100, frameWidth: 8, playhead: 0,
+            onSlide: { _, by in
+                Self.slides.append(by)
+                span = (span.lowerBound + by)...(span.upperBound + by)
+            })
+            .environment(\.timelineIdentifierPrefix, "budget.timeline")
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 
@@ -48,6 +115,7 @@ extension BodyCountSuites {
     /// Every slide, trim and end the host heard, in order.
     @MainActor private final class Log {
         var calls: [String] = []
+        var editsSpans = true
         var actions: TimelineLaneActions<String> {
             var actions = TimelineLaneActions<String>(
                 onSelectKeyframe: { _, _ in }, onSelectTrack: { self.calls.append("select \($0)") },
@@ -55,6 +123,7 @@ extension BodyCountSuites {
                 onMoveKeyframes: { self.calls.append("move \($0)") }, onEndKeyDrag: { self.calls.append("end") },
                 onTrim: { self.calls.append("trim \($0) \($1.rawValue) \($2)") }, onEndTrim: { self.calls.append("endTrim") })
             actions.onSlide = { self.calls.append("slide \($0) \($1)") }
+            actions.editsSpans = editsSpans
             return actions
         }
     }
@@ -100,6 +169,17 @@ extension BodyCountSuites {
         let (view, end) = dragged(log, from: 120, by: 1)
         view.release(at: CGPoint(x: end.x - 1, y: end.y))
         #expect(log.calls == ["select a"])
+    }
+
+    @Test func withoutSpanEditsABarDragNeitherSlidesNorTrims() {
+        for (frame, part) in [(170, "body"), (200, "end")] {
+            let log = Log()
+            log.editsSpans = false
+            let (view, end) = dragged(log, from: frame, by: 40)
+            #expect(view.lanes.first?.spans == [100...200], "a drag on the bar's \(part) moved it")
+            view.release(at: end)
+            #expect(log.calls == ["select a"], "a drag on the bar's \(part) sent \(log.calls)")
+        }
     }
 
     /// A lane view whose pointer reports to `log`, pressed at `frame` and dragged `dx` points.

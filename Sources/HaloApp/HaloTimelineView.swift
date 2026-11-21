@@ -11,7 +11,9 @@
 // the strip has focus sends `.selectAllKeys`. A bar's body drag goes to
 // `slideLayer` and an end drag to `trimLayer` (timeline-keys TK-4, as
 // `layer.slide` and `layer.trim` params), only while those specs can act;
-// until TK-6 builds them they can't, and the tooltip says why. A scrub or a name click gives
+// until TK-6 builds them they can't: the strip's `editsSpans` is off, so a
+// bar neither moves under the pointer nor snaps back, a press on it selects
+// its layer, and the tooltip says why. A scrub or a name click gives
 // the timeline focus so HaloViewer's keys reach it; a lane press leaves the
 // focus on the strip, which ⌘A needs.
 // The strip's context menu holds the five easing presets for the picked keys
@@ -132,12 +134,9 @@ struct HaloTimelineView: View {
                         dragStart = nil
                         perform(.endKeyDrag)
                     },
-                    onTrim: { id, edge, frame in
-                        if spanHelp == nil { trimLayer(.init(layer: id, edge: edge.rawValue, frame: frame)) }
-                    },
-                    onSlide: { id, by in
-                        if spanHelp == nil { slideLayer(.init(layer: id, by: by)) }
-                    },
+                    onTrim: { id, edge, frame in trimLayer(.init(layer: id, edge: edge.rawValue, frame: frame)) },
+                    onSlide: { id, by in slideLayer(.init(layer: id, by: by)) },
+                    editsSpans: spanHelp == nil,
                     onSelectAllKeys: { perform(.selectAllKeys) }) }
                     .accessibilityIdentifier("halo.timeline.track")
                     .environment(\.timelineIdentifierPrefix, "halo.timeline")
