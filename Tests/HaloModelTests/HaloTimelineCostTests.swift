@@ -2,7 +2,11 @@
 // docs/review-rubric.md): building the strip's rows for 300 layers, which the
 // viewer does on every scrub, and one scrub step (QB-L3's model side) each stay
 // under 5 ms in release and 50 ms in debug (CI); so do HB-6's rows on the
-// `crowd` fixture (300 layers, 5,000 keys, key frames included). The quietest
+// `crowd` fixture (300 layers, 5,000 keys, key frames included). A viewer
+// drag's commit on `huge` (2,000 layers, every property keyed) re-reads the
+// rows the timeline draws (key frames for the first 100 only) and Select All
+// Keys' help, under the same budget; walking every key of every row cost ~2 s
+// in debug. The quietest
 // p95 of three rounds of 100 counts, since scripts/ci runs suites in parallel.
 @testable import HaloModel
 import Testing
@@ -48,5 +52,19 @@ struct HaloTimelineCostTests {
         #expect(rows.count == 300)
         #expect(rows.first?.keyFrames == Array(stride(from: 0, to: 300, by: 30)))
         #expect(rows.last?.keyFrames == [])
+    }
+
+    /// H-J5: what a viewer drag's commit reads on `huge`: rows keyed only
+    /// where the timeline draws them, and Select All Keys' help.
+    @Test func commitReadsOnHuge() throws {
+        var project = HaloProject(services: .fake)
+        project.restore(try #require(HaloFixtures.project("huge")))
+        var rows: [HaloTimelineRow] = []
+        #expect(p95("huge rows") { rows = project.timelineRows(keyed: { $0 < 100 }) } <= budget)
+        #expect(rows.count == 2000)
+        #expect(rows.first?.keyFrames.isEmpty == false && rows.last?.keyFrames == [])
+        var help: String? = "unset"
+        #expect(p95("huge select all help") { help = project.selectAllKeysHelp } <= budget)
+        #expect(help == nil)
     }
 }

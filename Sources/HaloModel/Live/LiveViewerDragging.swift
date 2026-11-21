@@ -11,7 +11,7 @@ public struct LiveViewerDragging: ViewerDragging {
     public func hit(_ composition: HaloComposition, at frame: Int, point: HaloPoint) -> String? {
         composition.layers.first { layer in
             guard layer.kind != .null, layer.isVisible(at: frame),
-                let world = HaloKeyRules.worldMatrix(of: layer.id, in: composition, at: frame),
+                let world = HaloKeyRules.worldMatrix(of: layer, in: composition, at: frame),
                 let inverse = try? world.inverted()
             else { return false }
             let local = inverse.apply(point), b = layer.bounds(in: composition)
