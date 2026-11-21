@@ -1,7 +1,7 @@
 // NewDocumentSheetTests.swift (document-setup DS-5): the New Document sheet's rules, on NewDocumentForm: a preset
 // fills every field, a unit change keeps the pixels, the clipboard choice shows only with a size, settings mode
 // shows the anchor grid instead of presets, rate and duration show only for timed apps, and every control names
-// the parameter it sets.
+// the parameter it sets, and a sheet that opens on a preset's exact values names that preset, not Custom.
 import SuiteKernel
 import SuiteModel
 import Testing
@@ -23,6 +23,17 @@ import Testing
         #expect(form.chosen == "flare.story")
         #expect(form.text(.width) == "1080" && form.text(.height) == "1920" && form.text(.resolution) == "144")
         #expect(form.text(.duration) == "12")
+    }
+
+    @Test func opensOnThePresetItsValuesMatch() {
+        let desktop = NewDocumentPreset(id: "design.desktop", app: .design, title: "Desktop", detail: "1440 × 1024",
+                                        parameters: ["width": "1440", "height": "1024"])
+        let presets = [Self.story, desktop]
+        #expect(NewDocumentForm(DocumentSetup(width: 1440, height: 1024), limits: DocumentLimits(), presets: presets).chosen == "design.desktop")
+        #expect(NewDocumentForm(DocumentSetup(width: 1440, height: 1000), limits: DocumentLimits(), presets: presets).chosen == nil)
+        #expect(NewDocumentForm(DocumentSetup(width: 1440, height: 1024, background: .transparent), limits: DocumentLimits(),
+                                presets: presets).chosen == nil)
+        #expect(NewDocumentForm(DocumentSetup(width: 1440, height: 1024), limits: DocumentLimits()).chosen == nil)
     }
 
     @Test func unitChangeKeepsPixels() {
