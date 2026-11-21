@@ -1,7 +1,8 @@
 // FlareDocumentSheet.swift (document-setup DS-14): Flare's door to SuiteUI's shared NewDocumentSheet. File > New,
 // the toolbar's New and the empty state present it on Flare's presets (SuiteCreating) and its Create sends
 // `.file(.create)` from `NewDocumentSpec(setup)`, the router dismissing it once the document opens. File > Document
-// Settings… presents it in `.settings` mode on the open scene's setup; Apply writes it through `apply` (the window's
+// Settings… presents it in `.settings` mode on the open scene's setup, with no anchor grid (Flare content keeps
+// its stage coordinates, so an anchor would do nothing); Apply writes it through `apply` (the window's
 // `applyDocumentSetup`), and the sheet stays up with the reason when the model refuses. The rules live in
 // FlareDocumentSetup+Kernel.swift; this file only presents.
 import FlareModel
@@ -36,7 +37,7 @@ struct FlareDocumentSheet: ViewModifier {
                     onDone: { setup, _ in perform(.file(NewDocumentSpec(setup).intent)) }, onCancel: { sheet = nil })
             case .settings:
                 NewDocumentSheet(
-                    .settings, setup: setup, limits: limits,
+                    .settings, setup: setup, limits: limits, anchors: false,
                     onDone: { if apply($0, $1) { sheet = nil } }, onCancel: { sheet = nil })
             }
         }
