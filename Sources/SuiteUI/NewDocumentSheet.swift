@@ -1,7 +1,8 @@
 // NewDocumentSheet.swift (document-setup DS-5): the one sheet that starts a document and, in settings mode, edits
 // it later: the app's presets (the clipboard image's size first, when there is one), width and height in a unit,
 // resolution, the pixel size they make, orientation, background and, for timed apps, rate and duration. Settings
-// mode drops the presets and adds the anchor grid that says where old content stays. Each field shows its
+// mode drops the presets and adds the anchor grid that says where old content stays, unless the app never moves old
+// content (Flare keeps stage coordinates), where nine buttons that do nothing would be dead controls. Each field shows its
 // SetupProblem beside it and Create stays off until there are none; every control's help names the `file.new` or
 // `document.set-settings` parameter it sets. The rules are NewDocumentForm, plain and tested on its own; the sheet
 // owns that form as presentation state, so typing redraws the sheet, not the window behind it. A sheet that opens on
@@ -154,9 +155,11 @@ public struct NewDocumentForm: Sendable {
         return [paste] + presets
     }
 
-    /// The sections `mode` shows: presets for a new document, the anchor grid for settings, timing for timed apps.
-    public static func sections(_ mode: NewDocumentMode, limits: DocumentLimits) -> [Section] {
-        var sections: [Section] = if case .new = mode { [.presets, .size, .background] } else { [.size, .anchor, .background] }
+    /// The sections `mode` shows: presets for a new document, the anchor grid for settings (unless the app's content
+    /// keeps its coordinates whatever the anchor says, `anchors: false`), timing for timed apps.
+    public static func sections(_ mode: NewDocumentMode, limits: DocumentLimits, anchors: Bool = true) -> [Section] {
+        var sections: [Section] = if case .new = mode { [.presets, .size, .background] } else { [.size, .background] }
+        if case .settings = mode, anchors { sections.insert(.anchor, at: 1) }
         if limits.rates != nil { sections.append(.timing) }
         return sections
     }
@@ -170,16 +173,18 @@ public struct NewDocumentSheet: View {
     private let mode: NewDocumentMode
     private let onDone: @MainActor (DocumentSetup, BoxAnchor) -> Void
     private let onCancel: @MainActor () -> Void
+    private let anchors: Bool
     @State private var form: NewDocumentForm
 
-    public init(_ mode: NewDocumentMode, setup: DocumentSetup, limits: DocumentLimits,
+    /// `anchors: false` drops settings mode's anchor grid for an app that never moves old content.
+    public init(_ mode: NewDocumentMode, setup: DocumentSetup, limits: DocumentLimits, anchors: Bool = true,
                 onDone: @escaping @MainActor (DocumentSetup, BoxAnchor) -> Void, onCancel: @escaping @MainActor () -> Void) {
-        (self.mode, self.onDone, self.onCancel) = (mode, onDone, onCancel)
+        (self.mode, self.anchors, self.onDone, self.onCancel) = (mode, anchors, onDone, onCancel)
         _form = State(initialValue: NewDocumentForm(setup, limits: limits, presets: NewDocumentForm.choices(mode)))
     }
 
     public var body: some View {
-        let sections = NewDocumentForm.sections(mode, limits: form.limits)
+        let sections = NewDocumentForm.sections(mode, limits: form.limits, anchors: anchors)
         let creates = mode.command == "file.new"
         SuiteSheet(
             creates ? "New Document" : "Document Settings", cancelID: "suite.newdoc.cancel", onCancel: onCancel,
