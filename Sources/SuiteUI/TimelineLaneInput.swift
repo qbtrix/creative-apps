@@ -26,6 +26,9 @@
 // kept inside 0...duration, an edge landing on the playhead when Shift was
 // held at the press; the clip and its keys draw each step, then one onSlide
 // with the frames moved on release (a slide that didn't move is a bed click).
+// While the host's clips can't move (TimelineLaneContext.clipsMove false), a
+// press on a clip's body or end is a bed press: nothing draws a move that
+// would snap back on release, and a clip end shows no resize pointer.
 // A press first takes the strip's focus (TimelineFocusClaim, #1813).
 // It owns the lane's hover, presentation state: which lane the pointer is
 // over and the key under it. A hover sample writes only when that changes,
@@ -88,7 +91,7 @@ struct TimelineLaneInput<ID: Hashable & Sendable>: ViewModifier {
                 case .active(let location):
                     let key = TimelineLaneHit.key(atX: location.x, on: track, mapping: mapping)
                     setHover(TimelineLaneHover(key: key))
-                    let onEnd = key == nil && TimelineLaneHit.clipEnd(atX: location.x, on: track, mapping: mapping) != nil
+                    let onEnd = context.clipsMove && key == nil && TimelineLaneHit.clipEnd(atX: location.x, on: track, mapping: mapping) != nil
                     if onEnd != overClipEnd { overClipEnd = onEnd }
                 case .ended:
                     setHover(nil)
@@ -186,6 +189,8 @@ enum TimelineLaneHit {
 @MainActor final class TimelineLaneContext<ID: Hashable & Sendable> {
     var playhead: Int
     var actions: TimelineLaneActions<ID>
+    /// The host can slide and trim clips now; while false a press on a clip is a bed press.
+    var clipsMove = true
 
     init(
         playhead: Int = 0,
@@ -265,10 +270,11 @@ struct TimelineLanePointerExtras {
         let held = KeyModifiers(flags: flags)
         (active, modifiers, liveDelta, liveTrim) = (true, held, 0, nil)
         target = TimelineLanePress.target(atX: point.x, on: lane.track, mapping: lane.mapping)
+        if !lane.context.clipsMove, case .clipEnd = target { target = .bed }
         drag = TimelineLanePress.begin(
             target, modifiers: held, on: lane.track, playhead: lane.context.playhead, mapping: lane.mapping, actions: lane.context.actions)
         trim = TimelineLanePress.beginTrim(target, playhead: lane.context.playhead, mapping: lane.mapping)
-        if target == .bed, let span = TimelineLaneHit.clipBody(atX: point.x, on: lane.track, mapping: lane.mapping) {
+        if target == .bed, lane.context.clipsMove, let span = TimelineLaneHit.clipBody(atX: point.x, on: lane.track, mapping: lane.mapping) {
             slide = TimelineSlideDrag(span: span, playhead: lane.context.playhead, mapping: lane.mapping, snaps: held.contains(.shift))
         }
         if drag != nil || trim != nil || slide != nil { watchEscape() }

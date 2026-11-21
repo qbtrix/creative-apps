@@ -70,6 +70,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     private let onTrim: @MainActor (ID, SpanEdge, Int) -> Void
     private let onEndTrim: @MainActor () -> Void
     private let onSlide: @MainActor (ID, Int) -> Void
+    private let clipsMove: Bool
     private let onUnit: @MainActor (TimeUnit) -> Void
     private let onWorkArea: @MainActor (ClosedRange<Int>?) -> Void
     private let onSelectAllKeys: (@MainActor () -> Void)?
@@ -112,6 +113,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     /// toolbar. `onPickKeyframe` gets a nil frame when the bed is clicked;
     /// `onMoveKeyframes` gets the frames moved since its last call, and
     /// `onSlide` a clip body's track and the frames it moved since its last call.
+    /// `clipsMove` false makes a press on a clip a bed press, while the host can't slide or trim.
     public init(
         tracks: [TimelineTrack<ID>], duration: Int, frameWidth: CGFloat, playhead: Int,
         unit: TimeUnit = .frames, fps: Int = 0, rate: FrameRate? = nil, workArea: ClosedRange<Int>? = nil, toolbar: Bool = false,
@@ -124,6 +126,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         onTrim: @escaping @MainActor (ID, SpanEdge, Int) -> Void = { _, _, _ in },
         onEndTrim: @escaping @MainActor () -> Void = {},
         onSlide: @escaping @MainActor (ID, Int) -> Void = { _, _ in },
+        clipsMove: Bool = true,
         onUnit: @escaping @MainActor (TimeUnit) -> Void = { _ in },
         onWorkArea: @escaping @MainActor (ClosedRange<Int>?) -> Void = { _ in },
         onSelectAllKeys: (@MainActor () -> Void)? = nil
@@ -145,6 +148,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
         self.onTrim = onTrim
         self.onEndTrim = onEndTrim
         self.onSlide = onSlide
+        self.clipsMove = clipsMove
         self.onUnit = onUnit
         self.onWorkArea = onWorkArea
         self.onSelectAllKeys = onSelectAllKeys
@@ -250,6 +254,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     /// Hands the lanes' presses this body's playhead and closures, without re-running a lane.
     private func updateLaneContext() {
         laneContext.playhead = playhead
+        laneContext.clipsMove = clipsMove
         laneContext.actions = TimelineLaneActions(
             onSelectKeyframe: onSelectKeyframe, onSelectTrack: onSelectTrack, onPickKeyframe: onPickKeyframe,
             onMoveKeyframes: onMoveKeyframes, onEndKeyDrag: onEndKeyDrag, onTrim: onTrim, onEndTrim: onEndTrim,
