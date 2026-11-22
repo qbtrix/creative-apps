@@ -1,12 +1,14 @@
 // PlaceVector.swift (placed-images PL-1 stub, PL-6 body): an SVG flattened once into paint every vector draw
 // takes, through FlareCore's `SVGImport` and `RenderList`, each path flattened at 0.25 asset units;
-// `vectorSize` is the one-parse size read a place uses.
+// `svgScene` is the parse itself, kept for the last file read, so a place's size read and the target's own layers
+// (Flare's `insertPlaced`) share one parse.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
 import Foundation
 #endif
 import FlareCore
+import Synchronization
 
 extension PlaceRules {
     /// How far a flattened polygon may stray from its curve, in asset units.
@@ -15,8 +17,22 @@ extension PlaceRules {
     /// The SVG's natural size (its viewBox, else width and height) from one parse, with no render list or
     /// flattening: what a place reads before the target makes its own layers or paint.
     public static func vectorSize(_ data: Data, name: String) throws -> Size {
-        let (scene, _) = try SVGImport.scene(from: data, name: name)
+        let (scene, _) = try svgScene(data, name: name)
         return Size(width: scene.width, height: scene.height)
+    }
+
+    // ponytail: one entry, the file a place is reading right now; a keyed cache if two places ever interleave.
+    private static let lastScene = Mutex<(data: Data, name: String, scene: Scene, report: ImportReport)?>(nil)
+
+    /// `SVGImport.scene(from:name:)`, parsed once for the last file it read: the size read before a place and the
+    /// target's layers after it get the same scene from one parse. A file that throws is never kept.
+    public static func svgScene(_ data: Data, name: String) throws -> (Scene, ImportReport) {
+        if let hit = lastScene.withLock({ $0.flatMap { $0.name == name && $0.data == data ? ($0.scene, $0.report) : nil } }) {
+            return hit
+        }
+        let (scene, report) = try SVGImport.scene(from: data, name: name)
+        lastScene.withLock { $0 = (data, name, scene, report) }
+        return (scene, report)
     }
 
     /// The SVG in `data` as polygons with their paint, in paint order; throws the import's reason.

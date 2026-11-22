@@ -1,6 +1,6 @@
 // PlaceVectorTests.swift (placed-images PL-1 written, PL-6 turns on): an SVG flattened into paint. Two groups
 // stay two items in their colours and paint order, a ring keeps its hole, a gradient keeps its stops, the size
-// comes from the viewBox (also by the size-only read a place uses), a filter is reported skipped, and damaged bytes throw. The SVGs are in Fixtures/place/.
+// comes from the viewBox (also by the size-only read a place uses, which keeps only the last file's parse), a filter is reported skipped, and damaged bytes throw. The SVGs are in Fixtures/place/.
 import Foundation
 import Testing
 import SuiteKernel
@@ -50,6 +50,16 @@ import SuiteKernel
     @Test(arguments: ["two-groups.svg", "ring.svg", "gradient.svg"]) func sizeMatchesFlattening(_ name: String) throws {
         let data = try Data(contentsOf: Self.fixtures.appendingPathComponent(name))
         #expect(try PlaceRules.vectorSize(data, name: name) == PlaceRules.vector(data, name: name).size)
+    }
+    /// The kept parse answers only for the same bytes and name: reading another file between two reads of one
+    /// never hands back the other file's scene.
+    @Test func keptSceneMatchesItsFile() throws {
+        let two = try Data(contentsOf: Self.fixtures.appendingPathComponent("two-groups.svg"))
+        let ring = try Data(contentsOf: Self.fixtures.appendingPathComponent("ring.svg"))
+        for (data, name) in [(two, "two-groups.svg"), (ring, "ring.svg"), (two, "two-groups.svg"), (ring, "ring.svg")] {
+            #expect(try PlaceRules.vectorSize(data, name: name) == PlaceRules.vector(data, name: name).size)
+        }
+        #expect(throws: (any Error).self) { try PlaceRules.vectorSize(Data("<svg><g".utf8), name: "ring.svg") }
     }
     @Test func sizeReadsViewBox() throws {
         let data = try Data(contentsOf: Self.fixtures.appendingPathComponent("two-groups.svg"))
