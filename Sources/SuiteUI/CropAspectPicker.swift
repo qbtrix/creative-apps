@@ -1,5 +1,6 @@
 // CropAspectPicker.swift (orientation-crop OC-5): ChoiceChips for each crop aspect, Custom W and H fields, and a
-// landscape/portrait toggle on X; each sends a CropPick naming its crop.* command (rules: CropAspectChoices).
+// landscape/portrait toggle on X; each sends a CropPick naming its crop.* command (rules: CropAspectChoices). A column
+// in an inspector, one row in a ToolOptionsBar (ToolOptionsStack).
 import SuiteKernel
 import SwiftUI
 
@@ -23,7 +24,7 @@ public struct CropAspectPicker: View {
 
     public var body: some View {
         let (toggle, portrait) = (Self.toggleHelp(aspect), orientation == .portrait)
-        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+        ToolOptionsStack(spacing: SuiteSpacing.s) {
             ChoiceChips(options: Self.chips, selected: editingCustom ? .custom : CropAspectChoice.chip(for: aspect), onSelect: choose)
                 .help("Locks the crop to a shape: \(CropAspectChoices.aspectCommand)")
             if editingCustom || CropAspectChoice.chip(for: aspect) == .custom { custom }

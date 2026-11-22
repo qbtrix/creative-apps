@@ -1,7 +1,7 @@
 // PhotoSeamsSnapshots.swift: the Photo window under `-PhotoFixture sample`
 // (S-12): the sample fixture on the fakes, its picture on the canvas and the
 // "Preview data" pill in the status line (with its tooltip), and the
-// Eyedropper's Tool Options section (its hint, size chips and brush colour).
+// Eyedropper's tool options bar (its hint, size chips and brush colour).
 // Writes photo-preview-pill-dark.png (the editor is dark on purpose, as in
 // PhotoEditorSnapshots) and photo-eyedropper-options-{light,dark}.png. macOS only.
 import PhotoModel
@@ -34,10 +34,9 @@ import Testing
         #expect(model.sampleSize == .point)
         #expect(ToolOptionsSection.eyedropperHint == "Click the image to pick a color for the brush.")
         for scheme in [ColorScheme.light, .dark] {
-            let view = ToolOptionsSection(model: model, perform: { _ in })
-                .padding(SuiteSpacing.m)
-                .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)
-                .padding(SuiteSpacing.xxl)
+            // The bar as the window draws it over the canvas, at the window's width.
+            let view = PhotoToolOptionsBar(model: model, perform: { _ in })
+                .frame(maxHeight: .infinity, alignment: .top)
             try snapshot(view, name: "photo-eyedropper-options-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }

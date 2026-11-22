@@ -1,7 +1,7 @@
 // PhotoProInspectorSnapshots.swift: Photo's inspector in the Pro density
 // layout for a new 1920 × 1080 image with Background selected and every
 // adjustment section open: the InspectorHeader with the Model's detail
-// lines, the Layer section, Tool Options, then the flush, hairline-separated adjustment sections
+// lines, the Layer section, then the flush, hairline-separated adjustment sections
 // with Gamma as a ScrubField. Light and Dark. Writes
 // photo-inspector-layer-light.png and photo-inspector-layer-dark.png, then
 // the same panel as tall as its whole content, so the inspector is drawn

@@ -167,6 +167,13 @@ public enum SuiteSize {
     public static let capsTracking: CGFloat = 0.7
     public static let studioRow: CGFloat = 28
     public static let studioTick: CGFloat = 2
+    /// The tool options bar (ToolOptionsBar): its fixed height, one Studio row
+    /// with `s` above and below, so the canvas never moves as tools change;
+    /// and the narrowest cell a control gets in it.
+    public static let toolOptionsBar: CGFloat = studioRow + 2 * SuiteSpacing.s
+    public static let toolOptionsCell: CGFloat = 150
+    /// One choice chip in a ToolOptionsBar's single row of chips (ChoiceChips).
+    public static let toolOptionsChip: CGFloat = 76
     /// The curve editor (CurveEditor): its height, a handle, the handle's hit
     /// target and the preview dot.
     public static let curveEditor: CGFloat = 180

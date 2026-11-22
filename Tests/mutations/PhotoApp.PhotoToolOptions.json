@@ -12,5 +12,26 @@
     "find": "var hex: HexColor { HexColor(red, green, blue) }",
     "replace": "var hex: HexColor { HexColor(red, blue, green) }",
     "tests": "PhotoHexColorBridgeTests"
+  },
+  {
+    "label": "barSkipsOptions: the tool options bar stops reading the toolOptions facet, so a brush-size step leaves its Size row stale",
+    "file": "Sources/PhotoApp/PhotoToolOptions.swift",
+    "find": "session?.workspace(reading: .tool, .toolOptions) ?? given",
+    "replace": "session?.workspace(reading: .tool) ?? given",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  },
+  {
+    "label": "barReadsGiven: the bar shows the workspace the editor handed it, never the session's, so a size step the window skips never reaches it",
+    "file": "Sources/PhotoApp/PhotoToolOptions.swift",
+    "find": "let model = session?.workspace(reading: .tool, .toolOptions) ?? given",
+    "replace": "let model = given",
+    "tests": "RenderBudgetPhotoFacetsTests"
+  },
+  {
+    "label": "paintFollowsEraser: the bar's color reads the active tool's options, so with the eraser picked it shows the eraser's unused color, not the paint color",
+    "file": "Sources/PhotoApp/PhotoToolOptions.swift",
+    "find": "HexColor { model.brushOptions.hex }",
+    "replace": "HexColor { model.toolOptions.hex }",
+    "tests": "PhotoToolOptionsBarTests"
   }
 ]

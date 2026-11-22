@@ -1,4 +1,4 @@
-// PhotoBrushSnapshots.swift: Photo's Tool Options section with the brush
+// PhotoBrushSnapshots.swift: Photo's tool options bar with the brush
 // selected (#26): size, hardness, color and opacity, each away from its
 // default. Light and Dark. Writes photo-brush-options-light.png and
 // photo-brush-options-dark.png. macOS only.
@@ -20,10 +20,9 @@ import Testing
         model.setToolOption(.opacity(percent: 80))
         model.setToolOption(.color(red: 220, green: 30, blue: 30))
         for scheme in [ColorScheme.light, .dark] {
-            let view = ToolOptionsSection(model: model, perform: { _ in })
-                .padding(SuiteSpacing.m)
-                .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)
-                .padding(SuiteSpacing.xxl)
+            // The bar as the window draws it over the canvas, at the window's width.
+            let view = PhotoToolOptionsBar(model: model, perform: { _ in })
+                .frame(maxHeight: .infinity, alignment: .top)
             try snapshot(view, name: "photo-brush-options-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }

@@ -3,9 +3,9 @@
 // empty state: Crop picked, no crop, Free, the fields disabled under "Drag on
 // the image, or pick a ratio below, to start a crop.") and
 // photo-crop-ratio-light/dark.png (1:1 locked, a centered 600 x 600 pending
-// crop, Y disabled since the crop spans the full height). `gridAligned` checks blueprint 7.4 rule
-// 5: the four fields' frames (CropFieldBoundsKey) form a 2 x 2 grid, X over W and Y
-// over H, equal widths within 1 pt. macOS only.
+// crop, Y disabled since the crop spans the full height). `fieldsInOneRow` checks blueprint 7.4 rule
+// 5: in the tool options bar the four fields' frames (CropFieldBoundsKey) sit in one row, X, Y, W, H
+// left to right, equal widths within 1 pt. macOS only.
 import AppKit
 import PhotoModel
 import SuiteUI
@@ -62,26 +62,23 @@ import Testing
     }
 
     /// Blueprint 7.4 rule 5, measured from the bounds each field reports
-    /// through CropFieldBoundsKey in a panel-wide host. SwiftUI builds a
+    /// through CropFieldBoundsKey in a window-wide bar. SwiftUI builds a
     /// hosting view's accessibility tree only when an assistive client asks,
     /// so a headless runner has no accessibility frames to read.
-    @Test func gridAligned() throws {
+    @Test func fieldsInOneRow() throws {
         var model = try opened()
         model.setCropAspect(.ratio(1, 1))
         let frames = fieldFrames(
-            in: CropOptions(model: model, perform: { _ in }).padding(SuiteSpacing.m),
-            size: CGSize(width: SuiteSize.editorPanelWidth, height: 480))
+            in: PhotoToolOptionsBar(model: model, perform: { _ in }),
+            size: CGSize(width: 1440, height: SuiteSize.toolOptionsBar))
         let x = try #require(frames["photo.crop.x"], "no photo.crop.x among \(frames.keys.sorted())")
         let y = try #require(frames["photo.crop.y"])
         let w = try #require(frames["photo.crop.width"])
         let h = try #require(frames["photo.crop.height"])
         #expect(x.width > 0 && x.height > 0, "photo.crop.x has no size: \(x)")
         for frame in [y, w, h] { #expect(abs(frame.width - x.width) <= 1, "field widths differ: \(frames)") }
-        #expect(abs(x.minX - w.minX) <= 1, "X is not over W: \(x) \(w)")
-        #expect(abs(y.minX - h.minX) <= 1, "Y is not over H: \(y) \(h)")
-        #expect(abs(x.midY - y.midY) <= 1 && abs(w.midY - h.midY) <= 1, "a row is ragged: \(frames)")
-        #expect(y.minX > x.maxX && h.minX > w.maxX, "the columns overlap: \(frames)")
-        #expect(x.midY != w.midY, "the two rows share a line: \(frames)")
+        for frame in [y, w, h] { #expect(abs(frame.midY - x.midY) <= 1, "the row is ragged: \(frames)") }
+        #expect(y.minX > x.maxX && w.minX > y.maxX && h.minX > w.maxX, "not X, Y, W, H left to right: \(frames)")
     }
 
     /// Each crop field's frame in `view`'s space, resolved from its

@@ -3,9 +3,9 @@
 // (RenderBudgetHarness.swift) with the `large` fixture (three 4000 x 3000
 // layers). The window keeps its PhotoWorkspace in a PhotoSession that
 // republishes it as facets, and each view re-runs only for the facets it reads:
-// - 30 Brush size steps run PhotoEditor's body 0 times and PhotoPanel's 30
-//   times, call the canvas view's `show` 0 times, and the Size row then shows
-//   the last size.
+// - 30 Brush size steps run PhotoEditor's and PhotoPanel's bodies 0 times and
+//   the tool options bar's (PhotoToolOptionsBar) 30 times, call the canvas
+//   view's `show` 0 times, and the Size row then shows the last size.
 // - A layer click (`pickLayer`) calls the canvas view's `show` 0 times and runs
 //   PhotoPanel's body at most once, and the Layer section then shows the
 //   picked layer's opacity.
@@ -29,7 +29,7 @@ import Testing
 @MainActor @Suite(.serialized) struct RenderBudgetPhotoFacetsTests {
     static let steps = 30
 
-    @Test(.timeLimit(.minutes(3))) func brushSizeStepsRunOnlyThePanel() async throws {
+    @Test(.timeLimit(.minutes(3))) func brushSizeStepsRunOnlyTheOptionsBar() async throws {
         let session = PhotoSession(try PhotoWorkspace.fixture(.large))
         let (w, tally, canvas, send) = try await Self.host(session)
         defer { w.close() }
@@ -39,7 +39,7 @@ import Testing
         let sizes = (1...Self.steps).map { start + Double($0) }
         #expect(sizes.allSatisfy(ToolOptions.sizeRange.contains))
 
-        let (panel, shows) = (tally.runs(of: PhotoPanel.self), canvas.showCalls)
+        let (panel, bar, shows) = (tally.runs(of: PhotoPanel.self), tally.runs(of: PhotoToolOptionsBar.self), canvas.showCalls)
         let step = try await w.measure("photo brush size, \(Self.steps) steps, large", bodies: Self.editor(tally)) {
             try await w.ticks(Self.steps) { send(.toolOption(.size(sizes[$0 - 1]))) }
         }
@@ -48,7 +48,8 @@ import Testing
         #expect(w.value("photo.tool.size")?.contains("\(Int(sizes.last ?? 0))") == true,
                 "the Size row shows \(w.value("photo.tool.size") ?? "nothing")")
         #expect(step.bodies == 0, "\(step)")
-        #expect(tally.runs(of: PhotoPanel.self) - panel == Self.steps)
+        #expect(tally.runs(of: PhotoPanel.self) - panel == 0, "a tool option step re-ran the inspector")
+        #expect(tally.runs(of: PhotoToolOptionsBar.self) - bar == Self.steps)
         #expect(canvas.showCalls - shows == 0)
     }
 

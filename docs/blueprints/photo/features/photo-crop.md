@@ -167,7 +167,7 @@ CP-2's `cropAspectBadge`.
 | CP-1 | `LiveCropSizingTests` on 800 × 600: `applying(1:1, nil)` is (100, 0, 600, 600); width 400 under 1:1 from (100, 0, 600, 600) gives (100, 0, 400, 400); X 700 with width 200 gives X 600; `dragged` (10, 10)→(210, 110) Free gives (10, 10, 200, 100), under 1:1 gives (10, 10, 200, 200); `swapped(3:2)` is 2:3; Original on 800 × 600 is 4:3; every result of 1,000 seeded random inputs lies inside the canvas, is at least 1 × 1 and keeps the ratio within 1 px | a result leaves the canvas, drops below 1 px, or breaks the ratio by more than 1 px |
 | CP-2 | `PhotoCropSizeTests`: `setCropField(.width, 0)` returns false and changes nothing; fields are disabled with no crop and Free and enabled after choosing 1:1; the crop drag under 3:2 keeps 3:2; `dragUpdatesEveryEvent` (QB-F2): 60 drag events give 60 different `pendingCrop` values; PF-5: a typed crop then Apply equals CoreRaster `cropped` of each layer at that rect; nothing but Apply records a history step | a bad value is taken, the drag ignores the lock, the overlay would lag, or a field edit is an undo step |
 | CP-3 | `PhotoCropBudgetTests`: PB-8 ≤ 0.05 ms release and ≤ 0.5 ms debug (gated in CI), 60 events on `large` | the debug gate fails in CI |
-| CP-4 | `PhotoCropOptionsSnapshots`: `photo-crop-options-light.png`, `-dark.png` (empty state) and `photo-crop-ratio-light.png`, `-dark.png` (1:1 locked, 600 × 600); identifiers `photo.crop.x`, `.y`, `.width`, `.height`, `.aspect.<title>`, `.swap`, `.apply`, `.cancel`; the four fields line up as a 2 × 2 grid (7.4 rule 5, equal widths in the snapshot host's frames) | a control has no identifier, or the grid is ragged |
+| CP-4 | `PhotoCropOptionsSnapshots`: `photo-crop-options-light.png`, `-dark.png` (empty state) and `photo-crop-ratio-light.png`, `-dark.png` (1:1 locked, 600 × 600); identifiers `photo.crop.x`, `.y`, `.width`, `.height`, `.aspect.<title>`, `.swap`, `.apply`, `.cancel`; the four fields sit in one row of the tool options bar (7.4 rule 5, equal widths in the snapshot host's frames) | a control has no identifier, or the row is ragged |
 | CP-5 | PJ-8 passes on the macOS run with every step `shot`, including Return in the W field leaving the crop pending; the overlay's pill reads "1:1" under the lock and is absent under Free | any step fails, or Return in a field applies the crop |
 | CP-7 | PJ-P1 records at least 60 samples per series (brush, crop, pan) and PJ-P2 at least 60, as report-only lines on the contact sheet | a series has fewer than 60 samples |
 
@@ -179,7 +179,7 @@ CP-2's `cropAspectBadge`.
 | PF-5 | typed crop equals CoreRaster `cropped` | `PhotoCropSizeTests.typedCropMatchesCropped` |
 | QB-F2 | the crop rect follows every drag event | `PhotoCropSizeTests.dragUpdatesEveryEvent` |
 | QB-F4 | the four fields type; Return applies; Escape cancels | PJ-8 |
-| 7.4 rule 5 | the 2 × 2 grid lines up within 1 pt | `PhotoCropOptionsSnapshots.gridAligned` (PV-10's PJ-17 measures it again) |
+| 7.4 rule 5 | the one row lines up within 1 pt | `PhotoCropOptionsSnapshots.fieldsInOneRow` (PV-10's PJ-17 measures it again) |
 | PJ-P1, PJ-P2 | report-only until #330 | `testCanvasDragLatency`, `testSliderScrubLatency` |
 
 ## Done check

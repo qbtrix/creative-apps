@@ -1,7 +1,7 @@
 // PhotoJourneyTests+Gradient.swift: PJ-G1, a sky gradient in a selection
 // (gradient-fill PG-6; docs/blueprints/photo/features/gradient-fill.md,
 // Journey steps; RJ-P19). On sky.png (the 800 x 600 test photo) a marquee
-// over the top half, then G, Shift-G picks the Gradient tool: Tool Options shows
+// over the top half, then G, Shift-G picks the Gradient tool: the options bar shows
 // SuiteUI's stop bar (`suite.gradient.bar`) and no angle row
 // (`suite.gradient.angle`). The first stop goes deep blue and the last pale
 // blue through the editor's hex field (`suite.gradient.color`); a drag from

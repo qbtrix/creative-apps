@@ -73,11 +73,12 @@ extension Journey {
         return true
     }
 
-    /// The inspector's dropdown identified `id` or labelled `label`: its menu
-    /// button, never the row's label text, which carries the same identifier.
-    func inspectorMenu(_ id: String, label: String) -> XCUIElement {
+    /// The dropdown identified `id` or labelled `label` in `container` (the inspector unless
+    /// given, `suite.toolOptions` for a tool option): its menu button, never the row's label
+    /// text, which carries the same identifier.
+    func inspectorMenu(_ id: String, label: String, in container: String = "suite.inspector") -> XCUIElement {
         let types = [XCUIElement.ElementType.menuButton, .popUpButton, .button].map { NSNumber(value: $0.rawValue) }
-        return element("suite.inspector").descendants(matching: .any).matching(
+        return element(container).descendants(matching: .any).matching(
             NSPredicate(format: "elementType IN %@ AND (identifier == %@ OR label == %@)", types, id, label)
         ).firstMatch
     }

@@ -1,5 +1,5 @@
 // PhotoFillToolOptions.swift: the Gradient tool's own options in the
-// inspector, under its one-line hint (ToolOptionsSection; gradient-fill
+// tool options bar, before its one-line hint (ToolOptionsSection; gradient-fill
 // PG-2). SuiteUI's GradientEditor on the tool's kernel `Fill`
 // (`ToolOptions.gradient`, whose points are a unit box's), limited to linear
 // and radial and with no angle row, since the drag sets the line. Each

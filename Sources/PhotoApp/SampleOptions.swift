@@ -1,4 +1,4 @@
-// SampleOptions.swift: the eyedropper's own options in the inspector, under
+// SampleOptions.swift: the eyedropper's own options in the tool options bar, before
 // its one-line hint (ToolOptionsSection): SuiteUI's SampleSizeChips (Point,
 // 3 x 3, 5 x 5) on the workspace's sample size. A chip asks the window to
 // change it (`.sample(.size)`); values in, intents out.

@@ -1,9 +1,9 @@
 // PhotoRetouchOptions.swift: the Paint Bucket's, Spot Heal's and Remove's
-// options in the inspector's Tool Options (fill-heal FH-3), under each tool's
-// one-line hint (ToolOptionsSection). The bucket: Tolerance, Contiguous and
-// All Layers (`PhotoWorkspace.bucketOptions`); the heal tools: the brush's
-// Size and Hardness. Every control is identified "photo.tool.<name>". Values
-// in, intents out.
+// options in the tool options bar (fill-heal FH-3, PhotoToolOptionsBar), each
+// tool's one-line hint last. The bucket: Tolerance, Contiguous and All Layers
+// (`PhotoWorkspace.bucketOptions`), filling with the bar's color (the brush's); the
+// heal tools: the brush's Size and Hardness. Every control is identified
+// "photo.tool.<name>". Values in, intents out.
 import PhotoModel
 import SuiteUI
 import SwiftUI
@@ -27,19 +27,18 @@ struct PhotoRetouchOptions: View {
     @ViewBuilder
     private var bucket: some View {
         let options = model.bucketOptions
-        hint(Self.bucketHint)
         InspectorSliderRow(
             "Tolerance", value: Double(options.tolerance), in: PhotoWorkspace.bucketToleranceRange, decimals: 0
         ) { perform(.bucketOption(.tolerance(Int($0.rounded())))) }
         .accessibilityIdentifier("photo.tool.tolerance")
         toggle("Contiguous", "photo.tool.contiguous", options.contiguous) { .contiguous($0) }
         toggle("All Layers", "photo.tool.all-layers", options.sampleAllLayers) { .sampleAllLayers($0) }
+        hint(Self.bucketHint)
     }
 
     @ViewBuilder
     private func heal(_ text: String) -> some View {
         let options = model.toolOptions
-        hint(text)
         InspectorSliderRow("Size", value: options.size, in: ToolOptions.sizeRange, unit: "px", decimals: 0) {
             perform(.toolOption(.size($0)))
         }
@@ -48,6 +47,7 @@ struct PhotoRetouchOptions: View {
             "Hardness", value: options.hardnessPercent, in: ToolOptions.hardnessRange, unit: "%", decimals: 0
         ) { perform(.toolOption(.hardness(percent: $0))) }
         .accessibilityIdentifier("photo.tool.hardness")
+        hint(text)
     }
 
     private func toggle(
@@ -64,6 +64,7 @@ struct PhotoRetouchOptions: View {
         Text(text)
             .font(SuiteFont.inspectorMeta)
             .foregroundStyle(SuiteColor.textSecondary)
-            .fixedSize(horizontal: false, vertical: true)
+            .lineLimit(1)
+            .help(text)
     }
 }
