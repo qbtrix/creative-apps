@@ -163,14 +163,14 @@ public enum PlaceCommands {
         return selection
     }
     /// The base64 file as an asset `target` takes: the size checked before the sniff, then the format against the
-    /// target's set; its natural size from the SVG's flattening or the target's header read.
+    /// target's set; its natural size from one SVG parse (no flattening) or the target's header read.
     static func asset<T: PlacedImageTarget>(_ target: T, _ id: String, name: String, base64: String) throws -> PlacedAsset {
         guard let data = Data(base64Encoded: base64) else { throw CatalogError.failed(id: id, message: "The file's bytes aren't base64.") }
         guard data.count <= PlaceRules.maxBytes else { throw CatalogError.unavailable(id: id, why: PlaceRules.sizeHelp) }
         guard let format = PlaceRules.format(of: data), target.placeFormats.contains(format) else {
             throw CatalogError.unavailable(id: id, why: PlaceRules.formatHelp(for: target.placeFormats))
         }
-        let natural = format == .svg ? try PlaceRules.vector(data, name: name).size : try target.rasterSize(data, format: format)
+        let natural = format == .svg ? try PlaceRules.vectorSize(data, name: name) : try target.rasterSize(data, format: format)
         return PlacedAsset(id: PlaceRules.assetID(of: data), name: name, format: format, natural: natural, data: data)
     }
 }
