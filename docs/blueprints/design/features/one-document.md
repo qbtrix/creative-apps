@@ -116,7 +116,7 @@ Measured in `RenderBudgetDesignAnimateTests` and written to `Tests/render-budget
 
 ## Acceptance
 
-Measured for the quality gate (#6373) on a release build (`swift test -c release -Xswiftc -DDEBUG -Xswiftc -enable-testing --no-parallel`), 3 runs, each started at a 1-minute load under 12 (6 to 10), all green. Times are gated only on an optimized build; a debug build counts bodies and prints the times.
+Measured for the quality gate (#6373) on a release build (`swift test -c release -Xswiftc -DDEBUG -Xswiftc -enable-testing --no-parallel`), 3 runs, each started at a 1-minute load under 12 (6 to 10), all green. Times are gated only on an optimized build; a debug build counts bodies and prints the times. Rows 2 and 3 were timed with the p95 gate in place; that gate now lives in `dragTiming` and `scrubTiming`, disabled until the supervisor adds their Tests/perf-suites.txt lines.
 
 | Row | Test | Budget | Measured (3 runs) | Pass |
 |---|---|---|---|---|

@@ -1,9 +1,9 @@
 // RenderBudgetDesignHeroTests.swift: the one-document hero's edit-while-animated budgets (OD-15 rows 2 and 3,
 // Tests/render-budgets.md), on `animated(500)` in the real window. `dragKeyed` scrubs to frame 60, then drags the
-// first rectangle where it shows there, 120 samples: gated at Design's drag row, 3 window bodies, and on an
-// optimized build a 6 ms step p95. `scrubRuler` runs 120 ruler scrub steps, each laid out and displayed: gated at
-// 0 window bodies (the canvas alone follows the frame), and on an optimized build an 8.3 ms step p95. A debug build
-// (the gate) only prints the times as `BUDGET` lines: debug SwiftUI is slower than any frame budget. macOS only.
+// first rectangle where it shows there, 120 samples: gated at Design's drag row, 3 window bodies. `scrubRuler` runs
+// 120 ruler scrub steps, each laid out and displayed: gated at 0 window bodies (the canvas alone follows the frame).
+// `dragTiming` and `scrubTiming` run the same gestures and, on an optimized build, gate a 6 ms and an 8.3 ms step
+// p95; they wait disabled on their Tests/perf-suites.txt lines. A debug build only prints the times. macOS only.
 #if canImport(AppKit)
 import AppKit
 @testable import DesignModel
@@ -24,7 +24,17 @@ extension BodyCountSuites {
         /// Times are gated only on an optimized build (`swift test -c release -Xswiftc -DDEBUG`).
         static let timed = !_isDebugAssertConfiguration()
 
-        @Test(.timeLimit(.minutes(2))) func dragKeyed() async throws {
+        @Test(.timeLimit(.minutes(2))) func dragKeyed() async throws { try await drag(timed: false) }
+
+        @Test(.disabled("waits on its Tests/perf-suites.txt line"), .timeLimit(.minutes(2)))
+        func dragTiming() async throws { try await drag(timed: Self.timed) }
+
+        @Test(.timeLimit(.minutes(2))) func scrubRuler() async throws { try await scrub(timed: false) }
+
+        @Test(.disabled("waits on its Tests/perf-suites.txt line"), .timeLimit(.minutes(2)))
+        func scrubTiming() async throws { try await scrub(timed: Self.timed) }
+
+        private func drag(timed: Bool) async throws {
             #if DEBUG
             let seed = DesignFixtures.animated(500)
             let w = RenderBudgetWindow(DesignWindow(seed: seed, live: DesignLiveDrag()))
@@ -44,7 +54,7 @@ extension BodyCountSuites {
             print("BUDGET design drag keyed at 60 on animated(500): \(move)")
             #expect((move.bodies ?? 1) >= 1, "the drag never reached the canvas: \(move)")
             expectBodies(move, atMost: 3, target: 3)
-            if Self.timed { expectP95(move, atMost: 6, target: 6) }
+            if timed { expectP95(move, atMost: 6, target: 6) }
             perform(.pause)  // nothing plays: it only records the window's workspace
             let after = try #require(DesignWindow.lastWorkspace)
             #expect(after.playhead == 60, "the drag moved the playhead")
@@ -53,7 +63,7 @@ extension BodyCountSuites {
             #endif
         }
 
-        @Test(.timeLimit(.minutes(2))) func scrubRuler() async throws {
+        private func scrub(timed: Bool) async throws {
             #if DEBUG
             let seed = DesignFixtures.animated(500)
             let w = RenderBudgetWindow(DesignWindow(seed: seed, live: DesignLiveDrag()))
@@ -76,7 +86,7 @@ extension BodyCountSuites {
             print(String(format: "BUDGET design scrub ruler 120 steps on animated(500): p50 %.2f p95 %.2f max %.2f ms | over 8.3 ms %d | window bodies %d",
                          sorted[60], sorted[114], sorted.last ?? 0, times.filter { $0 > 8.33 }.count, ran))
             #expect(ran == 0, "a scrub step ran the window: \(ran) bodies")
-            if Self.timed { #expect(sorted[114] <= 8.3, "scrub step p95 \(sorted[114]) ms is over 8.3 ms") }
+            if timed { #expect(sorted[114] <= 8.3, "scrub step p95 \(sorted[114]) ms is over 8.3 ms") }
             try await w.settle(400)
             perform(.pause)
             let landed = try #require(DesignWindow.lastWorkspace)
