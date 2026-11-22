@@ -90,6 +90,8 @@ private struct PenPathsSample: View {
                     PathEditOverlay(draft: draft, path: path, selection: selection, tool: tool, zoom: 1, pointer: pointer) { _ in }
                 }
                 .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+                .padding(SuiteSpacing.m)
+                .background(SuiteColor.canvasSurround, in: .rect(cornerRadius: SuiteRadius.large))
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

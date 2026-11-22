@@ -117,6 +117,8 @@ struct GalleryPenPathsPage: View {
                 .accessibilityLabel("Pen canvas")
                 .accessibilityValue("One sample path")
                 .accessibilityIdentifier("suite.gallery.pen-canvas")
+                .padding(SuiteSpacing.m)
+                .background(SuiteColor.canvasSurround, in: .rect(cornerRadius: SuiteRadius.large))
             Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
                 .accessibilityLabel(log.joined(separator: "\n"))
                 .accessibilityValue(log.joined(separator: "\n"))

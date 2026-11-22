@@ -170,4 +170,20 @@ struct PathGesture: Sendable {
             return picked ? [.select(anchors: [], rect: nil, extend: false)] : []
         }
     }
+
+    /// The buttons for the key-only actions, so a mouse alone can reach them: Finish Path and Cancel Path while a
+    /// draft is open (Return, Escape), Delete Points while points are selected (Delete). Empty when none applies.
+    static func buttons(in context: PathContext) -> [PathButton] {
+        if context.draft != nil {
+            return [PathButton(title: "Finish Path", systemImage: "checkmark.circle", id: "suite.path.finish", intent: .finish),
+                    PathButton(title: "Cancel Path", systemImage: "xmark.circle", id: "suite.path.cancel", intent: .cancel)]
+        }
+        guard context.path != nil, !context.selection.ordered.isEmpty else { return [] }
+        return [PathButton(title: "Delete Points", systemImage: "trash", id: "suite.path.remove", intent: .remove)]
+    }
+}
+
+/// One button of the overlay's action bar: what it reads, its symbol, its identifier and the intent it sends.
+struct PathButton: Sendable, Equatable {
+    let title: String, systemImage: String, id: String, intent: PathIntent
 }

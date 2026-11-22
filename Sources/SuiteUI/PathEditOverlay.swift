@@ -9,6 +9,8 @@
 // view points in, document-space intents out. The overlay keeps only its
 // gesture, the pointer and focus; the app owns the draft, path and selection.
 // PN-4 adds one hidden accessibility element per anchor and drawn handle.
+// A floating bar at the bottom gives the key-only actions a button (Finish
+// Path, Cancel Path while drawing; Delete Points with points selected).
 // `pressesPassThrough()` keeps the marks and hover for a host whose own canvas
 // gesture takes the presses. `holdsPressesUntilRelease()` runs a press's intents
 // on a PathLiveDrag the overlay draws and hands them to the app once, at
@@ -107,6 +109,7 @@ public struct PathEditOverlay: View {
             send(intents)
             return intents.isEmpty ? .ignored : .handled
         }
+        .overlay(alignment: .bottom) { actionBar }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Path editor")
         .accessibilityValue(context.draft.map { "Drawing, \($0.contour.anchors.count) points" }
@@ -130,6 +133,18 @@ public struct PathEditOverlay: View {
         var overlay = self
         overlay.holdsPresses = true
         return overlay
+    }
+
+    /// The floating bar for the actions a key would take (Finish Path, Cancel Path, Delete Points), so the mouse can
+    /// reach them too; hidden while a press lasts and when the host takes the presses (`pressesPassThrough()`).
+    @ViewBuilder private var actionBar: some View {
+        let buttons = takesPresses && tracker.pressed == nil ? PathGesture.buttons(in: context) : []
+        if !buttons.isEmpty {
+            ToolbarGroup(buttons.map { button in
+                ToolbarAction(button.title, systemImage: button.systemImage, identifier: button.id) { send([button.intent]) }
+            })
+            .padding(SuiteSpacing.m)
+        }
     }
 
     /// The rubber band, the handle a Pen drag pulls, the marquee and the close ring.

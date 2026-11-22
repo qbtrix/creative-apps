@@ -132,3 +132,19 @@ private let a1 = AnchorRef(contour: 0, index: 1)
     let passing = full.pressesPassThrough()
     #expect(!passing.takesPresses)
 }
+
+@Test func everyKeyOnlyPathActionHasAButton() {
+    let ids = { (c: PathContext) in PathGesture.buttons(in: c).map(\.id) }
+    let intents = { (c: PathContext) in PathGesture.buttons(in: c).map(\.intent) }
+    // An open draft: Return and Escape get Finish Path and Cancel Path, so a mouse alone can leave a path open or drop it.
+    let drawing = context(.pen, draft: [corner(0, 0), corner(10, 0)])
+    #expect(ids(drawing) == ["suite.path.finish", "suite.path.cancel"])
+    #expect(intents(drawing) == [.finish, .cancel])
+    // Selected points and no draft: Delete gets Delete Points.
+    let selected = context(.directSelect, selected: [a1])
+    #expect(ids(selected) == ["suite.path.remove"])
+    #expect(intents(selected) == [PathGesture.key(.delete, modifiers: [], in: selected)].flatMap { $0 })
+    // Nothing to finish or delete: no bar.
+    #expect(ids(context(.directSelect)).isEmpty)
+    #expect(ids(context(.pen)).isEmpty)
+}
