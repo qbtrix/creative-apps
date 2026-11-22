@@ -68,7 +68,7 @@ enum PenPathsFixture {
     }
 }
 
-/// The page's layout with the overlay's state seeded: the tool picker, the artboard and the overlay on it.
+/// The page's layout, panel background included, with the overlay's state seeded: the tool picker, the artboard and the overlay on it.
 private struct PenPathsSample: View {
     var path = GalleryPenPaths.sample
     var artboard = SuiteSize.contentMinimum
@@ -93,5 +93,6 @@ private struct PenPathsSample: View {
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(SuiteColor.panel)
     }
 }

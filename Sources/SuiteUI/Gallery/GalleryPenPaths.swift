@@ -4,7 +4,7 @@
 // runs as its command in `GalleryPenBoard`'s catalog and writes one line, `<command id> [<step>, <n> in History]
 // <intent>` or `<command id> [refused: <why>] <intent>` (a view command's step reads "no step"), so an anchor drag of
 // many moves under one token shows as one undo step. The Pen's closed or finished paths are added beside the sample,
-// which stays the path in edit.
+// which stays the path in edit. The page sits on the panel color so the white artboard reads in Light.
 import SuiteKernel
 import SwiftUI
 
@@ -124,5 +124,6 @@ struct GalleryPenPathsPage: View {
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(SuiteColor.panel)
     }
 }

@@ -3,7 +3,8 @@
 // turns presses, drags and keys into the kernel's PathIntents: a Pen click adds
 // a point, a press-drag adds one with a handle, a click near the first anchor
 // closes, an anchor drag moves under one token, Option breaks a handle, Delete
-// removes; an overlay can pass its presses through. Pure value tests. macOS only.
+// removes; an overlay can pass its presses through; the rubber
+// band is the segment a click lays. Pure value tests. macOS only.
 import SuiteKernel
 @testable import SuiteUI
 import SwiftUI
@@ -131,4 +132,16 @@ private let a1 = AnchorRef(contour: 0, index: 1)
     // Flare's stage routes presses itself, but the Pen's rubber band, close ring and pointer need the hover.
     let passing = full.pressesPassThrough()
     #expect(!passing.takesPresses)
+}
+
+@Test(arguments: [1.0, 2.0])
+func theRubberBandIsTheSegmentAClickLays(zoom: Double) {
+    // After a smooth anchor, a plain click lays a cubic through its out handle that ends on the point itself.
+    let smooth = VectorAnchor(point: Point(x: 10, y: 10), handleIn: Point(x: 0, y: 10), handleOut: Point(x: 30, y: 10), kind: .smooth)
+    let draft = PenDraft(contour: VectorContour(anchors: [corner(0, 0), smooth], closed: false), scale: zoom)
+    let pointer = CGPoint(x: 20 * zoom, y: 40 * zoom)
+    let laid = PenRules.add(Point(x: 20, y: 40), handleOut: nil, to: draft, scale: zoom)
+    let parts = PathMarks.parts([laid.contour], toView: .identity)
+    let segment = PathMarks.outline(anchors: parts.anchors, segments: [PathSegment(from: 1, to: 2)], zoom: zoom)
+    #expect(PathMarks.rubberBand(from: smooth, to: pointer, zoom: zoom) == segment)
 }

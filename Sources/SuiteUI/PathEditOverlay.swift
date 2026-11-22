@@ -137,10 +137,7 @@ public struct PathEditOverlay: View {
         let s = context.scale
         let view = { (p: Point) in CGPoint(x: p.x * s, y: p.y * s) }
         if tracker.pressed == nil, context.tool == .pen, let pointer, let end = context.draft?.contour.anchors.last {
-            Path { band in
-                band.move(to: view(end.point))
-                if let out = end.handleOut { band.addQuadCurve(to: pointer, control: view(out)) } else { band.addLine(to: pointer) }
-            }
+            PathMarks.rubberBand(from: end, to: pointer, zoom: context.zoom)
             .stroke(SuiteColor.accent, lineWidth: 1)
             .accessibilityHidden(true)
         }

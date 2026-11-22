@@ -2,7 +2,8 @@
 // guide lines, drawn in a CanvasViewport's overlay. `PathMarks` strokes the
 // path's segments and marks each anchor: a corner anchor is a square, a smooth
 // anchor a circle with its handle lines and handle dots, so the two read apart
-// at a glance. `ViewportGuideMarks` draws ruler guides as hairlines across the
+// at a glance; `rubberBand` is the Pen's preview of the next segment, drawn as
+// the segment a click would lay. `ViewportGuideMarks` draws ruler guides as hairlines across the
 // whole visible stretch (not the kernel's snap guides between two boxes,
 // which editor-kernel's `SnapGuideMarks` draws). Positions are document
 // pixels at the canvas zoom; mark sizes are fixed on screen (`SuiteSize.anchor`
@@ -188,6 +189,14 @@ extension PathMarks {
             self.hovered = flat(ref).flatMap { end == .handleIn ? parts.anchors[$0].handleIn : parts.anchors[$0].handleOut }
         case .segment, nil: self.hovered = nil
         }
+    }
+
+    /// The Pen's rubber band from the draft's last anchor `end` (document pixels) to `pointer` (view points): the
+    /// segment a plain click there lays, drawn by `outline` like the laid one, so the preview is the result.
+    public nonisolated static func rubberBand(from end: VectorAnchor, to pointer: CGPoint, zoom: Double) -> Path {
+        let s = scale(zoom), at = CGPoint(x: pointer.x / s, y: pointer.y / s)
+        let from = parts([VectorContour(anchors: [end], closed: false)], toView: .identity).anchors
+        return outline(anchors: from + [PathAnchor(point: at, kind: .corner)], segments: [PathSegment(from: 0, to: 1)], zoom: zoom)
     }
 
     /// Every contour's anchors in one list, mapped by `toView`, and the
