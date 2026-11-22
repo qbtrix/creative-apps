@@ -1,5 +1,6 @@
 // PlaceVector.swift (placed-images PL-1 stub, PL-6 body): an SVG flattened once into paint every vector draw
-// takes, through FlareCore's `SVGImport` and `RenderList`, each path flattened at 0.25 asset units.
+// takes, through FlareCore's `SVGImport` and `RenderList`, each path flattened at 0.25 asset units;
+// `vectorSize` is the one-parse size read a place uses.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -10,6 +11,13 @@ import FlareCore
 extension PlaceRules {
     /// How far a flattened polygon may stray from its curve, in asset units.
     static let flattenTolerance = 0.25
+
+    /// The SVG's natural size (its viewBox, else width and height) from one parse, with no render list or
+    /// flattening: what a place reads before the target makes its own layers or paint.
+    public static func vectorSize(_ data: Data, name: String) throws -> Size {
+        let scene = try SVGImport.scene(from: data, name: name).scene
+        return Size(width: scene.width, height: scene.height)
+    }
 
     /// The SVG in `data` as polygons with their paint, in paint order; throws the import's reason.
     public static func vector(_ data: Data, name: String) throws -> PlacedVector {

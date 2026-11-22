@@ -1,6 +1,6 @@
 // PlaceVectorTests.swift (placed-images PL-1 written, PL-6 turns on): an SVG flattened into paint. Two groups
 // stay two items in their colours and paint order, a ring keeps its hole, a gradient keeps its stops, the size
-// comes from the viewBox, a filter is reported skipped, and damaged bytes throw. The SVGs are in Fixtures/place/.
+// comes from the viewBox (also by the size-only read a place uses), a filter is reported skipped, and damaged bytes throw. The SVGs are in Fixtures/place/.
 import Foundation
 import Testing
 import SuiteKernel
@@ -44,5 +44,15 @@ import SuiteKernel
     @Test func throwsOnDamage() {
         #expect(throws: (any Error).self) { try PlaceRules.vector(Data("<svg><g".utf8), name: "damaged.svg") }
         #expect(throws: (any Error).self) { try PlaceRules.vector(Data("not an svg".utf8), name: "text.svg") }
+        #expect(throws: (any Error).self) { try PlaceRules.vectorSize(Data("<svg><g".utf8), name: "damaged.svg") }
+    }
+    /// The size-only read a place uses (#6243) gives the flattening's size, viewBox first, without flattening.
+    @Test(arguments: ["two-groups.svg", "ring.svg", "gradient.svg"]) func sizeMatchesFlattening(_ name: String) throws {
+        let data = try Data(contentsOf: Self.fixtures.appendingPathComponent(name))
+        #expect(try PlaceRules.vectorSize(data, name: name) == PlaceRules.vector(data, name: name).size)
+    }
+    @Test func sizeReadsViewBox() throws {
+        let data = try Data(contentsOf: Self.fixtures.appendingPathComponent("two-groups.svg"))
+        #expect(try PlaceRules.vectorSize(data, name: "two-groups.svg") == Size(width: 240, height: 80))
     }
 }
