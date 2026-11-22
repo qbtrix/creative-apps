@@ -4,7 +4,9 @@
 // runs as its command in `GalleryPenBoard`'s catalog and writes one line, `<command id> [<step>, <n> in History]
 // <intent>` or `<command id> [refused: <why>] <intent>` (a view command's step reads "no step"), so an anchor drag of
 // many moves under one token shows as one undo step. The Pen's closed or finished paths are added beside the sample,
-// which stays the path in edit.
+// which stays the path in edit. Finish Path and Cancel Path buttons do the draft's Return and Escape by mouse, disabled
+// with the catalog's reason while they can't run. The artboard sits in a `canvasSurround` frame, as on an app's canvas,
+// so its white reads against a light window.
 import SuiteKernel
 import SwiftUI
 
@@ -64,6 +66,12 @@ struct GalleryPenBoard: PathEditTarget {
         } catch { return "\(command.id) [refused: \(error.description)] \(intent)" }
     }
 
+    /// Why `intent`'s command can't run now, nil when it can: a button's disabled reason.
+    func help(_ intent: PathIntent) -> String? {
+        guard let catalog = Self.catalog else { return "The path commands didn't load." }
+        return catalog.availability(intent.command.id, on: self).why
+    }
+
     /// The log after `line`: a line whose step folded into the open one (same command, same step count) replaces the
     /// last line, so one drag is one line; the newest 200 lines stay.
     static func logging(_ line: String, after log: [String]) -> [String] {
@@ -96,6 +104,10 @@ struct GalleryPenPathsPage: View {
                 id: "suite.gallery.pen-tool"
             ) { tool = $0 }
             .fixedSize()
+            HStack(spacing: SuiteSpacing.s) {
+                draftButton("Finish Path", .finish, id: "suite.gallery.pen-finish")
+                draftButton("Cancel Path", .cancel, id: "suite.gallery.pen-cancel")
+            }
             SuiteColor.artboard
                 .frame(width: SuiteSize.contentMinimum.width, height: SuiteSize.contentMinimum.height)
                 .overlay(alignment: .topLeading) {
@@ -117,6 +129,8 @@ struct GalleryPenPathsPage: View {
                 .accessibilityLabel("Pen canvas")
                 .accessibilityValue("One sample path")
                 .accessibilityIdentifier("suite.gallery.pen-canvas")
+                .padding(SuiteSpacing.l)
+                .background(SuiteColor.canvasSurround, in: .rect(cornerRadius: SuiteRadius.medium))
             Text(log.last ?? "Nothing yet").font(SuiteFont.caption).foregroundStyle(SuiteColor.secondaryText).lineLimit(1)
                 .accessibilityLabel(log.joined(separator: "\n"))
                 .accessibilityValue(log.joined(separator: "\n"))
@@ -124,5 +138,14 @@ struct GalleryPenPathsPage: View {
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    /// Return and Escape's twin for the mouse: runs `intent` on the board, disabled with its help while it can't run.
+    private func draftButton(_ title: String, _ intent: PathIntent, id: String) -> some View {
+        let why = board.help(intent)
+        return Button(title) { log = GalleryPenBoard.logging(board.send(intent), after: log) }
+            .disabled(why != nil)
+            .help(why ?? title)
+            .suiteControl(id: id, enabled: why == nil, reason: why)
     }
 }

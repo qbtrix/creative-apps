@@ -148,14 +148,14 @@ private struct PastEdgeSample: View {
 
 /// WCAG relative luminance of the sRGB pixel at (x, y), top-left origin; 0 off the image.
 @MainActor
-private func luma(_ image: NSBitmapImageRep, _ x: Int, _ y: Int) -> Double {
+func luma(_ image: NSBitmapImageRep, _ x: Int, _ y: Int) -> Double {
     guard let c = image.colorAt(x: x, y: y)?.usingColorSpace(.sRGB) else { return 0 }
     func lin(_ v: CGFloat) -> Double { v <= 0.04045 ? Double(v) / 12.92 : pow((Double(v) + 0.055) / 1.055, 2.4) }
     return 0.2126 * lin(c.redComponent) + 0.7152 * lin(c.greenComponent) + 0.0722 * lin(c.blueComponent)
 }
 
 /// The WCAG contrast ratio of two luminances.
-private func wcag(_ a: Double, _ b: Double) -> Double { (max(a, b) + 0.05) / (min(a, b) + 0.05) }
+func wcag(_ a: Double, _ b: Double) -> Double { (max(a, b) + 0.05) / (min(a, b) + 0.05) }
 
 private struct PageInspectorSample: View {
     let model: DesignWorkspace

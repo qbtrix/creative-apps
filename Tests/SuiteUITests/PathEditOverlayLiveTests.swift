@@ -54,6 +54,21 @@ import Testing
         #expect(undone && board.shapes.added.isEmpty)
     }
 
+    /// Mouse-only: the page's Finish Path and Cancel Path buttons read their help from the catalog. With no draft both
+    /// say why they can't run; one Pen click lets Cancel run and Finish asks for a second point; two clicks let Finish
+    /// add the open path as one step.
+    @Test func finishAndCancelButtonsSayWhyUntilTheyCanRun() {
+        var board = GalleryPenBoard()
+        #expect(board.help(.finish) == "Click with the Pen to start a path." && board.help(.cancel) != nil)
+        _ = board.send(.penAdd(Point(x: 40, y: 40), handleOut: nil))
+        #expect(board.help(.finish) == "Click a second point to finish the path." && board.help(.cancel) == nil)
+        _ = board.send(.penAdd(Point(x: 140, y: 60), handleOut: nil))
+        #expect(board.help(.finish) == nil)
+        let line = board.send(.finish)
+        #expect(line.hasPrefix("path.finish ") && board.penDraft == nil && board.shapes.added.first?.contours.first?.closed == false, "\(line)")
+        #expect(board.help(.finish) != nil && board.help(.cancel) != nil)
+    }
+
     /// An intent the commands refuse logs why and records nothing: Delete with no point selected.
     @Test func aRefusedIntentLogsWhy() {
         var board = GalleryPenBoard()

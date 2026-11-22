@@ -4,7 +4,7 @@
 // to the pointer, a draft with a smooth fourth anchor and its handles, the
 // close ring with the pointer on the first anchor, the sample in Direct
 // Selection with a corner and a smooth anchor selected (handles shown), and
-// 5,000 anchors with half selected. The drafts and pointers are seeded, so
+// 5,000 anchors with half selected. Finish Path and Cancel Path enable with the draft. The drafts and pointers are seeded, so
 // the screens don't wait on PenRules (PN-5) or the page's selection (PN-8).
 // Writes suiteui-pen-paths{,-drawing,-smooth,-close-hover,-selected,-stress}-{light,dark}.png.
 import Foundation
@@ -38,7 +38,18 @@ import Testing
         }
         #expect(PenPathsFixture.stars().path.contours.reduce(0) { $0 + $1.anchors.count } == 5_000)
     }
+
+    /// In Light the white artboard sat on the white window with no edge, so a first-time user couldn't see where the
+    /// canvas was: the page now frames it in `canvasSurround`. A pixel just inside the page's left padding reads
+    /// apart from the artboard's empty left side.
+    @Test func artboardReadsAgainstItsSurroundInLight() throws {
+        let image = try #require(render(GalleryPenPathsPage(), scheme: .light))
+        let y = 300, edge = Int(SuiteSpacing.m) + 4, inside = Int(SuiteSpacing.m + SuiteSpacing.l) + 60
+        let ratio = wcag(luma(image, edge, y), luma(image, inside, y))
+        #expect(ratio >= 1.2, "the artboard's edge doesn't read in Light: contrast \(ratio) between (\(edge), \(y)) and (\(inside), \(y))")
+    }
 }
+
 
 /// The 5,000-anchor stress path: 500 ten-point stars on a 25 x 20 grid, 36 pt cells, inside a 920 x 740 artboard.
 enum PenPathsFixture {
@@ -68,7 +79,7 @@ enum PenPathsFixture {
     }
 }
 
-/// The page's layout with the overlay's state seeded: the tool picker, the artboard and the overlay on it.
+/// The page's layout with the overlay's state seeded: the tool picker, the draft's buttons, the artboard and the overlay.
 private struct PenPathsSample: View {
     var path = GalleryPenPaths.sample
     var artboard = SuiteSize.contentMinimum
@@ -84,12 +95,18 @@ private struct PenPathsSample: View {
             }
             .pickerStyle(.segmented)
             .fixedSize()
+            HStack(spacing: SuiteSpacing.s) {
+                Button("Finish Path") {}.disabled(PenRules.finishHelp(draft) != nil)
+                Button("Cancel Path") {}.disabled(draft == nil)
+            }
             SuiteColor.artboard
                 .frame(width: artboard.width, height: artboard.height)
                 .overlay(alignment: .topLeading) {
                     PathEditOverlay(draft: draft, path: path, selection: selection, tool: tool, zoom: 1, pointer: pointer) { _ in }
                 }
                 .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+                .padding(SuiteSpacing.l)
+                .background(SuiteColor.canvasSurround, in: .rect(cornerRadius: SuiteRadius.medium))
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
