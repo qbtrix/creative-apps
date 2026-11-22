@@ -15,7 +15,7 @@ extension PlaceRules {
     /// The SVG's natural size (its viewBox, else width and height) from one parse, with no render list or
     /// flattening: what a place reads before the target makes its own layers or paint.
     public static func vectorSize(_ data: Data, name: String) throws -> Size {
-        let scene = try SVGImport.scene(from: data, name: name).scene
+        let (scene, _) = try SVGImport.scene(from: data, name: name)
         return Size(width: scene.width, height: scene.height)
     }
 
