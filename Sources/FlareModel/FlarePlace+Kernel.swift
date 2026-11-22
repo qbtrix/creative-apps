@@ -1,7 +1,8 @@
 // FlarePlace+Kernel.swift (svg-place PF-5): Flare's workspace is a kernel `PlacedImageTarget`, so the place
 // commands in `PlaceCommands` bring an SVG into the edited scene the way the other apps place pictures. Flare draws
-// no pixels, so it takes SVG only and `rasterSize` refuses. A place reads the SVG through `PlaceRules.svgScene` (FlareCore's `SVGImport`, the parse the size read made): each
-// top-level group becomes a layer named after it, every shape mapped by one fit matrix (the kernel's
+// no pixels, so it takes SVG only and `rasterSize` refuses. A place reads the SVG through `PlaceRules.svgScene`
+// (FlareCore's `SVGImport`, the parse the size read made): each top-level group becomes a layer named after it,
+// every shape mapped by one fit matrix (the kernel's
 // `PlaceRules.fitted` box), all added by one `PlaceLayers` command, so one undo step and one document check (2,000
 // `AddLayer`s each scanned every layer, qbtrix/creative-core#828). Flare keeps no picture after, so
 // `placedSelection` is nil and the picture edits refuse. `placeSpecs` are the kernel's five place specs as Flare's
