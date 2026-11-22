@@ -132,3 +132,26 @@ private let a1 = AnchorRef(contour: 0, index: 1)
     let passing = full.pressesPassThrough()
     #expect(!passing.takesPresses)
 }
+
+/// The draft's segment from anchor `from` to `to`, as the marks draw it once committed (view points at `zoom`).
+private func committed(_ draft: PenDraft, from: Int, to: Int, zoom: Double) -> Path {
+    PathMarks.outline(anchors: PathMarks.parts([draft.contour], toView: .identity).anchors,
+                      segments: [PathSegment(from: from, to: to)], zoom: zoom)
+}
+
+@Test func rubberBandPreviewsTheSegmentAClickCommits() {
+    let smooth = VectorAnchor(point: Point(x: 40, y: 40), handleIn: Point(x: 20, y: 20), handleOut: Point(x: 60, y: 60), kind: .smooth)
+    let draft = PenDraft(contour: VectorContour(anchors: [corner(0, 0), smooth], closed: false), scale: 2)
+    let pointer = CGPoint(x: 200, y: 100) // view points at zoom 2: document (100, 50)
+    let added = PenRules.add(Point(x: 100, y: 50), handleOut: nil, to: draft, scale: 2)
+    #expect(PathMarks.rubberBand(draft, pointer: pointer, closes: false, zoom: 2) == committed(added, from: 1, to: 2, zoom: 2))
+}
+
+@Test func closeRubberBandPreviewsTheClosingSegment() {
+    let first = VectorAnchor(point: Point(x: 0, y: 0), handleIn: Point(x: -20, y: 10), handleOut: Point(x: 20, y: -10), kind: .smooth)
+    let last = VectorAnchor(point: Point(x: 0, y: 80), handleIn: Point(x: 30, y: 90), handleOut: Point(x: -30, y: 70), kind: .smooth)
+    let draft = PenDraft(contour: VectorContour(anchors: [first, corner(80, 0), corner(80, 80), last], closed: false), scale: 1)
+    let closed = PenRules.closed(draft)
+    #expect(closed.contour.closed)
+    #expect(PathMarks.rubberBand(draft, pointer: CGPoint(x: 3, y: 2), closes: true, zoom: 1) == committed(closed, from: 3, to: 0, zoom: 1))
+}

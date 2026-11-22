@@ -112,7 +112,7 @@ struct GalleryPenPathsPage: View {
                         }
                     }
                 }
-                .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+                .galleryAreaArtboard()
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel("Pen canvas")
                 .accessibilityValue("One sample path")

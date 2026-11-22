@@ -89,7 +89,7 @@ private struct PenPathsSample: View {
                 .overlay(alignment: .topLeading) {
                     PathEditOverlay(draft: draft, path: path, selection: selection, tool: tool, zoom: 1, pointer: pointer) { _ in }
                 }
-                .clipShape(.rect(cornerRadius: SuiteRadius.medium))
+                .galleryAreaArtboard()
         }
         .padding(SuiteSpacing.m)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
