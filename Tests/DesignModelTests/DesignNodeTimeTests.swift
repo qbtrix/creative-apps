@@ -138,7 +138,8 @@ import Testing
 
     @Test func theRealPerfJourneyOpensAnimated500() {
         var workspace = DesignWorkspace()
-        #expect(workspace.openFixture("animated"))
+        let opened = workspace.openFixture("animated")
+        #expect(opened)
         #expect(workspace.pages == DesignFixtures.animated(500).pages)
         #expect(workspace.documentURL == nil && !workspace.canUndo)
     }
