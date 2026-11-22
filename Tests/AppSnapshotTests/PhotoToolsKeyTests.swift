@@ -2,7 +2,9 @@
 // through SuiteUI's ToolKeys over its PhotoPaletteTool faces, keeping Photo's bindings: V M B E S J C I G in either
 // case; never a tool the workspace's help disables; nothing for an unknown letter or more than one character. A
 // shared letter picks its first enabled tool (fill-heal FH-3: J Spot Heal, G Paint Bucket), Heal and Gradient while
-// the workspace disables the retouch tools, and Shift cycles the letter's enabled tools. macOS only.
+// the workspace disables the retouch tools, and Shift cycles the letter's enabled tools. Every tool
+// wears its own symbol. macOS only.
+import AppKit
 import PhotoModel
 import SuiteUI
 import Testing
@@ -53,6 +55,16 @@ import Testing
     /// Halo's move tool wear, not a look that reads as its own tool.
     @Test func selectWearsTheSuitesSelectArrow() {
         #expect(PhotoTool.select.systemImage == "cursorarrow")
+    }
+
+    /// Each palette tool wears its own symbol, and the symbol exists, so no two buttons look alike (#6396:
+    /// Remove wore Magic Wand's wand).
+    @Test func everyToolWearsItsOwnSymbol() {
+        let symbols = PhotoTool.allCases.map(\.systemImage)
+        #expect(Set(symbols).count == symbols.count, "shared symbols: \(symbols.filter { s in symbols.filter { $0 == s }.count > 1 })")
+        for tool in PhotoTool.allCases {
+            #expect(NSImage(systemSymbolName: tool.systemImage, accessibilityDescription: nil) != nil, "\(tool) has no symbol")
+        }
     }
 
     @Test func disabledToolIsNotPicked() {
