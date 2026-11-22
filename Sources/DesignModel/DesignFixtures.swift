@@ -7,7 +7,8 @@
 // to front. Ids follow the counters' "page-N" and "node-N", so the next minted
 // id is past every fixture id. `flat(_:)` is a page of top-level layers; `animated(_:)` and `keyedCrowd` are the keyed documents the node-time tests
 // and budgets use; `animated(_:kinds:)` is `animated(_:)` per node kind (text, gradient, stroke, a mixed
-// UI of cards), keyed the same way, for the raster costing rows. They stay off `names`. Linux-safe.
+// UI of cards), keyed the same way, for the raster costing rows. They stay off `names` (no per-name filing pin),
+// but `named("animated")` opens `animated(500)` for the real-app perf journey. Linux-safe.
 
 import SuiteKernel
 
@@ -15,13 +16,14 @@ public enum DesignFixtures {
     /// The fixture names a launch argument uses, in the blueprint's order.
     public static let names = ["empty", "cards", "two-pages", "crowd"]
 
-    /// The fixture called `name` in `names`, or nil.
+    /// The fixture called `name` in `names`, `animated(500)` for "animated", or nil.
     public static func named(_ name: String) -> DesignWorkspace? {
         switch name {
         case "empty": empty
         case "cards": cards
         case "two-pages": twoPages
         case "crowd": crowd
+        case "animated": animated(500)  // launch-only, for DesignRealPerfJourneyTests; not in `names`
         default: nil
         }
     }
@@ -82,7 +84,7 @@ public enum DesignFixtures {
 
     /// One 1440 × 1024 UI frame holding `count` 24 × 16 rectangles in rows of 25. Every rectangle's x, y and
     /// opacity are keyed over 2 s (frames 0 and 120 at 60 fps) and the frame's x too, so sampling moves a subtree.
-    /// Not in `names`: no journey opens it.
+    /// Not in `names`; the real-app perf journey opens `animated(500)` as "animated".
     public static func animated(_ count: Int) -> DesignWorkspace {
         let cells = (0..<count).map { i in
             keyed(DesignNode(id: "node-\(i + 2)", name: "Rectangle \(i + 1)", kind: .rectangle,

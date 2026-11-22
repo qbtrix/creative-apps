@@ -7,7 +7,9 @@
 // more than a short one, and they never read the playhead, so a scrub never
 // redraws them (#1257). A drag anywhere on it scrubs through the playhead's
 // TimelineScrubSender, so it sends only changed frames; VoiceOver reads and
-// steps the playhead frame. A snapshot offers the marks the strip's width (#219).
+// steps the playhead frame. Under a probe host each step that moves the
+// playhead reports a `ruler-scrub` sample through the canvas probe, so the
+// real-app perf journey reads its step latency. A snapshot offers the marks the strip's width (#219).
 // TL-18: labels read in the host's unit, spaced from the widest label
 // (TimelineRulerLabels); the work area is a bar on the lower 6 pt with two
 // 16 pt handles (TimelineWorkAreaBar, laid over the playhead by the strip).
@@ -27,6 +29,10 @@ struct TimelineRuler: View, BodyCounted {
     let onScrub: @MainActor (Int) -> Void
     @Environment(\.suiteSnapshotRendering) private var snapshot
     @State private var sender = TimelineScrubSender()
+    @Environment(\.canvasProbe) private var probe
+
+    /// The probe series a ruler scrub step records under.
+    static let scrubSeries = "ruler-scrub"
 
     var body: some View {
         // The content x at the ruler's leading edge.
@@ -41,8 +47,14 @@ struct TimelineRuler: View, BodyCounted {
         .clipped()
         .contentShape(Rectangle())
         .gesture(DragGesture(minimumDistance: 0).onChanged { drag in
+            let eventTime = ProcessInfo.processInfo.systemUptime
             let frame = mapping.frame(atX: Double(drag.location.x - timelineInset) + scrollX)
-            sender.send(frame, from: playhead, to: onScrub)
+            guard sender.send(frame, from: playhead, to: onScrub), let probe else { return }
+            // Shown by the next main-actor turn, as CanvasViewport's drag samples are.
+            Task { @MainActor in
+                probe.record(ProbeSample(series: Self.scrubSeries, eventTime: eventTime,
+                                         shownAt: ProcessInfo.processInfo.systemUptime))
+            }
         }.onEnded { _ in sender.end() })
         .accessibilityElement()
         .accessibilityLabel("Frame Ruler")

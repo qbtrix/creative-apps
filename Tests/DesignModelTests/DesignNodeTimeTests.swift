@@ -133,7 +133,14 @@ import Testing
         #expect(node2.frame.y == 40)
         #expect(abs(node2.opacity - 0.65) < 1e-9)
         #expect(DesignFixtures.animated(500).pages[0].nodes[0].children.count == 500)
-        #expect(!DesignFixtures.names.contains("animated"), "no journey launch argument changes")
+        #expect(!DesignFixtures.names.contains("animated"), "it stays off the per-name filing pins")
+    }
+
+    @Test func theRealPerfJourneyOpensAnimated500() {
+        var workspace = DesignWorkspace()
+        #expect(workspace.openFixture("animated"))
+        #expect(workspace.pages == DesignFixtures.animated(500).pages)
+        #expect(workspace.documentURL == nil && !workspace.canUndo)
     }
 
     @Test func keyedCrowdKeysOnlyTheRectangles() throws {

@@ -44,8 +44,9 @@ import Testing
     @Test func draggingOverTheSameFrameSendsOneScrub() {
         let sender = TimelineScrubSender()
         var sent: [Int] = []
-        for frame in [30, 31, 31, 31, 32, 32] { sender.send(frame, from: 30) { sent.append($0) } }
+        let took = [30, 31, 31, 31, 32, 32].map { frame in sender.send(frame, from: 30) { sent.append($0) } }
         #expect(sent == [31, 32])
+        #expect(took == [false, true, false, false, true, false], "the ruler's probe samples only the sends")
         sender.end()
         sender.send(32, from: 32) { sent.append($0) }
         #expect(sent == [31, 32])
