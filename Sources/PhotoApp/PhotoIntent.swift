@@ -101,7 +101,7 @@ extension PhotoTool: PaletteTool {
         case .clone: "square.on.square"
         case .spotHeal: "bandage.fill"
         case .heal: "bandage"
-        case .remove: "wand.and.stars"
+        case .remove: "eraser.line.dashed"
         case .crop: "crop"
         case .eyedropper: "eyedropper"
         case .bucket: "drop.fill"
