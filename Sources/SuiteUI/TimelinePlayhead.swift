@@ -10,7 +10,8 @@
 // (TimelinePlayheadGrab), less the token of each key at the playhead, which
 // the lane's own key drag takes; a drag scrubs through TimelineScrubSender, which
 // the ruler's drag uses too and which calls onScrub only when the frame
-// changes (#1297). With a work area, the lanes before its first tick and
+// changes (#1297) and, under a probe host, records each step as a
+// `ruler-scrub` sample, so a sweep that starts on the pill is timed too. With a work area, the lanes before its first tick and
 // after its last are dimmed to 60 % here (laneBed at 40 % over them,
 // TimelinePlayheadGrab.dims), so no lane redraws when it moves. Equatable
 // without its closure, so the strip skips it unless the playhead, the
@@ -34,6 +35,7 @@ struct TimelinePlayhead: View, BodyCounted {
     let onScrub: @MainActor (Int) -> Void
     @State private var sender = TimelineScrubSender()
 
+    @Environment(\.canvasProbe) private var probe
     #if DEBUG
     @Environment(\.bodyTally) private var bodyTally
     #endif
@@ -63,7 +65,7 @@ struct TimelinePlayhead: View, BodyCounted {
                 lineX: lineX, pill: pill, height: proxy.size.height, keyYs: keys.map { keyY($0) }))
             .gesture(DragGesture(minimumDistance: 0).onChanged { drag in
                 let frame = mapping.frame(atX: Double(drag.location.x + scroll.x - timelineInset))
-                sender.send(frame, from: playhead, to: onScrub)
+                sender.scrub(frame, from: playhead, to: onScrub, probe: probe)
             }.onEnded { _ in sender.end() })
         }
     }
@@ -226,6 +228,17 @@ enum TimelinePlayheadGrab {
         lastSent = frame
         onScrub(frame)
         return true
+    }
+
+    /// `send`, and on a send a `ruler-scrub` sample to `probe`, shown by the next main-actor turn (as
+    /// CanvasViewport's drag samples are). The ruler and the playhead both scrub through it.
+    func scrub(_ frame: Int, from playhead: Int, to onScrub: @MainActor (Int) -> Void, probe: CanvasProbe?) {
+        let eventTime = ProcessInfo.processInfo.systemUptime
+        guard send(frame, from: playhead, to: onScrub), let probe else { return }
+        Task { @MainActor in
+            probe.record(ProbeSample(series: TimelineRuler.scrubSeries, eventTime: eventTime,
+                                     shownAt: ProcessInfo.processInfo.systemUptime))
+        }
     }
 
     /// The drag ended; the next one starts from the playhead.
