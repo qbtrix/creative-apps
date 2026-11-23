@@ -1,16 +1,54 @@
-// PhotoToolOptions.swift: the Tool Options section of the inspector, which
-// shows the active tool's options. The brush, eraser, clone and heal preset
-// menu (ToolOptions.presets) and sliders
-// and the marquee's actions live here; the crop's, selection's, transform's
-// and eyedropper's own options each live in their file (CropOptions,
-// SelectOptions, TransformOptions, SampleOptions). Values in, intents out.
+// PhotoToolOptions.swift: the Photo window's tool options bar, SuiteUI's
+// ToolOptionsBar under the toolbar, above the canvas (PhotoEditorDetail). It
+// leads with the paint color (`photo.tool.color`, always the brush's: the
+// brush, the Paint Bucket, Fill and the Eyedropper's pick all use it), then
+// ToolOptionsSection: only the active tool's options, one row of cells, each
+// tool's hint last. The brush, eraser, clone and heal preset menu
+// (ToolOptions.presets) and sliders and the marquee's actions live here; the
+// crop's, selection's, transform's, eyedropper's, gradient's and retouch
+// tools' own options each live in their file (CropOptions, SelectOptions,
+// TransformOptions, SampleOptions, PhotoFillToolOptions, PhotoRetouchOptions).
+// In a window the bar reads the PhotoSession's `tool` and `toolOptions`
+// facets, so an option step re-runs it alone; without a session (the
+// snapshots) it shows the workspace it was given. Debug builds report its
+// body runs to the window's BodyTally. Values in, intents out.
 import PhotoModel
 import SuiteUI
 import SwiftUI
 
-/// The active tool's options: a preset, size, hardness and opacity for the brush (plus
-/// its color) and the eraser, each tool's own; what to do with a selection;
-/// applying a crop; the eyedropper's sample size and the brush color it picks into.
+/// The bar: the paint color, then the active tool's options.
+struct PhotoToolOptionsBar: View {
+    private let given: PhotoWorkspace
+    let perform: PhotoPerform
+    @Environment(PhotoSession.self) private var session: PhotoSession?
+    #if DEBUG
+    @Environment(\.bodyTally) private var bodyTally
+    #endif
+
+    init(model: PhotoWorkspace, perform: @escaping PhotoPerform) {
+        (given, self.perform) = (model, perform)
+    }
+
+    /// The color every paint tool uses: the brush's, even while the eraser (which has none) is active.
+    nonisolated static func paint(_ model: PhotoWorkspace) -> HexColor { model.brushOptions.hex }
+
+    var body: some View {
+        #if DEBUG
+        let _ = bodyTally.ran(Self.self)
+        #endif
+        let model = session?.workspace(reading: .tool, .toolOptions) ?? given
+        ToolOptionsBar {
+            InspectorColorWellRow("Color", color: Self.paint(model)) { perform(.toolOption(.brushColor($0))) }
+                .accessibilityIdentifier("photo.tool.color")
+        } content: {
+            ToolOptionsSection(model: model, perform: perform)
+        }
+    }
+}
+
+/// The active tool's options: a preset, size, hardness and opacity for the brush
+/// and the eraser, each tool's own; what to do with a selection; applying a crop;
+/// the eyedropper's sample size. Laid out by the bar's ToolOptionsStack.
 struct ToolOptionsSection: View {
     let model: PhotoWorkspace
     let perform: PhotoPerform
@@ -26,62 +64,52 @@ struct ToolOptionsSection: View {
 
     var body: some View {
         let options = model.toolOptions
-        InspectorSection("Tool Options") {
-            switch model.tool {
-            case .brush, .eraser, .clone, .heal:
-                if model.tool == .clone { hint("Option-click to set the source, then paint to clone from it.") }
-                if model.tool == .heal {
-                    hint("Option-click to set the source, then paint over a blemish to heal it with the source's texture.")
-                }
-                presetRow(options)
-                InspectorSliderRow("Size", value: options.size, in: ToolOptions.sizeRange, unit: "px", decimals: 0) {
-                    perform(.toolOption(.size($0)))
-                }
-                .accessibilityIdentifier("photo.tool.size")
-                InspectorSliderRow(
-                    "Hardness", value: options.hardnessPercent, in: ToolOptions.hardnessRange, unit: "%", decimals: 0
-                ) { perform(.toolOption(.hardness(percent: $0))) }
-                .accessibilityIdentifier("photo.tool.hardness")
-                if model.tool == .brush { colorRow(options) }
-                InspectorSliderRow(
-                    "Opacity", value: options.opacityPercent, in: ToolOptions.opacityRange, unit: "%", decimals: 0
-                ) { perform(.toolOption(.opacity(percent: $0))) }
-                .accessibilityIdentifier("photo.tool.opacity")
-            case .marquee, .ellipse, .lasso, .polygon, .wand:
-                hint("Drag over the image to select. Delete clears the selection; Fill paints it.")
-                colorRow(options)
-                HStack(spacing: SuiteSpacing.xs) {
-                    command("Select All", "checkmark.rectangle", help: nil, .selectAll)
-                    command("Deselect", "rectangle.dashed", help: model.canDeselect ? nil : "Nothing is selected.", .deselect)
-                }
-                HStack(spacing: SuiteSpacing.xs) {
-                    let why = model.canEditSelection ? nil : "Select part of the selected layer first."
-                    command("Delete", "trash", help: why, .deleteSelection)
-                    command("Fill", "paintbrush.fill", help: why, .fillSelection)
-                }
-                SelectOptions(model: model, perform: perform)
-            case .crop:
-                // CropOptions draws the crop's one instruction line itself.
-                CropOptions(model: model, perform: perform)
-            case .select:
-                hint(model.moveHint)
-                // An adjustment layer can't move: its rows would only sit there disabled.
-                if model.canMoveSelection { TransformOptions(model: model, perform: perform) }
-            case .eyedropper:
-                hint(Self.eyedropperHint)
-                SampleOptions(model: model, perform: perform)
-                // The brush colour a pick lands in, so the pick shows without switching tools.
-                colorRow(options)
-            case .gradient:
-                hint(Self.gradientHint)
-                PhotoFillToolOptions(model: model, perform: perform)
-            case .text:
-                hint(Self.typeHint)
-            case .bucket, .spotHeal, .remove:
-                PhotoRetouchOptions(model: model, perform: perform)
-            case .pen:
-                hint(Self.penHint)
+        switch model.tool {
+        case .brush, .eraser, .clone, .heal:
+            presetRow(options)
+            InspectorSliderRow("Size", value: options.size, in: ToolOptions.sizeRange, unit: "px", decimals: 0) {
+                perform(.toolOption(.size($0)))
             }
+            .accessibilityIdentifier("photo.tool.size")
+            InspectorSliderRow(
+                "Hardness", value: options.hardnessPercent, in: ToolOptions.hardnessRange, unit: "%", decimals: 0
+            ) { perform(.toolOption(.hardness(percent: $0))) }
+            .accessibilityIdentifier("photo.tool.hardness")
+            InspectorSliderRow(
+                "Opacity", value: options.opacityPercent, in: ToolOptions.opacityRange, unit: "%", decimals: 0
+            ) { perform(.toolOption(.opacity(percent: $0))) }
+            .accessibilityIdentifier("photo.tool.opacity")
+            if model.tool == .clone { hint("Option-click to set the source, then paint to clone from it.") }
+            if model.tool == .heal {
+                hint("Option-click to set the source, then paint over a blemish to heal it with the source's texture.")
+            }
+        case .marquee, .ellipse, .lasso, .polygon, .wand:
+            SelectOptions(model: model, perform: perform)
+            command("Select All", "checkmark.rectangle", help: nil, .selectAll)
+            command("Deselect", "rectangle.dashed", help: model.canDeselect ? nil : "Nothing is selected.", .deselect)
+            let why = model.canEditSelection ? nil : "Select part of the selected layer first."
+            command("Delete", "trash", help: why, .deleteSelection)
+            command("Fill", "paintbrush.fill", help: why, .fillSelection)
+            hint("Drag over the image to select. Delete clears the selection; Fill paints it.")
+        case .crop:
+            // CropOptions draws the crop's one instruction line itself.
+            CropOptions(model: model, perform: perform)
+        case .select:
+            // An adjustment layer can't move: its rows would only sit there disabled.
+            if model.canMoveSelection { TransformOptions(model: model, perform: perform) }
+            hint(model.moveHint)
+        case .eyedropper:
+            SampleOptions(model: model, perform: perform)
+            hint(Self.eyedropperHint)
+        case .gradient:
+            PhotoFillToolOptions(model: model, perform: perform)
+            hint(Self.gradientHint)
+        case .text:
+            hint(Self.typeHint)
+        case .bucket, .spotHeal, .remove:
+            PhotoRetouchOptions(model: model, perform: perform)
+        case .pen:
+            hint(Self.penHint)
         }
     }
 
@@ -99,16 +127,12 @@ struct ToolOptionsSection: View {
         .accessibilityIdentifier("photo.tool.preset")
     }
 
-    private func colorRow(_ options: ToolOptions) -> some View {
-        InspectorColorWellRow("Color", color: options.hex) { perform(.toolOption(.brushColor($0))) }
-        .accessibilityIdentifier("photo.tool.color")
-    }
-
     private func hint(_ text: String) -> some View {
         Text(text)
             .font(SuiteFont.inspectorMeta)
             .foregroundStyle(SuiteColor.textSecondary)
-            .fixedSize(horizontal: false, vertical: true)
+            .lineLimit(1)
+            .help(text)
     }
 
     private func command(_ title: String, _ symbol: String, help: String?, _ intent: PhotoIntent) -> some View {

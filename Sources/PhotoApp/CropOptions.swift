@@ -1,18 +1,18 @@
-// CropOptions.swift: the crop tool's options in the inspector (PV-3): the
-// pending crop's X, Y, W and H as ScrubFields two per row in a Grid (X over
-// W, Y over H, equal columns), the shared CropAspectPicker (its chips, Custom
-// W:H and the landscape/portrait toggle on X; orientation-crop OC-13), then
-// Apply Crop over Cancel, each action full width and every row SuiteSpacing.xs apart.
-// Apply carries no Return shortcut, so Return in a field commits the field;
-// Return on the canvas applies through `.confirm`. Cancel carries
-// no Escape shortcut either, which would close a field being typed in before
-// its own Escape; Escape on the canvas cancels through `.dismiss`.
+// CropOptions.swift: the crop tool's options in the tool options bar (PV-3,
+// PhotoToolOptionsBar), one row: the pending crop's X, Y, W and H as
+// ScrubFields of equal width, the shared CropAspectPicker (its chips, Custom
+// W:H and the landscape/portrait toggle on X; orientation-crop OC-13), Apply
+// Crop, Cancel, then the one instruction line. Apply carries no Return
+// shortcut, so Return in a field commits the field; Return on the canvas
+// applies through `.confirm`. Cancel carries no Escape shortcut either, which
+// would close a field being typed in before its own Escape; Escape on the
+// canvas cancels through `.dismiss`.
 // Each field row is one accessibility element (the letter, the field's name
 // and value combined) carrying the field's identifier, labelled with its name
 // and number ("Width, 600 pixels") so XCUI reads the number.
 // Each field reports its bounds through CropFieldBoundsKey as an anchor, so
-// a test measures the 2 x 2 grid without an assistive client; nothing in the
-// app reads it. Values in, intents out.
+// a test measures the row without an assistive client; nothing in the app
+// reads it. Values in, intents out.
 import PhotoModel
 import SuiteKernel
 import SuiteUI
@@ -23,24 +23,11 @@ struct CropOptions: View {
     let perform: PhotoPerform
 
     var body: some View {
-        // One row gap throughout, InspectorSection's own (SuiteSpacing.xs).
-        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
-            // The one instruction line, always present so nothing moves when a crop appears.
-            Text(model.cropCaption)
-                .font(SuiteFont.inspectorMeta)
-                .foregroundStyle(SuiteColor.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityIdentifier("photo.crop.caption")
-            Grid(horizontalSpacing: SuiteSpacing.xs, verticalSpacing: SuiteSpacing.xs) {
-                GridRow {
-                    field(.x)
-                    field(.y)
-                }
-                GridRow {
-                    field(.width)
-                    field(.height)
-                }
-            }
+        ToolOptionsStack {
+            field(.x)
+            field(.y)
+            field(.width)
+            field(.height)
             CropAspectPicker(aspect: model.cropPickerAspect, orientation: model.cropPickerOrientation) {
                 perform(.crop(.pick($0)))
             }
@@ -54,6 +41,13 @@ struct CropOptions: View {
                 "Cancel", systemImage: "xmark", unavailableHelp: model.cropCancelHelp,
                 identifier: "photo.crop.cancel"
             ) { perform(.cancelCrop) })
+            // The one instruction line, always present so nothing moves when a crop appears.
+            Text(model.cropCaption)
+                .font(SuiteFont.inspectorMeta)
+                .foregroundStyle(SuiteColor.textSecondary)
+                .lineLimit(1)
+                .help(model.cropCaption)
+                .accessibilityIdentifier("photo.crop.caption")
         }
     }
 

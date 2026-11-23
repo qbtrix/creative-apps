@@ -2270,8 +2270,8 @@ those widths with a message.
    has the same minX and the same width (#79), and every value field the
    same maxX.
 4. Section headers share one minX; labels inside bars share one minX.
-5. The crop options' four `ScrubField`s line up as a 2 × 2 grid: equal
-   widths, X over W and Y over H share minX.
+5. The crop options' four `ScrubField`s sit in one row of the tool options
+   bar: equal widths, X, Y, W, H left to right on one midY.
 6. No identified element lies outside the window (the audit's `offscreen`)
    and no two controls overlap (`overlap`), at every width.
 7. The top bar's items keep one baseline (equal midY) and none is clipped:

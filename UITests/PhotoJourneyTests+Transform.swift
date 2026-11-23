@@ -158,7 +158,7 @@ final class PhotoTransformJourneyTests: XCTestCase {
         let rotation = photo.element("suite.transform.rotation")
         XCTAssert(rotation.waitForExistence(timeout: 5), "no Rotation row")
         rotation.click()
-        let panel = photo.element("suite.inspector")
+        let panel = photo.element("suite.toolOptions")
         let named = panel.textFields["Rotation"]
         let field = named.waitForExistence(timeout: 3) ? named : panel.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking Rotation opened no field to type in")

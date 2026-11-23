@@ -1,7 +1,7 @@
 // TransformOptions.swift: the move and transform tool's own options in the
-// inspector (transform PT-2): SuiteUI's TransformRows on the selected layer's
-// box (the draft's while Free Transform is up), then Free Transform, or Apply
-// over Cancel while a draft is up, each full width and SuiteSpacing.xs apart.
+// tool options bar (transform PT-2, PhotoToolOptionsBar), one row: SuiteUI's
+// TransformRows on the selected layer's box (the draft's while Free Transform
+// is up), then Free Transform, or Apply and Cancel while a draft is up.
 // The rows and flips send SuiteKernel's TransformIntent, run as catalog
 // commands by the window; disabled, each says why (no pixel layer, or the
 // transform service's help). Apply carries no Return shortcut and Cancel no
@@ -27,7 +27,7 @@ struct TransformOptions: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+        ToolOptionsStack {
             TransformRows(
                 selection: (live?.rowsShown ?? model).transformSelection(reusing: &kept.box), help: model.transformHelp,
                 flipHelp: model.flipHelp

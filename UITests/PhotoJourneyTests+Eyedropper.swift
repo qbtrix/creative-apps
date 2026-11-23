@@ -47,7 +47,7 @@ final class PhotoEyedropperJourneyTests: XCTestCase {
         // 2 and 3. A click on the sky makes the brush colour the sky's.
         // The row's label text carries photo.tool.color too; its hex field reads the colour.
         let types = [XCUIElement.ElementType.textField, .colorWell].map { NSNumber(value: $0.rawValue) }
-        let well = photo.element("suite.inspector").descendants(matching: .any).matching(
+        let well = photo.element("suite.toolOptions").descendants(matching: .any).matching(
             NSPredicate(format: "identifier == 'photo.tool.color' AND elementType IN %@", types)).firstMatch
         XCTAssert(well.waitForExistence(timeout: 5), "the Eyedropper's options show no brush colour (photo.tool.color)")
         let before = well.value as? String

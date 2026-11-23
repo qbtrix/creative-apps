@@ -1,8 +1,9 @@
 // PhotoJourneyTests+Retouch.swift: PJ-FH1 and PJ-FH2, fill and heal in Photo
 // (fill-heal FH-3; docs/blueprints/suiteui/features/fill-heal.md, Journey
 // steps). On sky.png (the 800 x 600 test photo): G picks the Paint Bucket,
-// Tool Options shows Tolerance, Contiguous and All Layers
-// (`photo.tool.tolerance`, `.contiguous`, `.all-layers`), a click in the sky
+// the tool options bar (`suite.toolOptions`) shows its color, Tolerance,
+// Contiguous and All Layers (`photo.tool.color`, `.tolerance`, `.contiguous`,
+// `.all-layers`) and the inspector none of them, a click in the sky
 // fills it as one "Paint Bucket" step and Command-Z takes it back; J picks
 // Spot Heal with Size and Hardness, a click on the sun's edge heals it as one
 // "Spot Heal" step, Remove paints over the sun as one "Remove" step and
@@ -20,8 +21,11 @@ final class PhotoRetouchJourneyTests: XCTestCase {
         photo.press(character: "g")
         let tool = photo.element("suite.tools").buttons["Paint Bucket"]
         XCTAssert(tool.waitForExistence(timeout: 5) && tool.isSelected, "G didn't pick the Paint Bucket")
-        for id in ["photo.tool.tolerance", "photo.tool.contiguous", "photo.tool.all-layers"] {
-            XCTAssert(photo.element(id).waitForExistence(timeout: 5), "no \(id) in Tool Options")
+        let bar = photo.element("suite.toolOptions").descendants(matching: .any)
+        let inspector = photo.element("suite.inspector").descendants(matching: .any)
+        for id in ["photo.tool.color", "photo.tool.tolerance", "photo.tool.contiguous", "photo.tool.all-layers"] {
+            XCTAssert(bar[id].waitForExistence(timeout: 5), "no \(id) in the tool options bar")
+            XCTAssertFalse(inspector[id].exists, "\(id) is still in the inspector")
         }
         photo.shot("retouch-bucket-options")
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.1, dy: 0.1), to: CGVector(dx: 0.1, dy: 0.1))

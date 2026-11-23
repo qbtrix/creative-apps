@@ -2,6 +2,7 @@
 // and, for the wand, Tolerance (0...255), Contiguous and All Layers. Each control names the `AreaSelectCommands`
 // command it feeds (`AreaControl.command`); Feather shows one decimal, Tolerance whole levels (`AreaControl.decimals`).
 // While Shift or Option is held the mode chip shows the keys' mode, as a drag uses it. The view keeps only the held keys; the host owns the options and gets each change with its control.
+// A column in an inspector, one row in a ToolOptionsBar (ToolOptionsStack).
 // Identifiers: `suite.area.tool-<shape>`, `suite.area.mode-<mode>` and `suite.area.<control>`.
 import SuiteKernel
 import SwiftUI
@@ -77,7 +78,7 @@ public struct AreaToolOptions: View {
 
     public var body: some View {
         let shown = AreaControl.shown(options.tool)
-        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+        ToolOptionsStack(spacing: SuiteSpacing.s) {
             ChoiceChips(options: Self.tools, selected: options.tool) { tool in send(.tool) { $0.tool = tool } }
             ChoiceChips(options: Self.modes, selected: Self.shownMode(options.mode, held: held)) { mode in send(.mode) { $0.mode = mode } }
             InspectorSliderRow("Feather", value: options.feather, in: AreaControl.feathers, step: 1, unit: "px",

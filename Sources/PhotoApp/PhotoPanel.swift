@@ -1,15 +1,15 @@
 // PhotoPanel.swift: the inspector of a Photo window: the image header, then
 // an Adjust | History tab switch (`photo.inspector.tabs`). Adjust is
-// PhotoAdjustTab in one scroll view (the active tool's options, the selected
-// layer's blend mode and opacity from PhotoLayerSettings, then the adjustment
-// sections); History is PhotoHistoryTab. The window keeps which tab shows
+// PhotoAdjustTab in one scroll view (the selected layer's blend mode and
+// opacity from PhotoLayerSettings, then the adjustment sections; the tool's
+// options live in the bar over the canvas); History is PhotoHistoryTab. The window keeps which tab shows
 // (`photoInspectorTab`, PhotoWindow+History.swift) and Window > History picks
 // History. The layer list lives in the window's sidebar (PhotoLayerList). With
 // no image open it says how to start. Values in, intents out. Every control
-// carries a `photo.tool.*` or `photo.layer.*` accessibility identifier for the
+// carries a `photo.layer.*` or adjustment accessibility identifier for the
 // UI journeys and the app audit. In a window it reads the PhotoSession's
-// `tool`, `toolOptions`, `adjust` and `history` facets, so an option step
-// re-runs it alone; its layer rows and header follow the window's own pass
+// `tool`, `adjust` and `history` facets, so a tool option step never re-runs
+// it; its layer rows and header follow the window's own pass
 // (the window re-creates it on every other facet). Without a session (the
 // snapshots) it shows the workspace it was given. Debug builds report its body
 // runs to the window's BodyTally.
@@ -31,7 +31,7 @@ struct PhotoPanel: View {
     }
 
     /// The window's workspace now, read through the facets this panel shows; the given one outside a window.
-    private var model: PhotoWorkspace { session?.workspace(reading: .tool, .toolOptions, .adjust, .history) ?? given }
+    private var model: PhotoWorkspace { session?.workspace(reading: .tool, .adjust, .history) ?? given }
 
     /// The inspector's tabs.
     static let tabs = [

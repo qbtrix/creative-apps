@@ -1,4 +1,4 @@
-// SelectOptions.swift: the area tools' options in the inspector (area-selection AR-11): SuiteUI's AreaToolOptions on
+// SelectOptions.swift: the area tools' options in the tool options bar (area-selection AR-11): SuiteUI's AreaToolOptions on
 // the workspace's area options. A shape chip picks its tool (the Marquee is the rectangle); every other change goes
 // to the workspace as the new options. Values in, intents out.
 import PhotoModel
