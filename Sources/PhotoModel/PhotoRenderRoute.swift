@@ -384,16 +384,33 @@ extension PhotoWorkspace {
         let placed = try cache.draftSource(key, on: gpu) {
             var buffer = try shown(tiled.flattened(part), part.x, part.y)
             for _ in 0..<level {
-                // Halved at each 2 x 2 block's centre: bilinear there is the block's mean.
                 PhotoRenderCount.resample()
-                buffer = try buffer.transformed(AffineMatrix(a: 0.5, b: 0, c: 0, d: 0.5, tx: 0, ty: 0),
-                                                width: (buffer.width + 1) / 2, height: (buffer.height + 1) / 2, filter: .bilinear)
+                buffer = try Self.halvedAcrossCores(buffer)
             }
             return (try gpu.surface(buffer), 0, 0)
         }
         guard let source = placed?.surface else { return true }
         try dispatcher.composite(source, onto: &picture, through: through(level), mode: mode, opacity: opacity, filter: .bilinear)
         return true
+    }
+
+    /// `buffer` halved exactly as CoreRaster's bilinear `transformed` at scale 0.5 halves it (a [1 3 3 1] / 8 tent
+    /// each way, clear past the edge), one 256 px output tile per task across the cores. A draft makes each level
+    /// under its cache's lock in the middle of a drag, so on one core an 8K layer held every band about 0.7 s
+    /// (#6206). Each tile's source crop holds every tap its pixels read (two source pixels either way), cut only
+    /// at the buffer's own edge, so the tiles come out bit for bit as the whole call's.
+    static func halvedAcrossCores(_ buffer: PixelBuffer) throws -> PixelBuffer {
+        var out = try TiledPixels(width: (buffer.width + 1) / 2, height: (buffer.height + 1) / 2)
+        let grid = out
+        out.tiles = try PhotoLayerComposite.inParallel(grid.tiles.count) { i in
+            let r = grid.tileRect(i)
+            let (x0, y0) = (max(2 * r.x - 1, 0), max(2 * r.y - 1, 0))
+            let (x1, y1) = (min(2 * r.maxX, buffer.width - 1), min(2 * r.maxY, buffer.height - 1))
+            let crop = try buffer.cropped(x: x0, y: y0, width: x1 - x0 + 1, height: y1 - y0 + 1)
+            let m = AffineMatrix(a: 0.5, b: 0, c: 0, d: 0.5, tx: Double(x0) / 2 - Double(r.x), ty: Double(y0) / 2 - Double(r.y))
+            return try crop.transformed(m, width: r.width, height: r.height, filter: .bilinear)
+        }
+        return try out.flattened()
     }
 
     /// `next`, with `old` released.
