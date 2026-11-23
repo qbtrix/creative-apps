@@ -331,9 +331,10 @@ extension PhotoWorkspace {
     /// on part of the layer draws the rest first (`boxCut`'s rest, its painted bounds kept in `cache` too), so a
     /// frame only composites kept surfaces. The kernel
     /// samples at a stretch of 1 or more, so a shrink composites the source halved once per halving it needs
-    /// (each half made once per draft as well). `shown` multiplies a source by the layer's shown mask (`mask`, nil
-    /// without one) once, as the source is made. False when the route's GPU doesn't run `.affine` or the opacity
-    /// is out of range: the caller resamples on the CPU (and CoreRaster reports the opacity).
+    /// (each half made once per draft, tile by tile across the cores: `halvedAcrossCores`). `shown` multiplies a
+    /// source by the layer's shown mask (`mask`, nil without one) once, as the source is made. False when the
+    /// route's GPU doesn't run `.affine` or the opacity is out of range: the caller resamples on the CPU (and
+    /// CoreRaster reports the opacity).
     private func compositeDraftOnGPU(_ m: AffineMatrix, _ tiled: TiledPixels, mask: TiledPixels?,
                                      shown: (PixelBuffer, Int, Int) throws -> PixelBuffer, box: PixelRect, of layer: PhotoLayer,
                                      onto picture: inout RenderSurface, at rect: PixelRect, on dispatcher: RenderDispatcher,
