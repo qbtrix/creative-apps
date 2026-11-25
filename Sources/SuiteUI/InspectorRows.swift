@@ -130,13 +130,22 @@ private struct InspectorSectionHeader: View {
 public struct InspectorRow<Value: View>: View {
     private let label: String
     private let value: Value
+    private let padding: CGFloat
+    private let alignment: Alignment?
     @State private var hovering = false
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.suiteReduceMotion) private var reduceMotion
 
     public init(_ label: String, @ViewBuilder value: () -> Value) {
+        self.init(label, padding: SuiteSpacing.m, value: value)
+    }
+
+    /// A row on `padding` instead of the usual SuiteSpacing.m, `value` at `alignment` (a tight color row).
+    init(_ label: String, padding: CGFloat, alignment: Alignment? = nil, @ViewBuilder value: () -> Value) {
         self.label = label
         self.value = value()
+        self.padding = padding
+        self.alignment = alignment
     }
 
     public var body: some View {
@@ -152,9 +161,9 @@ public struct InspectorRow<Value: View>: View {
             }
             value
                 .font(SuiteFont.inspectorLabel)
-                .frame(maxWidth: .infinity, alignment: label.isEmpty ? .leading : .trailing)
+                .frame(maxWidth: .infinity, alignment: alignment ?? (label.isEmpty ? .leading : .trailing))
         }
-        .padding(.horizontal, SuiteSpacing.m)
+        .padding(.horizontal, padding)
         .frame(minHeight: SuiteSize.studioRow)
         .background(hovering && isEnabled ? SuiteColor.field : SuiteColor.panelRaised, in: .rect(cornerRadius: SuiteRadius.row))
         .onHover { hovering = $0 }
