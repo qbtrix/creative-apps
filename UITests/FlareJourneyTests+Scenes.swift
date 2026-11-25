@@ -8,7 +8,8 @@
 // and redoes it with ⇧⌘Z. The dimmed rows wait on SuiteUI #146 (the Model's
 // layerRowIsDimmed is proven by FlareSidebarHelpTests), and removing a scene
 // waits on the row menus (LF-2). The sidebar is read by its row titles top
-// first, section headers left out. One shot per step, `flare-scenes-<step>`.
+// first, section headers left out; a click or double-click aims at a row's
+// name text, never the row's middle. One shot per step, `flare-scenes-<step>`.
 import XCTest
 
 final class FlareScenesJourneys: XCTestCase {
@@ -89,9 +90,10 @@ final class FlareScenesJourneys: XCTestCase {
 
     // MARK: - Helpers
 
-    /// The first element in the sidebar whose label or value is `title`.
+    /// The first text in the sidebar whose label or value is `title`: the name itself, where a double-click
+    /// renames. A layer row is labelled with its name too, and its middle is blank space, which only selects.
     @MainActor private func text(_ title: String, in root: XCUIElement) -> XCUIElement {
-        root.descendants(matching: .any).matching(NSPredicate(format: "label == %@ OR value == %@", title, title)).firstMatch
+        root.staticTexts.matching(NSPredicate(format: "label == %@ OR value == %@", title, title)).firstMatch
     }
 
     /// The sidebar row (outline row, else cell) holding `title`.
