@@ -11,6 +11,7 @@
 // SidebarRow.doubleClickRenames / keyRenames / renameActionName gate the
 // double-click on the title, Return on the focused row and the "Rename"
 // accessibility action. App panels (#3194): `.app` naming, LayerTreeOptions, LayerRowDecoration.
+// A decoration's `showsEye` false leaves that row's eye slot empty (no dead eye).
 // A `live` decoration shimmers the name (AgentWorking.swift) and its caption
 // ticks as a number when it changes under an animation.
 // LayerRowLook picks a row's state fill: drop target, selected, hover, rest.
@@ -134,8 +135,9 @@ enum LayerRowLook: Equatable {
 /// What one row draws beyond its name, as plain data the app keys by layer
 /// id (#3194): a thumbnail, a leading SF Symbol with its label and id (by
 /// default the naming's `<id>.symbol`), a caption line under the name, and
-/// the row's tooltip and accessibility value, and `live` for a row an agent is
-/// working on now (its name shimmers, `.agentShimmer`).
+/// the row's tooltip and accessibility value, `live` for a row an agent is
+/// working on now (its name shimmers, `.agentShimmer`), and `showsEye` false
+/// for a row whose eye would hide nothing (its slot stays, empty).
 public struct LayerRowDecoration: Equatable, Sendable {
     public var thumbnail: Image?
     public var symbol: String?
@@ -145,9 +147,11 @@ public struct LayerRowDecoration: Equatable, Sendable {
     public var help: String?
     public var value: String?
     public var live: Bool
+    public var showsEye: Bool
 
     public init(thumbnail: Image? = nil, symbol: String? = nil, symbolLabel: String? = nil, symbolID: String? = nil,
-                caption: String? = nil, help: String? = nil, value: String? = nil, live: Bool = false) {
+                caption: String? = nil, help: String? = nil, value: String? = nil, live: Bool = false,
+                showsEye: Bool = true) {
         self.thumbnail = thumbnail
         self.symbol = symbol
         self.symbolLabel = symbolLabel
@@ -156,6 +160,7 @@ public struct LayerRowDecoration: Equatable, Sendable {
         self.help = help
         self.value = value
         self.live = live
+        self.showsEye = showsEye
     }
 }
 

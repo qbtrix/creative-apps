@@ -2,7 +2,7 @@
 // request is one row, an open one lists its steps then its layers one level in,
 // the eye state and the caption; which request reads live while an agent
 // works, the working mark's VoiceOver label, and the empty hint's command on
-// its own line.
+// its own line, and no eye on a row that changed no layer.
 import Foundation
 import SuiteKernel
 import Testing
@@ -47,6 +47,15 @@ import Testing
         let caption = AgentActivityList.decorations(Self.requests, timeZone: utc)["agent.1"]?.caption ?? ""
         #expect(caption.hasPrefix("claude · ") && caption.hasSuffix(" · 2 steps"))
         #expect(AgentActivityList.decorations(Self.requests, timeZone: utc)["agent.3"]?.caption?.hasSuffix("1 step") == true)
+    }
+
+    @Test func rowsThatChangedNoLayerDrawNoEye() {
+        // A Blur step's eye hid nothing: a dead control (CLAUDE.md, No dead controls).
+        let open = AgentActivityList.decorations(Self.requests, timeZone: .gmt)
+        #expect(open["agent.3"]?.showsEye == false, "a request with no layers drew an eye")
+        #expect(open["agent.3.step.3"]?.showsEye == false, "a step with no layers drew an eye")
+        #expect(open["agent.1"]?.showsEye == true && open["agent.1.step.1"]?.showsEye == true)
+        #expect(open["agent.1.layer.l2"]?.showsEye == true)
     }
 
     @Test func undoHelpSaysWhyOrNothing() {

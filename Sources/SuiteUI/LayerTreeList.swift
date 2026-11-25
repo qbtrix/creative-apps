@@ -449,7 +449,12 @@ struct LayerTreeRow: View, Equatable {
             title
             Spacer(minLength: SuiteSpacing.s)
             if options.showsEye {
-                toggle(naming.visibility(row)) { onAction(.toggleHidden(row.id)) }
+                if decoration?.showsEye ?? true {
+                    toggle(naming.visibility(row)) { onAction(.toggleHidden(row.id)) }
+                } else {
+                    // The slot stays, so the eyes below and above keep one column.
+                    Color.clear.frame(width: SuiteSize.iconButtonHit, height: SuiteSize.iconButtonHit)
+                }
             }
             if options.showsLock {
                 toggle(naming.lock(row)) { onAction(.toggleLocked(row.id)) }
