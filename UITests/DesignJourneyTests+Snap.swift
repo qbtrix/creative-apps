@@ -98,12 +98,13 @@ final class DesignSnapJourneyTests: XCTestCase {
             design.shot("snap-several")
             clickUndo(design)
 
-            // 5. Equal spacing: C left to 1 pt short of a gap to B equal to A's: X 600, "spacing x 100".
+            // 5. Equal spacing: C left to 2 pt short of a gap to B equal to A's: X 600, "spacing x 100".
             _ = frame(design, Self.rowC)
-            // 1 pt short here, not 2: a point is 4 page points at the fitted zoom. From 2 pt short (608) C's
-            // right edge is 12 pt from the page's middle (720) and its gap 8 pt from equal, close enough that
-            // the drag lined up on the middle at X 620 in two runs.
-            let target = frames.b.maxX + (frames.b.minX - frames.a.maxX) + 1
+            // On the 1024 × 768 runner this step can't pass yet: the fitted zoom is 25%, so the snap reach is
+            // 32 page points, and wherever C's gap is in reach of equal its right edge is in reach of the page's
+            // middle (720). SuiteKernel's `Snapping.offset` takes a line before a gap, so C lands on X 620
+            // (runs 45563576413 to 45625018434); the blueprint (snapping.md) says the smaller offset wins.
+            let target = frames.b.maxX + (frames.b.minX - frames.a.maxX) + 2
             drag(design, from: CGPoint(x: frames.c.midX, y: frames.c.midY),
                  to: CGPoint(x: frames.c.midX + target - frames.c.minX, y: frames.c.midY))
             expectStep(design, "Undo Move", after: "the spacing move")
