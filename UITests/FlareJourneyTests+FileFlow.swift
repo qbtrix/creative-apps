@@ -8,12 +8,15 @@
 //    flare-in-halo FH-1 adds Halo, which then starts with the scene (SJ17's path). Until then the step checks
 //    the submenu lists no Halo and the test ends in a skip naming FH-1, so steps 1-3 still count.
 // The files are dragged from a small floating window the test runner shows, as a person drags from a folder
-// window (`dragFile`, Journey+FileDrag.swift). Every file lives in this test's own temp folder. One shot per
+// window (`dragFile`, Journey+FileDrag.swift), held a second over the stage before the release. Every file lives in this test's own temp folder. One shot per
 // step, `flare-file-flow-<step>`. FL-7 turned it on once the drop, Open Recent and Open In ran on live
 // services (FL-3, FL-4, SF-8).
 import XCTest
 
 final class FlareFileFlowJourneyTests: XCTestCase {
+    /// How long each drag holds over the stage before the release. Released on arrival, the drag ended with
+    /// operation 0 (refused) on every dev run from 11-14 on; the runs that passed ended partway along the path.
+    private static let hold: TimeInterval = 1
     /// The drop mark's identifier (SuiteFileControlID.dropMark).
     private static let dropMark = "suite.file.drop-mark"
     /// This file is UITests/<name>, so its grandparent is the repo root.
@@ -66,7 +69,7 @@ final class FlareFileFlowJourneyTests: XCTestCase {
 
         // 2. Title.flare dropped on the stage: it opens in a new window.
         let windows = flare.app.windows.count
-        dragFile(folder.appending(path: "Title.flare"), onto: stage)
+        dragFile(folder.appending(path: "Title.flare"), onto: stage, hold: Self.hold)
         XCTAssert(flare.app.windows["Title"].waitForExistence(timeout: 15), "dropping Title.flare opened no Title window")
         XCTAssertEqual(flare.app.windows.count, windows + 1, "Title.flare didn't open in a window of its own")
         flare.shot("file-flow-2-dropped-flare")
@@ -76,7 +79,7 @@ final class FlareFileFlowJourneyTests: XCTestCase {
         try Data(("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"80\" height=\"80\">"
             + "<g id=\"logo\"><rect width=\"80\" height=\"80\" fill=\"#E53935\"/></g></svg>").utf8).write(to: svg)
         let front = flare.element("flare.stagePane")
-        dragFile(svg, onto: front)
+        dragFile(svg, onto: front, hold: Self.hold)
         let note = flare.element("flare.status.place")
         let placed = NSPredicate(format: "label == %@ OR value == %@", "Placed logo.svg: 1 layer.", "Placed logo.svg: 1 layer.")
         XCTAssertEqual(XCTWaiter.wait(for: [expectation(for: placed, evaluatedWith: note)], timeout: 5), .completed,

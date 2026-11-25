@@ -21,8 +21,13 @@
 // which redraws the same crop. Every step checks `photo.canvas.crop` while a
 // crop is pending and shoots `photo-crop-*`. Values are waited for with query
 // predicates, never a sleep. The chips and toggle are CropAspectPicker's (OC-13).
+// At the runner's window the crop row is wider than the bar, so a field is
+// scrolled into the bar before its number is clicked. A field's row is one
+// combined element, a slider at rest and a plain element while it types, which
+// is how the journey sees the typing field open and close.
 // PJ-OC (OC-14): two-layers.ora, Image > Flip Canvas Horizontal changes the
 // picture as one step, one Undo restores it exactly, then a 4:5 portrait crop.
+// Its layers are read off the Layers panel's rows (`photo.layer.row.<id>`).
 import CoreGraphics
 import XCTest
 
@@ -150,7 +155,7 @@ final class PhotoCropJourneyTests: XCTestCase {
         let photo = Journey("Photo", self, arguments: photoArguments(open: file))
         XCTAssert(photo.window(named: "two-layers.ora").waitForExistence(timeout: 30), "two-layers.ora didn't open")
         expectText("48 × 32 px", photo, "the status bar shows no 48 × 32 px image size")
-        for layer in ["Pasted Layer", "Background"] { expectText(layer, photo, "the Layers panel shows no \(layer)") }
+        for layer in ["Pasted Layer", "Background"] { expectLayerRow(layer, photo) }
         let canvas = photo.element("suite.canvas")
         XCTAssert(canvas.waitForExistence(timeout: 5), "no canvas (suite.canvas)")
         let before = canvas.screenshot().pngRepresentation
@@ -244,6 +249,13 @@ final class PhotoCropJourneyTests: XCTestCase {
         XCTAssert(match.waitForExistence(timeout: 5), message)
     }
 
+    /// A row of the Layers panel (`photo.layer.row.<id>`) is labelled `name`.
+    @MainActor private func expectLayerRow(_ name: String, _ photo: Journey) {
+        let row = photo.app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier BEGINSWITH %@ AND label == %@", "photo.layer.row.", name)).firstMatch
+        XCTAssert(row.waitForExistence(timeout: 5), "the Layers panel shows no \(name)")
+    }
+
     /// Waits for the crop field `id` to read `value` pixels.
     @MainActor private func expectField(_ id: String, _ value: Int, _ photo: Journey) {
         expectField(id, around: value, within: 0, photo)
@@ -282,16 +294,41 @@ final class PhotoCropJourneyTests: XCTestCase {
     @MainActor private func typeNumber(_ value: Int, into id: String, _ photo: Journey) {
         let field = photo.element(id)
         XCTAssert(field.waitForExistence(timeout: 5) && field.isEnabled, "the crop field \(id) isn't there to type in")
+        scrollIntoBar(field, photo)
         // The number sits at the row's right, inside its 12 pt inset and 56 pt wide.
         field.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 0.5)).withOffset(CGVector(dx: -40, dy: 0)).click()
-        let typing = panel(photo).textFields.firstMatch
+        // The row is one combined element, so its typing field never shows as a text field: while it types the
+        // row is a plain element (`other`), and back to a slider once Return closes it.
+        let typing = panel(photo).otherElements.matching(identifier: id).firstMatch
         // The typing field takes the keys as it opens (ScrubField asks for focus), as typeValue in PhotoJourneyTests.
-        _ = typing.waitForExistence(timeout: 3)
+        XCTAssert(typing.waitForExistence(timeout: 3), "clicking \(id)'s number opened no typing field")
         photo.app.typeKey(.rightArrow, modifierFlags: .command)
         for _ in 0..<8 { photo.app.typeKey(.delete, modifierFlags: []) }
         photo.app.typeText("\(value)")
         photo.app.typeKey(.return, modifierFlags: [])
-        XCTAssert(typing.waitForNonExistence(timeout: 5), "Return didn't close \(id)'s typing field")
+        XCTAssert(typing.waitForNonExistence(timeout: 5) && panel(photo).sliders.matching(identifier: id).firstMatch.exists,
+                  "Return didn't close \(id)'s typing field")
+    }
+
+    /// Scrolls the bar's options sideways until `element` shows whole in it: at a narrow window the crop row is
+    /// wider than the bar, and a click on a point (not an element) never scrolls it there.
+    @MainActor private func scrollIntoBar(_ element: XCUIElement, _ photo: Journey) {
+        let view = panel(photo).scrollViews.firstMatch
+        guard view.exists else { return }
+        // A positive delta should bring the leading options in; if the element moves away instead, flip it.
+        // The step halves whenever the needed way turns, so it can't bounce past a field nearly as wide as the bar.
+        var (sign, step, last): (CGFloat, CGFloat, CGFloat) = (1, 60, 0)
+        for _ in 0..<40 {
+            let (shown, before) = (view.frame, element.frame)
+            if before.minX >= shown.minX, before.maxX <= shown.maxX { return }
+            let want: CGFloat = before.minX < shown.minX ? 1 : -1
+            if last != 0, want != last { step = max(step / 2, 4) }
+            last = want
+            view.scroll(byDeltaX: step * want * sign, deltaY: 0)
+            let moved = element.frame.minX - before.minX
+            if moved * want < 0 { sign = -sign }
+        }
+        XCTFail("\(element.identifier) never scrolled into the tool options bar (it is at \(element.frame), the bar shows \(view.frame))")
     }
 
     /// Drags on the canvas between two image pixels, the image placed as `image` says.
