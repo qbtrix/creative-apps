@@ -2,7 +2,8 @@
 // docs/blueprints/design/features/style-rows.md, Journey steps item 3; SR-b,
 // ST-8; quality rows QD-S7 and QD-S6). On `crowd` (2,000 layers) at
 // 1024 × 768 it selects Frame 36's Text row in Layers, drags the Opacity bar
-// back and forth for 600 pt at 300 pt a second, double-clicks the Text on the
+// back and forth for 600 pt at 300 pt a second (more legs while the probe has
+// under 60 samples), double-clicks the Text's word on the
 // canvas and types a 30-character line into the inline editor twice (⌘A
 // between, 60 keystrokes), commits it with Return, then drags the X scrub
 // field the same way. A Layers row is clicked in its blank space between the
@@ -77,26 +78,31 @@ final class DesignPerfScrubJourneyTests: XCTestCase {
 
     // MARK: - Steps
 
-    /// Drags the bar `identifier` across 80% of its width, right then left, for 600 pt in all; its samples.
+    /// Drags the bar `identifier` across 80% of its width, right then left, for 600 pt in all and, when the
+    /// probe records, until it has 60 samples; its samples.
     @MainActor private func scrub(_ design: Journey, _ identifier: String, step: String) -> (samples: Int, summary: String) {
         let bar = design.element("suite.inspector").descendants(matching: .any)[identifier].firstMatch
         XCTAssert(bar.waitForExistence(timeout: 5), "no \(identifier) in the inspector")
         let width = bar.frame.width
         XCTAssert(width > 20, "\(identifier) is \(width) pt wide")
-        let legs = max(1, Int((Self.span / max(width * 0.8, 1)).rounded(.up)))
+        let span = max(1, Int((Self.span / max(width * 0.8, 1)).rounded(.up)))
         let before = sampleCount(design)
         let velocity = XCUIGestureVelocity(Self.speed * (NSScreen.main?.backingScaleFactor ?? 1))
-        var seconds = 0.0
-        for leg in 0..<legs {
-            let from: CGFloat = leg.isMultiple(of: 2) ? 0.1 : 0.9
+        var seconds = 0.0, legs = 0, added = 0
+        // Past 600 pt the legs go on while the probe has recorded some samples but under the 60 a series
+        // needs (40 legs at most): on the hosted runner 600 pt of the Opacity bar gave 13.
+        while legs < span || (added > 0 && added < Journey.minimumSamples && legs < 40) {
+            let from: CGFloat = legs.isMultiple(of: 2) ? 0.1 : 0.9
             let started = Date()
             bar.coordinate(withNormalizedOffset: CGVector(dx: from, dy: 0.5)).click(
                 forDuration: 0.05, thenDragTo: bar.coordinate(withNormalizedOffset: CGVector(dx: 1 - from, dy: 0.5)),
                 withVelocity: velocity, thenHoldForDuration: 0.05)
             seconds += Date().timeIntervalSince(started) - Self.legPause
+            legs += 1
+            if legs >= span { added = sampleCount(design) - before }
         }
         design.shot(step)
-        let added = sampleCount(design) - before
+        added = sampleCount(design) - before
         if added > 0 { return (added, "samples=\(added) report-only (suite.perf samples over \(legs) legs)") }
         let events = Int((max(seconds, 0) * Self.eventRate).rounded(.down))
         let time = String(format: "%.2f", seconds)

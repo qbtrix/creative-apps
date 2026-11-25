@@ -2,7 +2,7 @@
 // docs/blueprints/design/features/canvas-basics.md, Journey steps item 3,
 // CB-b). On the `cards` fixture at 1024 × 768, every step with the mouse on
 // visible controls: a clicked text box hugs "A longer line of text" (W over
-// 120, H at least 16); Title at size 48 refits (H at least 48, W grown); a
+// 120, H at least 16); Title at size 24, then 48, refits (H at least 48, W grown); a
 // box dragged 150 pt wide keeps its width and wraps two sentences onto more
 // than one line. Typing replaces the placeholder with no Command-A (#3338),
 // W follows the typing before the commit (#3335), and the Width chips switch
@@ -65,21 +65,17 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         let title = design.element("suite.sidebar").descendants(matching: .any)[Self.titleRow].firstMatch
         XCTAssert(title.waitForExistence(timeout: 5), "no Title row in Layers (\(Self.titleRow))")
         selectLayer(design, Self.titleRow)
-        let widthBefore = frameValue(design, "Width")
         let size = sizeField(design)
         XCTAssert(size.waitForExistence(timeout: 5), "no text Size field in the inspector")
-        // At 768 high the Text rows sit below the inspector's fold: scrolled into reach, then typed into the
-        // scrub's own field once the click has opened it.
-        design.reveal(size)
-        size.click()
-        XCTAssert(design.element("suite.inspector").textFields["suite.scrub.typing"].waitForExistence(timeout: 5),
-                  "clicking Size opened no typing field")
-        design.app.typeKey("a", modifierFlags: .command)
-        design.app.typeText("48\r")
+        // The fixture's box is 200 pt wide, wider than its word at any size here, so "wider than before" is
+        // measured between two fitted boxes: size 24 fits it first, then 48 has to widen that.
+        typeSize("24", into: size, design)
         XCTAssert(design.app.buttons["Undo Change Text Style"].waitForExistence(timeout: 5), "the Size field made no undo step")
+        let widthBefore = frameValue(design, "Width")
+        typeSize("48", into: size, design)
         let titleHeight = frameValue(design, "Height"), titleWidth = frameValue(design, "Width")
         XCTAssertGreaterThanOrEqual(titleHeight ?? 0, 48, "Title at size 48 is cut off: H \(String(describing: titleHeight))")
-        XCTAssertGreaterThan(titleWidth ?? 0, widthBefore ?? .infinity, "Title's box didn't widen at size 48")
+        XCTAssertGreaterThan(titleWidth ?? 0, widthBefore ?? .infinity, "Title's box didn't widen from size 24 to 48")
         design.shot("text-fit-size")
 
         // A box dragged 150 pt wide on the blank area at (432, 768) keeps its width and wraps.
@@ -116,6 +112,24 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         let enabled = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == true AND enabled == true"), object: size)
         XCTAssertEqual(XCTWaiter.wait(for: [enabled], timeout: 5), .completed,
                        "clicking \(identifier) in Layers didn't select a text layer (Size stays off)")
+    }
+
+    /// Types `value` into the text Size field and waits for it to read back. At 768 high the Text rows sit
+    /// below the inspector's fold: scrolled into reach, then typed into the scrub's own field once the click
+    /// has opened it.
+    @MainActor private func typeSize(_ value: String, into size: XCUIElement, _ design: Journey) {
+        design.reveal(size)
+        size.click()
+        XCTAssert(design.element("suite.inspector").textFields["suite.scrub.typing"].waitForExistence(timeout: 5),
+                  "clicking Size opened no typing field")
+        design.app.typeKey("a", modifierFlags: .command)
+        design.app.typeText(value + "\r")
+        var reads = false
+        for _ in 0..<25 where !reads {
+            reads = (size.value as? NSNumber)?.stringValue == value || (size.value as? String)?.hasPrefix(value) == true
+            if !reads { Thread.sleep(forTimeInterval: 0.2) }
+        }
+        XCTAssert(reads, "Size reads \(String(describing: size.value)) after typing \(value)")
     }
 
     /// Clicks the canvas's blank area, (864, 921) on the page, below the cards: it commits an open edit.

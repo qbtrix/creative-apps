@@ -76,7 +76,10 @@ final class DesignSnapJourneyTests: XCTestCase {
             clickUndo(design)
 
             // 4. Several: a marquee over A and B, then the box's bottom 2 pt short of Pair's bottom: guide y 500.
-            drag(design, from: CGPoint(x: frames.a.minX - 10, y: frames.a.minY - 10),
+            // The marquee starts 16 pt left of A and 4 pt above it: A is still selected, and at the fitted zoom
+            // its corner handles sit outside it with an 8 pt reach, so a press 10 pt off the corner resized A
+            // (#6307); and Title's box ends 7 pt above A, so a start higher up would take Title in too.
+            drag(design, from: CGPoint(x: frames.a.minX - 16, y: frames.a.minY - 4),
                  to: CGPoint(x: frames.b.maxX + 10, y: frames.b.maxY + 10))
             drag(design, from: CGPoint(x: frames.a.midX, y: frames.a.midY),
                  to: CGPoint(x: frames.a.midX, y: frames.a.midY + frames.pair.maxY - 2 - frames.b.maxY))

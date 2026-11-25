@@ -17,8 +17,10 @@
 // SidebarRow with an eye and a lock toggle (`layerToggles`, from the group
 // state the tree passes down, so no row walks the page); a click flips
 // that layer's own flag, one undo step (#45). A layer hidden by itself or by
-// a group around it reads dimmed (SuiteColor.textSecondary, which keeps 4.5:1
-// on a highlighted row), and a child of a hidden or locked group
+// a group around it reads dimmed (SuiteColor.textSecondary) until its row is
+// selected: on the highlight the dimmed name measured 4.41:1, under the 4.5:1
+// text needs, so a selected row's name is primary and its eye says hidden. A
+// child of a hidden or locked group
 // shows the group's state in its toggles. Each row carries the identifier
 // `design.layer.<id>`: a leaf row is a container with its toggles inside, and a
 // group's row, its disclosure's label, reads as one checkbox. That checkbox takes
@@ -314,17 +316,19 @@ private struct DesignLayerTree: View {
 
     var body: some View {
         let shown = nodes.frontToBack.prefix(limit ?? nodes.count)
+        // Read once: each row asks whether it is selected.
+        let selected = Set(model.selectedNodeIDs)
         if nodes.allSatisfy(\.children.isEmpty) {
-            ForEach(shown) { node in row(node).tag(node.id) }
+            ForEach(shown) { node in row(node, selected).tag(node.id) }
         } else {
-            mixed(shown)
+            mixed(shown, selected)
         }
     }
 
-    private func mixed(_ shown: ArraySlice<DesignNode>) -> some View {
+    private func mixed(_ shown: ArraySlice<DesignNode>, _ selected: Set<String>) -> some View {
         ForEach(shown) { node in
             if node.children.isEmpty {
-                row(node).tag(node.id)
+                row(node, selected).tag(node.id)
             } else {
                 DisclosureGroup(
                     isExpanded: Binding(
@@ -334,17 +338,17 @@ private struct DesignLayerTree: View {
                         nodes: node.children, model: model, perform: perform, drag: drag,
                         hiddenAbove: hiddenAbove || node.isHidden, lockedAbove: lockedAbove || node.isLocked)
                 } label: {
-                    row(node, isDisclosureLabel: true).tag(node.id)
+                    row(node, selected, isDisclosureLabel: true).tag(node.id)
                 }
                 .tag(node.id)
             }
         }
     }
 
-    private func row(_ node: DesignNode, isDisclosureLabel: Bool = false) -> DesignLayerRow {
+    private func row(_ node: DesignNode, _ selected: Set<String>, isDisclosureLabel: Bool = false) -> DesignLayerRow {
         DesignLayerRow(
             node: node, perform: perform, drag: drag, hiddenAbove: hiddenAbove, lockedAbove: lockedAbove,
-            isDisclosureLabel: isDisclosureLabel)
+            isDisclosureLabel: isDisclosureLabel, isSelected: selected.contains(node.id))
     }
 }
 
@@ -358,6 +362,8 @@ private struct DesignLayerRow: View {
     let hiddenAbove: Bool, lockedAbove: Bool
     /// A group's row: its disclosure flattens the label into one checkbox, so the row combines.
     var isDisclosureLabel = false
+    /// The row holds the list's highlight: a hidden layer's name then reads in the primary color.
+    var isSelected = false
 
     var body: some View {
         let id = node.id
@@ -378,7 +384,7 @@ private struct DesignLayerRow: View {
         )
         .lineLimit(1)
         .truncationMode(.middle)
-        .foregroundStyle(hiddenAbove || node.isHidden ? SuiteColor.textSecondary : Color.primary)
+        .foregroundStyle((hiddenAbove || node.isHidden) && !isSelected ? SuiteColor.textSecondary : Color.primary)
         .simultaneousGesture(TapGesture().modifiers(.shift).onEnded { perform(.toggleSelect(id)) })
         .background { if line == .into { RoundedRectangle(cornerRadius: SuiteRadius.row).fill(SuiteColor.dragFill) } }
         .overlay(alignment: line == .above ? .top : .bottom) {
