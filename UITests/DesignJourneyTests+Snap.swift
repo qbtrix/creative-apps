@@ -13,9 +13,12 @@
 // launch (#2456), and a row is clicked off its name (#2496).
 // Written before its code (lead.md, contract rule 13): SN-6 writes it skipped
 // by name; SN-7 draws the guides; SN-8 adds View > Snap to Layers and lifts
-// the skip (the item enabled right after Fit Page, the checkmark, the
-// relaunch, the toggle); SN-10 sets `snapIsLive`: the drags and guide reads
-// run on the live snap routes.
+// the skip (the item enabled right after Fit Page, the relaunch, the toggle);
+// SN-10 sets `snapIsLive`: the drags and guide reads run on the live snap routes.
+// The item's checkmark doesn't reach XCUITest: a checked item read unchecked,
+// so the walk clicked it and turned snapping off before its first drag (#6307).
+// Whether snapping is on is read from what a drag does instead (`snaps`), and
+// the open menu is shot after the relaunch so a person sees the mark.
 import XCTest
 
 final class DesignSnapJourneyTests: XCTestCase {
@@ -41,14 +44,16 @@ final class DesignSnapJourneyTests: XCTestCase {
     @MainActor private func walkSnapAndSmartGuides() {
         var design = open()
 
-        // 1. A clean start: Snap to Layers on; note B's, C's, Pair's and A's frames.
+        // 1. A clean start: note B's, C's, Pair's and A's frames, then Snap to Layers on (it is by default;
+        // an earlier run on this Mac may have left it off).
         let item = viewItem(design)
         XCTAssert(item.isEnabled, "View > \(Self.snapItem) is disabled")
         expectAfterFitPage(design)
-        if isChecked(item) { closeView(design) } else { item.click() }
+        closeView(design)
         design.expandDesignLayer(Self.rowDesktop)
         let frames = Frames(a: frame(design, Self.rowA), b: frame(design, Self.rowB),
                             c: frame(design, Self.rowC), pair: frame(design, Self.rowPair))
+        if Self.snapIsLive, !snaps(design, frames) { viewItem(design).click() }
         design.shot("snap-start")
 
         if Self.snapIsLive {
@@ -116,8 +121,7 @@ final class DesignSnapJourneyTests: XCTestCase {
 
         // 8. Remembered: relaunch; Snap to Layers is unchecked and step 2's drag doesn't snap.
         design = open()
-        let off = viewItem(design)
-        XCTAssertFalse(isChecked(off), "Snap to Layers is checked after a relaunch with it turned off")
+        _ = viewItem(design)
         design.shot("snap-remembered", screen: true)
         closeView(design)
         if Self.snapIsLive {
@@ -187,13 +191,14 @@ final class DesignSnapJourneyTests: XCTestCase {
         design.app.menuBars.firstMatch.menuBarItems["View"].click()
     }
 
-    /// Whether a menu item shows its checkmark: it reads selected, or its mark ("✓", 1) in its value
-    /// (SuiteJourneyTests' rate menu reads its check the same way).
-    @MainActor private func isChecked(_ item: XCUIElement) -> Bool {
-        if item.isSelected { return true }
-        if let number = item.value as? NSNumber { return number.boolValue }
-        let text = item.value as? String ?? ""
-        return text == "1" || text == "✓"
+    /// Whether snapping is on, read from a drag: step 2's move lands A on X 200 only when it snaps
+    /// (192 at the fitted zoom when it doesn't). The move is undone.
+    @MainActor private func snaps(_ design: Journey, _ frames: Frames) -> Bool {
+        moveAToB(design, frames)
+        expectStep(design, "Undo Move", after: "the move that reads the setting")
+        let snapped = Self.poll(seconds: 2) { design.inspectorNumber("X position") == 200 }
+        clickUndo(design)
+        return snapped
     }
 
     /// Clicks the top bar's Undo.
@@ -243,9 +248,9 @@ final class DesignSnapJourneyTests: XCTestCase {
         XCTAssert(Self.poll { read().map(condition) == true }, "after \(step) the inspector's \(name) reads \(String(describing: read()))")
     }
 
-    /// Polls `condition` for up to five seconds.
-    @MainActor private static func poll(_ condition: () -> Bool) -> Bool {
-        for _ in 0..<25 {
+    /// Polls `condition` for up to `seconds` (five by default).
+    @MainActor private static func poll(seconds: Double = 5, _ condition: () -> Bool) -> Bool {
+        for _ in 0..<Int(seconds / 0.2) {
             if condition() { return true }
             Thread.sleep(forTimeInterval: 0.2)
         }

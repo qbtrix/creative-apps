@@ -12,8 +12,9 @@
 // the page and the size badge below it, so its fractions drift off the page as
 // the selection changes (#3043: the press meant for A landed above it on Desktop).
 // The one zoom-dependent check reads its scale from A's selection frame, so it
-// holds at any zoom. Holding Option while hovering has no XCUI API, so that
-// step posts CGEvents, as FlareJourneyTests+Draw does for its drags.
+// holds at any zoom. The Option hover holds the key through XCUITest
+// (`perform(withKeyModifiers:)`): the hosted runner refuses posted CGEvents
+// (CGPreflightPostEventAccess is false there), so a posted Option never arrived.
 // Written before its code (lead.md, contract rule 13): D0-9a wrote the walk
 // skipped by name, and D0-9d turned it on with the badge and text preview.
 import XCTest
@@ -24,8 +25,6 @@ final class DesignFeedbackJourneyTests: XCTestCase {
     static let pageWidth = 1440.0, pageHeight = 1024.0
     /// The page's rectangle on screen; its fractions are page points over the page's size.
     static let artboard = "suite.canvas.artboard"
-    /// The Option key's virtual key code (kVK_Option).
-    static let optionKeyCode: CGKeyCode = 58
 
     /// The five feedback steps: the hover outline, the move and resize pointers,
     /// the copy pointer, the size badge, and the Text tool's preview and click-drag.
@@ -81,11 +80,11 @@ final class DesignFeedbackJourneyTests: XCTestCase {
 
         // 3. Copy pointer: with A selected, hold Option and hover A.
         canvas.coordinate(withNormalizedOffset: aCenter).hover()
-        Self.postKey(Self.optionKeyCode, down: true)
-        Self.moveMouse(to: canvas.coordinate(withNormalizedOffset: aCenter).withOffset(CGVector(dx: 2, dy: 0)).screenPoint, flags: .maskAlternate)
-        XCTAssert(Self.waitForValue(hover, "copy"), "holding Option over A isn't copy (design.canvas.hover reads \(Self.value(hover)))")
-        design.shot("feedback-pointer-copy")
-        Self.postKey(Self.optionKeyCode, down: false)
+        XCUIElement.perform(withKeyModifiers: .option) {
+            canvas.coordinate(withNormalizedOffset: aCenter).withOffset(CGVector(dx: 2, dy: 0)).hover()
+            XCTAssert(Self.waitForValue(hover, "copy"), "holding Option over A isn't copy (design.canvas.hover reads \(Self.value(hover)))")
+            design.shot("feedback-pointer-copy")
+        }
 
         // 4. Size badge: A's size, then after dragging its handle by (20, 10), then a new 120 × 80 box.
         XCTAssert(Self.waitForText(badge, "100 × 80"), "the badge doesn't read A's size 100 × 80 (design.canvas.badge reads \(Self.text(badge)))")
@@ -124,9 +123,9 @@ final class DesignFeedbackJourneyTests: XCTestCase {
         CGVector(dx: x / pageWidth, dy: y / pageHeight)
     }
 
-    /// The accessibility value of `element`, or "" when it has none.
+    /// The accessibility value of `element`, "" when it has none, "no mark" when the element is gone.
     @MainActor private static func value(_ element: XCUIElement) -> String {
-        element.value as? String ?? ""
+        element.exists ? element.value as? String ?? "" : "no mark"
     }
 
     /// A Text's words, read as its label, or its value on macOS.
@@ -182,19 +181,5 @@ final class DesignFeedbackJourneyTests: XCTestCase {
         if let height {
             XCTAssertEqual(frame.height, height, accuracy: 1, "\(what) is \(frame.height) tall, not \(height)")
         }
-    }
-
-    /// Presses or releases `key` as a CGEvent, to hold a modifier while the pointer moves.
-    @MainActor private static func postKey(_ key: CGKeyCode, down: Bool) {
-        CGEvent(keyboardEventSource: nil, virtualKey: key, keyDown: down)?.post(tap: .cghidEventTap)
-        Thread.sleep(forTimeInterval: 0.2)
-    }
-
-    /// Moves the pointer to `point` on screen with `flags` held, as a CGEvent.
-    @MainActor private static func moveMouse(to point: CGPoint, flags: CGEventFlags = []) {
-        let event = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: point, mouseButton: .left)
-        event?.flags = flags
-        event?.post(tap: .cghidEventTap)
-        Thread.sleep(forTimeInterval: 0.3)
     }
 }

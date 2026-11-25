@@ -83,7 +83,9 @@ final class DesignTextJourneyTests: XCTestCase {
         XCTAssert(family.waitForExistence(timeout: 5), "no Family menu in the inspector (\(Self.familyRow.id))")
         let before = Self.text(family)
         family.click()
-        let items = design.app.menuItems.matching(NSPredicate(format: "title != '' AND title != %@", before))
+        // The open menu's items sit under its menu button. The app's whole tree lists the menu bar's
+        // first, so a search from the app clicked the Apple menu's About This Mac (#2590).
+        let items = family.menuItems.matching(NSPredicate(format: "title != '' AND title != %@", before))
         XCTAssert(items.firstMatch.waitForExistence(timeout: 5), "the Family menu offers no family but \(before)")
         let picked = items.firstMatch.title
         items.firstMatch.click()
