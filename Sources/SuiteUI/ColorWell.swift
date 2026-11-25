@@ -14,7 +14,9 @@
 // color panel's picks stream through `onChange` and end once when the panel
 // closes (SwiftUI's ColorPicker reports no end of interaction) or the row goes
 // away. The row owns presentation state only: the hex text being typed and
-// the gesture's run. A `sampleable` row (the default) shows an
+// the gesture's run. Short of room (a keyed row beside its KeyframeButton
+// pair) the row drops its visible label, then its eyedropper (ViewThatFits),
+// so it never runs past the column. A `sampleable` row (the default) shows an
 // EyedropperButton after the hex code; its pick is one change and one end,
 // after ending an open run of panel picks, and Escape changes nothing. A host
 // that disables the row passes its reason as `sampleHelp`, so the button lists
@@ -193,42 +195,59 @@ public struct InspectorColorRow: View {
     }
 
     public var body: some View {
-        InspectorRow(label) {
-            HStack(spacing: SuiteSpacing.s) {
-                ColorPicker(
-                    label, selection: Binding(get: { color }, set: { pick($0.resolve(in: environment)) }),
-                    supportsOpacity: supportsOpacity
-                )
-                .labelsHidden()
-                .accessibilityIdentifier("suite.colorwell." + label.lowercased().replacingOccurrences(of: " ", with: "-"))
-                .frame(width: SuiteSize.swatch.width, height: SuiteSize.swatch.height)
-                .clipShape(Capsule())
-                .overlay(Capsule().strokeBorder(SuiteColor.outline, lineWidth: 1))
-                TextField(
-                    "\(label) Hex",
-                    text: Binding(get: { draft ?? HexColor(color.resolve(in: environment)).text }, set: { draft = $0 })
-                )
-                .textFieldStyle(.plain)
-                .labelsHidden()
-                .font(SuiteFont.inspectorValue)
-                .multilineTextAlignment(.trailing)
-                .focused($isTyping)
-                // Return gives the keys back (the focus change commits, once), so ⌘Z undoes the edit, not the typing.
-                .onSubmit { isTyping = false }
-                .onChange(of: isTyping) { _, typing in if !typing { commit() } }
-                .frame(width: SuiteSize.hexField)
-                .background {
-                    if isTyping { RoundedRectangle(cornerRadius: SuiteRadius.field).fill(SuiteColor.fieldActive).padding(-SuiteSpacing.xs) }
-                }
-                .help("\(label) as a hex code, like #1877F2")
-                .accessibilityIdentifier(hexID ?? "", isEnabled: hexID != nil)
-                if sampleable { EyedropperButton(help: sampleHelp) { sample($0, ends: &ends) } }
+        // The widest tier that fits: label and eyedropper; then no visible label (the swatch and hex field still
+        // speak it) on tighter gaps; then the swatch and hex alone, so a keyed row beside its KeyframeButton pair
+        // never runs past the inspector column (TK-flare).
+        ViewThatFits(in: .horizontal) {
+            InspectorRow(label) { controls(gap: SuiteSpacing.s, eyedropper: true) }
+            InspectorRow("", padding: SuiteSpacing.s, alignment: .trailing) {
+                controls(gap: SuiteSpacing.xs, eyedropper: true)
+            }
+            InspectorRow("", padding: SuiteSpacing.xs, alignment: .trailing) {
+                controls(gap: SuiteSpacing.xs, eyedropper: false)
             }
         }
+        // Once on the row, not per tier, so leaving the field commits once.
+        .onChange(of: isTyping) { _, typing in if !typing { commit() } }
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { note in
             if note.object is NSColorPanel { closePicks() }
         }
         .onDisappear(perform: closePicks)
+    }
+
+    /// The swatch, the hex field and (with `eyedropper`, on a sampleable row) the EyedropperButton, `gap` apart.
+    private func controls(gap: CGFloat, eyedropper: Bool) -> some View {
+        HStack(spacing: gap) {
+            ColorPicker(
+                label, selection: Binding(get: { color }, set: { pick($0.resolve(in: environment)) }),
+                supportsOpacity: supportsOpacity
+            )
+            .labelsHidden()
+            .accessibilityIdentifier("suite.colorwell." + label.lowercased().replacingOccurrences(of: " ", with: "-"))
+            .frame(width: SuiteSize.swatch.width, height: SuiteSize.swatch.height)
+            .clipShape(Capsule())
+            .overlay(Capsule().strokeBorder(SuiteColor.outline, lineWidth: 1))
+            TextField(
+                "\(label) Hex",
+                text: Binding(get: { draft ?? HexColor(color.resolve(in: environment)).text }, set: { draft = $0 })
+            )
+            .textFieldStyle(.plain)
+            .labelsHidden()
+            .font(SuiteFont.inspectorValue)
+            .multilineTextAlignment(.trailing)
+            .focused($isTyping)
+            // Return gives the keys back (the row's focus change commits, once), so ⌘Z undoes the edit.
+            .onSubmit { isTyping = false }
+            .frame(width: SuiteSize.hexField)
+            .background {
+                if isTyping {
+                    RoundedRectangle(cornerRadius: SuiteRadius.field).fill(SuiteColor.fieldActive).padding(-SuiteSpacing.xs)
+                }
+            }
+            .help("\(label) as a hex code, like #1877F2")
+            .accessibilityIdentifier(hexID ?? "", isEnabled: hexID != nil)
+            if sampleable && eyedropper { EyedropperButton(help: sampleHelp) { sample($0, ends: &ends) } }
+        }
     }
 
     /// A panel pick. The run is written only when it opens, never per sample.

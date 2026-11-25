@@ -1,0 +1,4 @@
+[
+{"label": "Hovering a keyframe button shows no fill", "file": "Sources/SuiteUI/KeyframeButton.swift", "find": "        case .hover: SuiteColor.rowHover", "replace": "        case .hover: nil", "tests": "KeyframeButtonTests"},
+{"label": "Pressing a keyframe button looks like hovering it", "file": "Sources/SuiteUI/KeyframeButton.swift", "find": "        case .pressed: SuiteColor.valueFill", "replace": "        case .pressed: SuiteColor.rowHover", "tests": "KeyframeButtonTests"}
+]
