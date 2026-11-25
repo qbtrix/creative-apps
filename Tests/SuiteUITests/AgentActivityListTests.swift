@@ -1,7 +1,8 @@
 // AgentActivityListTests.swift: the AI tab's rows over LayerTreeList: a closed
 // request is one row, an open one lists its steps then its layers one level in,
 // the eye state and the caption; which request reads live while an agent
-// works, and the working mark's VoiceOver label.
+// works, the working mark's VoiceOver label, and the empty hint's command on
+// its own line.
 import Foundation
 import SuiteKernel
 import Testing
@@ -16,6 +17,11 @@ import Testing
                         date: Date(timeIntervalSince1970: 30), layers: ["l1", "l2"]),
         AgentStepRecord(id: 3, name: "Blur", client: "cursor", date: Date(timeIntervalSince1970: 3600)),
     ])
+
+    @MainActor @Test func emptyHintKeepsTheCommandOnOneLine() {
+        // A sidebar-wide hint wrapped the command it asks for ("afterglow mcp / --live").
+        #expect(AgentActivityList.emptyHint.split(separator: "\n").contains("afterglow mcp --live"))
+    }
 
     @Test func rowsOpenToStepsThenLayers() {
         let closed = AgentActivityList.rows(Self.requests, expanded: [], names: [:], hidden: [])

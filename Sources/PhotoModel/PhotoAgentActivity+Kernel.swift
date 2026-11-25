@@ -3,8 +3,10 @@
 // steps of this image's history (`History.agentSteps`, timed by PhotoHistory's
 // `agentDates`); with none the tab shows its empty state. A step's layers come from its undo payload, which
 // is cheap and needs no extra state: a tile or mask edit names its layer; a
-// layer-list or whole-stack edit is diffed by id against the layers now
-// (new ids were created, a differing value was changed). `setLayersHidden`
+// layer-list or whole-stack edit is diffed by id against the list right after
+// that step, the next list-carrying step's before-list or the layers now (new
+// ids were created, a differing value was changed), so a later user edit
+// never lands in an agent's request. `setLayersHidden`
 // is the tab's eye, one "Hide Agent Layers"/"Show Agent Layers" step;
 // `selectLayers` picks exactly the live ones of the ids. `agentWork` feeds the
 // tab's working marks. Linux-safe.
@@ -18,7 +20,22 @@ import SuiteKernel
 extension PhotoWorkspace {
     /// The agent's requests in this image, newest first.
     public var agentRequests: [AgentRequest] {
-        AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step, _ in step.payload.layerIDs(now: layers) })
+        let after = layersAfterEachStep
+        return AgentRequests.group(history.kernel.agentSteps(dates: history.agentDates) { step, _ in
+            step.payload.layerIDs(now: after[step.idAfter] ?? layers)
+        })
+    }
+
+    /// The layer list right after each applied step, by `idAfter`: the next list-carrying step's before-list
+    /// (steps between them leave the list alone), or the layers now after the last one.
+    private var layersAfterEachStep: [Int: [PhotoLayer]] {
+        var out: [Int: [PhotoLayer]] = [:]
+        var after = layers
+        for step in history.kernel.undoSteps.reversed() {
+            out[step.idAfter] = after
+            if let before = step.payload.layerList { after = before }
+        }
+        return out
     }
 
     /// The open request and the newest agent step: what the AI tab's working marks read (SuiteUI AgentWorking).
@@ -45,10 +62,7 @@ extension PhotoWorkspace {
 
 extension PhotoEdit {
     /// The layers the step that recorded this undo payload created or changed.
-    // ponytail: list and stack edits diff against the layers now, not the step's own after-state, so a
-    // later edit to any layer also counts. Design and Halo diff against the next step's payload
-    // (History.agentSteps hands it over), but Photo's next payload is a tile or list diff, not the
-    // layer list; a per-step after-list in PhotoHistory fixes it if it matters.
+    /// `now` is the list right after that step (`layersAfterEachStep`), so a later edit never counts.
     func layerIDs(now: [PhotoLayer]) -> [PhotoLayer.ID] {
         switch self {
         case .tiles(let layer, _), .maskTiles(let layer, _): [layer]
@@ -57,6 +71,16 @@ extension PhotoEdit {
         case .group(let edits):
             edits.flatMap { $0.layerIDs(now: now) }.reduce(into: []) { if !$0.contains($1) { $0.append($1) } }
         case .adjustments, .selection, .draft, .paths, .area: []
+        }
+    }
+
+    /// The layer list as it was before this edit, when the edit carries one.
+    var layerList: [PhotoLayer]? {
+        switch self {
+        case .layers(let before, _): before
+        case .stack(let stack): stack.layers
+        case .group(let edits): edits.lazy.compactMap(\.layerList).first
+        case .tiles, .maskTiles, .adjustments, .selection, .draft, .paths, .area: nil
         }
     }
 

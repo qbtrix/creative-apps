@@ -60,4 +60,23 @@ import Testing
         #expect(poster.steps.count == 2 && poster.date > .distantPast)
         #expect(poster.layers.contains(first) && poster.layers.count == 2)
     }
+
+    @Test func laterUserEditsStayOutOfAnAgentRequest() throws {
+        var model = try PhotoWorkspace.fixture(.layered)
+        let start = model.layers
+        StepOrigin.$current.withValue(.agent(client: "claude", request: nil)) {
+            _ = model.setHistoryRequest("Sailboat")
+            model.addLayer()
+            _ = model.setHistoryRequest(nil)
+        }
+        let agentLayer = try #require(model.layers.map(\.id).first { id in !start.contains { $0.id == id } })
+        let afterAgent = model.layers
+        model.toggleVisibility(start[0].id)
+        model.addLayer()
+        let userLayer = try #require(model.layers.map(\.id).first { id in !afterAgent.contains { $0.id == id } })
+        let request = try #require(model.agentRequests.first)
+        #expect(request.layers == [agentLayer], "user layers \([userLayer, start[0].id]) counted as the agent's")
+        model.setLayersHidden(request.layers, hidden: true)
+        #expect(model.layers.first { $0.id == userLayer }?.isVisible == true, "Hide hid the user's own layer")
+    }
 }
