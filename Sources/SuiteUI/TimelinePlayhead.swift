@@ -218,12 +218,14 @@ enum TimelinePlayheadGrab {
 @MainActor final class TimelineScrubSender {
     private(set) var lastSent: Int?
 
-    /// Sends `frame` unless it is the last frame sent, or `playhead` before any.
-    func send(_ frame: Int, from playhead: Int, to onScrub: @MainActor (Int) -> Void) {
+    /// Sends `frame` unless it is the last frame sent, or `playhead` before any; true when it sent.
+    @discardableResult
+    func send(_ frame: Int, from playhead: Int, to onScrub: @MainActor (Int) -> Void) -> Bool {
         let last = lastSent ?? playhead
-        guard frame != last else { return }
+        guard frame != last else { return false }
         lastSent = frame
         onScrub(frame)
+        return true
     }
 
     /// The drag ended; the next one starts from the playhead.

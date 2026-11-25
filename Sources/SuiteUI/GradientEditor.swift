@@ -11,7 +11,8 @@
 // an app shows the same one over a solid fill's colour row. The bar's gesture math is `GradientBarDrag`: a click adds a stop, a drag moves one under
 // one drag token, a drag 40 pt off removes it; arrows nudge the selected stop 1% and Delete removes it. A colour-panel
 // session and an angle scrub each carry one token too, so the app folds each gesture into one undo step. Where a stop
-// lands after an add or a move comes from `GradientRules`, so the selection follows it.
+// lands after an add or a move comes from `GradientRules`, so the selection follows it. Its rows are a column in an
+// inspector and one row in a ToolOptionsBar (ToolOptionsStack).
 import Foundation
 import SuiteKernel
 import SwiftUI
@@ -80,7 +81,7 @@ public struct GradientEditor: View {
     private var index: Int { min(max(selected, 0), max(fill.stops.count - 1, 0)) }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: SuiteSpacing.s) {
+        ToolOptionsStack(spacing: SuiteSpacing.s) {
             if types.count > 1 {
                 GradientTypeSwitch(type: type, types: types, typeID: typePrefix, help: typeHelp) { send(.type($0)) }
             }

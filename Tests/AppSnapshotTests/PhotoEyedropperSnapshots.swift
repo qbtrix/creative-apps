@@ -56,10 +56,9 @@ import Testing
         model.setSampleSize(.fiveByFive)
         #expect(model.sampleSize == .fiveByFive)
         for scheme in [ColorScheme.light, .dark] {
-            let view = ToolOptionsSection(model: model, perform: { _ in })
-                .padding(SuiteSpacing.m)
-                .frame(width: SuiteSize.inspectorWidth.ideal, alignment: .topLeading)
-                .padding(SuiteSpacing.xxl)
+            // The bar as the window draws it over the canvas, at the window's width.
+            let view = PhotoToolOptionsBar(model: model, perform: { _ in })
+                .frame(maxHeight: .infinity, alignment: .top)
             try snapshot(view, name: "photo-eyedropper-sample-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
         }
     }

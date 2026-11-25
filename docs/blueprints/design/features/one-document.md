@@ -114,6 +114,20 @@ Measured in `RenderBudgetDesignAnimateTests` and written to `Tests/render-budget
 4. first key slide-in: one window body
 5. inspector toggle-key: at most the inspector's body
 
+## Acceptance
+
+Measured for the quality gate (#6373) on a release build (`swift test -c release -Xswiftc -DDEBUG -Xswiftc -enable-testing --no-parallel`), 3 runs, each started at a 1-minute load under 12 (6 to 10), all green. Times are gated only on an optimized build; a debug build counts bodies and prints the times. Rows 2 and 3 were timed with the p95 gate in place; that gate now lives in `dragTiming` and `scrubTiming`, disabled until the supervisor adds their Tests/perf-suites.txt lines.
+
+| Row | Test | Budget | Measured (3 runs) | Pass |
+|---|---|---|---|---|
+| 1. play animated(500) 5 s | `RenderBudgetDesignAnimateTests.playback` | 0 window bodies per frame; at most 2 refreshes over 16.7 ms; refresh 1 and the last under 16.7 ms | 0 window bodies; 0 over 16.7 ms (0 over 8.3); p50 2.2, p95 2.9-3.0 ms; refresh 1 7.9-8.1 ms; last 2.9-3.2 ms. animated(50): p95 2.4-2.6, refresh 1 5.4-6.2 ms | yes |
+| 2. drag a keyed rectangle at frame 60 | `RenderBudgetDesignHeroTests.dragKeyed` | at most 3 bodies, 6 ms step p95 | 2 window bodies; 122 steps, p50 3.1-3.2, p95 4.25-4.49 ms; the x key lands at 60 | yes |
+| 3. scrub the ruler 120 samples | `RenderBudgetDesignHeroTests.scrubRuler` | canvas only (0 window bodies), 8.3 ms step p95 | 0 window bodies; p50 3.3, p95 3.97-4.11, max 6.4 ms | yes |
+| 4. first key slide-in | `RenderBudgetDesignTimelineTests.slideIn` | one window body | 1 window body, 2 strip bodies; 30 scrub steps then run the window 0 times | yes |
+| 5. inspector toggle-key | `RenderBudgetDesignKeyTests.press` | at most the inspector's body | 1 window body, 1 editor body (the key edit itself) | yes |
+
+Timing is load-bound: at load 36 the same build read drag p95 34-43 ms, scrub p95 27-31 ms and 13-31 late playback refreshes. Run the timed rows on a quiet Mac. The hero journey (`testOneDocumentHero`) passed in five dev journeys runs in a row (11-19 to 11-21). Contact sheets: `one-document/hero-contact-light.png` (the journey's eight steps) and `one-document/hero-contact-dark.png` (the slot, key and Animate menu snapshots in dark).
+
 ## Quiet rerun (2026-10-31)
 
 OD-16 reran OD-11's playback budget (`RenderBudgetDesignAnimateTests.playback`, now run on both `animated(500)` and `animated(50)`) on a release build (`swift test -c release -Xswiftc -enable-testing -Xswiftc -DDEBUG --no-parallel`). Each run plays the fixture once: 600 refreshes of a hand-fired 120 Hz link, with layout and display forced on each. Before every run the script waited for the 1-minute load to drop under 20. The gate had no holders. Load is the 1-minute average just before and just after each run. No run went over 20, so none was marked not quiet or rerun.

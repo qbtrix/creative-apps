@@ -117,7 +117,7 @@ final class PhotoShellJourneyTests: XCTestCase {
     }
 
     /// The title, an empty or Saved subtitle, one layer, the palette at the
-    /// canvas's leading edge and the inspector's header, Tool Options, Layer and adjustments.
+    /// canvas's leading edge, the tool options bar over the canvas, and the inspector's header, Layer and adjustments.
     @MainActor private func expectOpen(_ photo: Journey, shot: String) {
         let title = photo.app.windows.firstMatch.title
         XCTAssert(title.contains(Self.file), "the open image's title reads \(title), not \(Self.file) beside its subtitle")
@@ -133,9 +133,9 @@ final class PhotoShellJourneyTests: XCTestCase {
         let header = "\(Self.file), 800 × 600 px, sRGB · 1 layer"
         let labelled = inspector.matching(NSPredicate(format: "label CONTAINS %@", header)).firstMatch
         XCTAssert(labelled.waitForExistence(timeout: 5), "the inspector's header doesn't read \(header)")
-        for section in ["tool-options", "layer"] {
-            XCTAssert(inspector["suite.inspector.section." + section].exists, "the inspector has no \(section) section")
-        }
+        XCTAssert(photo.element("suite.toolOptions").exists, "no tool options bar (suite.toolOptions) over the canvas")
+        XCTAssertFalse(inspector["suite.inspector.section.tool-options"].exists, "the inspector still shows Tool Options")
+        XCTAssert(inspector["suite.inspector.section.layer"].exists, "the inspector has no layer section")
         XCTAssert(photo.element("suite.inspector").sliders["Exposure"].exists, "the inspector shows no adjustments (Exposure)")
         photo.shot(shot)
     }

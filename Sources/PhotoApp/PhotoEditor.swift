@@ -3,7 +3,9 @@
 // else "Photo") with the save state as its subtitle, the toolbar's eight
 // commands (PhotoToolbarItem: Open, Save and Export beside the title; Undo,
 // Redo and the zoom commands trailing), the sidebar's Layers and AI tabs
-// (PhotoSidebarTabs), the canvas with its rulers in EditorDetail with the
+// (PhotoSidebarTabs), the tool options bar over the canvas while an image is
+// open (PhotoToolOptionsBar: the paint color, then the active tool's options),
+// the canvas with its rulers in EditorDetail with the
 // floating tool palette over its leading edge while an image is open (each
 // tool a PhotoPaletteTool carrying the workspace's `toolHelp`) and the status
 // line under it (PhotoStatusLine, with the save status `photo.bar.saved`
@@ -96,8 +98,8 @@ struct PhotoEditor: View, BodyCounted {
     }
 }
 
-/// The window's middle column: the canvas with its rulers in EditorDetail, the tool palette over its leading edge
-/// while an image is open, and the status line with the save status. Its own view so a golden draws it without the
+/// The window's middle column: the tool options bar and, under it, the canvas with its rulers in EditorDetail, the
+/// tool palette over its leading edge while an image is open, and the status line with the save status. Its own view so a golden draws it without the
 /// split view, which renders blank offscreen (PhotoFileFlowSnapshots).
 struct PhotoEditorDetail: View {
     let model: PhotoWorkspace
@@ -113,6 +115,13 @@ struct PhotoEditorDetail: View {
     var saveStatus: PhotoSaveStatus?
 
     var body: some View {
+        VStack(spacing: 0) {
+            if model.canvas != nil { PhotoToolOptionsBar(model: model, perform: perform) }
+            detail
+        }
+    }
+
+    private var detail: some View {
         EditorDetail {
             PhotoCanvas(
                 model: model, tiles: tiles, zoom: zoom, onViewport: onViewport, onZoom: onZoom, perform: perform,

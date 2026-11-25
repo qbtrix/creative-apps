@@ -9,7 +9,8 @@
 // by the difference; one drag shares one token, so the host makes it one undo
 // step. With several turns ("Mixed") the row reads "Rotate By": a typed value
 // turns each item by that much more (the kernel has no per-item absolute turn).
-// A "Flip" label leads the icon-only flips.
+// A "Flip" label leads the icon-only flips. In a ToolOptionsBar the rows sit
+// side by side in one row (ToolOptionsStack).
 // With no selection, or `help`, every control is disabled and says why;
 // `flipHelp` disables the flips alone. Identifiers `suite.transform.<row>`,
 // `suite.transform.flip-horizontal` and `suite.transform.flip-vertical`.
@@ -47,7 +48,7 @@ public struct TransformRows: View {
     public var body: some View {
         let reason = Self.reason(selection: selection, help: help)
         let item = selection ?? TransformBox(box: Rect(minX: 0, minY: 0, maxX: 1, maxY: 1))
-        VStack(alignment: .leading, spacing: SuiteSpacing.xs) {
+        ToolOptionsStack {
             ForEach([TransformRow.x, .y, .w, .h], id: \.self) { row in
                 InspectorRow(row.rawValue.uppercased()) {
                     ScrubField(row.rawValue.uppercased(), value: Self.value(row, of: item), in: Self.range(row),

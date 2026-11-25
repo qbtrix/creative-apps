@@ -183,8 +183,8 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.app.buttons["Redo Paint"].waitForExistence(timeout: 5), "Undo didn't undo the stroke")
 
         // The Preset menu (AB-p2) sets every brush setting at once: Soft Round is 60 px.
-        let preset = photo.inspectorMenu("photo.tool.preset", label: "Preset")
-        XCTAssert(preset.waitForExistence(timeout: 5), "the brush's Tool Options show no Preset menu")
+        let preset = photo.inspectorMenu("photo.tool.preset", label: "Preset", in: "suite.toolOptions")
+        XCTAssert(preset.waitForExistence(timeout: 5), "the brush's tool options bar shows no Preset menu")
         preset.click()
         XCTAssert(photo.chooseShownMenuItem("Soft Round", timeout: 5), "the Preset menu doesn't list Soft Round")
         // The row's label text carries photo.tool.size too, so each of its few elements is read; a
@@ -328,11 +328,12 @@ final class PhotoJourneyTests: XCTestCase {
         XCTAssert(photo.app.buttons["Undo Heal"].waitForExistence(timeout: 5), "the heal stroke made no Heal step")
 
         tools["Eraser"].click()
-        // The eraser shows its own size, hardness and opacity, and no color (#26).
+        // The eraser shows its own size, hardness and opacity (#26); the bar keeps the paint color at its lead.
         for option in ["size", "hardness", "opacity"] {
             XCTAssert(photo.element("photo.tool." + option).waitForExistence(timeout: 5), "the eraser shows no \(option)")
         }
-        XCTAssertFalse(photo.element("photo.tool.color").exists, "the eraser shows a color")
+        XCTAssert(photo.element("suite.toolOptions").descendants(matching: .any)["photo.tool.color"].exists,
+                  "the paint color left the tool options bar with the eraser")
         photo.drag(on: "suite.canvas", from: CGVector(dx: 0.1, dy: 0.8), to: CGVector(dx: 0.5, dy: 0.5), step: "erased")
 
         tools["Marquee"].click()
