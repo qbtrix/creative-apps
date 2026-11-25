@@ -114,7 +114,10 @@ final class DesignFeedbackJourneyTests: XCTestCase {
         design.drag(on: Self.artboard, from: Self.frac(40, 920), to: Self.frac(340, 950))
         let editor = design.element("design.text")
         XCTAssert(editor.waitForExistence(timeout: 5), "the click-drag opened no text editor (design.text)")
-        Self.expectSize(editor.frame, width: 300 * scale, height: nil, "the text editor")
+        // The field reads 1 pt past its box on each side (77 pt over a 75 pt box in run 45563576413, with the
+        // inspector's W at 300.0), so the box is the field's frame less that point, and W is checked too.
+        Self.expectSize(editor.frame.insetBy(dx: 1, dy: 0), width: 300 * scale, height: nil, "the text editor")
+        XCTAssert(Self.waitForInspector(design, "Width", 300), "the inspector's W doesn't read 300 while the box is open")
         design.shot("feedback-text-box")
         design.app.typeText("Hello")
         design.press(.return, step: "feedback-text-typed")
