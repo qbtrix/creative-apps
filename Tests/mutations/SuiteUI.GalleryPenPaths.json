@@ -1,0 +1,4 @@
+[
+{"label":"Undo stays on with nothing to take back","file":"Sources/SuiteUI/Gallery/GalleryPenPaths.swift","find":"var undoHelp: String? { history.canUndo ? nil : \"Nothing to undo.\" }","replace":"var undoHelp: String? { nil }","tests":"PathEditOverlayLiveTests"},
+{"label":"Undo logs without taking the step back","file":"Sources/SuiteUI/Gallery/GalleryPenPaths.swift","find":"guard let name = history.undoName, undo() else","replace":"guard let name = history.undoName else","tests":"PathEditOverlayLiveTests"}
+]

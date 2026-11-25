@@ -34,7 +34,7 @@ public enum PenTool: String, CaseIterable, Sendable {
 public struct PathEditOverlay: View {
     private let context: PathContext
     private let onIntent: (PathIntent) -> Void
-    /// false: marks and hover only (`pressesPassThrough()`, the stand-in init); presses, drags and keys reach the view under it.
+    /// false: marks and hover only (`pressesPassThrough()`); presses, drags and keys reach the view under it.
     var takesPresses = true
     /// true: a press's intents go to `live` and reach `onIntent` together at release (`holdsPressesUntilRelease()`).
     var holdsPresses = false
