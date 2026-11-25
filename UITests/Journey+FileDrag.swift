@@ -7,7 +7,7 @@
 // own waits included) queues the window server's mouse events but never hands them to the panel. JourneyEventPump
 // does that dispatch on a timer for the length of the drag, so the panel sees mouseDown/mouseDragged and starts a
 // real drag session. Lines prefixed `FILEDRAG:` in the test log trace each step (frames, pump ticks, source
-// callbacks, the session's end and its operation).
+// callbacks, the session's end and its operation). The drag holds a second over the target before it lets go.
 import AppKit
 import XCTest
 
@@ -40,7 +40,10 @@ extension XCTestCase {
               + " under-press=\(JourneyEventPump.windowOwner(at: NSPoint(x: frame.midX, y: frame.midY)))")
         let from = target.coordinate(withNormalizedOffset: .zero)
             .withOffset(CGVector(dx: press.x - targetFrame.minX, dy: press.y - targetFrame.minY))
-        from.press(forDuration: 0.3, thenDragTo: target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)))
+        // The hold keeps the button down over the target so the app answers the drag's updates there before the
+        // release: released at once, the session could end before the target took it (operation 0).
+        from.click(forDuration: 0.3, thenDragTo: target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)),
+                   withVelocity: .default, thenHoldForDuration: 1)
         print("FILEDRAG: xcui drag returned ticks=\(pump.ticks) dispatched=\(pump.dispatched)"
               + " down=\(source.sawMouseDown) began=\(source.began) ended=\(source.ended.map { "\($0.rawValue)" } ?? "no")")
         // The session can still be running; its end (and the drop's data request) arrives through the pump.
