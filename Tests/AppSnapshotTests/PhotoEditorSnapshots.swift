@@ -1,7 +1,7 @@
 // PhotoEditorSnapshots.swift: the Photo window (PhotoEditor) in each state
 // its core loop reaches: an opened photo, layers composited, a brush and an
 // eraser stroke, a marquee selection, a pending crop, a moved layer, a Select
-// box mid-drag, exposure +1, layers in the sidebar, the export sheet and a refusal in the status line
+// box mid-drag, Select's outlines on two picked layers, exposure +1, layers in the sidebar, the export sheet and a refusal in the status line
 // (photo-status-message-dark.png only); the rail's tool help is checked here
 // too. Each other state writes
 // photo-<state>-light.png and photo-<state>-dark.png. The canvas picture is rendered the way the window renders
@@ -119,6 +119,26 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         let marks = PhotoCanvasOverlay(model: model, zoom: 1, hover: nil).marks.map(\.identifier)
         #expect(marks.contains("photo.canvas.select-box"), "the overlay shows \(marks)")
         try shoot("select-box", model)
+    }
+
+    /// Select at rest on the photo with a red square layer over it, both picked (a click on the square, then a
+    /// Shift-click on the photo): each picked layer shows SuiteUI's pick outline at its painted box (#6149).
+    @Test func selectPickedOutlines() throws {
+        var model = try opened()
+        model.addLayer()
+        model.setToolOption(.color(red: 220, green: 30, blue: 30))
+        drag(&model, .marquee, (80, 140), (240, 300))
+        model.fillSelection()
+        model.deselect()
+        drag(&model, .select, (160, 220), (160, 220))
+        model.drag(from: Mask.Point(x: 500, y: 400), to: Mask.Point(x: 500, y: 400), modifiers: .shift)
+        model.endDrag()
+        #expect(model.selectedLayerIDs.count == 2, "the Shift-click didn't add the photo to the picks")
+        let picked = PhotoCanvasOverlay(model: model, zoom: 1, hover: nil).marks.first { $0.identifier == "photo.canvas.picked" }
+        #expect(picked?.rect == CGRect(x: 0, y: 0, width: 640, height: 480), "the outlines' union isn't the photo: \(String(describing: picked))")
+        var kept: [PhotoWorkspace.PaintedBox] = []
+        #expect(model.pickOutlines(reusing: &kept).contains(PixelRect(x: 80, y: 140, width: 160, height: 160)), "the square isn't outlined at its box")
+        try shoot("select-picked", model)
     }
 
     @Test func exposurePlusOne() throws {

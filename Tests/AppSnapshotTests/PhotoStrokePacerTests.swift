@@ -65,7 +65,8 @@ import Testing
     @Test func aPendingCropIsAnIdentifiedImageNotAButton() throws {
         var model = PhotoWorkspace()
         try model.newCanvas(width: 640, height: 480)
-        #expect(PhotoCanvasOverlay(model: model, zoom: 1, hover: nil).marks.isEmpty)
+        #expect(PhotoCanvasOverlay(model: model, zoom: 1, hover: nil).marks.map(\.identifier) == ["photo.canvas.picked"],
+                "Select at rest outlines only the picked layer")
         model.selectTool(.crop)
         model.drag(from: Mask.Point(x: 40, y: 40), to: Mask.Point(x: 40, y: 40))
         model.drag(from: Mask.Point(x: 40, y: 40), to: Mask.Point(x: 600, y: 400))
@@ -87,6 +88,7 @@ import Testing
         let ring = PhotoCanvasOverlay(model: model, zoom: 2, hover: CGPoint(x: 100, y: 50)).marks
         #expect(ring == [.brushCursor(CGRect(x: 80, y: 30, width: 40, height: 40))])
         model.selectTool(.select)
-        #expect(PhotoCanvasOverlay(model: model, zoom: 2, hover: CGPoint(x: 100, y: 50)).marks.isEmpty, "no cursor for Move")
+        #expect(!PhotoCanvasOverlay(model: model, zoom: 2, hover: CGPoint(x: 100, y: 50)).marks.contains { $0.identifier == "photo.canvas.brush-cursor" },
+                "no cursor for Select")
     }
 }

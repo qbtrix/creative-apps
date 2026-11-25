@@ -10,7 +10,9 @@
 // `gradientDrag`; `photo.canvas.gradient-line`), Remove's outline while it
 // drags (SuiteUI's MotionPathMarks through its points, from the same live copy
 // or `removeStroke`; `photo.canvas.remove-stroke`), the Select tool's box while it drags (SuiteUI's
-// SelectBoxMark, from the same live copy or `selectBox`; `photo.canvas.select-box`)
+// SelectBoxMark, from the same live copy or `selectBox`; `photo.canvas.select-box`), the picked layers' outlines
+// while Select rests (SuiteUI's PickOutlineMark on `pickOutlines`; `photo.canvas.picked`, one probe at their union,
+// PhotoPickOutlines reading the facets the picks and pixels live in, its painted boxes kept across bodies)
 // and the Eyedropper's loupe (PhotoSampleLoupe, `suite.sample.loupe`), in
 // that order. SuiteUI's marks are hidden from
 // accessibility, so each visible mark also gets one probe (`probe(zoom:)`): a
@@ -70,6 +72,7 @@ struct PhotoCanvasOverlay: View {
                 MotionPathMarks(points: points.map { CGPoint(x: $0.x, y: $0.y) }, zoom: zoom)
                 mark.probe(zoom: zoom)
             }
+            PhotoPickOutlines(given: given, zoom: zoom, liveLine: liveLine)
             if let box = selectBox {
                 SelectBoxMark(rect: box, zoom: zoom)
                 PhotoCanvasMark.selectBox(box).probe(zoom: zoom)
@@ -120,9 +123,11 @@ struct PhotoCanvasOverlay: View {
 
     /// The accessibility elements the overlay shows, in drawing order.
     var marks: [PhotoCanvasMark] {
-        [
+        var unkept: [PhotoWorkspace.PaintedBox] = []
+        return [
             selection, CropOverlay(model: model, zoom: zoom).mark,
-            TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine, removeOutline, selectBox.map(PhotoCanvasMark.selectBox),
+            TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine, removeOutline,
+            PhotoCanvasMark.picked(model.pickOutlines(reusing: &unkept).map(\.cgRect)), selectBox.map(PhotoCanvasMark.selectBox),
         ].compactMap { $0 }
     }
 }
@@ -147,6 +152,11 @@ struct PhotoCanvasMark: Equatable {
     static func brushCursor(_ rect: CGRect) -> Self {
         Self(identifier: "photo.canvas.brush-cursor", label: "Brush size", rect: rect)
     }
+    /// The picked layers' outlines: one element at the union of their boxes; nil without one.
+    static func picked(_ rects: [CGRect]) -> Self? {
+        guard let first = rects.first else { return nil }
+        return Self(identifier: "photo.canvas.picked", label: "Picked layers", rect: rects.dropFirst().reduce(first) { $0.union($1) })
+    }
     static func selectBox(_ rect: CGRect) -> Self { Self(identifier: "photo.canvas.select-box", label: "Selection box", rect: rect) }
     static func gradientLine(_ rect: CGRect) -> Self {
         Self(identifier: "photo.canvas.gradient-line", label: "Gradient line", rect: rect)
@@ -162,5 +172,29 @@ extension PhotoCanvasMark {
     /// clicks. The SuiteUI mark it covers stays hidden.
     func probe(zoom: Double) -> ProbeElement {
         ProbeElement(identifier, label: label, rect: rect, zoom: zoom, traits: Self.traits)
+    }
+}
+
+/// The picked layers' outlines while Select rests (#6149). It reads the `tool`, `document` and `canvas` facets
+/// itself (the tool, the picks, the pixels), so a pick re-runs this leaf; the live drag line's copy while one is
+/// live (its stroke hides them). The painted boxes are kept across bodies, so a redraw reads none.
+private struct PhotoPickOutlines: View {
+    let given: PhotoWorkspace
+    let zoom: Double
+    let liveLine: LiveDragLine?
+    @Environment(PhotoSession.self) private var session: PhotoSession?
+    @State private var kept = Kept()
+
+    @MainActor final class Kept {
+        var boxes: [PhotoWorkspace.PaintedBox] = []
+    }
+
+    var body: some View {
+        let model = liveLine?.shown ?? session?.workspace(reading: .tool, .document, .canvas) ?? given
+        let rects = model.pickOutlines(reusing: &kept.boxes).map(\.cgRect)
+        if let mark = PhotoCanvasMark.picked(rects) {
+            PickOutlineMark(rects: rects, zoom: zoom)
+            mark.probe(zoom: zoom)
+        }
     }
 }

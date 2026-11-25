@@ -5,6 +5,8 @@
 // marquee draw it; the box itself comes from SuiteKernel's `Marquee.rect`. Its sibling GroupScopeMark is the
 // entered group's box (SuiteKernel's GroupScope, area-selection AR-14): the same accent edge on its halo, dimmed
 // to half and unfilled, so the scope a click picks in shows around the picked child without reading as a selection.
+// PickOutlineMark is the same edge on its halo, full strength and unfilled, round each picked layer's box in one
+// path (Photo's Select, #6149), so a box shows where the picks are without reading as a drag in progress.
 import SwiftUI
 
 public struct SelectBoxMark: View {
@@ -45,5 +47,29 @@ public struct GroupScopeMark: View {
 
     public var body: some View {
         SelectBoxMark(rect: rect, zoom: zoom, filled: false).opacity(0.5)
+    }
+}
+
+/// Each picked box's outline: `rects` in document units at `zoom`, the select box's accent edge on its paper halo,
+/// unfilled, all in one path. It takes no clicks and is hidden from accessibility.
+public struct PickOutlineMark: View {
+    let rects: [CGRect]
+    let zoom: Double
+
+    public init(rects: [CGRect], zoom: Double) {
+        (self.rects, self.zoom) = (rects, zoom)
+    }
+
+    public var body: some View {
+        let scale = zoom.isFinite && zoom > 0 ? zoom : 1
+        let boxes = Path { path in
+            for rect in rects { path.addRect(rect.applying(CGAffineTransform(scaleX: scale, y: scale))) }
+        }
+        ZStack(alignment: .topLeading) {
+            boxes.stroke(SuiteColor.overlayPaper, lineWidth: SuiteSize.pointMarkPaper)
+            boxes.stroke(SuiteColor.accent, lineWidth: 1)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }

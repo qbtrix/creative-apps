@@ -129,3 +129,41 @@ struct PhotoSelectToolTests {
     }
     #endif
 }
+
+/// With Select, the canvas outlines each picked layer's painted box (#6149), from a kept box per layer, so a
+/// redraw that leaves the pixels alone reads nothing; none while a drag runs or with another tool.
+struct PhotoSelectOutlineTests {
+    @Test func picksAreOutlinedAtTheirPaintedBoxes() throws {
+        var (w, top, _) = try PhotoSelectToolTests.two()
+        var kept: [PhotoWorkspace.PaintedBox] = []
+        let painted = try #require(w.pickOutlines(reusing: &kept).first)
+        #expect(w.pickOutlines(reusing: &kept).count == 1)
+        #expect(painted.x < 12 && painted.x + painted.width > 10 && painted.width < 40, "the top layer's stroke, not its canvas")
+        PhotoSelectToolTests.click(&w, 80, 80, .shift)
+        let both = w.pickOutlines(reusing: &kept)
+        #expect(both.count == 2)
+        #expect(both.contains(PixelRect(x: 0, y: 0, width: 100, height: 100)), "the opaque background's box")
+        #expect(kept.contains { $0.layerID == top })
+        w.selectTool(.brush)
+        #expect(w.pickOutlines(reusing: &kept).isEmpty, "only Select outlines its picks")
+        #expect(kept.isEmpty, "another tool drops the kept boxes")
+    }
+
+    @Test func aRedrawReadsNoBoxAndADragHidesThem() throws {
+        var (w, _, bottom) = try PhotoSelectToolTests.two()
+        var kept: [PhotoWorkspace.PaintedBox] = []
+        let tally = PhotoRenderCount.Tally()
+        PhotoRenderCount.$tally.withValue(tally) {
+            _ = w.pickOutlines(reusing: &kept)
+            w.toggleVisibility(bottom)
+            _ = w.pickOutlines(reusing: &kept)
+        }
+        #if DEBUG
+        #expect(tally.snapshot["paintedBoxes"] == 1, "a redraw re-read a kept box")
+        #endif
+        w.drag(from: Mask.Point(x: -10, y: -10), to: Mask.Point(x: 30, y: 30))
+        #expect(w.pickOutlines(reusing: &kept).isEmpty, "the box drag shows its own box, not the outlines")
+        w.endDrag()
+        #expect(!w.pickOutlines(reusing: &kept).isEmpty)
+    }
+}
