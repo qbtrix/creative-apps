@@ -146,13 +146,16 @@ final class DesignTextJourneyTests: XCTestCase {
         let committed = committedFrame(design)
         // The field's box is the node's box; its accessibility frame can be the field's line
         // height instead, so height is DesignTextScaleTests' check, not this one.
-        for (name, editorEdge, committedEdge) in [
-            ("left", editing.minX, committed.minX), ("top", editing.minY, committed.minY),
-            ("width", editing.width, committed.width),
-        ] {
+        for (name, editorEdge, committedEdge) in [("left", editing.minX, committed.minX), ("top", editing.minY, committed.minY)] {
             XCTAssertEqual(Double(committedEdge), Double(editorEdge), accuracy: 1,
                            "the committed text's \(name) jumped from the editor's at 50% (\(committed) vs \(editing))")
         }
+        // An auto-width editor is its text's width and an em more, so the next letter and the caret fit
+        // (DesignTextOverlay.field), and its field reads 1 pt past each side: at size 32 and 50% that is up to
+        // 18 pt over the committed box, never under it.
+        let slack = Double(editing.width - committed.width)
+        XCTAssert((-1...19).contains(slack),
+                  "the committed text's width jumped from the editor's at 50% (\(committed) vs \(editing))")
         design.shot("text-style-committed-50")
     }
 
