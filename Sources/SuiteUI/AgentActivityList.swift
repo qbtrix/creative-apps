@@ -12,7 +12,8 @@
 // closes the row. Which rows are open is this view's own state, so opening
 // the tab or a row runs no app body and no canvas render. The list mutates
 // nothing: every gesture goes out through `onAction`. With no requests it
-// shows "No agent actions yet." and the `afterglow mcp --live` hint. While
+// shows "No agent actions yet." and the hint with `afterglow mcp --live` on
+// its own line, so a narrow sidebar never wraps the command. While
 // an agent works (`work`, through AgentWorkWatch's linger) its request reads
 // as live: it opens once, its title shimmers, its step count ticks and each
 // new step eases in; when the work ends the shimmer fades into the plain row
@@ -46,7 +47,8 @@ public struct AgentActivityList: View {
     public static let naming = LayerTreeNaming.app(
         LayerTreeIDs(container: "suite.agent", row: "suite.agent.row.", control: "suite.agent."))
     public static let emptyTitle = "No agent actions yet."
-    public static let emptyHint = "Connect an agent with afterglow mcp --live and its edits show up here."
+    /// The command sits on its own line, so a narrow sidebar never wraps it.
+    public static let emptyHint = "Connect an agent with\nafterglow mcp --live\nand its edits show up here."
 
     /// `layerNames` names each layer id (a gone layer shows its id); `hidden` holds the hidden layers' ids.
     /// `showsEye` false drops the eyes, for an app whose layers can't hide. `undoHelp` disables Undo Request
