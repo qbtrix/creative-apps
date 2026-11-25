@@ -12,8 +12,7 @@
 // 1024 × 677 on the 1024 × 768 runner, between its menu bar and its Dock, and
 // a few points more or less as the Dock resizes for the running apps' tiles);
 // nothing here assumes an exact 768. A window found outside it is read again
-// for three seconds with this process's run loop turning, since the app refits
-// once a second and AppKit here learns the Dock's new size only on a turn.
+// for three seconds, since the app refits once a second.
 //
 // A column's own element doesn't give its column's frame (run 38991868071's
 // tree): a List that is the sidebar's only element takes `suite.sidebar`
@@ -62,9 +61,8 @@ extension Journey {
         XCTAssert(window.waitForExistence(timeout: 30), "no window opened")
         var frame = rect(window.frame)
         var found = outsideDisplay(frame)
-        // The Dock resizes as apps launch and quit, the app refits its window once a second
-        // (SuiteWindowSizer), and this process reads the Dock's size only as its run loop turns:
-        // a miss is read again for three seconds before it counts (#5908, #6320).
+        // The Dock resizes as apps launch and quit and the app refits its window once a second
+        // (SuiteWindowSizer), so a miss is read again for three seconds before it counts.
         for _ in 0..<6 where !found.isEmpty {
             RunLoop.current.run(until: Date().addingTimeInterval(0.5))
             frame = rect(window.frame)

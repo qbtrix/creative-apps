@@ -7,7 +7,8 @@
 // that fits is unchanged, one past an edge moves inside, and an empty or
 // non-finite visible frame changes nothing. The sizing view keeps its window
 // inside a visible frame that shrinks later with no notification (the Dock
-// growing for a tile mid-journey). macOS only.
+// growing for a tile mid-journey), also after the view left its window and
+// came back. macOS only.
 import AppKit
 import SwiftUI
 import Testing
@@ -66,6 +67,28 @@ import Testing
         screen.visible = NSRect(x: 0, y: 63, width: 1024, height: 674)
         try await Task.sleep(for: .milliseconds(300))
         #expect(window.frame == screen.visible, "the window stayed at \(window.frame) when the visible frame shrank")
+    }
+
+    /// SwiftUI can take the sizing view out of its window and put it back as the window's content changes (an
+    /// empty editor opening a file). The watch has to go on afterwards: the Dock shrinks the visible frame later.
+    @MainActor @Test func theWindowStillFollowsAfterTheViewLeavesItAndComesBack() async throws {
+        final class Screen { var visible = NSRect(x: 0, y: 0, width: 1024, height: 677) }
+        let screen = Screen()
+        let view = SuiteWindowSizingView(
+            requested: CGSize(width: 1024, height: 768), every: .milliseconds(20), visible: { _ in screen.visible })
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 300), styleMask: [.borderless], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        defer { window.close() }
+        window.contentView?.addSubview(view)
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(window.frame == screen.visible, "the launch size wasn't fitted: \(window.frame)")
+        view.removeFromSuperview()
+        try await Task.sleep(for: .milliseconds(100))
+        window.contentView?.addSubview(view)
+        screen.visible = NSRect(x: 0, y: 3, width: 1024, height: 674)
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(window.frame == screen.visible, "the window stayed at \(window.frame) after the view came back")
     }
 
     @Test func theFlagGivesItsSize() {
