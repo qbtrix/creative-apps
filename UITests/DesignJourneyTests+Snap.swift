@@ -6,16 +6,23 @@
 // drawn in a canvas, so the canvas publishes the last drag's guide summary as
 // the label of `design.canvas.guides` ("x 300, gap x 100", or "none"), read by
 // its label since XCUITest reads a SwiftUI value as empty (#262).
-// Screen positions come from the `design.canvas.selection` element's frame
-// after a click on each layer's row, so each drag stops 2 screen points short
-// of its target, inside the window's snap reach of 8 screen points. A file
+// Screen positions come from the fixture's page frames through the artboard
+// (`suite.canvas.artboard`, exactly the page at the current zoom), and each
+// drag stops 2 screen points short of its target, inside the window's snap
+// reach of 8 screen points. The selection mark's own frame isn't the layer's:
+// it takes in the handles, which sit outside a small layer and on the edge of a
+// larger one, so C's read 3 pt off A's and B's and the spacing drag fell short
+// (#6307). A file
 // opens with its rows collapsed, so Desktop's row is opened first, after each
 // launch (#2456), and a row is clicked off its name (#2496).
 // Written before its code (lead.md, contract rule 13): SN-6 writes it skipped
 // by name; SN-7 draws the guides; SN-8 adds View > Snap to Layers and lifts
-// the skip (the item enabled right after Fit Page, the checkmark, the
-// relaunch, the toggle); SN-10 sets `snapIsLive`: the drags and guide reads
-// run on the live snap routes.
+// the skip (the item enabled right after Fit Page, the relaunch, the toggle);
+// SN-10 sets `snapIsLive`: the drags and guide reads run on the live snap routes.
+// The item's checkmark doesn't reach XCUITest: a checked item read unchecked,
+// so the walk clicked it and turned snapping off before its first drag (#6307).
+// Whether snapping is on is read from what a drag does instead (`snaps`), and
+// the open menu is shot after the relaunch so a person sees the mark.
 import XCTest
 
 final class DesignSnapJourneyTests: XCTestCase {
@@ -29,8 +36,14 @@ final class DesignSnapJourneyTests: XCTestCase {
     static let guides = "design.canvas.guides", selection = "design.canvas.selection"
     static let undo = "design.bar.undo"
 
-    /// The screen frames of the layers the drags aim at, read at the start.
+    /// The screen frames of the layers the drags aim at, worked out at the start.
     struct Frames { var a: CGRect, b: CGRect, c: CGRect, pair: CGRect }
+    /// A's, B's, C's and Pair's frames on the 1440 pt wide page (DesignFixtures.cards).
+    static let pageA = CGRect(x: 100, y: 100, width: 100, height: 80)
+    static let pageB = CGRect(x: 300, y: 140, width: 200, height: 80)
+    static let pageC = CGRect(x: 700, y: 100, width: 100, height: 120)
+    static let pagePair = CGRect(x: 900, y: 400, width: 300, height: 100)
+    static let pageWidth = 1440.0, artboard = "suite.canvas.artboard"
 
     /// SN-c: moves, resizes, several moves, equal spacing and draws snap; the setting turns it off and is remembered.
     @MainActor func testSnapAndSmartGuides() throws {
@@ -41,14 +54,16 @@ final class DesignSnapJourneyTests: XCTestCase {
     @MainActor private func walkSnapAndSmartGuides() {
         var design = open()
 
-        // 1. A clean start: Snap to Layers on; note B's, C's, Pair's and A's frames.
+        // 1. A clean start: note B's, C's, Pair's and A's frames, then Snap to Layers on (it is by default;
+        // an earlier run on this Mac may have left it off).
         let item = viewItem(design)
         XCTAssert(item.isEnabled, "View > \(Self.snapItem) is disabled")
         expectAfterFitPage(design)
-        if isChecked(item) { closeView(design) } else { item.click() }
+        closeView(design)
         design.expandDesignLayer(Self.rowDesktop)
-        let frames = Frames(a: frame(design, Self.rowA), b: frame(design, Self.rowB),
-                            c: frame(design, Self.rowC), pair: frame(design, Self.rowPair))
+        let frames = Frames(a: onScreen(Self.pageA, design), b: onScreen(Self.pageB, design),
+                            c: onScreen(Self.pageC, design), pair: onScreen(Self.pagePair, design))
+        if Self.snapIsLive, !snaps(design, frames) { viewItem(design).click() }
         design.shot("snap-start")
 
         if Self.snapIsLive {
@@ -71,7 +86,10 @@ final class DesignSnapJourneyTests: XCTestCase {
             clickUndo(design)
 
             // 4. Several: a marquee over A and B, then the box's bottom 2 pt short of Pair's bottom: guide y 500.
-            drag(design, from: CGPoint(x: frames.a.minX - 10, y: frames.a.minY - 10),
+            // The marquee starts 16 pt left of A and 4 pt above it: A is still selected, and at the fitted zoom
+            // its corner handles sit outside it with an 8 pt reach, so a press 10 pt off the corner resized A
+            // (#6307); and Title's box ends 7 pt above A, so a start higher up would take Title in too.
+            drag(design, from: CGPoint(x: frames.a.minX - 16, y: frames.a.minY - 4),
                  to: CGPoint(x: frames.b.maxX + 10, y: frames.b.maxY + 10))
             drag(design, from: CGPoint(x: frames.a.midX, y: frames.a.midY),
                  to: CGPoint(x: frames.a.midX, y: frames.a.midY + frames.pair.maxY - 2 - frames.b.maxY))
@@ -82,6 +100,10 @@ final class DesignSnapJourneyTests: XCTestCase {
 
             // 5. Equal spacing: C left to 2 pt short of a gap to B equal to A's: X 600, "spacing x 100".
             _ = frame(design, Self.rowC)
+            // On the 1024 × 768 runner this step can't pass yet: the fitted zoom is 25%, so the snap reach is
+            // 32 page points, and wherever C's gap is in reach of equal its right edge is in reach of the page's
+            // middle (720). SuiteKernel's `Snapping.offset` takes a line before a gap, so C lands on X 620
+            // (runs 45563576413 to 45625018434); the blueprint (snapping.md) says the smaller offset wins.
             let target = frames.b.maxX + (frames.b.minX - frames.a.maxX) + 2
             drag(design, from: CGPoint(x: frames.c.midX, y: frames.c.midY),
                  to: CGPoint(x: frames.c.midX + target - frames.c.minX, y: frames.c.midY))
@@ -116,8 +138,7 @@ final class DesignSnapJourneyTests: XCTestCase {
 
         // 8. Remembered: relaunch; Snap to Layers is unchecked and step 2's drag doesn't snap.
         design = open()
-        let off = viewItem(design)
-        XCTAssertFalse(isChecked(off), "Snap to Layers is checked after a relaunch with it turned off")
+        _ = viewItem(design)
         design.shot("snap-remembered", screen: true)
         closeView(design)
         if Self.snapIsLive {
@@ -150,6 +171,15 @@ final class DesignSnapJourneyTests: XCTestCase {
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "cards showed no page (suite.canvas)")
         return design
+    }
+
+    /// `page`, a rectangle in page points, on screen: through the artboard, which is exactly the page at the
+    /// current zoom.
+    @MainActor private func onScreen(_ page: CGRect, _ design: Journey) -> CGRect {
+        let board = design.element(Self.artboard).frame
+        let scale = board.width / Self.pageWidth
+        return CGRect(x: board.minX + page.minX * scale, y: board.minY + page.minY * scale,
+                      width: page.width * scale, height: page.height * scale)
     }
 
     /// Clicks the Layers row `identifier` and returns the selection mark's screen frame.
@@ -187,13 +217,14 @@ final class DesignSnapJourneyTests: XCTestCase {
         design.app.menuBars.firstMatch.menuBarItems["View"].click()
     }
 
-    /// Whether a menu item shows its checkmark: it reads selected, or its mark ("✓", 1) in its value
-    /// (SuiteJourneyTests' rate menu reads its check the same way).
-    @MainActor private func isChecked(_ item: XCUIElement) -> Bool {
-        if item.isSelected { return true }
-        if let number = item.value as? NSNumber { return number.boolValue }
-        let text = item.value as? String ?? ""
-        return text == "1" || text == "✓"
+    /// Whether snapping is on, read from a drag: step 2's move lands A on X 200 only when it snaps
+    /// (192 at the fitted zoom when it doesn't). The move is undone.
+    @MainActor private func snaps(_ design: Journey, _ frames: Frames) -> Bool {
+        moveAToB(design, frames)
+        expectStep(design, "Undo Move", after: "the move that reads the setting")
+        let snapped = Self.poll(seconds: 2) { design.inspectorNumber("X position") == 200 }
+        clickUndo(design)
+        return snapped
     }
 
     /// Clicks the top bar's Undo.
@@ -243,9 +274,9 @@ final class DesignSnapJourneyTests: XCTestCase {
         XCTAssert(Self.poll { read().map(condition) == true }, "after \(step) the inspector's \(name) reads \(String(describing: read()))")
     }
 
-    /// Polls `condition` for up to five seconds.
-    @MainActor private static func poll(_ condition: () -> Bool) -> Bool {
-        for _ in 0..<25 {
+    /// Polls `condition` for up to `seconds` (five by default).
+    @MainActor private static func poll(seconds: Double = 5, _ condition: () -> Bool) -> Bool {
+        for _ in 0..<Int(seconds / 0.2) {
             if condition() { return true }
             Thread.sleep(forTimeInterval: 0.2)
         }
