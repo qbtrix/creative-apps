@@ -132,11 +132,16 @@ final class DesignLayersJourneyTests: XCTestCase {
         design.press(.escape)
     }
 
-    /// Drags `row` from its middle to `target` the way a hand does with the mouse: a held click,
+    /// Drags `row` by its name to `target` the way a hand does with the mouse: a held click,
     /// a slow move, and a short hold before the release, so the system drag reports the pointer
-    /// over the target row. On macOS the velocity form of `press` drives only the Touch Bar.
+    /// over the target row. The grab is on the name: the row's blank space belongs to the list's
+    /// table, which takes a press there as a selection drag and starts no row drag (the press in
+    /// B's blank space selected B, then C, and moved nothing, #3667). On macOS the velocity form
+    /// of `press` drives only the Touch Bar.
     @MainActor private func rowDrag(_ row: XCUIElement, to target: XCUICoordinate) {
-        row.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let name = row.staticTexts.firstMatch
+        XCTAssert(name.waitForExistence(timeout: 5), "the row \(row.identifier) shows no name to drag it by")
+        name.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             .click(forDuration: 0.6, thenDragTo: target, withVelocity: 200, thenHoldForDuration: 0.5)
     }
 
