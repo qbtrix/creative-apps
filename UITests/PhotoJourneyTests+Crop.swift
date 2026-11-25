@@ -299,7 +299,7 @@ final class PhotoCropJourneyTests: XCTestCase {
         // Not the paint color's hex field, which the bar always shows at its leading edge.
         let typing = panel(photo).textFields.matching(NSPredicate(format: "identifier != %@", "photo.tool.color")).firstMatch
         // The typing field takes the keys as it opens (ScrubField asks for focus), as typeValue in PhotoJourneyTests.
-        _ = typing.waitForExistence(timeout: 3)
+        XCTAssert(typing.waitForExistence(timeout: 3), "clicking \(id)'s number opened no typing field")
         photo.app.typeKey(.rightArrow, modifierFlags: .command)
         for _ in 0..<8 { photo.app.typeKey(.delete, modifierFlags: []) }
         photo.app.typeText("\(value)")
@@ -313,12 +313,15 @@ final class PhotoCropJourneyTests: XCTestCase {
         let view = panel(photo).scrollViews.firstMatch
         guard view.exists else { return }
         // A positive delta should bring the leading options in; if the element moves away instead, flip it.
-        var sign: CGFloat = 1
+        // The step halves whenever the needed way turns, so it can't bounce past a field nearly as wide as the bar.
+        var (sign, step, last): (CGFloat, CGFloat, CGFloat) = (1, 60, 0)
         for _ in 0..<40 {
             let (shown, before) = (view.frame, element.frame)
             if before.minX >= shown.minX, before.maxX <= shown.maxX { return }
             let want: CGFloat = before.minX < shown.minX ? 1 : -1
-            view.scroll(byDeltaX: 60 * want * sign, deltaY: 0)
+            if last != 0, want != last { step = max(step / 2, 4) }
+            last = want
+            view.scroll(byDeltaX: step * want * sign, deltaY: 0)
             let moved = element.frame.minX - before.minX
             if moved * want < 0 { sign = -sign }
         }

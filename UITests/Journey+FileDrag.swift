@@ -7,14 +7,15 @@
 // own waits included) queues the window server's mouse events but never hands them to the panel. JourneyEventPump
 // does that dispatch on a timer for the length of the drag, so the panel sees mouseDown/mouseDragged and starts a
 // real drag session. Lines prefixed `FILEDRAG:` in the test log trace each step (frames, pump ticks, source
-// callbacks, the session's end and its operation). The drag holds a second over the target before it lets go.
+// callbacks, the session's end and its operation). A caller can hold the drag over the target before it lets go.
 import AppKit
 import XCTest
 
 extension XCTestCase {
     /// Shows `file` in a small floating window at the screen's top left and drags it onto `target`'s middle.
-    /// The file must exist; the drop carries its URL, as a drag from a folder window does.
-    @MainActor func dragFile(_ file: URL, onto target: XCUIElement) {
+    /// The file must exist; the drop carries its URL, as a drag from a folder window does. `hold` keeps the button
+    /// down that many seconds over the target before the release.
+    @MainActor func dragFile(_ file: URL, onto target: XCUIElement, hold: TimeInterval = 0) {
         let screen = NSScreen.screens.first?.frame ?? .zero
         let frame = CGRect(x: screen.minX + 40, y: screen.maxY - 200, width: 120, height: 120)
         let source = JourneyFileDragSource(file: file)
@@ -40,10 +41,12 @@ extension XCTestCase {
               + " under-press=\(JourneyEventPump.windowOwner(at: NSPoint(x: frame.midX, y: frame.midY)))")
         let from = target.coordinate(withNormalizedOffset: .zero)
             .withOffset(CGVector(dx: press.x - targetFrame.minX, dy: press.y - targetFrame.minY))
-        // The hold keeps the button down over the target so the app answers the drag's updates there before the
-        // release: released at once, the session could end before the target took it (operation 0).
-        from.click(forDuration: 0.3, thenDragTo: target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)),
-                   withVelocity: .default, thenHoldForDuration: 1)
+        let to = target.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        if hold > 0 {
+            from.click(forDuration: 0.3, thenDragTo: to, withVelocity: .default, thenHoldForDuration: hold)
+        } else {
+            from.press(forDuration: 0.3, thenDragTo: to)
+        }
         print("FILEDRAG: xcui drag returned ticks=\(pump.ticks) dispatched=\(pump.dispatched)"
               + " down=\(source.sawMouseDown) began=\(source.began) ended=\(source.ended.map { "\($0.rawValue)" } ?? "no")")
         // The session can still be running; its end (and the drop's data request) arrives through the pump.
