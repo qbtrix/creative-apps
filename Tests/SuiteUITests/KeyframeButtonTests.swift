@@ -164,3 +164,20 @@ private struct KeyframeButtonHost: View {
     for child in (node.accessibilityChildren?() ?? nil) ?? [] { found.merge(axEnabled(in: child)) { $1 } }
     return found
 }
+
+/// Both buttons of the pair show hover and pressed (lead.md rule 15b): hover is
+/// `rowHover` with an outline, never fill alone (design.md: `rowHover` over
+/// `row` is 1.18:1 in Dark); pressed is the field fill. At rest the stopwatch
+/// keeps its own circle (the keyed tint while keyed here) and the diamond none.
+@Test func eachButtonShowsHoverAndPressedOverItsRest() {
+    for state in KeyState.allCases {
+        let rest = KeyframeButton.surface(state, level: .rest)
+        #expect(rest.fill == (state == .keyedHere ? SuiteColor.keyedTint : SuiteColor.panelRaised) && !rest.outlined)
+    }
+    #expect(KeyframeButton.surface(nil, level: .rest).fill == nil)
+    for state in KeyState.allCases.map(Optional.some) + [nil] {
+        let hover = KeyframeButton.surface(state, level: .hover), pressed = KeyframeButton.surface(state, level: .pressed)
+        #expect(hover.fill == SuiteColor.rowHover && hover.outlined)
+        #expect(pressed.fill == SuiteColor.field && pressed.outlined)
+    }
+}

@@ -5,7 +5,9 @@
 // playhead. Beside it a 28 pt slot always holds room for the key-here
 // diamond, so the row never changes width while the timeline scrubs: empty
 // while not animated, a hollow diamond to add a key at the playhead, a filled
-// one to remove it. Hover fills the circle; disabled draws at 40%, and with
+// one to remove it. Both buttons show hover (`rowHover` and an outline, never
+// fill alone) and pressed (the field fill) on their circle (`surface`, by
+// HoverButtonLevel's rule); disabled draws at 40%, and with
 // `unavailableHelp` both buttons show that reason as their tooltip, so a
 // mouse user learns why the pair does nothing (`help(_:state:unavailable:)`);
 // `unavailableHelp` also disables the pair itself, so with `registers` a host
@@ -22,7 +24,7 @@
 // can't act (`entries`), and reports `selected`: the stopwatch on once
 // animated, the diamond on while keyed here (`stateEntries`); hosts that list
 // the pair themselves leave it off.
-// Owns presentation state only: hover.
+// Owns presentation state only: each button's hover, in KeyframeCircleStyle.
 import SwiftUI
 
 /// The live faces of the keyframe button (UC3): the stopwatch hollow while not
@@ -82,7 +84,6 @@ public struct KeyframeButton: View {
     private let registers: Bool
     private let onToggle: @MainActor () -> Void
     private let onKey: @MainActor () -> Void
-    @State private var hovering = false
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.suiteReduceMotion) private var reduceMotion
 
@@ -154,14 +155,8 @@ public struct KeyframeButton: View {
                 Image(systemName: face.symbol)
                     .imageScale(.small)
                     .foregroundStyle(state.color)
-                    .frame(width: SuiteSize.keyframeButton, height: SuiteSize.keyframeButton)
-                    .background(
-                        state == .keyedHere ? SuiteColor.keyedTint : hovering && enabled ? SuiteColor.field : SuiteColor.panelRaised,
-                        in: Circle())
-                    .contentShape(Circle())
             }
-            .buttonStyle(.plain)
-            .onHover { hovering = $0 }
+            .buttonStyle(KeyframeCircleStyle(state: state))
             .help(help.stopwatch)
             .accessibilityLabel("Animate \(property)")
             .accessibilityValue(face.spoken)
@@ -173,10 +168,8 @@ public struct KeyframeButton: View {
                         Image(systemName: diamond.symbol)
                             .imageScale(.small)
                             .foregroundStyle(SuiteColor.stateKeyed)
-                            .frame(width: SuiteSize.keyframeButton, height: SuiteSize.keyframeButton)
-                            .contentShape(.rect)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(KeyframeCircleStyle(state: nil))
                     .help(help.diamond ?? "")
                     .accessibilityLabel("\(diamond.action), \(property)")
                     .accessibilityIdentifier(id.map(Self.diamondID) ?? diamond.symbol)
@@ -187,10 +180,49 @@ public struct KeyframeButton: View {
         }
         .disabled(unavailableHelp != nil)
         .opacity(enabled ? 1 : SuiteColor.disabledOpacity)
-        .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: hovering)
         .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: state)
     }
 
     /// The diamond's identifier beside the stopwatch identified `id`.
     nonisolated public static func diamondID(_ id: String) -> String { "\(id).diamond" }
+
+    /// The circle under a button of the pair (`state` for the stopwatch, nil for
+    /// the diamond) at `level`: hover and pressed take HoverButtonLevel's fill
+    /// and an outline, so hover never reads by fill alone; at rest the
+    /// stopwatch keeps its circle, on the keyed tint while keyed here, and the
+    /// diamond has none.
+    public static func surface(_ state: KeyState?, level: HoverButtonLevel) -> (fill: Color?, outlined: Bool) {
+        if let fill = level.fill { return (fill, true) }
+        guard let state else { return (nil, false) }
+        return (state == .keyedHere ? SuiteColor.keyedTint : SuiteColor.panelRaised, false)
+    }
+}
+
+/// A keyframe pair button's 28 pt circle with its hover and pressed surface (`KeyframeButton.surface`).
+private struct KeyframeCircleStyle: ButtonStyle {
+    let state: KeyState?
+
+    func makeBody(configuration: Configuration) -> some View { KeyframeCircle(configuration: configuration, state: state) }
+
+    private struct KeyframeCircle: View {
+        let configuration: ButtonStyleConfiguration
+        let state: KeyState?
+        @State private var hovering = false
+        @Environment(\.isEnabled) private var isEnabled
+        @Environment(\.suiteReduceMotion) private var reduceMotion
+
+        var body: some View {
+            let level = HoverButtonLevel.resolve(hovering: hovering, pressed: configuration.isPressed, enabled: isEnabled)
+            let surface = KeyframeButton.surface(state, level: level)
+            configuration.label
+                .frame(width: SuiteSize.keyframeButton, height: SuiteSize.keyframeButton)
+                .background(surface.fill ?? .clear, in: Circle())
+                .overlay {
+                    if surface.outlined { Circle().strokeBorder(SuiteColor.outline, lineWidth: 1).allowsHitTesting(false) }
+                }
+                .contentShape(Circle())
+                .onHover { hovering = $0 }
+                .animation(SuiteMotion.state(reduceMotion: reduceMotion), value: level)
+        }
+    }
 }

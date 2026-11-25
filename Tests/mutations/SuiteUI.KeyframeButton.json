@@ -1,0 +1,5 @@
+[
+{"label":"hover and pressed lose their outline, so hover reads by fill alone","file":"Sources/SuiteUI/KeyframeButton.swift","find":"if let fill = level.fill { return (fill, true) }","replace":"if let fill = level.fill { return (fill, false) }","tests":"eachButtonShowsHoverAndPressedOverItsRest"},
+{"label":"the diamond shows no hover or pressed surface","file":"Sources/SuiteUI/KeyframeButton.swift","find":"        if let fill = level.fill { return (fill, true) }\n        guard let state else { return (nil, false) }","replace":"        guard let state else { return (nil, false) }\n        if let fill = level.fill { return (fill, true) }","tests":"eachButtonShowsHoverAndPressedOverItsRest"},
+{"label":"the keyed tint is lost at rest","file":"Sources/SuiteUI/KeyframeButton.swift","find":"return (state == .keyedHere ? SuiteColor.keyedTint : SuiteColor.panelRaised, false)","replace":"return (SuiteColor.panelRaised, false)","tests":"eachButtonShowsHoverAndPressedOverItsRest"}
+]
