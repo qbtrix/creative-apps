@@ -78,10 +78,12 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         XCTAssertGreaterThan(titleWidth ?? 0, widthBefore ?? .infinity, "Title's box didn't widen from size 24 to 48")
         design.shot("text-fit-size")
 
-        // A box dragged 150 pt wide on the blank area at (432, 768) keeps its width and wraps.
+        // A box dragged 150 pt wide on the blank area at (1240, 768) keeps its width and wraps. Both its sides
+        // are more than 32 pt from every other layer's edges and centers: Snap to Layers reaches 8 screen
+        // points, 32 page points at the fitted 25%, and from (432, 768) the left side sat in reach of Locked's.
         tools["Text"].click()
         let points = Double(canvas.frame.width) / Self.pageWidth
-        let start = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.75))
+        let start = canvas.coordinate(withNormalizedOffset: CGVector(dx: 1240 / Self.pageWidth, dy: 0.75))
         start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 150 * points, dy: 24 * points)))
         design.app.typeText("The first sentence runs past the box. The second one wraps below it.")
         design.shot("text-fit-wrapping")

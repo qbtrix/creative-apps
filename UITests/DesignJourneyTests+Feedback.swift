@@ -14,7 +14,11 @@
 // The one zoom-dependent check reads its scale from A's selection frame, so it
 // holds at any zoom. The Option hover holds the key through XCUITest
 // (`perform(withKeyModifiers:)`): the hosted runner refuses posted CGEvents
-// (CGPreflightPostEventAccess is false there), so a posted Option never arrived.
+// (CGPreflightPostEventAccess is false there, and the post raises the system's
+// Accessibility Access prompt), so a posted Option never arrived.
+// Snap to Layers is on by default and reaches 8 screen points, 32 page points at
+// the fitted zoom of 25%, so every drag here ends more than 32 pt from any other
+// layer's edges and centers: a resize by (20, 10) snapped straight back to 100 × 80.
 // Written before its code (lead.md, contract rule 13): D0-9a wrote the walk
 // skipped by name, and D0-9d turned it on with the badge and text preview.
 import XCTest
@@ -86,20 +90,20 @@ final class DesignFeedbackJourneyTests: XCTestCase {
             design.shot("feedback-pointer-copy")
         }
 
-        // 4. Size badge: A's size, then after dragging its handle by (20, 10), then a new 120 × 80 box.
+        // 4. Size badge: A's size, then after dragging its handle by (50, 100), then a new 120 × 80 box.
         XCTAssert(Self.waitForText(badge, "100 × 80"), "the badge doesn't read A's size 100 × 80 (design.canvas.badge reads \(Self.text(badge)))")
         design.shot("feedback-badge-a")
-        design.drag(on: Self.artboard, from: Self.frac(200, 180), to: Self.frac(220, 190))
-        XCTAssert(Self.waitForText(badge, "120 × 90"), "the badge doesn't read 120 × 90 after the resize (reads \(Self.text(badge)))")
+        design.drag(on: Self.artboard, from: Self.frac(200, 180), to: Self.frac(250, 280))
+        XCTAssert(Self.waitForText(badge, "150 × 180"), "the badge doesn't read 150 × 180 after the resize (reads \(Self.text(badge)))")
         design.shot("feedback-badge-resized")
         tools["Rectangle"].click()
-        design.drag(on: Self.artboard, from: Self.frac(800, 620), to: Self.frac(920, 700), step: "feedback-badge-drawn")
+        design.drag(on: Self.artboard, from: Self.frac(1240, 760), to: Self.frac(1360, 840), step: "feedback-badge-drawn")
         XCTAssert(Self.waitForText(badge, "120 × 80"), "the badge doesn't read 120 × 80 for the new box (reads \(Self.text(badge)))")
 
-        // 5. Text preview: the Text tool's 120 × 24 box at the pointer, then a 300 pt click-drag.
+        // 5. Text preview: the Text tool's 120 × 24 box at the pointer, then a 300 pt click-drag from (40, 920).
         XCTAssert(tools["Text"].waitForExistence(timeout: 5), "no Text in the tool box (suite.tools)")
         tools["Text"].click()
-        let textPoint = canvas.coordinate(withNormalizedOffset: Self.frac(72, 870))
+        let textPoint = canvas.coordinate(withNormalizedOffset: Self.frac(40, 920))
         textPoint.hover()
         XCTAssert(Self.waitForValue(hover, "text"), "the Text tool's pointer isn't text (design.canvas.hover reads \(Self.value(hover)))")
         Self.expectSize(hover.frame, width: 120 * scale, height: 24 * scale, "the Text tool's hover mark")
@@ -107,7 +111,7 @@ final class DesignFeedbackJourneyTests: XCTestCase {
                   "the Text tool's box isn't at the pointer")
         design.shot("feedback-text-hover")
 
-        design.drag(on: Self.artboard, from: Self.frac(72, 870), to: Self.frac(372, 900))
+        design.drag(on: Self.artboard, from: Self.frac(40, 920), to: Self.frac(340, 950))
         let editor = design.element("design.text")
         XCTAssert(editor.waitForExistence(timeout: 5), "the click-drag opened no text editor (design.text)")
         Self.expectSize(editor.frame, width: 300 * scale, height: nil, "the text editor")

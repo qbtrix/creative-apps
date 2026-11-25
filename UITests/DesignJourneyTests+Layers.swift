@@ -136,13 +136,16 @@ final class DesignLayersJourneyTests: XCTestCase {
     /// a slow move, and a short hold before the release, so the system drag reports the pointer
     /// over the target row. The grab is on the name: the row's blank space belongs to the list's
     /// table, which takes a press there as a selection drag and starts no row drag (the press in
-    /// B's blank space selected B, then C, and moved nothing, #3667). On macOS the velocity form
-    /// of `press` drives only the Touch Bar.
+    /// B's blank space selected B, then C, and moved nothing, #3667). The move is 20 pt a second:
+    /// the system's drag starts about half a second after the pointer leaves the row, and at 200 pt
+    /// a second the pointer had already stopped on the target by then, so the drag never reported
+    /// a move over it and the release dropped nowhere. On macOS the velocity form of `press`
+    /// drives only the Touch Bar.
     @MainActor private func rowDrag(_ row: XCUIElement, to target: XCUICoordinate) {
         let name = row.staticTexts.firstMatch
         XCTAssert(name.waitForExistence(timeout: 5), "the row \(row.identifier) shows no name to drag it by")
         name.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            .click(forDuration: 0.6, thenDragTo: target, withVelocity: 200, thenHoldForDuration: 0.5)
+            .click(forDuration: 0.6, thenDragTo: target, withVelocity: 20, thenHoldForDuration: 1)
     }
 
     /// One ⌘Z makes `undone` true and ⇧⌘Z makes `redone` true again: the last step was one `step`.
