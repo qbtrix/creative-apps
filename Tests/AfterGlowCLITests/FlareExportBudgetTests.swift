@@ -28,7 +28,7 @@ import Testing
         return (time, io.files.filter { $0.key.hasPrefix("out") })
     }
 
-    @Test(.disabled("report-only: enable once Tests/perf-suites.txt lists AfterGlowCLITests.FlareExportBudgetTests"))
+    @Test
     func svgFrameLottieAndPNGSequenceStayInsideQBL8OnTheRealWriters() throws {
         let (svg, svgs) = try Self.export(48, "svg", #"{"frames":[24]}"#)
         let (lottie, lotties) = try Self.export(300, "lottie", #"{"dropText":true}"#)
