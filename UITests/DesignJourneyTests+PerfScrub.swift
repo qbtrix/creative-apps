@@ -18,9 +18,12 @@ import XCTest
 
 final class DesignPerfScrubJourneyTests: XCTestCase {
     static let arguments = ["-DesignFixture", "crowd", "-SuiteWindowSize", "1024x768", "-SuitePerfProbe"]
-    /// Frame 36 (node-(50N - 49)), its Text (node-50N) and that Text's middle on the 1440 × 1024 page.
+    /// Frame 36 (node-(50N - 49)), its Text (node-50N) and the middle of that Text's word on the 1440 × 1024
+    /// page. The fixture's box is 156 × 24 at (537, 934), but the word "Text" fills only its first 31 × 19 pt:
+    /// the first click of the double-click opens the edit, which fits the box to the word, so a second click
+    /// at the old box's middle (615, 946) fell outside it and only committed the edit (#2900).
     static let frameRow = "design.layer.node-1751", textRow = "design.layer.node-1800"
-    static let insideText = CGVector(dx: 615 / 1440.0, dy: 946 / 1024.0)
+    static let insideText = CGVector(dx: 552 / 1440.0, dy: 943 / 1024.0)
     static let opacity = "design.inspector.opacity", positionX = "design.inspector.x"
     static let line = "The quick brown fox jumps over"  // 30 characters
     static let span: CGFloat = 600, speed: CGFloat = 300, eventRate = 60.0, legPause = 0.1
