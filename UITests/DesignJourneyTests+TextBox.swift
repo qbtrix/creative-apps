@@ -64,9 +64,9 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         let widthBefore = frameValue(design, "Width")
         let size = sizeField(design)
         XCTAssert(size.waitForExistence(timeout: 5), "no text Size field in the inspector")
-        // At 768 high the Text rows sit below the inspector's fold: scrolled into reach, then typed into the
-        // scrub's own field once the click has opened it.
-        design.reveal(size)
+        // At 768 high the Text rows sit below the inspector's fold. The click brings the field into reach
+        // itself, as J11's does (DesignTextJourneyTests): after `reveal`'s wheel steps the same click opened
+        // no typing field (#3308). Then typed into the scrub's own field once the click has opened it.
         size.click()
         XCTAssert(design.element("suite.inspector").textFields["suite.scrub.typing"].waitForExistence(timeout: 5),
                   "clicking Size opened no typing field")

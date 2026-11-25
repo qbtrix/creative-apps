@@ -2,8 +2,8 @@
 // (packet docs/blueprints/design/features/select-several.md, Journey steps
 // item 4; SS-b, S-8; blueprint design section 4, P1, and 7.1, QD-S1 to QD-S5).
 // On `crowd` (2,000 layers) at 1024 × 768, the Move tool, it drags back and
-// forth at 300 pt a second, 600 pt per series in legs that stay on the
-// artboard: it presses Rectangle 1 in Frame 1 and moves what that picks to the
+// forth at 300 pt a second, 600 pt per series (more legs when the probe has
+// under 60 samples by then) in legs that stay on the artboard: it presses Rectangle 1 in Frame 1 and moves what that picks to the
 // empty band between the first two rows of frames (y 185), then along it;
 // draws a rectangle from (40, 600) to (1000, 990), picking Rectangle in the
 // tool box before each leg (a drawing tool goes back to Move after one shape);
@@ -119,7 +119,8 @@ final class DesignPerfCanvasJourneyTests: XCTestCase {
     // MARK: - Steps
 
     /// Drags through the page points `stops` in order, then back and forth between the last two,
-    /// until 600 pt of screen distance; with `restart` every leg is `stops[0]` to `stops[1]`.
+    /// until 600 pt of screen distance and, when the probe records, 60 samples (40 legs at most);
+    /// with `restart` every leg is `stops[0]` to `stops[1]`.
     /// `prepare` runs before each leg. Its samples.
     @MainActor private func drags(
         _ design: Journey, step: String, stops: [(Double, Double)], restart: Bool = false,
@@ -129,8 +130,10 @@ final class DesignPerfCanvasJourneyTests: XCTestCase {
         let velocity = XCUIGestureVelocity(Self.speed * (NSScreen.main?.backingScaleFactor ?? 1))
         let before = sampleCount(design)
         let last = stops.count - 1
-        var travelled: CGFloat = 0, seconds = 0.0, legs = 0
-        while travelled < Self.span, legs < 40, last >= 1 {
+        var travelled: CGFloat = 0, seconds = 0.0, legs = 0, added = 0
+        // Past 600 pt the legs go on while the probe has recorded some samples but under the 60 a
+        // series needs: the hosted runner draws a large shape at about 9 frames a second.
+        while travelled < Self.span || (added > 0 && added < Journey.minimumSamples), legs < 40, last >= 1 {
             // Leg k runs stops[k] to stops[k + 1] until the end, then between the last two.
             let past = max(0, legs + 1 - last)
             let end = restart ? 1 : (legs < last ? legs + 1 : (past.isMultiple(of: 2) ? last : last - 1))
@@ -148,9 +151,10 @@ final class DesignPerfCanvasJourneyTests: XCTestCase {
             seconds += Date().timeIntervalSince(started) - Self.legPause
             travelled += length
             legs += 1
+            if travelled >= Self.span { added = sampleCount(design) - before }
         }
         design.shot(step)
-        let added = sampleCount(design) - before
+        added = sampleCount(design) - before
         if added > 0 { return (added, "samples=\(added) report-only (suite.perf samples over \(legs) legs)") }
         let events = Int((max(seconds, 0) * Self.eventRate).rounded(.down))
         let time = String(format: "%.2f", seconds)
