@@ -1,5 +1,6 @@
 // SuitePenPathsSnapshots.swift (pen-paths PN-4): PathEditOverlay on the
-// gallery's `pen-paths` page, in Light and Dark. The empty page (the Pen
+// gallery's `pen-paths` page, in Light and Dark. The seeded states draw the
+// page's own tool switch (`SegmentedTabs`), so their PNGs show what the page shows. The empty page (the Pen
 // chosen, the sample path), a Pen draft of three corners with the rubber band
 // to the pointer, a draft with a smooth fourth anchor and its handles, the
 // close ring with the pointer on the first anchor, the sample in Direct
@@ -37,6 +38,21 @@ import Testing
             }
         }
         #expect(PenPathsFixture.stars().path.contours.reduce(0) { $0 + $1.anchors.count } == 5_000)
+    }
+
+    /// The seeded states draw the page's own tool switch, so their PNGs show what the page shows: the strip above
+    /// the artboard is the same pixels in the page and in the sample.
+    @Test func theSampleDrawsThePagesToolSwitch() throws {
+        for scheme in [ColorScheme.light, .dark] {
+            let page = try #require(render(GalleryPenPathsPage(), scheme: scheme))
+            let sample = try #require(render(PenPathsSample(), scheme: scheme))
+            #expect(Self.rows(page, 0..<44) == Self.rows(sample, 0..<44), "\(scheme.name) tool strip differs")
+        }
+    }
+
+    private static func rows(_ image: NSBitmapImageRep, _ range: Range<Int>) -> [UInt8] {
+        guard let data = image.bitmapData else { return [] }
+        return Array(UnsafeBufferPointer(start: data + range.lowerBound * image.bytesPerRow, count: range.count * image.bytesPerRow))
     }
 }
 
@@ -79,11 +95,8 @@ private struct PenPathsSample: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-            Picker("Tool", selection: .constant(tool)) {
-                ForEach(PenTool.allCases, id: \.self) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .fixedSize()
+            SegmentedTabs("Tool", tabs: PenTool.allCases.map { InspectorOption(id: $0, title: $0.title) }, selection: tool) { _ in }
+                .fixedSize()
             SuiteColor.artboard
                 .frame(width: artboard.width, height: artboard.height)
                 .overlay(alignment: .topLeading) {
