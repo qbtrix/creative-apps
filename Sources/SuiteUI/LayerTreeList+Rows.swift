@@ -135,7 +135,8 @@ enum LayerRowLook: Equatable {
 /// id (#3194): a thumbnail, a leading SF Symbol with its label and id (by
 /// default the naming's `<id>.symbol`), a caption line under the name, and
 /// the row's tooltip and accessibility value, and `live` for a row an agent is
-/// working on now (its name shimmers, `.agentShimmer`).
+/// working on now (its name shimmers, `.agentShimmer`). `hidesEye` drops the
+/// row's eye where hiding it would change nothing.
 public struct LayerRowDecoration: Equatable, Sendable {
     public var thumbnail: Image?
     public var symbol: String?
@@ -145,9 +146,11 @@ public struct LayerRowDecoration: Equatable, Sendable {
     public var help: String?
     public var value: String?
     public var live: Bool
+    public var hidesEye: Bool
 
     public init(thumbnail: Image? = nil, symbol: String? = nil, symbolLabel: String? = nil, symbolID: String? = nil,
-                caption: String? = nil, help: String? = nil, value: String? = nil, live: Bool = false) {
+                caption: String? = nil, help: String? = nil, value: String? = nil, live: Bool = false,
+                hidesEye: Bool = false) {
         self.thumbnail = thumbnail
         self.symbol = symbol
         self.symbolLabel = symbolLabel
@@ -156,6 +159,7 @@ public struct LayerRowDecoration: Equatable, Sendable {
         self.help = help
         self.value = value
         self.live = live
+        self.hidesEye = hidesEye
     }
 }
 

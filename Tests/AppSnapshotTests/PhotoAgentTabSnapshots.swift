@@ -1,6 +1,7 @@
 // PhotoAgentTabSnapshots.swift: Photo's sidebar on its AI tab (#6029): two
 // agent requests on SuiteUI's AgentActivityList, the poster one open to its
-// steps and layers, and the empty tab. Writes photo-ai-tab-light/-dark.png and
+// steps (Canvas Size changed no layer, so it has no eye) and layers, and the
+// empty tab. Writes photo-ai-tab-light/-dark.png and
 // photo-ai-tab-empty-light/-dark.png. macOS only.
 import Foundation
 import PhotoModel
@@ -21,7 +22,9 @@ import Testing
                             date: Date(timeIntervalSince1970: 0), layers: [ids[0]]),
             AgentStepRecord(id: 2, name: "Paint", client: "claude", request: "Make a poster",
                             date: Date(timeIntervalSince1970: 30), layers: [ids[0], ids[1]]),
-            AgentStepRecord(id: 3, name: "Gaussian Blur", client: "cursor", date: Date(timeIntervalSince1970: 3600),
+            AgentStepRecord(id: 3, name: "Canvas Size", client: "claude", request: "Make a poster",
+                            date: Date(timeIntervalSince1970: 40)),
+            AgentStepRecord(id: 4, name: "Gaussian Blur", client: "cursor", date: Date(timeIntervalSince1970: 3600),
                             layers: [ids[2]]),
         ])
         let names = Dictionary(model.layers.map { ($0.id, $0.name) }, uniquingKeysWith: { a, _ in a })

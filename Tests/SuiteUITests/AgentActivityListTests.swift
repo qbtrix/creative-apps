@@ -1,6 +1,7 @@
 // AgentActivityListTests.swift: the AI tab's rows over LayerTreeList: a closed
 // request is one row, an open one lists its steps then its layers one level in,
-// the eye state and the caption; which request reads live while an agent
+// the eye state and the caption, no eye on a row that changed no layer
+// (it would toggle nothing); which request reads live while an agent
 // works, the working mark's VoiceOver label, and the empty hint's command on
 // its own line.
 import Foundation
@@ -32,6 +33,14 @@ import Testing
         #expect(open.map(\.depth) == [0, 0, 1, 1, 1, 1])
         #expect(open[1].isHidden && open[1].isExpanded && open[4].inheritsHidden)
         #expect(!open[0].isHidden, "a request with no layers reads hidden")
+    }
+
+    @Test func aRowThatChangedNoLayerHasNoEye() {
+        // "Blur" changed no layer: its eye toggled nothing, a dead control.
+        let d = AgentActivityList.decorations(Self.requests, timeZone: .gmt)
+        #expect(d["agent.3"]?.hidesEye == true && d["agent.3.step.3"]?.hidesEye == true)
+        #expect(d["agent.1"]?.hidesEye == false && d["agent.1.step.1"]?.hidesEye == false)
+        #expect(d["agent.1.layer.l1"]?.hidesEye == false)
     }
 
     @Test func eachRowStandsForItsLayers() {

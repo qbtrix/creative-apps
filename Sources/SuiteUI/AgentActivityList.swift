@@ -4,7 +4,8 @@
 // its title with "client · time · N steps" as its caption; it opens to its
 // steps (by name) and the layers they created or changed. Each row's eye
 // shows or hides that row's layers (`setHidden`, one undo step in the app;
-// `showsEye: false` drops the eyes for an app whose layers can't hide, and
+// a row that changed no layer has no eye; `showsEye: false` drops the eyes
+// for an app whose layers can't hide, and
 // `undoHelp` disables Undo Request with the app's reason);
 // a click selects them; the context menu holds Select Layers, Undo Request
 // (the newest named request only, as `history.undo-request {title}` refuses
@@ -92,7 +93,6 @@ public struct AgentActivityList: View {
         case .disclose(let id):
             if expanded.contains(id) { expanded.remove(id) } else { expanded.insert(id) }
         case .toggleHidden(let id):
-            // ponytail: a step row with no layers has an inert eye; hide the eye per row if LayerTreeList grows that option.
             let ids = layers(of: id)
             if !ids.isEmpty { onAction(.setHidden(ids, !ids.allSatisfy(hidden.contains))) }
         case .toggleLocked, .move: break
@@ -170,7 +170,7 @@ public struct AgentActivityList: View {
     }
 
     /// Each request row's caption ("claude · 2:14 PM · 3 steps") and each child's kind symbol; the `live`
-    /// request's row shimmers.
+    /// request's row shimmers, and a request or step that changed no layer has no eye.
     nonisolated public static func decorations(_ requests: [AgentRequest], timeZone: TimeZone,
                                                live: String? = nil) -> [String: LayerRowDecoration] {
         var out: [String: LayerRowDecoration] = [:]
@@ -178,9 +178,11 @@ public struct AgentActivityList: View {
         style.timeZone = timeZone
         for request in requests {
             out[request.id] = LayerRowDecoration(symbol: "sparkles", symbolLabel: "Agent request",
-                                                 caption: caption(request, style: style), live: request.id == live)
+                                                 caption: caption(request, style: style), live: request.id == live,
+                                                 hidesEye: request.layers.isEmpty)
             for step in request.steps {
-                out[stepID(request, step)] = LayerRowDecoration(symbol: "arrow.turn.down.right", symbolLabel: "Step")
+                out[stepID(request, step)] = LayerRowDecoration(symbol: "arrow.turn.down.right", symbolLabel: "Step",
+                                                                   hidesEye: step.layers.isEmpty)
             }
             for layer in request.layers {
                 out[layerID(request, layer)] = LayerRowDecoration(symbol: "square.3.layers.3d", symbolLabel: "Layer")
