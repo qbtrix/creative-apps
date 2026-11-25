@@ -10,8 +10,8 @@
 //    at least 440 pt (SuiteSize.contentMinimum);
 // 2. the eight toolbar items are inside the window, hittable (so none went to
 //    the overflow), titled and clear of one another;
-// 3. the Frame fields and the Fill well start at the X field's leading x, and
-//    so does the locked hint, on "Locked" (#276). The bar rows (Opacity,
+// 3. the Frame fields and the Fill well's drawn swatch start at the X field's
+//    leading x, and so does the locked hint, on "Locked" (#276). The bar rows (Opacity,
 //    Radius, Stroke Width) carry their label inside the bar, so they span the
 //    row and have no value column; A has no Text section;
 // 4. every Layers row's eye shares one x, and every lock one, at each depth
@@ -32,6 +32,8 @@ final class DesignLayoutJourneyTests: XCTestCase {
     static let localSizes: [(width: Double, height: Double)] = [(1280, 800), (1440, 900), (1920, 1080)]
     static let tolerance = 0.5
     static let panel = 280.0, panelPadding = 12.0, canvasMinimum = 440.0
+    /// The Fill well's drawn swatch (SuiteSize.swatch).
+    static let swatchWidth: CGFloat = 24
     /// Design's narrowest window: the sidebar's ideal 200, the canvas's 440 and the 304 pt inspector column.
     static let windowFloor = 200.0 + canvasMinimum + panel + 2 * panelPadding
     static let bar = ["design.bar.new", "design.bar.open", "design.bar.save", "design.bar.undo",
@@ -125,7 +127,12 @@ final class DesignLayoutJourneyTests: XCTestCase {
         }
         let well = design.element("suite.inspector").descendants(matching: .colorWell).firstMatch
         XCTAssert(well.exists, "the Fill section shows no color well at \(label)")
-        XCTAssertEqual(well.frame.minX, column, accuracy: Self.tolerance, "the Fill well at \(label) leaves the value column")
+        // The well draws as a 24 pt swatch (SuiteSize.swatch) clipped out of the system's wider color well, and
+        // XCUITest reads the whole system well: 42 pt, 9 pt past the swatch on each side (#3080). The swatch's
+        // own leading edge is the well's middle less half a swatch.
+        let swatch = well.frame.midX - Self.swatchWidth / 2
+        XCTAssertEqual(swatch, column, accuracy: Self.tolerance,
+                       "the Fill well at \(label) leaves the value column (the system well reads \(well.frame))")
     }
 
     /// Rule 4: one x for every eye and one for every lock in Layers.

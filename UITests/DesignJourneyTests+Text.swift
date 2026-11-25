@@ -7,7 +7,7 @@
 // click Bold in the weight chips, Center in the alignment chips and
 // another family in the Family menu; select A and Title again and each reads
 // back; click A's row: the Text rows are disabled with "A isn't a text layer.";
-// click the top bar's zoom-out until the status line reads 50%; double-click
+// click the top bar's zoom-in (or zoom-out) until the status line reads 50%; double-click
 // Title on the canvas, type, press Return: the committed text's left, top and
 // width (the inspector's X, Y and W, scaled to the canvas) equal the editor's
 // within 1 pt, and Undo reads "Undo Edit Text". The canvas half (size 32 draws
@@ -37,6 +37,8 @@ final class DesignTextJourneyTests: XCTestCase {
     static let alignmentRow = (id: "design.inspector.text-alignment", label: "Alignment")
     /// A point inside Title's box, (130, 52) on the page, at any size from 16 up.
     static let insideTitle = CGVector(dx: 130 / 1440.0, dy: 52 / 1024.0)
+    /// The page's rectangle on screen; its fractions are page points over the page's size.
+    static let artboard = "suite.canvas.artboard"
 
     /// J11: the Text rows set Title's style, read back, refuse A, and the inline edit doesn't jump at 50%.
     @MainActor func testTextFontAndSize() throws {
@@ -83,7 +85,11 @@ final class DesignTextJourneyTests: XCTestCase {
         XCTAssert(family.waitForExistence(timeout: 5), "no Family menu in the inspector (\(Self.familyRow.id))")
         let before = Self.text(family)
         family.click()
-        let items = design.app.menuItems.matching(NSPredicate(format: "title != '' AND title != %@", before))
+        // The open menu sits in the window's tree, beside the inspector's rows (not under its menu button).
+        // The app's whole tree lists the menu bar's items first, so a search from the app clicked the Apple
+        // menu's About This Mac (#2590).
+        let items = design.app.windows.firstMatch.menuItems
+            .matching(NSPredicate(format: "title != '' AND title != %@", before))
         XCTAssert(items.firstMatch.waitForExistence(timeout: 5), "the Family menu offers no family but \(before)")
         let picked = items.firstMatch.title
         items.firstMatch.click()
@@ -111,15 +117,23 @@ final class DesignTextJourneyTests: XCTestCase {
         XCTAssert(reason.waitForExistence(timeout: 5), "the disabled Text rows don't say \"A isn't a text layer.\"")
         design.shot("text-style-not-text")
 
-        // 6. Zoom out from the top bar until the status line reads 50%.
-        let zoomOut = design.element("design.bar.zoom-out")
+        // 6. Zoom from the top bar until the status line reads 50%: in at this window's fitted 25%, out from
+        // a larger window's fit above 50%.
+        let zoomOut = design.element("design.bar.zoom-out"), zoomIn = design.element("design.bar.zoom-in")
         XCTAssert(zoomOut.waitForExistence(timeout: 5), "no zoom-out in the top bar (design.bar.zoom-out)")
-        for _ in 0..<8 where !statusReads50(design) { zoomOut.click() }
-        XCTAssert(Self.waitUntil { self.statusReads50(design) }, "the status line never read 50% zooming out")
+        XCTAssert(zoomIn.exists, "no zoom-in in the top bar (design.bar.zoom-in)")
+        for _ in 0..<8 {
+            guard let zoom = statusZoom(design), zoom != 50 else { break }
+            (zoom < 50 ? zoomIn : zoomOut).click()
+        }
+        XCTAssert(Self.waitUntil { self.statusZoom(design) == 50 },
+                  "the status line never read 50% (it reads \(String(describing: statusZoom(design)))%)")
 
         // 7. Double-click Title, type, Return: the committed box sits where the editor was, one Edit Text step.
         design.clickDesignLayer(Self.titleRow)
-        canvas.coordinate(withNormalizedOffset: Self.insideTitle).doubleClick()
+        // Through the artboard, which is exactly the page: `suite.canvas` also takes in the frame label above
+        // the page and the size badge under the selection, so its fractions drift off the page (#3043).
+        design.element(Self.artboard).coordinate(withNormalizedOffset: Self.insideTitle).doubleClick()
         let editor = design.element("design.text")
         XCTAssert(editor.waitForExistence(timeout: 5), "double-clicking Title opened no text editor (design.text)")
         design.press(character: "a", .command)
@@ -132,13 +146,16 @@ final class DesignTextJourneyTests: XCTestCase {
         let committed = committedFrame(design)
         // The field's box is the node's box; its accessibility frame can be the field's line
         // height instead, so height is DesignTextScaleTests' check, not this one.
-        for (name, editorEdge, committedEdge) in [
-            ("left", editing.minX, committed.minX), ("top", editing.minY, committed.minY),
-            ("width", editing.width, committed.width),
-        ] {
+        for (name, editorEdge, committedEdge) in [("left", editing.minX, committed.minX), ("top", editing.minY, committed.minY)] {
             XCTAssertEqual(Double(committedEdge), Double(editorEdge), accuracy: 1,
                            "the committed text's \(name) jumped from the editor's at 50% (\(committed) vs \(editing))")
         }
+        // An auto-width editor is its text's width and an em more, so the next letter and the caret fit
+        // (DesignTextOverlay.field), and its field reads 1 pt past each side: at size 32 and 50% that is up to
+        // 18 pt over the committed box, never under it.
+        let slack = Double(editing.width - committed.width)
+        XCTAssert((-1...19).contains(slack),
+                  "the committed text's width jumped from the editor's at 50% (\(committed) vs \(editing))")
         design.shot("text-style-committed-50")
     }
 
@@ -157,9 +174,9 @@ final class DesignTextJourneyTests: XCTestCase {
         return design.element("suite.inspector").buttons[title].firstMatch
     }
 
-    /// The committed text's frame in screen points: the inspector's X, Y, W and H, scaled to the canvas.
+    /// The committed text's frame in screen points: the inspector's X, Y, W and H, scaled to the artboard.
     @MainActor private func committedFrame(_ design: Journey) -> CGRect {
-        let canvas = design.element("suite.canvas").frame
+        let canvas = design.element(Self.artboard).frame
         let scale = Double(canvas.width) / Self.pageWidth
         let values = ["X position", "Y position", "Width", "Height"].map { frameValue(design, $0) ?? .nan }
         guard values.count == 4 else { return .null }
@@ -175,11 +192,15 @@ final class DesignTextJourneyTests: XCTestCase {
         return Self.number(field)
     }
 
-    /// Whether the status line's zoom reads 50% ("Zoom 50%" as a label, or "50%" as a plain Text's words).
-    @MainActor private func statusReads50(_ design: Journey) -> Bool {
+    /// The status line's zoom as a whole percent ("Zoom 50%" as a label, or "50%" as a plain Text's words); nil
+    /// when no text there reads a percent.
+    @MainActor private func statusZoom(_ design: Journey) -> Int? {
         let status = design.element("suite.status")
         let texts = status.staticTexts.allElementsBoundByIndex.flatMap { [$0.label, $0.value as? String ?? ""] }
-        return texts.contains { $0 == "50%" || $0 == "Zoom 50%" }
+        for text in texts where text.hasSuffix("%") {
+            if let percent = Int(text.dropLast().split(separator: " ").last ?? "") { return percent }
+        }
+        return nil
     }
 
     /// The first number an element reads ("32", "32 pt", "1,440 points"), or nil.

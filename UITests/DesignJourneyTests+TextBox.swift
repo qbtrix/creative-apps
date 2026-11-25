@@ -2,7 +2,7 @@
 // docs/blueprints/design/features/canvas-basics.md, Journey steps item 3,
 // CB-b). On the `cards` fixture at 1024 × 768, every step with the mouse on
 // visible controls: a clicked text box hugs "A longer line of text" (W over
-// 120, H at least 16); Title at size 48 refits (H at least 48, W grown); a
+// 120, H at least 16); Title at size 24, then 48, refits (H at least 48, W grown); a
 // box dragged 150 pt wide keeps its width and wraps two sentences onto more
 // than one line. Typing replaces the placeholder with no Command-A (#3338),
 // W follows the typing before the commit (#3335), and the Width chips switch
@@ -16,6 +16,8 @@ final class DesignTextBoxJourneyTests: XCTestCase {
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
     /// The page of `cards` is 1440 × 1024 points; Desktop fills it.
     static let pageWidth = 1440.0
+    /// The page's rectangle on screen.
+    static let artboard = "suite.canvas.artboard"
     /// The layer ids `cards` opens with (DesignFixtures), so a new row is the one not in this list.
     static let fixtureLayers = Set((1...10).map { "design.layer.node-\($0)" })
     /// Title's row in Layers.
@@ -29,8 +31,10 @@ final class DesignTextBoxJourneyTests: XCTestCase {
     @MainActor func testTextBoxFitsItsText() throws {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
-        let canvas = design.element("suite.canvas")
-        XCTAssert(canvas.waitForExistence(timeout: 10), "the cards fixture showed no page (suite.canvas)")
+        // The artboard is exactly the page, so its fractions are page points over the page's size; `suite.canvas`
+        // also takes in the frame label above the page and the size badge under the selection (#3043).
+        let canvas = design.element(Self.artboard)
+        XCTAssert(canvas.waitForExistence(timeout: 10), "the cards fixture showed no page (\(Self.artboard))")
         let tools = design.element("suite.tools").buttons
         XCTAssert(tools["Text"].waitForExistence(timeout: 5), "no Text in the tool box (suite.tools)")
 
@@ -49,9 +53,12 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "typing text made no undo step")
 
         // Its row in Layers: the box hugs the line, wider than the old 120 pt default, one line tall.
+        // The row's id is read now: the element is bound by its place in the list, and the next new layer
+        // takes that place, so its id read later named the dragged text, not this one.
         let row = newLayerRow(design)
         XCTAssert(row.waitForExistence(timeout: 5), "no Layers row for the new text")
-        row.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        let firstText = row.identifier
+        selectLayer(design, firstText)
         let width = frameValue(design, "Width"), height = frameValue(design, "Height")
         XCTAssertGreaterThan(width ?? 0, 120, "the clicked box doesn't fit \"A longer line of text\": W \(String(describing: width))")
         XCTAssertGreaterThanOrEqual(height ?? 0, 16, "the clicked box is shorter than a line: H \(String(describing: height))")
@@ -60,51 +67,82 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         // Title at size 48: the box refits, at least 48 tall and wider than before.
         let title = design.element("suite.sidebar").descendants(matching: .any)[Self.titleRow].firstMatch
         XCTAssert(title.waitForExistence(timeout: 5), "no Title row in Layers (\(Self.titleRow))")
-        title.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
-        let widthBefore = frameValue(design, "Width")
+        selectLayer(design, Self.titleRow)
         let size = sizeField(design)
         XCTAssert(size.waitForExistence(timeout: 5), "no text Size field in the inspector")
-        // At 768 high the Text rows sit below the inspector's fold: scrolled into reach, then typed into the
-        // scrub's own field once the click has opened it.
-        design.reveal(size)
-        size.click()
-        XCTAssert(design.element("suite.inspector").textFields["suite.scrub.typing"].waitForExistence(timeout: 5),
-                  "clicking Size opened no typing field")
-        design.app.typeKey("a", modifierFlags: .command)
-        design.app.typeText("48\r")
+        // The fixture's box is 200 pt wide, wider than its word at any size here, so "wider than before" is
+        // measured between two fitted boxes: size 24 fits it first, then 48 has to widen that.
+        typeSize("24", into: size, design)
         XCTAssert(design.app.buttons["Undo Change Text Style"].waitForExistence(timeout: 5), "the Size field made no undo step")
+        let widthBefore = frameValue(design, "Width")
+        typeSize("48", into: size, design)
         let titleHeight = frameValue(design, "Height"), titleWidth = frameValue(design, "Width")
         XCTAssertGreaterThanOrEqual(titleHeight ?? 0, 48, "Title at size 48 is cut off: H \(String(describing: titleHeight))")
-        XCTAssertGreaterThan(titleWidth ?? 0, widthBefore ?? .infinity, "Title's box didn't widen at size 48")
+        XCTAssertGreaterThan(titleWidth ?? 0, widthBefore ?? .infinity, "Title's box didn't widen from size 24 to 48")
         design.shot("text-fit-size")
 
-        // A box dragged 150 pt wide on the blank area at (432, 768) keeps its width and wraps.
+        // A box dragged 150 pt wide on the blank area at (1240, 768) keeps its width and wraps. Both its sides
+        // are more than 32 pt from every other layer's edges and centers: Snap to Layers reaches 8 screen
+        // points, 32 page points at the fitted 25%, and from (432, 768) the left side was 32 pt from Locked's.
         tools["Text"].click()
         let points = Double(canvas.frame.width) / Self.pageWidth
-        let start = canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.75))
+        let start = canvas.coordinate(withNormalizedOffset: CGVector(dx: 1240 / Self.pageWidth, dy: 0.75))
         start.press(forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 150 * points, dy: 24 * points)))
         design.app.typeText("The first sentence runs past the box. The second one wraps below it.")
         design.shot("text-fit-wrapping")
         commitByClickingBlank(design)
-        let wrapped = newLayerRow(design, skipping: row.identifier)
+        let wrapped = newLayerRow(design, skipping: firstText)
         XCTAssert(wrapped.waitForExistence(timeout: 5), "no Layers row for the dragged text")
-        wrapped.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        selectLayer(design, wrapped.identifier)
         let fixedWidth = frameValue(design, "Width"), fixedHeight = frameValue(design, "Height")
         XCTAssertEqual(fixedWidth ?? 0, 150, accuracy: 0.5, "the dragged box didn't keep its 150 pt width")
         XCTAssertGreaterThan(fixedHeight ?? 0, 24, "the dragged box didn't grow down past one line: H \(String(describing: fixedHeight))")
         design.shot("text-fit-fixed")
 
         // The Width chips switch it to auto width as one step (#3337).
-        let modes = design.element("design.inspector.text-width")
-        XCTAssert(modes.waitForExistence(timeout: 5), "no Width chips in the Text section")
-        modes.buttons["Auto width"].firstMatch.click()
+        // The chip by its own id (`<row id>.<title, dashed>`): a search for the button inside the row's group
+        // found the group, then lost it when the click looked again (run 45591728076).
+        let auto = design.element("design.inspector.text-width.auto-width")
+        XCTAssert(auto.waitForExistence(timeout: 5), "no Auto width chip in the Text section")
+        design.reveal(auto)
+        auto.click()
         XCTAssert(design.app.buttons["Undo Change Text Style"].waitForExistence(timeout: 5), "Auto width made no undo step")
         design.shot("text-fit-auto-mode")
     }
 
+    /// Clicks the Layers row `identifier` off its name and waits for the Text section's Size to turn on, as it
+    /// does only for a text layer. A click at 30% of a row lands on its name, which selects nothing (#2496):
+    /// the blank-area click before it had picked Desktop, whose 1440 pt W passed the box checks and whose
+    /// disabled Size opened no typing field (#3308).
+    @MainActor private func selectLayer(_ design: Journey, _ identifier: String) {
+        design.clickDesignLayer(identifier)
+        let size = sizeField(design)
+        let enabled = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == true AND enabled == true"), object: size)
+        XCTAssertEqual(XCTWaiter.wait(for: [enabled], timeout: 5), .completed,
+                       "clicking \(identifier) in Layers didn't select a text layer (Size stays off)")
+    }
+
+    /// Types `value` into the text Size field and waits for it to read back. At 768 high the Text rows sit
+    /// below the inspector's fold: scrolled into reach, then typed into the scrub's own field once the click
+    /// has opened it.
+    @MainActor private func typeSize(_ value: String, into size: XCUIElement, _ design: Journey) {
+        design.reveal(size)
+        size.click()
+        XCTAssert(design.element("suite.inspector").textFields["suite.scrub.typing"].waitForExistence(timeout: 5),
+                  "clicking Size opened no typing field")
+        design.app.typeKey("a", modifierFlags: .command)
+        design.app.typeText(value + "\r")
+        var reads = false
+        for _ in 0..<25 where !reads {
+            reads = (size.value as? NSNumber)?.stringValue == value || (size.value as? String)?.hasPrefix(value) == true
+            if !reads { Thread.sleep(forTimeInterval: 0.2) }
+        }
+        XCTAssert(reads, "Size reads \(String(describing: size.value)) after typing \(value)")
+    }
+
     /// Clicks the canvas's blank area, (864, 921) on the page, below the cards: it commits an open edit.
     @MainActor private func commitByClickingBlank(_ design: Journey) {
-        design.element("suite.canvas").coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.9)).click()
+        design.element(Self.artboard).coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.9)).click()
         XCTAssert(Self.waitForGone(design.element("design.text")), "the click on the blank area left the text editor open")
     }
 

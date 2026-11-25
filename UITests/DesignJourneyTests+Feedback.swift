@@ -12,8 +12,13 @@
 // the page and the size badge below it, so its fractions drift off the page as
 // the selection changes (#3043: the press meant for A landed above it on Desktop).
 // The one zoom-dependent check reads its scale from A's selection frame, so it
-// holds at any zoom. Holding Option while hovering has no XCUI API, so that
-// step posts CGEvents, as FlareJourneyTests+Draw does for its drags.
+// holds at any zoom. The Option hover holds the key through XCUITest
+// (`perform(withKeyModifiers:)`): the hosted runner refuses posted CGEvents
+// (CGPreflightPostEventAccess is false there, and the post raises the system's
+// Accessibility Access prompt), so a posted Option never arrived.
+// Snap to Layers is on by default and reaches 8 screen points, 32 page points at
+// the fitted zoom of 25%, so every drag here ends more than 32 pt from any other
+// layer's edges and centers: a resize by (20, 10) snapped straight back to 100 × 80.
 // Written before its code (lead.md, contract rule 13): D0-9a wrote the walk
 // skipped by name, and D0-9d turned it on with the badge and text preview.
 import XCTest
@@ -24,8 +29,6 @@ final class DesignFeedbackJourneyTests: XCTestCase {
     static let pageWidth = 1440.0, pageHeight = 1024.0
     /// The page's rectangle on screen; its fractions are page points over the page's size.
     static let artboard = "suite.canvas.artboard"
-    /// The Option key's virtual key code (kVK_Option).
-    static let optionKeyCode: CGKeyCode = 58
 
     /// The five feedback steps: the hover outline, the move and resize pointers,
     /// the copy pointer, the size badge, and the Text tool's preview and click-drag.
@@ -81,26 +84,26 @@ final class DesignFeedbackJourneyTests: XCTestCase {
 
         // 3. Copy pointer: with A selected, hold Option and hover A.
         canvas.coordinate(withNormalizedOffset: aCenter).hover()
-        Self.postKey(Self.optionKeyCode, down: true)
-        Self.moveMouse(to: canvas.coordinate(withNormalizedOffset: aCenter).withOffset(CGVector(dx: 2, dy: 0)).screenPoint, flags: .maskAlternate)
-        XCTAssert(Self.waitForValue(hover, "copy"), "holding Option over A isn't copy (design.canvas.hover reads \(Self.value(hover)))")
-        design.shot("feedback-pointer-copy")
-        Self.postKey(Self.optionKeyCode, down: false)
+        XCUIElement.perform(withKeyModifiers: .option) {
+            canvas.coordinate(withNormalizedOffset: aCenter).withOffset(CGVector(dx: 2, dy: 0)).hover()
+            XCTAssert(Self.waitForValue(hover, "copy"), "holding Option over A isn't copy (design.canvas.hover reads \(Self.value(hover)))")
+            design.shot("feedback-pointer-copy")
+        }
 
-        // 4. Size badge: A's size, then after dragging its handle by (20, 10), then a new 120 × 80 box.
+        // 4. Size badge: A's size, then after dragging its handle by (50, 100), then a new 120 × 80 box.
         XCTAssert(Self.waitForText(badge, "100 × 80"), "the badge doesn't read A's size 100 × 80 (design.canvas.badge reads \(Self.text(badge)))")
         design.shot("feedback-badge-a")
-        design.drag(on: Self.artboard, from: Self.frac(200, 180), to: Self.frac(220, 190))
-        XCTAssert(Self.waitForText(badge, "120 × 90"), "the badge doesn't read 120 × 90 after the resize (reads \(Self.text(badge)))")
+        design.drag(on: Self.artboard, from: Self.frac(200, 180), to: Self.frac(250, 280))
+        XCTAssert(Self.waitForText(badge, "150 × 180"), "the badge doesn't read 150 × 180 after the resize (reads \(Self.text(badge)))")
         design.shot("feedback-badge-resized")
         tools["Rectangle"].click()
-        design.drag(on: Self.artboard, from: Self.frac(800, 620), to: Self.frac(920, 700), step: "feedback-badge-drawn")
+        design.drag(on: Self.artboard, from: Self.frac(1240, 760), to: Self.frac(1360, 840), step: "feedback-badge-drawn")
         XCTAssert(Self.waitForText(badge, "120 × 80"), "the badge doesn't read 120 × 80 for the new box (reads \(Self.text(badge)))")
 
-        // 5. Text preview: the Text tool's 120 × 24 box at the pointer, then a 300 pt click-drag.
+        // 5. Text preview: the Text tool's 120 × 24 box at the pointer, then a 300 pt click-drag from (40, 920).
         XCTAssert(tools["Text"].waitForExistence(timeout: 5), "no Text in the tool box (suite.tools)")
         tools["Text"].click()
-        let textPoint = canvas.coordinate(withNormalizedOffset: Self.frac(72, 870))
+        let textPoint = canvas.coordinate(withNormalizedOffset: Self.frac(40, 920))
         textPoint.hover()
         XCTAssert(Self.waitForValue(hover, "text"), "the Text tool's pointer isn't text (design.canvas.hover reads \(Self.value(hover)))")
         Self.expectSize(hover.frame, width: 120 * scale, height: 24 * scale, "the Text tool's hover mark")
@@ -108,10 +111,13 @@ final class DesignFeedbackJourneyTests: XCTestCase {
                   "the Text tool's box isn't at the pointer")
         design.shot("feedback-text-hover")
 
-        design.drag(on: Self.artboard, from: Self.frac(72, 870), to: Self.frac(372, 900))
+        design.drag(on: Self.artboard, from: Self.frac(40, 920), to: Self.frac(340, 950))
         let editor = design.element("design.text")
         XCTAssert(editor.waitForExistence(timeout: 5), "the click-drag opened no text editor (design.text)")
-        Self.expectSize(editor.frame, width: 300 * scale, height: nil, "the text editor")
+        // The field reads 1 pt past its box on each side (77 pt over a 75 pt box in run 45563576413, with the
+        // inspector's W at 300.0), so the box is the field's frame less that point, and W is checked too.
+        Self.expectSize(editor.frame.insetBy(dx: 1, dy: 0), width: 300 * scale, height: nil, "the text editor")
+        XCTAssert(Self.waitForInspector(design, "Width", 300), "the inspector's W doesn't read 300 while the box is open")
         design.shot("feedback-text-box")
         design.app.typeText("Hello")
         design.press(.return, step: "feedback-text-typed")
@@ -124,9 +130,9 @@ final class DesignFeedbackJourneyTests: XCTestCase {
         CGVector(dx: x / pageWidth, dy: y / pageHeight)
     }
 
-    /// The accessibility value of `element`, or "" when it has none.
+    /// The accessibility value of `element`, "" when it has none, "no mark" when the element is gone.
     @MainActor private static func value(_ element: XCUIElement) -> String {
-        element.value as? String ?? ""
+        element.exists ? element.value as? String ?? "" : "no mark"
     }
 
     /// A Text's words, read as its label, or its value on macOS.
@@ -182,19 +188,5 @@ final class DesignFeedbackJourneyTests: XCTestCase {
         if let height {
             XCTAssertEqual(frame.height, height, accuracy: 1, "\(what) is \(frame.height) tall, not \(height)")
         }
-    }
-
-    /// Presses or releases `key` as a CGEvent, to hold a modifier while the pointer moves.
-    @MainActor private static func postKey(_ key: CGKeyCode, down: Bool) {
-        CGEvent(keyboardEventSource: nil, virtualKey: key, keyDown: down)?.post(tap: .cghidEventTap)
-        Thread.sleep(forTimeInterval: 0.2)
-    }
-
-    /// Moves the pointer to `point` on screen with `flags` held, as a CGEvent.
-    @MainActor private static func moveMouse(to point: CGPoint, flags: CGEventFlags = []) {
-        let event = CGEvent(mouseEventSource: nil, mouseType: .mouseMoved, mouseCursorPosition: point, mouseButton: .left)
-        event?.flags = flags
-        event?.post(tap: .cghidEventTap)
-        Thread.sleep(forTimeInterval: 0.3)
     }
 }
