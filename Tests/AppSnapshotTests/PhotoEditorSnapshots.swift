@@ -121,6 +121,24 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         try shoot("select-box", model)
     }
 
+    /// Select on a red square painted on its own layer: a click on it picks it, and the canvas outlines its painted
+    /// box (#6149), not the whole layer, with nothing moved.
+    @Test func selectPickedOutline() throws {
+        var model = PhotoWorkspace()
+        try model.newCanvas(width: 640, height: 480)
+        model.addLayer()
+        model.setToolOption(.color(red: 220, green: 30, blue: 30))
+        drag(&model, .marquee, (80, 140), (280, 340))
+        model.fillSelection()
+        model.deselect()
+        drag(&model, .select, (180, 240), (180, 240))
+        let marks = PhotoCanvasOverlay(model: model, zoom: 1, hover: nil).marks
+        #expect(marks.filter { $0.identifier == "photo.canvas.picked" }.map(\.rect) == [CGRect(x: 80, y: 140, width: 200, height: 200)],
+                "the overlay shows \(marks)")
+        #expect(model.layers.allSatisfy { $0.offsetX == 0 && $0.offsetY == 0 }, "the click moved a layer")
+        try shoot("select-picked", model)
+    }
+
     @Test func exposurePlusOne() throws {
         var model = try opened()
         model.adjust(.exposure(1))
