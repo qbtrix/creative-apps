@@ -9,10 +9,8 @@
 // Element frames are in points from the main screen's top left; NSScreen
 // frames start at its bottom left, so the visible frame is flipped against the
 // main screen's height. The window has to fit the visible frame (about
-// 1024 × 677 on the 1024 × 768 runner, between its menu bar and its Dock, and
-// a few points more or less as the Dock resizes for the running apps' tiles);
-// nothing here assumes an exact 768. A window found outside it is read again
-// for three seconds, since the app refits once a second.
+// 1024 × 737 on the 1024 × 768 runner, under its menu bar); nothing here
+// assumes an exact 768.
 //
 // A column's own element doesn't give its column's frame (run 38991868071's
 // tree): a List that is the sidebar's only element takes `suite.sidebar`
@@ -59,15 +57,10 @@ extension Journey {
     ) {
         let window = app.windows.firstMatch
         XCTAssert(window.waitForExistence(timeout: 30), "no window opened")
-        var frame = rect(window.frame)
-        var found = outsideDisplay(frame)
-        // The Dock resizes as apps launch and quit and the app refits its window once a second
-        // (SuiteWindowSizer), so a miss is read again for three seconds before it counts.
-        for _ in 0..<6 where !found.isEmpty {
-            RunLoop.current.run(until: Date().addingTimeInterval(0.5))
-            frame = rect(window.frame)
-            found = outsideDisplay(frame)
-        }
+        let frame = rect(window.frame)
+        var found = ShellGeometry.violations(
+            window: visibleFrame(around: frame), regions: ["window": frame],
+            minimums: [:], apart: [], clear: [], container: "display's visible frame")
 
         var regions: [String: AppAudit.Rect] = [:]
         let tree = try? window.snapshot()
@@ -133,13 +126,6 @@ extension Journey {
             if let rest = path(to: identifier, from: child, index: offset) { return [(node: node, index: index)] + rest }
         }
         return nil
-    }
-
-    /// The rule a window `frame` breaks by leaving its display's visible frame; none when it is inside.
-    private func outsideDisplay(_ frame: AppAudit.Rect) -> [String] {
-        ShellGeometry.violations(
-            window: visibleFrame(around: frame), regions: ["window": frame],
-            minimums: [:], apart: [], clear: [], container: "display's visible frame")
     }
 
     /// The visible frame of the screen the window's center is on (the main

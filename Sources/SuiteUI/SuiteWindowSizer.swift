@@ -8,8 +8,7 @@
 // points at a time; #1778: a window fitted at launch sat 3 pt into the Dock
 // when the journey measured it), and not every Dock resize posts a screen
 // parameters change, so the sizer fits the window again whenever they change
-// and once a second for as long as it is in a window, starting again when
-// SwiftUI takes the view out of its window and puts it back. A fit only ever
+// and once a second for as long as it is in the window. A fit only ever
 // shrinks or moves the window; `SuiteWindowSize.fitted` is the math.
 import AppKit
 import SwiftUI
@@ -63,13 +62,11 @@ final class SuiteWindowSizingView: NSView {
     /// The visible frame a window is kept inside: its screen's (the main screen's before it has one).
     private let visible: @MainActor (NSWindow) -> NSRect?
     private var done = false
-    /// The once-a-second fit while the view is in a window; nil outside one.
-    private var watch: Task<Void, Never>?
 
     /// A test passes its own `visible` frame and a short `interval`.
     init(
         requested: CGSize, every interval: Duration = .seconds(1),
-        visible: @escaping @MainActor (NSWindow) -> NSRect? = { SuiteWindowSizingView.visibleFrame(around: $0) }
+        visible: @escaping @MainActor (NSWindow) -> NSRect? = { ($0.screen ?? NSScreen.main)?.visibleFrame }
     ) {
         self.requested = requested
         self.interval = interval
@@ -79,36 +76,19 @@ final class SuiteWindowSizingView: NSView {
 
     required init?(coder: NSCoder) { nil }
 
-    /// The visible frame of the screen `window` is on, read from `NSScreen.screens` each time: the screen
-    /// object a window holds can keep the visible frame it had when the window took it, and a window
-    /// fitted during its app's launch then stayed 3 pt under the Dock the launch resized (#5908, #6320).
-    static func visibleFrame(around window: NSWindow) -> NSRect? {
-        let held = window.screen
-        let now = NSScreen.screens.first { $0.frame == held?.frame } ?? NSScreen.main ?? held
-        return now?.visibleFrame
-    }
-
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        // Out of a window the watch stops; back in one it starts again. SwiftUI can take the view out and
-        // put it back as the window's content changes, and a watch that ended there left the window at its
-        // launch fit while the Dock grew under it (#5908, #6320).
-        watch?.cancel()
-        watch = nil
-        guard window != nil else { return }
-        let first = !done
-        if first {
-            done = true
-            // A selector observer is unregistered when the view goes away (macOS 10.11 and later).
-            NotificationCenter.default.addObserver(
-                self, selector: #selector(screenParametersChanged),
-                name: NSApplication.didChangeScreenParametersNotification, object: nil)
-        }
-        watch = Task { @MainActor [weak self, interval] in
-            if first { self?.applySize() }
+        if done || window == nil { return }
+        done = true
+        // A selector observer is unregistered when the view goes away (macOS 10.11 and later).
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(screenParametersChanged),
+            name: NSApplication.didChangeScreenParametersNotification, object: nil)
+        Task { @MainActor [weak self, interval] in
+            self?.applySize()
             while true {
                 do { try await Task.sleep(for: interval) } catch { return }
-                guard let self else { return }
+                guard let self, self.window != nil else { return }
                 self.refit()
             }
         }
