@@ -117,5 +117,12 @@
     "find": "if let mask = shownMask(of: layers[at]) { tiles = try masked(tiles, by: mask) }",
     "replace": "_ = tiles",
     "tests": "PhotoTransformLiftTests/aMaskedLayerLiftsMasked"
+  },
+  {
+    "label": "baseKeepsClearRest: a Select move's clear rest stays in the picture under the lift, so each press keys a new base",
+    "file": "Sources/PhotoModel/PhotoTransformLift+Kernel.swift",
+    "find": "(try? rest.paintedBounds()) != nil",
+    "replace": "true",
+    "tests": "PhotoTransformLiftTests/theBaseUnderAWholePaintedBoxHidesTheClearRest"
   }
 ]

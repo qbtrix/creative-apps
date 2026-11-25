@@ -167,10 +167,10 @@ extension PhotoWorkspace {
 /// (`surface`); the dispatcher route keeps the layers the stack still shares, from the bottom, with the last
 /// render, as a surface on a GPU backend or as the pixels themselves on the CPU, whose backend lives one render,
 /// and hands back a copy to draw on (`composite`). A region is kept under its layers' key (the layer, its pixels
-/// and its mask, whose comparison is quick on shared storage); the live route's regions all share one key, and
-/// keeping one under a new key releases every region kept under another. Thread-safe: bands and tiles render in
-/// parallel, and a kept surface is copied or released only under the lock.
-/// ponytail: the kept regions are one picture's worth of memory (about 265 MB at 8K); cap them if a profile shows it.
+/// and its mask, whose comparison is quick on shared storage); the live route keeps the regions of its latest two
+/// keys, so a lift's base and the whole picture, alternating press by press, both stay kept. A redraw of every
+/// tile keeps them too unless the canvas size changed (`keep(width:height:)`). Thread-safe: bands and tiles
+/// render in parallel, and a kept surface is copied or released only under the lock.
 public final class PhotoCompositeCache: Sendable {
     struct LayerKey: Equatable, Sendable {
         let layer: PhotoLayer
@@ -229,6 +229,11 @@ public final class PhotoCompositeCache: Sendable {
     }
 
     private let entries = Mutex<[PixelRect: Entry]>([:])
+    /// The live route's regions under the key before `entries`' (`surface`), so a gesture that alternates two
+    /// pictures (a lift's base at each press, the whole stack at each release) finds both kept.
+    private let older = Mutex<[PixelRect: Entry]>([:])
+    /// The canvas size the kept regions belong to (`keep(width:height:)`).
+    private let size = Mutex<[Int]>([])
     private let drafts = Mutex<[DraftSource]>([])
     private let buffers = Mutex<[PixelRect: Pixels]>([:])
     private let makes = Mutex(0)
@@ -236,7 +241,7 @@ public final class PhotoCompositeCache: Sendable {
     public init() {}
 
     /// Regions kept.
-    public var count: Int { entries.withLock { $0.count } + buffers.withLock { $0.count } }
+    public var count: Int { entries.withLock { $0.count } + older.withLock { $0.count } + buffers.withLock { $0.count } }
     /// Composites made so far (a region not kept, or kept under other layers).
     public var made: Int { makes.withLock { $0 } }
 
@@ -273,7 +278,9 @@ public final class PhotoCompositeCache: Sendable {
             return (try dispatcher.surface(held.pixels), held.key.count)
         }
         let last = entries.withLock { $0[rect]?.stack } ?? buffers.withLock { $0[rect]?.stack }
-        let laid = Self.shared(stack, with: last)
+        // Nothing shared keeps the whole stack, as the first render does: an empty base would serve every render.
+        let shared = Self.shared(stack, with: last)
+        let laid = shared == 0 ? stack.count : shared
         let made = try make(laid)
         makes.withLock { $0 += 1 }
         PhotoRenderCount.base(made: true)
@@ -296,17 +303,40 @@ public final class PhotoCompositeCache: Sendable {
     }
 
     /// The kept composite of `rect` under `key` on `backend`, else `make()`'s, kept. The cache owns it: the
-    /// caller never releases it.
+    /// caller never releases it. Two keys stay kept, the latest and the one before it: a region found under the
+    /// older one makes it the latest again, and a new key drops the regions of the older one.
+    /// ponytail: two pictures' worth of regions while a gesture alternates them (about 530 MB at 8K); one key's
+    /// worth otherwise.
     func surface(_ rect: PixelRect, key: Key, on backend: any RenderBackend,
                  make: () throws -> RenderSurface) throws -> RenderSurface {
-        if let held = entries.withLock({ $0[rect] }), held.key == key, held.backend.name == backend.name { return held.surface }
+        let found: RenderSurface? = entries.withLock { entries in
+            older.withLock { older in
+                let fits = { (held: Entry?) in held?.key == key && held?.backend.name == backend.name }
+                if fits(entries[rect]) { return entries[rect]?.surface }
+                guard fits(older[rect]) else { return nil }
+                swap(&entries, &older)
+                return entries[rect]?.surface
+            }
+        }
+        if let found { return found }
         let made = try make()
         makes.withLock { $0 += 1 }
         let stale: [Entry] = entries.withLock { entries in
-            let old = entries.filter { $0.key == rect || $0.value.key != key || $0.value.backend.name != backend.name }
-            for rect in old.keys { entries[rect] = nil }
-            entries[rect] = Entry(key: key, surface: made, backend: backend)
-            return Array(old.values)
+            older.withLock { older in
+                let fits = { (held: Entry) in held.key == key && held.backend.name == backend.name }
+                var stale: [Entry] = []
+                // The latest other key's regions step down to `older`; the ones under neither key go.
+                if let previous = entries.values.first(where: { !fits($0) }) {
+                    let steps = { (held: Entry) in held.key == previous.key && held.backend.name == previous.backend.name }
+                    stale += older.values
+                    older = entries.filter { steps($0.value) }
+                    stale += entries.values.filter { !fits($0) && !steps($0) }
+                    entries = entries.filter { fits($0.value) }
+                }
+                if let held = entries[rect] { stale.append(held) }
+                entries[rect] = Entry(key: key, surface: made, backend: backend)
+                return stale
+            }
         }
         for entry in stale { entry.backend.release(entry.surface) }
         return made
@@ -347,11 +377,24 @@ public final class PhotoCompositeCache: Sendable {
     public func removeAll() {
         removeDraftSources()
         buffers.withLock { $0 = [:] }
-        let all = entries.withLock { entries -> [Entry] in
-            defer { entries = [:] }
-            return Array(entries.values)
+        let all = entries.withLock { entries in
+            older.withLock { older -> [Entry] in
+                defer { (entries, older) = ([:], [:]) }
+                return Array(entries.values) + Array(older.values)
+            }
         }
         for entry in all { entry.backend.release(entry.surface) }
+    }
+
+    /// Releases every kept region unless they belong to a `width` x `height` canvas: a new size cuts new regions.
+    /// A redraw of every tile at the same size keeps them, so the picture under a lift, drawn whole at each press,
+    /// and the release's whole picture find what the other left (#6038).
+    public func keep(width: Int, height: Int) {
+        let changed = size.withLock { size in
+            defer { size = [width, height] }
+            return size != [width, height]
+        }
+        if changed { removeAll() }
     }
 
     deinit { removeAll() }

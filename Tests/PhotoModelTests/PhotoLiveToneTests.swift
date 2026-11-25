@@ -4,7 +4,8 @@
 // layer at the top, one under a pixel layer, and one at 50 % Multiply all take the live route (layer tiles stay
 // resident, nothing read back) and give the reference, and a step on the top or middle layer composites
 // nothing either; Blur sends a region back to the dispatcher route; a Free Transform drag frame keeps its base
-// under the draft's layer and draws that layer through its matrix, the same bytes as the dispatcher route's frame.
+// under the draft's layer and draws that layer through its matrix, the same bytes as the dispatcher route's frame;
+// the live cache keeps the latest two keys, so a press and a release that alternate composite nothing again.
 // The "GPU" is CoreRender's CPU backend under another name (it runs tone programs through ToneProgram.map), so
 // it all runs on Linux.
 import CoreRaster
@@ -175,5 +176,28 @@ private final class TonedSink: @unchecked Sendable {
         _ = try await PhotoRenderer.update(workspace, since: nil, route: route, target: sink.target)
         #expect(sink.toned == 0)
         #expect(try await Self.worst(sink.bytes, workspace) <= 1)
+    }
+
+    /// The live route keeps two keys: a gesture that alternates two pictures (a lift's base at each press, the
+    /// whole stack at each release) finds both kept, and a third key drops the older one (#6038).
+    @Test func theLiveCacheKeepsTheLatestTwoKeys() throws {
+        let gpu = CPUBackend(name: "stand-in")
+        let cache = PhotoCompositeCache()
+        let rect = PixelRect(x: 0, y: 0, width: 4, height: 4)
+        let (a, b, c) = (PhotoLayer(id: "a", name: "A"), PhotoLayer(id: "b", name: "B"), PhotoLayer(id: "c", name: "C"))
+        func key(_ layers: PhotoLayer...) -> PhotoCompositeCache.Key {
+            PhotoCompositeCache.Key(layers: layers.map { PhotoCompositeCache.LayerKey(layer: $0, pixels: nil, mask: nil) })
+        }
+        func show(_ shown: PhotoCompositeCache.Key) throws {
+            _ = try cache.surface(rect, key: shown, on: gpu) { try gpu.blank(width: 4, height: 4) }
+        }
+        for shown in [key(a), key(a, b), key(a), key(a, b)] { try show(shown) }
+        #expect(cache.made == 2, "a press and a release alternating composited \(cache.made) times, not 2")
+        try show(key(a, b, c))
+        try show(key(a, b))
+        #expect(cache.made == 3, "the key before the latest was dropped")
+        try show(key(a))
+        #expect(cache.made == 4, "a third key kept the oldest")
+        #expect(cache.count == 2)
     }
 }

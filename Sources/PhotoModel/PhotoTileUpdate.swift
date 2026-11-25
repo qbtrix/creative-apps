@@ -4,7 +4,8 @@
 // as premultiplied 8-bit sRGB (what Core Animation draws without converting),
 // so a brush event costs its dirty tiles, never a copy of the whole canvas.
 // With no revision shown (a new image, a new size) every tile comes, and the
-// update says it is complete. The full-frame `render` stays the reference: the
+// update says it is complete; at the same size the kept composites stay, so a
+// redraw of every tile (a lift's base at a press) reuses them. The full-frame `render` stays the reference: the
 // tiles laid where they belong equal its bytes, premultiplied the same way
 // (`premultiplied(_:)`). While Free Transform is up, both draw the draft's
 // layer through the draft: a still frame resampled once (`transformPreview`),
@@ -84,8 +85,8 @@ extension PhotoRenderer {
         let workspace = workspace.transformPreview(live: live)
         let started = clock.now
         let damage = revision.map { workspace.damage(since: $0) } ?? .all
-        // A new picture or size: the kept composites belong to the old regions.
-        if revision == nil { route.composites.removeAll() }
+        // A new size: the kept composites belong to the old regions. Every tile at the same size keeps them.
+        route.composites.keep(width: canvas.width, height: canvas.height)
         // A still frame ends the drag: its draft's GPU source goes.
         if !workspace.liveDraft { route.composites.removeDraftSources() }
         let rects = tiles(of: canvas, in: damage)
