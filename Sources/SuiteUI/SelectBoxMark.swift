@@ -1,8 +1,8 @@
 // SelectBoxMark.swift: the one box a Select or marquee drag shows over a canvas (#6012): `rect` in document units
 // at `zoom`, a 1 pt accent edge on a paper halo (as every canvas mark has, so it shows over a blue sky) over a
 // 10 % accent fill. A shape, not a Canvas, so a box dragged past the document's edge still shows. It takes no
-// clicks and is hidden from accessibility. Photo's Select and Design's
-// marquee draw it; the box itself comes from SuiteKernel's `Marquee.rect`. Its sibling GroupScopeMark is the
+// clicks and is hidden from accessibility. Photo's Select and Design's marquee draw it, the box itself from
+// SuiteKernel's `Marquee.rect`; unfilled, it is Photo's outline round each picked layer. Its sibling GroupScopeMark is the
 // entered group's box (SuiteKernel's GroupScope, area-selection AR-14): the same accent edge on its halo, dimmed
 // to half and unfilled, so the scope a click picks in shows around the picked child without reading as a selection.
 import SwiftUI
@@ -16,7 +16,8 @@ public struct SelectBoxMark: View {
         (self.rect, self.zoom) = (rect, zoom)
     }
 
-    init(rect: CGRect, zoom: Double, filled: Bool) {
+    /// `filled: false` draws the edge alone: the outline round a picked layer (Photo's Select picks, #6149).
+    public init(rect: CGRect, zoom: Double, filled: Bool) {
         (self.rect, self.zoom, self.filled) = (rect, zoom, filled)
     }
 

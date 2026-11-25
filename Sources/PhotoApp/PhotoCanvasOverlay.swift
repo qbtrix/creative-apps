@@ -10,8 +10,9 @@
 // `gradientDrag`; `photo.canvas.gradient-line`), Remove's outline while it
 // drags (SuiteUI's MotionPathMarks through its points, from the same live copy
 // or `removeStroke`; `photo.canvas.remove-stroke`), the Select tool's box while it drags (SuiteUI's
-// SelectBoxMark, from the same live copy or `selectBox`; `photo.canvas.select-box`)
-// and the Eyedropper's loupe (PhotoSampleLoupe, `suite.sample.loupe`), in
+// SelectBoxMark, from the same live copy or `selectBox`; `photo.canvas.select-box`), Select's outline round
+// each picked layer (PickedLayerMarks: SelectBoxMark unfilled on the Model's kept `pickedBoxes`, hidden while a
+// move or Free Transform runs; `photo.canvas.picked`) and the Eyedropper's loupe (PhotoSampleLoupe, `suite.sample.loupe`), in
 // that order. SuiteUI's marks are hidden from
 // accessibility, so each visible mark also gets one probe (`probe(zoom:)`): a
 // clear rectangle at the mark's frame that the journeys find by identifier,
@@ -74,6 +75,7 @@ struct PhotoCanvasOverlay: View {
                 SelectBoxMark(rect: box, zoom: zoom)
                 PhotoCanvasMark.selectBox(box).probe(zoom: zoom)
             }
+            PickedLayerMarks(given: given, zoom: zoom)
             PhotoSampleLoupe(model: model, zoom: zoom, hover: hover)
         }
     }
@@ -123,7 +125,38 @@ struct PhotoCanvasOverlay: View {
         [
             selection, CropOverlay(model: model, zoom: zoom).mark,
             TransformOverlay(model: model, zoom: zoom).mark, brushCursor, gradientLine, removeOutline, selectBox.map(PhotoCanvasMark.selectBox),
-        ].compactMap { $0 }
+        ].compactMap { $0 } + PickedLayerMarks.marks(model, kept: PickedLayerMarks.Kept())
+    }
+}
+
+/// Select's outline round each picked layer (#6149): SuiteUI's SelectBoxMark, unfilled, on the Model's
+/// `pickedBoxes`. Its own leaf, reading the window's document, tool and canvas facets itself, so a pick re-runs
+/// it and nothing above it; while a move or Free Transform runs on the live copy the copy's draft hides it.
+/// The painted boxes are kept across bodies, read again only when a picked layer's pixels change.
+private struct PickedLayerMarks: View {
+    let given: PhotoWorkspace
+    let zoom: Double
+    @Environment(PhotoSession.self) private var session: PhotoSession?
+    @Environment(\.photoLiveTransform) private var live
+    @State private var kept = Kept()
+
+    /// The picked layers' painted boxes, kept across bodies (`pickedBoxes(reusing:)`); goes with the view.
+    @MainActor final class Kept {
+        var boxes: [PhotoLayer.ID: PhotoWorkspace.PaintedBox] = [:]
+    }
+
+    @MainActor static func marks(_ model: PhotoWorkspace, kept: Kept) -> [PhotoCanvasMark] {
+        model.pickedBoxes(reusing: &kept.boxes).map {
+            PhotoCanvasMark.picked(CGRect(x: $0.x, y: $0.y, width: $0.width, height: $0.height))
+        }
+    }
+
+    var body: some View {
+        let model = live?.shown ?? session?.workspace(reading: .document, .tool, .canvas) ?? given
+        ForEach(Array(Self.marks(model, kept: kept).enumerated()), id: \.offset) { _, mark in
+            SelectBoxMark(rect: mark.rect, zoom: zoom, filled: false)
+            mark.probe(zoom: zoom)
+        }
     }
 }
 
@@ -148,6 +181,7 @@ struct PhotoCanvasMark: Equatable {
         Self(identifier: "photo.canvas.brush-cursor", label: "Brush size", rect: rect)
     }
     static func selectBox(_ rect: CGRect) -> Self { Self(identifier: "photo.canvas.select-box", label: "Selection box", rect: rect) }
+    static func picked(_ rect: CGRect) -> Self { Self(identifier: "photo.canvas.picked", label: "Picked layer", rect: rect) }
     static func gradientLine(_ rect: CGRect) -> Self {
         Self(identifier: "photo.canvas.gradient-line", label: "Gradient line", rect: rect)
     }

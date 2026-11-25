@@ -127,5 +127,36 @@ struct PhotoSelectToolTests {
         #expect(box() == nil)
         #expect(known == nil, "another tool kept the layer's pixels")
     }
+    /// Select outlines each picked layer's painted box on the canvas (#6149), read once per layer pixels: redraws
+    /// reuse it, a Shift-click on the opaque background adds no box (it covers the canvas, whose edge shows it), a
+    /// move shifts both with no read (the background, off the edge now, shows), and another tool shows none.
+    @Test func pickedBoxesOutlineThePicksOncePerLayerPixels() throws {
+        var (w, top, bottom) = try Self.two()
+        let tally = PhotoRenderCount.Tally()
+        var known: [PhotoLayer.ID: PhotoWorkspace.PaintedBox] = [:]
+        func boxes() -> [PixelRect] { PhotoRenderCount.$tally.withValue(tally) { w.pickedBoxes(reusing: &known) } }
+        func reads() -> Int { tally.snapshot["paintedBoxes"] ?? 0 }
+
+        #expect(w.selectedLayerIDs == [top])
+        let first = try #require(boxes().first)
+        #expect(boxes().count == 1)
+        #expect(first.width < 100 && first.x <= 10 && first.x + first.width > 10, "the top layer's paint is \(first)")
+        for _ in 1...5 { #expect(boxes() == [first]) }
+        #expect(reads() == 1, "unchanged pixels read the box \(reads()) times")
+
+        Self.click(&w, 80, 80, .shift)
+        #expect(Set(w.selectedLayerIDs) == [top, bottom])
+        #expect(boxes() == [first], "the background's box covers the canvas")
+        #expect(reads() == 2)
+
+        w.moveSelectedLayers(dx: 7, dy: 4)
+        #expect(Set(boxes()) == [first.offsetBy(7, 4), PixelRect(x: 7, y: 4, width: 100, height: 100)],
+                "the moved background no longer covers the canvas")
+        #expect(reads() == 2, "an offset-only move read the box again")
+
+        w.selectTool(.brush)
+        #expect(boxes().isEmpty, "only Select outlines the picks")
+        #expect(known.isEmpty, "another tool kept the layers' pixels")
+    }
     #endif
 }
