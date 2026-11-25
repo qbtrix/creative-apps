@@ -37,6 +37,8 @@ final class DesignTextJourneyTests: XCTestCase {
     static let alignmentRow = (id: "design.inspector.text-alignment", label: "Alignment")
     /// A point inside Title's box, (130, 52) on the page, at any size from 16 up.
     static let insideTitle = CGVector(dx: 130 / 1440.0, dy: 52 / 1024.0)
+    /// The page's rectangle on screen; its fractions are page points over the page's size.
+    static let artboard = "suite.canvas.artboard"
 
     /// J11: the Text rows set Title's style, read back, refuse A, and the inline edit doesn't jump at 50%.
     @MainActor func testTextFontAndSize() throws {
@@ -121,7 +123,9 @@ final class DesignTextJourneyTests: XCTestCase {
 
         // 7. Double-click Title, type, Return: the committed box sits where the editor was, one Edit Text step.
         design.clickDesignLayer(Self.titleRow)
-        canvas.coordinate(withNormalizedOffset: Self.insideTitle).doubleClick()
+        // Through the artboard, which is exactly the page: `suite.canvas` also takes in the frame label above
+        // the page and the size badge under the selection, so its fractions drift off the page (#3043).
+        design.element(Self.artboard).coordinate(withNormalizedOffset: Self.insideTitle).doubleClick()
         let editor = design.element("design.text")
         XCTAssert(editor.waitForExistence(timeout: 5), "double-clicking Title opened no text editor (design.text)")
         design.press(character: "a", .command)
@@ -159,9 +163,9 @@ final class DesignTextJourneyTests: XCTestCase {
         return design.element("suite.inspector").buttons[title].firstMatch
     }
 
-    /// The committed text's frame in screen points: the inspector's X, Y, W and H, scaled to the canvas.
+    /// The committed text's frame in screen points: the inspector's X, Y, W and H, scaled to the artboard.
     @MainActor private func committedFrame(_ design: Journey) -> CGRect {
-        let canvas = design.element("suite.canvas").frame
+        let canvas = design.element(Self.artboard).frame
         let scale = Double(canvas.width) / Self.pageWidth
         let values = ["X position", "Y position", "Width", "Height"].map { frameValue(design, $0) ?? .nan }
         guard values.count == 4 else { return .null }

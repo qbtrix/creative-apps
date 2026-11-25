@@ -16,6 +16,8 @@ final class DesignTextBoxJourneyTests: XCTestCase {
     static let arguments = ["-DesignFixture", "cards", "-SuiteWindowSize", "1024x768"]
     /// The page of `cards` is 1440 × 1024 points; Desktop fills it.
     static let pageWidth = 1440.0
+    /// The page's rectangle on screen.
+    static let artboard = "suite.canvas.artboard"
     /// The layer ids `cards` opens with (DesignFixtures), so a new row is the one not in this list.
     static let fixtureLayers = Set((1...10).map { "design.layer.node-\($0)" })
     /// Title's row in Layers.
@@ -29,8 +31,10 @@ final class DesignTextBoxJourneyTests: XCTestCase {
     @MainActor func testTextBoxFitsItsText() throws {
         let design = Journey("Design", self, arguments: Self.arguments)
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
-        let canvas = design.element("suite.canvas")
-        XCTAssert(canvas.waitForExistence(timeout: 10), "the cards fixture showed no page (suite.canvas)")
+        // The artboard is exactly the page, so its fractions are page points over the page's size; `suite.canvas`
+        // also takes in the frame label above the page and the size badge under the selection (#3043).
+        let canvas = design.element(Self.artboard)
+        XCTAssert(canvas.waitForExistence(timeout: 10), "the cards fixture showed no page (\(Self.artboard))")
         let tools = design.element("suite.tools").buttons
         XCTAssert(tools["Text"].waitForExistence(timeout: 5), "no Text in the tool box (suite.tools)")
 
@@ -116,7 +120,7 @@ final class DesignTextBoxJourneyTests: XCTestCase {
 
     /// Clicks the canvas's blank area, (864, 921) on the page, below the cards: it commits an open edit.
     @MainActor private func commitByClickingBlank(_ design: Journey) {
-        design.element("suite.canvas").coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.9)).click()
+        design.element(Self.artboard).coordinate(withNormalizedOffset: CGVector(dx: 0.6, dy: 0.9)).click()
         XCTAssert(Self.waitForGone(design.element("design.text")), "the click on the blank area left the text editor open")
     }
 
