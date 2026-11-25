@@ -191,7 +191,7 @@ public struct KeyframeButton: View {
     /// and an outline, so hover never reads by fill alone; at rest the
     /// stopwatch keeps its circle, on the keyed tint while keyed here, and the
     /// diamond has none.
-    public static func surface(_ state: KeyState?, level: HoverButtonLevel) -> (fill: Color?, outlined: Bool) {
+    nonisolated public static func surface(_ state: KeyState?, level: HoverButtonLevel) -> (fill: Color?, outlined: Bool) {
         if let fill = level.fill { return (fill, true) }
         guard let state else { return (nil, false) }
         return (state == .keyedHere ? SuiteColor.keyedTint : SuiteColor.panelRaised, false)
