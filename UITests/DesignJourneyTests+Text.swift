@@ -7,7 +7,7 @@
 // click Bold in the weight chips, Center in the alignment chips and
 // another family in the Family menu; select A and Title again and each reads
 // back; click A's row: the Text rows are disabled with "A isn't a text layer.";
-// click the top bar's zoom-out until the status line reads 50%; double-click
+// click the top bar's zoom-in (or zoom-out) until the status line reads 50%; double-click
 // Title on the canvas, type, press Return: the committed text's left, top and
 // width (the inspector's X, Y and W, scaled to the canvas) equal the editor's
 // within 1 pt, and Undo reads "Undo Edit Text". The canvas half (size 32 draws
@@ -117,11 +117,17 @@ final class DesignTextJourneyTests: XCTestCase {
         XCTAssert(reason.waitForExistence(timeout: 5), "the disabled Text rows don't say \"A isn't a text layer.\"")
         design.shot("text-style-not-text")
 
-        // 6. Zoom out from the top bar until the status line reads 50%.
-        let zoomOut = design.element("design.bar.zoom-out")
+        // 6. Zoom from the top bar until the status line reads 50%: in at this window's fitted 25%, out from
+        // a larger window's fit above 50%.
+        let zoomOut = design.element("design.bar.zoom-out"), zoomIn = design.element("design.bar.zoom-in")
         XCTAssert(zoomOut.waitForExistence(timeout: 5), "no zoom-out in the top bar (design.bar.zoom-out)")
-        for _ in 0..<8 where !statusReads50(design) { zoomOut.click() }
-        XCTAssert(Self.waitUntil { self.statusReads50(design) }, "the status line never read 50% zooming out")
+        XCTAssert(zoomIn.exists, "no zoom-in in the top bar (design.bar.zoom-in)")
+        for _ in 0..<8 {
+            guard let zoom = statusZoom(design), zoom != 50 else { break }
+            (zoom < 50 ? zoomIn : zoomOut).click()
+        }
+        XCTAssert(Self.waitUntil { self.statusZoom(design) == 50 },
+                  "the status line never read 50% (it reads \(String(describing: statusZoom(design)))%)")
 
         // 7. Double-click Title, type, Return: the committed box sits where the editor was, one Edit Text step.
         design.clickDesignLayer(Self.titleRow)
@@ -183,11 +189,15 @@ final class DesignTextJourneyTests: XCTestCase {
         return Self.number(field)
     }
 
-    /// Whether the status line's zoom reads 50% ("Zoom 50%" as a label, or "50%" as a plain Text's words).
-    @MainActor private func statusReads50(_ design: Journey) -> Bool {
+    /// The status line's zoom as a whole percent ("Zoom 50%" as a label, or "50%" as a plain Text's words); nil
+    /// when no text there reads a percent.
+    @MainActor private func statusZoom(_ design: Journey) -> Int? {
         let status = design.element("suite.status")
         let texts = status.staticTexts.allElementsBoundByIndex.flatMap { [$0.label, $0.value as? String ?? ""] }
-        return texts.contains { $0 == "50%" || $0 == "Zoom 50%" }
+        for text in texts where text.hasSuffix("%") {
+            if let percent = Int(text.dropLast().split(separator: " ").last ?? "") { return percent }
+        }
+        return nil
     }
 
     /// The first number an element reads ("32", "32 pt", "1,440 points"), or nil.

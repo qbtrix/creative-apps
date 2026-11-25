@@ -6,9 +6,13 @@
 // drawn in a canvas, so the canvas publishes the last drag's guide summary as
 // the label of `design.canvas.guides` ("x 300, gap x 100", or "none"), read by
 // its label since XCUITest reads a SwiftUI value as empty (#262).
-// Screen positions come from the `design.canvas.selection` element's frame
-// after a click on each layer's row, so each drag stops 2 screen points short
-// of its target, inside the window's snap reach of 8 screen points. A file
+// Screen positions come from the fixture's page frames through the artboard
+// (`suite.canvas.artboard`, exactly the page at the current zoom), and each
+// drag stops 2 screen points short of its target, inside the window's snap
+// reach of 8 screen points. The selection mark's own frame isn't the layer's:
+// it takes in the handles, which sit outside a small layer and on the edge of a
+// larger one, so C's read 3 pt off A's and B's and the spacing drag fell short
+// (#6307). A file
 // opens with its rows collapsed, so Desktop's row is opened first, after each
 // launch (#2456), and a row is clicked off its name (#2496).
 // Written before its code (lead.md, contract rule 13): SN-6 writes it skipped
@@ -32,8 +36,14 @@ final class DesignSnapJourneyTests: XCTestCase {
     static let guides = "design.canvas.guides", selection = "design.canvas.selection"
     static let undo = "design.bar.undo"
 
-    /// The screen frames of the layers the drags aim at, read at the start.
+    /// The screen frames of the layers the drags aim at, worked out at the start.
     struct Frames { var a: CGRect, b: CGRect, c: CGRect, pair: CGRect }
+    /// A's, B's, C's and Pair's frames on the 1440 pt wide page (DesignFixtures.cards).
+    static let pageA = CGRect(x: 100, y: 100, width: 100, height: 80)
+    static let pageB = CGRect(x: 300, y: 140, width: 200, height: 80)
+    static let pageC = CGRect(x: 700, y: 100, width: 100, height: 120)
+    static let pagePair = CGRect(x: 900, y: 400, width: 300, height: 100)
+    static let pageWidth = 1440.0, artboard = "suite.canvas.artboard"
 
     /// SN-c: moves, resizes, several moves, equal spacing and draws snap; the setting turns it off and is remembered.
     @MainActor func testSnapAndSmartGuides() throws {
@@ -51,8 +61,8 @@ final class DesignSnapJourneyTests: XCTestCase {
         expectAfterFitPage(design)
         closeView(design)
         design.expandDesignLayer(Self.rowDesktop)
-        let frames = Frames(a: frame(design, Self.rowA), b: frame(design, Self.rowB),
-                            c: frame(design, Self.rowC), pair: frame(design, Self.rowPair))
+        let frames = Frames(a: onScreen(Self.pageA, design), b: onScreen(Self.pageB, design),
+                            c: onScreen(Self.pageC, design), pair: onScreen(Self.pagePair, design))
         if Self.snapIsLive, !snaps(design, frames) { viewItem(design).click() }
         design.shot("snap-start")
 
@@ -157,6 +167,15 @@ final class DesignSnapJourneyTests: XCTestCase {
         XCTAssert(design.app.windows.firstMatch.waitForExistence(timeout: 30), "no window opened")
         XCTAssert(design.element("suite.canvas").waitForExistence(timeout: 10), "cards showed no page (suite.canvas)")
         return design
+    }
+
+    /// `page`, a rectangle in page points, on screen: through the artboard, which is exactly the page at the
+    /// current zoom.
+    @MainActor private func onScreen(_ page: CGRect, _ design: Journey) -> CGRect {
+        let board = design.element(Self.artboard).frame
+        let scale = board.width / Self.pageWidth
+        return CGRect(x: board.minX + page.minX * scale, y: board.minY + page.minY * scale,
+                      width: page.width * scale, height: page.height * scale)
     }
 
     /// Clicks the Layers row `identifier` and returns the selection mark's screen frame.

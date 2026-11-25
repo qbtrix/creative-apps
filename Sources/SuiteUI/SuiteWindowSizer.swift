@@ -69,7 +69,7 @@ final class SuiteWindowSizingView: NSView {
     /// A test passes its own `visible` frame and a short `interval`.
     init(
         requested: CGSize, every interval: Duration = .seconds(1),
-        visible: @escaping @MainActor (NSWindow) -> NSRect? = { ($0.screen ?? NSScreen.main)?.visibleFrame }
+        visible: @escaping @MainActor (NSWindow) -> NSRect? = { SuiteWindowSizingView.visibleFrame(around: $0) }
     ) {
         self.requested = requested
         self.interval = interval
@@ -78,6 +78,15 @@ final class SuiteWindowSizingView: NSView {
     }
 
     required init?(coder: NSCoder) { nil }
+
+    /// The visible frame of the screen `window` is on, read from `NSScreen.screens` each time: the screen
+    /// object a window holds can keep the visible frame it had when the window took it, and a window
+    /// fitted during its app's launch then stayed 3 pt under the Dock the launch resized (#5908, #6320).
+    static func visibleFrame(around window: NSWindow) -> NSRect? {
+        let held = window.screen
+        let now = NSScreen.screens.first { $0.frame == held?.frame } ?? NSScreen.main ?? held
+        return now?.visibleFrame
+    }
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()

@@ -53,9 +53,12 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         XCTAssert(design.app.buttons["Undo Add Text"].waitForExistence(timeout: 5), "typing text made no undo step")
 
         // Its row in Layers: the box hugs the line, wider than the old 120 pt default, one line tall.
+        // The row's id is read now: the element is bound by its place in the list, and the next new layer
+        // takes that place, so its id read later named the dragged text, not this one.
         let row = newLayerRow(design)
         XCTAssert(row.waitForExistence(timeout: 5), "no Layers row for the new text")
-        selectLayer(design, row.identifier)
+        let firstText = row.identifier
+        selectLayer(design, firstText)
         let width = frameValue(design, "Width"), height = frameValue(design, "Height")
         XCTAssertGreaterThan(width ?? 0, 120, "the clicked box doesn't fit \"A longer line of text\": W \(String(describing: width))")
         XCTAssertGreaterThanOrEqual(height ?? 0, 16, "the clicked box is shorter than a line: H \(String(describing: height))")
@@ -88,7 +91,7 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         design.app.typeText("The first sentence runs past the box. The second one wraps below it.")
         design.shot("text-fit-wrapping")
         commitByClickingBlank(design)
-        let wrapped = newLayerRow(design, skipping: row.identifier)
+        let wrapped = newLayerRow(design, skipping: firstText)
         XCTAssert(wrapped.waitForExistence(timeout: 5), "no Layers row for the dragged text")
         selectLayer(design, wrapped.identifier)
         let fixedWidth = frameValue(design, "Width"), fixedHeight = frameValue(design, "Height")
