@@ -7,17 +7,21 @@
 // shows, and back up until Frame 40's row (`design.layer.node-1951`) does.
 // Frames are expanded bottom up from the keyboard: click Frame 1's row in its
 // blank space (clickDesignLayer, #2496), Right Arrow opens it, Up Arrow moves
-// to the frame above, which opening a lower row never shifts.
+// to the frame above, which opening a lower row never shifts. All 79 keys go
+// in one `typeText` on the list: a key typed on the app has XCUITest snapshot
+// the whole window first, 20 s a key once 1,000 rows are open, and 40 frames
+// never opened inside the budget (22 did, #4292). A query by identifier stays
+// near 2 s, so each frame's Text row is then checked by its id.
 // Report-only (QB-L10; docs/review-rubric.md, How gates are set): the scroll
 // times each scroll call's round trip, which needs the app's main thread to
 // answer, as a coarse sign of a stall, and adds the frame intervals `suite.perf`
 // lists under `-SuitePerfProbe` (SuiteUI's FrameProbe), when it lists any.
+// Each way is `sampledScrolls` timed steps of 100 rows, then one jump to the
+// end: 2,040 rows are 400 wheel steps of 120, more than the budget holds.
 // The numbers go to .build/ui-screens/perf-design-layers.json and attach as
 // "perf-design-layers"; the test asserts only that every row was reached.
-// The whole walk has a wall-clock budget (`budgetSeconds`): on the hosted
-// runner each XCUITest query over the expanded tree takes 20 to 50 s, so
-// unbounded the walk ran past an hour and the job's timeout cancelled every
-// suite after it (#4292). Past the budget it fails, naming the step it reached.
+// The whole walk has a wall-clock budget (`budgetSeconds`); past it the walk
+// fails, naming the step it reached, so the suites after it still run.
 // Frame N's id is node-(50N - 49) and its Text is node-(50N) (DesignFixtures.crowd).
 // The list is found as `suite.sidebar`: Layers is the sidebar's root view, so
 // SuiteWindow's outer identifier replaces its own `design.layers` (#3307), and
@@ -33,6 +37,12 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
     static let bottomRow = "design.layer.node-2"
     /// A scroll round trip over this many milliseconds counts as a stall (about six 60 Hz refreshes).
     static let stallMilliseconds = 100.0
+    /// How many scroll steps each way are timed before the walk jumps to the list's end.
+    static let sampledScrolls = 5
+    /// One timed scroll step: about 100 rows.
+    static let step: CGFloat = 2400
+    /// More than the expanded list is tall (2,040 rows), so one scroll by it reaches either end.
+    static let listHeight: CGFloat = 100_000
     /// How long the expand and both scrolls may take together before the walk fails.
     static let budgetSeconds = 600.0
     /// When the walk's budget runs out; set as the test starts.
@@ -49,9 +59,9 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
         guard expandEveryFrame(design, layers) else { return }
         design.shot("perf-layers-expanded")
 
-        let down = scroll(layers, until: row(design, Self.bottomRow), by: -120)
+        let down = scroll(layers, until: row(design, Self.bottomRow), by: -Self.step)
         design.shot("perf-layers-bottom")
-        let up = scroll(layers, until: row(design, Self.topRow), by: 120)
+        let up = scroll(layers, until: row(design, Self.topRow), by: Self.step)
         design.shot("perf-layers-top")
         report(down: down, up: up, perf: design.element("suite.perf"))
     }
@@ -61,36 +71,42 @@ final class DesignPerfLayersJourneyTests: XCTestCase {
     /// Whether the walk's budget has run out.
     private var overBudget: Bool { Date() >= deadline }
 
-    /// Opens all 40 frames' rows, Frame 1 first, from the keyboard; false (and a failure) when
-    /// the budget ran out first.
+    /// Opens all 40 frames' rows, Frame 1 first, from the keyboard in one typed run; false (and a
+    /// failure) when a frame's Text row never showed or the budget ran out first.
     @MainActor private func expandEveryFrame(_ design: Journey, _ layers: XCUIElement) -> Bool {
         let first = row(design, Self.frames[0])
         _ = scroll(layers, until: first, by: -120)
         design.clickDesignLayer(Self.frames[0])
+        let (right, up) = (XCUIKeyboardKey.rightArrow.rawValue, XCUIKeyboardKey.upArrow.rawValue)
+        layers.typeText(right + String(repeating: up + right, count: Self.frames.count - 1))
+        // The last frame's Text row shows once the app has worked through every key.
+        _ = row(design, "design.layer.node-\(50 * Self.frames.count)").waitForExistence(timeout: 120)
         for (index, frame) in Self.frames.enumerated() {
             if overBudget {
-                XCTFail("\(Int(Self.budgetSeconds)) s opened only \(index) of \(Self.frames.count) frames' rows")
+                XCTFail("\(Int(Self.budgetSeconds)) s checked only \(index) of \(Self.frames.count) frames' rows")
                 return false
             }
-            if index > 0 { design.press(.upArrow) }
-            design.press(.rightArrow)
-            let text = row(design, "design.layer.node-\(50 * (index + 1))")
-            XCTAssert(text.waitForExistence(timeout: 5), "Right Arrow didn't open \(frame): its Text row never showed")
+            guard row(design, "design.layer.node-\(50 * (index + 1))").exists else {
+                XCTFail("the typed run didn't open \(frame): its Text row never showed")
+                return false
+            }
         }
         return true
     }
 
-    /// Scrolls `list` by `delta` until `target` is hittable, at most 200 times and within the
-    /// walk's budget; the round trip of each call.
+    /// Scrolls `list` by `delta` until `target` is hittable, within the walk's budget: `sampledScrolls`
+    /// timed steps of `delta`, then jumps of the whole list's height. The round trip of each timed step.
     @MainActor private func scroll(_ list: XCUIElement, until target: XCUIElement, by delta: CGFloat) -> [Double] {
         var trips: [Double] = []
-        while !(target.exists && target.isHittable), trips.count < 200, !overBudget {
+        var jumps = 0
+        while !(target.exists && target.isHittable), jumps < 3, !overBudget {
+            let sampled = trips.count < Self.sampledScrolls
             let started = Date()
-            list.scroll(byDeltaX: 0, deltaY: delta)
-            trips.append(Date().timeIntervalSince(started) * 1000)
+            list.scroll(byDeltaX: 0, deltaY: sampled ? delta : (delta < 0 ? -Self.listHeight : Self.listHeight))
+            if sampled { trips.append(Date().timeIntervalSince(started) * 1000) } else { jumps += 1 }
         }
         let why = overBudget ? " before the walk's budget ran out" : ""
-        XCTAssert(target.exists && target.isHittable, "\(trips.count) scrolls didn't reach \(target.identifier)\(why)")
+        XCTAssert(target.exists && target.isHittable, "\(trips.count) scrolls and \(jumps) jumps didn't reach \(target.identifier)\(why)")
         return trips
     }
 
