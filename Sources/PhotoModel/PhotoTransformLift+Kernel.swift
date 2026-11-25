@@ -13,7 +13,7 @@
 // sharpen on the image or an adjustment layer above reads `readMargin` pixels around each pixel, so the lifted
 // pixels carry those margins, summed, clear on every side, and blur alone: the lift's edge softens over the
 // blurred picture under it, close to the canvas and exact again at the release. The picture under the lift keeps the layer's pixels outside the box
-// (`boxCut`), as commit does, and lacks the layers above. The pixels are the same for every drag of one draft
+// (`boxCut`), as commit does, unless they are clear, and lacks the layers above. The pixels are the same for every drag of one draft
 // (`liftSprite`), so the canvas makes them once per Free Transform; each drag renders only the picture under
 // them (`liftedBase`). The canvas draws no layer style and tones through no adjustment layer's mask, so neither
 // keeps a layer down: the lift draws what the canvas does. A layer's shown mask multiplies the lifted pixels, so it
@@ -106,7 +106,11 @@ extension PhotoWorkspace {
         base.transformDraft = nil
         base.liveDraft = false
         for above in 0...at where !base.layers[above].kind.isAdjustment { base.layers[above].isVisible = false }
-        if let draft = transformDraft, let (_, rest) = try? boxCut(of: layers[at], in: draft.box) {
+        // A rest with no paint (a Select move's box is the layer's painted box) stays hidden, so the picture under
+        // the lift is the layers below alone and the next press finds it kept (#6038).
+        if let draft = transformDraft, let (_, rest) = try? boxCut(of: layers[at], in: draft.box),
+            (try? rest.paintedBounds()) != nil
+        {
             base.pixels[layers[at].id] = rest
             base.layers[at].isVisible = true
         }

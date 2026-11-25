@@ -252,4 +252,48 @@ import Testing
         #expect(try base.pixel(x: 125, y: 85) != clear, "the Logo outside the selection stays under the lift")
         #expect(try base.pixel(x: 135, y: 95) == clear, "the lifted part is not under itself")
     }
+
+    /// A layer whose paint is all inside the box (a Select move's box is the layer's painted box) leaves a clear
+    /// rest, so the picture under its lift lacks the layer, the same picture at every press (#6038).
+    @Test func theBaseUnderAWholePaintedBoxHidesTheClearRest() throws {
+        var workspace = PhotoWorkspace()
+        try workspace.newCanvas(width: 300, height: 200)
+        workspace.addLayer()
+        PhotoLiveToneTests.fill(&workspace, red: 200, green: 30, blue: 40, from: Mask.Point(x: 40, y: 30), to: Mask.Point(x: 120, y: 90))
+        let id = try #require(workspace.selectedLayerID)
+        workspace.selectTool(.select)
+        try workspace.beginTransform()
+        let box = try #require(workspace.transformSelection)
+        try workspace.setTransform(TransformBox(box: Rect(minX: box.box.minX + 20, minY: box.box.minY, maxX: box.box.maxX + 20, maxY: box.box.maxY)),
+                                   name: "Move", drag: "m")
+        let base = try #require(workspace.liftedBase)
+        let at = try #require(base.index(of: id))
+        #expect(!base.layers[at].isVisible, "the clear rest of the moved layer stayed in the picture under the lift")
+    }
+
+    /// A second press on the same lift, with nothing else changed, finds the picture under it kept (#6038): the
+    /// app renders the lift's base at each press of a Move or Free Transform drag, and the canvas's composite
+    /// cache serves it once the first press made it, with the drag's release frame drawn in between.
+    @Test(arguments: [PhotoRenderRoute.cpu, PhotoRenderRouteTests.standIn])
+    func aSecondPressFindsTheLiftsBaseKept(route shared: PhotoRenderRoute) async throws {
+        var workspace = try PhotoLiveTransformTests.transforming()
+        try workspace.setTransform(TransformBox(box: Rect(minX: 127, minY: 77, maxX: 187, maxY: 117)), name: "Move", drag: "m")
+        let route = PhotoLiveTransformTests.route(shared)
+        let shown = try await PhotoRenderer.update(workspace, since: nil, route: route)
+        let base = try #require(workspace.liftedBase)
+        _ = try await PhotoRenderer.update(base, since: nil, route: route)
+        let pressed = route.composites.made
+        _ = try await PhotoRenderer.update(workspace, since: shown.revision, route: route)
+        let released = route.composites.made
+        let again = try #require(workspace.liftedBase)
+        #if DEBUG
+        let tally = PhotoRenderCount.Tally()
+        _ = try await PhotoRenderCount.$tally.withValue(tally) { try await PhotoRenderer.update(again, since: nil, route: route) }
+        #expect((tally.snapshot["bases"] ?? 0, tally.snapshot["layers"] ?? 0) == (0, 0), "the second press drew \(tally.snapshot)")
+        #else
+        _ = try await PhotoRenderer.update(again, since: nil, route: route)
+        #endif
+        #expect(pressed > 0, "the first press made the picture under the lift")
+        #expect(route.composites.made == released, "the second press composited the picture under the lift again (made \(pressed) then \(released) then \(route.composites.made))")
+    }
 }

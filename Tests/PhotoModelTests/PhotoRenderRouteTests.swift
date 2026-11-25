@@ -102,11 +102,13 @@ import Testing
         #expect(route.composites.made == regions, "the open's render keeps every region whole")
 
         workspace.selectTool(.select)
-        workspace.drag(from: Mask.Point(x: 100, y: 100), to: Mask.Point(x: 110, y: 104))
+        // On Paint's stroke (y = 410 at x = 400), so the Move takes the top layer, not the Background under it.
+        workspace.drag(from: Mask.Point(x: 400, y: 410), to: Mask.Point(x: 410, y: 414))
         let first = try await PhotoRenderer.update(workspace, since: opened.revision, route: route)
         #expect(route.composites.made == regions * 2, "the first step makes the base under the moved layer once per region")
 
-        workspace.drag(from: Mask.Point(x: 110, y: 104), to: Mask.Point(x: 120, y: 110))
+        workspace.drag(from: Mask.Point(x: 410, y: 414), to: Mask.Point(x: 420, y: 420))
+        #expect(workspace.selectedLayerID == workspace.layers.first?.id, "the Move took a layer under Paint")
         let second = try await PhotoRenderer.update(workspace, since: first.revision, route: route)
         #expect(route.composites.made == regions * 2, "the next step composited the layers under the moved one again")
         workspace.endDrag()
