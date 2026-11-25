@@ -27,7 +27,7 @@
 // `suite.inspectorToggle`, and each action's `identifier`).
 // The `sidebar:` init takes an app's own list instead of the sections (the
 // sections inits put a SuiteSidebarList there); either way the slot is one
-// container carrying `suite.sidebar`, so the app's list keeps its own
+// group carrying `suite.sidebar` (a bare List too, never its outline), so the app's list keeps its own
 // identifier inside it. It reads -SuiteGallery too (Halo hosts gallery
 // pages); its internal `galleryPage:` twin skips the check, so a gallery page
 // built on it never recurses. `documentActions` (New, Open,
@@ -257,16 +257,22 @@ extension SuiteWindow {
 
     private var splitView: some View {
         NavigationSplitView(columnVisibility: $columns) {
-            sidebar
-                .environment(\.sidebarContextActions, contextActions.map { SidebarContextActions($0) })
-                .environment(\.sidebarExpansion, sidebarExpansion)
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("suite.sidebar")
-                // The system's sidebar toggle has no accessibility identifier and can't be given one
-                // (the app audit, #262); the toolbar's own `suite.sidebarToggle` replaces it.
-                .toolbar(removing: .sidebarToggle)
-                .navigationSplitViewColumnWidth(
-                    min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
+            // SwiftUI puts a one-child container's identifier on the child, so a bare List sidebar left
+            // `suite.sidebar` on its outline, which XCUITest reports not hittable (#2702). The hidden,
+            // zero-height second child keeps the slot a group; it takes no space and isn't read out.
+            VStack(spacing: 0) {
+                sidebar
+                Color.clear.frame(height: .zero).accessibilityHidden(true)
+            }
+            .environment(\.sidebarContextActions, contextActions.map { SidebarContextActions($0) })
+            .environment(\.sidebarExpansion, sidebarExpansion)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("suite.sidebar")
+            // The system's sidebar toggle has no accessibility identifier and can't be given one
+            // (the app audit, #262); the toolbar's own `suite.sidebarToggle` replaces it.
+            .toolbar(removing: .sidebarToggle)
+            .navigationSplitViewColumnWidth(
+                min: SuiteSize.sidebarWidth.min, ideal: SuiteSize.sidebarWidth.ideal, max: SuiteSize.sidebarWidth.max)
         } detail: {
             content
                 // An explicit ideal so the content's own ideal width can't widen the
