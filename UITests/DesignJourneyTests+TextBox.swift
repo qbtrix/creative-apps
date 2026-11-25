@@ -80,7 +80,7 @@ final class DesignTextBoxJourneyTests: XCTestCase {
 
         // A box dragged 150 pt wide on the blank area at (1240, 768) keeps its width and wraps. Both its sides
         // are more than 32 pt from every other layer's edges and centers: Snap to Layers reaches 8 screen
-        // points, 32 page points at the fitted 25%, and from (432, 768) the left side sat in reach of Locked's.
+        // points, 32 page points at the fitted 25%, and from (432, 768) the left side was 32 pt from Locked's.
         tools["Text"].click()
         let points = Double(canvas.frame.width) / Self.pageWidth
         let start = canvas.coordinate(withNormalizedOffset: CGVector(dx: 1240 / Self.pageWidth, dy: 0.75))
