@@ -1,10 +1,10 @@
 // GalleryPenPaths.swift: the gallery's `pen-paths` page (pen-paths PN-2, PN-3; PN-8 runs its intents through
 // `PathCommands` on a local target with a `History`). An artboard with a sample path on it under PathEditOverlay, a
-// Pen and Direct Selection picker, and the `suite.gallery.log` line the journey reads. Each intent the overlay sends
-// runs as its command in `GalleryPenBoard`'s catalog and writes one line, `<command id> [<step>, <n> in History]
-// <intent>` or `<command id> [refused: <why>] <intent>` (a view command's step reads "no step"), so an anchor drag of
-// many moves under one token shows as one undo step. The Pen's closed or finished paths are added beside the sample,
-// which stays the path in edit.
+// Pen and Direct Selection picker with an Undo button, and the `suite.gallery.log` line the journey reads. Each
+// intent the overlay sends runs as its command in `GalleryPenBoard`'s catalog and writes one line, `<command id>
+// [<step>, <n> in History] <intent>` or `<command id> [refused: <why>] <intent>` (a view command's step reads "no
+// step"), so an anchor drag of many moves under one token shows as one undo step; Undo writes `edit.undo [<step>
+// undone, <n> left]`. The Pen's closed or finished paths are added beside the sample, which stays the path in edit.
 import SuiteKernel
 import SwiftUI
 
@@ -82,6 +82,15 @@ struct GalleryPenBoard: PathEditTarget {
         if moved { anchorSelection = Selection() }
         return moved
     }
+
+    /// The page's Undo button's reason it can't act, nil when there is a step to take back.
+    var undoHelp: String? { history.canUndo ? nil : "Nothing to undo." }
+
+    /// The Undo button's click: takes back the last step and returns its log line, or why it can't.
+    mutating func undoLine() -> String {
+        guard let name = history.undoName, undo() else { return "edit.undo [refused: Nothing to undo.]" }
+        return "edit.undo [\(name) undone, \(history.index) left]"
+    }
 }
 
 struct GalleryPenPathsPage: View {
@@ -91,10 +100,17 @@ struct GalleryPenPathsPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: SuiteSpacing.s) {
-            SegmentedTabs(
-                "Tool", tabs: PenTool.allCases.map { InspectorOption(id: $0, title: $0.title) }, selection: tool,
-                id: "suite.gallery.pen-tool"
-            ) { tool = $0 }
+            HStack(spacing: SuiteSpacing.s) {
+                SegmentedTabs(
+                    "Tool", tabs: PenTool.allCases.map { InspectorOption(id: $0, title: $0.title) }, selection: tool,
+                    id: "suite.gallery.pen-tool"
+                ) { tool = $0 }
+                InspectorAction(ToolbarAction(
+                    "Undo", systemImage: "arrow.uturn.backward", unavailableHelp: board.undoHelp,
+                    identifier: "suite.gallery.pen-undo"
+                ) { log = GalleryPenBoard.logging(board.undoLine(), after: log) })
+                .frame(width: SuiteSize.actionButton * 3) // InspectorAction fills its width; hugging, it clips its title.
+            }
             .fixedSize()
             SuiteColor.artboard
                 .frame(width: SuiteSize.contentMinimum.width, height: SuiteSize.contentMinimum.height)
