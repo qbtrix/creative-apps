@@ -1,0 +1,4 @@
+[
+{"label": "The tightest color row keeps its eyedropper and overruns the column", "file": "Sources/SuiteUI/ColorWell.swift", "find": "                controls(gap: SuiteSpacing.xs, eyedropper: false)", "replace": "                controls(gap: SuiteSpacing.xs, eyedropper: true)", "tests": "KeyedColorRowFitTests"},
+{"label": "A color row never gives up its label", "file": "Sources/SuiteUI/ColorWell.swift", "find": "            InspectorRow(\"\", padding: SuiteSpacing.s, alignment: .trailing) {", "replace": "            InspectorRow(label, padding: SuiteSpacing.s, alignment: .trailing) {", "tests": "KeyedColorRowFitTests"}
+]

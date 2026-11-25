@@ -5,8 +5,8 @@
 // tree, which SwiftUI builds once the app is asked for it), that a
 // disabled pair's tooltips say why it can't act, that SuiteKeyframeFacing
 // gives each presence's stopwatch, diamond, action and spoken text (equal to
-// the contract's Fake), and that each `suite.controls` entry's reason is its
-// tooltip. macOS only.
+// the contract's Fake), that each `suite.controls` entry's reason is its
+// tooltip, and that each button shows hover and press fills. macOS only.
 import AppKit
 import SuiteUI
 import SwiftUI
@@ -163,4 +163,20 @@ private struct KeyframeButtonHost: View {
     }
     for child in (node.accessibilityChildren?() ?? nil) ?? [] { found.merge(axEnabled(in: child)) { $1 } }
     return found
+}
+
+/// The stopwatch and the diamond show hover and press on fills a user can tell apart from rest (design.md: the
+/// circle on `row`, hover `rowHover`); the keyed-here tint stays under both, and a disabled pair rests.
+@Test func eachButtonShowsHoverAndPress() {
+    for state in [KeyState.idle, .animated] {
+        let rest = KeyframeButton.circleFill(state, .rest)
+        #expect(KeyframeButton.circleFill(state, .hover) == SuiteColor.rowHover && rest != SuiteColor.rowHover)
+        #expect(KeyframeButton.circleFill(state, .pressed) == SuiteColor.valueFill)
+    }
+    for level in [HoverButtonLevel.rest, .hover, .pressed] {
+        #expect(KeyframeButton.circleFill(.keyedHere, level) == SuiteColor.keyedTint)
+    }
+    #expect(KeyframeButton.diamondFill(.rest) == nil)
+    #expect(KeyframeButton.diamondFill(.hover) == SuiteColor.rowHover)
+    #expect(KeyframeButton.diamondFill(.pressed) == SuiteColor.valueFill)
 }
