@@ -100,9 +100,12 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         design.shot("text-fit-fixed")
 
         // The Width chips switch it to auto width as one step (#3337).
-        let modes = design.element("design.inspector.text-width")
-        XCTAssert(modes.waitForExistence(timeout: 5), "no Width chips in the Text section")
-        modes.buttons["Auto width"].firstMatch.click()
+        // The chip by its own id (`<row id>.<title, dashed>`): a search for the button inside the row's group
+        // found the group, then lost it when the click looked again (run 45591728076).
+        let auto = design.element("design.inspector.text-width.auto-width")
+        XCTAssert(auto.waitForExistence(timeout: 5), "no Auto width chip in the Text section")
+        design.reveal(auto)
+        auto.click()
         XCTAssert(design.app.buttons["Undo Change Text Style"].waitForExistence(timeout: 5), "Auto width made no undo step")
         design.shot("text-fit-auto-mode")
     }
