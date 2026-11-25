@@ -51,7 +51,7 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         // Its row in Layers: the box hugs the line, wider than the old 120 pt default, one line tall.
         let row = newLayerRow(design)
         XCTAssert(row.waitForExistence(timeout: 5), "no Layers row for the new text")
-        row.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        selectLayer(design, row.identifier)
         let width = frameValue(design, "Width"), height = frameValue(design, "Height")
         XCTAssertGreaterThan(width ?? 0, 120, "the clicked box doesn't fit \"A longer line of text\": W \(String(describing: width))")
         XCTAssertGreaterThanOrEqual(height ?? 0, 16, "the clicked box is shorter than a line: H \(String(describing: height))")
@@ -60,13 +60,13 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         // Title at size 48: the box refits, at least 48 tall and wider than before.
         let title = design.element("suite.sidebar").descendants(matching: .any)[Self.titleRow].firstMatch
         XCTAssert(title.waitForExistence(timeout: 5), "no Title row in Layers (\(Self.titleRow))")
-        title.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        selectLayer(design, Self.titleRow)
         let widthBefore = frameValue(design, "Width")
         let size = sizeField(design)
         XCTAssert(size.waitForExistence(timeout: 5), "no text Size field in the inspector")
-        // At 768 high the Text rows sit below the inspector's fold. The click brings the field into reach
-        // itself, as J11's does (DesignTextJourneyTests): after `reveal`'s wheel steps the same click opened
-        // no typing field (#3308). Then typed into the scrub's own field once the click has opened it.
+        // At 768 high the Text rows sit below the inspector's fold: scrolled into reach, then typed into the
+        // scrub's own field once the click has opened it.
+        design.reveal(size)
         size.click()
         XCTAssert(design.element("suite.inspector").textFields["suite.scrub.typing"].waitForExistence(timeout: 5),
                   "clicking Size opened no typing field")
@@ -88,7 +88,7 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         commitByClickingBlank(design)
         let wrapped = newLayerRow(design, skipping: row.identifier)
         XCTAssert(wrapped.waitForExistence(timeout: 5), "no Layers row for the dragged text")
-        wrapped.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).click()
+        selectLayer(design, wrapped.identifier)
         let fixedWidth = frameValue(design, "Width"), fixedHeight = frameValue(design, "Height")
         XCTAssertEqual(fixedWidth ?? 0, 150, accuracy: 0.5, "the dragged box didn't keep its 150 pt width")
         XCTAssertGreaterThan(fixedHeight ?? 0, 24, "the dragged box didn't grow down past one line: H \(String(describing: fixedHeight))")
@@ -100,6 +100,18 @@ final class DesignTextBoxJourneyTests: XCTestCase {
         modes.buttons["Auto width"].firstMatch.click()
         XCTAssert(design.app.buttons["Undo Change Text Style"].waitForExistence(timeout: 5), "Auto width made no undo step")
         design.shot("text-fit-auto-mode")
+    }
+
+    /// Clicks the Layers row `identifier` off its name and waits for the Text section's Size to turn on, as it
+    /// does only for a text layer. A click at 30% of a row lands on its name, which selects nothing (#2496):
+    /// the blank-area click before it had picked Desktop, whose 1440 pt W passed the box checks and whose
+    /// disabled Size opened no typing field (#3308).
+    @MainActor private func selectLayer(_ design: Journey, _ identifier: String) {
+        design.clickDesignLayer(identifier)
+        let size = sizeField(design)
+        let enabled = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == true AND enabled == true"), object: size)
+        XCTAssertEqual(XCTWaiter.wait(for: [enabled], timeout: 5), .completed,
+                       "clicking \(identifier) in Layers didn't select a text layer (Size stays off)")
     }
 
     /// Clicks the canvas's blank area, (864, 921) on the page, below the cards: it commits an open edit.
