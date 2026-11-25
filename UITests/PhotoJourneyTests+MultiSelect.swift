@@ -9,7 +9,8 @@
 // "Hide Layers" step; the Opacity slider to 50 sets both, one "Layer Opacity"
 // step; a Shift-drag with Select (V) on the canvas adds the layer under it to
 // the pick and moves them 40 px right, one "Move Layers" step that Command-Z
-// takes back; Option-Command-A (Select > All Layers) picks all
+// takes back, and a plain click there picks only the layer under it, outlined
+// on the canvas (`photo.canvas.picked`); Option-Command-A (Select > All Layers) picks all
 // four; Delete Layer is refused with "At least one layer must stay."; row 4
 // Command-clicked off, Delete Layers takes three in one step and Command-Z
 // brings them back. Rows are `photo.layer.row.<id>` (PM-3), picked while
@@ -86,6 +87,12 @@ final class PhotoMultiLayerJourneyTests: XCTestCase {
         photo.press(character: "z", .command)
         expect("Redo Move Layers", photo, "Command-Z didn't take the Move Layers step back")
         photo.shot("multi-5-move-undone")
+        // A plain Select click there picks only the layer under it, and the canvas outlines it (#6149).
+        grab.click()
+        XCTAssert(waitUntil { rows.filter(\.isSelected).count == 1 }, "a Select click didn't pick one layer")
+        XCTAssert(photo.element("photo.canvas.picked").waitForExistence(timeout: 5),
+                  "the picked layer has no outline on the canvas (photo.canvas.picked)")
+        photo.shot("multi-5-picked")
 
         // 6. Option-Command-A (Select > All Layers): all four rows picked.
         photo.press(character: "a", [.command, .option])
