@@ -3,7 +3,8 @@
 // row read "Bac…und"). This measures "Background", the longest label any app gives the row, in the row's label
 // font against the row inside Flare's inspector column (the editor panel and its gutters), where that row lives;
 // "Stroke", the longest label a row at the ideal inspector width carries; and "#FFFFFF" in its value font.
-// A keyed row (KeyedColorRowFitTests) must fit beside its KeyframeButton pair at the ideal and minimum widths.
+// A keyed row (KeyedColorRowFitTests) must fit beside its KeyframeButton pair at the ideal and minimum widths,
+// and keep its eyedropper at the ideal width.
 // macOS only.
 #if canImport(AppKit)
 import AppKit
@@ -65,6 +66,26 @@ import SwiftUI
             let width = Self.width(label, offered: offered)
             #expect(width <= offered, "\(label) row is \(width) pt beside its keys; the column leaves \(offered) pt")
         }
+    }
+
+    /// At the ideal width the row gives up only its visible label, not the eyedropper: the tier without either is
+    /// for the minimum width alone.
+    @Test func atTheIdealWidthAKeyedRowKeepsItsEyedropper() {
+        let offered = SuiteSize.inspectorWidth.ideal - 4 * SuiteSpacing.m - Self.pair
+        let store = SuiteControlStore()
+        let row = InspectorColorWellRow("Stroke", color: HexColor(0x1C, 0x1C, 0x1E), onChange: { _ in })
+            .frame(width: offered)
+            .environment(\.suiteControlStore, store)
+        let host = NSHostingView(rootView: row)
+        let window = NSWindow(
+            contentRect: CGRect(x: 0, y: 0, width: offered, height: 60), styleMask: [.titled], backing: .buffered,
+            defer: false)
+        window.contentView = host
+        host.layoutSubtreeIfNeeded()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+        host.layoutSubtreeIfNeeded()
+        let ids = store.inventory.document().controls.map(\.id)
+        #expect(ids.contains("suite.color.eyedropper"), "the row at \(offered) pt lists \(ids)")
     }
 }
 #endif
