@@ -75,4 +75,17 @@ import Testing
         for i in 0..<300 { log = GalleryPenBoard.logging("line \(i) [no step]", after: log) }
         #expect(log.count == 200 && log.last == "line 299 [no step]")
     }
+
+    /// The page's Undo button: off with a reason until there is a step, then each click takes one back and logs it.
+    @Test func thePageUndoTakesBackOneStepAndLogsIt() {
+        var board = GalleryPenBoard()
+        #expect(board.undoHelp == "Nothing to undo.")
+        _ = board.send(.selectAll)
+        _ = board.send(.move(dx: 5, dy: 0, drag: "d1"))
+        #expect(board.undoHelp == nil)
+        let line = board.undoLine()
+        #expect(line == "edit.undo [Move Points undone, 0 left]", "\(line)")
+        #expect(board.pathInEdit == GalleryPenPaths.sample && board.undoHelp == "Nothing to undo.")
+        #expect(board.undoLine() == "edit.undo [refused: Nothing to undo.]")
+    }
 }
