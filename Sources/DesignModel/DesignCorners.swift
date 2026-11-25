@@ -3,7 +3,9 @@
 // stored radius is clamped to half the shorter side when it is set, and the
 // canvas draws `drawnCornerRadius`, so a layer resized smaller after rounding
 // still draws a valid shape. A run of radius edits on one layer is one undo
-// step, like the frame fields. Linux-safe: no UI imports.
+// step, like the frame fields. The row is off, with its reason, on a hidden
+// layer as on a locked one (style-rows: "Show Hidden to change it.").
+// Linux-safe: no UI imports.
 
 extension DesignNodeKind {
     /// Whether a layer of this kind has corners a radius rounds.
@@ -38,10 +40,12 @@ extension DesignNode {
 
 extension DesignWorkspace {
     /// Why the Radius row can't be used for the selection, or nil when it can: nothing selected,
-    /// a kind with no corners, or a lock on the layer or a group around it.
+    /// a kind with no corners, a lock on the layer or a group around it, or the layer hidden
+    /// (itself or by a group around it), as the Opacity and Stroke rows refuse it.
     public var cornerRadiusHelp: String? {
         guard let node = selectedNode else { return "Select a rectangle or frame to round its corners." }
-        return node.kind.cornerlessHelp ?? lockHelp(node.id)
+        if let help = node.kind.cornerlessHelp ?? lockHelp(node.id) { return help }
+        return isHiddenInTree(node.id) ? DesignRefusal.hidden(node.name).help : nil
     }
 
     /// Sets a rectangle's or frame's corner radius, clamped to 0...half its shorter side. A

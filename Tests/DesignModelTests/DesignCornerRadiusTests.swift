@@ -1,8 +1,9 @@
 // DesignCornerRadiusTests.swift: the inspector's Radius row (#532, slice 1).
 // setCornerRadius clamps to half the shorter side, a run of edits is one undo
 // step, and cornerRadiusHelp says why the row is off: nothing selected, a kind
-// with no corners, or a lock on the layer or a group around it. Old files with
-// no radius still open. Runs on Linux and macOS.
+// with no corners, a lock on the layer or a group around it, or the layer or a
+// group around it hidden. Old files with no radius still open. Runs on Linux
+// and macOS.
 #if canImport(FoundationEssentials)
 import FoundationEssentials
 #else
@@ -94,6 +95,19 @@ private func sample() throws -> DesignWorkspace {
     #expect(workspace.cornerRadiusHelp == "Unlock the layer to edit it.")
     #expect(DesignNodeKind.text.cornerlessHelp == "Text has no corners to round.")
     #expect(DesignNodeKind.rectangle.cornerlessHelp == nil && DesignNodeKind.frame.cornerlessHelp == nil)
+}
+
+@Test func aHiddenLayerOrOneInAHiddenGroupTurnsTheRadiusRowOff() throws {
+    var workspace = try sample()
+    workspace.selectItem("node-3")
+    try workspace.setNodeHidden("node-3", true)
+    #expect(workspace.cornerRadiusHelp == "Show Rectangle to change it.")
+    #expect(workspace.styleHelp(.cornerRadius) == "Show Rectangle to change it.")
+    try workspace.setNodeHidden("node-3", false)
+    try workspace.setNodeHidden("node-2", true)
+    #expect(workspace.cornerRadiusHelp == "Show Rectangle to change it.")
+    try workspace.setNodeLocked("node-3", true)
+    #expect(workspace.cornerRadiusHelp == "Unlock the layer to edit it.")
 }
 
 @Test func aFileWithoutARadiusStillOpensWithSquareCorners() throws {
