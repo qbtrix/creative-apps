@@ -3,7 +3,7 @@
 // Flare and Halo it makes one edit and presses ⌘W: the sheet reads UnsavedPrompt's message for the document
 // with Save, Don't Save and Cancel (`<app>.close.save|dontSave|cancel`, from UnsavedPrompt.answers); Escape
 // cancels and the window stays, still dirty; ⌘W again and ⌘D (Don't Save) closes it. Then a fresh launch, an
-// edit and File > New ask the same; Save on the untitled document opens the Save panel, and cancelling the
+// edit and File > New ask the same (after Create, when New opens the New Document sheet); Save on the untitled document opens the Save panel, and cancelling the
 // panel (a sheet, or the app-modal dialog Design's runs) keeps the document. Each app's leg skips by name until its slice turns it on (UP-6 Design, UP-8 Photo,
 // UP-10 Flare, UP-12 Halo); the test runs every leg and skips at the end naming the legs still waiting.
 // The bundle doesn't link SuiteKernel, so the words below mirror UnsavedPrompt (Sources/SuiteKernel/Session/
@@ -129,6 +129,12 @@ final class SuiteUnsavedJourneyTests: XCTestCase {
         editor.edit(journey)
         journey.app.menuBars.menuBarItems["File"].click()
         journey.app.menuBars.menuItems[editor.newItem].firstMatch.click()
+        // An editor whose New opens the shared New Document sheet asks once Create is pressed.
+        let newSheet = journey.element("suite.newdoc")
+        if newSheet.waitForExistence(timeout: 3) {
+            journey.element("suite.newdoc.create").click()
+            XCTAssert(newSheet.waitForNonExistence(timeout: 5), "\(editor.app): Create left the New Document sheet up")
+        }
         expectPrompt(editor, journey)
         let saveButton = sheet(journey).buttons["\(editor.prefix).close.save"]
         saveButton.click()
