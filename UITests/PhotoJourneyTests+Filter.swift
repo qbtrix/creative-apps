@@ -32,8 +32,10 @@ final class PhotoFilterJourneyTests: XCTestCase {
         let radius = photo.element("suite.filter.slider.radius")
         XCTAssert(radius.waitForExistence(timeout: 5), "Gaussian Blur… opened no sheet with a Radius slider")
         photo.enter("8", in: radius)
-        // The bar is a slider to XCUI, so its value is the number (ScrubField).
-        XCTAssert(waitUntil { (radius.value as? NSNumber).map { abs($0.doubleValue - 8) <= 1.5 } ?? false },
+        // Tab has no other field to go to in this sheet, so the typing stays open (run 45602316434's hierarchy:
+        // `suite.scrub.typing` still focused, reading 8, three seconds on). The field takes Return (onSubmit).
+        if photo.element("suite.scrub.typing").exists { photo.app.typeKey(.return, modifierFlags: []) }
+        XCTAssert(waitUntil { Self.number(radius.value).map { abs($0 - 8) <= 1.5 } ?? false },
                   "Radius reads \(String(describing: radius.value)), not about 8 px")
         XCTAssert(photo.element("photo.filter.preview").waitForExistence(timeout: 10), "the sheet shows no Preview")
         photo.shot("filter-sheet")
@@ -183,6 +185,12 @@ final class PhotoFilterJourneyTests: XCTestCase {
             }
         }
         return Double(differing) / Double((x1 - x0) * (y1 - y0))
+    }
+
+    /// A bar's value: a number (the slider ScrubField shows XCUI), else the first number in its text ("8.0 px").
+    static func number(_ value: Any?) -> Double? {
+        if let number = value as? NSNumber { return number.doubleValue }
+        return (value as? String).flatMap { Double($0.split(separator: " ").first.map(String.init) ?? "") }
     }
 
     /// Whether `condition` holds within five seconds.

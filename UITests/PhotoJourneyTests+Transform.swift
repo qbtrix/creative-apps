@@ -162,10 +162,15 @@ final class PhotoTransformJourneyTests: XCTestCase {
     }
 
     /// The header's selected-layer line, "Pasted Layer W × H px at X, Y"; empty when none shows within five seconds.
+    /// The header is one label of comma-joined facts ("beach.png, 800 × 600 px, …, Pasted Layer 160 × 90 px at
+    /// 320, 240"), the layer's line last, so the line runs from "Pasted Layer " to the end of its row.
     @MainActor private func layerLine(_ photo: Journey) -> String {
         for _ in 0..<17 {
-            let lines = said(photo).flatMap { $0.split(whereSeparator: \.isNewline).map(String.init) }
-            if let line = lines.first(where: { $0.hasPrefix("Pasted Layer") && $0.contains(" px at ") }) { return line }
+            for text in said(photo) {
+                guard let start = text.range(of: "Pasted Layer ") else { continue }
+                let line = String(text[start.lowerBound...].prefix { !$0.isNewline })
+                if line.contains(" px at ") { return line }
+            }
             Thread.sleep(forTimeInterval: 0.3)
         }
         return ""

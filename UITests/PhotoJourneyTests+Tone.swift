@@ -77,12 +77,19 @@ final class PhotoToneJourneyTests: XCTestCase {
         photo.element("suite.canvas").screenshot().pngRepresentation
     }
 
-    /// Types `value` into the tone row `suite.tone.<slider>`'s bar (Journey.enter: click, type, Tab; Command-A
-    /// would run Photo's Select > All).
+    /// Types `value` into the tone row `suite.tone.<slider>`'s bar: a click opens its typing field
+    /// (`suite.scrub.typing`), which is cleared without Command-A (Photo's Select > All), then Return.
     @MainActor private func type(_ value: String, into slider: String, _ photo: Journey) {
         let row = photo.element("suite.tone.\(slider)")
         XCTAssert(row.waitForExistence(timeout: 5), "no tone row suite.tone.\(slider)")
-        photo.enter(value, in: row)
+        row.click()
+        let field = photo.element("suite.scrub.typing")
+        XCTAssert(field.waitForExistence(timeout: 5), "suite.tone.\(slider) opened no field to type in")
+        field.click()
+        photo.app.typeKey(.rightArrow, modifierFlags: .command)
+        for _ in 0..<12 { photo.app.typeKey(.delete, modifierFlags: []) }
+        photo.app.typeText(value)
+        photo.app.typeKey(.return, modifierFlags: [])
     }
 
     /// True once `condition` holds, polled for five seconds.
