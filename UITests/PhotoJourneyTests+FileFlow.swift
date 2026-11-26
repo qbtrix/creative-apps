@@ -4,7 +4,8 @@
 // while the open's note lands); Logo.png dropped on the canvas shows
 // "Place in Sunset" and lands as a layer "Logo" that one Undo removes; Intro.halo dropped opens in Halo;
 // File > Open In ▸ Library hands the image to Library. The files are dragged from a small window the test
-// runner shows (Journey+FileDrag.swift). The marks are read after the drag returns, about 4 s after the drop,
+// runner shows (Journey+FileDrag.swift), each held a second over the canvas before the release, as Flare's
+// and Photo's drop-fit journeys do (without it a drop was sometimes refused, operation 0). The marks are read after the drag returns, about 4 s after the drop,
 // so Photo launches with `-SuiteDropLinger 15` to keep each mark up past its 3 s.
 import XCTest
 
@@ -53,7 +54,7 @@ final class PhotoFileFlowJourneyTests: XCTestCase {
         XCTAssertFalse(logo.exists, "Sunset.png already has a layer Logo")
         let logoFile = folder.appending(path: "Logo.png")
         try writeTestPhoto(to: logoFile, width: 200, height: 150)
-        dragFile(logoFile, onto: canvas)
+        dragFile(logoFile, onto: canvas, hold: 1)
         XCTAssert(mark.waitForExistence(timeout: 5), "dropping Logo.png showed no mark")
         XCTAssert(mark.label.hasPrefix("Place in Sunset"), "the mark reads \(mark.label), not Place in Sunset")
         XCTAssert(logo.waitForExistence(timeout: 10), "dropping Logo.png listed no layer Logo")
@@ -67,7 +68,7 @@ final class PhotoFileFlowJourneyTests: XCTestCase {
         // Step 3: Intro.halo dropped on the canvas: the mark says Halo, and Halo opens it.
         let intro = folder.appending(path: "Intro.halo")
         FileManager.default.createFile(atPath: intro.path, contents: Data())
-        dragFile(intro, onto: canvas)
+        dragFile(intro, onto: canvas, hold: 1)
         let toHalo = NSPredicate(format: "label == %@", "Open in Halo")
         XCTAssertEqual(XCTWaiter.wait(for: [expectation(for: toHalo, evaluatedWith: mark)], timeout: 5), .completed,
                        "dropping Intro.halo didn't say it opens in Halo")
