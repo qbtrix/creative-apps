@@ -1,6 +1,7 @@
 // PhotoJourneyTests+FileFlow.swift: PFJ1 (packet docs/blueprints/photo/features/file-flow.md, Journey
 // steps; PF-6 written, PF-7 turned on live). Photo opens Sunset.png on the suite's `weekOfWork` recents:
-// File > Open Recent ▸ lists Photo's files from the suite's one list; Logo.png dropped on the canvas shows
+// File > Open Recent ▸ lists Photo's files from the suite's one list (File is opened again, up to three times,
+// while the open's note lands); Logo.png dropped on the canvas shows
 // "Place in Sunset" and lands as a layer "Logo" that one Undo removes; Intro.halo dropped opens in Halo;
 // File > Open In ▸ Library hands the image to Library. The files are dragged from a small window the test
 // runner shows (Journey+FileDrag.swift). The marks are read after the drag returns, about 4 s after the drop,
@@ -25,13 +26,20 @@ final class PhotoFileFlowJourneyTests: XCTestCase {
 
         // File has one Open Recent ▸ (the suite's), listing Photo's files.
         let file = photo.app.menuBars.firstMatch.menuBarItems["File"]
-        file.click()
         let recent = file.menuItems["Open Recent"]
-        XCTAssert(recent.waitForExistence(timeout: 5), "File has no Open Recent")
+        // The open notes Sunset.png in the shared list off the main actor, and a menu already open doesn't take
+        // the update, so a list that isn't there yet gets the menu opened again, as a person would.
+        var listed = false
+        for attempt in 0..<3 where !listed {
+            if attempt > 0 { photo.press(.escape); photo.press(.escape); sleep(1) }
+            file.click()
+            XCTAssert(recent.waitForExistence(timeout: 5), "File has no Open Recent")
+            recent.hover()
+            listed = file.menuItems["Sunset.png"].waitForExistence(timeout: 3)
+        }
         XCTAssertEqual(file.menuItems.matching(NSPredicate(format: "title == %@", "Open Recent")).count, 1,
                        "File shows more than one Open Recent")
-        recent.hover()
-        XCTAssert(file.menuItems["Sunset.png"].waitForExistence(timeout: 5), "Open Recent doesn't list Sunset.png")
+        XCTAssert(listed, "Open Recent doesn't list Sunset.png after three openings of File")
         photo.shot("open-recent", screen: true)
         photo.press(.escape)
         photo.press(.escape)
