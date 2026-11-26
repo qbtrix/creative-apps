@@ -4,6 +4,9 @@
 // retouch.spot-heal, retouch.heal and retouch.remove. Each is an edit of one
 // undo step named for its tool, over `BucketRules` and `HealRules`: it works
 // out the new pixels from the target's, then calls `replaceTarget` once.
+// A Remove stroke works out and writes back only a window around the
+// stroke (`replaceTarget(_:x:y:name:)`), so its cost is the stroke's, not
+// the document's (#6439).
 // The selection weighs each pixel once, in `replaceTarget`; no command
 // weighs its result by it as well (#5094: a half-selected pixel took a
 // quarter of the bucket's fill).

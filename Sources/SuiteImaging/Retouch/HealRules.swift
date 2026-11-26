@@ -3,7 +3,9 @@
 // it (`filledFromSurroundings`, whose patch search and seam heal are core's),
 // heal clones from a source offset and solves the seam (`healed`), and remove
 // fills a stroke or a selection, grown a little, from its surroundings. Every
-// mask is buffer-sized, as core takes it. Linux-safe.
+// mask is buffer-sized, as core takes it; a stroke's remove crops the buffer
+// to the window core's fill reads, so it gives the same pixels at a cost set
+// by the stroke. Linux-safe.
 import CoreRaster
 import SuiteKernel
 

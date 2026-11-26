@@ -2,9 +2,10 @@
 // remove over creative-core's heal and fill. A dot on flat sky heals to within
 // 3 levels of the sky, heal copies texture from its source offset, remove of
 // a square on a texture leaves no pixel of the square's colour, and the same
-// seed gives the same pixels. Mutations (FH-5h): SuiteImaging.HealRules
+// seed gives the same pixels; a stroke's remove works in a window around the
+// stroke and matches the whole-buffer remove. Mutations: SuiteImaging.HealRules
 // (`.removeIsRepeatable`, `.healCopiesFromSource`,
-// `.healSkipsOffCanvasSource`, `.healClipsBothAxes`).
+// `.healSkipsOffCanvasSource`, `.healClipsBothAxes`, `.removeWorksInAWindow`).
 import CoreRaster
 import Testing
 import SuiteKernel

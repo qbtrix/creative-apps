@@ -4,6 +4,8 @@
 // and a Remove stroke fills what it passed over, each as one undo step named
 // for its tool however many samples the drag brought, and undo restores the
 // layer byte for byte. A tool that can't act says why and records nothing.
+// A Remove stroke writes back only its window, as the whole-canvas remove
+// would (mutations: PhotoModel.PhotoRetouch+Kernel `.patchWritesAtItsCorner`).
 // Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel

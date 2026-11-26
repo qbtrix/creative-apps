@@ -6,7 +6,7 @@
 // brush colour; heal's source is the Option-click clone source's offset.
 // `replaceTarget` writes back through `editSelection`, weighted by the
 // selection like Fill Selection, as one undo step that keeps only the tiles
-// it changed. A text layer's pixels come from its words, so it refuses.
+// it changed, walking only the pixels of the patch it is given. A text layer's pixels come from its words, so it refuses.
 // Linux-safe.
 import CoreRaster
 import SuiteImaging
