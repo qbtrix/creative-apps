@@ -1,7 +1,7 @@
 // PhotoEditorSnapshots.swift: the Photo window (PhotoEditor) in each state
 // its core loop reaches: an opened photo, layers composited, a brush and an
 // eraser stroke, a marquee selection, a pending crop, a moved layer, a Select
-// box mid-drag, exposure +1, layers in the sidebar, the export sheet and a refusal in the status line
+// box mid-drag, the palette wrapped into two columns in a short window, exposure +1, layers in the sidebar, the export sheet and a refusal in the status line
 // (photo-status-message-dark.png only); the rail's tool help is checked here
 // too. Each other state writes
 // photo-<state>-light.png and photo-<state>-dark.png. The canvas picture is rendered the way the window renders
@@ -60,6 +60,22 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
 
     @Test func openedPhoto() throws {
         try shoot("opened", try opened())
+    }
+
+    /// The window at 1024 x 600, as short as a laptop's with the Dock up: the
+    /// 18-tool palette no longer fits one column and wraps into two (#6426),
+    /// every tool inside the canvas. Writes photo-palette-columns-light/dark.png.
+    @Test func shortWindowWrapsThePalette() throws {
+        let model = try opened()
+        #expect(EditorDetailLayout.paletteColumns(toolCount: PhotoTool.allCases.count, height: 480) == 2)
+        let tiles = try photoTiles(model)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1)
+                    .frame(width: 1024, height: 600)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading),
+                name: "photo-palette-columns-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
     }
 
     @Test func layersComposite() throws {
