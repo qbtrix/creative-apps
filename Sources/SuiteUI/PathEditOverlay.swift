@@ -136,13 +136,10 @@ public struct PathEditOverlay: View {
     @ViewBuilder private func guides(hint: PathCursorHint?) -> some View {
         let s = context.scale
         let view = { (p: Point) in CGPoint(x: p.x * s, y: p.y * s) }
-        if tracker.pressed == nil, context.tool == .pen, let pointer, let end = context.draft?.contour.anchors.last {
-            Path { band in
-                band.move(to: view(end.point))
-                if let out = end.handleOut { band.addQuadCurve(to: pointer, control: view(out)) } else { band.addLine(to: pointer) }
-            }
-            .stroke(SuiteColor.accent, lineWidth: 1)
-            .accessibilityHidden(true)
+        if tracker.pressed == nil, context.tool == .pen, let pointer, let draft = context.draft {
+            PathMarks.rubberBand(draft, pointer: pointer, closes: hint == .close, zoom: context.zoom)
+                .stroke(SuiteColor.accent, lineWidth: 1)
+                .accessibilityHidden(true)
         }
         if let pull = tracker.penHandle {
             let mirror = Point(x: 2 * pull.anchor.x - pull.handle.x, y: 2 * pull.anchor.y - pull.handle.y)

@@ -137,7 +137,7 @@ struct GalleryAreaSelectSheet: View {
     }
 }
 
-private extension View {
+extension View {
     /// The white artboard's rounded clip and outline, so it reads on the light page too.
     func galleryAreaArtboard() -> some View {
         clipShape(.rect(cornerRadius: SuiteRadius.medium))

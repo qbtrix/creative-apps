@@ -190,6 +190,17 @@ extension PathMarks {
         }
     }
 
+    /// The Pen's rubber band, in view points at `zoom`: the segment a click at `pointer` (view points) would commit,
+    /// drawn as `outline` draws it, so it doesn't jump on the click. From the draft's last anchor through its out
+    /// handle to a corner at the pointer, or, when the click `closes`, to the first anchor through its in handle.
+    public nonisolated static func rubberBand(_ draft: PenDraft, pointer: CGPoint, closes: Bool, zoom: Double) -> Path {
+        let anchors = parts([draft.contour], toView: .identity).anchors
+        guard let end = anchors.last, let first = anchors.first else { return Path() }
+        let s = scale(zoom)
+        let target = closes ? first : PathAnchor(point: CGPoint(x: pointer.x / s, y: pointer.y / s), kind: .corner)
+        return outline(anchors: [end, target], segments: [PathSegment(from: 0, to: 1)], zoom: zoom)
+    }
+
     /// Every contour's anchors in one list, mapped by `toView`, and the
     /// segments joining each contour's neighbours, plus last to first when it
     /// is closed. A contour of fewer than two anchors adds its anchors and no
