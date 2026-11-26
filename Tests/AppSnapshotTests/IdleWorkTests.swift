@@ -298,6 +298,27 @@ extension BodyCountSuites {
             w.close()
         }
 
+        /// A release starts its picture with the release, not at SwiftUI's next pass. Once the press's render has
+        /// drained (a kept base makes it quick), a release that waited for the window's `.onChange` left a moment
+        /// with nothing in flight, and a wait on the renders read the drag as settled before its last picture began.
+        @Test(.timeLimit(.minutes(15)))
+        func photoMoveReleaseStartsItsPictureAtOnce() async throws {
+            let label = Self.label("release", .gpu)
+            let (w, send, _, _) = try await Self.stressWindow(.gpu, label)
+            let before = Self.photoCounts()
+            try await w.ticks(5) { i in send(.drag(CGPoint(x: 128, y: 300), CGPoint(x: 128 + Double(i) * 4, y: 300))) }
+            // The press's picture (the one under the lift) lands and nothing is left in flight.
+            #expect(try await Self.until(w) { (Self.photoCounts()["pictures"] ?? 0) > (before["pictures"] ?? 0) },
+                    Comment(rawValue: "\(label): the press's picture never landed"))
+            #expect(try await Self.rendered(w), Comment(rawValue: "\(label): the press's render never drained"))
+            #if DEBUG
+            send(.endDrag)
+            #expect(CanvasRenderer.inFlight > 0, Comment(rawValue: "\(label): the release left no render in flight"))
+            #endif
+            _ = try await Self.rendered(w)
+            w.close()
+        }
+
         /// The Levels Black slider (the stress journey's `levels`): each step changes the histogram's key, so it
         /// recounts after the release, and that recount finds every row kept: it lays no layer.
         @Test(.timeLimit(.minutes(15)), arguments: [RenderingChoice.gpu, .cpu])
