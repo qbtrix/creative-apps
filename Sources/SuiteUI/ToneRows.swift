@@ -8,7 +8,8 @@
 // A row that can't act is disabled with its reason as help (ToneRowsRules,
 // which ToneRowsTests drive; the shared reason shows once above, the others
 // once under their section). `rowHelp` is the host's own reason per row, such
-// as Photo's Sharpen on an adjustment layer.
+// as Photo's Sharpen on an adjustment layer; a section with no row that can act
+// shows no Reset.
 import Foundation
 import SuiteImaging
 import SwiftUI
@@ -126,9 +127,11 @@ struct ToneRowsRules: Sendable {
         return .set(slider, v, drag: drag)
     }
 
-    /// The section's Reset, only while the group is off neutral and the controls can act.
+    /// The section's Reset, only while the group is off neutral and one of its shown rows can act: a host that turns
+    /// every row off (`rowHelp`) would refuse the reset too.
     func reset(_ group: ToneGroup) -> ToneIntent? {
-        guard autoReason == nil, settings?.isNeutral(group) == false else { return nil }
+        guard autoReason == nil, settings?.isNeutral(group) == false,
+              sliders(group).contains(where: { reason($0) == nil }) else { return nil }
         return .reset(group)
     }
 

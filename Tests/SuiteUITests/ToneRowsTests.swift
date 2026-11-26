@@ -93,6 +93,15 @@ private func tokens(_ intents: [ToneIntent]) -> Set<String> {
     #expect(rules(help: "Busy.", rowHelp: [.contrast: why]).reason(.contrast) == "Busy.") // the shared reason wins
 }
 
+/// A section whose every row is off by the host's reason offers no Reset, even off neutral: the host would refuse it.
+@Test func aSectionWithNoLiveRowHasNoReset() {
+    let why = "Sharpen is for the image."
+    let layer = rules(.neutral.setting(.sharpenAmount, to: 50).setting(.contrast, to: 20),
+                      rowHelp: Dictionary(uniqueKeysWithValues: ToneGroup.sharpen.sliders.map { ($0, why) }))
+    #expect(layer.reset(.sharpen) == nil)
+    #expect(layer.reset(.tone) == .reset(.tone))
+}
+
 @Test func hiddenSlidersAndEmptySectionsDrop() {
     let photo = rules(hidden: [.exposure])
     #expect(!photo.sliders(.tone).contains(.exposure))

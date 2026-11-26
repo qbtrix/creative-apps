@@ -1,5 +1,6 @@
 // SuiteToneRowsSnapshots.swift (tone-controls TC-4): ToneRows in an inspector, Light and Dark: suiteui-tone-rows
-// (neutral), -edited (three Resets show), -vibrance-waiting (PRESENCE alone) and -sharpen-off (SHARPEN at Amount 0).
+// (neutral), -edited (three Resets show), -vibrance-waiting (PRESENCE alone), -sharpen-off (SHARPEN at Amount 0) and
+// -row-help (SHARPEN off by the host's own reason, as on Photo's adjustment layer, with Contrast still live).
 import SuiteImaging
 import SwiftUI
 import Testing
@@ -8,16 +9,24 @@ import Testing
 
 @MainActor
 @Suite struct SuiteToneRowsSnapshots {
+    static let layerReason = "Sharpen is for the image."
+
     @Test func toneRowsStates() throws {
         let edited = ToneSettings.neutral.setting(.temperature, to: 30).setting(.tint, to: -8)
             .setting(.highlights, to: -40).setting(.shadows, to: 35).setting(.sharpenAmount, to: 80)
         let all = Set(ToneSlider.allCases)
+        let layerSharpen = Dictionary(uniqueKeysWithValues: ToneGroup.sharpen.sliders.map { ($0, Self.layerReason) })
         let states: [(suffix: String, sample: ToneRowsSample)] = [
             ("", ToneRowsSample(settings: .neutral, hidden: [])),
             ("-edited", ToneRowsSample(settings: edited, hidden: [])),
             ("-vibrance-waiting", ToneRowsSample(settings: .neutral, hidden: all.subtracting(ToneGroup.presence.sliders))),
             ("-sharpen-off", ToneRowsSample(settings: .neutral, hidden: all.subtracting(ToneGroup.sharpen.sliders))),
+            ("-row-help", ToneRowsSample(
+                settings: .neutral.setting(.sharpenAmount, to: 50),
+                hidden: all.subtracting(ToneGroup.sharpen.sliders + [.contrast]), rowHelp: layerSharpen)),
         ]
+        #expect(ToneRowsRules(settings: .neutral, help: nil, hidden: [], rowHelp: layerSharpen).notes(.sharpen)
+            == [Self.layerReason], "the row-help state doesn't show its reason under SHARPEN")
         #expect([ToneGroup.whiteBalance, .tone, .sharpen].allSatisfy {
             ToneRowsRules(settings: edited, help: nil, hidden: []).reset($0) != nil
         }, "the edited state doesn't show its Resets")
@@ -33,9 +42,10 @@ import Testing
 private struct ToneRowsSample: View {
     let settings: ToneSettings
     let hidden: Set<ToneSlider>
+    var rowHelp: [ToneSlider: String] = [:]
 
     var body: some View {
-        ToneRows(settings: settings, help: nil, hidden: hidden) { _ in }
+        ToneRows(settings: settings, help: nil, hidden: hidden, rowHelp: rowHelp) { _ in }
             .padding(.vertical, SuiteSpacing.m)
             .frame(width: SuiteSize.inspectorWidth.ideal)
             .background(SuiteColor.panel)
