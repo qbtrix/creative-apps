@@ -7,8 +7,8 @@
 // (`suite.transform.x` ... `.rotation`), and Edit > Free Transform puts the
 // box (`photo.canvas.transform-box`) and its turn knob (`suite.handles.turn`)
 // on the layer's bounds. A shift-drag out from the bottom-right handle scales
-// it in proportion; 15 typed in Rotation turns the box (the knob reads
-// "15 degrees"); Return on the canvas commits one "Free Transform" step, the
+// it in proportion; 15 typed in Rotation turns the box (the row reads 15);
+// Return on the canvas commits one "Free Transform" step, the
 // box goes and the layer's line changes. Command-Z puts the layer's line back
 // and the draft up again (the commit's undo restores the draft); Escape drops
 // it. Edit > Transform > Flip Horizontal is one "Flip Horizontal" step that
@@ -56,11 +56,13 @@ final class PhotoTransformJourneyTests: XCTestCase {
                        "the shift-drag didn't keep the box's proportions")
         photo.shot("transform-2-scaled")
 
-        // 3. 15 in Rotation: the knob reads 15 degrees.
+        // 3. 15 in Rotation: the row reads 15. The knob's spoken value ("15 degrees") reaches XCUITest empty, as
+        // SwiftUI values on a plain element do (#262; run 45758630743's recording shows the box turned 15° while
+        // the knob's value read ""), so the journey reads the row, a slider whose value XCUITest gets as a number.
         typeRotation("15", photo)
-        let turned = NSPredicate(format: "value CONTAINS '15 degrees'")
-        let knob = photo.element("suite.handles.turn")
-        wait(for: [XCTNSPredicateExpectation(predicate: turned, object: knob)], timeout: 5)
+        let rotation = photo.element("suite.transform.rotation")
+        XCTAssert(waitUntil { (rotation.value as? NSNumber).map { abs($0.doubleValue - 15) < 0.5 } ?? false },
+                  "Rotation reads \(String(describing: rotation.value)), not 15")
         photo.shot("transform-3-turned")
 
         // 4. Return on the canvas: one Free Transform step, the box gone, the layer changed.
@@ -150,6 +152,15 @@ final class PhotoTransformJourneyTests: XCTestCase {
         }
         walk(root)
         return all
+    }
+
+    /// Whether `condition` holds within five seconds.
+    @MainActor private func waitUntil(_ condition: () -> Bool) -> Bool {
+        for _ in 0..<17 {
+            if condition() { return true }
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        return condition()
     }
 
     /// Whether no label or value in the window holds `string` within five seconds.

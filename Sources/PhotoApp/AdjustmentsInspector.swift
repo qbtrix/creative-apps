@@ -18,7 +18,9 @@
 // Under Exposure sit the suite's tone rows (tone-controls PT-2): White
 // Balance, Tone, Presence and Sharpen from `settings.tone`, Exposure hidden
 // since Photo's own section shows it, each change out as a ToneIntent through
-// `onTone` and `toneHelp` saying why the rows are off.
+// `onTone`, `toneHelp` saying why the rows are off and `toneRowHelp` why one
+// row is. They show for every target: an adjustment layer of any kind takes
+// tone (on a Levels layer they lead), and its Sharpen rows say why they're off.
 import PhotoModel
 import SuiteImaging
 import SuiteModel
@@ -33,6 +35,7 @@ struct AdjustmentsInspector: View {
     var sections: [AdjustmentKind] = AdjustmentKind.allCases
     var showsEnable = true
     var toneHelp: String? = nil
+    var toneRowHelp: [ToneSlider: String] = [:]
     var onTone: (ToneIntent) -> Void = { _ in }
 
     var body: some View {
@@ -42,9 +45,7 @@ struct AdjustmentsInspector: View {
                     .exposure(Float($0))
                 }
             }
-            if sections.contains(.exposure) {
-                ToneRows(settings: settings.tone, help: toneHelp, hidden: [.exposure], onIntent: onTone)
-            }
+            ToneRows(settings: settings.tone, help: toneHelp, hidden: [.exposure], rowHelp: toneRowHelp, onIntent: onTone)
             section(.levels) {
                 HistogramView(histogram, emptyMessage: "No histogram yet.", id: "photo.levels.histogram")
                 levelsRow("Black", settings.blackPoint) { .blackPoint($0) }
