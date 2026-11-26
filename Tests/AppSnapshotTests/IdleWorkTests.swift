@@ -12,7 +12,8 @@
 // histogram's recount). The gates are counts, never clocks, so a loaded Mac passes or fails the same way: every
 // step waits for the work before it to finish (a deadline poll, not a sleep); a Move drag is a compositor lift
 // (docs/render-contract.md): its press renders the picture under the moved layer once, its samples render nothing,
-// and its release lands one picture, so a 30-sample drag costs what a one-sample drag does; a Levels recount lays
+// and its release lands one picture, started with the release (never a moment with nothing in flight), so a
+// 30-sample drag costs what a one-sample drag does; a Levels recount lays
 // no layer, a Hue drag recounts nothing, and once a gesture's work has
 // finished nothing renders or recounts again. A Free Transform step on a layer mid-stack, rendered straight
 // through the renderer (no window) on the CPU and Metal routes, lays that layer and the ones above it on each
