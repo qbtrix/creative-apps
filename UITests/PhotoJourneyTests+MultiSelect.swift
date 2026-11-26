@@ -150,10 +150,13 @@ final class PhotoMultiLayerJourneyTests: XCTestCase {
     /// `button` refuses with `reason`: clicked while enabled, the window says
     /// it; disabled, its help tag does when hovered.
     @MainActor private func expectRefusal(_ reason: String, on button: XCUIElement, _ photo: Journey) {
-        if button.isEnabled { button.click() } else { button.hover() }
-        let said = photo.app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@ OR title CONTAINS %@", reason, reason, reason))
-            .firstMatch
+        let saying = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@ OR title CONTAINS %@", reason, reason, reason)
+        // The help tag by its type: a query over every element of a four-layer window outruns XCUI's timeout.
+        let enabled = button.isEnabled
+        if enabled { button.click() } else { button.hover() }
+        let said = enabled
+            ? photo.app.descendants(matching: .any).matching(saying).firstMatch
+            : photo.app.helpTags.matching(saying).firstMatch
         XCTAssert(said.waitForExistence(timeout: 5), "Delete Layer with every layer picked doesn't say \(reason)")
     }
 
