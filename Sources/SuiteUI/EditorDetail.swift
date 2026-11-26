@@ -5,7 +5,9 @@
 // optional timeline slot (a host's TimelineStrip, empty by default, so the canvas
 // fits in what is left once), then a hairline and the status line (a ViewerStatusBar). The palette sits `ruler + l` from
 // the leading edge and is centred in the area inside the rulers, so it never
-// covers a ruler. Content, not chrome: flat on the canvas surround, no glass;
+// covers a ruler; one taller than that area wraps into columns
+// (`paletteColumns`, the rule ToolbarGroup wraps by), and the fit clears every
+// column. Content, not chrome: flat on the canvas surround, no glass;
 // the palette brings its one capsule. The canvas region carries the
 // accessibility identifier `suite.viewport` and the status line
 // `suite.status`. EditorDetailLayout is the palette and fit math, plain and
@@ -24,8 +26,8 @@ public struct EditorDetail<Canvas: View, Palette: View, Timeline: View, Status: 
     private let palette: Palette
     private let timeline: Timeline
     private let status: Status
-    /// The palette's measured height, from which its tool count follows.
-    @State private var paletteHeight: CGFloat = 0
+    /// The palette's measured size, from which its tool count follows.
+    @State private var paletteSize: CGSize = .zero
 
     public init(
         @ViewBuilder canvas: () -> Canvas, @ViewBuilder palette: () -> Palette,
@@ -38,7 +40,7 @@ public struct EditorDetail<Canvas: View, Palette: View, Timeline: View, Status: 
     }
 
     public var body: some View {
-        let toolCount = EditorDetailLayout.toolCount(paletteHeight: paletteHeight)
+        let toolCount = EditorDetailLayout.toolCount(paletteSize: paletteSize)
         let fit: @Sendable (CGSize, CGSize) -> Double = { viewport, artboard in
             EditorDetailLayout(viewport: viewport, toolCount: toolCount).fitScale(artboard: artboard)
         }
@@ -48,7 +50,7 @@ public struct EditorDetail<Canvas: View, Palette: View, Timeline: View, Status: 
                 .environment(\.canvasFitScale, fit)
                 .overlay(alignment: .leading) {
                     palette
-                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { paletteHeight = $0 }
+                        .onGeometryChange(for: CGSize.self) { $0.size } action: { paletteSize = $0 }
                         // Never over the rulers: past the vertical one, centred below the horizontal one.
                         .padding(.leading, SuiteSize.ruler + SuiteSpacing.l)
                         .padding(.top, SuiteSize.ruler)
@@ -89,26 +91,55 @@ public struct EditorDetailLayout: Equatable, Sendable {
         self.toolCount = max(toolCount, 0)
     }
 
-    /// A vertical floating palette of `toolCount` buttons: one button wide and
-    /// `toolCount` high, with the capsule's `xs` padding on every side.
-    public static func paletteSize(toolCount: Int) -> CGSize {
+    /// A vertical floating palette of `toolCount` buttons in `columns` columns
+    /// (filled top to bottom, as even as they go), with the capsule's `xs`
+    /// padding on every side.
+    public static func paletteSize(toolCount: Int, columns: Int = 1) -> CGSize {
         let inset = 2 * SuiteSpacing.xs
+        let columns = max(columns, 1)
+        let rows = (max(toolCount, 0) + columns - 1) / columns
         return CGSize(
-            width: SuiteSize.toolButton + inset,
-            height: CGFloat(max(toolCount, 0)) * SuiteSize.toolButton + inset)
+            width: CGFloat(columns) * SuiteSize.toolButton + inset,
+            height: CGFloat(rows) * SuiteSize.toolButton + inset)
     }
 
-    /// The tool count of a vertical floating palette `paletteHeight` tall; 0 for no palette.
+    /// The columns a vertical floating palette of `toolCount` buttons takes in
+    /// `height` (the palette's room, its capsule's padding included): one when
+    /// they all fit, else as few as keep every button inside it, at least one
+    /// row each. One for a height that isn't positive and finite (not measured yet).
+    /// ToolbarGroup wraps its `.floating` palette by this rule, and the fit's
+    /// clearance reads it, so the two agree.
+    public static func paletteColumns(toolCount: Int, height: CGFloat) -> Int {
+        guard height.isFinite, height > 0, toolCount > 0 else { return 1 }
+        let rows = max(Int(((height - 2 * SuiteSpacing.xs) / SuiteSize.toolButton).rounded(.down)), 1)
+        return (toolCount + rows - 1) / rows
+    }
+
+    /// The tool count of a vertical floating palette `paletteHeight` tall in one column; 0 for no palette.
     public static func toolCount(paletteHeight: CGFloat) -> Int {
         let buttons = (paletteHeight - 2 * SuiteSpacing.xs) / SuiteSize.toolButton
         guard buttons.isFinite, buttons > 0 else { return 0 }
         return Int(buttons.rounded())
     }
 
+    /// The buttons a palette of `paletteSize` holds, rows times columns: the
+    /// tool count, or one over it when the last column is short, which gives
+    /// the same columns. 0 for no palette.
+    public static func toolCount(paletteSize: CGSize) -> Int {
+        let columns = (paletteSize.width - 2 * SuiteSpacing.xs) / SuiteSize.toolButton
+        guard columns.isFinite, columns > 0 else { return 0 }
+        return toolCount(paletteHeight: paletteSize.height) * max(Int(columns.rounded()), 1)
+    }
+
+    /// The palette's columns in this viewport.
+    public var paletteColumns: Int {
+        Self.paletteColumns(toolCount: toolCount, height: viewport.height)
+    }
+
     /// The palette in viewport coordinates: `l` from the leading ruler, centred
     /// vertically, never above the top ruler.
     public var paletteFrame: CGRect {
-        let size = Self.paletteSize(toolCount: toolCount)
+        let size = Self.paletteSize(toolCount: toolCount, columns: paletteColumns)
         let height = viewport.height.isFinite ? viewport.height : 0
         return CGRect(origin: CGPoint(x: SuiteSpacing.l, y: max((height - size.height) / 2, 0)), size: size)
     }
@@ -117,7 +148,8 @@ public struct EditorDetailLayout: Equatable, Sendable {
     /// palette's inset and width, half a handle's hit and `xs`. The rulers are
     /// already outside `viewport`.
     public var clearance: CGFloat {
-        SuiteSpacing.l + Self.paletteSize(toolCount: toolCount).width + SuiteSize.anchorHit / 2 + SuiteSpacing.xs
+        SuiteSpacing.l + Self.paletteSize(toolCount: toolCount, columns: paletteColumns).width + SuiteSize.anchorHit / 2
+            + SuiteSpacing.xs
     }
 
     /// The zoom at which `artboard` (document pixels) sits centred with

@@ -126,7 +126,9 @@ final class PhotoJourneyTests: XCTestCase {
         options.iterationCount = 3
         XCTExpectFailure("the hosted runner may not collect hitches", options: .nonStrict()) {
             measure(metrics: [XCTHitchMetric(application: photo.app)], options: options) {
-                canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.35)).click(
+                // From a quarter in: the 4000 x 3000 image sits at the 10% floor, wider than the fit's room, so its
+                // leading edge runs under the tool palette (two columns at the runner's size).
+                canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.35)).click(
                     forDuration: 0.05, thenDragTo: canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.65)),
                     withVelocity: .fast, thenHoldForDuration: 0)
             }
