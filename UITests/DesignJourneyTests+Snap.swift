@@ -45,7 +45,7 @@ final class DesignSnapJourneyTests: XCTestCase {
     static let pagePair = CGRect(x: 900, y: 400, width: 300, height: 100)
     static let pageWidth = 1440.0, artboard = "suite.canvas.artboard"
 
-    /// SN-c: moves, resizes, several moves, equal spacing and draws snap; the setting turns it off and is remembered.
+    /// SN-c: moves, resizes, several moves, equal spacing and draws snap, a line before a gap; the setting turns it off and is remembered.
     @MainActor func testSnapAndSmartGuides() throws {
         walkSnapAndSmartGuides()
     }
@@ -98,18 +98,27 @@ final class DesignSnapJourneyTests: XCTestCase {
             design.shot("snap-several")
             clickUndo(design)
 
-            // 5. Equal spacing: C left to 2 pt short of a gap to B equal to A's: X 600, "spacing x 100".
+            // 5. Lines first: C left to 2 pt short of a gap to B equal to A's (600). At the fitted 25% the reach
+            // is 32 page points, so C's right edge is in reach of the page's middle (720) too, and the line wins
+            // (SuiteKernel's `Snapping.offset`): X 620, guide x 720.
             _ = frame(design, Self.rowC)
-            // On the 1024 × 768 runner this step can't pass yet: the fitted zoom is 25%, so the snap reach is
-            // 32 page points, and wherever C's gap is in reach of equal its right edge is in reach of the page's
-            // middle (720). SuiteKernel's `Snapping.offset` takes a line before a gap, so C lands on X 620
-            // (runs 45563576413 to 45625018434); the blueprint (snapping.md) says the smaller offset wins.
             let target = frames.b.maxX + (frames.b.minX - frames.a.maxX) + 2
             drag(design, from: CGPoint(x: frames.c.midX, y: frames.c.midY),
                  to: CGPoint(x: frames.c.midX + target - frames.c.minX, y: frames.c.midY))
+            expectStep(design, "Undo Move", after: "the move near a line and a gap")
+            expectField(design, "X position", "the move near a line and a gap") { $0 == 620 }
+            expectGuides(design, contain: "x 720", after: "the move near a line and a gap")
+            design.shot("snap-lines-first")
+            clickUndo(design)
+
+            // Equal spacing: A right until its middle is 2 pt short of halfway between B and C, the one spot on
+            // `cards` where an equal gap is out of every line's reach at 25%: X 550, 50 each side.
+            _ = frame(design, Self.rowA)
+            let middle = (frames.b.maxX + frames.c.minX) / 2 - 2
+            drag(design, from: CGPoint(x: frames.a.midX, y: frames.a.midY), to: CGPoint(x: middle, y: frames.a.midY))
             expectStep(design, "Undo Move", after: "the spacing move")
-            expectField(design, "X position", "the spacing move") { $0 == 600 }
-            expectGuides(design, contain: "spacing x 100", after: "the spacing move")
+            expectField(design, "X position", "the spacing move") { $0 == 550 }
+            expectGuides(design, contain: "spacing x 50", after: "the spacing move")
             design.shot("snap-spacing")
             clickUndo(design)
 

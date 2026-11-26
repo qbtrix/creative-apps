@@ -156,9 +156,14 @@ guides value need the live routes, so they sit behind
       and left of A to 10 pt below and right of B (select-several's J5
       rule); drag A until the box's bottom is 2 pt short of Pair's bottom:
       "Undo Move", and the guides value holds "y 500". Click Undo.
-   5. *Equal spacing:* click C's row; drag C left until its left edge is 2
-      pt short of where its gap to B equals A's gap to B: X reads 600, the
-      guides value holds "spacing x 100". Click Undo.
+   5. *Lines first:* click C's row; drag C left until its left edge is 2
+      pt short of where its gap to B equals A's gap to B (600). At the
+      fitted 25% its right edge is in reach of the page's middle too, and
+      a line wins over a gap: X reads 620, the guides value holds "x 720".
+      Click Undo. *Equal spacing:* click A's row; drag A right until its
+      middle is 2 pt short of halfway between B and C, out of every
+      line's reach: X reads 550, the guides value holds "spacing x 50".
+      Click Undo.
    6. *Draw:* click Rectangle in the tool box; drag from 2 pt right of B's
       top-right corner to 2 pt left of C's bottom-left corner: X 500, Y 140,
       W 200, H 80 ("Undo Add Rectangle"). Click Undo.
@@ -314,7 +319,7 @@ routes (SN-4 moves, SN-5 resize and draw), in DesignCanvasEditing:
     .noSnap: snap nothing, gesture.guides = empty
     tol = handleTolerance                           # the window keeps it SuiteSpacing.s / zoom
     move routes:  box = the moving box at start + delta (several: the selection's bounds)
-                  per axis: d = the smaller of lines.offset(box min, mid, max) and gaps.spacingOffset
+                  per axis: d = lines.offset(box min, mid, max), else gaps.spacingOffset (lines first)
                   delta += d
     resize:       box = today's resized frame; values = the handle's edges only (a corner one x, one y)
                   per axis: d = lines.offset(the dragged edge); the dragged edge moves by d
