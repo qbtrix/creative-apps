@@ -39,6 +39,11 @@ public protocol LayerPlacing: HaloService {
     /// Layer space to composition space, parents applied outermost last. Nil
     /// for an unknown layer.
     func worldMatrix(of layerID: String, in composition: HaloComposition, at frame: Int) -> HaloMatrix?
+    /// `value(_:of:in:at:)` for a layer the caller already holds, without
+    /// finding it by id: a draw list asks this once per layer.
+    func value(_ property: HaloProperty, of layer: HaloLayer, in composition: HaloComposition, at frame: Int) -> Double?
+    /// `worldMatrix(of:in:at:)` for a layer the caller already holds.
+    func worldMatrix(of layer: HaloLayer, in composition: HaloComposition, at frame: Int) -> HaloMatrix?
     /// The layers `layerID` may follow: every other layer except those that
     /// already follow it, in timeline order.
     func parentCandidates(for layerID: String, in composition: HaloComposition) -> [String]

@@ -1,4 +1,6 @@
 [
 {"label": "batch delete keeps a track left with one key animated", "file": "Sources/HaloModel/Live/HaloKeyRules.swift", "find": "if left.count >= 2 { c.layers[i].tracks[p.rawValue] = left; continue }", "replace": "if left.count >= 1 { c.layers[i].tracks[p.rawValue] = left; continue }", "tests": "HaloKeyDeleteBatchTests"},
-{"label": "batch delete of a whole track keeps its last key, not its first", "file": "Sources/HaloModel/Live/HaloKeyRules.swift", "find": "let first = left.first ?? track.min { $0.frame < $1.frame }", "replace": "let first = left.first ?? track.max { $0.frame < $1.frame }", "tests": "HaloKeyDeleteBatchTests"}
+{"label": "batch delete of a whole track keeps its last key, not its first", "file": "Sources/HaloModel/Live/HaloKeyRules.swift", "find": "let first = left.first ?? track.min { $0.frame < $1.frame }", "replace": "let first = left.first ?? track.max { $0.frame < $1.frame }", "tests": "HaloKeyDeleteBatchTests"},
+{"label": "parent choices offer a layer's own followers", "file": "Sources/HaloModel/Live/HaloKeyRules.swift", "find": "if current == id { return true }", "replace": "if current == id { return false }", "tests": "HaloKernelFollowTests"},
+{"label": "parent choices offer the layer itself", "file": "Sources/HaloModel/Live/HaloKeyRules.swift", "find": "filter { $0 != id && !followsID($0) }", "replace": "filter { !followsID($0) }", "tests": "HaloKernelFollowTests"}
 ]

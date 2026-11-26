@@ -6,10 +6,12 @@
 // names stack is lazy; the lanes stack, laid out at every lane's height inside
 // the sideways scroll, builds only the rows the vertical scroll shows
 // (`lanesShown`; a screen of rows before it first reports), with clear space
-// for the rest, so a long track list costs the rows in view. Each stack sits
-// behind one `.equatable()` (TimelineNameRows,
-// TimelineLaneRows) over the tracks and the mapping (and, for the lanes, the
-// rows shown), and a row compares only its track and mapping; the playhead and
+// for the rest, so a long track list costs the rows in view. A host that
+// scrolls the strip in its own vertical scroll sets `timelineRowsShown`, and
+// both stacks then build only those rows (#1262). Each stack sits behind one
+// `.equatable()` (TimelineNameRows, TimelineLaneRows) over the tracks and the
+// mapping (and the rows shown), and a row compares only its track and
+// mapping; the playhead and
 // the closures a press needs sit in one unobserved TimelineLaneContext the body
 // rewrites. So a frame change runs the playhead layer and never re-evaluates a
 // ForEach or a lane, even when layout runs ahead of SwiftUI's flush under load
@@ -76,6 +78,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
     @Environment(\.suiteSnapshotRendering) private var snapshot
     /// The host's prefix for the name buttons' identifiers; nil puts none.
     @Environment(\.timelineIdentifierPrefix) private var idPrefix
+    @Environment(\.timelineRowsShown) private var rowsShown
     /// The stretch of the lanes the scroll view shows, in mapping x; nil until
     /// it first reports.
     @State private var visibleX: ClosedRange<Double>?
@@ -174,7 +177,7 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             // lanes offered the strip's width, clipped at its edge (#219).
             if snapshot {
                 HStack(alignment: .top, spacing: 0) {
-                    names
+                    names(rows: nil)
                     Divider()
                     GeometryReader { proxy in
                         lanes(width: layout.lanesWidth(
@@ -185,9 +188,10 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
                 .frame(height: layout.lanesHeight, alignment: .top)
             } else {
                 // Offered less than the ideal height, the lanes scroll under the pinned ruler.
+                let shown = rowsShown.map { $0.clamped(to: tracks.indices) }
                 ScrollView(.vertical) {
                     HStack(alignment: .top, spacing: 0) {
-                        names
+                        names(rows: shown)
                         Divider()
                         ScrollView(.horizontal) {
                             lanes(width: layout.lanesWidth(contentWidth: mapping.contentWidth, offered: 0, snapshot: false))
@@ -337,17 +341,20 @@ public struct TimelineStrip<ID: Hashable & Sendable>: View {
             .padding(.leading, SuiteSize.timelineLabelColumn + TimelinePlayheadGrab.divider)
     }
 
-    private var names: some View {
-        TimelineNameRows(tracks: tracks, idPrefix: idPrefix, context: laneContext).equatable()
+    private func names(rows: Range<Int>?) -> some View {
+        TimelineNameRows(tracks: tracks, idPrefix: idPrefix, context: laneContext, rows: rows).equatable()
             .frame(width: SuiteSize.timelineLabelColumn)
     }
 
-    /// The lanes the stack builds: the rows the vertical scroll shows (`visibleRows`), a screen of rows from the
-    /// top before it reports, and every row in a snapshot. The lanes' horizontal scroll view is laid out at every
-    /// lane's height, so inside it the lazy stack alone built every lane (500 tracks cost a host ~90 ms a body);
-    /// the names column, a direct child of the vertical scroll, is lazy on its own.
+    /// The lanes the stack builds: the rows a host that scrolls the strip itself shows (`timelineRowsShown`),
+    /// else the rows the vertical scroll shows (`visibleRows`), a screen of rows from the top before it reports,
+    /// and every row in a snapshot. The lanes' horizontal scroll view is laid out at every lane's height, so
+    /// inside it the lazy stack alone built every lane (500 tracks cost a host ~90 ms a body); the names column,
+    /// a direct child of the vertical scroll, is lazy on its own.
     private var lanesShown: Range<Int> {
-        snapshot ? 0..<tracks.count : TimelineStripLayout.lanesShown(reported: visibleRows, count: tracks.count)
+        guard !snapshot else { return 0..<tracks.count }
+        if let rowsShown { return rowsShown.clamped(to: 0..<tracks.count) }
+        return TimelineStripLayout.lanesShown(reported: visibleRows, count: tracks.count)
     }
 
     private func lanes(width: CGFloat) -> some View {
@@ -413,10 +420,12 @@ struct TimelineNameRows<ID: Hashable & Sendable>: View, Equatable {
     let tracks: [TimelineTrack<ID>]
     let idPrefix: String?
     let context: TimelineLaneContext<ID>
+    /// The rows built; nil builds every one.
+    let rows: Range<Int>?
 
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 0) {
-            ForEach(tracks) { track in
+            ForEach(tracks[rows ?? tracks.indices]) { track in
                 let nameID = TimelineLaneSpeech.identifier(idPrefix, "name", track.id)
                 Button { context.actions.onSelectTrack(track.id) } label: {
                     Text(track.name)
@@ -432,10 +441,20 @@ struct TimelineNameRows<ID: Hashable & Sendable>: View, Equatable {
                 .accessibilityIdentifier(nameID ?? "", isEnabled: nameID != nil)
             }
         }
+        .timelineRowWindow(rows, of: tracks.count)
     }
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.tracks == rhs.tracks && lhs.idPrefix == rhs.idPrefix && lhs.context === rhs.context
+        lhs.tracks == rhs.tracks && lhs.idPrefix == rhs.idPrefix && lhs.context === rhs.context && lhs.rows == rhs.rows
+    }
+}
+
+extension View {
+    /// Places the built `rows` at their own lanes in a column as tall as
+    /// `count` lanes; nil (every row built) changes nothing.
+    func timelineRowWindow(_ rows: Range<Int>?, of count: Int) -> some View {
+        padding(.top, SuiteSize.timelineLane * CGFloat(rows?.lowerBound ?? 0))
+            .frame(height: rows.map { _ in SuiteSize.timelineLane * CGFloat(count) }, alignment: .top)
     }
 }
 

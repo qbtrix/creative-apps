@@ -2,7 +2,8 @@
 // 24 and 30 fps, scrubbing clamped to the composition, the layers active at a
 // frame, the strip's rows with each layer's key frames, in and out points set
 // at the playhead (an out point before the in point is refused), and the
-// layer header's frames with the out point exclusive. Runs on Linux and macOS.
+// layer header's frames with the out point exclusive; rows read their key
+// frames only where asked. Runs on Linux and macOS.
 @testable import HaloModel
 import Testing
 
@@ -173,4 +174,16 @@ private func fixture(_ name: String) throws -> HaloProject {
     project.setSelectedLayerOutPoint()
     #expect(project.selectedLayerHeader?.frames == "Frames 20–50")
     #expect(project.selectedLayer?.outFrame == 51)
+}
+
+/// Rows outside `keyed` carry no key frames; the rest carry the layer's.
+@Test func rowsReadKeyFramesOnlyWhereKeyed() throws {
+    var project = HaloProject(services: .fake)
+    project.restore(try #require(HaloFixtures.project("crowd")))
+    let all = project.timelineRows
+    let some = project.timelineRows(keyed: { $0 == 0 })
+    #expect(some.map(\.id) == all.map(\.id))
+    #expect(some.first?.keyFrames == all.first?.keyFrames && some.first?.keyFrames.isEmpty == false)
+    #expect(some.dropFirst().allSatisfy { $0.keyFrames.isEmpty })
+    #expect(all.dropFirst().contains { !$0.keyFrames.isEmpty })
 }

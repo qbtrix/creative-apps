@@ -1,6 +1,7 @@
 // HaloTimeline.swift: the selected composition's timeline: the playhead and
 // its timecode, the layers active at a frame, the rows the viewer's timeline
-// strip draws (each with its layer's key frames for the diamonds), and setting a layer's in and out points at the playhead (the
+// strip draws (each with its layer's key frames for the diamonds, read only
+// for the rows asked), and setting a layer's in and out points at the playhead (the
 // I and O keys, each one undo step or a refusal under the timeline).
 // Linux-safe: no UI imports. The playhead stays in
 // 0..<durationFrames; a layer stays visible for at least one frame.
@@ -46,11 +47,13 @@ extension HaloComposition {
     }
 
     /// One row per layer, top first, with `selectedLayerID`'s row marked.
-    public func timelineRows(selectedLayerID: String?) -> [HaloTimelineRow] {
-        layers.map { layer in
+    /// Only the rows whose index `keyed` takes read their key frames; the
+    /// rest carry none, since a key walk over huge's 2,000 rows cost seconds.
+    public func timelineRows(selectedLayerID: String?, keyed: (Int) -> Bool = { _ in true }) -> [HaloTimelineRow] {
+        layers.enumerated().map { i, layer in
             HaloTimelineRow(
                 id: layer.id, name: layer.name, span: layer.inFrame...max(layer.inFrame, layer.outFrame),
-                isSelected: layer.id == selectedLayerID, keyFrames: layer.keyFrames)
+                isSelected: layer.id == selectedLayerID, keyFrames: keyed(i) ? layer.keyFrames : [])
         }
     }
 }
@@ -68,6 +71,11 @@ extension HaloProject {
     /// The selected composition's rows for the timeline strip; empty without one.
     public var timelineRows: [HaloTimelineRow] {
         selectedComposition?.timelineRows(selectedLayerID: selectedLayerID) ?? []
+    }
+
+    /// The rows with key frames only where `keyed` takes the row's index.
+    public func timelineRows(keyed: (Int) -> Bool) -> [HaloTimelineRow] {
+        selectedComposition?.timelineRows(selectedLayerID: selectedLayerID, keyed: keyed) ?? []
     }
 
     /// Moves the selected composition's playhead to `frame`, clamped to its

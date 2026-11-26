@@ -34,24 +34,35 @@ extension HaloProject {
     }
 
     /// The frames `layerID`'s lane draws picked.
+    /// Reads only `layerID`'s own keys: the timeline asks once per row, so a
+    /// walk over every layer's keys made one body O(layers²) on `huge`.
     public func pickedFrames(of layerID: String) -> Set<Int> {
-        Set(pickedKeyframes.filter { $0.layerID == layerID }.map(\.frame))
+        let picked = keySelection.set.filter { $0.layerID == layerID }
+        guard !picked.isEmpty, let layer = selectedComposition?.layers.first(where: { $0.id == layerID }) else { return [] }
+        return Set(Self.keys(of: layer).filter(picked.contains).map(\.frame))
     }
 
-    /// Nil when Select All Keys can act; otherwise why not.
+    /// Nil when Select All Keys can act; otherwise why not. Stops at the
+    /// first animated track: the menus ask on every window body, and listing
+    /// huge's keys to count them cost ~300 ms in debug.
     public var selectAllKeysHelp: String? {
-        compositionKeys.isEmpty ? "There are no keys to select." : nil
+        let animated = (selectedComposition?.layers ?? []).contains { layer in
+            HaloProperty.keyable.contains { (layer.tracks[$0.rawValue]?.count ?? 0) >= 2 }
+        }
+        return animated ? nil : "There are no keys to select."
     }
 
     /// Every key of the selected composition's animated tracks: layers top
     /// first, then `HaloProperty.keyable` order, then by frame.
     var compositionKeys: [HaloKeyRef] {
-        let layers = selectedComposition?.layers ?? []
-        return layers.flatMap { layer in
-            HaloProperty.keyable.flatMap { property -> [HaloKeyRef] in
-                guard let track = layer.tracks[property.rawValue], track.count >= 2 else { return [] }
-                return track.map(\.frame).sorted().map { HaloKeyRef(layerID: layer.id, property: property, frame: $0) }
-            }
+        (selectedComposition?.layers ?? []).flatMap(Self.keys(of:))
+    }
+
+    /// `layer`'s keys of its animated tracks, in `HaloProperty.keyable` order, then by frame.
+    static func keys(of layer: HaloLayer) -> [HaloKeyRef] {
+        HaloProperty.keyable.flatMap { property -> [HaloKeyRef] in
+            guard let track = layer.tracks[property.rawValue], track.count >= 2 else { return [] }
+            return track.map(\.frame).sorted().map { HaloKeyRef(layerID: layer.id, property: property, frame: $0) }
         }
     }
 }
