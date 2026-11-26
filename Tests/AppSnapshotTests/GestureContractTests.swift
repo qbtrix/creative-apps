@@ -12,8 +12,13 @@
 // (V, a selects tool in Photo and Design) moves the object it presses, so its row owes the move's delta;
 // one that changes nothing fails "drag hit nothing", which no exclusion covers. Pixel work is Photo's PhotoRenderCount (regions, layer composites, resamples) and Library's loupe renders
 // (LibraryLoupeRenders); the other apps have no pixel counter yet, so they owe the body bound only. Library's crop
-// row first pulls the new frame's corner in, so the frame it then drags has room to move. The count starts from a settled canvas (`idle`): the 12 MP
-// fixture's first picture is about 940 renders that go on landing after the editor's bodies settle, and a count
+// row first pulls the new frame's corner in, so the frame it then drags has room to move. Photo's document is the
+// large fixture's three layers at 1000 x 750 (`photoSize`): the contract counts work, which a small document
+// does as often as a big one, and at 12 MP each case waited on a first picture of about 940 renders and, for
+// lasso, wand, bucket and remove, on a release that held the main thread for a minute or more (44 minutes
+// over the 18 cases on CI, #6436). The 24 MP timing of these drags is `PixelMover`'s
+// (RenderBudgetPhotoLiveTransformTests.swift). The count starts from a settled canvas (`idle`): the first
+// picture's renders go on landing after the editor's bodies settle, and a count
 // begun before the last one charges the rest to the drag. Select's move lifts the layer once at its first sample
 // (one render of the canvas without it), so its count starts once that lift has landed. Step p95 is printed per tool (GESTURE-CONTRACT lines), not gated:
 // a timing gate belongs in Tests/perf-suites.txt. A tool skips its contract only through `exclusions` (reason
@@ -25,7 +30,6 @@ import AppKit
 import DesignModel
 import HaloModel
 import LibraryModel
-import PhotoModel
 import SuiteKernel
 import SuiteUI
 import SwiftUI
@@ -37,6 +41,7 @@ import Testing
 @testable import HaloApp
 @testable import LibraryApp
 @testable import PhotoApp
+@testable import PhotoModel
 
 /// Every app with a canvas.
 enum GestureApp: String, CaseIterable { case photo, design, flare, halo, library }
@@ -44,6 +49,8 @@ enum GestureApp: String, CaseIterable { case photo, design, flare, halo, library
 extension BodyCountSuites {
     @MainActor @Suite struct GestureContractTests {
         static let samples = 60
+        /// Photo's document: the large fixture's layers, small enough that a debug build draws it in seconds.
+        static let photoSize = (width: 1000, height: 750)
 
         /// Tools that skip their class's contract, keyed `<app>.<tool>`: why, and the issue that tracks the fix.
         static let exclusions: [String: (reason: String, issue: Int)] = [:]
@@ -74,7 +81,8 @@ extension BodyCountSuites {
         }
 
         @Test(.timeLimit(.minutes(10)), arguments: PhotoTool.allCases) func photo(_ tool: PhotoTool) async throws {
-            var model = try PhotoWorkspace.fixture(.large)
+            var model = PhotoWorkspace(services: .fake)
+            try model.openLarge(width: Self.photoSize.width, height: Self.photoSize.height)
             model.selectTool(tool)
             let w = RenderBudgetWindow(PhotoWindow(model: model).allowsWindowActivationEvents())
             defer { w.close() }
@@ -88,10 +96,10 @@ extension BodyCountSuites {
             }
             let edited = try #require(await w.first(PhotoWindowEditedView.self))
             let board = try #require(await w.element("suite.canvas.artboard"), "no artboard")
-            let size = CGSize(width: 4000, height: 3000)  // the large fixture: every layer fills it
+            let size = CGSize(width: Self.photoSize.width, height: Self.photoSize.height)  // every layer fills it
             let zoom = board.width / size.width
             let layer = try #require(model.selectedLayer)
-            let target = Self.aims(tool.gesture) ? w.point(CGPoint(x: 2000, y: 1500), on: size, in: board) : nil
+            let target = Self.aims(tool.gesture) ? w.point(CGPoint(x: size.width / 2, y: size.height / 2), on: size, in: board) : nil
             try await Self.run(.photo, tool.rawValue, tool.gesture, w, at: target, bodies: PhotoWindowStrokeTests.editorBodies,
                 pixels: pixels, lifted: tool == .select ? {
                     try #require(await RenderBudgetPhotoLiveTransformTests.idle(w, limit: .seconds(150)), "the lift never landed")
