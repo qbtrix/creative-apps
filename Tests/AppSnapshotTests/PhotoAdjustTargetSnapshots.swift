@@ -1,11 +1,12 @@
 // PhotoAdjustTargetSnapshots.swift: Photo's inspector editing its adjust target
 // (AL-7 of photo-adjustment-layers, PV-6): on the `layered` fixture with
 // "Curves 1" selected, the header reads "Curves 1" over "Adjusts the layers
-// below" and the inspector shows only that layer's Curves section, with no enable
-// switch (the row's eye turns the layer off), under the Layer section with
+// below" and the inspector leads with that layer's Curves section, with no enable
+// switch (the row's eye turns the layer off), the tone rows after it, under the Layer section with
 // its Blend Mode and Opacity, as the inspector shows it (#1713). With Background selected the
 // target is the whole image, under "Image", with the five sections that hold
-// values (AdjustmentKind.sections; Black & White and Invert are kinds, AJ-8). Writes
+// values (AdjustmentKind.sections; Black & White and Invert are kinds, AJ-8), the tone
+// rows under its Exposure. Writes
 // photo-adjust-target-light.png and photo-adjust-target-dark.png. macOS only.
 import PhotoModel
 import SuiteUI
@@ -38,6 +39,7 @@ import Testing
         #expect(AdjustmentsPanel.showsEnable(for: model.adjustTarget) == false)
         #expect(model.selectedLayer?.name == "Curves 1", "the Layer section shows Curves 1's blend and opacity")
         #expect(AdjustTabSample(model: model).showsLayerSettings, "the sample draws the Layer section, as PhotoPanel does")
+        #expect(!AdjustmentsInspector.toneLeads(model.adjustSections), "the layer's own Curves leads, the tone rows follow")
         for scheme in [ColorScheme.light, .dark] {
             try snapshot(
                 AdjustTabSample(model: model), name: "photo-adjust-target-\(scheme == .dark ? "dark" : "light")",
@@ -55,6 +57,7 @@ import Testing
         #expect(model.adjustHeader.info == "Adjusts the whole image")
         #expect(model.adjustSections == [.exposure, .levels, .curves, .blur, .hueSaturation])
         #expect(AdjustmentsPanel.showsEnable(for: model.adjustTarget))
+        #expect(AdjustmentsInspector.toneLeads(model.adjustSections), "the tone rows sit under Exposure")
     }
 }
 

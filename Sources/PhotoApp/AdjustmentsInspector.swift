@@ -15,12 +15,14 @@
 // passes adjustSections), and `showsEnable` false drops the enable checkboxes, for
 // an adjustment layer, whose row's eye turns it off. The defaults are the
 // whole image's inspector, unchanged.
-// Under Exposure sit the suite's tone rows (tone-controls PT-2): White
-// Balance, Tone, Presence and Sharpen from `settings.tone`, Exposure hidden
-// since Photo's own section shows it, each change out as a ToneIntent through
-// `onTone`, `toneHelp` saying why the rows are off and `toneRowHelp` why one
-// row is. They show for every target: an adjustment layer of any kind takes
-// tone (on a Levels layer they lead), and its Sharpen rows say why they're off.
+// The suite's tone rows (tone-controls PT-2): White Balance, Tone, Presence
+// and Sharpen from `settings.tone`, Exposure hidden since Photo's own section
+// shows it, each change out as a ToneIntent through `onTone`, `toneHelp`
+// saying why the rows are off and `toneRowHelp` why one row is. They show for
+// every target: under Exposure on the whole image (`toneLeads`), after the
+// layer's own section on an adjustment layer, so a Curves or Levels layer
+// opens on its curve or levels, not on rows it was not made for; its Sharpen
+// rows say why they're off.
 import PhotoModel
 import SuiteImaging
 import SuiteModel
@@ -45,7 +47,7 @@ struct AdjustmentsInspector: View {
                     .exposure(Float($0))
                 }
             }
-            ToneRows(settings: settings.tone, help: toneHelp, hidden: [.exposure], rowHelp: toneRowHelp, onIntent: onTone)
+            if Self.toneLeads(sections) { toneRows }
             section(.levels) {
                 HistogramView(histogram, emptyMessage: "No histogram yet.", id: "photo.levels.histogram")
                 levelsRow("Black", settings.blackPoint) { .blackPoint($0) }
@@ -63,7 +65,16 @@ struct AdjustmentsInspector: View {
             section(.blur) {
                 slider("Radius", settings.blurSigma, AdjustmentSettings.sigmaRange, unit: "px", decimals: 1) { .blurSigma($0) }
             }
+            if !Self.toneLeads(sections) { toneRows }
         }
+    }
+
+    /// Whether the tone rows sit under Exposure, near the top: only where Photo's Exposure section shows (the
+    /// whole image). An adjustment layer's own section leads instead.
+    nonisolated static func toneLeads(_ sections: [AdjustmentKind]) -> Bool { sections.contains(.exposure) }
+
+    private var toneRows: some View {
+        ToneRows(settings: settings.tone, help: toneHelp, hidden: [.exposure], rowHelp: toneRowHelp, onIntent: onTone)
     }
 
     /// One section, when `sections` holds it: its enable checkbox (while
