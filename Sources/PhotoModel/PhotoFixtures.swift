@@ -10,7 +10,9 @@
 // layers (pixel layers, a third of them masked, and every fourth an
 // adjustment layer), each pixel layer painting a sparse diagonal of tiles from
 // one shared tile cache, for the real-app stress journeys and the idle-work
-// tests (`openStress` takes a smaller size and layer count for those). The
+// tests (`openStress` takes a smaller size and layer count for those, and
+// `openLarge` a smaller size for a test that needs the three layers, not the
+// 12 MP). The
 // blueprint's test-only `limit` (about 4 GB) is left out. Each fixture opens
 // with a clean history.
 // PhotoLaunchOptions reads `-PhotoFixture <name>` from the arguments the app
@@ -130,11 +132,9 @@ extension PhotoWorkspace {
         touch(.all)
     }
 
-    /// Three 4000 x 3000 layers, top first: "Noise" (scattered translucent
-    /// tiles), "Gradient" (a translucent left-to-right ramp) and "Background"
-    /// (a top-to-bottom ramp).
-    private mutating func openLarge() throws {
-        let width = 4000, height = 3000
+    /// Three `width` x `height` layers (the large document is 4000 x 3000), top first: "Noise" (scattered
+    /// translucent tiles), "Gradient" (a translucent left-to-right ramp) and "Background" (a top-to-bottom ramp).
+    mutating func openLarge(width: Int = 4000, height: Int = 3000) throws {
         let background = try Self.tiled(width: width, height: height) { _, row in
             RGBA(r: 0.05 + Float(row) * 0.06, g: 0.2, b: 0.8 - Float(row) * 0.05, a: 1)
         }

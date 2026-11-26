@@ -7,8 +7,8 @@
 // (`suite.transform.x` ... `.rotation`), and Edit > Free Transform puts the
 // box (`photo.canvas.transform-box`) and its turn knob (`suite.handles.turn`)
 // on the layer's bounds. A shift-drag out from the bottom-right handle scales
-// it in proportion; 15 typed in Rotation turns the box (the knob reads
-// "15 degrees"); Return on the canvas commits one "Free Transform" step, the
+// it in proportion; 15 typed in Rotation turns the box (the row reads 15);
+// Return on the canvas commits one "Free Transform" step, the
 // box goes and the layer's line changes. Command-Z puts the layer's line back
 // and the draft up again (the commit's undo restores the draft); Escape drops
 // it. Edit > Transform > Flip Horizontal is one "Flip Horizontal" step that
@@ -56,11 +56,13 @@ final class PhotoTransformJourneyTests: XCTestCase {
                        "the shift-drag didn't keep the box's proportions")
         photo.shot("transform-2-scaled")
 
-        // 3. 15 in Rotation: the knob reads 15 degrees.
+        // 3. 15 in Rotation: the row reads 15. The knob's spoken value ("15 degrees") reaches XCUITest empty, as
+        // SwiftUI values on a plain element do (#262; run 45758630743's recording shows the box turned 15° while
+        // the knob's value read ""), so the journey reads the row, a slider whose value XCUITest gets as a number.
         typeRotation("15", photo)
-        let turned = NSPredicate(format: "value CONTAINS '15 degrees'")
-        let knob = photo.element("suite.handles.turn")
-        wait(for: [XCTNSPredicateExpectation(predicate: turned, object: knob)], timeout: 5)
+        let rotation = photo.element("suite.transform.rotation")
+        XCTAssert(waitUntil { (rotation.value as? NSNumber).map { abs($0.doubleValue - 15) < 0.5 } ?? false },
+                  "Rotation reads \(String(describing: rotation.value)), not 15")
         photo.shot("transform-3-turned")
 
         // 4. Return on the canvas: one Free Transform step, the box gone, the layer changed.
@@ -68,29 +70,30 @@ final class PhotoTransformJourneyTests: XCTestCase {
         photo.press(.return)
         XCTAssert(box.waitForNonExistence(timeout: 5), "Return left the transform box up")
         XCTAssert(photo.app.buttons["Undo Free Transform"].waitForExistence(timeout: 5), "Return made no Free Transform step")
-        XCTAssert(text(line, photo).waitForNonExistence(timeout: 5), "the commit left the layer at \(line)")
+        XCTAssert(gone(line, photo), "the commit left the layer at \(line)")
         photo.shot("transform-4-committed")
 
         // 5. Command-Z: the layer is back where it was, the draft up again; Escape drops it.
         photo.press(character: "z", .command)
         XCTAssert(photo.app.buttons["Redo Free Transform"].waitForExistence(timeout: 5), "Command-Z didn't undo the transform")
-        XCTAssert(text(line, photo).waitForExistence(timeout: 5), "Command-Z didn't put the layer back at \(line)")
+        XCTAssert(photo.shows(line, in: photo.app.windows.firstMatch, timeout: 5), "Command-Z didn't put the layer back at \(line)")
         photo.shot("transform-5-undone")
-        photo.element("suite.canvas").click()
+        // No click first: the canvas still has the keyboard from step 4, and a Select click inside the restored
+        // box picked the Background under it, so the flip turned the wrong layer (run 45780184665's recording).
         photo.press(.escape)
         XCTAssert(box.waitForNonExistence(timeout: 5), "Escape left the transform box up")
 
         // 6. Edit > Transform > Flip Horizontal: one Flip Horizontal step, the layer in place.
         choose(["Edit", "Transform", "Flip Horizontal"], photo)
         XCTAssert(photo.app.buttons["Undo Flip Horizontal"].waitForExistence(timeout: 5), "the flip made no step")
-        XCTAssert(text(line, photo).waitForExistence(timeout: 5), "the flip moved the layer off \(line)")
+        XCTAssert(photo.shows(line, in: photo.app.windows.firstMatch, timeout: 5), "the flip moved the layer off \(line)")
         photo.shot("transform-6-flipped")
     }
 
     /// MJ-PT step 6: Image > Canvas Size…, the crop note, +400 about the centre, OK, Undo.
     @MainActor func testCanvasSizeBorder() throws {
         let photo = try openBeach()
-        XCTAssert(text("800 × 600 px", photo).waitForExistence(timeout: 5), "beach.png isn't 800 × 600 px")
+        XCTAssert(photo.shows("800 × 600 px", in: photo.app.windows.firstMatch, timeout: 5), "beach.png isn't 800 × 600 px")
 
         // 1. Width -200: the sheet warns the canvas will be cropped.
         choose(["Image", "Canvas Size…"], photo)
@@ -106,7 +109,7 @@ final class PhotoTransformJourneyTests: XCTestCase {
         typeSize("400", into: "photo.canvas-size.width", photo)
         typeSize("400", into: "photo.canvas-size.height", photo)
         XCTAssert(note.waitForNonExistence(timeout: 5), "the crop note stayed while the canvas only grows")
-        XCTAssert(text("New size 1200 × 1000 px", photo).waitForExistence(timeout: 5), "the sheet doesn't read 1200 × 1000")
+        XCTAssert(photo.shows("New size 1200 × 1000 px", in: photo.app.windows.firstMatch, timeout: 5), "the sheet doesn't read 1200 × 1000")
         XCTAssert(photo.element("photo.canvas-size.anchor.center").exists, "the sheet has no centre anchor")
         photo.shot("transform-canvas-sheet")
 
@@ -114,13 +117,13 @@ final class PhotoTransformJourneyTests: XCTestCase {
         ok.click()
         XCTAssert(ok.waitForNonExistence(timeout: 5), "OK left the Canvas Size sheet up")
         XCTAssert(photo.app.buttons["Undo Canvas Size"].waitForExistence(timeout: 5), "OK made no Canvas Size step")
-        XCTAssert(text("1200 × 1000 px", photo).waitForExistence(timeout: 5), "the image isn't 1200 × 1000 px")
+        XCTAssert(photo.shows("1200 × 1000 px", in: photo.app.windows.firstMatch, timeout: 5), "the image isn't 1200 × 1000 px")
         photo.shot("transform-canvas-border")
 
         // 4. Command-Z: 800 x 600 again.
         photo.element("suite.canvas").click()
         photo.press(character: "z", .command)
-        XCTAssert(text("800 × 600 px", photo).waitForExistence(timeout: 5), "Command-Z didn't give back 800 × 600 px")
+        XCTAssert(photo.shows("800 × 600 px", in: photo.app.windows.firstMatch, timeout: 5), "Command-Z didn't give back 800 × 600 px")
         photo.shot("transform-canvas-undone")
     }
 
@@ -138,19 +141,51 @@ final class PhotoTransformJourneyTests: XCTestCase {
         return photo
     }
 
-    /// The first element whose label or value holds `string`.
-    @MainActor private func text(_ string: String, _ photo: Journey) -> XCUIElement {
-        photo.app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", string, string)).firstMatch
+    /// Every label and text value the window shows, from one snapshot. A `label CONTAINS … OR value
+    /// CONTAINS …` query over the whole app timed out while it evaluated (Journey.shows).
+    @MainActor private func said(_ photo: Journey) -> [String] {
+        guard let root = try? photo.app.windows.firstMatch.snapshot() else { return [] }
+        var all: [String] = []
+        func walk(_ node: any XCUIElementSnapshot) {
+            all.append(node.label)
+            if let value = node.value as? String { all.append(value) }
+            node.children.forEach(walk)
+        }
+        walk(root)
+        return all
     }
 
-    /// The header's selected-layer line, "Pasted Layer W × H px at X, Y"; empty when none shows.
+    /// Whether `condition` holds within five seconds.
+    @MainActor private func waitUntil(_ condition: () -> Bool) -> Bool {
+        for _ in 0..<17 {
+            if condition() { return true }
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        return condition()
+    }
+
+    /// Whether no label or value in the window holds `string` within five seconds.
+    @MainActor private func gone(_ string: String, _ photo: Journey) -> Bool {
+        for _ in 0..<17 {
+            if !said(photo).contains(where: { $0.contains(string) }) { return true }
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        return false
+    }
+
+    /// The header's selected-layer line, "Pasted Layer W × H px at X, Y"; empty when none shows within five seconds.
+    /// The header is one label of comma-joined facts ("beach.png, 800 × 600 px, …, Pasted Layer 160 × 90 px at
+    /// 320, 240"), the layer's line last, so the line runs from "Pasted Layer " to the end of its row.
     @MainActor private func layerLine(_ photo: Journey) -> String {
-        let header = text(" px at ", photo)
-        guard header.waitForExistence(timeout: 5) else { return "" }
-        let said = [header.label, header.value as? String ?? ""].joined(separator: "\n")
-        let lines = said.split(whereSeparator: \.isNewline).map(String.init)
-        return lines.first { $0.hasPrefix("Pasted Layer") && $0.contains(" px at ") } ?? ""
+        for _ in 0..<17 {
+            for text in said(photo) {
+                guard let start = text.range(of: "Pasted Layer ") else { continue }
+                let line = String(text[start.lowerBound...].prefix { !$0.isNewline })
+                if line.contains(" px at ") { return line }
+            }
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        return ""
     }
 
     /// Clicks the Rotation bar to type, replaces its number with `degrees` and presses Return.
@@ -162,18 +197,23 @@ final class PhotoTransformJourneyTests: XCTestCase {
         let named = panel.textFields["Rotation"]
         let field = named.waitForExistence(timeout: 3) ? named : panel.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking Rotation opened no field to type in")
-        field.typeKey("a", modifierFlags: .command)
-        field.typeText(degrees)
+        replace(field, with: degrees, photo)
         field.typeKey(.return, modifierFlags: [])
+    }
+
+    /// Clears `field` and types `text`, without Command-A (Photo's Select > All has it).
+    @MainActor private func replace(_ field: XCUIElement, with text: String, _ photo: Journey) {
+        field.click()
+        photo.app.typeKey(.rightArrow, modifierFlags: .command)
+        for _ in 0..<12 { photo.app.typeKey(.delete, modifierFlags: []) }
+        photo.app.typeText(text)
     }
 
     /// Replaces the sheet field `identifier`'s text with `value`, then Tab (Return would press OK).
     @MainActor private func typeSize(_ value: String, into identifier: String, _ photo: Journey) {
         let field = photo.element(identifier)
         XCTAssert(field.waitForExistence(timeout: 5), "the sheet has no \(identifier)")
-        field.click()
-        field.typeKey("a", modifierFlags: .command)
-        field.typeText("\(value)\t")
+        replace(field, with: "\(value)\t", photo)
     }
 
     /// Opens the menu bar item `path[0]`, hovers each submenu on the way and clicks the last item, which must be on.

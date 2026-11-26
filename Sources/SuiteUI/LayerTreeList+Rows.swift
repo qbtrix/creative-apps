@@ -9,7 +9,8 @@
 // the draft and the refusal (a refused rename keeps its draft, shakes once
 // and shows SidebarRenameMessage), and
 // SidebarRow.doubleClickRenames / keyRenames / renameActionName gate the
-// double-click on the title, Return on the focused row and the "Rename"
+// double-click on the title (told by the click's own count, PointerClick, so
+// a single click on the name picks at once, modifiers and all), Return on the focused row and the "Rename"
 // accessibility action. App panels (#3194): `.app` naming, LayerTreeOptions, LayerRowDecoration.
 // A `live` decoration shimmers the name (AgentWorking.swift) and its caption
 // ticks as a number when it changes under an animation.
@@ -214,7 +215,9 @@ extension LayerTreeRow {
             .foregroundStyle(options.dims(row) ? SuiteColor.secondaryText : Color.primary)
             .agentShimmer(decoration?.live == true)
             .contentShape(.rect)
-            .simultaneousGesture(TapGesture(count: 2).onEnded { openRename(on: .title) })
+            // The event's own click count, as SidebarRow's title (#6217), never a timed `TapGesture(count: 2)`,
+            // which can hold the single click back until Shift or Command is up (#4378).
+            .onTapGesture { if PointerClick.count() >= 2 { openRename(on: .title) } else { onSelect?(row.id) } }
     }
 
     /// The decoration's thumbnail and symbol, before the name.

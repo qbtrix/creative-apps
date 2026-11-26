@@ -2,7 +2,7 @@
 // services' recents, routing and hand-offs: an open and a save note two events; `recents(for: .design)` lists
 // only Design's files and drops one deleted from disk; `openIn` sends one hand-off with the verb open; Open In
 // reads its targets and its refusal from the routing slot; reopening the app's own file goes to its document host,
-// another app's to that app. Each test gets its own temp folder. macOS only.
+// another app's to that app; a list read before a note never replaces the one after it. Each test gets its own temp folder. macOS only.
 #if os(macOS)
 import Foundation
 import SuiteModel
@@ -52,6 +52,19 @@ private func ref(_ path: String, _ app: SuiteApp, _ type: SuiteTypeID) -> SuiteD
         #expect(bridge.recents(for: .design).map(\.name) == ["Poster.design"])
         #expect(try await services.recents.list().items.contains { $0.ref.displayName == "Logo.design" } == false)
         #expect(bridge.recents(for: .launcher).count == 2)
+    }
+
+    /// A refresh that read the list before a note but lands after it (the launch's watch racing the open's note)
+    /// leaves the newer list showing, so a just-opened file stays in Open Recent.
+    @Test func aStaleListNeverReplacesANewerOne() async throws {
+        let services = SuiteServices.fake()
+        let bridge = SuiteDocumentsBridge(app: .design, services: services)
+        let paths = try files(["Poster.design", "Logo.design"])
+        await bridge.note(ref(paths[0], .design, .designDocument), .opened)
+        let stale = try await services.recents.list()
+        await bridge.note(ref(paths[1], .design, .designDocument), .opened)
+        bridge.apply(stale)
+        #expect(Set(bridge.recents(for: .design).map(\.name)) == ["Poster.design", "Logo.design"])
     }
 
     @Test func openInSendsOneHandOffWithTheVerbOpen() async throws {

@@ -2,7 +2,8 @@
 // folders. The kernel's drop rule (DropPlan) gives one action per file, worked out with the bridge's
 // registry, and the window performs them in one step. While files hover, a mark at the window's bottom says
 // what the first one will do: "Open in Halo", "Place in Sunset", or why it can't open. The mark stays a
-// moment after the release, so a refused file is read, not silently ignored.
+// moment after the release (3 s; `-SuiteDropLinger` lengthens it for the journeys), so a refused file is
+// read, not silently ignored.
 import Foundation
 import SuiteKernel
 import SuiteModel
@@ -83,8 +84,12 @@ struct SuiteDropMarkView: View {
 /// What the drop mark shows: the planned actions of the files hovering now, or of the last drop for
 /// `linger` after it. A plan that lands after its files left (a stale session) is dropped.
 @MainActor @Observable final class SuiteDropHover {
-    /// How long the mark stays after a drop.
-    static let linger: Duration = .seconds(3)
+    /// How long the mark stays after a drop: 3 s, or `-SuiteDropLinger <seconds>` for the journeys, whose
+    /// synthesized drag returns about 4 s after the drop lands.
+    static var linger: Duration {
+        let seconds = UserDefaults.standard.double(forKey: "SuiteDropLinger")
+        return .seconds(seconds > 0 ? seconds : 3)
+    }
 
     private(set) var actions: [DropAction] = []
     @ObservationIgnored private var session = 0

@@ -2,7 +2,7 @@
 // process records every open and save in the shared recents list, reads one app's recent files, hands a
 // document to another app and answers which apps read an extension. It keeps the list it last read and
 // refreshes it after each note, on `refresh()` and on each change `watch()` hears, so a menu reads it without
-// waiting. A refresh drops every file gone from disk from the shared list. Reopening a file this app last used
+// waiting; a read older than the list it shows (by revision) never replaces it. A refresh drops every file gone from disk from the shared list. Reopening a file this app last used
 // goes straight to its document host: a hand-off to itself through Launch Services can reach another copy of the
 // app, or none, when this one runs outside AfterGlow.app (#4332). Open In's targets and its refusal come from
 // the services' routing slot. `thumbnails` is the services' shared previews, the one store a process's saves
@@ -19,6 +19,8 @@ import SuiteModel
     public nonisolated let registry: SuiteTypeRegistry
     /// The shared recents list as last read, newest first.
     public private(set) var items: [RecentItem] = []
+    /// The revision of the list `items` came from; an older read never replaces it.
+    @ObservationIgnored private var revision = 0
     /// The host a reopen of this app's own file goes to; nil uses the suite delegate's (tests inject one).
     @ObservationIgnored public var host: (any SuiteDocumentHost)?
     @ObservationIgnored private let services: SuiteServices
@@ -38,7 +40,15 @@ import SuiteModel
         guard let list = try? await services.recents.list() else { return }
         let gone = list.items.filter { !exists($0.ref.path) }
         for item in gone { try? await services.recents.remove(fileID: item.ref.fileID) }
-        items = list.items.filter { item in !gone.contains { $0.ref.fileID == item.ref.fileID } }
+        apply(list, dropping: Set(gone.map(\.ref.fileID)))
+    }
+
+    /// Shows `list` less the `gone` files, unless a newer revision already shows: a refresh that read the list
+    /// before a note and lands after it (the launch's watch racing an open's note) would put the file back out.
+    func apply(_ list: RecentsList, dropping gone: Set<String> = []) {
+        guard list.revision >= revision else { return }
+        revision = list.revision
+        items = list.items.filter { !gone.contains($0.ref.fileID) }
     }
 
     /// Refreshes on every change to the shared list until the calling task ends.

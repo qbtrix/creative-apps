@@ -1,8 +1,9 @@
 // CropOptions.swift: the crop tool's options in the tool options bar (PV-3,
-// PhotoToolOptionsBar), one row: the pending crop's X, Y, W and H as
-// ScrubFields of equal width, the shared CropAspectPicker (its chips, Custom
-// W:H and the landscape/portrait toggle on X; orientation-crop OC-13), Apply
-// Crop, Cancel, then the one instruction line. Apply carries no Return
+// PhotoToolOptionsBar), one row: Apply Crop and Cancel first, so they show
+// without scrolling the bar at the suite's smallest window, then the pending
+// crop's X, Y, W and H as ScrubFields of equal width, the shared
+// CropAspectPicker (its chips, Custom W:H and the landscape/portrait toggle on
+// X; orientation-crop OC-13), then the one instruction line. Apply carries no Return
 // shortcut, so Return in a field commits the field; Return on the canvas
 // applies through `.confirm`. Cancel carries no Escape shortcut either, which
 // would close a field being typed in before its own Escape; Escape on the
@@ -24,6 +25,15 @@ struct CropOptions: View {
 
     var body: some View {
         ToolOptionsStack {
+            // First in the row: the bar shows about two cells at the suite's smallest window, the rest scrolls.
+            InspectorAction(ToolbarAction(
+                "Apply Crop", systemImage: "crop", unavailableHelp: model.cropApplyHelp,
+                identifier: "photo.crop.apply"
+            ) { perform(.applyCrop) })
+            InspectorAction(ToolbarAction(
+                "Cancel", systemImage: "xmark", unavailableHelp: model.cropCancelHelp,
+                identifier: "photo.crop.cancel"
+            ) { perform(.cancelCrop) })
             field(.x)
             field(.y)
             field(.width)
@@ -33,14 +43,6 @@ struct CropOptions: View {
             }
             .disabled(model.canvas == nil)
             .help(model.cropAspectGroupHelp)
-            InspectorAction(ToolbarAction(
-                "Apply Crop", systemImage: "crop", unavailableHelp: model.cropApplyHelp,
-                identifier: "photo.crop.apply"
-            ) { perform(.applyCrop) })
-            InspectorAction(ToolbarAction(
-                "Cancel", systemImage: "xmark", unavailableHelp: model.cropCancelHelp,
-                identifier: "photo.crop.cancel"
-            ) { perform(.cancelCrop) })
             // The one instruction line, always present so nothing moves when a crop appears.
             Text(model.cropCaption)
                 .font(SuiteFont.inspectorMeta)

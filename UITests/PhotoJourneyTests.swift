@@ -126,7 +126,9 @@ final class PhotoJourneyTests: XCTestCase {
         options.iterationCount = 3
         XCTExpectFailure("the hosted runner may not collect hitches", options: .nonStrict()) {
             measure(metrics: [XCTHitchMetric(application: photo.app)], options: options) {
-                canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.35)).click(
+                // From a quarter in: the 4000 x 3000 image sits at the 10% floor, wider than the fit's room, so its
+                // leading edge runs under the tool palette (two columns at the runner's size).
+                canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.35)).click(
                     forDuration: 0.05, thenDragTo: canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.65)),
                     withVelocity: .fast, thenHoldForDuration: 0)
             }
@@ -657,6 +659,8 @@ final class PhotoJourneyTests: XCTestCase {
     @MainActor private func drag(_ label: String, by fraction: CGFloat, _ photo: Journey) {
         let slider = photo.app.sliders[label]
         XCTAssert(slider.waitForExistence(timeout: 5), "no \(label) slider")
+        // A coordinate drag doesn't scroll its element into view as a click does.
+        photo.reveal(slider)
         slider.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             .press(forDuration: 0.1, thenDragTo: slider.coordinate(withNormalizedOffset: CGVector(dx: 0.5 + fraction, dy: 0.5)))
     }

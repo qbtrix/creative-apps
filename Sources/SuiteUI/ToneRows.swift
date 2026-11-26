@@ -7,12 +7,14 @@
 // sends one `.set` per sample under one drag token; Auto (`suite.tone.auto`).
 // A row that can't act is disabled with its reason as help (ToneRowsRules,
 // which ToneRowsTests drive; the shared reason shows once above, the others
-// once under their section).
+// once under their section). `rowHelp` is the host's own reason per row, such
+// as Photo's Sharpen on an adjustment layer.
 import Foundation
 import SuiteImaging
 import SwiftUI
 
-/// `hidden` drops sliders an app shows elsewhere (Photo keeps its own Exposure section).
+/// `hidden` drops sliders an app shows elsewhere (Photo keeps its own Exposure section); `rowHelp` turns a row off with
+/// the host's reason for it.
 public struct ToneRows: View {
     private let rules: ToneRowsRules
     /// Called once per gesture sample with its intent.
@@ -21,10 +23,10 @@ public struct ToneRows: View {
     @State private var drag: String?
 
     public init(
-        settings: ToneSettings?, help: String?, hidden: Set<ToneSlider> = [],
+        settings: ToneSettings?, help: String?, hidden: Set<ToneSlider> = [], rowHelp: [ToneSlider: String] = [:],
         onIntent: @escaping @MainActor (ToneIntent) -> Void
     ) {
-        rules = ToneRowsRules(settings: settings, help: help, hidden: hidden)
+        rules = ToneRowsRules(settings: settings, help: help, hidden: hidden, rowHelp: rowHelp)
         self.onIntent = onIntent
     }
 
@@ -84,6 +86,8 @@ struct ToneRowsRules: Sendable {
     let settings: ToneSettings?
     let help: String?
     let hidden: Set<ToneSlider>
+    /// The host's reason a row is off, by slider; the shared `help` comes first.
+    var rowHelp: [ToneSlider: String] = [:]
 
     nonisolated static let nothing = "No picture to adjust."
     nonisolated static let sharpenOff = "Sharpen is off at Amount 0."
@@ -102,6 +106,7 @@ struct ToneRowsRules: Sendable {
     /// Why the slider's row can't act; nil when it can.
     func reason(_ slider: ToneSlider) -> String? {
         if let all = autoReason { return all }
+        if let own = rowHelp[slider] { return own }
         if let waiting = ToneRules.waiting[slider] { return waiting }
         let needsAmount = slider == .sharpenRadius || slider == .sharpenThreshold
         return needsAmount && value(.sharpenAmount) == 0 ? Self.sharpenOff : nil

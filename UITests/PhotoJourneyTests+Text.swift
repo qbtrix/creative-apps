@@ -76,7 +76,11 @@ final class PhotoTextJourneyTests: XCTestCase {
         let box = photo.element("photo.text.box")
         XCTAssert(box.waitForExistence(timeout: 5), "a Type tool click on the title opened no box")
         XCTAssertEqual(box.value as? String, "SUMMER SALE", "the reopened layer's words aren't text any more")
-        photo.press(character: "a", .command)
+        // Clear the old words with Delete, not Command-A: the box takes focus a moment after it opens, and a
+        // Command-A before then reached neither the field nor the box, so the new words joined the old ones
+        // ("SUMMER SALESUMMER DEALS", run 45602316434). Delete clears both ways: the field's selected words, or
+        // the box's draft a letter at a time while the canvas holds the keys (PhotoTextBoxKeys).
+        for _ in 0..<16 { photo.app.typeKey(.delete, modifierFlags: []) }
         photo.app.typeText("SUMMER DEALS")
         photo.press(.return)
         expect("Undo Edit Text", photo, "Return made no Edit Text step")

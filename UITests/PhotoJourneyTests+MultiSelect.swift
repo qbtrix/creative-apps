@@ -9,8 +9,8 @@
 // "Hide Layers" step; the Opacity slider to 50 sets both, one "Layer Opacity"
 // step; a Shift-drag with Select (V) on the canvas adds the layer under it to
 // the pick and moves them 40 px right, one "Move Layers" step that Command-Z
-// takes back, and a plain click there picks only the layer under it, outlined
-// on the canvas (`photo.canvas.picked`); Option-Command-A (Select > All Layers) picks all
+// takes back, and a plain click on Paint's stroke picks only Paint, outlined
+// on the canvas (`photo.canvas.picked`; a layer covering the canvas gets none); Option-Command-A (Select > All Layers) picks all
 // four; Delete Layer is refused with "At least one layer must stay."; row 4
 // Command-clicked off, Delete Layers takes three in one step and Command-Z
 // brings them back. Rows are `photo.layer.row.<id>` (PM-3), picked while
@@ -87,8 +87,9 @@ final class PhotoMultiLayerJourneyTests: XCTestCase {
         photo.press(character: "z", .command)
         expect("Redo Move Layers", photo, "Command-Z didn't take the Move Layers step back")
         photo.shot("multi-5-move-undone")
-        // A plain Select click there picks only the layer under it, and the canvas outlines it (#6149).
-        grab.click()
+        // A plain Select click on Paint's stroke (y 410 at x 400 on the 800 x 600 image) picks only Paint, and the
+        // canvas outlines it (#6149). The middle is bare Background, which covers the canvas and gets no outline (#6418).
+        canvas.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 410.0 / 600)).click()
         XCTAssert(waitUntil { rows.filter(\.isSelected).count == 1 }, "a Select click didn't pick one layer")
         XCTAssert(photo.element("photo.canvas.picked").waitForExistence(timeout: 5),
                   "the picked layer has no outline on the canvas (photo.canvas.picked)")
@@ -149,10 +150,13 @@ final class PhotoMultiLayerJourneyTests: XCTestCase {
     /// `button` refuses with `reason`: clicked while enabled, the window says
     /// it; disabled, its help tag does when hovered.
     @MainActor private func expectRefusal(_ reason: String, on button: XCUIElement, _ photo: Journey) {
-        if button.isEnabled { button.click() } else { button.hover() }
-        let said = photo.app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@ OR title CONTAINS %@", reason, reason, reason))
-            .firstMatch
+        let saying = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@ OR title CONTAINS %@", reason, reason, reason)
+        // The help tag by its type: a query over every element of a four-layer window outruns XCUI's timeout.
+        let enabled = button.isEnabled
+        if enabled { button.click() } else { button.hover() }
+        let said = enabled
+            ? photo.app.descendants(matching: .any).matching(saying).firstMatch
+            : photo.app.helpTags.matching(saying).firstMatch
         XCTAssert(said.waitForExistence(timeout: 5), "Delete Layer with every layer picked doesn't say \(reason)")
     }
 
