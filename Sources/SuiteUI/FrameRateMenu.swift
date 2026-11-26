@@ -7,7 +7,9 @@
 // value menu (InspectorValueMenu, #4362): the rate and a chevron, plain. In a
 // toolbar row (`placement: .toolbar`, #4601) the same Menu is a raised chip
 // in ChipRow's SuiteChipStyle at SuiteSize.compactControl, so it matches the
-// chips beside it in height and fill. It takes the rate and an
+// chips beside it in height and fill. In a sheet's grid of bordered pickers
+// (`placement: .form`, NewDocumentSheet) it is a stock menu Picker at regular
+// size, like the Preset and Unit pickers beside it. It takes the rate and an
 // `onSelect` closure, never a binding: apps can't bind to their Model. What
 // the menu lists is plain Swift, `items(checked:)` (FrameRateMenuTests).
 import SuiteKernel
@@ -23,8 +25,9 @@ public struct FrameRateMenuItem: Identifiable, Hashable, Sendable {
 
 /// A Menu of the common frame rates, its title the bound rate's, the bound rate checked.
 public struct FrameRateMenu: View {
-    /// Where the menu sits: an inspector row draws the plain value menu, a toolbar row a raised chip.
-    public enum Placement: Sendable { case row, toolbar }
+    /// Where the menu sits: an inspector row draws the plain value menu, a toolbar row a raised chip, a sheet's form
+    /// a stock menu Picker.
+    public enum Placement: Sendable { case row, toolbar, form }
 
     private let rate: FrameRate
     let placement: Placement
@@ -38,8 +41,8 @@ public struct FrameRateMenu: View {
         self.onSelect = onSelect
     }
 
-    /// The control size either placement draws at.
-    let controlSize = SuiteSize.compactControl
+    /// The control size the placement draws at: a form's picker matches the sheet's regular controls.
+    var controlSize: ControlSize { placement == .form ? .regular : SuiteSize.compactControl }
 
     /// The menu's items in order, `rate`'s checked; a rate off the list checks none.
     nonisolated public static func items(checked rate: FrameRate) -> [FrameRateMenuItem] {
@@ -59,10 +62,22 @@ public struct FrameRateMenu: View {
             switch placement {
             case .row: menu
             case .toolbar: chip
+            case .form: picker
             }
         }
         .controlSize(controlSize)
         .help("Frame Rate")
+    }
+
+    /// The form picker: the value menu's Picker as a stock bordered menu.
+    private var picker: some View {
+        let value = menu
+        return Picker(value.label, selection: value.pick) {
+            ForEach(value.options) { Text($0.title).tag($0.id) }
+        }
+        .pickerStyle(.menu)
+        .labelsHidden()
+        .fixedSize()
     }
 
     /// The toolbar chip: the value menu's Picker behind a ChipRow chip titled with the rate and a chevron.

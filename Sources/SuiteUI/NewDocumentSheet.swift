@@ -282,7 +282,7 @@ public struct NewDocumentSheet: View {
     @ViewBuilder private var timingRows: some View {
         GridRow {
             Text("Frame Rate")
-            FrameRateMenu(rate: form.setup.frameRate ?? FrameRate(whole: 24)) { form.setRate($0) }
+            FrameRateMenu(rate: form.setup.frameRate ?? FrameRate(whole: 24), placement: .form) { form.setRate($0) }
                 .help(NewDocumentForm.parameter("frameRate", mode)).accessibilityIdentifier("suite.newdoc.rate")
         }
         GridRow {
