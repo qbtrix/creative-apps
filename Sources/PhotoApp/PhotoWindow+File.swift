@@ -19,8 +19,8 @@
 // the snapshot; a bad document shows its ArchiveError message and the window
 // keeps what it had. Flat files open through `openImage`, so Save knows
 // their kind. Each successful open and save is noted in the suite's shared
-// recents through SuiteDocumentsBridge (file-flow PF-4), which File > Open
-// Recent lists: `.opened` or `.saved`, once each, with the file's suite type.
+// recents through the process's one SuiteDocumentsBridge (PhotoShell.bridge,
+// file-flow PF-4), the one File > Open Recent lists: `.opened` or `.saved`, once each, with the file's suite type.
 // The first note hands over Photo's old saved list ("PhotoRecentFiles") once
 // and removes its key.
 // A document save that lands first publishes the file's thumbnail, off the
@@ -113,12 +113,9 @@ final class PhotoFileSession {
     /// The bridge opens and saves are noted through; nil uses the process's (tests inject one).
     @ObservationIgnored var bridge: SuiteDocumentsBridge?
 
-    /// Photo's bridge on the live suite store (`-SuiteSupportDir` moves it), made on first use.
-    static let suiteBridge: SuiteDocumentsBridge = {
-        let arguments = ProcessInfo.processInfo.arguments
-        let support = SuiteLocations.supportFolder(arguments: arguments, home: NSHomeDirectory())
-        return SuiteDocumentsBridge(app: .photo, services: .live(support: support, app: .photo, arguments: arguments))
-    }()
+    /// The process's one bridge, the one File > Open Recent reads: a note through a second bridge reached the
+    /// menu only when its store change came back through `watch()`, so a just-opened file could be missing.
+    static var suiteBridge: SuiteDocumentsBridge { PhotoShell.bridge }
 
     /// Publishes the thumbnail of the document saved at `url` to the bridge's previews, off the main actor (ST-7).
     func publishPreview(of url: URL, archive: any DocumentArchiving) async {
