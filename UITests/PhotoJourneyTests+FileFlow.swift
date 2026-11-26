@@ -3,7 +3,8 @@
 // File > Open Recent ▸ lists Photo's files from the suite's one list; Logo.png dropped on the canvas shows
 // "Place in Sunset" and lands as a layer "Logo" that one Undo removes; Intro.halo dropped opens in Halo;
 // File > Open In ▸ Library hands the image to Library. The files are dragged from a small window the test
-// runner shows (Journey+FileDrag.swift).
+// runner shows (Journey+FileDrag.swift). The marks are read after the drag returns, about 4 s after the drop,
+// so Photo launches with `-SuiteDropLinger 15` to keep each mark up past its 3 s.
 import XCTest
 
 final class PhotoFileFlowJourneyTests: XCTestCase {
@@ -17,7 +18,9 @@ final class PhotoFileFlowJourneyTests: XCTestCase {
         addTeardownBlock { try? FileManager.default.removeItem(at: folder) }
         let sunset = folder.appending(path: "Sunset.png")
         try writeTestPhoto(to: sunset)
-        let photo = Journey("Photo", self, arguments: photoArguments(open: sunset) + ["-SuiteFixture", "weekOfWork"])
+        let photo = Journey("Photo", self, arguments: photoArguments(open: sunset) + ["-SuiteFixture", "weekOfWork"]
+                            // XCUI's drag returns about 4 s after the drop; the mark's 3 s would be gone.
+                            + ["-SuiteDropLinger", "15"])
         XCTAssert(photo.window(named: "Sunset.png").waitForExistence(timeout: 30), "Sunset.png didn't open")
 
         // File has one Open Recent ▸ (the suite's), listing Photo's files.
