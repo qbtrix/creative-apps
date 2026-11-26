@@ -68,13 +68,13 @@ final class PhotoTransformJourneyTests: XCTestCase {
         photo.press(.return)
         XCTAssert(box.waitForNonExistence(timeout: 5), "Return left the transform box up")
         XCTAssert(photo.app.buttons["Undo Free Transform"].waitForExistence(timeout: 5), "Return made no Free Transform step")
-        XCTAssert(text(line, photo).waitForNonExistence(timeout: 5), "the commit left the layer at \(line)")
+        XCTAssert(gone(line, photo), "the commit left the layer at \(line)")
         photo.shot("transform-4-committed")
 
         // 5. Command-Z: the layer is back where it was, the draft up again; Escape drops it.
         photo.press(character: "z", .command)
         XCTAssert(photo.app.buttons["Redo Free Transform"].waitForExistence(timeout: 5), "Command-Z didn't undo the transform")
-        XCTAssert(text(line, photo).waitForExistence(timeout: 5), "Command-Z didn't put the layer back at \(line)")
+        XCTAssert(photo.shows(line, in: photo.app.windows.firstMatch, timeout: 5), "Command-Z didn't put the layer back at \(line)")
         photo.shot("transform-5-undone")
         photo.element("suite.canvas").click()
         photo.press(.escape)
@@ -83,14 +83,14 @@ final class PhotoTransformJourneyTests: XCTestCase {
         // 6. Edit > Transform > Flip Horizontal: one Flip Horizontal step, the layer in place.
         choose(["Edit", "Transform", "Flip Horizontal"], photo)
         XCTAssert(photo.app.buttons["Undo Flip Horizontal"].waitForExistence(timeout: 5), "the flip made no step")
-        XCTAssert(text(line, photo).waitForExistence(timeout: 5), "the flip moved the layer off \(line)")
+        XCTAssert(photo.shows(line, in: photo.app.windows.firstMatch, timeout: 5), "the flip moved the layer off \(line)")
         photo.shot("transform-6-flipped")
     }
 
     /// MJ-PT step 6: Image > Canvas Size…, the crop note, +400 about the centre, OK, Undo.
     @MainActor func testCanvasSizeBorder() throws {
         let photo = try openBeach()
-        XCTAssert(text("800 × 600 px", photo).waitForExistence(timeout: 5), "beach.png isn't 800 × 600 px")
+        XCTAssert(photo.shows("800 × 600 px", in: photo.app.windows.firstMatch, timeout: 5), "beach.png isn't 800 × 600 px")
 
         // 1. Width -200: the sheet warns the canvas will be cropped.
         choose(["Image", "Canvas Size…"], photo)
@@ -106,7 +106,7 @@ final class PhotoTransformJourneyTests: XCTestCase {
         typeSize("400", into: "photo.canvas-size.width", photo)
         typeSize("400", into: "photo.canvas-size.height", photo)
         XCTAssert(note.waitForNonExistence(timeout: 5), "the crop note stayed while the canvas only grows")
-        XCTAssert(text("New size 1200 × 1000 px", photo).waitForExistence(timeout: 5), "the sheet doesn't read 1200 × 1000")
+        XCTAssert(photo.shows("New size 1200 × 1000 px", in: photo.app.windows.firstMatch, timeout: 5), "the sheet doesn't read 1200 × 1000")
         XCTAssert(photo.element("photo.canvas-size.anchor.center").exists, "the sheet has no centre anchor")
         photo.shot("transform-canvas-sheet")
 
@@ -114,13 +114,13 @@ final class PhotoTransformJourneyTests: XCTestCase {
         ok.click()
         XCTAssert(ok.waitForNonExistence(timeout: 5), "OK left the Canvas Size sheet up")
         XCTAssert(photo.app.buttons["Undo Canvas Size"].waitForExistence(timeout: 5), "OK made no Canvas Size step")
-        XCTAssert(text("1200 × 1000 px", photo).waitForExistence(timeout: 5), "the image isn't 1200 × 1000 px")
+        XCTAssert(photo.shows("1200 × 1000 px", in: photo.app.windows.firstMatch, timeout: 5), "the image isn't 1200 × 1000 px")
         photo.shot("transform-canvas-border")
 
         // 4. Command-Z: 800 x 600 again.
         photo.element("suite.canvas").click()
         photo.press(character: "z", .command)
-        XCTAssert(text("800 × 600 px", photo).waitForExistence(timeout: 5), "Command-Z didn't give back 800 × 600 px")
+        XCTAssert(photo.shows("800 × 600 px", in: photo.app.windows.firstMatch, timeout: 5), "Command-Z didn't give back 800 × 600 px")
         photo.shot("transform-canvas-undone")
     }
 
@@ -138,19 +138,37 @@ final class PhotoTransformJourneyTests: XCTestCase {
         return photo
     }
 
-    /// The first element whose label or value holds `string`.
-    @MainActor private func text(_ string: String, _ photo: Journey) -> XCUIElement {
-        photo.app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", string, string)).firstMatch
+    /// Every label and text value the window shows, from one snapshot. A `label CONTAINS … OR value
+    /// CONTAINS …` query over the whole app timed out while it evaluated (Journey.shows).
+    @MainActor private func said(_ photo: Journey) -> [String] {
+        guard let root = try? photo.app.windows.firstMatch.snapshot() else { return [] }
+        var all: [String] = []
+        func walk(_ node: any XCUIElementSnapshot) {
+            all.append(node.label)
+            if let value = node.value as? String { all.append(value) }
+            node.children.forEach(walk)
+        }
+        walk(root)
+        return all
     }
 
-    /// The header's selected-layer line, "Pasted Layer W × H px at X, Y"; empty when none shows.
+    /// Whether no label or value in the window holds `string` within five seconds.
+    @MainActor private func gone(_ string: String, _ photo: Journey) -> Bool {
+        for _ in 0..<17 {
+            if !said(photo).contains(where: { $0.contains(string) }) { return true }
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        return false
+    }
+
+    /// The header's selected-layer line, "Pasted Layer W × H px at X, Y"; empty when none shows within five seconds.
     @MainActor private func layerLine(_ photo: Journey) -> String {
-        let header = text(" px at ", photo)
-        guard header.waitForExistence(timeout: 5) else { return "" }
-        let said = [header.label, header.value as? String ?? ""].joined(separator: "\n")
-        let lines = said.split(whereSeparator: \.isNewline).map(String.init)
-        return lines.first { $0.hasPrefix("Pasted Layer") && $0.contains(" px at ") } ?? ""
+        for _ in 0..<17 {
+            let lines = said(photo).flatMap { $0.split(whereSeparator: \.isNewline).map(String.init) }
+            if let line = lines.first(where: { $0.hasPrefix("Pasted Layer") && $0.contains(" px at ") }) { return line }
+            Thread.sleep(forTimeInterval: 0.3)
+        }
+        return ""
     }
 
     /// Clicks the Rotation bar to type, replaces its number with `degrees` and presses Return.
@@ -162,18 +180,23 @@ final class PhotoTransformJourneyTests: XCTestCase {
         let named = panel.textFields["Rotation"]
         let field = named.waitForExistence(timeout: 3) ? named : panel.textFields.firstMatch
         XCTAssert(field.waitForExistence(timeout: 5), "clicking Rotation opened no field to type in")
-        field.typeKey("a", modifierFlags: .command)
-        field.typeText(degrees)
+        replace(field, with: degrees, photo)
         field.typeKey(.return, modifierFlags: [])
+    }
+
+    /// Clears `field` and types `text`, without Command-A (Photo's Select > All has it).
+    @MainActor private func replace(_ field: XCUIElement, with text: String, _ photo: Journey) {
+        field.click()
+        photo.app.typeKey(.rightArrow, modifierFlags: .command)
+        for _ in 0..<12 { photo.app.typeKey(.delete, modifierFlags: []) }
+        photo.app.typeText(text)
     }
 
     /// Replaces the sheet field `identifier`'s text with `value`, then Tab (Return would press OK).
     @MainActor private func typeSize(_ value: String, into identifier: String, _ photo: Journey) {
         let field = photo.element(identifier)
         XCTAssert(field.waitForExistence(timeout: 5), "the sheet has no \(identifier)")
-        field.click()
-        field.typeKey("a", modifierFlags: .command)
-        field.typeText("\(value)\t")
+        replace(field, with: "\(value)\t", photo)
     }
 
     /// Opens the menu bar item `path[0]`, hovers each submenu on the way and clicks the last item, which must be on.

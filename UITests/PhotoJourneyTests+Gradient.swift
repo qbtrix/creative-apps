@@ -55,7 +55,8 @@ final class PhotoGradientJourneyTests: XCTestCase {
 
         // 2. The first stop deep blue, the last pale blue.
         setStop(0, to: Self.deepBlue, photo)
-        XCTAssert(photo.element("suite.gradient.stop.0").label.hasSuffix("blue"), "the first stop isn't blue")
+        let first = photo.element("suite.gradient.stop.0")
+        XCTAssert(Self.waitUntil { first.label.hasSuffix("blue") }, "the first stop isn't blue (\(first.label))")
         setStop(1, to: Self.paleBlue, photo)
         photo.shot("gradient-options")
 
@@ -89,10 +90,12 @@ final class PhotoGradientJourneyTests: XCTestCase {
         let stop = photo.element("suite.gradient.stop.\(index)")
         XCTAssert(stop.waitForExistence(timeout: 5), "no stop handle suite.gradient.stop.\(index)")
         stop.click()
-        let field = photo.app.textFields.matching(NSPredicate(
-            format: "identifier == %@ OR label == %@", "suite.gradient.color", "Color Hex")).firstMatch
-        XCTAssert(field.waitForExistence(timeout: 5), "no gradient Color Hex field")
-        field.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+        // By its id alone: the bar's leading paint colour is a "Color Hex" field too (photo.tool.color).
+        let field = photo.app.textFields["suite.gradient.color"]
+        XCTAssert(field.waitForExistence(timeout: 5), "no gradient Color Hex field (suite.gradient.color)")
+        // The options bar scrolls sideways and the hex field sits past its edge on the runner's window: an
+        // element click scrolls it into view, a coordinate click lands on whatever covers that point.
+        field.click()
         photo.press(.rightArrow, .command)
         photo.press(.leftArrow, [.command, .shift])
         photo.app.typeText(hex)

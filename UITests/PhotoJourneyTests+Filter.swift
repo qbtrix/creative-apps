@@ -32,9 +32,9 @@ final class PhotoFilterJourneyTests: XCTestCase {
         let radius = photo.element("suite.filter.slider.radius")
         XCTAssert(radius.waitForExistence(timeout: 5), "Gaussian Blur… opened no sheet with a Radius slider")
         photo.enter("8", in: radius)
-        let value = photo.element("suite.filter.value.radius")
-        XCTAssert(waitUntil { Self.number(value.label).map { abs($0 - 8) <= 1.5 } ?? false },
-                  "Radius reads \(value.label), not about 8 px")
+        // The bar is a slider to XCUI, so its value is the number (ScrubField).
+        XCTAssert(waitUntil { (radius.value as? NSNumber).map { abs($0.doubleValue - 8) <= 1.5 } ?? false },
+                  "Radius reads \(String(describing: radius.value)), not about 8 px")
         XCTAssert(photo.element("photo.filter.preview").waitForExistence(timeout: 10), "the sheet shows no Preview")
         photo.shot("filter-sheet")
         let previewed = canvas(photo)
@@ -122,11 +122,12 @@ final class PhotoFilterJourneyTests: XCTestCase {
         item.click()
     }
 
-    /// Scrolls the inspector until `element` lies inside it, then clicks it.
+    /// Scrolls the inspector until `element` lies inside it, then clicks it. The Looks grid is lazy: its buttons
+    /// exist only once it scrolls into view, under the whole Adjust tab, so each try scrolls a long way.
     @MainActor private func click(_ element: XCUIElement, _ photo: Journey) {
         let inspector = photo.element("suite.inspector")
         XCTAssert(inspector.waitForExistence(timeout: 5), "no inspector (suite.inspector)")
-        for _ in 0..<30 where !element.waitForExistence(timeout: 0.5) { inspector.scroll(byDeltaX: 0, deltaY: -40) }
+        for _ in 0..<30 where !element.waitForExistence(timeout: 0.5) { inspector.scroll(byDeltaX: 0, deltaY: -150) }
         XCTAssert(element.exists, "no \(element.identifier) in the inspector")
         for _ in 0..<30 where !inspector.frame.contains(element.frame) {
             inspector.scroll(byDeltaX: 0, deltaY: element.frame.minY < inspector.frame.minY ? 40 : -40)
@@ -182,11 +183,6 @@ final class PhotoFilterJourneyTests: XCTestCase {
             }
         }
         return Double(differing) / Double((x1 - x0) * (y1 - y0))
-    }
-
-    /// The first number in `text` ("8.0 px" is 8); nil when it has none.
-    static func number(_ text: String) -> Double? {
-        Double(text.split(separator: " ").first.map(String.init) ?? "")
     }
 
     /// Whether `condition` holds within five seconds.
