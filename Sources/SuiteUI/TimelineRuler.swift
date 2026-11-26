@@ -8,8 +8,9 @@
 // redraws them (#1257). A drag anywhere on it scrubs through the playhead's
 // TimelineScrubSender, so it sends only changed frames; VoiceOver reads and
 // steps the playhead frame. Under a probe host each step that moves the
-// playhead reports a `ruler-scrub` sample through the canvas probe, so the
-// real-app perf journey reads its step latency. A snapshot offers the marks the strip's width (#219).
+// playhead reports a `ruler-scrub` sample through the canvas probe, as a drag
+// on the playhead's pill does (TimelineScrubSender.scrub), so the real-app
+// perf journey reads its step latency wherever the sweep starts. A snapshot offers the marks the strip's width (#219).
 // TL-18: labels read in the host's unit, spaced from the widest label
 // (TimelineRulerLabels); the work area is a bar on the lower 6 pt with two
 // 16 pt handles (TimelineWorkAreaBar, laid over the playhead by the strip).
@@ -47,14 +48,8 @@ struct TimelineRuler: View, BodyCounted {
         .clipped()
         .contentShape(Rectangle())
         .gesture(DragGesture(minimumDistance: 0).onChanged { drag in
-            let eventTime = ProcessInfo.processInfo.systemUptime
             let frame = mapping.frame(atX: Double(drag.location.x - timelineInset) + scrollX)
-            guard sender.send(frame, from: playhead, to: onScrub), let probe else { return }
-            // Shown by the next main-actor turn, as CanvasViewport's drag samples are.
-            Task { @MainActor in
-                probe.record(ProbeSample(series: Self.scrubSeries, eventTime: eventTime,
-                                         shownAt: ProcessInfo.processInfo.systemUptime))
-            }
+            sender.scrub(frame, from: playhead, to: onScrub, probe: probe)
         }.onEnded { _ in sender.end() })
         .accessibilityElement()
         .accessibilityLabel("Frame Ruler")

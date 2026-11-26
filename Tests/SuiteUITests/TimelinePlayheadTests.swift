@@ -2,7 +2,8 @@
 // row TL-8). A press inside half the 16 pt band beside the line, down in a
 // lane, grabs it and one 9 pt off doesn't, nor one on a key at the playhead;
 // the pill grabs too. A drag that
-// stays on one frame sends one onScrub, and none at the playhead's own frame.
+// stays on one frame sends one onScrub, and none at the playhead's own frame;
+// each send records one `ruler-scrub` probe sample.
 // The pill reads the playhead in the host's unit. Lanes outside the work
 // area dim from the inset to its first tick and from its last tick to the
 // end; no work area, or one over every frame, dims nothing. A row partly in
@@ -50,6 +51,16 @@ import Testing
         sender.end()
         sender.send(32, from: 32) { sent.append($0) }
         #expect(sent == [31, 32])
+    }
+
+    /// The real-app sweep starts on the pill at frame 0 (#6373): its steps must reach the probe as the ruler's do.
+    @Test func aScrubRecordsOneRulerScrubSamplePerSentFrame() async {
+        let sender = TimelineScrubSender()
+        var series: [String] = []
+        let probe = CanvasProbe { series.append($0.series) }
+        for frame in [0, 1, 1, 2] { sender.scrub(frame, from: 0, to: { _ in }, probe: probe) }
+        for _ in 0..<100 where series.count < 2 { await Task.yield() }
+        #expect(series == [TimelineRuler.scrubSeries, TimelineRuler.scrubSeries])
     }
 
     @Test func thePillReadsThirtyAtThirty() {

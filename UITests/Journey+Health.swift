@@ -6,9 +6,9 @@
 //   - step: the `suite.perf` samples the gesture added under its series
 //     (event time to the main-actor turn or refresh that showed it, recorded
 //     by the app under -SuitePerfProbe), p95 in ms against `stepBudget`. A
-//     series the app doesn't publish reads n/a; a gesture with no series
-//     (scroll, zoom keys) reports each XCUITest call's round trip, which
-//     carries XCUITest's own overhead, so neither is gated.
+//     series that recorded no step fails (the gesture timed nothing); a
+//     gesture with no series (scroll, zoom keys) reports each XCUITest call's
+//     round trip, which carries XCUITest's own overhead, so it isn't gated.
 //   - hang: a window query through XCUITest (the accessibility path) timed
 //     right after the gesture; over `hangLimit` seconds fails.
 //   - surfaces and idle, from outside the process: macOS sandboxes the test
@@ -139,6 +139,8 @@ extension Journey {
             if !slowest.isEmpty {
                 parts.insert("slowest " + slowest.map { String(format: "%d:%.0f", $0.offset, $0.element) }.joined(separator: " "), at: 1)
             }
+            // A gesture that records no step timed nothing; a missed press must not pass as fast (#6373).
+            XCTAssertFalse(steps.isEmpty, "\(label): the gesture recorded no \(series) step, so it timed nothing")
             if let p95 { XCTAssertLessThanOrEqual(p95, budget, "\(label): step p95 \(Int(p95)) ms over \(Int(budget)) ms") }
         } else {
             let p95 = Self.p95(roundTrips.map { $0 * 1000 })
