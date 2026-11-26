@@ -8,7 +8,9 @@
 // beach.ora, rewrites it four ways with a stored-zip writer (PhotoZip's
 // layout) and opens each. Open Recent reads the focused window's list, so with
 // every window closed a reopen relaunches Photo with no file first (the list
-// is in the app's defaults). XCUITest reads no document-edited state, so
+// is in the app's defaults), and Clear Menu leaves a disabled "No Recent
+// Files". PJ-1 compares the reopened canvas on the Brush, as it was edited:
+// Select, the tool a reopen starts on, outlines the picked layer. XCUITest reads no document-edited state, so
 // "edited" is `photo.bar.saved`'s label. PJ-DS (document-setup DS-8) makes a
 // 4 × 6 in image at 300 ppi from File > New's shared sheet. Shots: `photo-documents-<step>`.
 import CoreGraphics
@@ -72,6 +74,8 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         let header = photo.app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS '2 layers'"))
         XCTAssert(header.firstMatch.waitForExistence(timeout: 10), "the image header doesn't count 2 layers")
         expectRow("Layer 1", meta: "Multiply 50%", photo)
+        // The Brush, as when `edited` was read: a reopen starts on Select, which outlines the picked layer (#6418).
+        photo.element("suite.tools").buttons["Brush"].click()
         let share = Self.differingShare(edited, steadyCanvas(photo))
         XCTAssertLessThanOrEqual(share, 0.01, "the reopened canvas differs from the saved one in \(share * 100)% of its pixels")
         photo.shot("documents-1-reopened")
@@ -181,11 +185,11 @@ final class PhotoDocumentsJourneyTests: XCTestCase {
         XCTAssert(undo.waitForExistence(timeout: 5) && !undo.isEnabled, "the reopened beach.png kept the stroke's undo")
         photo.shot("documents-2-reopened")
 
-        // 4. Clear Menu leaves only Clear Menu, disabled.
+        // 4. Clear Menu leaves the suite's empty state: "No Recent Files", disabled (file-flow SF-3).
         recentMenu(photo).menuItems["Clear Menu"].click()
         let items = recentMenu(photo).children(matching: .menuItem).allElementsBoundByIndex.filter { !$0.title.isEmpty }
-        XCTAssertEqual(items.map(\.title), ["Clear Menu"], "Open Recent after Clear Menu")
-        XCTAssertFalse(items.first?.isEnabled ?? true, "Clear Menu is enabled with nothing to clear")
+        XCTAssertEqual(items.map(\.title), ["No Recent Files"], "Open Recent after Clear Menu")
+        XCTAssertFalse(items.first?.isEnabled ?? true, "No Recent Files is enabled")
         photo.shot("documents-2-recent-cleared", screen: true)
         photo.press(.escape)
     }

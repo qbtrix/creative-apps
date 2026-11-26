@@ -19,7 +19,8 @@
 // checks don't depend on where the fitted image sits. `suite.canvas` is the
 // whole viewport (682 x 582 pt on the runner), not the artboard: the fitted
 // image sits inside it with a margin, so PJ-6 finds the image's rect by its
-// colored pixels and measures the pasted layer against that. Layer bounds
+// colored pixels and measures the pasted layer against that, on the Brush
+// (Select outlines the picked layer over its edge). Layer bounds
 // aren't on any label (no accessibility identifier gives them), so the pasted
 // layer's size and place are read from the canvas pixels. XCUITest shows a
 // disabled menu item's help tag but not its text, so Paste's "Nothing to
@@ -149,6 +150,8 @@ final class PhotoEditJourneyTests: XCTestCase {
         expect("Undo Paste", photo, "Edit > Paste made no Paste step")
         XCTAssert(photo.app.staticTexts["Pasted Layer"].waitForExistence(timeout: 5), "the layer list lists no Pasted Layer")
         expectHeader("2 layers", photo, "the header doesn't count two layers after the paste")
+        // Off Select, which outlines the picked Pasted Layer's edge (#6418) and would shrink the magenta box.
+        photo.element("suite.tools").buttons["Brush"].click()
         var box: CGRect?
         XCTAssert(waitFor { box = self.magentaBox(photo); return box != nil }, "the pasted image isn't on the canvas")
         // 200 x 100 at (300, 250) on the 800 x 600 image, within 4 image pixels, mapped into the

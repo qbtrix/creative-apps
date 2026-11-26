@@ -6,7 +6,8 @@
 // second step and Redo the third, and the step count holds. One more stroke
 // drops the ten undone rows and a new "Paint" row is current. Quitting with
 // unsaved work and relaunching offers "Restore portrait.jpg from <time>?",
-// and Restore shows the 3-step image. Both run on the live
+// and Restore brings the edited picture back with fresh history: nothing to
+// undo (a beta decision, #4406). Both run on the live
 // jump (PH-5) and autosave (PH-6), turned on by PH-7. Shots: `history-*`.
 import XCTest
 
@@ -37,7 +38,7 @@ final class PhotoHistoryJourneyTests: XCTestCase {
         photo.shot("history-new-step")
     }
 
-    /// Quit with unsaved work, relaunch: the offer names portrait.jpg and Restore shows the 3-step image.
+    /// Quit with unsaved work, relaunch: the offer names portrait.jpg and Restore brings back the edited image, no undo.
     @MainActor func testRestoreAfterQuit() throws {
         let recovery = FileManager.default.temporaryDirectory.appending(path: "photo-history-recovery-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: recovery, withIntermediateDirectories: true)
@@ -55,7 +56,13 @@ final class PhotoHistoryJourneyTests: XCTestCase {
         photo.shot("history-recovery-offer")
         photo.app.buttons["photo.recovery.restore"].click()
         XCTAssert(photo.element("suite.canvas").waitForExistence(timeout: 15), "Restore opened no canvas")
-        XCTAssert(photo.app.buttons["Undo Paint"].waitForExistence(timeout: 5), "the restored image has no steps to undo")
+        // The picture comes back, not its history (captain, 2026-10-24, #4406): edited, nothing to undo.
+        let saved = photo.element("photo.bar.saved")
+        XCTAssert(saved.waitForExistence(timeout: 10), "no save status (photo.bar.saved)")
+        for _ in 0..<25 where !saved.label.hasPrefix("Edited") { Thread.sleep(forTimeInterval: 0.2) }
+        XCTAssert(saved.label.hasPrefix("Edited"), "the restored image reads \(saved.label), not Edited")
+        let undo = photo.app.buttons["photo.bar.undo"]
+        XCTAssert(undo.waitForExistence(timeout: 5) && !undo.isEnabled, "the restored image came with undo history")
         photo.shot("history-restored")
     }
 
