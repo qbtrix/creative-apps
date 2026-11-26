@@ -2,7 +2,8 @@
 // Photo opens Sunset.png (800 x 600). Big.png (3200 x 2400) dropped on the canvas lands as a layer "Big" with
 // "Placed at 25%." on the status line, fitted inside the image rather than at its own size; one Undo takes it away.
 // Sky.heic, written here with Core Image, then places as a layer "Sky" instead of "Can't place Sky.heic.". The
-// files are dragged from the runner's small window (Journey+FileDrag.swift).
+// files are dragged from the runner's small window (Journey+FileDrag.swift), held a second over the canvas before
+// the release, as Flare's file flow does: without it the drop was sometimes refused (operation 0).
 import CoreImage
 import XCTest
 
@@ -20,7 +21,7 @@ final class PhotoDropFitJourneyTests: XCTestCase {
 
         let big = folder.appending(path: "Big.png")
         try writeTestPhoto(to: big, width: 3200, height: 2400)
-        dragFile(big, onto: canvas)
+        dragFile(big, onto: canvas, hold: 1)
         // XCUI's drag returns about 4 s after the drop, so the launch holds the status message 30 s.
         let status = photo.app.staticTexts.matching(
             NSPredicate(format: "label == 'Placed at 25%.' OR value == 'Placed at 25%.'")).firstMatch
@@ -34,7 +35,7 @@ final class PhotoDropFitJourneyTests: XCTestCase {
         let source = try XCTUnwrap(CIImage(contentsOf: sunset), "Sunset.png doesn't read")
         let space = try XCTUnwrap(CGColorSpace(name: CGColorSpace.sRGB))
         try CIContext().writeHEIFRepresentation(of: source, to: sky, format: .RGBA8, colorSpace: space)
-        dragFile(sky, onto: canvas)
+        dragFile(sky, onto: canvas, hold: 1)
         XCTAssert(photo.app.staticTexts["Sky"].waitForExistence(timeout: 15), "dropping Sky.heic listed no layer Sky")
         let refused = photo.app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH \"Can't place\"")).firstMatch
         XCTAssertFalse(refused.exists, "the status line says it can't place Sky.heic")
