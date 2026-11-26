@@ -87,7 +87,7 @@ struct AdjustmentsPanel: View {
     }
 
     /// Each tone row's own reason from the model (an adjustment layer's Sharpen), for the rows to show off.
-    static func toneRowHelp(_ model: PhotoWorkspace) -> [ToneSlider: String] {
+    nonisolated static func toneRowHelp(_ model: PhotoWorkspace) -> [ToneSlider: String] {
         Dictionary(uniqueKeysWithValues: ToneSlider.allCases.compactMap { s in model.toneSliderHelp(s).map { (s, $0) } })
     }
 
