@@ -25,6 +25,9 @@
 // reports a `press` sample, and each tool's selection fade (0.14 s, none
 // under `suiteReduceMotion`) a `fade-start`/`fade-end` pair on series `tool`
 // (ChipProbe, which a probe host sets). `.rail` keeps the action's own help.
+// A vertical `.floating` palette taller than the room it is offered wraps into
+// columns (ToolColumnsLayout, by EditorDetailLayout.paletteColumns), so no tool
+// hides under what lies below it.
 import SwiftUI
 
 public struct ToolbarAction: Identifiable {
@@ -142,7 +145,8 @@ public struct ToolbarGroup: View {
     public var body: some View {
         let spacing = style == .rail ? SuiteSpacing.xxs : 0
         let stack = axis == .horizontal
-            ? AnyLayout(HStackLayout(spacing: spacing)) : AnyLayout(VStackLayout(spacing: spacing))
+            ? AnyLayout(HStackLayout(spacing: spacing))
+            : style == .floating ? AnyLayout(ToolColumnsLayout()) : AnyLayout(VStackLayout(spacing: spacing))
         let palette = stack {
             ForEach(actions) { action in
                 // A disabled tool never shows as the selected one.
@@ -325,5 +329,34 @@ extension View {
     /// Registers `action` under its identifier: a `.floating` tool with the picking rule's tooltip as its reason.
     fileprivate func suiteControl(_ action: ToolbarAction, style: ToolbarGroup.Style) -> some View {
         suiteControl(entry: ToolbarGroup.entry(action, style: style), identifies: true)
+    }
+}
+
+/// A vertical `.floating` palette's buttons, top to bottom: one column when the proposed height holds them all,
+/// else EditorDetailLayout.paletteColumns' columns (filled down, then across), as EditorDetail's fit expects.
+struct ToolColumnsLayout: Layout {
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let (cell, columns, rows) = grid(proposal, subviews)
+        return CGSize(width: CGFloat(columns) * cell.width, height: CGFloat(rows) * cell.height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let (cell, _, rows) = grid(proposal, subviews)
+        for (index, subview) in subviews.enumerated() {
+            let point = CGPoint(
+                x: bounds.minX + CGFloat(index / rows) * cell.width, y: bounds.minY + CGFloat(index % rows) * cell.height)
+            subview.place(at: point, anchor: .topLeading, proposal: ProposedViewSize(cell))
+        }
+    }
+
+    /// The cell (the first button's size; every tool button is the same), the columns and the rows.
+    private func grid(_ proposal: ProposedViewSize, _ subviews: Subviews) -> (CGSize, Int, Int) {
+        let cell = subviews.first?.sizeThatFits(.unspecified) ?? .zero
+        // A height under one button is a stack probing for its minimum, not a room: one column then. The
+        // capsule's padding sits outside this stack; the rule counts it in.
+        let height = proposal.height.flatMap { $0 >= cell.height ? $0 : nil } ?? .infinity
+        let room = height + 2 * SuiteSpacing.xs
+        let columns = EditorDetailLayout.paletteColumns(toolCount: subviews.count, height: room)
+        return (cell, columns, max((subviews.count + columns - 1) / columns, 1))
     }
 }

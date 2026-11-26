@@ -32,7 +32,7 @@ private let artboards = [
     CGSize(width: 1600, height: 1000), CGSize(width: 1000, height: 1600), CGSize(width: 1, height: 1),
     CGSize(width: 20000, height: 20000),
 ]
-private let toolCounts = [1, 6, 10]
+private let toolCounts = [1, 6, 10, 18]
 /// ZoomMath's floor: the fit never hands a host a zoom it would clamp away.
 private let smallestZoom = ZoomMath.range.lowerBound
 
@@ -53,6 +53,33 @@ private func unclamped(_ layout: EditorDetailLayout, _ artboard: CGSize) -> Doub
     }
     #expect(EditorDetailLayout.toolCount(paletteHeight: 0) == 0)
     #expect(EditorDetailLayout.toolCount(paletteHeight: .nan) == 0)
+}
+
+/// Photo's 18 tools under a 44 pt tool options bar at the runner's 1024 x 768: 529 pt inside the rulers.
+@Test func editorDetailPaletteTallerThanTheCanvasWrapsIntoColumns() {
+    let room = CGSize(width: 492, height: 529)
+    #expect(EditorDetailLayout.paletteColumns(toolCount: 18, height: room.height) == 2)
+    #expect(EditorDetailLayout.paletteColumns(toolCount: 16, height: room.height) == 1, "16 x 32 + 8 = 520 fits")
+    #expect(EditorDetailLayout.paletteColumns(toolCount: 18, height: .infinity) == 1)
+    #expect(EditorDetailLayout.paletteColumns(toolCount: 18, height: .nan) == 1)
+    #expect(EditorDetailLayout.paletteColumns(toolCount: 18, height: 0) == 1, "no room measured yet")
+    #expect(EditorDetailLayout.paletteColumns(toolCount: 18, height: 20) == 18, "one row at least")
+    // Two columns of nine, balanced.
+    #expect(EditorDetailLayout.paletteSize(toolCount: 18, columns: 2) == CGSize(width: 72, height: 9 * 32 + 8))
+    let layout = EditorDetailLayout(viewport: room, toolCount: 18)
+    #expect(layout.paletteFrame.size == CGSize(width: 72, height: 296))
+    #expect(layout.paletteFrame.maxY <= room.height)
+    #expect(layout.clearance == SuiteSpacing.l + 72 + SuiteSize.anchorHit / 2 + SuiteSpacing.xs)
+    // A fitted artboard's handles stay clear of both columns.
+    for artboard in artboards where unclamped(layout, artboard) >= smallestZoom {
+        let scale = layout.fitScale(artboard: artboard)
+        let leading = (room.width - artboard.width * scale) / 2 - SuiteSize.anchorHit / 2
+        #expect(leading - layout.paletteFrame.maxX >= SuiteSpacing.xs - 1e-9, "\(artboard)")
+    }
+    // Its measured size gives back a count with the same columns.
+    let count = EditorDetailLayout.toolCount(paletteSize: layout.paletteFrame.size)
+    #expect(EditorDetailLayout.paletteColumns(toolCount: count, height: room.height) == 2)
+    #expect(EditorDetailLayout.toolCount(paletteSize: .zero) == 0)
 }
 
 @Test func editorDetailPaletteClearsTheRulers() {
