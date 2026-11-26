@@ -12,7 +12,8 @@
 // histogram's recount). The gates are counts, never clocks, so a loaded Mac passes or fails the same way: every
 // step waits for the work before it to finish (a deadline poll, not a sleep); a Move drag is a compositor lift
 // (docs/render-contract.md): its press renders the picture under the moved layer once, its samples render nothing,
-// and its release lands one picture, so a 30-sample drag costs what a one-sample drag does; a Levels recount lays
+// and its release lands one picture, started with the release (never a moment with nothing in flight), so a
+// 30-sample drag costs what a one-sample drag does; a Levels recount lays
 // no layer, a Hue drag recounts nothing, and once a gesture's work has
 // finished nothing renders or recounts again. A Free Transform step on a layer mid-stack, rendered straight
 // through the renderer (no window) on the CPU and Metal routes, lays that layer and the ones above it on each
@@ -258,18 +259,21 @@ extension BodyCountSuites {
             // pixels, and the release lands one picture where the layer was and is. So the drag's cost is per
             // drag, not per sample: a one-sample drag is the reference, measured after two steps that warm the
             // route (the first render into a new presenter texture is a full one, and the histogram's first
-            // recounts).
+            // recounts). The reference's release waits for its press to land: a release that beats the press's
+            // render drops the lift unshown, one picture instead of two, and which comes first is the machine's
+            // speed, so an unwaited reference read 1 where a fast 30-sample drag (250 ms) lands both.
             var step: [String: Int] = [:]
             for n in 1...3 {
                 let before = Self.photoCounts()
                 try await w.ticks(1) { _ in send(.drag(CGPoint(x: 128, y: 300), CGPoint(x: 128 + Double(n) * 2, y: 300))) }
+                #expect(try await Self.rendered(w), Comment(rawValue: "\(label): step \(n)'s press never drained"))
                 send(.endDrag)
                 #expect(try await Self.rendered(w), Comment(rawValue: "\(label): step \(n)'s renders never drained"))
                 step = IdleWork.delta(Self.photoCounts(), since: before)
                 print("\(label): step \(n) and its renders" + IdleWork.describe(step))
             }
-            #expect((step["pictures"] ?? 0) >= 1 && (step["bases"] ?? 0) <= (step["regions"] ?? 0),
-                    Comment(rawValue: "\(label): a one-sample drag landed no picture, or made more than a base per region" + IdleWork.describe(step)))
+            #expect(step["pictures"] == 2 && (step["bases"] ?? 0) <= (step["regions"] ?? 0),
+                    Comment(rawValue: "\(label): a one-sample drag didn't land its press's and its release's picture, or made more than a base per region" + IdleWork.describe(step)))
 
             let before = Self.photoCounts()
             try await w.ticks(30) { i in
@@ -294,6 +298,27 @@ extension BodyCountSuites {
             #expect(after["regions"] == 0 && after["pictures"] == 0,
                     Comment(rawValue: "\(label): the canvas rendered again after the drag's renders drained" + IdleWork.describe(after)))
             // The renderer outlives its window: let it finish before the next case counts.
+            _ = try await Self.rendered(w)
+            w.close()
+        }
+
+        /// A release starts its picture with the release, not at SwiftUI's next pass. Once the press's render has
+        /// drained (a kept base makes it quick), a release that waited for the window's `.onChange` left a moment
+        /// with nothing in flight, and a wait on the renders read the drag as settled before its last picture began.
+        @Test(.timeLimit(.minutes(15)))
+        func photoMoveReleaseStartsItsPictureAtOnce() async throws {
+            let label = Self.label("release", .gpu)
+            let (w, send, _, _) = try await Self.stressWindow(.gpu, label)
+            let before = Self.photoCounts()
+            try await w.ticks(5) { i in send(.drag(CGPoint(x: 128, y: 300), CGPoint(x: 128 + Double(i) * 4, y: 300))) }
+            // The press's picture (the one under the lift) lands and nothing is left in flight.
+            #expect(try await Self.until(w) { (Self.photoCounts()["pictures"] ?? 0) > (before["pictures"] ?? 0) },
+                    Comment(rawValue: "\(label): the press's picture never landed"))
+            #expect(try await Self.rendered(w), Comment(rawValue: "\(label): the press's render never drained"))
+            #if DEBUG
+            send(.endDrag)
+            #expect(CanvasRenderer.inFlight > 0, Comment(rawValue: "\(label): the release left no render in flight"))
+            #endif
             _ = try await Self.rendered(w)
             w.close()
         }
