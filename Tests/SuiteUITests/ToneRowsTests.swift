@@ -5,8 +5,10 @@ import Testing
 
 @testable import SuiteUI
 
-private func rules(_ settings: ToneSettings? = .neutral, help: String? = nil, hidden: Set<ToneSlider> = []) -> ToneRowsRules {
-    ToneRowsRules(settings: settings, help: help, hidden: hidden)
+private func rules(
+    _ settings: ToneSettings? = .neutral, help: String? = nil, hidden: Set<ToneSlider> = [], rowHelp: [ToneSlider: String] = [:]
+) -> ToneRowsRules {
+    ToneRowsRules(settings: settings, help: help, hidden: hidden, rowHelp: rowHelp)
 }
 
 /// A drag as the view runs it: the open token (opened on the first sample), then the sample's intent.
@@ -76,6 +78,19 @@ private func tokens(_ intents: [ToneIntent]) -> Set<String> {
     #expect(ToneSlider.allCases.allSatisfy { rules(help: "Busy.").reason($0) == "Busy." })
     #expect(ToneSlider.allCases.allSatisfy { rules(nil).reason($0) == ToneRowsRules.nothing })
     #expect(rules(nil).notes(.presence).isEmpty) // the one reason shows once, above the sections
+}
+
+/// A host's own reason for a row (Photo's Sharpen on an adjustment layer) turns that row off, asks for no set, and
+/// shows once under its section; the rows without one still act.
+@Test func aRowsOwnHelpTurnsItOff() {
+    let why = "Sharpen is for the image."
+    let layer = rules(.neutral.setting(.sharpenAmount, to: 50),
+                      rowHelp: Dictionary(uniqueKeysWithValues: ToneGroup.sharpen.sliders.map { ($0, why) }))
+    #expect(ToneGroup.sharpen.sliders.allSatisfy { layer.reason($0) == why })
+    #expect(layer.set(.sharpenAmount, to: 80, drag: nil) == nil)
+    #expect(layer.notes(.sharpen) == [why])
+    #expect(layer.reason(.contrast) == nil && layer.set(.contrast, to: 20, drag: nil) != nil)
+    #expect(rules(help: "Busy.", rowHelp: [.contrast: why]).reason(.contrast) == "Busy.") // the shared reason wins
 }
 
 @Test func hiddenSlidersAndEmptySectionsDrop() {

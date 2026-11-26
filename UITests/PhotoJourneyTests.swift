@@ -657,6 +657,8 @@ final class PhotoJourneyTests: XCTestCase {
     @MainActor private func drag(_ label: String, by fraction: CGFloat, _ photo: Journey) {
         let slider = photo.app.sliders[label]
         XCTAssert(slider.waitForExistence(timeout: 5), "no \(label) slider")
+        // A coordinate drag doesn't scroll its element into view as a click does.
+        photo.reveal(slider)
         slider.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             .press(forDuration: 0.1, thenDragTo: slider.coordinate(withNormalizedOffset: CGVector(dx: 0.5 + fraction, dy: 0.5)))
     }

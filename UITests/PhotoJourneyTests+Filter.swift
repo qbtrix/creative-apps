@@ -1,7 +1,7 @@
 // PhotoJourneyTests+Filter.swift (adjust-everywhere AJ-3, AJ-4, AJ-9): the
 // filter and look journeys on beach.png (800 x 600). PJ-AJ1: a marquee over
 // the sun, Filter > Blur > Gaussian Blur…, Radius 8, OK: inside softens,
-// outside doesn't, the sheet's Preview leaves the canvas alone, and one Undo
+// outside doesn't, the sheet's Preview adds no step, and one Undo
 // gives the opened picture back. PJ-AJ2: the High Contrast B&W look greys
 // the picture, Save Look… "Mine" keeps it in the suite's look folder, and a
 // second image opened over that folder takes Mine. Shots: `photo-filter-*`.
@@ -32,15 +32,16 @@ final class PhotoFilterJourneyTests: XCTestCase {
         let radius = photo.element("suite.filter.slider.radius")
         XCTAssert(radius.waitForExistence(timeout: 5), "Gaussian Blur… opened no sheet with a Radius slider")
         photo.enter("8", in: radius)
-        let value = photo.element("suite.filter.value.radius")
-        XCTAssert(waitUntil { Self.number(value.label).map { abs($0 - 8) <= 1.5 } ?? false },
-                  "Radius reads \(value.label), not about 8 px")
+        // Tab has no other field to go to in this sheet, so the typing stays open (run 45602316434's hierarchy:
+        // `suite.scrub.typing` still focused, reading 8, three seconds on). The field takes Return (onSubmit).
+        if photo.element("suite.scrub.typing").exists { photo.app.typeKey(.return, modifierFlags: []) }
+        XCTAssert(waitUntil { Self.number(radius.value).map { abs($0 - 8) <= 1.5 } ?? false },
+                  "Radius reads \(String(describing: radius.value)), not about 8 px")
         XCTAssert(photo.element("photo.filter.preview").waitForExistence(timeout: 10), "the sheet shows no Preview")
         photo.shot("filter-sheet")
-        let previewed = canvas(photo)
-        for region in [Self.inside, Self.outside] {
-            XCTAssert(Self.share(opened, previewed, in: region) <= 0.005, "the Preview changed the document")
-        }
+        // The sheet covers most of the canvas on the runner's window, so a canvas shot under it differs from the
+        // opened one whatever the document holds (run 45780184665). The document is unchanged while no step is.
+        XCTAssertFalse(photo.app.buttons["Undo Gaussian Blur"].exists, "the Preview changed the document")
 
         photo.element("suite.filter.ok").click()
         expect("Undo Gaussian Blur", photo, "OK made no Gaussian Blur step")
@@ -122,11 +123,12 @@ final class PhotoFilterJourneyTests: XCTestCase {
         item.click()
     }
 
-    /// Scrolls the inspector until `element` lies inside it, then clicks it.
+    /// Scrolls the inspector until `element` lies inside it, then clicks it. The Looks grid is lazy: its buttons
+    /// exist only once it scrolls into view, under the whole Adjust tab, so each try scrolls a long way.
     @MainActor private func click(_ element: XCUIElement, _ photo: Journey) {
         let inspector = photo.element("suite.inspector")
         XCTAssert(inspector.waitForExistence(timeout: 5), "no inspector (suite.inspector)")
-        for _ in 0..<30 where !element.waitForExistence(timeout: 0.5) { inspector.scroll(byDeltaX: 0, deltaY: -40) }
+        for _ in 0..<30 where !element.waitForExistence(timeout: 0.5) { inspector.scroll(byDeltaX: 0, deltaY: -150) }
         XCTAssert(element.exists, "no \(element.identifier) in the inspector")
         for _ in 0..<30 where !inspector.frame.contains(element.frame) {
             inspector.scroll(byDeltaX: 0, deltaY: element.frame.minY < inspector.frame.minY ? 40 : -40)
@@ -184,9 +186,10 @@ final class PhotoFilterJourneyTests: XCTestCase {
         return Double(differing) / Double((x1 - x0) * (y1 - y0))
     }
 
-    /// The first number in `text` ("8.0 px" is 8); nil when it has none.
-    static func number(_ text: String) -> Double? {
-        Double(text.split(separator: " ").first.map(String.init) ?? "")
+    /// A bar's value: a number (the slider ScrubField shows XCUI), else the first number in its text ("8.0 px").
+    static func number(_ value: Any?) -> Double? {
+        if let number = value as? NSNumber { return number.doubleValue }
+        return (value as? String).flatMap { Double($0.split(separator: " ").first.map(String.init) ?? "") }
     }
 
     /// Whether `condition` holds within five seconds.

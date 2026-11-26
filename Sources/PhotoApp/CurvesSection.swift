@@ -23,9 +23,11 @@
 // layer and the ones above it; a count through every layer was seconds of
 // CPU on a many-layer image after every toggle or slider step. Mid-drag on a
 // tone row the sections read the window's live copy (PhotoWindow+Tone.swift).
+// The tone rows get each row's own reason from toneSliderHelp.
 // Values in, intents out.
 import CoreRaster
 import PhotoModel
+import SuiteImaging
 import SuiteModel
 import SuiteUI
 import SwiftUI
@@ -84,6 +86,11 @@ struct AdjustmentsPanel: View {
         workspace.curvesHistogram(composites: composites)
     }
 
+    /// Each tone row's own reason from the model (an adjustment layer's Sharpen), for the rows to show off.
+    nonisolated static func toneRowHelp(_ model: PhotoWorkspace) -> [ToneSlider: String] {
+        Dictionary(uniqueKeysWithValues: ToneSlider.allCases.compactMap { s in model.toneSliderHelp(s).map { (s, $0) } })
+    }
+
     /// An adjustment layer's sections have no enable switch: its row's eye turns it off.
     static func showsEnable(for target: PhotoAdjustTarget) -> Bool {
         if case .layer = target { false } else { true }
@@ -95,13 +102,14 @@ struct AdjustmentsPanel: View {
         case .image:
             AdjustmentsInspector(
                 settings: model.adjustments, onEdit: { perform(.adjust($0)) }, histogram: histogram,
-                onEditEnd: { perform(.endAdjust) }, toneHelp: model.toneHelp, onTone: { perform(.tone($0)) })
+                onEditEnd: { perform(.endAdjust) }, toneHelp: model.toneHelp, toneRowHelp: Self.toneRowHelp(model),
+                onTone: { perform(.tone($0)) })
         case .layer(let id, let settings):
             AdjustmentsInspector(
                 settings: settings, onEdit: { perform(.adjustmentLayer(.adjust(id, $0))) }, histogram: histogram,
                 onEditEnd: { perform(.adjustmentLayer(.endAdjust)) }, sections: model.adjustSections,
                 showsEnable: Self.showsEnable(for: model.adjustTarget), toneHelp: model.toneHelp,
-                onTone: { perform(.tone($0)) })
+                toneRowHelp: Self.toneRowHelp(model), onTone: { perform(.tone($0)) })
         }
     }
 }

@@ -84,12 +84,13 @@ struct PhotoFilterSheetAdapter: View {
     var body: some View {
         VStack(spacing: 0) {
             if draft.preview, let preview {
-                Image(decorative: preview, scale: 1)
+                // A labelled image, not a decorative one: a decorative image is hidden from accessibility, so
+                // VoiceOver and XCUI never found the picture.
+                Image(preview, scale: 1, label: Text("Preview"))
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: SuiteSize.inspectorWidth.max, height: SuiteSize.inspectorWidth.ideal)
                     .padding(.top, SuiteSpacing.l)
-                    .accessibilityLabel("Preview")
                     .accessibilityIdentifier("photo.filter.preview")
             }
             FilterSheet(draft: draft, target: model, onDraft: { perform(.filter(.draft($0))) },
