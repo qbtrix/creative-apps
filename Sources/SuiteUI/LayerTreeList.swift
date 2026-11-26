@@ -448,7 +448,7 @@ struct LayerTreeRow: View, Equatable {
             leading
             title
             Spacer(minLength: SuiteSpacing.s)
-            if options.showsEye {
+            if options.showsEye && decoration?.hidesEye != true {
                 toggle(naming.visibility(row)) { onAction(.toggleHidden(row.id)) }
             }
             if options.showsLock {
