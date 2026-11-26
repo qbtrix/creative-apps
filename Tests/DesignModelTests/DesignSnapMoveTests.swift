@@ -1,5 +1,6 @@
 // DesignSnapMoveTests.swift: snapping SN-4 on `cards`. Moves of one layer, several and an
-// Option-drag copy snap to lines and gaps before whole points; `.noSnap` snaps nothing. Linux and macOS.
+// Option-drag copy snap to lines and gaps before whole points; a line in reach wins over an equal gap
+// (lines first, at the journey's fitted 25% reach of 32 pt too); `.noSnap` snaps nothing. Linux and macOS.
 @testable import DesignModel
 import Testing
 
@@ -82,6 +83,26 @@ import Testing
         workspace.drag(from: pt(750, 160), to: pt(653, 160.4), modifiers: [])
         #expect(workspace.frame(Self.c) == rc(600, 100, 100, 120))
         #expect((workspace.snapGuides?.summary ?? "").contains("spacing x 100"))
+    }
+
+    @Test func aLineWinsOverAnEqualGapInReach() {
+        // At the fitted 25% zoom the reach is 32 pt. C at x 608 is -8 off the equal gap (600) and
+        // +12 off the page's middle (its right edge to 720): the line wins, C lands 620.
+        var workspace = cards(Self.c)
+        workspace.setHandleTolerance(32)
+        workspace.drag(from: pt(750, 160), to: pt(658, 160), modifiers: [])
+        #expect(workspace.frame(Self.c) == rc(620, 100, 100, 120))
+        #expect((workspace.snapGuides?.summary ?? "").contains("x 720"))
+    }
+
+    @Test func anEqualGapSnapsWithNoLineInReach() {
+        // At 25% (reach 32), A at x 542 is 8 short of centred between B (500) and C (700),
+        // and no line is within 32 of its edges or middle: it lands 550, 50 each side.
+        var workspace = cards(Self.a)
+        workspace.setHandleTolerance(32)
+        workspace.drag(from: pt(150, 140), to: pt(592, 140), modifiers: [])
+        #expect(workspace.frame(Self.a) == rc(550, 100, 100, 80))
+        #expect((workspace.snapGuides?.summary ?? "").contains("spacing x 50"))
     }
 
     @Test func aLongDragBuildsTheEngineOnceAndEndsAsItsLastSample() {
