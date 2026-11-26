@@ -5,7 +5,8 @@
 // optional timeline slot (a host's TimelineStrip, empty by default, so the canvas
 // fits in what is left once), then a hairline and the status line (a ViewerStatusBar). The palette sits `ruler + l` from
 // the leading edge and is centred in the area inside the rulers, so it never
-// covers a ruler. Content, not chrome: flat on the canvas surround, no glass;
+// covers a ruler; one taller than that area scrolls inside it (no scroller),
+// so no tool hides under the status line. Content, not chrome: flat on the canvas surround, no glass;
 // the palette brings its one capsule. The canvas region carries the
 // accessibility identifier `suite.viewport` and the status line
 // `suite.status`. EditorDetailLayout is the palette and fit math, plain and
@@ -47,11 +48,20 @@ public struct EditorDetail<Canvas: View, Palette: View, Timeline: View, Status: 
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .environment(\.canvasFitScale, fit)
                 .overlay(alignment: .leading) {
-                    palette
+                    // Measured inside the scroll too, so the count is the palette's own, not the clipped height.
+                    let measured = palette
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { paletteHeight = $0 }
-                        // Never over the rulers: past the vertical one, centred below the horizontal one.
-                        .padding(.leading, SuiteSize.ruler + SuiteSpacing.l)
-                        .padding(.top, SuiteSize.ruler)
+                    // A palette taller than the canvas scrolls inside it rather than running under the status line.
+                    ViewThatFits(in: .vertical) {
+                        measured
+                        ScrollView { measured.padding(.horizontal, SuiteSpacing.xs) }
+                            .scrollIndicators(.never)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .padding(.leading, -SuiteSpacing.xs)
+                    }
+                    // Never over the rulers: past the vertical one, centred below the horizontal one.
+                    .padding(.leading, SuiteSize.ruler + SuiteSpacing.l)
+                    .padding(.top, SuiteSize.ruler)
                 }
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("suite.viewport")
