@@ -12,7 +12,7 @@
 // keys held (DragModifiers) and the zoom, and, while they last, AppKit's mouse
 // event coalescing is off so every pointer sample arrives; StrokePacer (SuiteUI's pacer) hands
 // them to the workspace as they come, at most twice a display frame, and each
-// apply starts the picture's render at once. A brush, eraser, clone or heal
+// apply starts the picture's render at once, as a drag's release does. A brush, eraser, clone or heal
 // stroke draws on LiveStroke's LiveCopy and comes back once, at its end or before
 // any other intent, so drawing never re-runs the panels; a Free Transform
 // handle drag or row scrub runs on LiveTransformCopy the same way. Its workspace runs on
@@ -212,6 +212,7 @@ struct PhotoWindow: View {
     }
 
     func perform(_ intent: PhotoIntent) {
+        let shown = model.revision
         // Drag samples still waiting for the display frame land first, then a live stroke goes back.
         if case .drag = intent {} else {
             pacer.flush()
@@ -268,6 +269,9 @@ struct PhotoWindow: View {
             NSEvent.isMouseCoalescingEnabled = true
             pacer.stop()
             model.endDrag()
+            // The release's picture starts at once, as a sample's does: until SwiftUI's next pass reaches
+            // `.onChange` no render is in flight, so a drag whose press already drained would read as settled.
+            if model.revision != shown { renderer.show(model) }
         case .toolOption(let edit): model.setToolOption(edit)
         case .bucketOption(let edit): model.setBucketOption(edit)
         case .gradientOption(let intent): model.runGradientOption(intent)
