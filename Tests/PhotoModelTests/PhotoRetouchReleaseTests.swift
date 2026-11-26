@@ -7,6 +7,8 @@
 // Runs on Linux and macOS.
 import CoreRaster
 @testable import PhotoModel
+import SuiteImaging
+import SuiteKernel
 import Testing
 
 @Suite struct PhotoRetouchReleaseTests {
@@ -54,6 +56,30 @@ import Testing
         #expect(!workspace.isDragging && workspace.removeStroke == nil)
         workspace.undo()
         #expect(workspace.pixels == before, "undo restores \(name)")
+    }
+
+    /// A Remove stroke rebuilds and writes back only a window around the stroke (#6439), and lands the
+    /// pixels the whole-canvas remove lands; a patch that doesn't fit on the canvas is refused.
+    @Test func aRemoveStrokeWritesItsWindowAsTheWholeCanvasRemoveWould() throws {
+        var workspace = PhotoWorkspace(services: .fake)
+        try workspace.openLarge(width: 1000, height: 750)
+        workspace.setToolOption(.size(12))
+        workspace.setToolOption(.color(red: 255, green: 0, blue: 0))
+        stroke(&workspace, .brush, from: point(480, 375), to: point(520, 375))
+        workspace.setToolOption(.size(20))
+        let path = (0..<30).map { point(470 + Double($0) * 2, 375) }
+        var expected = workspace
+        let pixels = try #require(expected.targetPixels)
+        let grid = DabCoverage.stroke(path.map { Point(x: $0.x, y: $0.y) }, brush: BrushSettings(size: 20))
+        try expected.replaceTarget(
+            HealRules.remove(pixels, through: HealRules.mask(grid, width: 1000, height: 750), seed: 0), name: "Remove")
+        let before = workspace.pixels
+        drag(&workspace, .remove, path)
+        #expect(workspace.undoActionName == "Undo Remove")
+        #expect(workspace.pixels != before && workspace.pixels == expected.pixels)
+        let patch = try PixelBuffer(width: 10, height: 10)
+        #expect(throws: RasterError.self) { try workspace.replaceTarget(patch, x: 995, y: 0, name: "Remove") }
+        #expect(throws: RasterError.self) { try workspace.replaceTarget(patch, x: -1, y: 0, name: "Remove") }
     }
 
     @Test func theBucketFillsAtThePressWithItsOptions() throws {

@@ -33,5 +33,19 @@
     "find": "let y0 = max(0, -dy), y1 = min(height, height - dy)",
     "replace": "let y0 = 0, y1 = height",
     "tests": "HealRulesTests/healSkipsDabsWhoseSourceIsOffTheCanvas"
+  },
+  {
+    "label": ".removeWorksInAWindow: a stroke's remove crops the whole buffer, so its cost is the document's (#6439)",
+    "file": "Sources/SuiteImaging/Retouch/HealRules.swift",
+    "find": "let reach = grow + 8 + max(32, (max(x1 - x0, y1 - y0) + 2 * grow) / 2 + 1)",
+    "replace": "let reach = max(pixels.width, pixels.height)",
+    "tests": "HealRulesTests/aStrokesRemoveWorksInAWindowAndMatchesTheWholeBuffer"
+  },
+  {
+    "label": ".removeWorksInAWindow: a window without core's search context fills from less than the whole-buffer remove",
+    "file": "Sources/SuiteImaging/Retouch/HealRules.swift",
+    "find": "let reach = grow + 8 + max(32, (max(x1 - x0, y1 - y0) + 2 * grow) / 2 + 1)",
+    "replace": "let reach = grow + 8",
+    "tests": "HealRulesTests/aStrokesRemoveWorksInAWindowAndMatchesTheWholeBuffer"
   }
 ]

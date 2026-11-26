@@ -69,8 +69,19 @@ extension PhotoWorkspace: RetouchTarget {
         guard let canvas, p.width == canvas.width, p.height == canvas.height else {
             throw RasterError.invalid("the retouched pixels aren't the canvas's size")
         }
+        try replaceTarget(p, x: 0, y: 0, name: name)
+    }
+
+    /// Writes `p`, its top-left at canvas pixel (x, y), into the selected layer as one undo step named
+    /// `name`, walking only the pixels `p` covers; nothing is recorded when no pixel changes.
+    public mutating func replaceTarget(_ p: PixelBuffer, x: Int, y: Int, name: String) throws {
+        guard let canvas, x >= 0, y >= 0, x + p.width <= canvas.width, y + p.height <= canvas.height else {
+            throw RasterError.invalid("the retouched pixels don't fit on the canvas")
+        }
         if let why = retouchHelp { throw RasterError.invalid(why) }
-        editSelection(named: name, in: canvas.rect, masked: true) { x, y, old in (try? p.pixel(x: x, y: y)) ?? old }
+        editSelection(named: name, in: PixelRect(x: x, y: y, width: p.width, height: p.height), masked: true) { px, py, old in
+            (try? p.pixel(x: px - x, y: py - y)) ?? old
+        }
     }
 
     /// Heal's release: takes back the clone preview the drag laid, then runs

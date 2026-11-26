@@ -90,6 +90,35 @@ import SuiteImaging
         #expect(try HealRules.spotHeal(p, at: (31, 31), size: 10, seed: 3) == HealRules.spotHeal(p, at: (31, 31), size: 10, seed: 3))
     }
 
+    /// A 600 x 400 texture: the hash of `texture()`, tiled.
+    static func wide() throws -> PixelBuffer {
+        var p = try PixelBuffer(width: 600, height: 400)
+        for y in 0..<400 {
+            for x in 0..<600 {
+                let h = Float((x &* 73 &+ y &* 151 &+ (x * y) % 7) % 32) / 32
+                try p.setPixel(x: x, y: y, RGBA(r: 0.1 + 0.2 * h, g: 0.3 + 0.4 * h, b: 0.7 - 0.3 * h, a: 1))
+            }
+        }
+        return p
+    }
+
+    /// A stroke's remove works in a window around the stroke (#6439), never the whole buffer, and gives
+    /// the pixels the whole-buffer remove gives: core's fill reads only that window. Mid-buffer, on an
+    /// edge and in a corner.
+    @Test(arguments: [(300.0, 200.0), (6.0, 200.0), (594.0, 396.0)])
+    func aStrokesRemoveWorksInAWindowAndMatchesTheWholeBuffer(_ at: (Double, Double)) throws {
+        let p = try Self.wide()
+        let grid = DabCoverage.stroke((0..<20).map { Point(x: at.0 - 20 + Double($0) * 2, y: at.1) }, brush: BrushSettings(size: 12))
+        let whole = try HealRules.remove(p, through: HealRules.mask(grid, width: 600, height: 400), seed: 5)
+        let done = try #require(try HealRules.remove(p, stroke: grid, seed: 5))
+        #expect(done.patch.width < 600 / 2 && done.patch.height < 400, "the window is the stroke's, not the buffer's")
+        var pasted = p
+        try pasted.composite(done.patch, x: done.x, y: done.y, mode: .normal, opacity: 1)
+        #expect(pasted == whole)
+        #expect(try HealRules.remove(p, stroke: CoverageGrid(originX: 700, originY: 0, width: 4, height: 4, values: .init(repeating: 1, count: 16)), seed: 5) == nil,
+                "a stroke off the buffer removes nothing")
+    }
+
     @Test func maskPlacesTheGridInTheBuffer() throws {
         let grid = CoverageGrid(originX: -1, originY: 3, width: 3, height: 1, values: [1, 0.5, 1])
         let m = try HealRules.mask(grid, width: 8, height: 6)

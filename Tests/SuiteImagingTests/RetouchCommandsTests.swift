@@ -35,6 +35,11 @@ struct RetouchDoc: RetouchTarget {
         history.record(name, pixels)
         pixels = out
     }
+    mutating func replaceTarget(_ p: PixelBuffer, x: Int, y: Int, name: String) throws {
+        guard var whole = pixels else { return }
+        try whole.composite(p, x: x, y: y, mode: .normal, opacity: 1)
+        try replaceTarget(whole, name: name)
+    }
     /// Undoes the last step; false when there is none.
     mutating func undo() -> Bool {
         var current = pixels

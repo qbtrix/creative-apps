@@ -28,6 +28,9 @@ public protocol RetouchTarget: Sendable {
     /// Replaces the selected layer's pixels as one undo step called `name`,
     /// mixing each new pixel in by the selection's coverage when there is one.
     mutating func replaceTarget(_ p: PixelBuffer, name: String) throws
+    /// The same for the part of the layer `p` covers, its top-left at document pixel (x, y); the rest
+    /// of the layer stays as it is.
+    mutating func replaceTarget(_ p: PixelBuffer, x: Int, y: Int, name: String) throws
 }
 
 /// The fill and heal commands.
@@ -111,16 +114,17 @@ public enum RetouchCommands {
                    kind: .edit, params: RemoveParams.self, schema: remove,
                    example: .object(["points": stroke, "size": .number(12)]), availability: { ready($0) }) { t, p -> Done in
                 let pixels = try layer(t, "retouch.remove")
-                let coverage: Mask
                 if let points = p.points, !points.isEmpty {
+                    // A stroke rebuilds and writes back only the window around it (#6439).
                     let grid = DabCoverage.stroke(points.map { Point(x: $0.x, y: $0.y) }, brush: BrushSettings(size: p.size ?? 20))
-                    coverage = try HealRules.mask(grid, width: pixels.width, height: pixels.height)
+                    if let done = try HealRules.remove(pixels, stroke: grid, seed: seed(p.seed)) {
+                        try t.replaceTarget(done.patch, x: done.x, y: done.y, name: "Remove")
+                    }
                 } else if let selection = t.selectionCoverage {
-                    coverage = selection
+                    try t.replaceTarget(HealRules.remove(pixels, through: selection, seed: seed(p.seed)), name: "Remove")
                 } else {
                     throw CatalogError.unavailable(id: "retouch.remove", why: removeHelp)
                 }
-                try t.replaceTarget(HealRules.remove(pixels, through: coverage, seed: seed(p.seed)), name: "Remove")
                 return Done()
             },
         ]
