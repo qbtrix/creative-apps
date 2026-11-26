@@ -78,7 +78,8 @@ final class PhotoTransformJourneyTests: XCTestCase {
         XCTAssert(photo.app.buttons["Redo Free Transform"].waitForExistence(timeout: 5), "Command-Z didn't undo the transform")
         XCTAssert(photo.shows(line, in: photo.app.windows.firstMatch, timeout: 5), "Command-Z didn't put the layer back at \(line)")
         photo.shot("transform-5-undone")
-        photo.element("suite.canvas").click()
+        // No click first: the canvas still has the keyboard from step 4, and a Select click inside the restored
+        // box picked the Background under it, so the flip turned the wrong layer (run 45780184665's recording).
         photo.press(.escape)
         XCTAssert(box.waitForNonExistence(timeout: 5), "Escape left the transform box up")
 
