@@ -212,8 +212,8 @@ public struct HaloProject: Sendable, Equatable {
         return true
     }
 
-    /// Why renaming composition `id` to `name` would be refused, as the alert
-    /// says it; nil when the rename would succeed. Names that look the same
+    /// Why renaming composition `id` to `name` would be refused, as the
+    /// sidebar row says it; nil when the rename would succeed. Names that look the same
     /// (whitespace, invisible format characters, letter case, composed or
     /// decomposed accents) count as taken.
     public func renameProblem(_ id: String, to name: String) -> String? {
@@ -225,6 +225,13 @@ public struct HaloProject: Sendable, Equatable {
             return "“\(name)” is already used by another composition. Choose a different name."
         }
         return nil
+    }
+
+    /// Why the last rename of composition `id` was refused, for its sidebar
+    /// row to show under the rename field; nil for another composition's
+    /// refusal or once a rename of `id` succeeds.
+    public func renameRefusal(_ id: String) -> String? {
+        refusedRename?.id == id ? refusedRename?.problem : nil
     }
 
     /// Forgets the refused rename, as when the user cancels it.
