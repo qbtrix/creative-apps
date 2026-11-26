@@ -259,18 +259,21 @@ extension BodyCountSuites {
             // pixels, and the release lands one picture where the layer was and is. So the drag's cost is per
             // drag, not per sample: a one-sample drag is the reference, measured after two steps that warm the
             // route (the first render into a new presenter texture is a full one, and the histogram's first
-            // recounts).
+            // recounts). The reference's release waits for its press to land: a release that beats the press's
+            // render drops the lift unshown, one picture instead of two, and which comes first is the machine's
+            // speed, so an unwaited reference read 1 where a fast 30-sample drag (250 ms) lands both.
             var step: [String: Int] = [:]
             for n in 1...3 {
                 let before = Self.photoCounts()
                 try await w.ticks(1) { _ in send(.drag(CGPoint(x: 128, y: 300), CGPoint(x: 128 + Double(n) * 2, y: 300))) }
+                #expect(try await Self.rendered(w), Comment(rawValue: "\(label): step \(n)'s press never drained"))
                 send(.endDrag)
                 #expect(try await Self.rendered(w), Comment(rawValue: "\(label): step \(n)'s renders never drained"))
                 step = IdleWork.delta(Self.photoCounts(), since: before)
                 print("\(label): step \(n) and its renders" + IdleWork.describe(step))
             }
-            #expect((step["pictures"] ?? 0) >= 1 && (step["bases"] ?? 0) <= (step["regions"] ?? 0),
-                    Comment(rawValue: "\(label): a one-sample drag landed no picture, or made more than a base per region" + IdleWork.describe(step)))
+            #expect(step["pictures"] == 2 && (step["bases"] ?? 0) <= (step["regions"] ?? 0),
+                    Comment(rawValue: "\(label): a one-sample drag didn't land its press's and its release's picture, or made more than a base per region" + IdleWork.describe(step)))
 
             let before = Self.photoCounts()
             try await w.ticks(30) { i in
