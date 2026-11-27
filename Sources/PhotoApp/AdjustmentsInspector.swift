@@ -20,7 +20,9 @@
 // since Photo's own section shows it, each change out as a ToneIntent through
 // `onTone`, `toneHelp` saying why the rows are off and `toneRowHelp` why one
 // row is. They show for every target: an adjustment layer of any kind takes
-// tone (on a Levels layer they lead), and its Sharpen rows say why they're off.
+// tone, and its Sharpen rows say why they're off. Without an Exposure section
+// (a Curves or Levels layer) they follow the layer's own sections
+// (`toneRowsLead`), so the control the layer was added for comes first.
 import PhotoModel
 import SuiteImaging
 import SuiteModel
@@ -45,7 +47,7 @@ struct AdjustmentsInspector: View {
                     .exposure(Float($0))
                 }
             }
-            ToneRows(settings: settings.tone, help: toneHelp, hidden: [.exposure], rowHelp: toneRowHelp, onIntent: onTone)
+            if Self.toneRowsLead(sections) { toneRows }
             section(.levels) {
                 HistogramView(histogram, emptyMessage: "No histogram yet.", id: "photo.levels.histogram")
                 levelsRow("Black", settings.blackPoint) { .blackPoint($0) }
@@ -63,8 +65,16 @@ struct AdjustmentsInspector: View {
             section(.blur) {
                 slider("Radius", settings.blurSigma, AdjustmentSettings.sigmaRange, unit: "px", decimals: 1) { .blurSigma($0) }
             }
+            if !Self.toneRowsLead(sections) { toneRows }
         }
     }
+
+    private var toneRows: some View {
+        ToneRows(settings: settings.tone, help: toneHelp, hidden: [.exposure], rowHelp: toneRowHelp, onIntent: onTone)
+    }
+
+    /// Whether the tone rows sit under Exposure, before the other sections; without one they come last.
+    nonisolated static func toneRowsLead(_ sections: [AdjustmentKind]) -> Bool { sections.contains(.exposure) }
 
     /// One section, when `sections` holds it: its enable checkbox (while
     /// `showsEnable`) above its rows, and Reset while it isn't at its defaults.

@@ -62,6 +62,23 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         try shoot("opened", try opened())
     }
 
+    /// The editor at the suite's smallest window height: the 18-tool palette
+    /// is taller than the canvas there, so it wraps into two columns
+    /// (EditorDetailLayout.paletteColumns) and the fit clears both.
+    @Test func shortWindowPalette() throws {
+        let model = try opened()
+        let tiles = try photoTiles(model)
+        let canvas = SuiteSize.windowMinimum.height - 2 * SuiteSize.ruler - 100
+        #expect(EditorDetailLayout.paletteColumns(toolCount: PhotoTool.allCases.count, height: canvas) == 2)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 1)
+                    .frame(width: SuiteSize.windowMinimum.width, height: SuiteSize.windowMinimum.height)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading),
+                name: "photo-short-window-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
+    }
+
     @Test func layersComposite() throws {
         var model = PhotoWorkspace()
         try model.newCanvas(width: 640, height: 480)
