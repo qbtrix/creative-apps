@@ -1,5 +1,6 @@
 // SuiteToneRowsSnapshots.swift (tone-controls TC-4): ToneRows in an inspector, Light and Dark: suiteui-tone-rows
-// (neutral), -edited (three Resets show), -vibrance-waiting (PRESENCE alone) and -sharpen-off (SHARPEN at Amount 0).
+// (neutral), -edited (three Resets show), -vibrance-waiting (PRESENCE alone), -sharpen-off (SHARPEN at Amount 0) and
+// -sharpen-host-off (SHARPEN off by the host's own reason, Photo's adjustment layer).
 import SuiteImaging
 import SwiftUI
 import Testing
@@ -17,6 +18,9 @@ import Testing
             ("-edited", ToneRowsSample(settings: edited, hidden: [])),
             ("-vibrance-waiting", ToneRowsSample(settings: .neutral, hidden: all.subtracting(ToneGroup.presence.sliders))),
             ("-sharpen-off", ToneRowsSample(settings: .neutral, hidden: all.subtracting(ToneGroup.sharpen.sliders))),
+            ("-sharpen-host-off", ToneRowsSample(
+                settings: .neutral.setting(.sharpenAmount, to: 40), hidden: all.subtracting(ToneGroup.sharpen.sliders),
+                rowHelp: Dictionary(uniqueKeysWithValues: ToneGroup.sharpen.sliders.map { ($0, "Sharpen is for the image.") }))),
         ]
         #expect([ToneGroup.whiteBalance, .tone, .sharpen].allSatisfy {
             ToneRowsRules(settings: edited, help: nil, hidden: []).reset($0) != nil
@@ -33,9 +37,10 @@ import Testing
 private struct ToneRowsSample: View {
     let settings: ToneSettings
     let hidden: Set<ToneSlider>
+    var rowHelp: [ToneSlider: String] = [:]
 
     var body: some View {
-        ToneRows(settings: settings, help: nil, hidden: hidden) { _ in }
+        ToneRows(settings: settings, help: nil, hidden: hidden, rowHelp: rowHelp) { _ in }
             .padding(.vertical, SuiteSpacing.m)
             .frame(width: SuiteSize.inspectorWidth.ideal)
             .background(SuiteColor.panel)

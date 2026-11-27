@@ -1,0 +1,5 @@
+[
+{"label":"a host-off row keeps its section's Reset","file":"Sources/SuiteUI/ToneRows.swift","find":", !group.sliders.contains(where: { rowHelp[$0] != nil })","replace":"","tests":"ToneRowsTests"},
+{"label":"only a fully host-off section loses its Reset","file":"Sources/SuiteUI/ToneRows.swift","find":"!group.sliders.contains(where: { rowHelp[$0] != nil })","replace":"!group.sliders.allSatisfy({ rowHelp[$0] != nil })","tests":"ToneRowsTests"},
+{"label":"the host's row reason is ignored","file":"Sources/SuiteUI/ToneRows.swift","find":"if let own = rowHelp[slider] { return own }","replace":"","tests":"ToneRowsTests"}
+]

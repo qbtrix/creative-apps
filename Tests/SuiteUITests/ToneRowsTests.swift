@@ -93,6 +93,18 @@ private func tokens(_ intents: [ToneIntent]) -> Set<String> {
     #expect(rules(help: "Busy.", rowHelp: [.contrast: why]).reason(.contrast) == "Busy.") // the shared reason wins
 }
 
+/// A section's Reset sets every row in it, so a row the host turned off takes the Reset away too: no live ↺ over
+/// rows that refuse (Photo's Sharpen on an adjustment layer, with an Amount carried in).
+@Test func aHostOffRowHidesItsSectionsReset() {
+    let why = "Sharpen is for the image."
+    let edited = ToneSettings.neutral.setting(.sharpenAmount, to: 40).setting(.contrast, to: 20)
+    let layer = rules(edited, rowHelp: Dictionary(uniqueKeysWithValues: ToneGroup.sharpen.sliders.map { ($0, why) }))
+    #expect(layer.reset(.sharpen) == nil)
+    #expect(layer.reset(.tone) == .reset(.tone), "a section with no host-off row keeps its Reset")
+    #expect(rules(edited, rowHelp: [.sharpenThreshold: why]).reset(.sharpen) == nil, "one off row is enough")
+    #expect(rules(edited).reset(.sharpen) == .reset(.sharpen))
+}
+
 @Test func hiddenSlidersAndEmptySectionsDrop() {
     let photo = rules(hidden: [.exposure])
     #expect(!photo.sliders(.tone).contains(.exposure))
