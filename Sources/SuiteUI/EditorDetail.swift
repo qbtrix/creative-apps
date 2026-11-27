@@ -103,6 +103,11 @@ public struct EditorDetailLayout: Equatable, Sendable {
             height: CGFloat(rows) * SuiteSize.toolButton + inset)
     }
 
+    /// A floating palette's corner radius: concentric with its round tool wells (a well's radius plus the `xs`
+    /// padding), so a corner well never spills past it once the palette wraps into columns. One column or one row
+    /// is exactly that wide, so it is still a capsule.
+    public static let paletteCornerRadius = SuiteSize.toolButton / 2 + SuiteSpacing.xs
+
     /// The columns a vertical floating palette of `toolCount` buttons takes in
     /// `height` (the palette's room, its capsule's padding included): one when
     /// they all fit, else as few as keep every button inside it, at least one

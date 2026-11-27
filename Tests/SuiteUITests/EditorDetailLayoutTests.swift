@@ -82,6 +82,22 @@ private func unclamped(_ layout: EditorDetailLayout, _ artboard: CGSize) -> Doub
     #expect(EditorDetailLayout.toolCount(paletteSize: .zero) == 0)
 }
 
+/// The palette's outline is concentric with its round tool wells, so a corner well's hover, press or selection never
+/// spills past it in any column count; one column (or one row) stays a capsule.
+@Test func editorDetailPaletteCornersHugTheWells() {
+    let well = SuiteSize.toolButton / 2
+    for columns in 1...3 {
+        let size = EditorDetailLayout.paletteSize(toolCount: 18, columns: columns)
+        let radius = min(EditorDetailLayout.paletteCornerRadius, size.width / 2)
+        // The top-left well's centre and the corner arc's centre; the well must sit inside the arc.
+        let wellCentre = SuiteSpacing.xs + well
+        let reach = max(radius - wellCentre, 0) * 2.squareRoot() + well
+        #expect(reach <= radius + 1e-9, "\(columns) columns: well reaches \(reach) past a \(radius) corner")
+    }
+    let single = EditorDetailLayout.paletteSize(toolCount: 6)
+    #expect(EditorDetailLayout.paletteCornerRadius == single.width / 2, "one column is still a capsule")
+}
+
 @Test func editorDetailPaletteClearsTheRulers() {
     for (name, size) in viewports {
         for count in toolCounts {

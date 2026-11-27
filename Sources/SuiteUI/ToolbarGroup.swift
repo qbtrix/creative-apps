@@ -27,7 +27,8 @@
 // (ChipProbe, which a probe host sets). `.rail` keeps the action's own help.
 // A vertical `.floating` palette taller than the room it is offered wraps into
 // columns (ToolColumnsLayout, by EditorDetailLayout.paletteColumns), so no tool
-// hides under what lies below it.
+// hides under what lies below it; its glass corners stay concentric with the
+// wells (EditorDetailLayout.paletteCornerRadius), a capsule at one column.
 import SwiftUI
 
 public struct ToolbarAction: Identifiable {
@@ -182,7 +183,7 @@ public struct ToolbarGroup: View {
                 .focused($focused)
                 .focusEffectDisabled()
                 .onKeyPress(phases: .down) { press in pickTool(press) }
-                .suiteGlass(in: Capsule())
+                .suiteGlass(in: RoundedRectangle(cornerRadius: EditorDetailLayout.paletteCornerRadius))
         }
     }
 
