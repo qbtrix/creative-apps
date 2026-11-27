@@ -1,7 +1,7 @@
 // PhotoEditorSnapshots.swift: the Photo window (PhotoEditor) in each state
 // its core loop reaches: an opened photo, layers composited, a brush and an
 // eraser stroke, a marquee selection, a pending crop, a moved layer, a Select
-// box mid-drag, exposure +1, layers in the sidebar, the export sheet and a refusal in the status line
+// box mid-drag, exposure +1, layers in the sidebar, a short window's wrapped palette, the export sheet and a refusal in the status line
 // (photo-status-message-dark.png only); the rail's tool help is checked here
 // too. Each other state writes
 // photo-<state>-light.png and photo-<state>-dark.png. The canvas picture is rendered the way the window renders
@@ -180,6 +180,21 @@ func photoTiles(_ model: PhotoWorkspace) throws -> CanvasTiles? {
         #expect(PhotoPaletteTool(.gradient, in: model).unavailableHelp == nil)
         #expect(ToolOptionsSection.gradientHint == "Drag across the image to draw a gradient from the press to the release.")
         try shoot("gradient-tool", model)
+    }
+
+    /// The editor in a window too short for the 18-tool palette in one column (the journeys' 1024 x 640 runner):
+    /// the palette wraps into two columns of nine and the photo at 75% sits beside them.
+    /// Writes photo-palette-wrapped-light/dark.png.
+    @Test func paletteWrapsInAShortWindow() throws {
+        let model = try opened()
+        let tiles = try photoTiles(model)
+        for scheme in [ColorScheme.light, .dark] {
+            try snapshot(
+                PhotoEditor(model: model, tiles: tiles, renderMilliseconds: 8, zoom: 0.75)
+                    .frame(width: 1024, height: 560)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading),
+                name: "photo-palette-wrapped-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        }
     }
 
     /// SuiteUI's export sheet on an open image with JPEG picked (export-pack PX-2).
