@@ -3,7 +3,9 @@
 // EditorDetailLayout, the floating tool palette at its leading edge clear of
 // the rulers and the artboard, and the status line under a hairline, in Light
 // and Dark. Writes suiteui-editor-detail-light.png and
-// suiteui-editor-detail-dark.png for review.
+// suiteui-editor-detail-dark.png for review, and suiteui-editor-detail-wrapped-*
+// for an 18-tool palette (Photo's) in a canvas too short for one column: two
+// columns of nine, the artboard clear of both.
 import SuiteUI
 import SwiftUI
 import Testing
@@ -12,6 +14,7 @@ import Testing
 @Test func suiteEditorDetail() throws {
     for scheme in [ColorScheme.light, .dark] {
         try snapshot(EditorDetailSample(), name: "suiteui-editor-detail-\(scheme == .dark ? "dark" : "light")", scheme: scheme)
+        try snapshot(WrappedPaletteSample(), name: "suiteui-editor-detail-wrapped-\(scheme.name)", scheme: scheme)
     }
 }
 
@@ -45,5 +48,37 @@ struct EditorDetailSample: View {
         } status: {
             ViewerStatusBar(zoom: zoom, size: "1600 × 1000 px")
         }
+    }
+}
+
+/// Photo's 18 tools at the runner's window height: the palette wraps into two columns of nine.
+struct WrappedPaletteSample: View {
+    private let document = CGSize(width: 4000, height: 3000)
+    private let frame = CGSize(width: 1024, height: 580)
+    private let tools = [
+        "cursorarrow", "arrow.up.and.down.and.arrow.left.and.right", "lasso", "wand.and.stars", "crop", "eyedropper",
+        "paintbrush", "pencil", "eraser", "paintbrush.pointed", "bandage", "drop", "circle.lefthalf.filled",
+        "paintpalette", "textformat", "rectangle", "hand.raised", "magnifyingglass",
+    ].enumerated().map { ToolbarAction("Tool \($0.offset + 1)", systemImage: $0.element, isSelected: $0.offset == 6) }
+
+    private var zoom: Double {
+        let viewport = CGSize(width: frame.width - SuiteSize.ruler, height: frame.height - SuiteSize.ruler - 28)
+        return EditorDetailLayout(viewport: viewport, toolCount: tools.count).fitScale(artboard: document)
+    }
+
+    var body: some View {
+        EditorDetail {
+            CanvasViewport(documentSize: document, zoom: zoom, checkerboard: false) {
+                LinearGradient(colors: [.teal, .blue, .indigo], startPoint: .topLeading, endPoint: .bottomTrailing)
+            } overlay: {
+                EmptyView()
+            }
+        } palette: {
+            ToolbarGroup(tools, axis: .vertical)
+        } status: {
+            ViewerStatusBar(zoom: zoom, size: "4000 × 3000 px")
+        }
+        .frame(width: frame.width, height: frame.height)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
