@@ -185,6 +185,20 @@ import Testing
         #expect(workspace.adjustHeader.title == "Image")
     }
 
+    /// Tone rows sit under Exposure on the image and on an Exposure layer;
+    /// on any other adjustment layer the layer's own section comes first.
+    @Test func toneRowsLeadOnlyUnderExposure() throws {
+        var workspace = try image()
+        let background = try #require(workspace.selectedLayerID)
+        #expect(workspace.toneRowsLead)
+        workspace.addAdjustmentLayer(.levels)
+        #expect(!workspace.toneRowsLead)
+        workspace.addAdjustmentLayer(.exposure)
+        #expect(workspace.toneRowsLead)
+        workspace.selectLayer(background)
+        #expect(workspace.toneRowsLead)
+    }
+
     /// The `layered` fixture's "Curves 1" holds one kind, as a new layer does.
     @Test func layeredFixtureCurves1HoldsOnlyCurves() throws {
         var workspace = try PhotoWorkspace.fixture(.layered)

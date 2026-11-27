@@ -31,6 +31,11 @@ public enum AdjustmentKind: String, CaseIterable, Sendable, Codable {
 
     /// The sections with values and a switch of their own, the ones `enabled` holds.
     public static let sections: [AdjustmentKind] = [.exposure, .levels, .curves, .blur, .hueSaturation]
+
+    /// Whether tone rows sit under Exposure in these sections (the image, an
+    /// Exposure layer) rather than after them, so a Curves or Levels layer
+    /// shows its own control first.
+    public static func toneRowsLead(in sections: [AdjustmentKind]) -> Bool { sections.contains(.exposure) }
 }
 
 extension ImagingKind {

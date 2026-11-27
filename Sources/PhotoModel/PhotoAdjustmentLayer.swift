@@ -101,6 +101,9 @@ extension PhotoWorkspace {
         }
     }
 
+    /// Whether the tone rows lead the target's sections (AdjustmentKind.toneRowsLead).
+    public var toneRowsLead: Bool { AdjustmentKind.toneRowsLead(in: adjustSections) }
+
     /// "Image" or the layer's name, and the info line under it.
     public var adjustHeader: (title: String, info: String) {
         guard case .layer = adjustTarget, let layer = selectedLayer else {
