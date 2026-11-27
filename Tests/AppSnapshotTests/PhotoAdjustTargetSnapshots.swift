@@ -2,7 +2,7 @@
 // (AL-7 of photo-adjustment-layers, PV-6): on the `layered` fixture with
 // "Curves 1" selected, the header reads "Curves 1" over "Adjusts the layers
 // below" and the inspector shows only that layer's Curves section, with no enable
-// switch (the row's eye turns the layer off), under the Layer section with
+// switch (the row's eye turns the layer off) and the tone rows after it, under the Layer section with
 // its Blend Mode and Opacity, as the inspector shows it (#1713). With Background selected the
 // target is the whole image, under "Image", with the five sections that hold
 // values (AdjustmentKind.sections; Black & White and Invert are kinds, AJ-8). Writes
@@ -36,6 +36,7 @@ import Testing
         #expect(model.adjustHeader.info == "Adjusts the layers below")
         #expect(model.adjustSections == [.curves])
         #expect(AdjustmentsPanel.showsEnable(for: model.adjustTarget) == false)
+        #expect(!AdjustmentsInspector.toneRowsLead(model.adjustSections), "the curve comes first, the tone rows after it")
         #expect(model.selectedLayer?.name == "Curves 1", "the Layer section shows Curves 1's blend and opacity")
         #expect(AdjustTabSample(model: model).showsLayerSettings, "the sample draws the Layer section, as PhotoPanel does")
         for scheme in [ColorScheme.light, .dark] {
@@ -55,6 +56,7 @@ import Testing
         #expect(model.adjustHeader.info == "Adjusts the whole image")
         #expect(model.adjustSections == [.exposure, .levels, .curves, .blur, .hueSaturation])
         #expect(AdjustmentsPanel.showsEnable(for: model.adjustTarget))
+        #expect(AdjustmentsInspector.toneRowsLead(model.adjustSections), "the tone rows sit under Exposure")
     }
 }
 
