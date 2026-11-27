@@ -74,7 +74,7 @@ struct AdjustmentsInspector: View {
     /// Whether the tone rows sit under Exposure (the whole image) rather than
     /// after the target's own sections (an adjustment layer: its Curves or
     /// Levels comes first, so selecting it shows its own control).
-    static func toneRowsLead(_ sections: [AdjustmentKind]) -> Bool {
+    nonisolated static func toneRowsLead(_ sections: [AdjustmentKind]) -> Bool {
         sections.contains(.exposure)
     }
 
